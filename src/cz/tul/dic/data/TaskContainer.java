@@ -41,7 +41,7 @@ public class TaskContainer {
         }
     }
 
-    public Object getParameter(final Object key) {
+    public Object getParameter(final TaskParameter key) {
         return params.get(key);
     }
 
