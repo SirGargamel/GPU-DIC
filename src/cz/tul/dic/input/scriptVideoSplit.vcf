@@ -1,0 +1,3 @@
+VirtualDub.Open("%FILE%");
+VirtualDub.SaveImageSequence("%DIR%",".bmp",5,0);
+VirtualDub.Close();

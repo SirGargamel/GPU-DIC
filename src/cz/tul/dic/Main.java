@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package dic_voucher;
+package cz.tul.dic;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
