@@ -31,4 +31,12 @@ public class ROI {
         return y2;
     }
     
+    public int getWidth() {
+        return x2 - x1;
+    }
+    
+    public int getHeight() {
+        return y2 - y1;
+    }
+    
 }

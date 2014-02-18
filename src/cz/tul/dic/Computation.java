@@ -42,8 +42,7 @@ public class Computation {
         tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.AVI, new Object[] {new File("D:\\test.avi")}));
         
         // generate facets
-        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        System.err.println("TODO ClassicModeFacetGenerator");
+        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);        
         System.err.println("TODO TightModeFacetGenerator");
         FacetGenerator.generateFacets(tc);
         

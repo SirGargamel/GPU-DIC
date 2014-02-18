@@ -11,6 +11,7 @@ public enum TaskParameter {
     
     DIR(File.class),
     FACET_GENERATOR_MODE(FacetGeneratorMode.class),
+    FACET_GENERATOR_SPACING(int.class),
     ;
     
     private final Class type;

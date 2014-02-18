@@ -18,11 +18,12 @@ import java.util.Set;
 public class TaskContainer {
 
     private final Map<Object, Object> params;
-    private final List<Image> images;
+    private final List<Image> images;    
     private final RoiContainer rois;
     private final Set<ExportTask> exportTasks;
-    private Result result;
     private int facetSize;
+    private List<Set<Facet>> facets;
+    private Result result;    
 
     public TaskContainer() {
         params = new HashMap<>();
@@ -51,6 +52,10 @@ public class TaskContainer {
 
     public List<Image> getImages() {
         return Collections.unmodifiableList(images);
+    }
+    
+    public void assignFacets(final List<Set<Facet>> facets) {
+        this.facets = facets;
     }
 
     public ROI getRoi(final int position) {

@@ -2,6 +2,7 @@ package cz.tul.dic.generators;
 
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.TaskContainer;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -10,6 +11,8 @@ import java.util.Set;
  */
 public interface IFacetGenerator {
 
-    public Set<Facet> generateFacets(final TaskContainer tc);
+    List<Set<Facet>> generateFacets(final TaskContainer tc);
+    
+    FacetGeneratorMode getMode();
     
 }
