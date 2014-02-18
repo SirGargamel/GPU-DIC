@@ -1,6 +1,7 @@
 package cz.tul.dic.input;
 
 import cz.tul.dic.Utils;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.TaskContainer;
 import cz.tul.dic.data.TaskParameter;
 import java.io.BufferedReader;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.List;
 
 public class VideoLoader implements IInputLoader {
 
@@ -21,7 +23,7 @@ public class VideoLoader implements IInputLoader {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    public void loadData(Object in, TaskContainer tc) throws IOException {
+    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {
         if (!(in instanceof File)) {
             throw new IllegalArgumentException("VideoLoader needs a single file as input.");
         }
@@ -60,7 +62,8 @@ public class VideoLoader implements IInputLoader {
                 return name.startsWith(input.getName());
             }
         });
-        InputLoader.loadInput(Arrays.asList(files), tc);
+        final ImageLoader il = new ImageLoader();
+        return il.loadData(Arrays.asList(files), tc);
     }
 
     private String loadScript() throws IOException {
