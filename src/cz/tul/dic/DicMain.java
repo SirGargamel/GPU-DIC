@@ -16,11 +16,11 @@ import javafx.stage.Stage;
  *
  * @author Petr Jecmen
  */
-public class Main extends Application {
+public class DicMain extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/cz/tul/dic/gui/FXMLDocument.fxml"));
         
         Scene scene = new Scene(root);
         

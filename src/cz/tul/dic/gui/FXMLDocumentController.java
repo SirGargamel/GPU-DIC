@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 
-package cz.tul.dic;
+package cz.tul.dic.gui;
 
+import cz.tul.dic.Computation;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -28,8 +29,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private void handleButtonAction(ActionEvent event) throws IOException {        
         label.setText("Commencing computation!");
-        Computation.commenceComputation();
-        
+        Computation.commenceComputation();        
     }
     
     @Override
