@@ -47,7 +47,8 @@ public class Computation {
         FacetGenerator.generateFacets(tc);
         
         // generate deformations
-        System.err.println("TODO DeformationGenerator");
+        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
+        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 15, 0.5, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25});        
         DeformationGenerator.generateDeformations(tc);
         
         // split to subtask according to deformations and limits

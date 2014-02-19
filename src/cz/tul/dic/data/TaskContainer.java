@@ -23,6 +23,7 @@ public class TaskContainer {
     private final Set<ExportTask> exportTasks;
     private int facetSize;
     private List<Set<Facet>> facets;
+    private double[] deformations;
     private Result result;    
 
     public TaskContainer() {
@@ -88,6 +89,14 @@ public class TaskContainer {
 
     public Set<ExportTask> getExportTasks() {
         return Collections.unmodifiableSet(exportTasks);
+    }
+
+    public void setDeformations(double[] deformations) {
+        this.deformations = deformations;
+    }
+
+    public double[] getDeformations() {
+        return deformations;
     }
 
 }
