@@ -63,7 +63,11 @@ public class VideoLoader implements IInputLoader {
             }
         });
         final ImageLoader il = new ImageLoader();
-        return il.loadData(Arrays.asList(files), tc);
+        final List<Image> result = il.loadData(Arrays.asList(files), tc);
+        
+        Utils.deleteTempFir(tc);
+        
+        return result;
     }
 
     private String loadScript() throws IOException {
