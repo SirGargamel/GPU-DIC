@@ -15,6 +15,8 @@ import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -22,13 +24,22 @@ import java.io.IOException;
  */
 public class Computation {
     
-    private static final File IN = new File("d:\\temp\\image.avi");
+    private static final File IN_VIDEO = new File("d:\\temp\\image.avi");
+    private static final List<File> IN_IMAGES;
+    
+    static {
+        IN_IMAGES = new LinkedList<>();
+        
+        IN_IMAGES.add(new File("d:\\temp\\image000.bmp"));
+        IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
+    }
 
     public static void commenceComputation() throws IOException {
         final TaskContainer tc = new TaskContainer();                
         
         // load input data
-        InputLoader.loadInput(IN, tc);
+//        InputLoader.loadInput(IN_VIDEO, tc);
+        InputLoader.loadInput(IN_IMAGES, tc);
         
         // select ROI        
         System.err.println("TODO Check ROI if valid, make smaller if needed.");
