@@ -5,18 +5,17 @@ import cz.tul.dic.data.TaskContainer;
 import cz.tul.dic.data.TaskParameter;
 import cz.tul.dic.data.roi.ROI;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class SimpleFacetGenerator implements IFacetGenerator {
 
     private static final int DEFAULT_SPACING = 1;
 
     @Override
-    public List<Set<Facet>> generateFacets(TaskContainer tc) {
+    public List<List<Facet>> generateFacets(TaskContainer tc) {
         final int taskCount = tc.getImages().size() - 1;
-        List<Set<Facet>> result = new ArrayList<>(taskCount);
+        List<List<Facet>> result = new ArrayList<>(taskCount);
 
         Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
         final int spacing;
@@ -31,14 +30,15 @@ public class SimpleFacetGenerator implements IFacetGenerator {
             throw new IllegalArgumentException("Spacing cant must be smaller than facet size.");
         }
 
+        final int halfSize = facetSize / 2;
+        
         ROI roi;
-        Set<Facet> facets;
+        List<Facet> facets;
         int wCount, hCount;
         int roiW, roiH;
-        int centerX, centerY;
-        Facet f;
+        int centerX, centerY;        
         for (int i = 0; i < taskCount; i++) {
-            facets = new HashSet<>();
+            facets = new LinkedList<>();
 
             // generate centers
             roi = tc.getRoi(i);
@@ -49,10 +49,10 @@ public class SimpleFacetGenerator implements IFacetGenerator {
             hCount = roiH / (facetSize - spacing);
 
             for (int y = 0; y < hCount; y++) {
-                centerY = roi.getY1() - (facetSize / 2) + (y * (facetSize - spacing));
+                centerY = roi.getY1() + halfSize + (y * (facetSize - spacing));
 
                 for (int x = 0; x < wCount; x++) {
-                    centerX = roi.getX1() - (facetSize / 2) + (x * (facetSize - spacing));
+                    centerX = roi.getX1() + halfSize + (x * (facetSize - spacing));
                     
                     facets.add(Facet.createFacet(facetSize, centerX, centerY));
                 }

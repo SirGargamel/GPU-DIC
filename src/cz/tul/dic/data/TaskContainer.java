@@ -3,6 +3,7 @@ package cz.tul.dic.data;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RoiContainer;
 import cz.tul.dic.output.ExportTask;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,25 +19,27 @@ import java.util.Set;
 public class TaskContainer {
 
     private final Map<Object, Object> params;
-    private final List<Image> images;    
+    private final List<Image> images;
     private final RoiContainer rois;
     private final Set<ExportTask> exportTasks;
+    private final List<List<double[]>> results;
     private int facetSize;
-    private List<Set<Facet>> facets;
+    private List<List<Facet>> facets;    
     private double[] deformations;
-    private Result result;    
+    private Result result;
 
     public TaskContainer() {
         params = new HashMap<>();
         images = new LinkedList<>();
         rois = new RoiContainer();
         exportTasks = new HashSet<>();
+        results = new LinkedList<>();
     }
 
     public void addParameter(final TaskParameter key, final Object value) {
         if (value != null && value.getClass().equals(key.getType())) {
             params.put(key, value);
-        } else if (key != null && value != null){
+        } else if (key != null && value != null) {
             throw new IllegalArgumentException("Illegal value datatype - " + value.getClass().getSimpleName() + ", required " + key.getType().getSimpleName());
         } else {
             throw new IllegalArgumentException("Null values not supported.");
@@ -54,9 +57,21 @@ public class TaskContainer {
     public List<Image> getImages() {
         return Collections.unmodifiableList(images);
     }
-    
-    public void assignFacets(final List<Set<Facet>> facets) {
+
+    public void assignFacets(final List<List<Facet>> facets) {
         this.facets = facets;
+    }
+
+    public List<Facet> getFacets(final int position) {
+        return facets.get(position);
+    }
+    
+    public void storeResult(final List<double[]> result, final int position) {
+        while (results.size() <= position) {
+            results.add(null);
+        }
+        
+        results.set(position, result);
     }
 
     public ROI getRoi(final int position) {
@@ -97,6 +112,10 @@ public class TaskContainer {
 
     public double[] getDeformations() {
         return deformations;
+    }
+
+    public int getRoundCount() {
+        return images.size() - 1;
     }
 
 }

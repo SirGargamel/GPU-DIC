@@ -4,6 +4,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.TaskContainer;
 import cz.tul.dic.data.TaskParameter;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.FacetGenerator;
 import cz.tul.dic.generators.FacetGeneratorMode;
@@ -30,10 +31,11 @@ public class Computation {
         InputLoader.loadInput(IN, tc);
         
         // select ROI        
-        tc.addRoi(new ROI(0,0,320,240), 0);
+        System.err.println("TODO Check ROI if valid, make smaller if needed.");
+        tc.addRoi(new ROI(0,0,40,30), 0);
         
         // select facet size
-        tc.setFacetSize(5);
+        tc.setFacetSize(10);
         
         // add outputs
         tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.IMAGE, new Object[] {0, new File("D:\\test.bmp")}));
@@ -47,16 +49,20 @@ public class Computation {
         FacetGenerator.generateFacets(tc);
         
         // generate deformations
-        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
-        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 15, 0.5, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25});        
+        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
+        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-1, 1, 0.5, -1, 1, 0.5});    
+//        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
+//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});        
         DeformationGenerator.generateDeformations(tc);
         
         // split to subtask according to deformations and limits
         System.err.println("TODO TaskSplitter");
         
         // compute task
-        System.err.println("TODO Engine");
-        Engine.computeTask(tc);
+        System.err.println("TODO Precompute ideal work size");
+        final WorkSizeManager wsm = new WorkSizeManager();        
+        final Engine engine = new Engine(wsm);
+        engine.computeTask(tc);
         
         // perform export
         System.err.println("TODO ExportImage");
