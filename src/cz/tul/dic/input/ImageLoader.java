@@ -5,20 +5,15 @@ import cz.tul.dic.data.TaskContainer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ImageLoader implements IInputLoader {
 
-    private static final List<File> type;
-
-    static {
-        type = Arrays.asList(new File[0]);
-    }
+    private static final Class TYPE = List.class;
 
     @Override
-    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {
-        if (!in.getClass().isAssignableFrom(type.getClass())) {
+    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {        
+        if (!TYPE.isAssignableFrom(in.getClass())) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
         }
 
@@ -36,7 +31,7 @@ public class ImageLoader implements IInputLoader {
 
     @Override
     public Class getSupporteType() {
-        return type.getClass();
+        return TYPE;
     }
 
 }
