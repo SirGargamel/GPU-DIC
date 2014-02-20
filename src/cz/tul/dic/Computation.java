@@ -1,8 +1,9 @@
 package cz.tul.dic;
 
+import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.data.TaskContainer;
-import cz.tul.dic.data.TaskParameter;
+import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.generators.DeformationGenerator;

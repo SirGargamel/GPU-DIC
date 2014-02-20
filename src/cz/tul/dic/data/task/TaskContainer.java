@@ -1,9 +1,10 @@
-package cz.tul.dic.data;
+package cz.tul.dic.data.task;
 
+import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RoiContainer;
 import cz.tul.dic.output.ExportTask;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,8 +26,7 @@ public class TaskContainer {
     private final List<List<double[]>> results;
     private int facetSize;
     private List<List<Facet>> facets;    
-    private double[] deformations;
-    private Result result;
+    private double[] deformations;    
 
     public TaskContainer() {
         params = new HashMap<>();
@@ -88,14 +88,6 @@ public class TaskContainer {
 
     public void setFacetSize(int facetSize) {
         this.facetSize = facetSize;
-    }
-
-    public Result getResult() {
-        return result;
-    }
-
-    public void setResult(final Result result) {
-        this.result = result;
     }
 
     public void addExportTask(final ExportTask task) {

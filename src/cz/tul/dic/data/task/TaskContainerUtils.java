@@ -1,6 +1,6 @@
-package cz.tul.dic.data;
+package cz.tul.dic.data.task;
 
-import cz.tul.dic.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationDegree;
 
 /**
  *

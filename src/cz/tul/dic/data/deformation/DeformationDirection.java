@@ -1,4 +1,4 @@
-package cz.tul.dic.data;
+package cz.tul.dic.data.deformation;
 
 /**
  *

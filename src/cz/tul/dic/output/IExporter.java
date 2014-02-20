@@ -1,6 +1,6 @@
 package cz.tul.dic.output;
 
-import cz.tul.dic.data.Result;
+import cz.tul.dic.data.task.TaskContainer;
 
 /**
  *
@@ -8,6 +8,6 @@ import cz.tul.dic.data.Result;
  */
 public interface IExporter {
     
-    public void exportResult(final ExportTask task, final Result result);
+    public void exportResult(final ExportTask task, final TaskContainer tc);
     
 }

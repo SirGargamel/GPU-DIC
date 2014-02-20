@@ -1,7 +1,5 @@
 package cz.tul.dic.data;
 
-import cz.tul.dic.Coordinates;
-
 /**
  *
  * @author Petr Jecmen

@@ -1,7 +1,7 @@
 package cz.tul.dic.generators;
 
-import cz.tul.dic.data.TaskContainer;
-import cz.tul.dic.data.TaskParameter;
+import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import java.util.HashMap;
 import java.util.Map;
 

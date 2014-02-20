@@ -2,8 +2,8 @@ package cz.tul.dic.input;
 
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.TaskContainer;
-import cz.tul.dic.data.TaskParameter;
+import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

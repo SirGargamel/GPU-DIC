@@ -1,8 +1,8 @@
 package cz.tul.dic.generators;
 
-import cz.tul.dic.DeformationDegree;
-import cz.tul.dic.data.TaskContainer;
-import cz.tul.dic.data.TaskParameter;
+import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 
 /**
  *

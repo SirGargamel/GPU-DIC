@@ -1,8 +1,8 @@
 package cz.tul.dic.generators;
 
 import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.TaskContainer;
-import cz.tul.dic.data.TaskParameter;
+import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.roi.ROI;
 import java.util.ArrayList;
 import java.util.LinkedList;

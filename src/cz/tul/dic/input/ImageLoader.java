@@ -1,7 +1,7 @@
 package cz.tul.dic.input;
 
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.TaskContainer;
+import cz.tul.dic.data.task.TaskContainer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package cz.tul.dic.output;
 
-import cz.tul.dic.data.TaskContainer;
+import cz.tul.dic.data.task.TaskContainer;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -26,7 +26,7 @@ public class Exporter {
                 m = exporters.get(target);
                 mode = et.getMode();
                 if (m.containsKey(mode)) {
-                    m.get(mode).exportResult(et, tc.getResult());
+                    m.get(mode).exportResult(et, tc);
                 } else {
                     throw new IllegalArgumentException("Unsupported export mode for this target - " + et.toString());
                 }
