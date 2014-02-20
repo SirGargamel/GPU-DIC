@@ -104,10 +104,6 @@ public class TaskContainer {
 
     public double[] getDeformations() {
         return deformations;
-    }
-
-    public int getRoundCount() {
-        return images.size() - 1;
-    }
+    }   
 
 }

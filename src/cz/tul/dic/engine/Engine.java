@@ -89,7 +89,7 @@ public class Engine {
     }
 
     public void computeTask(final TaskContainer tc) {
-        final int roundCount = tc.getRoundCount();
+        final int roundCount = TaskContainerUtils.getRoundCount(tc);
         final int facetSize = tc.getFacetSize();
         final int facetArea = facetSize * facetSize;
 

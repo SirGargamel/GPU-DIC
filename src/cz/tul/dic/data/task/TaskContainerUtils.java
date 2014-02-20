@@ -29,6 +29,10 @@ public class TaskContainerUtils {
         return result;
     }
     
+    public static int getRoundCount(final TaskContainer tc) {        
+        return tc.getImages().size() - 1;
+    }
+    
     public static double[] extractDeformation(final TaskContainer tc, final int index) {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
