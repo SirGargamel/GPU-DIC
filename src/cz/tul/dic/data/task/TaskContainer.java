@@ -25,8 +25,9 @@ public class TaskContainer {
     private final Set<ExportTask> exportTasks;
     private final List<List<double[]>> results;
     private int facetSize;
-    private List<List<Facet>> facets;    
-    private double[] deformations;    
+    private List<List<Facet>> facets;
+    private double[] deformations;
+    private final List<double[][][]> finalResults;
 
     public TaskContainer() {
         params = new HashMap<>();
@@ -34,6 +35,7 @@ public class TaskContainer {
         rois = new RoiContainer();
         exportTasks = new HashSet<>();
         results = new LinkedList<>();
+        finalResults = new LinkedList<>();
     }
 
     public void addParameter(final TaskParameter key, final Object value) {
@@ -65,13 +67,17 @@ public class TaskContainer {
     public List<Facet> getFacets(final int position) {
         return facets.get(position);
     }
-    
+
     public void storeResult(final List<double[]> result, final int position) {
         while (results.size() <= position) {
             results.add(null);
         }
-        
+
         results.set(position, result);
+    }
+    
+    public List<double[]> getResults(final int position) {
+        return results.get(position);
     }
 
     public ROI getRoi(final int position) {
@@ -104,6 +110,18 @@ public class TaskContainer {
 
     public double[] getDeformations() {
         return deformations;
-    }   
+    }
+
+    public double[][][] getFinalResults(final int position) {
+        return finalResults.get(position);
+    }
+
+    public void storeFinalResults(final double[][][] result, final int position) {
+        while (finalResults.size() <= position) {
+            finalResults.add(null);
+        }
+
+        finalResults.set(position, result);
+    }
 
 }

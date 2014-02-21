@@ -171,6 +171,7 @@ public class Engine {
             final List<double[]> bestResults = pickBestResults(roundResult, tc, facetCount);
             // store data           
             tc.storeResult(bestResults, round);
+            buildFinalResults(tc, round);
             // round memory cleanup
             for (CLResource mem : clMem) {
                 if (!mem.isReleased()) {
@@ -292,6 +293,55 @@ public class Engine {
         }
 
         return result;
+    }
+
+    private void buildFinalResults(final TaskContainer tc, final int round) {
+        final Image img = tc.getImages().get(round);
+        final List<Facet> facets = tc.getFacets(round);
+        final List<double[]> results = tc.getResults(round);
+
+        final int width = img.getWidth();
+        final int height = img.getHeight();
+
+        final double[][][] finalResults = new double[width][height][];
+        final int[][] counter = new int[width][height];
+
+        Facet f;
+        double[] d = new double[2];
+        int[] data;
+        for (int i = 0; i < facets.size(); i++) {
+            f = facets.get(i);
+            d = results.get(i);
+
+            data = f.getData();
+
+            for (int j = 0; j < data.length - 1; j += 2) {
+                if (finalResults[data[j]][data[j + 1]] == null) {
+                    finalResults[data[j]][data[j + 1]] = new double[d.length];
+                    System.arraycopy(d, 0, finalResults[data[j]][data[j + 1]], 0, d.length);
+                    counter[data[j]][data[j + 1]] = 1;
+                } else {
+                    for (int k = 0; k < d.length; k++) {
+                        finalResults[data[j]][data[j + 1]][k] += d[k];
+                    }
+                    counter[data[j]][data[j + 1]]++;
+                }
+            }
+        }
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                for (int k = 0; k < d.length; k++) {
+                    if (counter[i][j] > 1) {
+                        finalResults[i][j][k] /= (double) counter[i][j];
+                    } else if (counter[i][j] == 0) {
+                        finalResults[i][j] = new double[d.length];
+                    }
+                }
+            }
+        }
+        
+        tc.storeFinalResults(finalResults, round);
     }
 
 }
