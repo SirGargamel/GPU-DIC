@@ -173,7 +173,9 @@ public class Engine {
             tc.storeResult(bestResults, round);
             // round memory cleanup
             for (CLResource mem : clMem) {
-                mem.release();
+                if (!mem.isReleased()) {
+                    mem.release();
+                }
             }
         }
     }
