@@ -1,0 +1,3 @@
+VirtualDub.Open("%FILE%");
+VirtualDub.SaveAVI("%TARGET%");
+VirtualDub.Close();

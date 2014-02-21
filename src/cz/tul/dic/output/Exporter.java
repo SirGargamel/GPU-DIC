@@ -15,9 +15,9 @@ public class Exporter {
 
     static {
         exporters = new EnumMap<>(ExportTarget.class);
-
-        IExporter exporter = new ExportImageFile();
-        addExporter(exporter);
+        
+        addExporter(new ExportImageFile());
+        addExporter(new ExportVideoFile());
     }
 
     private static void addExporter(final IExporter exporter) {
