@@ -23,10 +23,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -44,7 +41,6 @@ public class Engine {
     private static final Type DEVICE_TYPE = Type.GPU;
     private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
     private static final String KERNEL_NAME = "CL1D_I_V_LL_MC_D";
-    private static final String KERNEL_EXTENSION = ".cl";
     private static final int ARGUMENT_INDEX = 12;
     private final Set<CLResource> clMem;
     private final WorkSizeManager wsm;
@@ -88,7 +84,7 @@ public class Engine {
         System.err.println("TODO Support multiple kernels.");
     }
 
-    public void computeTask(final TaskContainer tc) {
+    public void computeTask(final TaskContainer tc) throws IOException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         final int facetSize = tc.getFacetSize();
         final int facetArea = facetSize * facetSize;
@@ -122,7 +118,7 @@ public class Engine {
             // create kernel and parameters            
             final int facetSubCount = wsm.getWorkSize(this.getClass());
 
-            program = context.createProgram(loadAndPrepareKernel(facetSize)).build();
+            program = context.createProgram(KernelPreparator.prepareKernel(KERNEL_NAME, tc)).build();
             clMem.add(program);
 
             kernel = program.createCLKernel(KERNEL_NAME);
@@ -249,24 +245,6 @@ public class Engine {
         return result;
     }
 
-    private String loadAndPrepareKernel(final int facetSize) {
-        String source = null;
-        try {
-            final InputStream in = WorkSizeManager.class.getResourceAsStream(KERNEL_NAME.concat(KERNEL_EXTENSION));
-            final BufferedReader bin = new BufferedReader(new InputStreamReader(in));
-            final StringBuilder sb = new StringBuilder();
-            while (bin.ready()) {
-                sb.append(bin.readLine());
-                sb.append("\n");
-            }
-            source = sb.toString().replaceAll("-1", Integer.toString(facetSize));
-        } catch (IOException ex) {
-            // should not happen
-            ex.printStackTrace(System.err);
-        }
-        return source;
-    }
-
     private int calculateLws0base(final CLKernel kernel) {
         final IntBuffer val = Buffers.newDirectIntBuffer(2);
         context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), device.getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
@@ -284,7 +262,7 @@ public class Engine {
 
     private List<double[]> pickBestResults(final float[] completeResults, final TaskContainer tc, final int facetCount) {
         final List<double[]> result = new ArrayList<>(facetCount);
-        
+
         final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
 
         float best, val;
@@ -299,7 +277,7 @@ public class Engine {
                     best = val;
                     bestIndex = def;
                 }
-                
+
                 index++;
             }
             result.add(TaskContainerUtils.extractDeformation(tc, bestIndex));

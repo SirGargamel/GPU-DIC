@@ -80,9 +80,10 @@ kernel void CL1D_I_V_LL_MC_D(
 
         def = coords - facetCenters[facetId];
         
-        deformedFacet[i] = (float2)(
-            coords.x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * def.x + deformations[baseIndexDeformation + 4] * def.y, 
-            coords.y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * def.x + deformations[baseIndexDeformation + 5] * def.y);
+//        deformedFacet[i] = (float2)(
+//            coords.x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * def.x + deformations[baseIndexDeformation + 4] * def.y, 
+//            coords.y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * def.x + deformations[baseIndexDeformation + 5] * def.y);
+        deformedFacet[i] = (float2)(%DEF%);
     }
     // compute correlation using ZNCC
     float deformedI[-1*-1];
