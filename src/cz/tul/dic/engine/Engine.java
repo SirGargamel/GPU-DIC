@@ -107,6 +107,7 @@ public class Engine {
 
             facets = tc.getFacets(round);
             facetCount = facets.size();
+
             facetData = generateFacetData(facets, facetSize);
             facetCenters = generateFacetCenters(facets);
 
@@ -115,8 +116,9 @@ public class Engine {
 
             results = context.createFloatBuffer(facetCount * deformationCount, Mem.WRITE_ONLY);
             clMem.add(results);
-            // create kernel and parameters            
-            final int facetSubCount = wsm.getWorkSize(this.getClass());
+            // create kernel and parameters
+            // how many facets will be computed during one round
+            final int facetSubCount = Math.min(wsm.getWorkSize(this.getClass()), facetCount);
 
             program = context.createProgram(KernelPreparator.prepareKernel(KERNEL_NAME, tc)).build();
             clMem.add(program);
@@ -132,7 +134,11 @@ public class Engine {
                 lws0 = EngineMath.roundUp(lws0base, deformationCount);
             }
             final int facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationCount) * facetSubCount;
-            final int groupCountPerFacet = deformationCount / lws0;
+            // number of groups, which will be participating on computation of one facet
+            int groupCountPerFacet = deformationCount / lws0;
+            if (deformationCount % lws0 > 0) {
+                groupCountPerFacet++;
+            }
 
             kernel.putArgs(imgA, imgB, facetData, facetCenters, deformations, results)
                     .putArg(img.getWidth())
@@ -184,24 +190,24 @@ public class Engine {
     private CLBuffer<IntBuffer> generateFacetData(final List<Facet> facets, final int facetSize) {
         final int facetArea = facetSize * facetSize;
         final int dataSize = facetArea * Coordinates.DIMENSION;
-        final int[] data = new int[facets.size() * dataSize];
+        final int[] completeData = new int[facets.size() * dataSize];
 
         int pointer = 0;
         int[] facetData;
         for (Facet f : facets) {
             facetData = f.getData();
-            System.arraycopy(facetData, 0, data, pointer, dataSize);
+            System.arraycopy(facetData, 0, completeData, pointer, dataSize);
             pointer += dataSize;
         }
 
-        final CLBuffer<IntBuffer> result = context.createIntBuffer(data.length, Mem.READ_ONLY);
+        final CLBuffer<IntBuffer> result = context.createIntBuffer(completeData.length, Mem.READ_ONLY);
         final IntBuffer resultBuffer = result.getBuffer();
         int index;
         for (int i = 0; i < facetArea; i++) {
             for (int f = 0; f < facets.size(); f++) {
                 index = f * dataSize + 2 * i;
-                resultBuffer.put(data[index]);
-                resultBuffer.put(data[index + 1]);
+                resultBuffer.put(completeData[index]);
+                resultBuffer.put(completeData[index + 1]);
             }
         }
         resultBuffer.rewind();
@@ -236,8 +242,8 @@ public class Engine {
     private CLBuffer<FloatBuffer> generateDeformations(final double[] deformations) {
         final CLBuffer<FloatBuffer> result = context.createFloatBuffer(deformations.length, Mem.READ_ONLY);
         final FloatBuffer buffer = result.getBuffer();
-        for (double f : deformations) {
-            buffer.put((float) f);
+        for (double d : deformations) {
+            buffer.put((float) d);
         }
         buffer.rewind();
 
