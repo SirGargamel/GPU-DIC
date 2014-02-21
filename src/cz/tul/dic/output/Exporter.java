@@ -53,16 +53,4 @@ public class Exporter {
         }
     }
 
-    public static int deformationToRGB(final double val) {
-        int result;
-        if (val == 0) {
-            result = 0;
-        } else if (val < 0) {
-            result = ((int) (val)) << 16;
-        } else {
-            result = ((int) (-val)) & 0xff;
-        }
-        return result;
-    }
-
 }
