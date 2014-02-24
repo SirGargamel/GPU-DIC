@@ -61,8 +61,8 @@ public class Computation {
         tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File("D:\\test1.bmp"), 1));
         tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File("D:\\test2.bmp"), 2));
         tc.addExportTask(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.ABS, new File("D:\\test.avi")));
-//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, new Object[]{0, new File("D:\\testMap.csv")}));
-//        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, new Object[]{0, 20, 20, new File("D:\\testLine.csv")}));
+        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, Direction.ABS, new File("D:\\testMap.csv"), 0));
+        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
 
         // generate facets
         tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);

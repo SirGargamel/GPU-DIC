@@ -6,6 +6,7 @@ import cz.tul.dic.output.data.DataExportMap;
 import cz.tul.dic.output.data.DataExportSequence;
 import cz.tul.dic.output.data.IDataExport;
 import cz.tul.dic.output.target.ITargetExport;
+import cz.tul.dic.output.target.TargetExportCsv;
 import cz.tul.dic.output.target.TargetExportFile;
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class Exporter {
 
         targetExporters = new HashMap<>();
         targetExporters.put(ExportTarget.FILE, new TargetExportFile());
+        targetExporters.put(ExportTarget.CSV, new TargetExportCsv());
     }
 
     public static void export(final TaskContainer tc) throws IOException {
