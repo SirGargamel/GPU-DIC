@@ -3,25 +3,29 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.tul.dic.output;
+package cz.tul.dic.output.target;
 
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.input.VideoLoader;
+import cz.tul.dic.output.ExportUtils;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class ExportVideoFile implements IExporter {
+
+
+public class TargetExportFile implements ITargetExport {
 
     private static final String IMAGE_EXTENSION = ".bmp";
     private static final String SCRIPT_NAME = "scriptVideoJoin.vcf";
@@ -30,24 +34,57 @@ public class ExportVideoFile implements IExporter {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    public void exportResult(ExportTask task, TaskContainer tc) throws IOException {
-        final Object o = task.getParam();
-        if (!(o instanceof File)) {
-            throw new IllegalArgumentException("Input parameter has to be the target file. - " + o);
+    public void exportData(Object data, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException {
+        if (data instanceof double[][]) {
+            // export image
+            exportImage((double[][]) data, targetParam, dataParams, tc);
+        } else if (data instanceof List) {
+            // export video
+            exportVideo((List<double[][]>) data, targetParam, tc);
+        } else {
+            throw new IllegalArgumentException("Unsupported data for file export - " + data.getClass());
+        }
+    }
+
+    private void exportImage(final double[][] data, final Object targetParams, int[] dataParams, final TaskContainer tc) throws IOException {
+        if (!(targetParams instanceof File)) {
+            throw new IllegalArgumentException("Illegal type of target parameter - " + targetParams.getClass());
+        }
+        if (dataParams.length < 1) {
+            throw new IllegalArgumentException("Not enough data parameters.");
         }
 
-        final File out = (File) o;
+        final int position = dataParams[0];
+        final File target = (File) targetParams;
+
+        final BufferedImage background = tc.getImages().get(position);
+        final BufferedImage overlay = ExportUtils.createImageFromMap(data);
+        
+        ImageIO.write(ExportUtils.overlayImage(background, overlay), "BMP", target);
+    }
+    
+    public void exportVideo(final List<double[][]> data, final Object targetParams, TaskContainer tc) throws IOException {        
+        if (!(targetParams instanceof File)) {
+            throw new IllegalArgumentException("Input parameter has to be the target file. - " + targetParams);
+        }
+
+        final File out = (File) targetParams;
         final String fullName = out.getName();
 
         final String name = fullName.substring(0, fullName.lastIndexOf("."));        
 
         final File temp = Utils.getTempDir(tc);
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        
+        if (roundCount != data.size()) {
+            throw new IllegalArgumentException("Provided data length and round count mismatch.");
+        }
 
         File target;
         for (int i = 0; i < roundCount; i++) {
             target = new File(temp.getAbsolutePath() + File.separator + name + i + IMAGE_EXTENSION);
-            ImageIO.write(ExportUtils.createImageResult(tc, i), "bmp", target);
+            exportImage(data.get(i), target, new int[] {i}, tc);
+            
         }
         // prepare script
         String script = loadScript();        
@@ -73,7 +110,7 @@ public class ExportVideoFile implements IExporter {
     }
 
     private String loadScript() throws IOException {
-        InputStream in = ExportVideoFile.class.getResourceAsStream(SCRIPT_NAME);
+        InputStream in = TargetExportFile.class.getResourceAsStream(SCRIPT_NAME);
         BufferedReader bin = new BufferedReader(new InputStreamReader(in));
         StringBuilder sb = new StringBuilder();
         while (bin.ready()) {
@@ -91,16 +128,6 @@ public class ExportVideoFile implements IExporter {
     
     private String extendBackslashes(final String in) {
         return in.replaceAll("\\\\", "\\\\\\\\");
-    }
-
-    @Override
-    public ExportTarget getTarget() {
-        return ExportTarget.AVI;
-    }
-
-    @Override
-    public ExportMode getMode() {
-        return ExportMode.MAP;
     }
 
 }

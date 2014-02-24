@@ -7,6 +7,7 @@ package cz.tul.dic.output;
 public enum ExportMode {
 
     MAP,
-    LINE
+    LINE,
+    SEQUENCE
     
 }

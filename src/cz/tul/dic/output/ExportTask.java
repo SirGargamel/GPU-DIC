@@ -13,12 +13,16 @@ public class ExportTask {
 
     private final ExportMode mode;
     private final ExportTarget target;
-    private final Object param;
+    private final Direction direction;
+    private final Object targetParam;
+    private final int[] dataParams;
 
-    public ExportTask(ExportMode mode, ExportTarget target, Object param) {
+    public ExportTask(ExportMode mode, ExportTarget target, final Direction direction, final Object targetParam, final int... dataParams) {
         this.mode = mode;
         this.target = target;
-        this.param = param;
+        this.direction = direction;
+        this.dataParams = dataParams;
+        this.targetParam = targetParam;
     }
 
     public ExportMode getMode() {
@@ -29,20 +33,32 @@ public class ExportTask {
         return target;
     }
 
-    public Object getParam() {
-        return param;
+    public Direction getDirection() {
+        return direction;
     }
-    
+
+    public int[] getDataParams() {
+        return dataParams;
+    }
+
+    public Object getTargetParam(){
+        return targetParam;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        
+
         sb.append(target);
         sb.append("-");
         sb.append(mode);
         sb.append("-");
-        sb.append(param);
-        
+        sb.append(direction);
+        sb.append("-");
+        sb.append(dataParams);
+        sb.append("-");
+        sb.append(targetParam);
+
         return sb.toString();
     }
 

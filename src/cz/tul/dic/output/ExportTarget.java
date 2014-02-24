@@ -7,8 +7,7 @@ package cz.tul.dic.output;
 public enum ExportTarget {
 
     GUI,
-    CSV,
-    AVI,
-    IMAGE
+    CSV,    
+    FILE
     
 }

@@ -1,7 +1,5 @@
 package cz.tul.dic.output;
 
-import cz.tul.dic.data.Image;
-import cz.tul.dic.data.task.TaskContainer;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -13,61 +11,113 @@ import java.awt.image.BufferedImage;
  * @author Petr Jecmen
  */
 public class ExportUtils {
-    
+
     private static final int IMAGE_TYPE = BufferedImage.TYPE_3BYTE_BGR;
     private static final float ALPHA = 0.75f;
     private static final Color BACKGROUND_COLOR = Color.BLACK;
-    
-    public static BufferedImage createImageResult(final TaskContainer tc, final int position) {
-        final Image background = tc.getImages().get(position);
+
+    public static double calculateDisplacement(final double[] def, final Direction dir) {
+        double result;
+        switch (dir) {
+            case X:
+                result = def[0];
+                break;
+            case Y:
+                result = def[1];
+                break;
+            case ABS:
+                result = Math.sqrt(def[0] * def[0] + def[1] * def[1]);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported direction.");
+        }
+
+        return result;
+    }
+
+    public static double calculateDeformation(final double[][][] results, final int x, final int y, final Direction dir) {
+        double result;
+
+        switch (dir) {
+            case DX:
+                result = results[x + 1][y][0] - results[x][y][0];
+                break;
+            case DY:
+                result = results[x][y + 1][1] - results[x][y][1];
+                break;
+            case DABS:
+                final double val1 = results[x + 1][y][0] - results[x][y][0];
+                final double val2 = results[x][y + 1][1] - results[x][y][1];
+                result = Math.sqrt(val1 * val1 + val2 * val2);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported direction.");
+        }
+
+        return result;
+    }
+
+    public static BufferedImage overlayImage(final BufferedImage background, final BufferedImage foreground) {
         final BufferedImage out = new BufferedImage(background.getWidth(), background.getHeight(), IMAGE_TYPE);
         Graphics2D g = out.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
         g.drawImage(background, 0, 0, null);
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, ALPHA));
-        g.drawImage(prepareOverlay(tc, position), 0, 0, null);
+        g.drawImage(foreground, 0, 0, null);
         g.dispose();
-        
+
         return out;
     }
-    
-    private static BufferedImage prepareOverlay(final TaskContainer tc, final int position) {
-        final Image background = tc.getImages().get(position);
-        final BufferedImage out = new BufferedImage(background.getWidth(), background.getHeight(), IMAGE_TYPE);
+
+    public static BufferedImage createImageFromMap(final double[][] mapData) {
+        if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
+            throw new IllegalArgumentException("Illegal map data.");
+        }
+
+        final int width = mapData.length;
+        final int height = mapData[1].length;
+
+        double min = Double.MAX_VALUE;
+        double max = -Double.MAX_VALUE;
+        double val;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                val = mapData[x][y];
+                if (val > max) {
+                    max = val;
+                }
+                if (val < min) {
+                    min = val;
+                }
+            }
+        }
+
+        final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
 
         Graphics2D g = out.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
         g.setColor(BACKGROUND_COLOR);
-        g.drawRect(0, 0, out.getWidth(), out.getHeight());
+        g.drawRect(0, 0, width, height);
 
-        final double[][][] results = tc.getFinalResults(position);
-
-        for (int x = 0; x < results.length; x++) {
-            for (int y = 0; y < results[x].length; y++) {
-                out.setRGB(x, y, deformationToVal(results[x][y]));
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                out.setRGB(x, y, deformationToRGB(mapData[x][y], min, max));
             }
         }
 
         return out;
     }
-    
-    private static int deformationToVal(final double[] deformation) {        
-        double val = Math.sqrt(deformation[0] * deformation[0] + deformation[1]* deformation[1]);
-        return deformationToRGB(val);
-    }
-    
-    public static int deformationToRGB(final double val) {
+
+    private static int deformationToRGB(final double val, final double min, final double max) {
         int result;
         if (val == 0) {
             result = 0;
         } else if (val < 0) {
-            result = ((int) (val)) << 16;
+            result = ((int) (val / min)) << 16;
         } else {
-            result = ((int) (-val)) & 0xff;
+            result = ((int) (-val / max)) & 0xff;
         }
         return result;
     }
-    
+
 }
