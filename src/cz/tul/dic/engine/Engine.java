@@ -28,7 +28,9 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -274,21 +276,34 @@ public class Engine {
 
         final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
 
-        float best, val;
-        int bestIndex, index;
+        float val, best;
+        List<Integer> candidates = new LinkedList<>();
+        int index, bestIndex;
         for (int facet = 0; facet < facetCount; facet++) {
             best = -Float.MAX_VALUE;
-            bestIndex = -1;
             index = facet * deformationCount;
             for (int def = 0; def < deformationCount; def++) {
                 val = completeResults[index];
                 if (val > best) {
                     best = val;
-                    bestIndex = def;
+
+                    candidates.clear();
+                    candidates.add(def);
+                } else if (val == best) {
+                    candidates.add(def);
                 }
 
                 index++;
             }
+
+            if (candidates.isEmpty()) {
+                throw new IllegalArgumentException("No best value found.");
+            }
+            if (candidates.size() > 1) {
+                Collections.sort(candidates, new DeformationResultSorter(tc));
+            }
+            bestIndex = candidates.get(0);
+
             result.add(TaskContainerUtils.extractDeformation(tc, bestIndex));
         }
 
@@ -340,7 +355,7 @@ public class Engine {
                 }
             }
         }
-        
+
         tc.storeFinalResults(finalResults, round);
     }
 
