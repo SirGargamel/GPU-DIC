@@ -28,16 +28,12 @@ public class TaskContainerUtils {
 
         return result;
     }
-    
-    public static int getRoundCount(final TaskContainer tc) {        
-        return tc.getImages().size() - 1;
-    }
-    
+
     public static double[] extractDeformation(final TaskContainer tc, final int index) {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
-        
+
         final int size;
         final DeformationDegree dd = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE);
         switch (dd) {
@@ -53,12 +49,12 @@ public class TaskContainerUtils {
             default:
                 throw new IllegalArgumentException("Deformation parameters not set.");
         }
-        
+
         final double[] result = new double[size];
-        
+
         System.arraycopy(tc.getDeformations(), size * index, result, 0, size);
-        
+
         return result;
     }
-    
+
 }

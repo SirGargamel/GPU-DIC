@@ -85,9 +85,7 @@ public class Computation {
         final Engine engine = new Engine(wsm);
         engine.computeTask(tc);
 
-        // perform export                
-        System.err.println("TODO Deformations coloring according to limits.");
-        System.err.println("TODO ExportCsv");
+        // perform export                                
         System.err.println("TODO ExportGUI");
         Exporter.export(tc);
     }

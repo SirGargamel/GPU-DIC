@@ -87,7 +87,7 @@ public class Engine {
     }
 
     public void computeTask(final TaskContainer tc) throws IOException {
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        final int roundCount = tc.getRoundCount();
         final int facetSize = tc.getFacetSize();
         final int facetArea = facetSize * facetSize;
 
@@ -103,9 +103,9 @@ public class Engine {
         int facetCount;
         for (int round = 0; round < roundCount; round++) {
             // generate data for OpenCL            
-            img = tc.getImages().get(round);
+            img = tc.getImage(round);
             imgA = generateImage(img);
-            imgB = generateImage(tc.getImages().get(round + 1));
+            imgB = generateImage(tc.getImage(round + 1));
 
             facets = tc.getFacets(round);
             facetCount = facets.size();
@@ -311,7 +311,7 @@ public class Engine {
     }
 
     private void buildFinalResults(final TaskContainer tc, final int round) {
-        final Image img = tc.getImages().get(round);
+        final Image img = tc.getImage(round);
         final List<Facet> facets = tc.getFacets(round);
         final List<double[]> results = tc.getResults(round);
 

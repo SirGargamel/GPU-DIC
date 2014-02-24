@@ -14,7 +14,7 @@ public class SimpleFacetGenerator implements IFacetGenerator {
 
     @Override
     public List<List<Facet>> generateFacets(TaskContainer tc) {
-        final int taskCount = tc.getImages().size() - 1;
+        final int taskCount = tc.getRoundCount();
         List<List<Facet>> result = new ArrayList<>(taskCount);
 
         Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);

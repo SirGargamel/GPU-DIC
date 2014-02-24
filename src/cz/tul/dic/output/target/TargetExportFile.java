@@ -7,7 +7,6 @@ package cz.tul.dic.output.target;
 
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.output.ExportUtils;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -23,8 +22,6 @@ import javax.imageio.ImageIO;
  *
  * @author Petr Jecmen
  */
-
-
 public class TargetExportFile implements ITargetExport {
 
     private static final String IMAGE_EXTENSION = ".bmp";
@@ -57,13 +54,13 @@ public class TargetExportFile implements ITargetExport {
         final int position = dataParams[0];
         final File target = (File) targetParams;
 
-        final BufferedImage background = tc.getImages().get(position);
+        final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay = ExportUtils.createImageFromMap(data);
-        
+
         ImageIO.write(ExportUtils.overlayImage(background, overlay), "BMP", target);
     }
-    
-    public void exportVideo(final List<double[][]> data, final Object targetParams, TaskContainer tc) throws IOException {        
+
+    public void exportVideo(final List<double[][]> data, final Object targetParams, TaskContainer tc) throws IOException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Input parameter has to be the target file. - " + targetParams);
         }
@@ -71,11 +68,11 @@ public class TargetExportFile implements ITargetExport {
         final File out = (File) targetParams;
         final String fullName = out.getName();
 
-        final String name = fullName.substring(0, fullName.lastIndexOf("."));        
+        final String name = fullName.substring(0, fullName.lastIndexOf("."));
 
         final File temp = Utils.getTempDir(tc);
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        
+        final int roundCount = tc.getRoundCount();
+
         if (roundCount != data.size()) {
             throw new IllegalArgumentException("Provided data length and round count mismatch.");
         }
@@ -83,11 +80,11 @@ public class TargetExportFile implements ITargetExport {
         File target;
         for (int i = 0; i < roundCount; i++) {
             target = new File(temp.getAbsolutePath() + File.separator + name + i + IMAGE_EXTENSION);
-            exportImage(data.get(i), target, new int[] {i}, tc);
-            
+            exportImage(data.get(i), target, new int[]{i}, tc);
+
         }
         // prepare script
-        String script = loadScript();        
+        String script = loadScript();
         script = script.replace(SCRIPT_FILE, temp.getAbsolutePath() + File.separator + name + "0" + IMAGE_EXTENSION);
         script = script.replace(SCRIPT_TARGET, out.getAbsolutePath());
         final String scriptPath = temp.getAbsolutePath().concat(File.separator).concat(SCRIPT_NAME);
@@ -95,7 +92,7 @@ public class TargetExportFile implements ITargetExport {
         // launch virtualdub to strip video to images
         final String[] command = {
             extendBackslashes(VIRTUAL_DUB.getAbsolutePath()),
-            "/x /s \"" + extendBackslashes(extendBackslashes(scriptPath)) + "\""};        
+            "/x /s \"" + extendBackslashes(extendBackslashes(scriptPath)) + "\""};
         try {
             final Process p = Runtime.getRuntime().exec(command[0].concat(" ").concat(command[1]));
             int result = p.waitFor();
@@ -119,13 +116,13 @@ public class TargetExportFile implements ITargetExport {
         }
         return sb.toString();
     }
-    
-    private void saveScript(final String script, final File target) throws IOException {        
+
+    private void saveScript(final String script, final File target) throws IOException {
         try (FileWriter out = new FileWriter(target)) {
             out.write(extendBackslashes(script));
         }
     }
-    
+
     private String extendBackslashes(final String in) {
         return in.replaceAll("\\\\", "\\\\\\\\");
     }

@@ -56,8 +56,12 @@ public class TaskContainer {
         images.add(image);
     }
 
-    public List<Image> getImages() {
-        return Collections.unmodifiableList(images);
+    public Image getImage(final int index) {
+        return images.get(index);
+    }
+    
+    public int getRoundCount() {        
+        return images.size() - 1;
     }
 
     public void assignFacets(final List<List<Facet>> facets) {
