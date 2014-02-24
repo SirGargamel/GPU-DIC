@@ -78,42 +78,37 @@ public class ExportUtils {
         final int width = mapData.length;
         final int height = mapData[1].length;
 
-        double min = Double.MAX_VALUE;
         double max = -Double.MAX_VALUE;
         double val;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                val = mapData[x][y];
+                val = Math.abs(mapData[x][y]);
                 if (val > max) {
                     max = val;
-                }
-                if (val < min) {
-                    min = val;
                 }
             }
         }
 
         final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
-
         Graphics2D g = out.createGraphics();
         g.setColor(BACKGROUND_COLOR);
         g.drawRect(0, 0, width, height);
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                out.setRGB(x, y, deformationToRGB(mapData[x][y], min, max));
+                out.setRGB(x, y, deformationToRGB(mapData[x][y], max));
             }
         }
 
         return out;
     }
 
-    private static int deformationToRGB(final double val, final double min, final double max) {
+    private static int deformationToRGB(final double val, final double max) {
         int result;
         if (val == 0) {
             result = 0;
         } else if (val < 0) {
-            result = ((int) (val / min)) << 16;
+            result = ((int) (val / max)) << 16;
         } else {
             result = ((int) (-val / max)) & 0xff;
         }
