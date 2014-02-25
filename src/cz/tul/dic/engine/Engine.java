@@ -11,7 +11,6 @@ import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLImageFormat;
 import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLMemory.Mem;
-import static com.jogamp.opencl.CLMemory.Mem.READ_ONLY;
 import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.CLResource;
@@ -38,20 +37,21 @@ import java.util.Set;
  *
  * @author Petr Jecmen
  */
-public class Engine {
+public final class Engine {
 
     private static final Type DEVICE_TYPE = Type.GPU;
     private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
     private static final String KERNEL_NAME = "CL1D_I_V_LL_MC_D";
     private static final int ARGUMENT_INDEX = 12;
-    private final Set<CLResource> clMem;
+    private final Set<CLResource> clMemRound, clMemTask;
     private final WorkSizeManager wsm;
     private final CLPlatform platform;
     private final CLContext context;
     private final CLDevice device;
 
     public Engine(final WorkSizeManager wsm) {
-        clMem = new HashSet<>();
+        clMemRound = new HashSet<>();
+        clMemTask = new HashSet<>();
         this.wsm = wsm;
 
         final CLPlatform tmpP = CLPlatform.getDefault(new Filter<CLPlatform>() {
@@ -91,6 +91,9 @@ public class Engine {
         final int facetSize = tc.getFacetSize();
         final int facetArea = facetSize * facetSize;
 
+        final CLCommandQueue queue = device.createCommandQueue();
+        clMemTask.add(queue);
+
         List<Facet> facets;
         Image img;
         CLImage2d<IntBuffer> imgA, imgB;
@@ -100,36 +103,42 @@ public class Engine {
         CLProgram program;
         CLKernel kernel;
         float[] roundResult;
-        int facetCount;
+        int facetCount, kernelRoundCount, lws0base, lws0, deformationCount;
+        List<double[]> bestResults;
         for (int round = 0; round < roundCount; round++) {
             // generate data for OpenCL            
             img = tc.getImage(round);
             imgA = generateImage(img);
+            queue.putWriteImage(imgA, false);
             imgB = generateImage(tc.getImage(round + 1));
+            queue.putWriteImage(imgB, false);
 
             facets = tc.getFacets(round);
             facetCount = facets.size();
 
             facetData = generateFacetData(facets, facetSize);
+            queue.putWriteBuffer(facetData, false);
+
             facetCenters = generateFacetCenters(facets);
+            queue.putWriteBuffer(facetCenters, false);
 
             deformations = generateDeformations(tc.getDeformations());
-            final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
+            queue.putWriteBuffer(deformations, false);
+            deformationCount = TaskContainerUtils.getDeformationCount(tc);
 
             results = context.createFloatBuffer(facetCount * deformationCount, Mem.WRITE_ONLY);
-            clMem.add(results);
+            clMemRound.add(results);
             // create kernel and parameters
             // how many facets will be computed during one round
             final int facetSubCount = Math.min(wsm.getWorkSize(this.getClass()), facetCount);
 
             program = context.createProgram(KernelPreparator.prepareKernel(KERNEL_NAME, tc)).build();
-            clMem.add(program);
+            clMemRound.add(program);
 
             kernel = program.createCLKernel(KERNEL_NAME);
-            clMem.add(kernel);
+            clMemRound.add(kernel);
 
-            final int lws0base = calculateLws0base(kernel);
-            final int lws0;
+            lws0base = calculateLws0base(kernel);            
             if (deformationCount > facetArea) {
                 lws0 = EngineMath.roundUp(lws0base, facetArea);
             } else {
@@ -152,33 +161,33 @@ public class Engine {
                     .putArg(0)
                     .rewind();
             // copy data and execute kernel
-            final int kernelRoundCount = (int) Math.ceil(facetCount / (double) facetSubCount);
-            final CLCommandQueue queue = device.createCommandQueue();
-            clMem.add(queue);
+            kernelRoundCount = (int) Math.ceil(facetCount / (double) facetSubCount);
 
-            queue.putWriteImage(imgA, false);
-            queue.putWriteImage(imgB, false);
-            queue.putWriteBuffer(facetData, false);
-            queue.putWriteBuffer(facetCenters, false);
-            queue.putWriteBuffer(deformations, false);
-            for (int j = 0; j < kernelRoundCount; j++) {
-                kernel.setArg(ARGUMENT_INDEX, j * facetSubCount);
+            for (int kernelRound = 0; kernelRound < kernelRoundCount; kernelRound++) {
+                kernel.setArg(ARGUMENT_INDEX, kernelRound * facetSubCount);
                 queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0);
             }
             // copy data back            
             queue.putReadBuffer(results, true);
-            queue.finish();
             roundResult = readBuffer(results.getBuffer());
             // pick best values            
-            final List<double[]> bestResults = pickBestResults(roundResult, tc, facetCount);
+            bestResults = pickBestResults(roundResult, tc, facetCount);
             // store data           
             tc.storeResult(bestResults, round);
             buildFinalResults(tc, round);
-            // round memory cleanup
-            for (CLResource mem : clMem) {
-                if (!mem.isReleased()) {
-                    mem.release();
-                }
+            clearMem(clMemRound);
+        }
+
+        queue.finish();
+
+        clearMem(clMemTask);
+    }
+
+    private void clearMem(final Set<CLResource> mems) {
+        // round memory cleanup
+        for (CLResource mem : mems) {
+            if (!mem.isReleased()) {
+                mem.release();
             }
         }
     }
@@ -187,8 +196,8 @@ public class Engine {
         final int[] imageData = image.toArray();
         final int imageWidth = image.getWidth();
         final IntBuffer imageBuffer = Buffers.newDirectIntBuffer(imageData);
-        final CLImage2d<IntBuffer> result = context.createImage2d(imageBuffer, imageWidth, imageData.length / imageWidth, IMAGE_FORMAT, READ_ONLY);
-        clMem.add(result);
+        final CLImage2d<IntBuffer> result = context.createImage2d(imageBuffer, imageWidth, imageData.length / imageWidth, IMAGE_FORMAT, Mem.READ_ONLY);
+        clMemRound.add(result);
         return result;
     }
 
@@ -217,7 +226,7 @@ public class Engine {
         }
         resultBuffer.rewind();
 
-        clMem.add(result);
+        clMemRound.add(result);
         return result;
     }
 
@@ -240,7 +249,7 @@ public class Engine {
         }
         buffer.rewind();
 
-        clMem.add(result);
+        clMemRound.add(result);
         return result;
     }
 
@@ -252,7 +261,7 @@ public class Engine {
         }
         buffer.rewind();
 
-        clMem.add(result);
+        clMemRound.add(result);
         return result;
     }
 
