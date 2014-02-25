@@ -37,7 +37,7 @@ public class Computation {
         IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
-//        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
+        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
     }
 
     public static void commenceComputation() throws IOException {
@@ -49,9 +49,9 @@ public class Computation {
 //        InputLoader.loadInput(IN_VIDEO_REAL, tc);
 
         // select ROI        
-        System.err.println("TODO Check ROI if valid, make smaller if needed.");
-        System.err.println("TODO If no ROI provided, choose whole image.");
-        tc.addRoi(new ROI(44, 49, 146, 109), 0);
+        System.out.println("TODO Check ROI if valid, make smaller if needed.");
+        System.out.println("TODO If no ROI provided, choose whole image.");
+        tc.addRoi(new ROI(5, 5, 315, 235), 0);
 
         // select facet size
         tc.setFacetSize(10);
@@ -60,13 +60,13 @@ public class Computation {
         tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File("D:\\test0.bmp"), 0));
         tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File("D:\\test1.bmp"), 1));
         tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File("D:\\test2.bmp"), 2));
-        tc.addExportTask(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.ABS, new File("D:\\test.avi")));
-        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, Direction.ABS, new File("D:\\testMap.csv"), 0));
-        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
+//        tc.addExportTask(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.ABS, new File("D:\\test.avi")));
+//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, Direction.ABS, new File("D:\\testMap.csv"), 0));
+//        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
 
         // generate facets
         tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        System.err.println("TODO TightModeFacetGenerator");
+        System.out.println("TODO TightModeFacetGenerator");
         FacetGenerator.generateFacets(tc);
 
         // generate deformations
@@ -77,16 +77,16 @@ public class Computation {
         DeformationGenerator.generateDeformations(tc);
 
         // split to subtask according to deformations and limits
-        System.err.println("TODO TaskSplitter");
+        System.out.println("TODO TaskSplitter");
 
-        // compute task
-        System.err.println("TODO Precompute ideal work size");
+        // compute task        
         final WorkSizeManager wsm = new WorkSizeManager();
+        System.out.println("TODO Compute ideal workSize dynamically");
         final Engine engine = new Engine(wsm);
         engine.computeTask(tc);
 
         // perform export                                
-        System.err.println("TODO ExportGUI");
+        System.out.println("TODO ExportGUI");
         Exporter.export(tc);
     }
 
