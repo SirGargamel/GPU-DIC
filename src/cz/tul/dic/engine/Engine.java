@@ -83,7 +83,7 @@ public final class Engine {
             }
         });
 
-        System.err.println("TODO Support multiple kernels.");
+        System.out.println("TODO Support multiple kernels.");
     }
 
     public void computeTask(final TaskContainer tc) throws IOException {
@@ -138,7 +138,7 @@ public final class Engine {
             kernel = program.createCLKernel(KERNEL_NAME);
             clMemRound.add(kernel);
 
-            lws0base = calculateLws0base(kernel);            
+            lws0base = calculateLws0base(kernel);
             if (deformationCount > facetArea) {
                 lws0 = EngineMath.roundUp(lws0base, facetArea);
             } else {
@@ -287,12 +287,12 @@ public final class Engine {
 
         float val, best;
         List<Integer> candidates = new LinkedList<>();
-        int index, bestIndex;
+        int baseIndex, bestIndex;
         for (int facet = 0; facet < facetCount; facet++) {
             best = -Float.MAX_VALUE;
-            index = facet * deformationCount;
+            baseIndex = facet * deformationCount;
             for (int def = 0; def < deformationCount; def++) {
-                val = completeResults[index];
+                val = completeResults[baseIndex + def];
                 if (val > best) {
                     best = val;
 
@@ -300,20 +300,20 @@ public final class Engine {
                     candidates.add(def);
                 } else if (val == best) {
                     candidates.add(def);
-                }
-
-                index++;
+                }                
             }
 
             if (candidates.isEmpty()) {
-                throw new IllegalArgumentException("No best value found.");
-            }
-            if (candidates.size() > 1) {
-                Collections.sort(candidates, new DeformationResultSorter(tc));
-            }
-            bestIndex = candidates.get(0);
+                System.err.println("No best value found for facet nr." + facet);
+                result.add(new double[]{0, 0});
+            } else {
+                if (candidates.size() > 1) {
+                    Collections.sort(candidates, new DeformationResultSorter(tc));
+                }
+                bestIndex = candidates.get(0);
 
-            result.add(TaskContainerUtils.extractDeformation(tc, bestIndex));
+                result.add(TaskContainerUtils.extractDeformation(tc, bestIndex));
+            }
         }
 
         return result;
