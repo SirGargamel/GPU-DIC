@@ -170,6 +170,7 @@ public final class Engine {
             // copy data back            
             queue.putReadBuffer(results, true);
             roundResult = readBuffer(results.getBuffer());
+            analyze(roundResult);
             // pick best values            
             bestResults = pickBestResults(roundResult, tc, facetCount);
             // store data           
@@ -300,11 +301,11 @@ public final class Engine {
                     candidates.add(def);
                 } else if (val == best) {
                     candidates.add(def);
-                }                
+                }
             }
 
             if (candidates.isEmpty()) {
-                System.err.println("No best value found for facet nr." + facet);
+//                System.err.println("No best value found for facet nr." + facet);
                 result.add(new double[]{0, 0});
             } else {
                 if (candidates.size() > 1) {
@@ -317,6 +318,22 @@ public final class Engine {
         }
 
         return result;
+    }
+
+    private void analyze(final float[] completeResults) {
+        int counter = 0;
+        int groupCount = 0;
+        boolean lastNotNan = false;
+        for (float f : completeResults) {
+            if (Float.isNaN(f)) {
+                counter++;
+                lastNotNan = false;
+            } else if (!lastNotNan) {
+                lastNotNan = true;
+                groupCount++;
+            }
+        }
+        System.out.println("Found " + counter + " NaN values in " + groupCount + " groups out of " + completeResults.length);        
     }
 
     private void buildFinalResults(final TaskContainer tc, final int round) {
