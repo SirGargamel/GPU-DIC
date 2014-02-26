@@ -38,7 +38,7 @@ kernel void CL2DImage(
     const int facetCoordCount = facetSize2 * 2;    
     const int baseIndexFacet = facetId * facetCoordCount; 
     const int baseIndexFacetCenter = facetId * 2;
-    const int baseIndexDeformation = deformationId * 6;
+    const int baseIndexDeformation = deformationId * %DEF_D%;
     // deform facet
     float deformedFacet[-1*-1*2];
     int index, i2, x, y;
@@ -53,8 +53,10 @@ kernel void CL2DImage(
         dx = x - facetCenters[baseIndexFacetCenter];
         dy = y - facetCenters[baseIndexFacetCenter + 1];
         
-        deformedFacet[i2] = x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * dx + deformations[baseIndexDeformation + 4] * dy;                    
-        deformedFacet[i2 + 1] = y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * dx + deformations[baseIndexDeformation + 5] * dy; 
+//        deformedFacet[i2] = x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * dx + deformations[baseIndexDeformation + 4] * dy;                    
+//        deformedFacet[i2 + 1] = y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * dx + deformations[baseIndexDeformation + 5] * dy; 
+        deformedFacet[i2] = %DEF_X%;
+        deformedFacet[i2 + 1] = %DEF_Y%;
     }
     // compute correlation using ZNCC
     float deformedI[-1*-1];

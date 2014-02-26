@@ -73,5 +73,10 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     boolean usesMemoryCoalescing() {
         return true;
     }
+    
+    @Override
+    boolean usesVectorization() {
+        return true;
+    }
 
 }

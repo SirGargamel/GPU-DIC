@@ -57,7 +57,7 @@ public abstract class Kernel {
 
     public void prepareKernel(final CLContext context, final CLDevice device, final TaskContainer tc) throws IOException {
         this.context = context;
-        program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, tc)).build();
+        program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, tc, usesVectorization())).build();
         clMem.add(program);
         kernel = program.createCLKernel(kernelName);
         clMem.add(kernel);
@@ -115,6 +115,8 @@ public abstract class Kernel {
             final int facetSize, final int facetCount);
 
     abstract boolean usesMemoryCoalescing();
+    
+    abstract boolean usesVectorization();
 
     public void finish() {
         queue.finish();

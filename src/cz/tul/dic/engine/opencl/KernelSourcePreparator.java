@@ -15,17 +15,20 @@ public class KernelSourcePreparator {
 
     private static final String KERNEL_EXTENSION = ".cl";
     private static final String REPLACE_FACET_SIZE = "-1";
-    private static final String REPLACE_DEFORMATION = "%DEF%";
+    private static final String REPLACE_DEFORMATION_X = "%DEF_X%";
+    private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";
     private static final String REPLACE_DEFORMATION_DEGREE = "%DEF_D%";
+    private static final String PLUS = " + ";
+    private static final String MUL = " * ";
     private final String kernelName;
     private String kernel;
 
-    public static String prepareKernel(final String kernelName, final TaskContainer tc) throws IOException {
+    public static String prepareKernel(final String kernelName, final TaskContainer tc, final boolean usesVectorization) throws IOException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         kp.loadKernel();
         kp.prepareFacetSize(tc.getFacetSize());
-        kp.prepareDeformations((DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE));
+        kp.prepareDeformations((DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE), usesVectorization);
 
         return kp.kernel;
     }
@@ -49,16 +52,67 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(REPLACE_FACET_SIZE, Integer.toString(facetSize));
     }
 
-    private void prepareDeformations(final DeformationDegree deg) {
+    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization) {
+        final String x, y, dx, dy;
+        if (usesVectorization) {
+            x = "coords.x";
+            y = "coords.y";
+            dx = "def.x";
+            dy = "def.y";
+        } else {
+            x = "x";
+            y = "y";
+            dx = "dx";
+            dy = "dy";
+        }
+        final StringBuilder sb = new StringBuilder();
         switch (deg) {
             case ZERO:
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION, "coords.x + deformations[baseIndexDeformation], \n"
-                        + "coords.y + deformations[baseIndexDeformation + 1]");
+                sb.append(x);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation]");
+//                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, "coords.x + deformations[baseIndexDeformation]");
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
+
+                sb.setLength(0);
+                sb.append(y);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + 1]");
+//                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, "coords.y + deformations[baseIndexDeformation + 1]");
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_DEGREE, "2");
                 break;
             case FIRST:
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION, "coords.x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * def.x + deformations[baseIndexDeformation + 4] * def.y, \n"
-                        + "coords.y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * def.x + deformations[baseIndexDeformation + 5] * def.y");
+                sb.append(x);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation]");
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + 2]");
+                sb.append(MUL);
+                sb.append(dx);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + 4]");
+                sb.append(MUL);
+                sb.append(dy);
+//                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, "coords.x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * def.x + deformations[baseIndexDeformation + 4] * def.y");
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
+                
+                sb.setLength(0);
+                sb.append(y);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + 1]");
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + 3]");
+                sb.append(MUL);
+                sb.append(dx);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + 5]");
+                sb.append(MUL);
+                sb.append(dy);
+//                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, "coords.y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * def.x + deformations[baseIndexDeformation + 5] * def.y");
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+                
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_DEGREE, "6");
                 break;
             case SECOND:

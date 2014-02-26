@@ -44,8 +44,8 @@ public class Computation {
         final TaskContainer tc = new TaskContainer();
 
         // load input data
-//        InputLoader.loadInput(IN_VIDEO_ART, tc);                
-        InputLoader.loadInput(IN_IMAGES, tc);
+        InputLoader.loadInput(IN_VIDEO_ART, tc);                
+//        InputLoader.loadInput(IN_IMAGES, tc);
 //        InputLoader.loadInput(IN_VIDEO_REAL, tc);
 
         // select ROI        
@@ -81,7 +81,7 @@ public class Computation {
 
         // compute task        
         System.out.println("TODO Compute ideal workSize dynamically");
-        tc.addParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
+        tc.addParameter(TaskParameter.KERNEL, KernelType.CL_2D_I);
         final Engine engine = new Engine();
         engine.computeTask(tc);
 

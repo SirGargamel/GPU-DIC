@@ -12,7 +12,7 @@ public class CL2DImage extends Kernel {
     private static final int KERNEL_BEST_LWS1 = 128;
 
     public CL2DImage() {
-        super("CL1D_I_V_LL_MC");
+        super("CL2DImage");
     }
 
     @Override
@@ -27,18 +27,12 @@ public class CL2DImage extends Kernel {
         final int facetGlobalWorkSize = EngineMath.roundUp(lws0, facetCount);
         final int deformationsGlobalWorkSize = EngineMath.roundUp(lws1, deformationCount);
 
-        int groupCountPerFacet = deformationCount / lws0;
-        if (deformationCount % lws0 > 0) {
-            groupCountPerFacet++;
-        }
-
         kernel.rewind();
         kernel.putArgs(imgA, imgB, facetData, facetCenters, deformations, results)
                 .putArg(imageWidth)
                 .putArg(deformationCount)
                 .putArg(facetSize)
-                .putArg(facetCount)
-                .putArg(groupCountPerFacet);
+                .putArg(facetCount);
         kernel.rewind();
 
         queue.put2DRangeKernel(kernel, 0, 0, facetGlobalWorkSize, deformationsGlobalWorkSize, lws0, lws1);
@@ -46,6 +40,11 @@ public class CL2DImage extends Kernel {
 
     @Override
     boolean usesMemoryCoalescing() {
+        return false;
+    }
+
+    @Override
+    boolean usesVectorization() {
         return false;
     }
 
