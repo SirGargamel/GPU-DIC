@@ -10,8 +10,9 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.engine.opencl.CL2DImage;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.opencl.Kernel;
+import cz.tul.dic.engine.opencl.KernelType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public final class Engine {
     }
 
     public void computeTask(final TaskContainer tc) throws IOException {
-        final Kernel kernel = new CL2DImage();
+        final Kernel kernel = Kernel.prepareKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         kernel.prepareKernel(context, device, tc);
 
         float[] roundResult;

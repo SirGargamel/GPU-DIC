@@ -1,6 +1,7 @@
 package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.FacetGeneratorMode;
 import java.io.File;
 
@@ -15,6 +16,7 @@ public enum TaskParameter {
     FACET_GENERATOR_SPACING(int.class),
     DEFORMATION_DEGREE(DeformationDegree.class),
     DEFORMATION_BOUNDS(double[].class),
+    KERNEL(KernelType.class),
     ;
     
     private final Class type;

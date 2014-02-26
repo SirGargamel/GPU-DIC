@@ -5,6 +5,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.FacetGenerator;
 import cz.tul.dic.generators.FacetGeneratorMode;
@@ -80,6 +81,7 @@ public class Computation {
 
         // compute task        
         System.out.println("TODO Compute ideal workSize dynamically");
+        tc.addParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
         final Engine engine = new Engine();
         engine.computeTask(tc);
 

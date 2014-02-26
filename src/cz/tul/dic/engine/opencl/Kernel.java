@@ -29,6 +29,19 @@ import java.util.Set;
  */
 public abstract class Kernel {
 
+    public static Kernel prepareKernel(final KernelType kernelType) {
+        switch (kernelType) {
+            case CL_2D_I:
+                return new CL2DImage();
+            case CL_1D_I_V_LL_MC:
+                return new CL1D_I_V_LL_MC();
+            case CL_1D_I_V_LL_MC_D:
+                return new CL1D_I_V_LL_MC_D();
+            default:
+                throw new IllegalArgumentException("Unsupported type of kernel - " + kernelType);
+        }
+    }
+
     private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
     private final String kernelName;
     protected CLContext context;

@@ -2,7 +2,6 @@ package cz.tul.dic.engine.opencl;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opencl.CLBuffer;
-import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.llb.CLKernelBinding;
@@ -13,13 +12,11 @@ import java.nio.IntBuffer;
 public class CL1D_I_V_LL_MC_D extends Kernel {
 
     private static final int ARGUMENT_INDEX = 12;
-    private final CLDevice device;
     private final WorkSizeManager wsm;
 
-    public CL1D_I_V_LL_MC_D(final CLDevice device) {
+    public CL1D_I_V_LL_MC_D() {
         super("CL1D_I_V_LL_MC_D");
         wsm = new WorkSizeManager();
-        this.device = device;
     }
 
     @Override
@@ -55,7 +52,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 .putArg(facetSubCount)
                 .putArg(0);
         kernel.rewind();
-            // copy data and execute kernel
+        // copy data and execute kernel
 
         final int kernelRoundCount = (int) Math.ceil(facetCount / (double) facetSubCount);
         for (int kernelRound = 0; kernelRound < kernelRoundCount; kernelRound++) {
@@ -68,10 +65,10 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
 
     private int calculateLws0base(final CLKernel kernel) {
         final IntBuffer val = Buffers.newDirectIntBuffer(2);
-        context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), device.getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
+        context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), queue.getDevice().getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
         return val.get(0);
     }
-    
+
     @Override
     boolean usesMemoryCoalescing() {
         return true;
