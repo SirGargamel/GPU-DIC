@@ -133,10 +133,10 @@ public abstract class Kernel {
     }
 
     private CLImage2d<IntBuffer> generateImage(final Image image) {
-        final int[] imageData = image.toArray();
-        final int imageWidth = image.getWidth();
-        final IntBuffer imageBuffer = Buffers.newDirectIntBuffer(imageData);
-        final CLImage2d<IntBuffer> result = context.createImage2d(imageBuffer, imageWidth, imageData.length / imageWidth, IMAGE_FORMAT, CLMemory.Mem.READ_ONLY);
+        final CLImage2d<IntBuffer> result = context.createImage2d(
+                Buffers.newDirectIntBuffer(image.toArray()),
+                image.getWidth(), image.getHeight(),
+                IMAGE_FORMAT, CLMemory.Mem.READ_ONLY);
         clMem.add(result);
         return result;
     }
