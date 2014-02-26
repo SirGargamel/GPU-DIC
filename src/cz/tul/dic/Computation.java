@@ -5,7 +5,6 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.FacetGenerator;
 import cz.tul.dic.generators.FacetGeneratorMode;
@@ -51,7 +50,7 @@ public class Computation {
         // select ROI        
         System.out.println("TODO Check ROI if valid, make smaller if needed.");
         System.out.println("TODO If no ROI provided, choose whole image.");
-        tc.addRoi(new ROI(5, 5, 315, 235), 0);
+        tc.addRoi(new ROI(0, 0, 320, 240), 0);
 
         // select facet size
         tc.setFacetSize(10);
@@ -80,9 +79,8 @@ public class Computation {
         System.out.println("TODO TaskSplitter");
 
         // compute task        
-        final WorkSizeManager wsm = new WorkSizeManager();
         System.out.println("TODO Compute ideal workSize dynamically");
-        final Engine engine = new Engine(wsm);
+        final Engine engine = new Engine();
         engine.computeTask(tc);
 
         // perform export                                

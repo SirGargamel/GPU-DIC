@@ -20,23 +20,22 @@ int interpolate(const float2 coords, read_only image2d_t image) {
     return intensity;    
 }
 
-kernel void CL1D_I_V_LL_MC_D(
+kernel void CL1D_I_V_LL_MC(
     read_only image2d_t imageA, read_only image2d_t imageB, 
     global read_only int2 * facets, global read_only float2 * facetCenters,
     global read_only float * deformations,
     global write_only float * result,        
     const int imageWidth, const int deformationCount,
     const int facetSize, const int facetCount,
-    const int groupCountPerFacet,
-    const int facetSubCount, const int facetBase) 
+    const int groupCountPerFacet) 
 {        
     //// ID checks    
     // facet
     const size_t groupId = get_group_id(0);
-    const size_t facetId = (groupId / groupCountPerFacet) + facetBase;
-    if (facetId >= facetBase + facetSubCount || facetId >= facetCount) {
+    const size_t facetId = groupId / groupCountPerFacet;
+    if (facetId >= facetCount) {
         return;
-    }        
+    }       
     // deformation    
     const int groupSubId = groupId % groupCountPerFacet;
     const size_t localId = get_local_id(0);
@@ -83,7 +82,7 @@ kernel void CL1D_I_V_LL_MC_D(
 //        deformedFacet[i] = (float2)(
 //            coords.x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * def.x + deformations[baseIndexDeformation + 4] * def.y, 
 //            coords.y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * def.x + deformations[baseIndexDeformation + 5] * def.y);
-        deformedFacet[i] = (float2)(%DEF%);
+    deformedFacet[i] = (float2)(%DEF%);
     }
     // compute correlation using ZNCC
     float deformedI[-1*-1];
