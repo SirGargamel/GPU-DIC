@@ -91,13 +91,14 @@ kernel void CL2DImage(
     }   
     
     float resultVal = 0;           
-    for (int i = 0; i < facetSize2; i++) {
-        index = baseIndexFacet + i*2;        
-        resultVal += facetI[i] * deformedI[i];
+    if (deltaF != 0 && deltaG != 0) {
+        for (int i = 0; i < facetSize2; i++) {
+            index = baseIndexFacet + i*2;        
+            resultVal += facetI[i] * deformedI[i];
+        }
+        resultVal /= sqrt(deltaF) * sqrt(deltaG);  
     }
-    resultVal /= sqrt(deltaF) * sqrt(deltaG);  
     
-    //store result
-    index = facetId * deformationCount + deformationId;
-    result[index] = resultVal;    
+    //store result    
+    result[facetId * deformationCount + deformationId] = resultVal;    
 }

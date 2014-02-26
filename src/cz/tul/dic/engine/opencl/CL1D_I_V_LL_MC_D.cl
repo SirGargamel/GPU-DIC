@@ -109,14 +109,15 @@ kernel void CL1D_I_V_LL_MC_D(
         deformedI[i] -= meanG;
         deltaG += deformedI[i] * deformedI[i];
     }    
-    const float deltaFs = sqrt(deltaF);
-    const float deltaGs = sqrt(deltaG);    
     
     float resultVal = 0;           
-    for (int i = 0; i < facetSize2; i++) {              
-        resultVal += facetI[i] * deformedI[i];
-    }
-    resultVal /= deltaFs * deltaGs;    
+    if (deltaF != 0 && deltaG != 0) {
+        for (int i = 0; i < facetSize2; i++) {
+            index = baseIndexFacet + i*2;        
+            resultVal += facetI[i] * deformedI[i];
+        }
+        resultVal /= sqrt(deltaF) * sqrt(deltaG);  
+    }    
     
     //store result    
     result[facetId * deformationCount + deformationId] = resultVal;    
