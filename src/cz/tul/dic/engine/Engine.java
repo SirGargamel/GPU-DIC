@@ -134,7 +134,9 @@ public final class Engine {
                 groupCount++;
             }
         }
-        System.out.println("Found " + counter + " NaN values in " + groupCount + " groups out of " + completeResults.length);
+        if (counter > 0) {
+            System.out.println("Found " + counter + " NaN values in " + groupCount + " groups out of " + completeResults.length);
+        }
     }
 
     private void buildFinalResults(final TaskContainer tc, final int round) {
