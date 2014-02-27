@@ -49,7 +49,7 @@ public class Computation {
 //            for (KernelType kt : KernelType.values()) {
 //                tcs.add(generateTask(i, kt));
 //            }
-            tcs.add(generateTask(i, KernelType.CL_1D_I_V_LL_MC_D));
+            tcs.add(generateTask(IN_IMAGES, i, KernelType.CL_1D_I_V_LL_MC_D));
         }
 
         System.out.println("TODO TightModeFacetGenerator");
@@ -68,13 +68,11 @@ public class Computation {
         }
     }
 
-    private static TaskContainer generateTask(final int facetSize, final KernelType kernelType) throws IOException {
+    private static TaskContainer generateTask(final Object in, final int facetSize, final KernelType kernelType) throws IOException {
         final TaskContainer tc = new TaskContainer();
 
         // load input data
-//        InputLoader.loadInput(IN_VIDEO_ART, tc);                
-        InputLoader.loadInput(IN_IMAGES, tc);
-//        InputLoader.loadInput(IN_VIDEO_REAL, tc);
+        InputLoader.loadInput(in, tc);                
 
         // select ROI        
         tc.addRoi(new ROI(0, 0, 320, 240), 0);
