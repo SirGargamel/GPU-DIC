@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,6 +85,7 @@ public final class Engine {
 
     private List<double[]> pickBestResults(final float[] completeResults, final TaskContainer tc, final int facetCount) {
         final List<double[]> result = new ArrayList<>(facetCount);
+        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc);
 
         final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
 
@@ -110,7 +112,7 @@ public final class Engine {
                 result.add(new double[]{0, 0});
             } else {
                 if (candidates.size() > 1) {
-                    Collections.sort(candidates, new DeformationResultSorter(tc));
+                    Collections.sort(candidates, candidatesComparator);
                 }
                 bestIndex = candidates.get(0);
 
