@@ -32,7 +32,7 @@ public class Computation {
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 10;
     private static final int SIZE_MAX = 30;
-    private static final int SIZE_STEP = 10;    
+    private static final int SIZE_STEP = 1;    
 
     static {
         IN_IMAGES = new LinkedList<>();
@@ -90,7 +90,9 @@ public class Computation {
         final String ext = Integer.toString(facetSize).concat("-").concat(kernelType.name()).concat(".bmp");
         final int roundCount = tc.getRoundCount();
         for (int round = 0; round < roundCount; round++) {
-            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(Integer.toString(round)).concat("-").concat(ext)), 0));
+            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(Integer.toString(round)).concat("-X-").concat(ext)), 0));
+            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(Integer.toString(round)).concat("-Y-").concat(ext)), 0));
+            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(Integer.toString(round)).concat("-ABS-").concat(ext)), 0));
         }
 //        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("0-").concat(ext)), 0));
 //        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("1-").concat(ext)), 1));
@@ -106,7 +108,7 @@ public class Computation {
 
         // generate deformations
         tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
-        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-5, 5, 0.5, -5, 5, 0.5});
+        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-5, 0, 0.5, -5, 0, 0.5});
 //        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
 //        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});        
         DeformationGenerator.generateDeformations(tc);
