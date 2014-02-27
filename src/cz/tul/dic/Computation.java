@@ -29,6 +29,8 @@ public class Computation {
     private static final File IN_VIDEO_REAL = new File("d:\\temp\\7202845m.avi");
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
+    private static final File OUT_DIR = new File("D:\\temp\\results");
+    private static final int[] FACET_SIZES = new int[]{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30};
 
     static {
         IN_IMAGES = new LinkedList<>();
@@ -41,32 +43,58 @@ public class Computation {
     }
 
     public static void commenceComputation() throws IOException {
+        final List<TaskContainer> tcs = new LinkedList<>();
+
+        for (int i : FACET_SIZES) {
+//            for (KernelType kt : KernelType.values()) {
+//                tcs.add(generateTask(i, kt));
+//            }
+            tcs.add(generateTask(i, KernelType.CL_1D_I_V_LL_MC_D));
+        }
+
+        System.out.println("TODO TightModeFacetGenerator");
+        System.out.println("TODO TaskSplitter");
+        System.out.println("TODO Check task container parameters validity - ROI, exports, NULL data");
+        System.out.println("TODO Compute ideal workSize dynamically");
+        System.out.println("TODO ExportGUI");
+
+        // compute task        
+        final Engine engine = new Engine();
+
+        for (TaskContainer tc : tcs) {
+            engine.computeTask(tc);
+            Exporter.export(tc);
+            System.out.println("Finished round " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL));
+        }
+    }
+
+    private static TaskContainer generateTask(final int facetSize, final KernelType kernelType) throws IOException {
         final TaskContainer tc = new TaskContainer();
 
         // load input data
-        InputLoader.loadInput(IN_VIDEO_ART, tc);                
-//        InputLoader.loadInput(IN_IMAGES, tc);
+//        InputLoader.loadInput(IN_VIDEO_ART, tc);                
+        InputLoader.loadInput(IN_IMAGES, tc);
 //        InputLoader.loadInput(IN_VIDEO_REAL, tc);
 
         // select ROI        
-        System.out.println("TODO Check ROI if valid, make smaller if needed.");
-        System.out.println("TODO If no ROI provided, choose whole image.");
         tc.addRoi(new ROI(0, 0, 320, 240), 0);
 
         // select facet size
-        tc.setFacetSize(10);
+        tc.setFacetSize(facetSize);
 
-        // add outputs                
-        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File("D:\\test0.bmp"), 0));
-        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File("D:\\test1.bmp"), 1));
-        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File("D:\\test2.bmp"), 2));
+        // add outputs             
+        final String target = OUT_DIR.getAbsolutePath().concat(File.separator);
+        final String ext = Integer.toString(facetSize).concat("-").concat(kernelType.name()).concat(".bmp");
+        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("0-").concat(ext)), 0));
+        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("1-").concat(ext)), 1));
+        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("2-").concat(ext)), 2));
+        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("3-").concat(ext)), 3));
 //        tc.addExportTask(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.ABS, new File("D:\\test.avi")));
 //        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, Direction.ABS, new File("D:\\testMap.csv"), 0));
 //        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
 
         // generate facets
         tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        System.out.println("TODO TightModeFacetGenerator");
         FacetGenerator.generateFacets(tc);
 
         // generate deformations
@@ -76,18 +104,9 @@ public class Computation {
 //        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});        
         DeformationGenerator.generateDeformations(tc);
 
-        // split to subtask according to deformations and limits
-        System.out.println("TODO TaskSplitter");
+        tc.addParameter(TaskParameter.KERNEL, kernelType);
 
-        // compute task        
-        System.out.println("TODO Compute ideal workSize dynamically");
-        tc.addParameter(TaskParameter.KERNEL, KernelType.CL_2D_I);
-        final Engine engine = new Engine();
-        engine.computeTask(tc);
-
-        // perform export                                
-        System.out.println("TODO ExportGUI");
-        Exporter.export(tc);
+        return tc;
     }
 
 }
