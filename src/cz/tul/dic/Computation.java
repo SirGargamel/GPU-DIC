@@ -88,10 +88,14 @@ public class Computation {
         // add outputs             
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator);
         final String ext = Integer.toString(facetSize).concat("-").concat(kernelType.name()).concat(".bmp");
-        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("0-").concat(ext)), 0));
-        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("1-").concat(ext)), 1));
-        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("2-").concat(ext)), 2));
-        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("3-").concat(ext)), 3));
+        final int roundCount = tc.getRoundCount();
+        for (int round = 0; round < roundCount; round++) {
+            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(Integer.toString(round)).concat("-").concat(ext)), 0));
+        }
+//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("0-").concat(ext)), 0));
+//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("1-").concat(ext)), 1));
+//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("2-").concat(ext)), 2));
+//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("3-").concat(ext)), 3));
 //        tc.addExportTask(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.ABS, new File("D:\\test.avi")));
 //        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, Direction.ABS, new File("D:\\testMap.csv"), 0));
 //        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
