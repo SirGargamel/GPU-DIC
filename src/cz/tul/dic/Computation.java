@@ -30,7 +30,9 @@ public class Computation {
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
-    private static final int[] FACET_SIZES = new int[]{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30};
+    private static final int SIZE_MIN = 10;
+    private static final int SIZE_MAX = 30;
+    private static final int SIZE_STEP = 10;    
 
     static {
         IN_IMAGES = new LinkedList<>();
@@ -42,15 +44,15 @@ public class Computation {
         IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
     }
 
-    public static void commenceComputation() throws IOException {
+    public static void commenceComputation() throws IOException {                        
         final List<TaskContainer> tcs = new LinkedList<>();
 
-        for (int i : FACET_SIZES) {
+        for (int size = SIZE_MIN; size <= SIZE_MAX; size+= SIZE_STEP ) {
             for (KernelType kt : KernelType.values()) {
-                tcs.add(generateTask(IN_IMAGES, i, kt));
+                tcs.add(generateTask(IN_IMAGES, size, kt));
             }
-//            tcs.add(generateTask(IN_IMAGES, i, KernelType.CL_1D_I_V_LL_MC_D));
-        }
+//            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
+        }                
 
         System.out.println("TODO TightModeFacetGenerator");
         System.out.println("TODO TaskSplitter");
