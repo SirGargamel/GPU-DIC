@@ -9,18 +9,25 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 public class TaskContainerUtils {
 
     public static int getDeformationCount(final TaskContainer tc) {
-        int result = tc.getDeformations().length;
+        final int deformationArrayLength = getDeformationArrayLength(tc);
+        final int result = tc.getDeformations().length / deformationArrayLength;
+
+        return result;
+    }
+
+    public static int getDeformationArrayLength(final TaskContainer tc) {
+        int result;
 
         final DeformationDegree dd = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE);
         switch (dd) {
             case ZERO:
-                result /= 2;
+                result = 2;
                 break;
             case FIRST:
-                result /= 6;
+                result = 6;
                 break;
             case SECOND:
-                result /= 12;
+                result = 12;
                 break;
             default:
                 throw new IllegalArgumentException("Deformation parameters not set.");
@@ -34,25 +41,9 @@ public class TaskContainerUtils {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
 
-        final int size;
-        final DeformationDegree dd = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE);
-        switch (dd) {
-            case ZERO:
-                size = 2;
-                break;
-            case FIRST:
-                size = 6;
-                break;
-            case SECOND:
-                size = 12;
-                break;
-            default:
-                throw new IllegalArgumentException("Deformation parameters not set.");
-        }
-
-        final double[] result = new double[size];
-
-        System.arraycopy(tc.getDeformations(), size * index, result, 0, size);
+        final int deformationArrayLength = getDeformationArrayLength(tc);
+        final double[] result = new double[deformationArrayLength];
+        System.arraycopy(tc.getDeformations(), deformationArrayLength * index, result, 0, deformationArrayLength);
 
         return result;
     }
