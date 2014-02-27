@@ -107,10 +107,10 @@ public class ExportUtils {
         int result;
         if (val == 0) {
             result = 0;
-        } else if (val < 0) {
-            result = ((int) (val / max)) << 16;
+        } else if (val > 0) {
+            result = ((int) (val / max * 255));
         } else {
-            result = ((int) (-val / max)) & 0xff;
+            result = ((byte) ((-val) / max * 255)) << 16;
         }
         return result;
     }
