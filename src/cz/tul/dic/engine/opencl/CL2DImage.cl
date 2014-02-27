@@ -92,8 +92,7 @@ kernel void CL2DImage(
     
     float resultVal = 0;           
     if (deltaF != 0 && deltaG != 0) {
-        for (int i = 0; i < facetSize2; i++) {
-            index = baseIndexFacet + i*2;        
+        for (int i = 0; i < facetSize2; i++) {                  
             resultVal += facetI[i] * deformedI[i];
         }
         resultVal /= sqrt(deltaF) * sqrt(deltaG);  
