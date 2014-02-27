@@ -136,7 +136,7 @@ public abstract class Kernel {
 
     private CLImage2d<IntBuffer> generateImage(final Image image) {
         final CLImage2d<IntBuffer> result = context.createImage2d(
-                Buffers.newDirectIntBuffer(image.toArray()),
+                Buffers.newDirectIntBuffer(image.toBWArray()),
                 image.getWidth(), image.getHeight(),
                 IMAGE_FORMAT, CLMemory.Mem.READ_ONLY);
         clMem.add(result);
