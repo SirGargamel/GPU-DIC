@@ -45,8 +45,8 @@ public class SimpleFacetGenerator implements IFacetGenerator {
             roiW = roi.getWidth();
             roiH = roi.getHeight();
 
-            wCount = roiW / (facetSize - spacing);
-            hCount = roiH / (facetSize - spacing);
+            wCount = (roiW - spacing) / (facetSize - spacing);
+            hCount = (roiH - spacing) / (facetSize - spacing);
 
             for (int y = 0; y < hCount; y++) {
                 centerY = roi.getY1() + halfSize + (y * (facetSize - spacing));
