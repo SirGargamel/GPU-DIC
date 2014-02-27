@@ -8,6 +8,10 @@ import cz.tul.dic.data.deformation.DeformationDegree;
  */
 public class TaskContainerUtils {
 
+    public static int getRoundCount(final TaskContainer tc) {
+        return tc.getImages().size() - 1;
+    }
+    
     public static int getDeformationCount(final TaskContainer tc) {
         final int deformationArrayLength = getDeformationArrayLength(tc);
         final int result = tc.getDeformations().length / deformationArrayLength;

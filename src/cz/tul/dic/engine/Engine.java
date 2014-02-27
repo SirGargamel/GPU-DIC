@@ -69,7 +69,7 @@ public final class Engine {
 
         float[] roundResult;
         List<double[]> bestResults;
-        final int roundCount = tc.getRoundCount();
+        final int roundCount = TaskContainerUtils.getRoundCount(tc);
         for (int round = 0; round < roundCount; round++) {
             roundResult = kernel.compute(tc, round);
             analyze(roundResult);

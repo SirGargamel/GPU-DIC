@@ -3,6 +3,7 @@ package cz.tul.dic;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.KernelType;
@@ -48,10 +49,10 @@ public class Computation {
         final List<TaskContainer> tcs = new LinkedList<>();
 
         for (int size = SIZE_MIN; size <= SIZE_MAX; size+= SIZE_STEP ) {
-            for (KernelType kt : KernelType.values()) {
-                tcs.add(generateTask(IN_IMAGES, size, kt));
-            }
-//            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
+//            for (KernelType kt : KernelType.values()) {
+//                tcs.add(generateTask(IN_IMAGES, size, kt));
+//            }
+            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
         }                
 
         System.out.println("TODO TightModeFacetGenerator");
@@ -71,6 +72,7 @@ public class Computation {
             Exporter.export(tc);
             System.out.println("Finished round " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
         }
+        System.out.println("All done !!!");
     }
 
     private static TaskContainer generateTask(final Object in, final int facetSize, final KernelType kernelType) throws IOException {
@@ -88,7 +90,7 @@ public class Computation {
         // add outputs             
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator);
         final String ext = Integer.toString(facetSize).concat("-").concat(kernelType.name()).concat(".bmp");
-        final int roundCount = tc.getRoundCount();
+        final int roundCount = TaskContainerUtils.getRoundCount(tc);
         for (int round = 0; round < roundCount; round++) {
             tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(Integer.toString(round)).concat("-X-").concat(ext)), 0));
             tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(Integer.toString(round)).concat("-Y-").concat(ext)), 0));
@@ -108,7 +110,9 @@ public class Computation {
 
         // generate deformations
         tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
-        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-5, 0, 0.5, -5, 0, 0.5});
+        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
+//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
+        
 //        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
 //        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});        
         DeformationGenerator.generateDeformations(tc);

@@ -7,6 +7,7 @@ package cz.tul.dic.output.target;
 
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.output.ExportUtils;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -71,7 +72,7 @@ public class TargetExportFile implements ITargetExport {
         final String name = fullName.substring(0, fullName.lastIndexOf("."));
 
         final File temp = Utils.getTempDir(tc);
-        final int roundCount = tc.getRoundCount();
+        final int roundCount = TaskContainerUtils.getRoundCount(tc);
 
         if (roundCount != data.size()) {
             throw new IllegalArgumentException("Provided data length and round count mismatch.");

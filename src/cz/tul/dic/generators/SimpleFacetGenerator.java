@@ -4,6 +4,7 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,7 @@ public class SimpleFacetGenerator implements IFacetGenerator {
 
     @Override
     public List<List<Facet>> generateFacets(TaskContainer tc) {
-        final int taskCount = tc.getRoundCount();
+        final int taskCount = TaskContainerUtils.getRoundCount(tc);
         List<List<Facet>> result = new ArrayList<>(taskCount);
 
         Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);

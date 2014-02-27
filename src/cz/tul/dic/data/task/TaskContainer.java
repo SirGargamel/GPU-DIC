@@ -60,8 +60,8 @@ public class TaskContainer {
         return images.get(index);
     }
     
-    public int getRoundCount() {        
-        return images.size() - 1;
+    public List<Image> getImages() {
+        return Collections.unmodifiableList(images);
     }
 
     public void assignFacets(final List<List<Facet>> facets) {
@@ -70,19 +70,7 @@ public class TaskContainer {
 
     public List<Facet> getFacets(final int position) {
         return facets.get(position);
-    }
-
-    public void storeResult(final List<double[]> result, final int position) {
-        while (results.size() <= position) {
-            results.add(null);
-        }
-
-        results.set(position, result);
-    }
-    
-    public List<double[]> getResults(final int position) {
-        return results.get(position);
-    }
+    }    
 
     public ROI getRoi(final int position) {
         return rois.getRoi(position);
@@ -98,15 +86,7 @@ public class TaskContainer {
 
     public void setFacetSize(int facetSize) {
         this.facetSize = facetSize;
-    }
-
-    public void addExportTask(final ExportTask task) {
-        exportTasks.add(task);
-    }
-
-    public Set<ExportTask> getExportTasks() {
-        return Collections.unmodifiableSet(exportTasks);
-    }
+    }    
 
     public void setDeformations(double[] deformations) {
         this.deformations = deformations;
@@ -115,17 +95,37 @@ public class TaskContainer {
     public double[] getDeformations() {
         return deformations;
     }
+    
+    public void storeResult(final List<double[]> result, final int round) {
+        while (results.size() <= round) {
+            results.add(null);
+        }
+
+        results.set(round, result);
+    }
+    
+    public List<double[]> getResults(final int round) {
+        return results.get(round);
+    }
 
     public double[][][] getFinalResults(final int position) {
         return finalResults.get(position);
     }
 
-    public void storeFinalResults(final double[][][] result, final int position) {
-        while (finalResults.size() <= position) {
+    public void storeFinalResults(final double[][][] result, final int round) {
+        while (finalResults.size() <= round) {
             finalResults.add(null);
         }
 
-        finalResults.set(position, result);
+        finalResults.set(round, result);
+    }
+    
+    public void addExportTask(final ExportTask task) {
+        exportTasks.add(task);
+    }
+
+    public Set<ExportTask> getExportTasks() {
+        return Collections.unmodifiableSet(exportTasks);
     }
 
 }
