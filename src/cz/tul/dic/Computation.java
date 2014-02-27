@@ -46,10 +46,10 @@ public class Computation {
         final List<TaskContainer> tcs = new LinkedList<>();
 
         for (int i : FACET_SIZES) {
-//            for (KernelType kt : KernelType.values()) {
-//                tcs.add(generateTask(i, kt));
-//            }
-            tcs.add(generateTask(IN_IMAGES, i, KernelType.CL_1D_I_V_LL_MC_D));
+            for (KernelType kt : KernelType.values()) {
+                tcs.add(generateTask(IN_IMAGES, i, kt));
+            }
+//            tcs.add(generateTask(IN_IMAGES, i, KernelType.CL_1D_I_V_LL_MC_D));
         }
 
         System.out.println("TODO TightModeFacetGenerator");
@@ -61,10 +61,13 @@ public class Computation {
         // compute task        
         final Engine engine = new Engine();
 
+        long time;
         for (TaskContainer tc : tcs) {
+            time = System.nanoTime();
             engine.computeTask(tc);
+            time = System.nanoTime() - time;
             Exporter.export(tc);
-            System.out.println("Finished round " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL));
+            System.out.println("Finished round " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
         }
     }
 
