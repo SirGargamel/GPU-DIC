@@ -1,4 +1,4 @@
-package cz.tul.dic.generators;
+package cz.tul.dic.generators.facet;
 
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.task.TaskContainer;
@@ -32,12 +32,12 @@ public class SimpleFacetGenerator implements IFacetGenerator {
         }
 
         final int halfSize = facetSize / 2;
-        
+
         ROI roi;
         List<Facet> facets;
         int wCount, hCount;
         int roiW, roiH;
-        int centerX, centerY;        
+        int centerX, centerY, gapX, gapY;
         for (int i = 0; i < taskCount; i++) {
             facets = new LinkedList<>();
 
@@ -48,13 +48,16 @@ public class SimpleFacetGenerator implements IFacetGenerator {
 
             wCount = (roiW - spacing) / (facetSize - spacing);
             hCount = (roiH - spacing) / (facetSize - spacing);
+            
+            gapX = (roiW - ((facetSize - spacing) * wCount + spacing)) / 2;
+            gapY = (roiH - ((facetSize - spacing) * hCount + spacing)) / 2;
 
             for (int y = 0; y < hCount; y++) {
-                centerY = roi.getY1() + halfSize + (y * (facetSize - spacing));
+                centerY = gapY + roi.getY1() + halfSize + (y * (facetSize - spacing));
 
                 for (int x = 0; x < wCount; x++) {
-                    centerX = roi.getX1() + halfSize + (x * (facetSize - spacing));
-                    
+                    centerX = gapX + roi.getX1() + halfSize + (x * (facetSize - spacing));
+
                     facets.add(Facet.createFacet(facetSize, centerX, centerY));
                 }
             }

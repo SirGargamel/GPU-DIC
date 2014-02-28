@@ -2,7 +2,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.engine.opencl.KernelType;
-import cz.tul.dic.generators.FacetGeneratorMode;
+import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.io.File;
 
 /**

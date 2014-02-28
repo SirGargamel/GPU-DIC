@@ -1,4 +1,4 @@
-package cz.tul.dic.generators;
+package cz.tul.dic.generators.facet;
 
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.task.TaskContainer;

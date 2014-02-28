@@ -8,8 +8,8 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.DeformationGenerator;
-import cz.tul.dic.generators.FacetGenerator;
-import cz.tul.dic.generators.FacetGeneratorMode;
+import cz.tul.dic.generators.facet.FacetGenerator;
+import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportMode;
@@ -18,7 +18,6 @@ import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,9 +32,8 @@ public class Computation {
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
-    private static final int SIZE_MAX = 50;
-    private static final int SIZE_STEP = 1;   
-    private static final DecimalFormat nf;
+    private static final int SIZE_MAX = 40;
+    private static final int SIZE_STEP = 1;       
 
     static {
         IN_IMAGES = new LinkedList<>();
@@ -44,9 +42,7 @@ public class Computation {
         IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
-        
-        nf = new DecimalFormat("00");
+        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));               
     }
 
     public static void commenceComputation() throws IOException {                        
@@ -96,12 +92,12 @@ public class Computation {
 
         // add outputs             
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator);
-        final String ext = Integer.toString(facetSize).concat("-").concat(kernelType.name()).concat(".bmp");
+        final String ext = String.format("%02d", facetSize).concat("-").concat(kernelType.name()).concat(".bmp");
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         for (int round = 0; round < roundCount; round++) {
-            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(nf.format(round)).concat("-X-").concat(ext)), 0));
-            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(Integer.toString(round)).concat("-Y-").concat(ext)), 0));
-            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(Integer.toString(round)).concat("-ABS-").concat(ext)), 0));
+            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), 0));
+            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), 0));
+            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), 0));
         }
 //        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("0-").concat(ext)), 0));
 //        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("1-").concat(ext)), 1));
