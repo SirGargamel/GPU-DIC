@@ -6,8 +6,11 @@ import com.jogamp.opencl.CLDevice.Type;
 import com.jogamp.opencl.CLErrorHandler;
 import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.util.Filter;
+import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -20,6 +23,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *
@@ -153,24 +158,26 @@ public final class Engine {
         final int[][] counter = new int[width][height];
 
         Facet f;
-        double[] d = new double[2];
-        int[] data;
+        double[] d = new double[Coordinates.DIMENSION];
+        int x, y;
+        Map<int[], double[]> deformedFacet;
         for (int i = 0; i < facets.size(); i++) {
             f = facets.get(i);
             d = results.get(i);
 
-            data = f.getData();
-
-            for (int j = 0; j < data.length - 1; j += 2) {
-                if (finalResults[data[j]][data[j + 1]] == null) {
-                    finalResults[data[j]][data[j + 1]] = new double[d.length];
-                    System.arraycopy(d, 0, finalResults[data[j]][data[j + 1]], 0, d.length);
-                    counter[data[j]][data[j + 1]] = 1;
+            deformedFacet = FacetUtils.deformFacet(f, d, (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE));
+            for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
+                x = e.getKey()[Coordinates.X];
+                y = e.getKey()[Coordinates.Y];
+                if (finalResults[x][y] == null) {
+                    finalResults[x][y] = new double[d.length];
+                    System.arraycopy(d, 0, finalResults[x][y], 0, d.length);
+                    counter[x][y] = 1;
                 } else {
                     for (int k = 0; k < d.length; k++) {
-                        finalResults[data[j]][data[j + 1]][k] += d[k];
+                        finalResults[x][y][k] += d[k];
                     }
-                    counter[data[j]][data[j + 1]]++;
+                    counter[x][y]++;
                 }
             }
         }
