@@ -18,6 +18,7 @@ import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,9 +32,10 @@ public class Computation {
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
-    private static final int SIZE_MIN = 10;
-    private static final int SIZE_MAX = 30;
-    private static final int SIZE_STEP = 1;    
+    private static final int SIZE_MIN = 3;
+    private static final int SIZE_MAX = 50;
+    private static final int SIZE_STEP = 1;   
+    private static final DecimalFormat nf;
 
     static {
         IN_IMAGES = new LinkedList<>();
@@ -43,6 +45,8 @@ public class Computation {
         IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
+        
+        nf = new DecimalFormat("00");
     }
 
     public static void commenceComputation() throws IOException {                        
@@ -52,7 +56,7 @@ public class Computation {
 //            for (KernelType kt : KernelType.values()) {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }
-            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
+            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D));
         }                
 
         System.out.println("TODO TightModeFacetGenerator");
@@ -92,7 +96,7 @@ public class Computation {
         final String ext = Integer.toString(facetSize).concat("-").concat(kernelType.name()).concat(".bmp");
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         for (int round = 0; round < roundCount; round++) {
-            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(Integer.toString(round)).concat("-X-").concat(ext)), 0));
+            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(nf.format(round)).concat("-X-").concat(ext)), 0));
             tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(Integer.toString(round)).concat("-Y-").concat(ext)), 0));
             tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(Integer.toString(round)).concat("-ABS-").concat(ext)), 0));
         }
