@@ -69,12 +69,15 @@ public class Computation {
         final Engine engine = new Engine();
 
         long time;
-        for (TaskContainer tc : tcs) {
+        TaskContainer tc;
+        while (!tcs.isEmpty()) {        
+            tc = tcs.get(0);
             time = System.nanoTime();
             engine.computeTask(tc);
             time = System.nanoTime() - time;
             Exporter.export(tc);
             System.out.println("Finished round " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+            tcs.remove(0);
         }
         System.out.println("All done !!!");
     }
