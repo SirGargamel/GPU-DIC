@@ -25,7 +25,8 @@ public class InputLoader {
         loaders.put(il.getSupporteType(), il);
     }
 
-    public static void loadInput(final Object in, final TaskContainer tc) throws IOException {
+    public static void loadInput(final TaskContainer tc) throws IOException {
+        final Object in = tc.getInput();
         final Class cls = in.getClass();
         IInputLoader loader = null;
 

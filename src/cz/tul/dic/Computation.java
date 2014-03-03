@@ -32,9 +32,9 @@ public class Computation {
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
-    private static final int SIZE_MIN = 5;
+    private static final int SIZE_MIN = 2;
     private static final int SIZE_MAX = 30;
-    private static final int SIZE_STEP = 1;       
+    private static final int SIZE_STEP = 1;
 
     static {
         IN_IMAGES = new LinkedList<>();
@@ -43,32 +43,35 @@ public class Computation {
         IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));               
+        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
     }
 
-    public static void commenceComputation() throws IOException {                        
+    public static void commenceComputation() throws IOException {
         final List<TaskContainer> tcs = new LinkedList<>();
 
-        for (int size = SIZE_MIN; size <= SIZE_MAX; size+= SIZE_STEP ) {
+        for (int size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_STEP) {
 //            for (KernelType kt : KernelType.values()) {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }            
-            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
-        }                                
+//            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
+            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D));
+        }
 
         // compute task        
         final Engine engine = new Engine();
 
         long time;
         TaskContainer tc;
-        while (!tcs.isEmpty()) {        
+        while (!tcs.isEmpty()) {
             tc = tcs.get(0);
-            
+
+            InputLoader.loadInput(tc);
+
             TaskContainerChecker.checkTaskValidity(tc);
-            
+
             FacetGenerator.generateFacets(tc);
             DeformationGenerator.generateDeformations(tc);
-            
+
             time = System.nanoTime();
             engine.computeTask(tc);
             time = System.nanoTime() - time;
@@ -80,10 +83,7 @@ public class Computation {
     }
 
     private static TaskContainer generateTask(final Object in, final int facetSize, final KernelType kernelType) throws IOException {
-        final TaskContainer tc = new TaskContainer();
-
-        // load input data
-        InputLoader.loadInput(in, tc);                
+        final TaskContainer tc = new TaskContainer(in);
 
         // select ROI        
         tc.addRoi(new ROI(0, 0, 319, 239), 0);
@@ -109,8 +109,8 @@ public class Computation {
 //        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
 
         // facets
-        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 3);        
+        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+        tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
 
         // deformations
         tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);

@@ -5,6 +5,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RoiContainer;
 import cz.tul.dic.output.ExportTask;
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import java.util.Set;
  */
 public class TaskContainer {
 
+    private final Object input;
     private final Map<Object, Object> params;
     private final List<Image> images;
     private final RoiContainer rois;
@@ -29,13 +31,19 @@ public class TaskContainer {
     private double[] deformations;
     private final List<double[][][]> finalResults;
 
-    public TaskContainer() {
+    public TaskContainer(final Object input) {
         params = new HashMap<>();
         images = new LinkedList<>();
         rois = new RoiContainer();
         exportTasks = new HashSet<>();
         results = new LinkedList<>();
         finalResults = new LinkedList<>();
+        
+        this.input = input;
+    }
+
+    public Object getInput() {
+        return input;
     }
 
     public void addParameter(final TaskParameter key, final Object value) {
