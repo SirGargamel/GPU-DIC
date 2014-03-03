@@ -2,6 +2,8 @@ package cz.tul.dic.engine.opencl;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opencl.CLBuffer;
+import com.jogamp.opencl.CLEvent;
+import com.jogamp.opencl.CLEventList;
 import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.llb.CLKernelBinding;
@@ -11,7 +13,8 @@ import java.nio.IntBuffer;
 
 public class CL1D_I_V_LL_MC_D extends Kernel {
 
-    private static final int ARGUMENT_INDEX = 12;
+    private static final int ARGUMENT_INDEX_COUNT = 12;
+    private static final int ARGUMENT_INDEX_BASE = 12;
     private final WorkSizeManager wsm;
 
     public CL1D_I_V_LL_MC_D() {
@@ -27,7 +30,6 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount) {
         final int facetArea = facetSize * facetSize;
-        final int facetSubCount = Math.min(wsm.getWorkSize(this.getClass()), facetCount);
         final int lws0base = calculateLws0base(kernel);
         final int lws0;
         if (deformationCount > facetArea) {
@@ -35,7 +37,6 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         } else {
             lws0 = EngineMath.roundUp(lws0base, deformationCount);
         }
-        final int facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationCount) * facetSubCount;
 
         int groupCountPerFacet = deformationCount / lws0;
         if (deformationCount % lws0 > 0) {
@@ -49,18 +50,35 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 .putArg(facetSize)
                 .putArg(facetCount)
                 .putArg(groupCountPerFacet)
-                .putArg(facetSubCount)
+                .putArg(0)
                 .putArg(0);
         kernel.rewind();
         // copy data and execute kernel
+        int facetSubCount, facetGlobalWorkSize;
+        long time;
+        CLEvent event;
+        int actualBase = 0, counter = 0;
+        final CLEventList eventList = new CLEventList(facetCount);
+        wsm.reset();
+        while (actualBase < facetCount) {
+            facetSubCount = Math.min(wsm.getWorkSize(), facetCount);
+            facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationCount) * facetSubCount;
 
-        final int kernelRoundCount = (int) Math.ceil(facetCount / (double) facetSubCount);
-        for (int kernelRound = 0; kernelRound < kernelRoundCount; kernelRound++) {
-            kernel.setArg(ARGUMENT_INDEX, kernelRound * facetSubCount);
-            queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0);
+            kernel.setArg(ARGUMENT_INDEX_BASE, actualBase);
+            kernel.setArg(ARGUMENT_INDEX_COUNT, facetSubCount);
+            queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0, eventList);
+
+            event = eventList.getEvent(counter);
+            queue.putWaitForEvent(eventList, counter, true);
+            time = event.getProfilingInfo(CLEvent.ProfilingCommand.END) - event.getProfilingInfo(CLEvent.ProfilingCommand.START);
+            wsm.storeTime(facetSubCount, time);
+            
+            actualBase += facetSubCount;
+            counter++;
         }
 
-        queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0);
+//        queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0);
+        eventList.release();
     }
 
     private int calculateLws0base(final CLKernel kernel) {
@@ -73,9 +91,14 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     boolean usesMemoryCoalescing() {
         return true;
     }
-    
+
     @Override
     boolean usesVectorization() {
+        return true;
+    }
+
+    @Override
+    boolean isDriven() {
         return true;
     }
 

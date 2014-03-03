@@ -46,6 +46,7 @@ public abstract class Kernel {
     private final String kernelName;
     protected CLContext context;
     protected CLKernel kernel;
+    protected CLDevice device;
     protected CLCommandQueue queue;
     private CLProgram program;
     private final Set<CLResource> clMem;
@@ -57,11 +58,17 @@ public abstract class Kernel {
 
     public void prepareKernel(final CLContext context, final CLDevice device, final TaskContainer tc) throws IOException {
         this.context = context;
+        this.device = device;
+
         program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, tc, usesVectorization())).build();
         clMem.add(program);
         kernel = program.createCLKernel(kernelName);
         clMem.add(kernel);
-        queue = device.createCommandQueue();
+        if (isDriven()) {
+            queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
+        } else {
+            queue = device.createCommandQueue();
+        }
         clMem.add(queue);
     }
 
@@ -72,7 +79,7 @@ public abstract class Kernel {
         final CLBuffer<IntBuffer> facetData;
         final CLBuffer<FloatBuffer> facetCenters;
         final CLBuffer<FloatBuffer> deformations, results;
-        // prepare data
+        // prepare data        
         img = tc.getImage(round);
         imgA = generateImage(img);
         queue.putWriteImage(imgA, false);
@@ -114,9 +121,17 @@ public abstract class Kernel {
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount);
 
-    abstract boolean usesMemoryCoalescing();
-    
-    abstract boolean usesVectorization();
+    boolean usesMemoryCoalescing() {
+        return false;
+    }
+
+    boolean usesVectorization() {
+        return false;
+    }
+
+    boolean isDriven() {
+        return false;
+    }
 
     public void finish() {
         queue.finish();

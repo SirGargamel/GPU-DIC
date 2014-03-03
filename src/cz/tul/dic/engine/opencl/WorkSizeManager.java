@@ -3,7 +3,6 @@ package cz.tul.dic.engine.opencl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 /**
  *
@@ -15,10 +14,9 @@ public class WorkSizeManager {
     private static final double MAX_TIME_LIN = 5;
     private static final int MAX_TIME_BASE = 1000000000;
     private static final double MAX_TIME;
-    private static final int INITIAL_WORK_SIZE = 16;
-    private final Map<Class, Map<Integer, Double>> timeData;
-    private final Map<Class, Integer> workSize;
-    private int baseWorkSize;
+    private static final int INITIAL_WORK_SIZE = 1;
+    private final Map<Integer, Long> timeData;
+    private int workSize;
 
     static {
         final String os = System.getProperty("os.name").toLowerCase();
@@ -31,60 +29,33 @@ public class WorkSizeManager {
 
     public WorkSizeManager() {
         timeData = new HashMap<>();
-        workSize = new HashMap<>();
-
-        baseWorkSize = INITIAL_WORK_SIZE;
+        workSize = INITIAL_WORK_SIZE;
     }
 
-    public int getWorkSize(final Class cls) {
-        int result = baseWorkSize;
-
-        if (workSize.containsKey(cls)) {
-            return workSize.get(cls);
-        }
-
-        return result;
+    public int getWorkSize() {
+        return workSize;
     }
 
-    public void forceWorkSize(final Class cls, final int count) {
-        if (count > baseWorkSize) {
-            workSize.put(cls, count);
-        } else {
-            workSize.put(cls, baseWorkSize);
-        }
+    public void reset() {
+        workSize = INITIAL_WORK_SIZE;
     }
 
-    public void reset(final Class cls) {
-        if (timeData.containsKey(cls)) {
-            timeData.get(cls).clear();
-            workSize.remove(cls);
-        }
+    public void storeTime(final int workSize, final long time) {        
+        timeData.put(workSize, time);
+        computeNextWorkSize();
     }
 
-    public void storeTime(final Class cls, final int workSize, final double time) {
-        Map<Integer, Double> map = timeData.get(cls);
-        if (map == null) {
-            map = new TreeMap<>();
-            timeData.put(cls, map);
-        }
-
-        map.put(workSize, time);
-        computeNextWorkSize(cls);
-    }
-
-    private void computeNextWorkSize(final Class cls) {
+    private void computeNextWorkSize() {
         int maxCount = 0;
-        double maxTime = -1;
+        double maxTime = -1;        
 
-        final Map<Integer, Double> values = timeData.get(cls);
-
-        if (values.isEmpty()) {
-            maxCount = baseWorkSize;
-        } else if (values.size() == 1) {
-            maxTime = values.values().iterator().next();
-            maxCount = computeNewCount(baseWorkSize, maxTime);
-        } else if (values.size() > 1) {
-            for (Entry<Integer, Double> e : values.entrySet()) {
+        if (timeData.isEmpty()) {
+            maxCount = INITIAL_WORK_SIZE;
+        } else if (timeData.size() == 1) {
+            maxTime = timeData.values().iterator().next();
+            maxCount = computeNewCount(INITIAL_WORK_SIZE, maxTime);
+        } else if (timeData.size() > 1) {
+            for (Entry<Integer, Long> e : timeData.entrySet()) {
                 if (e.getKey() > maxCount) {
                     maxCount = e.getKey();
                     maxTime = e.getValue();
@@ -93,7 +64,7 @@ public class WorkSizeManager {
             maxCount = computeNewCount(maxCount, maxTime);
         }
 
-        workSize.put(cls, maxCount);
+        workSize = maxCount;
     }
 
     private static int computeNewCount(final int oldCount, final double time) {
@@ -104,9 +75,5 @@ public class WorkSizeManager {
             result = oldCount * 3 / 2;
         }
         return result;
-    }
-
-    public void setBaseWorkSize(int baseWorkSize) {
-        this.baseWorkSize = baseWorkSize;
     }
 }
