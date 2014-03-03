@@ -32,7 +32,7 @@ public class Computation {
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
-    private static final int SIZE_MAX = 20;
+    private static final int SIZE_MAX = 40;
     private static final int SIZE_STEP = 1;       
 
     static {
@@ -54,8 +54,7 @@ public class Computation {
 //            }
             tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
         }                
-
-        System.out.println("TODO TightModeFacetGenerator");
+        
         System.out.println("TODO TaskSplitter");
         System.out.println("TODO Check task container parameters validity - ROI, exports, NULL data");
         System.out.println("TODO Compute ideal workSize dynamically");
@@ -68,6 +67,10 @@ public class Computation {
         TaskContainer tc;
         while (!tcs.isEmpty()) {        
             tc = tcs.get(0);
+            
+            FacetGenerator.generateFacets(tc);
+            DeformationGenerator.generateDeformations(tc);
+            
             time = System.nanoTime();
             engine.computeTask(tc);
             time = System.nanoTime() - time;
@@ -107,20 +110,18 @@ public class Computation {
 //        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, Direction.ABS, new File("D:\\testMap.csv"), 0));
 //        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
 
-        // generate facets
+        // facets
         tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
-        tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 3);
-        FacetGenerator.generateFacets(tc);
+        tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 3);        
 
-        // generate deformations
+        // deformations
         tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
         tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
-//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
-        
+//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});        
 //        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
-//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});        
-        DeformationGenerator.generateDeformations(tc);
+//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
 
+        // opencl
         tc.addParameter(TaskParameter.KERNEL, kernelType);
 
         return tc;
