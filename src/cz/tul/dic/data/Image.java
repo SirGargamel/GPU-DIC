@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 public class Image extends BufferedImage {
     
     private int[] grayScale;
+    private boolean isEnabled;
 
     public static Image loadImageFromDisk(final File in) throws IOException {
         if (!in.exists() || !in.isFile()) {
@@ -20,14 +21,15 @@ public class Image extends BufferedImage {
 
         final BufferedImage img = ImageIO.read(in);
         final Image result = new Image(img.getWidth(), img.getHeight(), img.getType());
-        result.getGraphics().drawImage(img, 0, 0, null);       
+        result.getGraphics().drawImage(img, 0, 0, null);                     
 
         return result;
 
     }
 
     private Image(int width, int height, int imageType) {
-        super(width, height, imageType);        
+        super(width, height, imageType);   
+        isEnabled = true;
     }
     
     private void createBw() {
@@ -54,6 +56,14 @@ public class Image extends BufferedImage {
         }
         
         return grayScale;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
     }
 
 }

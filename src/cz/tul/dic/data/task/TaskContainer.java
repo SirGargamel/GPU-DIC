@@ -56,10 +56,26 @@ public class TaskContainer {
         images.add(image);
     }
 
-    public Image getImage(final int index) {
-        return images.get(index);
+    public Image getImage(final int round) {
+        int counter = -1;
+        Image img = null;
+        for (int i = 0; i < images.size(); i++) {
+            img = images.get(i);
+            if (img.isEnabled()) {
+                counter++;
+            }
+            if (counter == round) {
+                break;
+            }
+        }
+        
+        if (counter < round) {
+            throw new IllegalArgumentException("Illegal round number - " + round + ", total round count = " + counter);
+        }
+
+        return img;
     }
-    
+
     public List<Image> getImages() {
         return Collections.unmodifiableList(images);
     }
@@ -70,7 +86,7 @@ public class TaskContainer {
 
     public List<Facet> getFacets(final int position) {
         return facets.get(position);
-    }    
+    }
 
     public ROI getRoi(final int position) {
         return rois.getRoi(position);
@@ -86,7 +102,7 @@ public class TaskContainer {
 
     public void setFacetSize(int facetSize) {
         this.facetSize = facetSize;
-    }    
+    }
 
     public void setDeformations(double[] deformations) {
         this.deformations = deformations;
@@ -95,7 +111,7 @@ public class TaskContainer {
     public double[] getDeformations() {
         return deformations;
     }
-    
+
     public void storeResult(final List<double[]> result, final int round) {
         while (results.size() <= round) {
             results.add(null);
@@ -103,7 +119,7 @@ public class TaskContainer {
 
         results.set(round, result);
     }
-    
+
     public List<double[]> getResults(final int round) {
         return results.get(round);
     }
@@ -119,7 +135,7 @@ public class TaskContainer {
 
         finalResults.set(round, result);
     }
-    
+
     public void addExportTask(final ExportTask task) {
         exportTasks.add(task);
     }

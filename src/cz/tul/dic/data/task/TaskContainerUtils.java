@@ -1,5 +1,6 @@
 package cz.tul.dic.data.task;
 
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 
 /**
@@ -9,7 +10,13 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 public class TaskContainerUtils {
 
     public static int getRoundCount(final TaskContainer tc) {
-        return tc.getImages().size() - 1;
+        int counter = 0;
+        for (Image img : tc.getImages()) {
+            if (img.isEnabled()) {
+                counter++;
+            }
+        }
+        return Math.max(counter - 1, 0);
     }
     
     public static int getDeformationCount(final TaskContainer tc) {
