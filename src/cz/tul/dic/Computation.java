@@ -3,6 +3,7 @@ package cz.tul.dic;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
@@ -31,8 +32,8 @@ public class Computation {
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
-    private static final int SIZE_MIN = 3;
-    private static final int SIZE_MAX = 40;
+    private static final int SIZE_MIN = 5;
+    private static final int SIZE_MAX = 30;
     private static final int SIZE_STEP = 1;       
 
     static {
@@ -51,13 +52,12 @@ public class Computation {
         for (int size = SIZE_MIN; size <= SIZE_MAX; size+= SIZE_STEP ) {
 //            for (KernelType kt : KernelType.values()) {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
-//            }
+//            }            
             tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
         }                
         
         System.out.println("TODO TaskSplitter");
-        System.out.println("TODO Check task container parameters validity - ROI, exports, NULL data");
-        System.out.println("TODO Compute ideal workSize dynamically");
+        System.out.println("TODO Check task container parameters validity - ROI, exports, NULL data");        
         System.out.println("TODO ExportGUI");
 
         // compute task        
@@ -67,6 +67,8 @@ public class Computation {
         TaskContainer tc;
         while (!tcs.isEmpty()) {        
             tc = tcs.get(0);
+            
+            TaskContainerChecker.checkTaskValidity(tc);
             
             FacetGenerator.generateFacets(tc);
             DeformationGenerator.generateDeformations(tc);

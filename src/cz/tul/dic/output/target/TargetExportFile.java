@@ -8,6 +8,7 @@ package cz.tul.dic.output.target;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.output.ExportMode;
 import cz.tul.dic.output.ExportUtils;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -126,6 +127,11 @@ public class TargetExportFile implements ITargetExport {
 
     private String extendBackslashes(final String in) {
         return in.replaceAll("\\\\", "\\\\\\\\");
+    }
+
+    @Override
+    public boolean supportsMode(ExportMode mode) {
+        return !ExportMode.LINE.equals(mode);
     }
 
 }

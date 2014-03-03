@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public abstract class Kernel {
 
-    public static Kernel prepareKernel(final KernelType kernelType) {
+    public static Kernel createKernel(final KernelType kernelType) {
         switch (kernelType) {
             case CL_2D_I:
                 return new CL2DImage();
@@ -38,7 +38,8 @@ public abstract class Kernel {
             case CL_1D_I_V_LL_MC_D:
                 return new CL1D_I_V_LL_MC_D();
             default:
-                throw new IllegalArgumentException("Unsupported type of kernel - " + kernelType);
+                System.out.println("Using default kernel.");
+                return new CL1D_I_V_LL_MC_D();
         }
     }
 

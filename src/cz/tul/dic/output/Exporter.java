@@ -67,4 +67,12 @@ public class Exporter {
                 tc);
     }
 
+    public static boolean isExportSupported(final ExportTask et) {
+        if (et == null) {
+            return false;
+        }
+        final ExportMode mode = et.getMode();
+        final ExportTarget target = et.getTarget();
+        return dataExporters.containsKey(mode) && targetExporters.containsKey(target) && targetExporters.get(target).supportsMode(mode);
+    }
 }

@@ -88,12 +88,12 @@ public class TaskContainer {
         return facets.get(position);
     }
 
-    public ROI getRoi(final int position) {
-        return rois.getRoi(position);
+    public ROI getRoi(final int round) {
+        return rois.getRoi(round);
     }
 
-    public void addRoi(ROI roi, final int position) {
-        rois.addRoi(roi, position);
+    public void addRoi(ROI roi, final int round) {
+        rois.addRoi(roi, round);
     }
 
     public int getFacetSize() {

@@ -32,7 +32,7 @@ import java.util.Map.Entry;
  */
 public final class Engine {
 
-    private static final Type DEVICE_TYPE = Type.GPU;
+    private static final Type DEVICE_TYPE = Type.GPU;    
     private final CLPlatform platform;
     private final CLContext context;
     private final CLDevice device;
@@ -69,7 +69,7 @@ public final class Engine {
     }
 
     public void computeTask(final TaskContainer tc) throws IOException {
-        final Kernel kernel = Kernel.prepareKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
+        final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         kernel.prepareKernel(context, device, tc);
 
         float[] roundResult;

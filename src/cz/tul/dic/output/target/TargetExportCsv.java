@@ -1,6 +1,7 @@
 package cz.tul.dic.output.target;
 
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.output.ExportMode;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class TargetExportCsv implements ITargetExport {
             // export image
             exportLine((double[]) data, targetParam);
         } else if (data instanceof double[][]) {
-            // export video
+            // export map
             exportMap((double[][]) data, targetParam);
         } else {
             throw new IllegalArgumentException("Unsupported data for CSV export - " + data.getClass());
@@ -58,6 +59,11 @@ public class TargetExportCsv implements ITargetExport {
             }
             out.append(SEPARATOR_LINE);
         }
+    }
+
+    @Override
+    public boolean supportsMode(ExportMode mode) {
+        return !ExportMode.SEQUENCE.equals(mode);
     }
 
 }
