@@ -13,7 +13,7 @@ import java.nio.IntBuffer;
 
 public class CL1D_I_V_LL_MC_D extends Kernel {
 
-    private static final int ARGUMENT_INDEX_COUNT = 12;
+    private static final int ARGUMENT_INDEX_COUNT = 11;
     private static final int ARGUMENT_INDEX_BASE = 12;
     private final WorkSizeManager wsm;
 
@@ -69,9 +69,9 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             kernel.setArg(ARGUMENT_INDEX_BASE, actualBase);
             kernel.setArg(ARGUMENT_INDEX_COUNT, facetSubCount);
             queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0, eventList);
-
+            
+            queue.putWaitForEvent(eventList, counter, true);            
             event = eventList.getEvent(counter);
-            queue.putWaitForEvent(eventList, counter, true);
             time = event.getProfilingInfo(CLEvent.ProfilingCommand.END) - event.getProfilingInfo(CLEvent.ProfilingCommand.START);
             wsm.storeTime(facetSubCount, time);
 
