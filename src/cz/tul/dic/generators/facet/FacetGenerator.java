@@ -18,6 +18,8 @@ public class FacetGenerator {
 
         IFacetGenerator fg = new SimpleFacetGenerator();
         generators.put(fg.getMode(), fg);
+        fg = new TightFacetGenerator();
+        generators.put(fg.getMode(), fg);
     }
 
     public static void generateFacets(final TaskContainer tc) {

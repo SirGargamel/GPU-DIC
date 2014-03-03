@@ -32,7 +32,7 @@ public class Computation {
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
-    private static final int SIZE_MAX = 40;
+    private static final int SIZE_MAX = 20;
     private static final int SIZE_STEP = 1;       
 
     static {
@@ -52,7 +52,7 @@ public class Computation {
 //            for (KernelType kt : KernelType.values()) {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }
-            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D));
+            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
         }                
 
         System.out.println("TODO TightModeFacetGenerator");
@@ -108,7 +108,8 @@ public class Computation {
 //        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
 
         // generate facets
-        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+        tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 3);
         FacetGenerator.generateFacets(tc);
 
         // generate deformations

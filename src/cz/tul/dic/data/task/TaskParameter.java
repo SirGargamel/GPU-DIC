@@ -13,7 +13,7 @@ public enum TaskParameter {
     
     DIR(File.class),
     FACET_GENERATOR_MODE(FacetGeneratorMode.class),
-    FACET_GENERATOR_SPACING(int.class),
+    FACET_GENERATOR_SPACING(Integer.class),
     DEFORMATION_DEGREE(DeformationDegree.class),
     DEFORMATION_BOUNDS(double[].class),
     KERNEL(KernelType.class),
