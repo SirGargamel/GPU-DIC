@@ -14,9 +14,10 @@ public class WorkSizeManager {
     private static final double MAX_TIME_LIN = 5;
     private static final int MAX_TIME_BASE = 1000000000;
     private static final double MAX_TIME;
-    private static final int INITIAL_WORK_SIZE = 1;
+    private static final double LIMIT_RATIO = 0.75;
+    private static final int INITIAL_WORK_SIZE = 32;
     private final Map<Integer, Long> timeData;
-    private int workSize;
+    private int workSize, max;
 
     static {
         final String os = System.getProperty("os.name").toLowerCase();
@@ -36,18 +37,23 @@ public class WorkSizeManager {
         return workSize;
     }
 
-    public void reset() {
-        workSize = INITIAL_WORK_SIZE;
+    public void setMaxCount(final int max) {
+        this.max = max;
     }
 
-    public void storeTime(final int workSize, final long time) {        
+    public void reset() {
+        workSize = INITIAL_WORK_SIZE;
+        timeData.clear();
+    }
+
+    public void storeTime(final int workSize, final long time) {
         timeData.put(workSize, time);
         computeNextWorkSize();
     }
 
     private void computeNextWorkSize() {
         int maxCount = 0;
-        double maxTime = -1;        
+        long maxTime = -1;
 
         if (timeData.isEmpty()) {
             maxCount = INITIAL_WORK_SIZE;
@@ -67,12 +73,14 @@ public class WorkSizeManager {
         workSize = maxCount;
     }
 
-    private static int computeNewCount(final int oldCount, final double time) {
-        int result = oldCount;
-        if (time < (MAX_TIME / 2)) {
-            result = 2 * oldCount;
-        } else if (time < (MAX_TIME / 4 * 3)) {
-            result = oldCount * 3 / 2;
+    private int computeNewCount(final int oldCount, final long time) {
+        int result;
+        if (oldCount < max) {
+            final long timePerFacet = time / oldCount;
+            final int maxCount = (int) (MAX_TIME / timePerFacet);
+            result = (int) (maxCount / LIMIT_RATIO);
+        } else {
+            result = Math.min(max, oldCount);
         }
         return result;
     }
