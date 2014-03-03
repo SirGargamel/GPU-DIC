@@ -29,7 +29,11 @@ public class RoiContainer {
     public ROI getRoi(final int position) {
         final ROI result;
         if (position >= rois.size()) {
-            result = rois.get(rois.size() - 1);
+            if (!rois.isEmpty()) {
+                result = rois.get(rois.size() - 1);
+            } else {
+                result = null;
+            }
         } else {
             result = rois.get(position);
         }
