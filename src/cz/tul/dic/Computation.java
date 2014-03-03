@@ -54,11 +54,7 @@ public class Computation {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }            
             tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC_D));
-        }                
-        
-        System.out.println("TODO TaskSplitter");
-        System.out.println("TODO Check task container parameters validity - ROI, exports, NULL data");        
-        System.out.println("TODO ExportGUI");
+        }                                
 
         // compute task        
         final Engine engine = new Engine();
@@ -90,7 +86,7 @@ public class Computation {
         InputLoader.loadInput(in, tc);                
 
         // select ROI        
-        tc.addRoi(new ROI(0, 0, 320, 240), 0);
+        tc.addRoi(new ROI(0, 0, 319, 239), 0);
 
         // select facet size
         tc.setFacetSize(facetSize);
@@ -113,7 +109,7 @@ public class Computation {
 //        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
 
         // facets
-        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 3);        
 
         // deformations

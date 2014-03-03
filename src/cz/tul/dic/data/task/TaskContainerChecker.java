@@ -29,7 +29,7 @@ public class TaskContainerChecker {
             roi = tc.getRoi(round);
             if (roi == null) {
                 System.err.println("Adding default ROI.");
-                roi = new ROI(0, 0, img.getWidth(), img.getHeight());
+                roi = new ROI(0, 0, img.getWidth() - 1, img.getHeight() - 1);
                 tc.addRoi(roi, round);
             } else {
                 if (roi.getX1() < 0 || roi.getY1() < 0) {
