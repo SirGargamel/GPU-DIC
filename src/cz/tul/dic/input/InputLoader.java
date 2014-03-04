@@ -27,13 +27,13 @@ public class InputLoader {
 
     public static void loadInput(final TaskContainer tc) throws IOException {
         final Object in = tc.getInput();
-        final Class cls = in.getClass();
+        final Class<?> cls = in.getClass();
         IInputLoader loader = null;
 
         if (loaders.containsKey(cls)) {
             loader = loaders.get(cls);
         } else {
-            for (Class c : loaders.keySet()) {
+            for (Class<?> c : loaders.keySet()) {
                 if (c.isAssignableFrom(cls)) {
                     loader = loaders.get(c);
                 }
