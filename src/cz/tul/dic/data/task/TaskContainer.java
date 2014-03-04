@@ -5,7 +5,6 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RoiContainer;
 import cz.tul.dic.output.ExportTask;
-import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +29,7 @@ public class TaskContainer {
     private List<List<Facet>> facets;
     private double[] deformations;
     private final List<double[][][]> finalResults;
+    private final Map<Integer, List<ComputationTask>> tasks;
 
     public TaskContainer(final Object input) {
         params = new HashMap<>();
@@ -38,7 +38,8 @@ public class TaskContainer {
         exportTasks = new HashSet<>();
         results = new LinkedList<>();
         finalResults = new LinkedList<>();
-        
+        tasks = new HashMap<>();
+
         this.input = input;
     }
 
@@ -76,7 +77,7 @@ public class TaskContainer {
                 break;
             }
         }
-        
+
         if (counter < round) {
             throw new IllegalArgumentException("Illegal round number - " + round + ", total round count = " + counter);
         }
@@ -150,6 +151,19 @@ public class TaskContainer {
 
     public Set<ExportTask> getExportTasks() {
         return Collections.unmodifiableSet(exportTasks);
+    }
+
+    public void addTask(final ComputationTask task, final int round) {
+        List<ComputationTask> l = tasks.get(round);
+        if (l == null) {
+            l = new LinkedList<>();
+            tasks.put(round, l);
+        }
+        l.add(task);
+    }
+
+    public Map<Integer, List<ComputationTask>> getTasks() {
+        return tasks;
     }
 
 }

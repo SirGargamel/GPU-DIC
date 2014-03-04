@@ -2,6 +2,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 
@@ -40,6 +41,12 @@ public class TaskContainerChecker {
                     throw new IllegalArgumentException("ROI cannot be larger than image.");
                 }
             }
+        }
+
+        final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
+        if (ts == null) {
+            System.err.println("Adding default TaskSplit.");
+            tc.addParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.NONE);
         }
 
         for (ExportTask et : tc.getExportTasks()) {

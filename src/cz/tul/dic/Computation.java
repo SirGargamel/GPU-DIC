@@ -6,6 +6,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.DeformationGenerator;
@@ -32,7 +33,7 @@ public class Computation {
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
-    private static final int SIZE_MIN = 2;
+    private static final int SIZE_MIN = 15;
     private static final int SIZE_MAX = 30;
     private static final int SIZE_STEP = 1;
 
@@ -54,7 +55,7 @@ public class Computation {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }            
 //            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
-            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D));
+            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
         }
 
         // compute task        
@@ -77,6 +78,7 @@ public class Computation {
             time = System.nanoTime() - time;
             Exporter.export(tc);
             System.out.println("Finished round " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+            
             tcs.remove(0);
         }
         System.out.println("All done !!!");
@@ -115,10 +117,12 @@ public class Computation {
         // deformations
         tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
         tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
-//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});        
 //        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
-//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-2, 2, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
+//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
 
+        // task
+        tc.addParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
+        
         // opencl
         tc.addParameter(TaskParameter.KERNEL, kernelType);
 

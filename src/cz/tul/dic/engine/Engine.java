@@ -11,9 +11,11 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.data.task.splitter.TaskSplitter;
 import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
 import java.io.IOException;
@@ -32,7 +34,7 @@ import java.util.Map.Entry;
  */
 public final class Engine {
 
-    private static final Type DEVICE_TYPE = Type.GPU;    
+    private static final Type DEVICE_TYPE = Type.GPU;
     private final CLPlatform platform;
     private final CLContext context;
     private final CLDevice device;
@@ -57,6 +59,7 @@ public final class Engine {
         } else {
             device = tmpD;
         }
+        System.out.println("Using " + device);
 
         context = CLContext.create(device);
         context.addCLErrorHandler(new CLErrorHandler() {
@@ -69,14 +72,23 @@ public final class Engine {
     }
 
     public void computeTask(final TaskContainer tc) throws IOException {
+        TaskSplitter.splitTask(tc);
+
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
-        kernel.prepareKernel(context, device, tc);
+        final int defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc);
+        kernel.prepareKernel(context, device, tc.getFacetSize(), (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE), defArrayLength);
 
         float[] roundResult;
         List<double[]> bestResults;
+        List<ComputationTask> tasks;
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         for (int round = 0; round < roundCount; round++) {
-            roundResult = kernel.compute(tc, round);
+            tasks = tc.getTasks().get(round);
+            for (ComputationTask ct : tasks) {
+                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
+            }
+            // condense results
+            roundResult = condenseResults(tasks);
             analyze(roundResult);
             // pick best values            
             bestResults = pickBestResults(roundResult, tc, tc.getFacets(round).size());
@@ -86,6 +98,24 @@ public final class Engine {
         }
 
         kernel.finish();
+    }
+
+    private float[] condenseResults(final List<ComputationTask> tasks) {
+        int l = 0;
+        for (ComputationTask ct : tasks) {
+            l += ct.getResults().length;
+        }
+
+        float[] tmp;
+        int counter = 0;
+        final float[] result = new float[l];
+        for (ComputationTask ct : tasks) {
+            tmp = ct.getResults();
+            System.arraycopy(tmp, 0, result, counter, tmp.length);
+            counter += tmp.length;
+        }
+
+        return result;
     }
 
     private List<double[]> pickBestResults(final float[] completeResults, final TaskContainer tc, final int facetCount) {

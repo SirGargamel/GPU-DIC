@@ -1,9 +1,6 @@
 package cz.tul.dic.engine.opencl;
 
 import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.data.task.TaskParameter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,12 +21,12 @@ public class KernelSourcePreparator {
     private final String kernelName;
     private String kernel;
 
-    public static String prepareKernel(final String kernelName, final TaskContainer tc, final boolean usesVectorization) throws IOException {
+    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization) throws IOException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         kp.loadKernel();
-        kp.prepareFacetSize(tc.getFacetSize());
-        kp.prepareDeformations(tc, usesVectorization);
+        kp.prepareFacetSize(facetSize);
+        kp.prepareDeformations(deg, deformationArrayLength, usesVectorization);
 
         return kp.kernel;
     }
@@ -53,8 +50,7 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(REPLACE_FACET_SIZE, Integer.toString(facetSize));
     }
 
-    private void prepareDeformations(final TaskContainer tc, final boolean usesVectorization) {
-        final DeformationDegree deg = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE);
+    private void prepareDeformations(final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization) {
         final String x, y, dx, dy;
         if (usesVectorization) {
             x = "coords.x";
@@ -81,7 +77,7 @@ public class KernelSourcePreparator {
                 sb.append(PLUS);
                 sb.append("deformations[baseIndexDeformation + 1]");
 //                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, "coords.y + deformations[baseIndexDeformation + 1]");
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());                
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
                 break;
             case FIRST:
                 sb.append(x);
@@ -97,7 +93,7 @@ public class KernelSourcePreparator {
                 sb.append(dy);
 //                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, "coords.x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * def.x + deformations[baseIndexDeformation + 4] * def.y");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
-                
+
                 sb.setLength(0);
                 sb.append(y);
                 sb.append(PLUS);
@@ -111,13 +107,13 @@ public class KernelSourcePreparator {
                 sb.append(MUL);
                 sb.append(dy);
 //                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, "coords.y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * def.x + deformations[baseIndexDeformation + 5] * def.y");
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());                                
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
                 break;
             case SECOND:
                 throw new IllegalArgumentException("Second degree not supported yet");
             default:
                 throw new IllegalArgumentException("Unsupported degree of deformation");
         }
-        kernel = kernel.replaceFirst(REPLACE_DEFORMATION_DEGREE, Integer.toString(TaskContainerUtils.getDeformationArrayLength(tc)));
+        kernel = kernel.replaceFirst(REPLACE_DEFORMATION_DEGREE, Integer.toString(deformationArrayLength));
     }
 }

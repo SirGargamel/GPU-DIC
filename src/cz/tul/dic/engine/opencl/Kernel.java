@@ -14,8 +14,7 @@ import com.jogamp.opencl.CLResource;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.deformation.DeformationDegree;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -57,11 +56,11 @@ public abstract class Kernel {
         clMem = new HashSet<>();
     }
 
-    public void prepareKernel(final CLContext context, final CLDevice device, final TaskContainer tc) throws IOException {
+    public void prepareKernel(final CLContext context, final CLDevice device, final int facetSize, final DeformationDegree deg, final int defArrayLength) throws IOException {
         this.context = context;
         this.device = device;
 
-        program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, tc, usesVectorization())).build();
+        program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization())).build();
         clMem.add(program);
         kernel = program.createCLKernel(kernelName);
         clMem.add(kernel);
@@ -73,46 +72,42 @@ public abstract class Kernel {
         clMem.add(queue);
     }
 
-    public float[] compute(TaskContainer tc, int round) {
-        final List<Facet> facets;
-        final Image img;
-        final CLImage2d<IntBuffer> imgA, imgB;
-        final CLBuffer<IntBuffer> facetData;
-        final CLBuffer<FloatBuffer> facetCenters;
-        final CLBuffer<FloatBuffer> deformations, results;
-        // prepare data        
-        img = tc.getImage(round);
-        imgA = generateImage(img);
-        queue.putWriteImage(imgA, false);
-        imgB = generateImage(tc.getImage(round + 1));
-        queue.putWriteImage(imgB, false);
+    public float[] compute(Image imageA, Image imageB, List<Facet> facets, double[] deformations, int deformationLength) {
+        final CLImage2d<IntBuffer> clImageA, clImageB;
+        final CLBuffer<IntBuffer> clFacetData;
+        final CLBuffer<FloatBuffer> clFacetCenters;
+        final CLBuffer<FloatBuffer> clDeformations, clResults;
+        // prepare data                
+        clImageA = generateImage(imageA);
+        queue.putWriteImage(clImageA, false);
+        clImageB = generateImage(imageB);
+        queue.putWriteImage(clImageB, false);
 
-        facets = tc.getFacets(round);
         final int facetCount = facets.size();
-        final int facetSize = tc.getFacetSize();
+        final int facetSize = facets.get(0).getSize();
 
-        facetData = generateFacetData(facets, facetSize, usesMemoryCoalescing());
-        queue.putWriteBuffer(facetData, false);
+        clFacetData = generateFacetData(facets, facetSize, usesMemoryCoalescing());
+        queue.putWriteBuffer(clFacetData, false);
 
-        facetCenters = generateFacetCenters(facets);
-        queue.putWriteBuffer(facetCenters, false);
+        clFacetCenters = generateFacetCenters(facets);
+        queue.putWriteBuffer(clFacetCenters, false);
 
-        deformations = generateDeformations(tc.getDeformations());
-        queue.putWriteBuffer(deformations, false);
-        final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
+        clDeformations = generateDeformations(deformations);
+        queue.putWriteBuffer(clDeformations, false);
+        final int deformationCount = deformations.length / deformationLength;
 
-        results = context.createFloatBuffer(facetCount * deformationCount, CLMemory.Mem.WRITE_ONLY);
-        clMem.add(results);
+        clResults = context.createFloatBuffer(facetCount * deformationCount, CLMemory.Mem.WRITE_ONLY);
+        clMem.add(clResults);
 
-        runKernel(imgA, imgB,
-                facetData, facetCenters,
-                deformations, results,
-                deformationCount, img.getWidth(), facetSize, facetCount);
+        runKernel(clImageA, clImageB,
+                clFacetData, clFacetCenters,
+                clDeformations, clResults,
+                deformationCount, imageA.getWidth(), facetSize, facetCount);
 
         // read result
         // copy data back            
-        queue.putReadBuffer(results, true);
-        return readBuffer(results.getBuffer());
+        queue.putReadBuffer(clResults, true);
+        return readBuffer(clResults.getBuffer());
     }
 
     abstract void runKernel(final CLImage2d<IntBuffer> imgA, final CLImage2d<IntBuffer> imgB,
