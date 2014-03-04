@@ -18,7 +18,7 @@ public class Utils {
         final String tempPath = dir.getAbsolutePath().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         if (!temp.exists()) {
-            temp.mkdir();
+            temp.mkdirs();
         }
 
         return temp;
