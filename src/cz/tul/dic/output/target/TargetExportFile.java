@@ -34,10 +34,10 @@ public class TargetExportFile implements ITargetExport {
 
     @Override
     public void exportData(Object data, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException {
-        if (data instanceof double[][]) {
+        if (data instanceof double[][]) {            
             // export image
             exportImage((double[][]) data, targetParam, dataParams, tc);
-        } else if (data instanceof List) {
+        } else if (data instanceof List) {            
             // export video
             exportVideo((List<double[][]>) data, targetParam, tc);
         } else {
@@ -55,6 +55,7 @@ public class TargetExportFile implements ITargetExport {
 
         final int position = dataParams[0];
         final File target = (File) targetParams;
+        Utils.ensureDirectoryExistence(target);
 
         final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay = ExportUtils.createImageFromMap(data);
@@ -68,6 +69,7 @@ public class TargetExportFile implements ITargetExport {
         }
 
         final File out = (File) targetParams;
+        Utils.ensureDirectoryExistence(out);
         final String fullName = out.getName();
 
         final String name = fullName.substring(0, fullName.lastIndexOf("."));

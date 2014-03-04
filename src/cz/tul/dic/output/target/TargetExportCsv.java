@@ -1,5 +1,6 @@
 package cz.tul.dic.output.target;
 
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.ExportMode;
 import java.io.File;
@@ -16,10 +17,10 @@ public class TargetExportCsv implements ITargetExport {
 
     @Override
     public void exportData(Object data, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
-        if (data instanceof double[]) {
+        if (data instanceof double[]) {            
             // export image
             exportLine((double[]) data, targetParam);
-        } else if (data instanceof double[][]) {
+        } else if (data instanceof double[][]) {            
             // export map
             exportMap((double[][]) data, targetParam);
         } else {
@@ -33,6 +34,7 @@ public class TargetExportCsv implements ITargetExport {
         }
 
         final File target = (File) targetParam;
+        Utils.ensureDirectoryExistence(target);
 
         try (FileWriter out = new FileWriter(target)) {
             for (double[] data1 : data) {
