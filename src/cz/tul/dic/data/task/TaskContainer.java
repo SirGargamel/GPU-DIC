@@ -48,7 +48,7 @@ public class TaskContainer {
     }
 
     public void addParameter(final TaskParameter key, final Object value) {
-        if (value != null && value.getClass().equals(key.getType())) {
+        if (value != null && key.getType().isAssignableFrom(value.getClass())) {
             params.put(key, value);
         } else if (key != null && value != null) {
             throw new IllegalArgumentException("Illegal value datatype - " + value.getClass().getSimpleName() + ", required " + key.getType().getSimpleName());
