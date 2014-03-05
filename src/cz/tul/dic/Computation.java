@@ -67,6 +67,8 @@ public class Computation {
             tc = tcs.get(0);
 
             InputLoader.loadInput(tc);
+            
+            addCompleteExport(tc);
 
             TaskContainerChecker.checkTaskValidity(tc);
 
@@ -91,13 +93,32 @@ public class Computation {
         tc.addRoi(new ROI(0, 0, 319, 239), 0);
 
         // select facet size
-        tc.setFacetSize(facetSize);
+        tc.setFacetSize(facetSize);        
 
-        // add outputs             
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator);
-        final String ext = String.format("%02d", facetSize).concat("-").concat(kernelType.name()).concat(".bmp");
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        for (int round = 0; round < roundCount; round++) {
+        // facets
+        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
+
+        // deformations
+        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
+        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
+//        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
+//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
+
+        // task
+        tc.addParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
+        tc.addParameter(TaskParameter.TASK_SPLIT_VALUE, 100);
+        
+        // opencl
+        tc.addParameter(TaskParameter.KERNEL, kernelType);
+
+        return tc;
+    }
+    
+    private static void addCompleteExport(final TaskContainer tc) {                 
+        final String target = OUT_DIR.getAbsolutePath().concat(File.separator);        
+        final String ext = String.format("%02d", tc.getFacetSize()).concat("-").concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat(".bmp");        
+        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
             tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), 0));
             tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), 0));
             tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), 0));
@@ -109,24 +130,6 @@ public class Computation {
 //        tc.addExportTask(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.ABS, new File("D:\\test.avi")));
 //        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, Direction.ABS, new File("D:\\testMap.csv"), 0));
 //        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
-
-        // facets
-        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
-        tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
-
-        // deformations
-        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
-        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
-//        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
-//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
-
-        // task
-        tc.addParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
-        
-        // opencl
-        tc.addParameter(TaskParameter.KERNEL, kernelType);
-
-        return tc;
     }
 
 }
