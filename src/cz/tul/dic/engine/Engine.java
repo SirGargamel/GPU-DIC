@@ -77,8 +77,7 @@ public final class Engine {
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         final int defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc);
         kernel.prepareKernel(context, device, tc.getFacetSize(), (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE), defArrayLength);
-
-        float[] roundResult;
+        
         List<double[]> bestResults;
         List<ComputationTask> tasks;
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
@@ -86,12 +85,9 @@ public final class Engine {
             tasks = tc.getTasks().get(round);
             for (ComputationTask ct : tasks) {
                 ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
-            }
-            // condense results
-            roundResult = condenseResults(tasks);
-            analyze(roundResult);
+            }            
             // pick best values            
-            bestResults = pickBestResults(roundResult, tc, tc.getFacets(round).size());
+            bestResults = pickBestResults(tasks, tc, round);
             // store data           
             tc.storeResult(bestResults, round);
             buildFinalResults(tc, round);
@@ -100,25 +96,8 @@ public final class Engine {
         kernel.finish();
     }
 
-    private float[] condenseResults(final List<ComputationTask> tasks) {
-        int l = 0;
-        for (ComputationTask ct : tasks) {
-            l += ct.getResults().length;
-        }
-
-        float[] tmp;
-        int counter = 0;
-        final float[] result = new float[l];
-        for (ComputationTask ct : tasks) {
-            tmp = ct.getResults();
-            System.arraycopy(tmp, 0, result, counter, tmp.length);
-            counter += tmp.length;
-        }
-
-        return result;
-    }
-
-    private List<double[]> pickBestResults(final float[] completeResults, final TaskContainer tc, final int facetCount) {
+    private List<double[]> pickBestResults(final List<ComputationTask> tasks, final TaskContainer tc, final int round) {
+        final int facetCount = tc.getFacets(round).size();
         final List<double[]> result = new ArrayList<>(facetCount);
         final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc);
 
@@ -127,11 +106,19 @@ public final class Engine {
         float val, best;
         List<Integer> candidates = new LinkedList<>();
         int baseIndex, bestIndex;
+        int taskIndex = 0;
+        int taskFacetIndex = 0;
+        float[] taskResults;
+        ComputationTask task;
         for (int facet = 0; facet < facetCount; facet++) {
             best = -Float.MAX_VALUE;
-            baseIndex = facet * deformationCount;
+            
+            task = tasks.get(taskIndex);
+            taskResults = task.getResults();
+            baseIndex = taskFacetIndex * deformationCount;            
+            
             for (int def = 0; def < deformationCount; def++) {
-                val = completeResults[baseIndex + def];
+                val = taskResults[baseIndex + def];
                 if (val > best) {
                     best = val;
 
@@ -153,27 +140,15 @@ public final class Engine {
 
                 result.add(TaskContainerUtils.extractDeformation(tc, bestIndex));
             }
+            
+            taskFacetIndex++;
+            if (taskFacetIndex >= task.getFacets().size()) {
+                taskFacetIndex = 0;
+                taskIndex++;
+            }
         }
 
         return result;
-    }
-
-    private void analyze(final float[] completeResults) {
-        int counter = 0;
-        int groupCount = 0;
-        boolean lastNotNan = false;
-        for (float f : completeResults) {
-            if (Float.isNaN(f)) {
-                counter++;
-                lastNotNan = false;
-            } else if (!lastNotNan) {
-                lastNotNan = true;
-                groupCount++;
-            }
-        }
-        if (counter > 0) {
-            System.out.println("Found " + counter + " NaN values in " + groupCount + " groups out of " + completeResults.length);
-        }
     }
 
     private void buildFinalResults(final TaskContainer tc, final int round) {
