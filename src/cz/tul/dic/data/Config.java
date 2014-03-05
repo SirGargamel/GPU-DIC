@@ -18,6 +18,7 @@ public class Config {
     private static final String EXT = ".config";
     private static final String SEPARATOR = " :: ";
     private static File projectDir;
+    private static boolean enableConfigs = true;
 
     public static void setProjectDir(final File dir) {
         if (dir.isDirectory()) {
@@ -32,15 +33,21 @@ public class Config {
     public static Map<String, String> loadConfig(final String name) throws IOException {
         final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(name).concat(EXT);
         final Map<String, String> result = new HashMap<>();
-        String line;
-        String[] split;
-        try (BufferedReader br = new BufferedReader(new FileReader(configFileName))) {
-            line = br.readLine();
-            split = line.split(SEPARATOR);
-            if (split.length != 2) {
-                throw new IOException("Illegal text found inside config file - " + line);
-            } else {
-                result.put(split[0], split[1]);
+
+        final File config = new File(configFileName);
+        if (enableConfigs && config.exists()) {
+            String line;
+            String[] split;
+            try (BufferedReader br = new BufferedReader(new FileReader(configFileName))) {
+                while (br.ready()) {
+                    line = br.readLine();
+                    split = line.split(SEPARATOR);
+                    if (split.length != 2) {
+                        throw new IOException("Illegal text found inside config file - " + line);
+                    } else {
+                        result.put(split[0], split[1]);
+                    }
+                }
             }
         }
         return result;
@@ -56,6 +63,10 @@ public class Config {
                 fw.write("\n");
             }
         }
+    }
+
+    public static void enableConfigs(boolean enable) {
+        enableConfigs = enable;
     }
 
 }

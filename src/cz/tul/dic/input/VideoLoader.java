@@ -1,6 +1,7 @@
 package cz.tul.dic.input;
 
 import cz.tul.dic.Utils;
+import cz.tul.dic.data.Config;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -13,10 +14,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class VideoLoader implements IInputLoader {
 
+    private static final String PREFIX_SIZE = "SIZE_";
+    private static final String PREFIX_MOD = "MOD_";
     private static final String SCRIPT_NAME = "scriptVideoSplit.vcf";
     private static final String SCRIPT_FILE = "%FILE%";
     private static final String SCRIPT_DIR = "%DIR%";
@@ -33,40 +39,137 @@ public class VideoLoader implements IInputLoader {
 
         final File input = (File) in;
         tc.addParameter(TaskParameter.DIR, input.getParentFile());
+        Config.setProjectDir(input.getParentFile());
         // create temp dir to store images
-        final File temp = Utils.getTempDir(tc);        
-        // prepare script
-        String script = loadScript();        
-        script = script.replace(SCRIPT_FILE, input.getAbsolutePath());
-        script = script.replace(SCRIPT_DIR, temp.getAbsolutePath().concat(File.separator).concat(input.getName()));
-        final String scriptPath = temp.getAbsolutePath().concat(File.separator).concat(SCRIPT_NAME);
-        saveScript(script, new File(scriptPath));
-        // launch virtualdub to strip video to images
-        final String[] command = {
-            extendBackslashes(VIRTUAL_DUB.getAbsolutePath()),
-            "/x /s \"" + extendBackslashes(extendBackslashes(scriptPath)) + "\""};        
-        try {
-            final Process p = Runtime.getRuntime().exec(command[0].concat(" ").concat(command[1]));
-            int result = p.waitFor();
-            if (result != 0) {
-                throw new IOException("Video splitting has failed.");
+        final File temp = Utils.getTempDir(tc);
+        // check cache
+        final List<File> files;
+        final Map<String, String> config = Config.loadConfig(input.getName());
+        if (!isCacheDataValid(input, temp, config)) {
+            // prepare script
+            String script = loadScript();
+            script = script.replace(SCRIPT_FILE, input.getAbsolutePath());
+            script = script.replace(SCRIPT_DIR, temp.getAbsolutePath().concat(File.separator).concat(input.getName()));
+            final String scriptPath = temp.getAbsolutePath().concat(File.separator).concat(SCRIPT_NAME);
+            saveScript(script, new File(scriptPath));
+            // launch virtualdub to strip video to images
+            final String[] command = {
+                extendBackslashes(VIRTUAL_DUB.getAbsolutePath()),
+                "/x /s \"" + extendBackslashes(extendBackslashes(scriptPath)) + "\""};
+            try {
+                final Process p = Runtime.getRuntime().exec(command[0].concat(" ").concat(command[1]));
+                int result = p.waitFor();
+                if (result != 0) {
+                    throw new IOException("Video splitting has failed.");
+                }
+            } catch (InterruptedException ex) {
+                throw new IOException("VirtualDub has been interrupted.", ex);
             }
-        } catch (InterruptedException ex) {
-            throw new IOException("VirtualDub has been interrupted.", ex);
-        }
-        // list of all bmp files inside temp dir with roght name
-        final File[] files = temp.listFiles(new FilenameFilter() {
+            files = Arrays.asList(temp.listFiles(new FilenameFilter() {
 
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.startsWith(input.getName());
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.startsWith(input.getName());
+                }
+            }));
+
+            // save config
+            config.clear();
+            config.put(PREFIX_MOD.concat(input.getName()), Long.toString(input.lastModified()));
+            config.put(PREFIX_SIZE.concat(input.getName()), Long.toString(input.length()));
+            for (File f : files) {
+                config.put(PREFIX_MOD.concat(f.getName()), Long.toString(f.lastModified()));
+                config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
             }
-        });
+            Config.saveConfig(input.getName(), config);
+        } else {
+            files = convertCacheDataToFiles(input, temp, config);
+        }
+        // list of all bmp files inside temp dir with roght name        
         final ImageLoader il = new ImageLoader();
-        final List<Image> result = il.loadData(Arrays.asList(files), tc);
-        
-        Utils.deleteTempFir(tc);
-        
+        final List<Image> result = il.loadData(files, tc);
+
+        return result;
+    }
+
+    private boolean isCacheDataValid(final File source, final File tempFolder, final Map<String, String> config) {
+        boolean result = true;
+
+        if (!tempFolder.isDirectory() || config == null || config.isEmpty()) {
+            result = false;
+        } else {
+            final String baseTempPath = tempFolder.getAbsolutePath().concat(File.separator);
+            File tempFile;
+            String key, fileName;
+            long valueConfig, valueFile;
+            for (Entry<String, String> e : config.entrySet()) {
+                key = e.getKey();
+                if (key.startsWith(PREFIX_SIZE)) {
+                    fileName = key.replaceFirst(PREFIX_SIZE, "");
+                    if (fileName.equals(source.getName())) {
+                        valueFile = source.length();
+                        valueConfig = Long.parseLong(e.getValue());
+                        if (valueFile != valueConfig) {
+                            result = false;
+                            break;
+                        }
+                    } else {
+                        tempFile = new File(baseTempPath.concat(fileName));
+                        if (!tempFile.exists()) {
+                            result = false;
+                            break;
+                        }
+                        valueFile = tempFile.length();
+                        valueConfig = Long.parseLong(e.getValue());
+                        if (valueFile != valueConfig) {
+                            result = false;
+                            break;
+                        }
+                    }
+                } else {
+                    fileName = key.replaceFirst(PREFIX_MOD, "");
+                    if (fileName.equals(source.getName())) {
+                        valueFile = source.lastModified();
+                        valueConfig = Long.parseLong(e.getValue());
+                        if (valueFile != valueConfig) {
+                            result = false;
+                            break;
+                        }
+                    } else {
+                        tempFile = new File(baseTempPath.concat(fileName));
+                        if (!tempFile.exists()) {
+                            result = false;
+                            break;
+                        }
+                        valueFile = tempFile.lastModified();
+                        valueConfig = Long.parseLong(e.getValue());
+                        if (valueFile != valueConfig) {
+                            result = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private List<File> convertCacheDataToFiles(final File source, final File tempFolder, final Map<String, String> config) {
+        final String baseTempPath = tempFolder.getAbsolutePath().concat(File.separator);
+        File tempFile;
+        final List<File> result = new LinkedList<>();
+        String key, fileName;
+        for (Entry<String, String> e : config.entrySet()) {
+            key = e.getKey();
+            if (key.startsWith(PREFIX_SIZE)) {
+                fileName = key.replaceFirst(PREFIX_SIZE, "");
+                if (fileName.equals(source.getName())) {
+                    tempFile = new File(baseTempPath.concat(fileName));
+                    result.add(tempFile);
+                }
+            }
+        }
         return result;
     }
 
@@ -81,12 +184,12 @@ public class VideoLoader implements IInputLoader {
         return sb.toString();
     }
 
-    private void saveScript(final String script, final File target) throws IOException {        
+    private void saveScript(final String script, final File target) throws IOException {
         try (FileWriter out = new FileWriter(target)) {
             out.write(extendBackslashes(script));
         }
     }
-    
+
     private String extendBackslashes(final String in) {
         return in.replaceAll("\\\\", "\\\\\\\\");
     }
