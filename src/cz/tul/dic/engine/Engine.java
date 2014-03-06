@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -77,47 +78,56 @@ public final class Engine {
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         final int defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc);
         kernel.prepareKernel(context, device, tc.getFacetSize(), (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE), defArrayLength);
-        
+
         List<double[]> bestResults;
         List<ComputationTask> tasks;
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        int facetCount;
         for (int round = 0; round < roundCount; round++) {
+            facetCount = tc.getFacets(round).size();
+            bestResults = new ArrayList<>(facetCount);
+            for (int i = 0; i < facetCount; i++) {
+                bestResults.add(null);
+            }
+
             tasks = tc.getTasks().get(round);
-            for (ComputationTask ct : tasks) {
+            Logger.trace("Computing {0} tasks for round {1}.", tasks.size(), round + 1);
+
+            ComputationTask ct;
+            while (!tasks.isEmpty()) {
+                ct = tasks.get(0);
                 ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
                 kernel.finishRound();
-            }            
-            // pick best values            
-            bestResults = pickBestResults(tasks, tc, round);
+                // pick best results for this computation task and discard ct data                          
+                pickBestResultsForTask(ct, bestResults, tc, round);
+                tasks.remove(0);
+            }
             // store data           
             tc.storeResult(bestResults, round);
             buildFinalResults(tc, round);
+            Logger.trace("Finished round {0} out of {1}.", round + 1, roundCount);
         }
 
         kernel.finishComputation();
     }
 
-    private List<double[]> pickBestResults(final List<ComputationTask> tasks, final TaskContainer tc, final int round) {
-        final int facetCount = tc.getFacets(round).size();
-        final List<double[]> result = new ArrayList<>(facetCount);
+    private void pickBestResultsForTask(final ComputationTask task, final List<double[]> bestResults, final TaskContainer tc, final int round) {
+        final List<Facet> facets = tc.getFacets(round);
         final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc);
 
+        final int facetCount = task.getFacets().size();
         final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
 
         float val, best;
         List<Integer> candidates = new LinkedList<>();
-        int baseIndex, bestIndex;
-        int taskIndex = 0;
-        int taskFacetIndex = 0;
+        int baseIndex, bestIndex, globalFacetIndex;
         float[] taskResults;
-        ComputationTask task;
-        for (int facet = 0; facet < facetCount; facet++) {
+        for (int localFacetIndex = 0; localFacetIndex < facetCount; localFacetIndex++) {
             best = -Float.MAX_VALUE;
-            
-            task = tasks.get(taskIndex);
+
             taskResults = task.getResults();
-            baseIndex = taskFacetIndex * deformationCount;            
-            
+            baseIndex = localFacetIndex * deformationCount;
+
             for (int def = 0; def < deformationCount; def++) {
                 val = taskResults[baseIndex + def];
                 if (val > best) {
@@ -130,26 +140,19 @@ public final class Engine {
                 }
             }
 
+            globalFacetIndex = facets.indexOf(task.getFacets().get(localFacetIndex));
             if (candidates.isEmpty()) {
 //                System.err.println("No best value found for facet nr." + facet);
-                result.add(new double[]{0, 0});
+                bestResults.set(globalFacetIndex, new double[]{0, 0});
             } else {
                 if (candidates.size() > 1) {
                     Collections.sort(candidates, candidatesComparator);
                 }
                 bestIndex = candidates.get(0);
 
-                result.add(TaskContainerUtils.extractDeformation(tc, bestIndex));
-            }
-            
-            taskFacetIndex++;
-            if (taskFacetIndex >= task.getFacets().size()) {
-                taskFacetIndex = 0;
-                taskIndex++;
+                bestResults.set(globalFacetIndex, TaskContainerUtils.extractDeformation(tc, bestIndex));
             }
         }
-
-        return result;
     }
 
     private void buildFinalResults(final TaskContainer tc, final int round) {
