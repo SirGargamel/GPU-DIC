@@ -164,7 +164,7 @@ public class VideoLoader implements IInputLoader {
             key = e.getKey();
             if (key.startsWith(PREFIX_SIZE)) {
                 fileName = key.replaceFirst(PREFIX_SIZE, "");
-                if (fileName.equals(source.getName())) {
+                if (!fileName.equals(source.getName())) {
                     tempFile = new File(baseTempPath.concat(fileName));
                     result.add(tempFile);
                 }
