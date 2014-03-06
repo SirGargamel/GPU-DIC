@@ -4,6 +4,8 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import java.io.File;
 import java.io.IOException;
+import org.pmw.tinylog.Logger;
+import org.pmw.tinylog.LoggingLevel;
 
 /**
  *
@@ -60,6 +62,21 @@ public class Utils {
                 dir.mkdirs();
             }
         }
+    }
+    
+    public static boolean isLevelLogged(final LoggingLevel testedLevel) {
+        final LoggingLevel currentLevel = Logger.getLoggingLevel();
+        int indexTestedLevel = 0, indexCurrentLevel = 1;
+        final LoggingLevel[] levels = LoggingLevel.values();        
+        for (int l = 0; l < levels.length; l++) {
+            if (levels[l].equals(testedLevel)) {
+                indexTestedLevel = l;
+            }
+            if (levels[l].equals(currentLevel)) {
+                indexCurrentLevel = l;
+            }
+        }
+        return indexCurrentLevel < indexTestedLevel;
     }
 
 }

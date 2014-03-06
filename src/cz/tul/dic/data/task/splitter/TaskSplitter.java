@@ -1,5 +1,6 @@
 package cz.tul.dic.data.task.splitter;
 
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -30,7 +31,7 @@ public abstract class TaskSplitter {
         if (splitters.containsKey(ts)) {
             splitters.get(ts).split(tc);
             // print statistics          
-            if (Logger.getLoggingLevel().equals(LoggingLevel.TRACE)) {
+            if (Utils.isLevelLogged(LoggingLevel.DEBUG)) {
                 int lastValue = -1, value;
                 int counter;
                 final StringBuilder sb = new StringBuilder();
@@ -60,7 +61,7 @@ public abstract class TaskSplitter {
                     sb.append("]; ");                    
                 }
                 sb.setLength(sb.length()-2);
-                Logger.trace(sb.toString());
+                Logger.debug(sb.toString());
             }
         } else {
             throw new IllegalArgumentException("Unsupported type of task splitting.");
