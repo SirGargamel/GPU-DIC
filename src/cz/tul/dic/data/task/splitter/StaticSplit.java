@@ -37,8 +37,10 @@ public class StaticSplit extends TaskSplitter {
                     sublist = new ArrayList<>();
                 }
             }
-            ct = new ComputationTask(tc.getImage(round), tc.getImage(round + 1), sublist, tc.getDeformations());
-            tc.addTask(ct, round);
+            if (!sublist.isEmpty()) {
+                ct = new ComputationTask(tc.getImage(round), tc.getImage(round + 1), sublist, tc.getDeformations());
+                tc.addTask(ct, round);
+            }
         }
     }
 }
