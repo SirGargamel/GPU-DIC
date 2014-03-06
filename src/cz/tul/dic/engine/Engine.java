@@ -85,6 +85,7 @@ public final class Engine {
             tasks = tc.getTasks().get(round);
             for (ComputationTask ct : tasks) {
                 ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
+                kernel.finishRound();
             }            
             // pick best values            
             bestResults = pickBestResults(tasks, tc, round);
@@ -93,7 +94,7 @@ public final class Engine {
             buildFinalResults(tc, round);
         }
 
-        kernel.finish();
+        kernel.finishComputation();
     }
 
     private List<double[]> pickBestResults(final List<ComputationTask> tasks, final TaskContainer tc, final int round) {

@@ -49,11 +49,12 @@ public abstract class Kernel {
     protected CLDevice device;
     protected CLCommandQueue queue;
     private CLProgram program;
-    private final Set<CLResource> clMem;
+    private final Set<CLResource> clGlobalMem, clRoundMem;
 
     public Kernel(String kernelName) {
         this.kernelName = kernelName;
-        clMem = new HashSet<>();
+        clGlobalMem = new HashSet<>();
+        clRoundMem = new HashSet<>();
     }
 
     public void prepareKernel(final CLContext context, final CLDevice device, final int facetSize, final DeformationDegree deg, final int defArrayLength) throws IOException {
@@ -61,15 +62,15 @@ public abstract class Kernel {
         this.device = device;
 
         program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization())).build();
-        clMem.add(program);
+        clGlobalMem.add(program);
         kernel = program.createCLKernel(kernelName);
-        clMem.add(kernel);
+        clGlobalMem.add(kernel);
         if (isDriven()) {
             queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
         } else {
             queue = device.createCommandQueue();
         }
-        clMem.add(queue);
+        clGlobalMem.add(queue);
     }
 
     public float[] compute(Image imageA, Image imageB, List<Facet> facets, double[] deformations, int deformationLength) {
@@ -97,7 +98,7 @@ public abstract class Kernel {
         final int deformationCount = deformations.length / deformationLength;
 
         clResults = context.createFloatBuffer(facetCount * deformationCount, CLMemory.Mem.WRITE_ONLY);
-        clMem.add(clResults);
+        clRoundMem.add(clResults);
 
         runKernel(clImageA, clImageB,
                 clFacetData, clFacetCenters,
@@ -129,10 +130,13 @@ public abstract class Kernel {
         return false;
     }
 
-    public void finish() {
-        queue.finish();
+    public void finishRound() {
+        clearMem(clRoundMem);
+    }
 
-        clearMem(clMem);
+    public void finishComputation() {
+        queue.finish();
+        clearMem(clGlobalMem);
     }
 
     private void clearMem(final Set<CLResource> mems) {
@@ -150,7 +154,7 @@ public abstract class Kernel {
                 Buffers.newDirectIntBuffer(image.toBWArray()),
                 image.getWidth(), image.getHeight(),
                 IMAGE_FORMAT, CLMemory.Mem.READ_ONLY);
-        clMem.add(result);
+        clRoundMem.add(result);
         return result;
     }
 
@@ -185,7 +189,7 @@ public abstract class Kernel {
         }
         resultBuffer.rewind();
 
-        clMem.add(result);
+        clRoundMem.add(result);
         return result;
     }
 
@@ -208,7 +212,7 @@ public abstract class Kernel {
         }
         buffer.rewind();
 
-        clMem.add(result);
+        clRoundMem.add(result);
         return result;
     }
 
@@ -220,7 +224,7 @@ public abstract class Kernel {
         }
         buffer.rewind();
 
-        clMem.add(result);
+        clRoundMem.add(result);
         return result;
     }
 
