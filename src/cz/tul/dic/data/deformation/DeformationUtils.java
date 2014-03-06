@@ -14,4 +14,13 @@ public class DeformationUtils {
         return Math.sqrt(result);
     }
     
+    public static double getAbs(final double[] deformations, final int deformationIndex, final int deformationLength) {
+        double result = 0;
+        final int base = deformationIndex * deformationLength;
+        for (int i = 0; i< deformationLength; i++) {                
+            result += deformations[base + i] * deformations[base + i];
+        }
+        return Math.sqrt(result);
+    }
+    
 }
