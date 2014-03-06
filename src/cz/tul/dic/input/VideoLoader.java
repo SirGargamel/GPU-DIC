@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.pmw.tinylog.Logger;
 
 public class VideoLoader implements IInputLoader {
 
@@ -46,6 +47,7 @@ public class VideoLoader implements IInputLoader {
         final List<File> files;
         final Map<String, String> config = Config.loadConfig(input.getName());
         if (!isCacheDataValid(input, temp, config)) {
+            Logger.debug("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
             // prepare script
             String script = loadScript();
             script = script.replace(SCRIPT_FILE, input.getAbsolutePath());
@@ -82,7 +84,7 @@ public class VideoLoader implements IInputLoader {
                 config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
             }
             Config.saveConfig(input.getName(), config);
-        } else {
+        } else {            
             files = convertCacheDataToFiles(input, temp, config);
         }
         // list of all bmp files inside temp dir with roght name        
@@ -170,6 +172,7 @@ public class VideoLoader implements IInputLoader {
                 }
             }
         }
+        Logger.debug("Found valid cache data for file {0}, importing {1} images.", source.getAbsolutePath(), result.size());
         return result;
     }
 

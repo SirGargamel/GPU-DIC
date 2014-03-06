@@ -107,7 +107,7 @@ public class TargetExportFile implements ITargetExport {
             throw new IOException("VirtualDub has been interrupted.", ex);
         }
 
-        Utils.deleteTempFir(tc);
+        Utils.deleteTempDir(tc);
     }
 
     private String loadScript() throws IOException {

@@ -26,11 +26,13 @@ public class Utils {
         return temp;
     }
 
-    public static void deleteTempFir(final TaskContainer tc) {
+    public static void deleteTempDir(final TaskContainer tc) {                
         final File dir = (File) (tc.getParameter(TaskParameter.DIR));
         final String tempPath = dir.getAbsolutePath().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         if (temp.exists()) {
+            Logger.trace("Deleting temp folder {0} and all of its contents.", temp.getAbsolutePath());
+            
             File[] list = temp.listFiles();
             for (File f : list) {
                 if (!f.delete()) {
