@@ -22,6 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.LoggingLevel;
+import org.pmw.tinylog.writers.ConsoleWriter;
 
 /**
  *
@@ -29,6 +32,7 @@ import java.util.List;
  */
 public class Computation {
 
+    private static final LoggingLevel LOGGING_LEVEL = LoggingLevel.TRACE;
     private static final File IN_VIDEO_REAL = new File("d:\\temp\\7202845m.avi");
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
@@ -38,13 +42,14 @@ public class Computation {
     private static final int SIZE_STEP = 1;
 
     static {
+        Configurator.defaultConfig().writer(new ConsoleWriter()).level(LOGGING_LEVEL).activate();
+        
         IN_IMAGES = new LinkedList<>();
-
         IN_IMAGES.add(new File("d:\\temp\\image000.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
+        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));                
     }
 
     public static void commenceComputation() throws IOException {
@@ -55,7 +60,7 @@ public class Computation {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }            
 //            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
-            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
+            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC));
         }
 
         // compute task        
@@ -96,7 +101,7 @@ public class Computation {
         tc.setFacetSize(facetSize);        
 
         // facets
-        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
         tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
 
         // deformations
