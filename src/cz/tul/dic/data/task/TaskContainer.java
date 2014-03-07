@@ -2,8 +2,8 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.roi.Container;
 import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.data.roi.RoiContainer;
 import cz.tul.dic.output.ExportTask;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,11 +22,11 @@ public class TaskContainer {
     private final Object input;
     private final Map<Object, Object> params;
     private final List<Image> images;
-    private final RoiContainer rois;
+    private final Container<ROI> rois;
+    private final Container<List<Facet>> facets;
     private final Set<ExportTask> exportTasks;
     private final List<List<double[]>> results;
-    private int facetSize;
-    private List<List<Facet>> facets;
+    private int facetSize;    
     private double[] deformations;
     private final List<double[][][]> finalResults;
     private final Map<Integer, List<ComputationTask>> tasks;
@@ -34,7 +34,8 @@ public class TaskContainer {
     public TaskContainer(final Object input) {
         params = new HashMap<>();
         images = new LinkedList<>();
-        rois = new RoiContainer();
+        rois = new Container<>();
+        facets = new Container<>();
         exportTasks = new HashSet<>();
         results = new LinkedList<>();
         finalResults = new LinkedList<>();
@@ -89,20 +90,20 @@ public class TaskContainer {
         return Collections.unmodifiableList(images);
     }
 
-    public void assignFacets(final List<List<Facet>> facets) {
-        this.facets = facets;
+    public void assignFacets(final List<Facet> facets, final int round) {
+        this.facets.addItem(facets, round);
     }
 
     public List<Facet> getFacets(final int position) {
-        return facets.get(position);
+        return facets.getItem(position);
     }
 
     public ROI getRoi(final int round) {
-        return rois.getRoi(round);
+        return rois.getItem(round);
     }
 
     public void addRoi(ROI roi, final int round) {
-        rois.addRoi(roi, round);
+        rois.addItem(roi, round);
     }
 
     public int getFacetSize() {

@@ -4,9 +4,7 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class TightFacetGenerator implements IFacetGenerator {
@@ -14,11 +12,8 @@ public class TightFacetGenerator implements IFacetGenerator {
     private static final int DEFAULT_SPACING = 2;
 
     @Override
-    public List<List<Facet>> generateFacets(TaskContainer tc) {
-        final int taskCount = TaskContainerUtils.getRoundCount(tc);
-        List<List<Facet>> result = new ArrayList<>(taskCount);
-
-        Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
+    public List<Facet> generateFacets(TaskContainer tc, int round) {
+        final Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
         final int spacing;
         if (o == null) {
             spacing = DEFAULT_SPACING;
@@ -28,36 +23,28 @@ public class TightFacetGenerator implements IFacetGenerator {
         final int facetSize = tc.getFacetSize();
         final int halfSize = facetSize / 2;
 
-        ROI roi;
-        List<Facet> facets;
-        int wCount, hCount;
-        int roiW, roiH;
-        int centerX, centerY;
-        for (int i = 0; i < taskCount; i++) {
-            facets = new LinkedList<>();
+        // generate centers
+        final ROI roi = tc.getRoi(round);
+        final int roiW = roi.getWidth();
+        final int roiH = roi.getHeight();
 
-            // generate centers
-            roi = tc.getRoi(i);
-            roiW = roi.getWidth();
-            roiH = roi.getHeight();
+        final int wCount = (roiW - facetSize + spacing) / (spacing);
+        final int hCount = (roiH - facetSize + spacing) / (spacing);
 
-            wCount = (roiW - facetSize + spacing) / (spacing);
-            hCount = (roiH - facetSize + spacing) / (spacing);
+        final List<Facet> result = new ArrayList<>(wCount * hCount);
 
 //            gapX = (roiW - ((facetSize - spacing) * wCount + spacing)) / 2;
 //            gapY = (roiH - ((facetSize - spacing) * hCount + spacing)) / 2;
-//
-            for (int y = 0; y < hCount; y++) {
-                centerY = roi.getY1() + halfSize + (y * spacing);
 
-                for (int x = 0; x < wCount; x++) {
-                    centerX = roi.getX1() + halfSize + (x * spacing);
+        int centerX, centerY;
+        for (int y = 0; y < hCount; y++) {
+            centerY = roi.getY1() + halfSize + (y * spacing);
 
-                    facets.add(Facet.createFacet(facetSize, centerX, centerY));
-                }
+            for (int x = 0; x < wCount; x++) {
+                centerX = roi.getX1() + halfSize + (x * spacing);
+
+                result.add(Facet.createFacet(facetSize, centerX, centerY));
             }
-
-            result.add(facets);
         }
 
         return result;

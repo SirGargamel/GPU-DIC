@@ -11,7 +11,7 @@ import java.util.Set;
  */
 public interface IFacetGenerator {
 
-    List<List<Facet>> generateFacets(final TaskContainer tc);
+    List<Facet> generateFacets(final TaskContainer tc, final int round);
     
     FacetGeneratorMode getMode();
     
