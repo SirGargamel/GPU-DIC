@@ -12,9 +12,11 @@ import java.util.Comparator;
 public class DeformationResultSorter implements Comparator<Integer> {
 
     private final TaskContainer tc;
+    private final int round;
 
-    public DeformationResultSorter(TaskContainer tc) {
+    public DeformationResultSorter(TaskContainer tc, final int round) {
         this.tc = tc;
+        this.round = round;
     }
 
     @Override
@@ -24,7 +26,7 @@ public class DeformationResultSorter implements Comparator<Integer> {
 //        
 //        return Double.compare(DeformationUtils.getAbs(def1), DeformationUtils.getAbs(def2));
         
-        final double[] deformations = tc.getDeformations();
+        final double[] deformations = tc.getDeformations(round);
         final int deformationLength = TaskContainerUtils.getDeformationArrayLength(tc);
         return Double.compare(
                 DeformationUtils.getAbs(deformations, o1, deformationLength), 

@@ -59,7 +59,7 @@ public class DeformationGenerator {
 
         }
 
-        tc.setDeformations(result);
+        tc.setDeformations(result, 0);
     }
 
     private static double[] generateZeroDegree(final double[] bounds) {

@@ -26,7 +26,7 @@ public class NoSplit extends TaskSplitter {
     @Override
     public ComputationTask next() {
         hasNext = false;
-        return new ComputationTask(tc.getImage(round), tc.getImage(round + 1), tc.getFacets(round), tc.getDeformations());
+        return new ComputationTask(tc.getImage(round), tc.getImage(round + 1), tc.getFacets(round), tc.getDeformations(round));
     }
 
     @Override

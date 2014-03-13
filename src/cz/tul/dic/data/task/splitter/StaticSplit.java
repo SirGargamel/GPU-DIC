@@ -50,7 +50,7 @@ public class StaticSplit extends TaskSplitter {
         
         checkIfHasNext();
         
-        return new ComputationTask(tc.getImage(round), tc.getImage(round+1), sublist, tc.getDeformations());        
+        return new ComputationTask(tc.getImage(round), tc.getImage(round+1), sublist, tc.getDeformations(round));        
     }
 
     @Override

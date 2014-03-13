@@ -20,15 +20,17 @@ import java.util.Set;
  */
 public class TaskContainer implements Serializable {
 
+    // input data
     private final Object input;
-    private final Map<Object, Object> params;
-    private final List<Image> images;
-    private final Container<ROI> rois;
-    private final Container<List<Facet>> facets;
-    private final Set<ExportTask> exportTasks;
-    private final List<List<double[]>> results;
     private int facetSize;
-    private double[] deformations;
+    private final Map<Object, Object> params;
+    private final Container<ROI> rois;
+    private final Container<double[]> deformations;
+    private final Set<ExportTask> exportTasks;    
+    // generated data
+    private final List<Image> images;
+    private final Container<List<Facet>> facets;
+    private final List<List<double[]>> results;
     private final List<double[][][]> finalResults;
 
     public TaskContainer(final Object input) {
@@ -39,7 +41,7 @@ public class TaskContainer implements Serializable {
         exportTasks = new HashSet<>();
         results = new LinkedList<>();
         finalResults = new LinkedList<>();
-//        tasks = new HashMap<>();
+        deformations = new Container<>();
 
         this.input = input;
     }
@@ -114,12 +116,12 @@ public class TaskContainer implements Serializable {
         this.facetSize = facetSize;
     }
 
-    public void setDeformations(double[] deformations) {
-        this.deformations = deformations;
+    public void setDeformations(double[] deformations, final int round) {
+        this.deformations.addItem(deformations, round);
     }
 
-    public double[] getDeformations() {
-        return deformations;
+    public double[] getDeformations(final int round) {
+        return deformations.getItem(round);
     }
 
     public void storeResult(final List<double[]> result, final int round) {

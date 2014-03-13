@@ -107,7 +107,7 @@ public final class Engine {
 
     private void pickBestResultsForTask(final ComputationTask task, final List<double[]> bestResults, final TaskContainer tc, final int round) {
         final List<Facet> facets = tc.getFacets(round);
-        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc);
+        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc, round);
 
         final int facetCount = task.getFacets().size();
         final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
