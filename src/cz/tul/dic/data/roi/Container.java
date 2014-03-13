@@ -1,5 +1,6 @@
 package cz.tul.dic.data.roi;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
  * @author Petr Jecmen
  * @param <T>
  */
-public final class Container<T> {
+public final class Container<T> implements Serializable {
 
     private final List<T> data;
 

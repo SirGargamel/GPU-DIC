@@ -5,6 +5,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.Container;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.output.ExportTask;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +18,7 @@ import java.util.Set;
  *
  * @author Petr Jecmen
  */
-public class TaskContainer {
+public class TaskContainer implements Serializable {
 
     private final Object input;
     private final Map<Object, Object> params;

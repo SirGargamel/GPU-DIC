@@ -2,7 +2,6 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
-import java.util.Map;
 
 /**
  *
@@ -19,7 +18,7 @@ public class TaskContainerUtils {
         }
         return Math.max(counter - 1, 0);
     }
-    
+
     public static int getDeformationCount(final TaskContainer tc) {
         final int deformationArrayLength = getDeformationArrayLength(tc);
         final int result = tc.getDeformations().length / deformationArrayLength;
@@ -58,22 +57,6 @@ public class TaskContainerUtils {
         System.arraycopy(tc.getDeformations(), deformationArrayLength * index, result, 0, deformationArrayLength);
 
         return result;
-    }
-    
-    public static TaskContainer loadTaskContainer(final Map<String, String> config) {
-        // obtain input file name
-        // create instance
-        // facet size
-        // ROIs
-        // deformation
-        // parameters
-        // exports
-        
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
-    public static void storeTaskContainer(final TaskContainer tc) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }
