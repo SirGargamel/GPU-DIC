@@ -26,10 +26,9 @@ public class TaskContainer {
     private final Container<List<Facet>> facets;
     private final Set<ExportTask> exportTasks;
     private final List<List<double[]>> results;
-    private int facetSize;    
+    private int facetSize;
     private double[] deformations;
     private final List<double[][][]> finalResults;
-    private final Map<Integer, List<ComputationTask>> tasks;
 
     public TaskContainer(final Object input) {
         params = new HashMap<>();
@@ -39,7 +38,7 @@ public class TaskContainer {
         exportTasks = new HashSet<>();
         results = new LinkedList<>();
         finalResults = new LinkedList<>();
-        tasks = new HashMap<>();
+//        tasks = new HashMap<>();
 
         this.input = input;
     }
@@ -152,19 +151,6 @@ public class TaskContainer {
 
     public Set<ExportTask> getExportTasks() {
         return Collections.unmodifiableSet(exportTasks);
-    }
-
-    public void addTask(final ComputationTask task, final int round) {
-        List<ComputationTask> l = tasks.get(round);
-        if (l == null) {
-            l = new LinkedList<>();
-            tasks.put(round, l);
-        }
-        l.add(task);
-    }
-
-    public Map<Integer, List<ComputationTask>> getTasks() {
-        return tasks;
     }
 
 }

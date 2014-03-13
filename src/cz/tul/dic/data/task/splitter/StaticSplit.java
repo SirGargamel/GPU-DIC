@@ -3,7 +3,6 @@ package cz.tul.dic.data.task.splitter;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,36 +10,51 @@ import java.util.List;
 public class StaticSplit extends TaskSplitter {
 
     private static final int SPLIT_DEFAULT = 50;
+    private final int split;
+    private boolean hasNext;
+    private int index;
+
+    public StaticSplit(final TaskContainer tc, final int round) {
+        super(tc, round);
+        
+        final Object o = this.tc.getParameter(TaskParameter.TASK_SPLIT_VALUE);
+        split = o == null ? SPLIT_DEFAULT : (int) o;
+        
+        checkIfHasNext();
+    }
 
     @Override
-    public void split(TaskContainer tc) {
-        final Object split = tc.getParameter(TaskParameter.TASK_SPLIT_VALUE);
-        final int splitCount = split == null ? SPLIT_DEFAULT : (int) split;
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+    public boolean hasNext() {
+        return hasNext;
+    }
+    
+    private void checkIfHasNext() {
+        final int facetCount = tc.getFacets(round).size();                
+        hasNext = index < facetCount - 1;
+    }
 
-        int facetCount, index;
-        ComputationTask ct;
-        List<Facet> sublist, facets;
-        for (int round = 0; round < roundCount; round++) {
-            facets = tc.getFacets(round);
-            facetCount = facets.size();
-
-            index = 0;
-            sublist = new ArrayList<>();
-            while (index < facetCount) {
-                sublist.add(facets.get(index));
-                index++;
-
-                if (index % splitCount == 0) {
-                    ct = new ComputationTask(tc.getImage(round), tc.getImage(round + 1), sublist, tc.getDeformations());
-                    tc.addTask(ct, round);
-                    sublist = new ArrayList<>();
-                }
-            }
-            if (!sublist.isEmpty()) {
-                ct = new ComputationTask(tc.getImage(round), tc.getImage(round + 1), sublist, tc.getDeformations());
-                tc.addTask(ct, round);
-            }
+    @Override
+    public ComputationTask next() {
+        final List<Facet> sublist = new ArrayList<>(split);
+        
+        final List<Facet> facets = tc.getFacets(round);
+        final int facetCount = facets.size();
+        
+        int count = 0;
+        while (count < split && index < facetCount) {
+            sublist.add(facets.get(index));
+            
+            count++;
+            index++;
         }
+        
+        checkIfHasNext();
+        
+        return new ComputationTask(tc.getImage(round), tc.getImage(round+1), sublist, tc.getDeformations());        
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("Not supported.");
     }
 }

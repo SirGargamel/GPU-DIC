@@ -3,22 +3,35 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
-
 
 public class NoSplit extends TaskSplitter {
 
-    @Override
-    public void split(TaskContainer tc) {
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        for (int round = 0; round < roundCount; round++) {
-            tc.addTask(new ComputationTask(tc.getImage(round), tc.getImage(round + 1), tc.getFacets(round), tc.getDeformations()), round);
-        }
+    private boolean hasNext;
+
+    public NoSplit(TaskContainer tc, int round) {
+        super(tc, round);
+
+        hasNext = true;
     }
-    
+
+    @Override
+    public boolean hasNext() {
+        return hasNext;
+    }
+
+    @Override
+    public ComputationTask next() {
+        hasNext = false;
+        return new ComputationTask(tc.getImage(round), tc.getImage(round + 1), tc.getFacets(round), tc.getDeformations());
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
 }

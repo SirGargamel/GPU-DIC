@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -73,14 +74,11 @@ public final class Engine {
     }
 
     public void computeTask(final TaskContainer tc) throws IOException {
-        TaskSplitter.splitTask(tc);
-
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         final int defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc);
         kernel.prepareKernel(context, device, tc.getFacetSize(), (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE), defArrayLength);
 
         List<double[]> bestResults;
-        List<ComputationTask> tasks;
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         int facetCount;
         for (int round = 0; round < roundCount; round++) {
@@ -90,17 +88,14 @@ public final class Engine {
                 bestResults.add(null);
             }
 
-            tasks = tc.getTasks().get(round);
-            Logger.trace("Computing {0} tasks for round {1}.", tasks.size(), round + 1);
-
+            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, round);
             ComputationTask ct;
-            while (!tasks.isEmpty()) {
-                ct = tasks.get(0);
+            while (it.hasNext()) {
+                ct = it.next();
                 ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
                 kernel.finishRound();
                 // pick best results for this computation task and discard ct data                          
                 pickBestResultsForTask(ct, bestResults, tc, round);
-                tasks.remove(0);
             }
             // store data           
             tc.storeResult(bestResults, round);
