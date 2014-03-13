@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -114,7 +113,7 @@ public final class Engine {
         final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
 
         float val, best;
-        List<Integer> candidates = new LinkedList<>();
+        final List<Integer> candidates = new ArrayList<>();
         int baseIndex, bestIndex, globalFacetIndex;
         float[] taskResults;
         for (int localFacetIndex = 0; localFacetIndex < facetCount; localFacetIndex++) {
@@ -137,7 +136,7 @@ public final class Engine {
 
             globalFacetIndex = facets.indexOf(task.getFacets().get(localFacetIndex));
             if (candidates.isEmpty()) {
-//                System.err.println("No best value found for facet nr." + facet);
+                Logger.warn("No best value found for facet nr." + globalFacetIndex);
                 bestResults.set(globalFacetIndex, new double[]{0, 0});
             } else {
                 if (candidates.size() > 1) {
