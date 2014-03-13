@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
 import org.pmw.tinylog.writers.ConsoleWriter;
 
@@ -37,7 +38,7 @@ public class Computation {
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
-    private static final int SIZE_MIN = 15;
+    private static final int SIZE_MIN = 5;
     private static final int SIZE_MAX = 30;
     private static final int SIZE_STEP = 1;
 
@@ -84,11 +85,11 @@ public class Computation {
             engine.computeTask(tc);
             time = System.nanoTime() - time;
             Exporter.export(tc);
-            System.out.println("Finished round " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+            Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
             
             tcs.remove(0);
         }
-        System.out.println("All done !!!");
+        Logger.info("All done !!!");
     }
 
     private static TaskContainer generateTask(final Object in, final int facetSize, final KernelType kernelType) throws IOException {
@@ -112,7 +113,7 @@ public class Computation {
 
         // task
         tc.addParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
-        tc.addParameter(TaskParameter.TASK_SPLIT_VALUE, 100);
+        tc.addParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
         
         // opencl
         tc.addParameter(TaskParameter.KERNEL, kernelType);
