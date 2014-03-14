@@ -19,7 +19,7 @@ public enum TaskParameter {
     DEFORMATION_BOUNDS(double[].class),
     KERNEL(KernelType.class),
     TASK_SPLIT_VARIANT(TaskSplit.class),
-    TASK_SPLIT_VALUE(Object.class),
+    TASK_SPLIT_VALUE(Integer.class),
     ;
     
     private final Class type;

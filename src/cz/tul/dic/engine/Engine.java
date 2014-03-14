@@ -110,7 +110,7 @@ public final class Engine {
         final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc, round);
 
         final int facetCount = task.getFacets().size();
-        final int deformationCount = TaskContainerUtils.getDeformationCount(tc);
+        final int deformationCount = TaskContainerUtils.getDeformationCount(tc, round);
 
         float val, best;
         final List<Integer> candidates = new ArrayList<>();
@@ -144,7 +144,7 @@ public final class Engine {
                 }
                 bestIndex = candidates.get(0);
 
-                bestResults.set(globalFacetIndex, TaskContainerUtils.extractDeformation(tc, bestIndex));
+                bestResults.set(globalFacetIndex, TaskContainerUtils.extractDeformation(tc, bestIndex, round));
             }
         }
     }

@@ -1,5 +1,6 @@
 package cz.tul.dic;
 
+import cz.tul.dic.data.Config;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
@@ -39,7 +40,7 @@ public class Computation {
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 5;
-    private static final int SIZE_MAX = 30;
+    private static final int SIZE_MAX = 50;
     private static final int SIZE_STEP = 1;
 
     static {
@@ -61,25 +62,29 @@ public class Computation {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }            
 //            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
-            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC));
+            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D));
         }
 
         // compute task        
         final Engine engine = new Engine();
 
         long time;
-        TaskContainer tc;
+        TaskContainer tc, loadedTc;
         while (!tcs.isEmpty()) {
             tc = tcs.get(0);
 
             InputLoader.loadInput(tc);
             
             addCompleteExport(tc);
+            
+            Config.saveConfig("taskConfig", TaskContainerUtils.serializeTaskContainer(tc));
+            loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfig"));            
+            System.out.println(loadedTc);
 
-            TaskContainerChecker.checkTaskValidity(tc);
+            TaskContainerChecker.checkTaskValidity(tc);            
 
-            FacetGenerator.generateFacets(tc);
-            DeformationGenerator.generateDeformations(tc);
+            FacetGenerator.generateFacets(tc);            
+            DeformationGenerator.generateDeformations(tc);                                    
 
             time = System.nanoTime();
             engine.computeTask(tc);

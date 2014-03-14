@@ -26,13 +26,13 @@ public class Utils {
         return temp;
     }
 
-    public static void deleteTempDir(final TaskContainer tc) {                
+    public static void deleteTempDir(final TaskContainer tc) {
         final File dir = (File) (tc.getParameter(TaskParameter.DIR));
         final String tempPath = dir.getAbsolutePath().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         if (temp.exists()) {
             Logger.trace("Deleting temp folder {0} and all of its contents.", temp.getAbsolutePath());
-            
+
             File[] list = temp.listFiles();
             for (File f : list) {
                 if (!f.delete()) {
@@ -65,11 +65,11 @@ public class Utils {
             }
         }
     }
-    
+
     public static boolean isLevelLogged(final LoggingLevel testedLevel) {
         final LoggingLevel currentLevel = Logger.getLoggingLevel();
         int indexTestedLevel = 0, indexCurrentLevel = 1;
-        final LoggingLevel[] levels = LoggingLevel.values();        
+        final LoggingLevel[] levels = LoggingLevel.values();
         for (int l = 0; l < levels.length; l++) {
             if (levels[l].equals(testedLevel)) {
                 indexTestedLevel = l;
