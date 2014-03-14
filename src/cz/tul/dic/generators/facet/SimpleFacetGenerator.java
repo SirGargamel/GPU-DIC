@@ -24,9 +24,9 @@ public class SimpleFacetGenerator implements IFacetGenerator {
 
         if (spacing >= facetSize) {
             throw new IllegalArgumentException("Spacing cant must be smaller than facet size.");
-        }                     
-        
-        final int halfSize = facetSize / 2;  
+        }
+
+        final int halfSize = facetSize / 2;
         final ROI roi = tc.getRoi(round);
         final int roiW = roi.getWidth();
         final int roiH = roi.getHeight();
@@ -39,14 +39,16 @@ public class SimpleFacetGenerator implements IFacetGenerator {
         final int gapX = (roiW - ((facetSize - spacing) * wCount + spacing)) / 2;
         final int gapY = (roiH - ((facetSize - spacing) * hCount + spacing)) / 2;
 
-        int centerX, centerY;
+        int centerX, centerY;        
         for (int y = 0; y < hCount; y++) {
             centerY = gapY + roi.getY1() + halfSize + (y * (facetSize - spacing));
 
             for (int x = 0; x < wCount; x++) {
                 centerX = gapX + roi.getX1() + halfSize + (x * (facetSize - spacing));
 
-                result.add(Facet.createFacet(facetSize, centerX, centerY));
+                if (roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
+                    result.add(Facet.createFacet(facetSize, centerX, centerY));
+                }
             }
         }
 

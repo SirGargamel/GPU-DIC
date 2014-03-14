@@ -2,6 +2,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -30,7 +31,7 @@ public class TaskContainerChecker {
             roi = tc.getRoi(round);
             if (roi == null) {
                 System.err.println("Adding default ROI.");
-                roi = new ROI(0, 0, img.getWidth() - 1, img.getHeight() - 1);
+                roi = new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1);
                 tc.addRoi(roi, round);
             } else {
                 if (roi.getX1() < 0 || roi.getY1() < 0) {

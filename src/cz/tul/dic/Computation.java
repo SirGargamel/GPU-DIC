@@ -2,7 +2,7 @@ package cz.tul.dic;
 
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -101,7 +101,7 @@ public class Computation {
         final TaskContainer tc = new TaskContainer(in);
 
         // select ROI        
-        tc.addRoi(new ROI(0, 0, 319, 239), 0);
+        tc.addRoi(new RectangleROI(0, 0, 319, 239), 0);
 
         // select facet size
         tc.setFacetSize(facetSize);        

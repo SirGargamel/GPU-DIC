@@ -43,7 +43,9 @@ public class TightFacetGenerator implements IFacetGenerator {
             for (int x = 0; x < wCount; x++) {
                 centerX = roi.getX1() + halfSize + (x * spacing);
 
-                result.add(Facet.createFacet(facetSize, centerX, centerY));
+                if (roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
+                    result.add(Facet.createFacet(facetSize, centerX, centerY));
+                }
             }
         }
 
