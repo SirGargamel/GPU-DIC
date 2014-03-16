@@ -61,7 +61,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         long time;
         CLEvent event;
         int actualBase = 0, counter = 0;
-        final CLEventList eventList = new CLEventList(facetCount / facetSubCount);        
+        final CLEventList eventList = new CLEventList((int) Math.ceil(facetCount / (double) facetSubCount));
         while (actualBase < facetCount) {
             facetSubCount = Math.min(wsm.getWorkSize(), facetCount);
             facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationCount) * facetSubCount;
@@ -69,8 +69,8 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             kernel.setArg(ARGUMENT_INDEX_BASE, actualBase);
             kernel.setArg(ARGUMENT_INDEX_COUNT, facetSubCount);
             queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0, eventList);
-            
-            queue.putWaitForEvent(eventList, counter, true);            
+
+            queue.putWaitForEvent(eventList, counter, true);
             event = eventList.getEvent(counter);
             time = event.getProfilingInfo(CLEvent.ProfilingCommand.END) - event.getProfilingInfo(CLEvent.ProfilingCommand.START);
             wsm.storeTime(facetSubCount, time);
