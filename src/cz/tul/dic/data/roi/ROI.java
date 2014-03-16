@@ -5,15 +5,18 @@ package cz.tul.dic.data.roi;
  * @author Petr Jecmen
  */
 public abstract class ROI {
-    
+
     static final String SEPARATOR = ";";
 
     public static ROI generateROI(final String data) {
         final String[] split = data.split(SEPARATOR);
-        if (split.length != 4) {
-            throw new IllegalArgumentException("4 values required for ROI - " + data);
+        if (split.length == 4) {
+            return new RectangleROI(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]), Integer.valueOf(split[3]));
+        } else if (split.length == 3) {
+            return new CircularROI(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+        } else {
+            throw new IllegalArgumentException("3 or 4 values required for ROI - " + data);
         }
-        return new RectangleROI(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]), Integer.valueOf(split[3]));
     }
 
     public ROI() {
@@ -31,7 +34,10 @@ public abstract class ROI {
     public abstract int getWidth();
 
     public abstract int getHeight();
-    
+
     public abstract boolean isAreaInside(int x1, int y1, int x2, int y2);
+    
+    @Override
+    public abstract String toString();
 
 }

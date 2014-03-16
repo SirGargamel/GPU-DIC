@@ -2,7 +2,7 @@ package cz.tul.dic;
 
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.roi.RectangleROI;
+import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -39,8 +39,8 @@ public class Computation {
     private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
-    private static final int SIZE_MIN = 5;
-    private static final int SIZE_MAX = 50;
+    private static final int SIZE_MIN = 3;
+    private static final int SIZE_MAX = 5;
     private static final int SIZE_STEP = 1;
 
     static {
@@ -62,7 +62,7 @@ public class Computation {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }            
 //            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
-            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D));
+            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC));
         }
 
         // compute task        
@@ -101,7 +101,8 @@ public class Computation {
         final TaskContainer tc = new TaskContainer(in);
 
         // select ROI        
-        tc.addRoi(new RectangleROI(0, 0, 319, 239), 0);
+//        tc.addRoi(new RectangleROI(0, 0, 319, 239), 0);
+        tc.addRoi(new CircularROI(160, 120, 40), 0);
 
         // select facet size
         tc.setFacetSize(facetSize);        
