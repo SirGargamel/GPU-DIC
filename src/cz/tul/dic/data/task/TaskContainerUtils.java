@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  *
@@ -21,7 +22,7 @@ import java.util.Map.Entry;
 public class TaskContainerUtils {
 
     private static final String CONFIG_INPUT = "INPUT";
-    private static final String CONFIG_SEPARATOR = ";";
+    private static final String CONFIG_SEPARATOR = ";;";
     private static final String CONFIG_SIZE = "SIZE";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
@@ -100,12 +101,20 @@ public class TaskContainerUtils {
         // facet size
         result.put(CONFIG_SIZE, Integer.toString(tc.getFacetSize()));
         // rois        
-        ROI roi, prevRoi = null;
+        Set<ROI> rois, prevRoi = null;
+        final StringBuilder sb = new StringBuilder();
         for (int round = 0; round < roundCount; round++) {
-            roi = tc.getRoi(round);
-            if (roi != prevRoi) {
-                result.put(CONFIG_ROIS.concat(Integer.toString(round)), roi.toString());
-                prevRoi = roi;
+            rois = tc.getRoi(round);
+            if (rois != prevRoi) {
+                sb.setLength(0);
+                for (ROI roi : rois) {
+                    sb.append(roi.toString());
+                    sb.append(CONFIG_SEPARATOR);
+                }
+                sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
+
+                result.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
+                prevRoi = rois;
             }
         }
         // exports
@@ -168,7 +177,10 @@ public class TaskContainerUtils {
             key = e.getKey();
             if (key.startsWith(CONFIG_ROIS)) {
                 index = Integer.valueOf(key.replaceFirst(CONFIG_ROIS, ""));
-                result.addRoi(ROI.generateROI(e.getValue()), index);
+                final String[] split = e.getValue().split(CONFIG_SEPARATOR);
+                for (String s : split) {
+                    result.addRoi(ROI.generateROI(s), index);
+                }
             } else if (key.startsWith(CONFIG_EXPORTS)) {
                 result.addExportTask(ExportTask.generateExportTask(e.getValue()));
             } else if (key.startsWith(CONFIG_PARAMETERS)) {

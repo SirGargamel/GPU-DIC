@@ -6,6 +6,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.roi.ROI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class SimpleFacetGenerator implements IFacetGenerator {
 
@@ -27,27 +28,30 @@ public class SimpleFacetGenerator implements IFacetGenerator {
         }
 
         final int halfSize = facetSize / 2;
-        final ROI roi = tc.getRoi(round);
-        final int roiW = roi.getWidth();
-        final int roiH = roi.getHeight();
+        final Set<ROI> rois = tc.getRoi(round);
 
-        final int wCount = (roiW - spacing) / (facetSize - spacing);
-        final int hCount = (roiH - spacing) / (facetSize - spacing);
+        final List<Facet> result = new ArrayList<>();
 
-        final List<Facet> result = new ArrayList<>(wCount * hCount);
+        int roiW, roiH, wCount, hCount, gapX, gapY, centerX, centerY;
+        for (ROI roi : rois) {
+            roiW = roi.getWidth();
+            roiH = roi.getHeight();
 
-        final int gapX = (roiW - ((facetSize - spacing) * wCount + spacing)) / 2;
-        final int gapY = (roiH - ((facetSize - spacing) * hCount + spacing)) / 2;
+            wCount = (roiW - spacing) / (facetSize - spacing);
+            hCount = (roiH - spacing) / (facetSize - spacing);
 
-        int centerX, centerY;        
-        for (int y = 0; y < hCount; y++) {
-            centerY = gapY + roi.getY1() + halfSize + (y * (facetSize - spacing));
+            gapX = (roiW - ((facetSize - spacing) * wCount + spacing)) / 2;
+            gapY = (roiH - ((facetSize - spacing) * hCount + spacing)) / 2;
 
-            for (int x = 0; x < wCount; x++) {
-                centerX = gapX + roi.getX1() + halfSize + (x * (facetSize - spacing));
+            for (int y = 0; y < hCount; y++) {
+                centerY = gapY + roi.getY1() + halfSize + (y * (facetSize - spacing));
 
-                if (roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
-                    result.add(Facet.createFacet(facetSize, centerX, centerY));
+                for (int x = 0; x < wCount; x++) {
+                    centerX = gapX + roi.getX1() + halfSize + (x * (facetSize - spacing));
+
+                    if (roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
+                        result.add(Facet.createFacet(facetSize, centerX, centerY));
+                    }
                 }
             }
         }

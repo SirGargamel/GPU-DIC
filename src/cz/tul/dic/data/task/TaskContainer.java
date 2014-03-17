@@ -24,7 +24,7 @@ public class TaskContainer implements Serializable {
     private final Object input;
     private int facetSize;
     private final Map<Object, Object> params;
-    private final Container<ROI> rois;
+    private final Container<Set<ROI>> rois;
     private final Container<double[]> deformations;
     private final Set<ExportTask> exportTasks;    
     // generated data
@@ -100,12 +100,17 @@ public class TaskContainer implements Serializable {
         return facets.getItem(position);
     }
 
-    public ROI getRoi(final int round) {
+    public Set<ROI> getRoi(final int round) {
         return rois.getItem(round);
     }
 
     public void addRoi(ROI roi, final int round) {
-        rois.addItem(roi, round);
+        Set<ROI> r = rois.getItem(round);
+        if (r == null) {
+            r = new HashSet<>(1);
+            rois.addItem(r, round);
+        }
+        r.add(roi);
     }
 
     public int getFacetSize() {
