@@ -183,7 +183,7 @@ public class TaskContainerUtils {
                     split = s.split(CONFIG_SEPARATOR_PAIRS);
                     if (split.length == 2) {
                         roi = ROI.generateROI(split[0]);
-                        result.addRoi(roi, index);
+                        result.setRoi(roi, index);
                         result.setDeformationLimits(doubleArrayFromString(split[1]), index, roi);
                     } else {
                         throw new IllegalArgumentException("Illegal roi-limits pair - " + split);
@@ -195,22 +195,22 @@ public class TaskContainerUtils {
                 tp = TaskParameter.valueOf(key.replaceFirst(CONFIG_PARAMETERS, ""));
                 switch (tp) {
                     case DIR:
-                        result.addParameter(tp, new File(e.getValue()));
+                        result.setParameter(tp, new File(e.getValue()));
                         break;
                     case FACET_GENERATOR_MODE:
-                        result.addParameter(tp, FacetGeneratorMode.valueOf(e.getValue()));
+                        result.setParameter(tp, FacetGeneratorMode.valueOf(e.getValue()));
                         break;
                     case FACET_GENERATOR_SPACING:
-                        result.addParameter(tp, Integer.valueOf(e.getValue()));
+                        result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
                     case KERNEL:
-                        result.addParameter(tp, KernelType.valueOf(e.getValue()));
+                        result.setParameter(tp, KernelType.valueOf(e.getValue()));
                         break;
                     case TASK_SPLIT_VARIANT:
-                        result.addParameter(tp, TaskSplit.valueOf(e.getValue()));
+                        result.setParameter(tp, TaskSplit.valueOf(e.getValue()));
                         break;
                     case TASK_SPLIT_VALUE:
-                        result.addParameter(tp, Integer.valueOf(e.getValue()));
+                        result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);

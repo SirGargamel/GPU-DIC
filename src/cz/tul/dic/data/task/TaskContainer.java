@@ -52,7 +52,7 @@ public class TaskContainer implements Serializable {
         return input;
     }
 
-    public void addParameter(final TaskParameter key, final Object value) {
+    public void setParameter(final TaskParameter key, final Object value) {
         if (value != null && key.getType().isAssignableFrom(value.getClass())) {
             params.put(key, value);
         } else if (key != null && value != null) {
@@ -94,7 +94,7 @@ public class TaskContainer implements Serializable {
         return Collections.unmodifiableList(images);
     }
 
-    public void assignFacets(final List<Facet> facets, final int round, final ROI roi) {
+    public void setFacets(final List<Facet> facets, final int round, final ROI roi) {
         Map<ROI, List<Facet>> m = this.facets.getItem(round);
         if (m == null) {
             m = new HashMap<>();
@@ -113,7 +113,7 @@ public class TaskContainer implements Serializable {
         return rois.getItem(round);
     }
 
-    public void addRoi(ROI roi, final int round) {
+    public void setRoi(final ROI roi, final int round) {
         Set<ROI> r = rois.getItem(round);
         if (r == null) {
             r = new HashSet<>(1);
@@ -126,7 +126,7 @@ public class TaskContainer implements Serializable {
         return facetSize;
     }
 
-    public void setFacetSize(int facetSize) {
+    public void setFacetSize(final int facetSize) {
         this.facetSize = facetSize;
     }
     
@@ -145,7 +145,7 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public void setDeformations(double[] deformations, final int round, final ROI roi) {
+    public void setDeformations(final double[] deformations, final int round, final ROI roi) {
         Map<ROI, double[]> m = this.deformations.getItem(round);
         if (m == null) {
             m = new HashMap<>();
@@ -161,7 +161,7 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public void storeResult(final List<double[]> result, final int round, final ROI roi) {
+    public void setResult(final List<double[]> result, final int round, final ROI roi) {
         while (results.size() <= round) {
             results.add(null);
         }
@@ -181,11 +181,11 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public double[][][] getFinalResults(final int position) {
+    public double[][][] getPerPixelResult(final int position) {
         return finalResults.get(position);
     }
 
-    public void storeFinalResults(final double[][][] result, final int round) {
+    public void setPerPixelResult(final double[][][] result, final int round) {
         while (finalResults.size() <= round) {
             finalResults.add(null);
         }

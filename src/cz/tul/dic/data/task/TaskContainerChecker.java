@@ -32,7 +32,7 @@ public class TaskContainerChecker {
             rois = tc.getRoi(round);
             if (rois == null || rois.isEmpty()) {
                 System.err.println("Adding default ROI.");
-                tc.addRoi(new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1), round);
+                tc.setRoi(new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1), round);
             } else {
                 for (ROI roi : rois) {
                     if (roi.getX1() < 0 || roi.getY1() < 0) {
@@ -48,7 +48,7 @@ public class TaskContainerChecker {
         final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
         if (ts == null) {
             System.err.println("Adding default TaskSplit.");
-            tc.addParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.NONE);
+            tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.NONE);
         }
 
         for (ExportTask et : tc.getExportTasks()) {

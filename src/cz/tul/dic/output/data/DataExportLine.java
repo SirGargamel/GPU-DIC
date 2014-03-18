@@ -21,7 +21,7 @@ public class DataExportLine implements IDataExport<double[]> {
 
         double[][][] results;
         for (int r = 0; r < roundCount; r++) {
-            results = tc.getFinalResults(r);
+            results = tc.getPerPixelResult(r);
             if (results == null || results.length < x || results[0].length < y) {
                 throw new IllegalArgumentException("Illegal result data.");
             }

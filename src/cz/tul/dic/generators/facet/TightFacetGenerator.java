@@ -53,7 +53,7 @@ public class TightFacetGenerator implements IFacetGenerator {
                 }
             }
             
-            tc.assignFacets(result, round, roi);
+            tc.setFacets(result, round, roi);
         }        
     }
 

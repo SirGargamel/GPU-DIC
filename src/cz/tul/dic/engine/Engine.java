@@ -101,7 +101,7 @@ public final class Engine {
                     pickBestResultsForTask(ct, bestResults, tc, round, roi);
                 }
                 // store data           
-                tc.storeResult(bestResults, round, roi);
+                tc.setResult(bestResults, round, roi);
             }
             buildFinalResults(tc, round);
             Logger.trace("Finished round {0} out of {1}.", round + 1, roundCount);
@@ -214,7 +214,7 @@ public final class Engine {
             }
         }
 
-        tc.storeFinalResults(finalResults, round);
+        tc.setPerPixelResult(finalResults, round);
     }
 
 }

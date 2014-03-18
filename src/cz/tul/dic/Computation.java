@@ -103,35 +103,35 @@ public class Computation {
 
         // select ROI 
         final ROI r1 = new RectangleROI(135, 19, 179, 200);
-        tc.addRoi(r1, 0);
+        tc.setRoi(r1, 0);
         final ROI r2 = new CircularROI(108, 101, 26);
-        tc.addRoi(r2, 0);
+        tc.setRoi(r2, 0);
         final ROI r3 = new CircularROI(203, 101, 26);
-        tc.addRoi(r3, 0);
+        tc.setRoi(r3, 0);
 
         // select facet size
         tc.setFacetSize(facetSize);        
 
         // facets
-//        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
-        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
+//        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
 
         // deformations
         tc.setDeformationLimits(new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5}, 0, r1);
         tc.setDeformationLimits(new double[]{-10, 0, 0.5, -10, 0, 0.5}, 0, r2);
         tc.setDeformationLimits(new double[]{-10, 0, 0.5, -10, 0, 0.5}, 0, r3);
-//        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
-//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
-//        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
-//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
+//        tc.setParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
+//        tc.setParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
+//        tc.setParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
+//        tc.setParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
 
         // task
-        tc.addParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
-        tc.addParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
+        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
+        tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
         
         // opencl
-        tc.addParameter(TaskParameter.KERNEL, kernelType);
+        tc.setParameter(TaskParameter.KERNEL, kernelType);
 
         return tc;
     }

@@ -11,7 +11,7 @@ public class DataExportMap implements IDataExport<double[][]> {
         if (params == null || params.length < 1) {
             throw new IllegalArgumentException("Not wnough input parameters (position required).");
         }
-        final double[][][] results = tc.getFinalResults(params[0]);
+        final double[][][] results = tc.getPerPixelResult(params[0]);
         if (results == null || results.length == 0 || results[0].length == 0) {
             throw new IllegalArgumentException("Illegal result data.");
         }
