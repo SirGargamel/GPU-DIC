@@ -22,39 +22,39 @@ public class TightFacetGenerator implements IFacetGenerator {
             spacing = (int) o;
         }
         final int facetSize = tc.getFacetSize();
-        final int halfSize = facetSize / 2;                
+        final int halfSize = facetSize / 2;
 
         // generate centers
         final Set<ROI> rois = tc.getRoi(round);
 
         List<Facet> result;
-        int roiW, roiH, wCount, hCount, centerX, centerY;
+        int roiW, roiH, wCount, hCount, centerX, centerY, gapX, gapY;
         for (ROI roi : rois) {
             result = new ArrayList<>();
-            
+
             roiW = roi.getWidth();
             roiH = roi.getHeight();
 
             wCount = (roiW - facetSize + spacing) / (spacing);
-            hCount = (roiH - facetSize + spacing) / (spacing);            
+            hCount = (roiH - facetSize + spacing) / (spacing);
 
-//            gapX = (roiW - ((facetSize - spacing) * wCount + spacing)) / 2;
-//            gapY = (roiH - ((facetSize - spacing) * hCount + spacing)) / 2;
-            
+            gapX = (roiW - (spacing * (wCount - 1) + facetSize)) / 2;
+            gapY = (roiH - (spacing * (hCount - 1) + facetSize)) / 2;
+
             for (int y = 0; y < hCount; y++) {
-                centerY = roi.getY1() + halfSize + (y * spacing);
+                centerY = gapX + roi.getY1() + halfSize + (y * spacing);
 
                 for (int x = 0; x < wCount; x++) {
-                    centerX = roi.getX1() + halfSize + (x * spacing);
+                    centerX = gapY + roi.getX1() + halfSize + (x * spacing);
 
                     if (roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
                         result.add(Facet.createFacet(facetSize, centerX, centerY));
                     }
                 }
             }
-            
+
             tc.setFacets(result, round, roi);
-        }        
+        }
     }
 
     @Override
