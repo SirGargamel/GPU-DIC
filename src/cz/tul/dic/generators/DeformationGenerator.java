@@ -14,7 +14,7 @@ import java.util.Set;
 public class DeformationGenerator {
 
     public static void generateDeformations(final TaskContainer tc) {
-        double[] bounds, deformations;
+        double[] limits, deformations;
         DeformationDegree degree;
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         Set<ROI> rois, oldRois = null;
@@ -22,18 +22,18 @@ public class DeformationGenerator {
             rois = tc.getRoi(round);
             if (rois != oldRois) {
                 for (ROI roi : rois) {
-                    bounds = tc.getDeformationLimits(round, roi);
-                    degree = DeformationUtils.getDegreeFromLimits(bounds);
+                    limits = tc.getDeformationLimits(round, roi);
+                    degree = DeformationUtils.getDegreeFromLimits(limits);
 
                     switch (degree) {
                         case ZERO:
-                            deformations = generateZeroDegree(bounds);
+                            deformations = generateZeroDegree(limits);
                             break;
                         case FIRST:
-                            deformations = generateFirstDegree(bounds);
+                            deformations = generateFirstDegree(limits);
                             break;
                         case SECOND:
-                            deformations = generateSecondDegree(bounds);
+                            deformations = generateSecondDegree(limits);
                             break;
                         default:
                             throw new UnsupportedOperationException("Unsupported degree of deformation - " + degree + ".");
@@ -46,22 +46,22 @@ public class DeformationGenerator {
         }
     }
 
-    private static double[] generateZeroDegree(final double[] bounds) {
-        if (bounds.length < 6) {
-            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + bounds.length + ", required 6.");
+    private static double[] generateZeroDegree(final double[] limits) {
+        if (limits.length < 6) {
+            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + limits.length + ", required 6.");
         }
 
         final int coeffCount = 2;
         int size = coeffCount;
-        size *= (bounds[1] - bounds[0]) / bounds[2] + 1;
-        size *= (bounds[4] - bounds[3]) / bounds[5] + 1;
+        size *= (limits[1] - limits[0]) / limits[2] + 1;
+        size *= (limits[4] - limits[3]) / limits[5] + 1;
 
         final double[] result = new double[size];
 
         int index;
         int i = 0;
-        for (double u = bounds[0]; u <= bounds[1]; u += bounds[2]) {
-            for (double v = bounds[3]; v <= bounds[4]; v += bounds[5]) {
+        for (double u = limits[0]; u <= limits[1]; u += limits[2]) {
+            for (double v = limits[3]; v <= limits[4]; v += limits[5]) {
                 index = i * coeffCount;
                 result[index] = u;
                 result[index + 1] = v;
@@ -72,30 +72,30 @@ public class DeformationGenerator {
         return result;
     }
 
-    private static double[] generateFirstDegree(final double[] bounds) {
-        if (bounds.length < 18) {
-            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + bounds.length + ", required 18.");
+    private static double[] generateFirstDegree(final double[] limits) {
+        if (limits.length < 18) {
+            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + limits.length + ", required 18.");
         }
 
         final int coeffCount = 6;
         int size = coeffCount;
-        size *= (bounds[1] - bounds[0]) / bounds[2] + 1;
-        size *= (bounds[4] - bounds[3]) / bounds[5] + 1;
-        size *= (bounds[7] - bounds[6]) / bounds[8] + 1;
-        size *= (bounds[10] - bounds[9]) / bounds[11] + 1;
-        size *= (bounds[13] - bounds[12]) / bounds[14] + 1;
-        size *= (bounds[16] - bounds[15]) / bounds[17] + 1;
+        size *= (limits[1] - limits[0]) / limits[2] + 1;
+        size *= (limits[4] - limits[3]) / limits[5] + 1;
+        size *= (limits[7] - limits[6]) / limits[8] + 1;
+        size *= (limits[10] - limits[9]) / limits[11] + 1;
+        size *= (limits[13] - limits[12]) / limits[14] + 1;
+        size *= (limits[16] - limits[15]) / limits[17] + 1;
 
         final double[] result = new double[size];
 
         int index;
         int i = 0;
-        for (double u = bounds[0]; u <= bounds[1]; u += bounds[2]) {
-            for (double v = bounds[3]; v <= bounds[4]; v += bounds[5]) {
-                for (double ux = bounds[6]; ux <= bounds[7]; ux += bounds[8]) {
-                    for (double uy = bounds[9]; uy <= bounds[10]; uy += bounds[11]) {
-                        for (double vx = bounds[12]; vx <= bounds[13]; vx += bounds[14]) {
-                            for (double vy = bounds[15]; vy <= bounds[16]; vy += bounds[17]) {
+        for (double u = limits[0]; u <= limits[1]; u += limits[2]) {
+            for (double v = limits[3]; v <= limits[4]; v += limits[5]) {
+                for (double ux = limits[6]; ux <= limits[7]; ux += limits[8]) {
+                    for (double uy = limits[9]; uy <= limits[10]; uy += limits[11]) {
+                        for (double vx = limits[12]; vx <= limits[13]; vx += limits[14]) {
+                            for (double vy = limits[15]; vy <= limits[16]; vy += limits[17]) {
                                 index = i * coeffCount;
                                 result[index] = u;
                                 result[index + 1] = v;
@@ -114,42 +114,42 @@ public class DeformationGenerator {
         return result;
     }
 
-    private static double[] generateSecondDegree(final double[] bounds) {
-        if (bounds.length < 36) {
-            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + bounds.length + ", required 36.");
+    private static double[] generateSecondDegree(final double[] limits) {
+        if (limits.length < 36) {
+            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + limits.length + ", required 36.");
         }
 
         final int coeffCount = 12;
         int size = coeffCount;
-        size *= (bounds[1] - bounds[0]) / bounds[2] + 1;
-        size *= (bounds[4] - bounds[3]) / bounds[5] + 1;
-        size *= (bounds[7] - bounds[6]) / bounds[8] + 1;
-        size *= (bounds[10] - bounds[9]) / bounds[11] + 1;
-        size *= (bounds[13] - bounds[12]) / bounds[14] + 1;
-        size *= (bounds[16] - bounds[15]) / bounds[17] + 1;
-        size *= (bounds[19] - bounds[18]) / bounds[20] + 1;
-        size *= (bounds[22] - bounds[21]) / bounds[23] + 1;
-        size *= (bounds[25] - bounds[24]) / bounds[26] + 1;
-        size *= (bounds[28] - bounds[27]) / bounds[29] + 1;
-        size *= (bounds[31] - bounds[30]) / bounds[32] + 1;
-        size *= (bounds[34] - bounds[33]) / bounds[35] + 1;
+        size *= (limits[1] - limits[0]) / limits[2] + 1;
+        size *= (limits[4] - limits[3]) / limits[5] + 1;
+        size *= (limits[7] - limits[6]) / limits[8] + 1;
+        size *= (limits[10] - limits[9]) / limits[11] + 1;
+        size *= (limits[13] - limits[12]) / limits[14] + 1;
+        size *= (limits[16] - limits[15]) / limits[17] + 1;
+        size *= (limits[19] - limits[18]) / limits[20] + 1;
+        size *= (limits[22] - limits[21]) / limits[23] + 1;
+        size *= (limits[25] - limits[24]) / limits[26] + 1;
+        size *= (limits[28] - limits[27]) / limits[29] + 1;
+        size *= (limits[31] - limits[30]) / limits[32] + 1;
+        size *= (limits[34] - limits[33]) / limits[35] + 1;
 
         final double[] result = new double[size];
 
         int index;
         int i = 0;
-        for (double u = bounds[0]; u <= bounds[1]; u += bounds[2]) {
-            for (double v = bounds[3]; v <= bounds[4]; v += bounds[5]) {
-                for (double ux = bounds[6]; ux <= bounds[7]; ux += bounds[8]) {
-                    for (double uy = bounds[9]; uy <= bounds[10]; uy += bounds[11]) {
-                        for (double vx = bounds[12]; vx <= bounds[13]; vx += bounds[14]) {
-                            for (double vy = bounds[15]; vy <= bounds[16]; vy += bounds[17]) {
-                                for (double uxx = bounds[18]; uxx <= bounds[19]; uxx += bounds[20]) {
-                                    for (double uxy = bounds[21]; uxy <= bounds[22]; uxy += bounds[23]) {
-                                        for (double uyy = bounds[24]; uyy <= bounds[25]; uyy += bounds[26]) {
-                                            for (double vxx = bounds[27]; vxx <= bounds[28]; vxx += bounds[29]) {
-                                                for (double vxy = bounds[30]; vxy <= bounds[31]; vxy += bounds[32]) {
-                                                    for (double vyy = bounds[33]; vyy <= bounds[34]; vyy += bounds[35]) {
+        for (double u = limits[0]; u <= limits[1]; u += limits[2]) {
+            for (double v = limits[3]; v <= limits[4]; v += limits[5]) {
+                for (double ux = limits[6]; ux <= limits[7]; ux += limits[8]) {
+                    for (double uy = limits[9]; uy <= limits[10]; uy += limits[11]) {
+                        for (double vx = limits[12]; vx <= limits[13]; vx += limits[14]) {
+                            for (double vy = limits[15]; vy <= limits[16]; vy += limits[17]) {
+                                for (double uxx = limits[18]; uxx <= limits[19]; uxx += limits[20]) {
+                                    for (double uxy = limits[21]; uxy <= limits[22]; uxy += limits[23]) {
+                                        for (double uyy = limits[24]; uyy <= limits[25]; uyy += limits[26]) {
+                                            for (double vxx = limits[27]; vxx <= limits[28]; vxx += limits[29]) {
+                                                for (double vxy = limits[30]; vxy <= limits[31]; vxy += limits[32]) {
+                                                    for (double vyy = limits[33]; vyy <= limits[34]; vyy += limits[35]) {
                                                         index = i * coeffCount;
                                                         result[index] = u;
                                                         result[index + 1] = v;

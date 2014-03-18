@@ -121,10 +121,6 @@ public class Computation {
         tc.setDeformationLimits(new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5}, 0, r1);
         tc.setDeformationLimits(new double[]{-10, 0, 0.5, -10, 0, 0.5}, 0, r2);
         tc.setDeformationLimits(new double[]{-10, 0, 0.5, -10, 0, 0.5}, 0, r3);
-//        tc.setParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
-//        tc.setParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
-//        tc.setParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
-//        tc.setParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
 
         // task
         tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);

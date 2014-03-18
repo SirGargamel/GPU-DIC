@@ -49,8 +49,8 @@ public class TaskContainerUtils {
     public static int getDeformationArrayLength(final TaskContainer tc, final int round, final ROI roi) {
         int result;
 
-        final double[] bounds = tc.getDeformationLimits(round, roi);
-        switch (bounds.length) {
+        final double[] limits = tc.getDeformationLimits(round, roi);
+        switch (limits.length) {
             case 6:
                 result = 2;
                 break;
