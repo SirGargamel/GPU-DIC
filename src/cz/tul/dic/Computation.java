@@ -1,8 +1,8 @@
 package cz.tul.dic;
 
 import cz.tul.dic.data.Config;
-import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.CircularROI;
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
@@ -41,7 +41,7 @@ public class Computation {
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
-    private static final int SIZE_MAX = 10;
+    private static final int SIZE_MAX = 35;
     private static final int SIZE_STEP = 1;
 
     static {
@@ -101,21 +101,28 @@ public class Computation {
     private static TaskContainer generateTask(final Object in, final int facetSize, final KernelType kernelType) throws IOException {
         final TaskContainer tc = new TaskContainer(in);
 
-        // select ROI        
-        tc.addRoi(new RectangleROI(135, 19, 179, 200), 0);
-        tc.addRoi(new CircularROI(108, 101, 26), 0);
-        tc.addRoi(new CircularROI(203, 101, 26), 0);
+        // select ROI 
+        final ROI r1 = new RectangleROI(135, 19, 179, 200);
+        tc.addRoi(r1, 0);
+        final ROI r2 = new CircularROI(108, 101, 26);
+        tc.addRoi(r2, 0);
+        final ROI r3 = new CircularROI(203, 101, 26);
+        tc.addRoi(r3, 0);
 
         // select facet size
         tc.setFacetSize(facetSize);        
 
         // facets
-        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+//        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+        tc.addParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tc.addParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
 
         // deformations
-        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
-        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
+        tc.setDeformationLimits(new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5}, 0, r1);
+        tc.setDeformationLimits(new double[]{-10, 0, 0.5, -10, 0, 0.5}, 0, r2);
+        tc.setDeformationLimits(new double[]{-10, 0, 0.5, -10, 0, 0.5}, 0, r3);
+//        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.ZERO);
+//        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[]{-10, 0, 0.5, -10, 0, 0.5});
 //        tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DeformationDegree.FIRST);
 //        tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, new double[] {-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});                
 

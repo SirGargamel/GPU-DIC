@@ -1,7 +1,6 @@
 package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.opencl.KernelType;
@@ -22,7 +21,9 @@ import java.util.Set;
 public class TaskContainerUtils {
 
     private static final String CONFIG_INPUT = "INPUT";
-    private static final String CONFIG_SEPARATOR = ";;";
+    private static final String CONFIG_SEPARATOR_DATA = ",,";
+    private static final String CONFIG_SEPARATOR_FULL = ";;";
+    private static final String CONFIG_SEPARATOR_PAIRS = "--";
     private static final String CONFIG_SIZE = "SIZE";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
@@ -38,42 +39,42 @@ public class TaskContainerUtils {
         return Math.max(counter - 1, 0);
     }
 
-    public static int getDeformationCount(final TaskContainer tc, final int round) {
-        final int deformationArrayLength = getDeformationArrayLength(tc);
-        final int result = tc.getDeformations(round).length / deformationArrayLength;
+    public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi) {
+        final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
+        final int result = tc.getDeformations(round, roi).length / deformationArrayLength;
 
         return result;
     }
 
-    public static int getDeformationArrayLength(final TaskContainer tc) {
+    public static int getDeformationArrayLength(final TaskContainer tc, final int round, final ROI roi) {
         int result;
 
-        final DeformationDegree dd = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE);
-        switch (dd) {
-            case ZERO:
+        final double[] bounds = tc.getDeformationLimits(round, roi);
+        switch (bounds.length) {
+            case 6:
                 result = 2;
                 break;
-            case FIRST:
+            case 18:
                 result = 6;
                 break;
-            case SECOND:
+            case 36:
                 result = 12;
                 break;
             default:
-                throw new IllegalArgumentException("Deformation parameters not set.");
+                throw new IllegalArgumentException("Illegal deformation parameters set.");
         }
 
         return result;
     }
 
-    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round) {
+    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi) {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
 
-        final int deformationArrayLength = getDeformationArrayLength(tc);
+        final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
         final double[] result = new double[deformationArrayLength];
-        System.arraycopy(tc.getDeformations(round), deformationArrayLength * index, result, 0, deformationArrayLength);
+        System.arraycopy(tc.getDeformations(round, roi), deformationArrayLength * index, result, 0, deformationArrayLength);
 
         return result;
     }
@@ -91,16 +92,16 @@ public class TaskContainerUtils {
             final StringBuilder sb = new StringBuilder();
             for (File f : l) {
                 sb.append(f.getAbsolutePath());
-                sb.append(CONFIG_SEPARATOR);
+                sb.append(CONFIG_SEPARATOR_FULL);
             }
-            sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
+            sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
             result.put(CONFIG_INPUT, sb.toString());
         } else {
             throw new IllegalArgumentException("Unsupported type of input.");
         }
         // facet size
         result.put(CONFIG_SIZE, Integer.toString(tc.getFacetSize()));
-        // rois        
+        // rois, deformation limits        
         Set<ROI> rois, prevRoi = null;
         final StringBuilder sb = new StringBuilder();
         for (int round = 0; round < roundCount; round++) {
@@ -109,9 +110,11 @@ public class TaskContainerUtils {
                 sb.setLength(0);
                 for (ROI roi : rois) {
                     sb.append(roi.toString());
-                    sb.append(CONFIG_SEPARATOR);
+                    sb.append(CONFIG_SEPARATOR_PAIRS);
+                    sb.append(toString(tc.getDeformationLimits(round, roi)));
+                    sb.append(CONFIG_SEPARATOR_FULL);
                 }
-                sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
+                sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
 
                 result.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
                 prevRoi = rois;
@@ -128,11 +131,7 @@ public class TaskContainerUtils {
         for (TaskParameter tp : TaskParameter.values()) {
             val = tc.getParameter(tp);
             if (val != null) {
-                if (tp.equals(TaskParameter.DEFORMATION_BOUNDS)) {
-                    result.put(CONFIG_PARAMETERS.concat(tp.name()), toString((double[]) val));
-                } else {
-                    result.put(CONFIG_PARAMETERS.concat(tp.name()), val.toString());
-                }
+                result.put(CONFIG_PARAMETERS.concat(tp.name()), val.toString());
             }
         }
 
@@ -144,9 +143,9 @@ public class TaskContainerUtils {
 
         for (double d : data) {
             sb.append(d);
-            sb.append(CONFIG_SEPARATOR);
+            sb.append(CONFIG_SEPARATOR_DATA);
         }
-        sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
+        sb.setLength(sb.length() - CONFIG_SEPARATOR_DATA.length());
 
         return sb.toString();
     }
@@ -155,9 +154,9 @@ public class TaskContainerUtils {
         final TaskContainer result;
         // input
         final String input = data.get(CONFIG_INPUT);
-        if (input.contains(CONFIG_SEPARATOR)) {
+        if (input.contains(CONFIG_SEPARATOR_FULL)) {
             // list of images
-            final String[] split = input.split(CONFIG_SEPARATOR);
+            final String[] split = input.split(CONFIG_SEPARATOR_FULL);
             final List<File> l = new ArrayList<>(split.length);
             for (String s : split) {
                 l.add(new File(s));
@@ -173,13 +172,22 @@ public class TaskContainerUtils {
         String key;
         TaskParameter tp;
         int index;
+        String[] split;
+        ROI roi;
         for (Entry<String, String> e : data.entrySet()) {
             key = e.getKey();
             if (key.startsWith(CONFIG_ROIS)) {
                 index = Integer.valueOf(key.replaceFirst(CONFIG_ROIS, ""));
-                final String[] split = e.getValue().split(CONFIG_SEPARATOR);
-                for (String s : split) {
-                    result.addRoi(ROI.generateROI(s), index);
+                final String[] splitPairs = e.getValue().split(CONFIG_SEPARATOR_FULL);
+                for (String s : splitPairs) {
+                    split = s.split(CONFIG_SEPARATOR_PAIRS);
+                    if (split.length == 2) {
+                        roi = ROI.generateROI(split[0]);
+                        result.addRoi(roi, index);
+                        result.setDeformationLimits(doubleArrayFromString(split[1]), index, roi);
+                    } else {
+                        throw new IllegalArgumentException("Illegal roi-limits pair - " + split);
+                    }
                 }
             } else if (key.startsWith(CONFIG_EXPORTS)) {
                 result.addExportTask(ExportTask.generateExportTask(e.getValue()));
@@ -194,12 +202,6 @@ public class TaskContainerUtils {
                         break;
                     case FACET_GENERATOR_SPACING:
                         result.addParameter(tp, Integer.valueOf(e.getValue()));
-                        break;
-                    case DEFORMATION_DEGREE:
-                        result.addParameter(tp, DeformationDegree.valueOf(e.getValue()));
-                        break;
-                    case DEFORMATION_BOUNDS:
-                        result.addParameter(tp, doubleArrayFromString(e.getValue()));
                         break;
                     case KERNEL:
                         result.addParameter(tp, KernelType.valueOf(e.getValue()));
@@ -220,7 +222,7 @@ public class TaskContainerUtils {
     }
 
     private static double[] doubleArrayFromString(final String data) {
-        final String[] split = data.split(CONFIG_SEPARATOR);
+        final String[] split = data.split(CONFIG_SEPARATOR_DATA);
         final double[] result = new double[split.length];
         for (int i = 0; i < split.length; i++) {
             result[i] = Double.valueOf(split[i]);

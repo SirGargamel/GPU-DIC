@@ -13,7 +13,7 @@ public class TightFacetGenerator implements IFacetGenerator {
     private static final int DEFAULT_SPACING = 2;
 
     @Override
-    public List<Facet> generateFacets(TaskContainer tc, int round) {
+    public void generateFacets(TaskContainer tc, int round) {
         final Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
         final int spacing;
         if (o == null) {
@@ -22,15 +22,16 @@ public class TightFacetGenerator implements IFacetGenerator {
             spacing = (int) o;
         }
         final int facetSize = tc.getFacetSize();
-        final int halfSize = facetSize / 2;
-        
-        final List<Facet> result = new ArrayList<>();
+        final int halfSize = facetSize / 2;                
 
         // generate centers
         final Set<ROI> rois = tc.getRoi(round);
 
+        List<Facet> result;
         int roiW, roiH, wCount, hCount, centerX, centerY;
         for (ROI roi : rois) {
+            result = new ArrayList<>();
+            
             roiW = roi.getWidth();
             roiH = roi.getHeight();
 
@@ -51,9 +52,9 @@ public class TightFacetGenerator implements IFacetGenerator {
                     }
                 }
             }
-        }
-
-        return result;
+            
+            tc.assignFacets(result, round, roi);
+        }        
     }
 
     @Override

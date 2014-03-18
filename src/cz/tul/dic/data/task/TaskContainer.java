@@ -25,12 +25,13 @@ public class TaskContainer implements Serializable {
     private int facetSize;
     private final Map<Object, Object> params;
     private final Container<Set<ROI>> rois;
-    private final Container<double[]> deformations;
-    private final Set<ExportTask> exportTasks;    
+    private final Container<Map<ROI, double[]>> deformationBounds;
+    private final Set<ExportTask> exportTasks;
     // generated data
     private final List<Image> images;
-    private final Container<List<Facet>> facets;
-    private final List<List<double[]>> results;
+    private final Container<Map<ROI, List<Facet>>> facets;
+    private final Container<Map<ROI, double[]>> deformations;
+    private final List<Map<ROI, List<double[]>>> results;
     private final List<double[][][]> finalResults;
 
     public TaskContainer(final Object input) {
@@ -42,6 +43,7 @@ public class TaskContainer implements Serializable {
         results = new LinkedList<>();
         finalResults = new LinkedList<>();
         deformations = new Container<>();
+        deformationBounds = new Container<>();
 
         this.input = input;
     }
@@ -92,12 +94,19 @@ public class TaskContainer implements Serializable {
         return Collections.unmodifiableList(images);
     }
 
-    public void assignFacets(final List<Facet> facets, final int round) {
-        this.facets.addItem(facets, round);
+    public void assignFacets(final List<Facet> facets, final int round, final ROI roi) {
+        Map<ROI, List<Facet>> m = this.facets.getItem(round);
+        if (m == null) {
+            m = new HashMap<>();
+            this.facets.addItem(m, round);
+        }   
+        m.put(roi, facets);
     }
 
-    public List<Facet> getFacets(final int position) {
-        return facets.getItem(position);
+    public List<Facet> getFacets(final int position, final ROI roi) {                
+        final Map<ROI, List<Facet>> m = facets.getItem(position);
+        final List<Facet> result = m == null ? null : m.get(roi);
+        return result;
     }
 
     public Set<ROI> getRoi(final int round) {
@@ -120,25 +129,56 @@ public class TaskContainer implements Serializable {
     public void setFacetSize(int facetSize) {
         this.facetSize = facetSize;
     }
-
-    public void setDeformations(double[] deformations, final int round) {
-        this.deformations.addItem(deformations, round);
+    
+    public void setDeformationLimits(final double[] limits, final int round, final ROI roi) {
+        Map<ROI, double[]> m = deformationBounds.getItem(round);
+        if (m == null) {
+            m = new HashMap<>();
+            deformationBounds.addItem(m, round);
+        }
+        m.put(roi, limits);
+    }
+    
+    public double[] getDeformationLimits(final int round, final ROI roi) {
+        final Map<ROI, double[]> m = deformationBounds.getItem(round);
+        final double[] result = m == null ? null : m.get(roi);
+        return result;
     }
 
-    public double[] getDeformations(final int round) {
-        return deformations.getItem(round);
+    public void setDeformations(double[] deformations, final int round, final ROI roi) {
+        Map<ROI, double[]> m = this.deformations.getItem(round);
+        if (m == null) {
+            m = new HashMap<>();
+            this.deformations.addItem(m, round);
+        }
+        
+        m.put(roi, deformations);
     }
 
-    public void storeResult(final List<double[]> result, final int round) {
+    public double[] getDeformations(final int round, final ROI roi) {
+        final Map<ROI, double[]> m = this.deformations.getItem(round);
+        final double[] result = m == null ? null : m.get(roi);                
+        return result;
+    }
+
+    public void storeResult(final List<double[]> result, final int round, final ROI roi) {
         while (results.size() <= round) {
             results.add(null);
         }
 
-        results.set(round, result);
+        Map<ROI, List<double[]>> m = results.get(round);
+        if (m == null) {
+            m = new HashMap<>();
+            results.add(round, m);
+        }
+                
+        m.put(roi, result);
     }
 
-    public List<double[]> getResults(final int round) {
-        return results.get(round);
+    public List<double[]> getResults(final int round, final ROI roi) {
+        final Map<ROI, List<double[]>> m = results.get(round);
+        final List<double[]> result = m == null ? null : m.get(roi);                
+        return result;
     }
 
     public double[][][] getFinalResults(final int position) {

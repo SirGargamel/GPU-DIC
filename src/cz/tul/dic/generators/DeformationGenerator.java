@@ -1,8 +1,11 @@
 package cz.tul.dic.generators;
 
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.data.task.TaskContainerUtils;
+import java.util.Set;
 
 /**
  *
@@ -10,56 +13,37 @@ import cz.tul.dic.data.task.TaskParameter;
  */
 public class DeformationGenerator {
 
-    private static final double[] DEFAULT_BOUNDS = new double[]{
-        -10, 10, 0.25, -10, 10, 0.25,
-        -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1,
-        -0.1, 0.1, 0.025, -0.1, 0.1, 0.025, -0.1, 0.1, 0.025, -0.1, 0.1, 0.025, -0.1, 0.1, 0.025, -0.1, 0.1, 0.025};
-    private static final DeformationDegree DEFAULT_BOUNDS_DEGREE = DeformationDegree.FIRST;
-
     public static void generateDeformations(final TaskContainer tc) {
-        final double[] bounds;
-        final DeformationDegree degree;
+        double[] bounds, deformations;
+        DeformationDegree degree;
+        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        Set<ROI> rois, oldRois = null;
+        for (int round = 0; round < roundCount; round++) {
+            rois = tc.getRoi(round);
+            if (rois != oldRois) {
+                for (ROI roi : rois) {
+                    bounds = tc.getDeformationLimits(round, roi);
+                    degree = DeformationUtils.getDegreeFromLimits(bounds);
 
-        final Object o = tc.getParameter(TaskParameter.DEFORMATION_BOUNDS);
-        final Object o2 = tc.getParameter(TaskParameter.DEFORMATION_DEGREE);
-        if (o == null && o2 != null) {
-            bounds = DEFAULT_BOUNDS;
-            tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, bounds);
+                    switch (degree) {
+                        case ZERO:
+                            deformations = generateZeroDegree(bounds);
+                            break;
+                        case FIRST:
+                            deformations = generateFirstDegree(bounds);
+                            break;
+                        case SECOND:
+                            deformations = generateSecondDegree(bounds);
+                            break;
+                        default:
+                            throw new UnsupportedOperationException("Unsupported degree of deformation - " + degree + ".");
 
-            degree = (DeformationDegree) (o2);
-        } else if (o != null && o2 == null) {
-            bounds = (double[]) o;
-
-            degree = DEFAULT_BOUNDS_DEGREE;
-            tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DEFAULT_BOUNDS_DEGREE);
-        } else if (o != null && o2 != null) {
-            bounds = (double[]) o;
-            degree = (DeformationDegree) (o2);
-        } else {
-            bounds = DEFAULT_BOUNDS;
-            tc.addParameter(TaskParameter.DEFORMATION_BOUNDS, bounds);
-
-            degree = DEFAULT_BOUNDS_DEGREE;
-            tc.addParameter(TaskParameter.DEFORMATION_DEGREE, DEFAULT_BOUNDS_DEGREE);
+                    }
+                    tc.setDeformations(deformations, round, roi);
+                }
+            }
+            oldRois = rois;
         }
-
-        final double[] result;
-        switch (degree) {
-            case ZERO:
-                result = generateZeroDegree(bounds);
-                break;
-            case FIRST:
-                result = generateFirstDegree(bounds);
-                break;
-            case SECOND:
-                result = generateSecondDegree(bounds);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unsupported degree of deformation - " + degree + ".");
-
-        }
-
-        tc.setDeformations(result, 0);
     }
 
     private static double[] generateZeroDegree(final double[] bounds) {

@@ -21,6 +21,7 @@ import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -85,6 +86,11 @@ public abstract class Kernel {
         queue.putWriteImage(clImageB, false);
 
         final int facetCount = facets.size();
+        if (facets.isEmpty()) {
+            Logger.warn("Empty facets for computation.");
+            return new float[0];
+        }
+        
         final int facetSize = facets.get(0).getSize();
 
         clFacetData = generateFacetData(facets, facetSize, usesMemoryCoalescing());

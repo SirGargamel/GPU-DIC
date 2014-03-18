@@ -11,6 +11,8 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -74,30 +76,33 @@ public final class Engine {
 
     public void computeTask(final TaskContainer tc) throws IOException {
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
-        final int defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc);
-        kernel.prepareKernel(context, device, tc.getFacetSize(), (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE), defArrayLength);
 
         List<double[]> bestResults;
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        int facetCount;
+        int facetCount, defArrayLength;
         for (int round = 0; round < roundCount; round++) {
-            facetCount = tc.getFacets(round).size();
-            bestResults = new ArrayList<>(facetCount);
-            for (int i = 0; i < facetCount; i++) {
-                bestResults.add(null);
-            }
+            for (ROI roi : tc.getRoi(round)) {
+                defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
+                kernel.prepareKernel(context, device, tc.getFacetSize(), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength);
 
-            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, round);
-            ComputationTask ct;
-            while (it.hasNext()) {
-                ct = it.next();
-                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
-                kernel.finishRound();
-                // pick best results for this computation task and discard ct data                          
-                pickBestResultsForTask(ct, bestResults, tc, round);
+                facetCount = tc.getFacets(round, roi).size();
+                bestResults = new ArrayList<>(facetCount);
+                for (int i = 0; i < facetCount; i++) {
+                    bestResults.add(null);
+                }
+
+                final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, round, roi);
+                ComputationTask ct;
+                while (it.hasNext()) {
+                    ct = it.next();
+                    ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
+                    kernel.finishRound();
+                    // pick best results for this computation task and discard ct data                          
+                    pickBestResultsForTask(ct, bestResults, tc, round, roi);
+                }
+                // store data           
+                tc.storeResult(bestResults, round, roi);
             }
-            // store data           
-            tc.storeResult(bestResults, round);
             buildFinalResults(tc, round);
             Logger.trace("Finished round {0} out of {1}.", round + 1, roundCount);
         }
@@ -105,12 +110,13 @@ public final class Engine {
         kernel.finishComputation();
     }
 
-    private void pickBestResultsForTask(final ComputationTask task, final List<double[]> bestResults, final TaskContainer tc, final int round) {
-        final List<Facet> facets = tc.getFacets(round);
-        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc, round);
+    private void pickBestResultsForTask(final ComputationTask task, final List<double[]> bestResults, final TaskContainer tc, final int round, final ROI roi) {
+        final List<Facet> globalFacets = tc.getFacets(round, roi);
+        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc, round, roi);
 
-        final int facetCount = task.getFacets().size();
-        final int deformationCount = TaskContainerUtils.getDeformationCount(tc, round);
+        final List<Facet> localFacets = task.getFacets();
+        final int facetCount = localFacets.size();
+        final int deformationCount = TaskContainerUtils.getDeformationCount(tc, round, roi);
 
         float val, best;
         final List<Integer> candidates = new ArrayList<>();
@@ -134,7 +140,11 @@ public final class Engine {
                 }
             }
 
-            globalFacetIndex = facets.indexOf(task.getFacets().get(localFacetIndex));
+            globalFacetIndex = globalFacets.indexOf(localFacets.get(localFacetIndex));
+            if (globalFacetIndex < 0) {
+                throw new IllegalArgumentException("Local facet not found in global registry.");
+            }
+
             if (candidates.isEmpty()) {
                 Logger.warn("No best value found for facet nr." + globalFacetIndex);
                 bestResults.set(globalFacetIndex, new double[]{0, 0});
@@ -144,54 +154,61 @@ public final class Engine {
                 }
                 bestIndex = candidates.get(0);
 
-                bestResults.set(globalFacetIndex, TaskContainerUtils.extractDeformation(tc, bestIndex, round));
+                bestResults.set(globalFacetIndex, TaskContainerUtils.extractDeformation(tc, bestIndex, round, roi));
             }
         }
     }
 
     private void buildFinalResults(final TaskContainer tc, final int round) {
         final Image img = tc.getImage(round);
-        final List<Facet> facets = tc.getFacets(round);
-        final List<double[]> results = tc.getResults(round);
-
         final int width = img.getWidth();
         final int height = img.getHeight();
 
         final double[][][] finalResults = new double[width][height][];
         final int[][] counter = new int[width][height];
 
+        List<Facet> facets;
+        List<double[]> results;
         Facet f;
-        double[] d = new double[Coordinates.DIMENSION];
+        double[] d;
         int x, y;
         Map<int[], double[]> deformedFacet;
-        for (int i = 0; i < facets.size(); i++) {
-            f = facets.get(i);
-            d = results.get(i);
+        DeformationDegree degree;
+        for (ROI roi : tc.getRoi(round)) {
+            facets = tc.getFacets(round, roi);
+            results = tc.getResults(round, roi);
 
-            deformedFacet = FacetUtils.deformFacet(f, d, (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_DEGREE));
-            for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
-                x = e.getKey()[Coordinates.X];
-                y = e.getKey()[Coordinates.Y];
-                if (finalResults[x][y] == null) {
-                    finalResults[x][y] = new double[d.length];
-                    System.arraycopy(d, 0, finalResults[x][y], 0, d.length);
-                    counter[x][y] = 1;
-                } else {
-                    for (int k = 0; k < d.length; k++) {
-                        finalResults[x][y][k] += d[k];
+            degree = DeformationUtils.getDegree(results.get(0));
+
+            for (int i = 0; i < facets.size(); i++) {
+                f = facets.get(i);
+                d = results.get(i);
+
+                deformedFacet = FacetUtils.deformFacet(f, d, degree);
+                for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
+                    x = e.getKey()[Coordinates.X];
+                    y = e.getKey()[Coordinates.Y];
+                    if (finalResults[x][y] == null) {
+                        finalResults[x][y] = new double[Coordinates.DIMENSION];
+                        System.arraycopy(d, 0, finalResults[x][y], 0, Coordinates.DIMENSION);
+                        counter[x][y] = 1;
+                    } else {
+                        for (int k = 0; k < Coordinates.DIMENSION; k++) {
+                            finalResults[x][y][k] += d[k];
+                        }
+                        counter[x][y]++;
                     }
-                    counter[x][y]++;
                 }
             }
         }
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                for (int k = 0; k < d.length; k++) {
+                for (int k = 0; k < Coordinates.DIMENSION; k++) {
                     if (counter[i][j] > 1) {
                         finalResults[i][j][k] /= (double) counter[i][j];
                     } else if (counter[i][j] == 0) {
-                        finalResults[i][j] = new double[d.length];
+                        finalResults[i][j] = new double[Coordinates.DIMENSION];
                     }
                 }
             }

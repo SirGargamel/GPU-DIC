@@ -26,7 +26,7 @@ public class FacetGenerator {
         final FacetGeneratorMode mode = (FacetGeneratorMode) tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
         if (generators.containsKey(mode)) {
             final int round = 0;
-            tc.assignFacets(generators.get(mode).generateFacets(tc, round), round);
+            generators.get(mode).generateFacets(tc, round);
         } else {
             throw new IllegalArgumentException("Unsupported mode of facet generator - " + mode.toString());
         }
