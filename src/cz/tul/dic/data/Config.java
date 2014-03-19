@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -32,7 +32,7 @@ public class Config {
 
     public static Map<String, String> loadConfig(final String name) throws IOException {
         final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(name).concat(EXT);
-        final Map<String, String> result = new HashMap<>();
+        final Map<String, String> result = new LinkedHashMap<>();
 
         final File config = new File(configFileName);
         if (enableConfigs && config.exists()) {
