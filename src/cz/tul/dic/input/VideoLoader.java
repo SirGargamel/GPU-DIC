@@ -38,9 +38,7 @@ public class VideoLoader implements IInputLoader {
             throw new FileNotFoundException("VirtualDub is not available.");
         }
 
-        final File input = (File) in;
-        tc.setParameter(TaskParameter.DIR, input.getParentFile());
-        Config.setProjectDir(input.getParentFile());
+        final File input = (File) in;        
         // create temp dir to store images
         final File temp = Utils.getTempDir(tc);
         // check cache
@@ -90,6 +88,9 @@ public class VideoLoader implements IInputLoader {
         // list of all bmp files inside temp dir with roght name        
         final ImageLoader il = new ImageLoader();
         final List<Image> result = il.loadData(files, tc);
+        
+        tc.setParameter(TaskParameter.DIR, input.getParentFile());
+        Config.setProjectDir(input.getParentFile());
 
         return result;
     }

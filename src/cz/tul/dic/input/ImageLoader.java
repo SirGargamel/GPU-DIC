@@ -1,6 +1,7 @@
 package cz.tul.dic.input;
 
 import cz.tul.dic.Utils;
+import cz.tul.dic.data.Config;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -25,7 +26,9 @@ public class ImageLoader implements IInputLoader {
         if (data.isEmpty()) {
             throw new IllegalArgumentException("No images.");
         } else {
+            final File parent = data.get(0).getParentFile();
             tc.setParameter(TaskParameter.DIR, data.get(0).getParentFile());
+            Config.setProjectDir(data.get(0).getParentFile());
         }
 
         final List<Image> result = new ArrayList<>(data.size());
