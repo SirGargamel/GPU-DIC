@@ -20,10 +20,13 @@ import cz.tul.dic.output.ExportMode;
 import cz.tul.dic.output.ExportTarget;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
+import cz.tul.dic.output.OutputUtils;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
@@ -43,16 +46,19 @@ public class Computation {
     private static final int SIZE_MIN = 3;
     private static final int SIZE_MAX = 35;
     private static final int SIZE_STEP = 1;
+    private static final Set<ExportTask> exports;
 
     static {
         Configurator.defaultConfig().writer(new ConsoleWriter()).level(LOGGING_LEVEL).activate();
-        
+
         IN_IMAGES = new LinkedList<>();
         IN_IMAGES.add(new File("d:\\temp\\image000.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
         IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));                
+        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
+
+        exports = new HashSet<>();
     }
 
     public static void commenceComputation() throws IOException {
@@ -71,28 +77,35 @@ public class Computation {
 
         long time;
         TaskContainer tc, loadedTc;
+        Set<ExportTask> loadedExports;
         while (!tcs.isEmpty()) {
             tc = tcs.get(0);
 
             InputLoader.loadInput(tc);
-            
-            addCompleteExport(tc);
+
+            // generate exports
+            generateExports(tc);
+            Config.saveConfig("exportsConfig", OutputUtils.serializeExports(exports));
+            loadedExports = OutputUtils.deserializeExports(Config.loadConfig("exportsConfig"));
+            System.out.println(loadedExports);
             
             Config.saveConfig("taskConfig", TaskContainerUtils.serializeTaskContainer(tc));
-            loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfig"));            
+            loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfig"));
             System.out.println(loadedTc);
 
-            TaskContainerChecker.checkTaskValidity(tc);            
+            TaskContainerChecker.checkTaskValidity(tc);
 
-            FacetGenerator.generateFacets(tc);            
-            DeformationGenerator.generateDeformations(tc);                                    
+            FacetGenerator.generateFacets(tc);
+            DeformationGenerator.generateDeformations(tc);
 
             time = System.nanoTime();
             engine.computeTask(tc);
             time = System.nanoTime() - time;
-            Exporter.export(tc);
+            for (ExportTask et : exports) {
+                Exporter.export(et, tc);
+            }
             Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-            
+
             tcs.remove(0);
         }
         Logger.info("All done !!!");
@@ -110,11 +123,11 @@ public class Computation {
         tc.setRoi(r3, 0);
 
         // select facet size
-        tc.setFacetSize(facetSize);        
+        tc.setFacetSize(facetSize);
 
         // facets
-//        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+//        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
 
         // deformations
@@ -125,28 +138,22 @@ public class Computation {
         // task
         tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
         tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
-        
+
         // opencl
         tc.setParameter(TaskParameter.KERNEL, kernelType);
 
         return tc;
     }
-    
-    private static void addCompleteExport(final TaskContainer tc) {                 
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator);        
-        final String ext = String.format("%02d", tc.getFacetSize()).concat("-").concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat(".bmp");        
+
+    private static void generateExports(final TaskContainer tc) {
+        exports.clear();
+        final String target = OUT_DIR.getAbsolutePath().concat(File.separator);
+        final String ext = String.format("%02d", tc.getFacetSize()).concat("-").concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat(".bmp");
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
-            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), 0));
-            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), 0));
-            tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), 0));
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), 0));
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), 0));
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), 0));
         }
-//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("0-").concat(ext)), 0));
-//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("1-").concat(ext)), 1));
-//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("2-").concat(ext)), 2));
-//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat("3-").concat(ext)), 3));
-//        tc.addExportTask(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.ABS, new File("D:\\test.avi")));
-//        tc.addExportTask(new ExportTask(ExportMode.MAP, ExportTarget.CSV, Direction.ABS, new File("D:\\testMap.csv"), 0));
-//        tc.addExportTask(new ExportTask(ExportMode.LINE, ExportTarget.CSV, Direction.ABS, new File("D:\\testLine.csv"), 0, 20, 20));
     }
 
 }

@@ -26,7 +26,6 @@ public class TaskContainer implements Serializable {
     private final Map<Object, Object> params;
     private final Container<Set<ROI>> rois;
     private final Container<Map<ROI, double[]>> deformationLimits;
-    private final Set<ExportTask> exportTasks;
     // generated data
     private final List<Image> images;
     private final Container<Map<ROI, List<Facet>>> facets;
@@ -39,7 +38,6 @@ public class TaskContainer implements Serializable {
         images = new LinkedList<>();
         rois = new Container<>();
         facets = new Container<>();
-        exportTasks = new HashSet<>();
         results = new LinkedList<>();
         finalResults = new LinkedList<>();
         deformations = new Container<>();
@@ -99,11 +97,11 @@ public class TaskContainer implements Serializable {
         if (m == null) {
             m = new HashMap<>();
             this.facets.addItem(m, round);
-        }   
+        }
         m.put(roi, facets);
     }
 
-    public List<Facet> getFacets(final int position, final ROI roi) {                
+    public List<Facet> getFacets(final int position, final ROI roi) {
         final Map<ROI, List<Facet>> m = facets.getItem(position);
         final List<Facet> result = m == null ? null : m.get(roi);
         return result;
@@ -129,7 +127,7 @@ public class TaskContainer implements Serializable {
     public void setFacetSize(final int facetSize) {
         this.facetSize = facetSize;
     }
-    
+
     public void setDeformationLimits(final double[] limits, final int round, final ROI roi) {
         Map<ROI, double[]> m = deformationLimits.getItem(round);
         if (m == null) {
@@ -138,7 +136,7 @@ public class TaskContainer implements Serializable {
         }
         m.put(roi, limits);
     }
-    
+
     public double[] getDeformationLimits(final int round, final ROI roi) {
         final Map<ROI, double[]> m = deformationLimits.getItem(round);
         final double[] result = m == null ? null : m.get(roi);
@@ -151,13 +149,13 @@ public class TaskContainer implements Serializable {
             m = new HashMap<>();
             this.deformations.addItem(m, round);
         }
-        
+
         m.put(roi, deformations);
     }
 
     public double[] getDeformations(final int round, final ROI roi) {
         final Map<ROI, double[]> m = this.deformations.getItem(round);
-        final double[] result = m == null ? null : m.get(roi);                
+        final double[] result = m == null ? null : m.get(roi);
         return result;
     }
 
@@ -171,13 +169,13 @@ public class TaskContainer implements Serializable {
             m = new HashMap<>();
             results.add(round, m);
         }
-                
+
         m.put(roi, result);
     }
 
     public List<double[]> getResults(final int round, final ROI roi) {
         final Map<ROI, List<double[]>> m = results.get(round);
-        final List<double[]> result = m == null ? null : m.get(roi);                
+        final List<double[]> result = m == null ? null : m.get(roi);
         return result;
     }
 
@@ -192,13 +190,4 @@ public class TaskContainer implements Serializable {
 
         finalResults.set(round, result);
     }
-
-    public void addExportTask(final ExportTask task) {
-        exportTasks.add(task);
-    }
-
-    public Set<ExportTask> getExportTasks() {
-        return Collections.unmodifiableSet(exportTasks);
-    }
-
 }

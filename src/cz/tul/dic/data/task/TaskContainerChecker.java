@@ -49,13 +49,7 @@ public class TaskContainerChecker {
         if (ts == null) {
             System.err.println("Adding default TaskSplit.");
             tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.NONE);
-        }
-
-        for (ExportTask et : tc.getExportTasks()) {
-            if (!Exporter.isExportSupported(et)) {
-                throw new IllegalArgumentException("Unsupported exeport task - " + et);
-            }
-        }
+        }       
     }
 
 }

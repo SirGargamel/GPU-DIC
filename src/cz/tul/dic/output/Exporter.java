@@ -30,13 +30,7 @@ public class Exporter {
         targetExporters = new HashMap<>();
         targetExporters.put(ExportTarget.FILE, new TargetExportFile());
         targetExporters.put(ExportTarget.CSV, new TargetExportCsv());
-    }
-
-    public static void export(final TaskContainer tc) throws IOException {
-        for (ExportTask et : tc.getExportTasks()) {
-            export(et, tc);
-        }
-    }
+    }        
 
     public static void export(final ExportTask et, final TaskContainer tc) throws IOException {
         IDataExport dataExporter;

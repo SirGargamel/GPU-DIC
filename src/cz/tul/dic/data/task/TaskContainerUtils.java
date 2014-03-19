@@ -26,8 +26,7 @@ public class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_PAIRS = "--";
     private static final String CONFIG_SIZE = "SIZE";
     private static final String CONFIG_PARAMETERS = "PARAM_";
-    private static final String CONFIG_ROIS = "ROI_";
-    private static final String CONFIG_EXPORTS = "EXPORT_";
+    private static final String CONFIG_ROIS = "ROI_";    
 
     public static int getRoundCount(final TaskContainer tc) {
         int counter = 0;
@@ -120,12 +119,6 @@ public class TaskContainerUtils {
                 prevRoi = rois;
             }
         }
-        // exports
-        int i = 0;
-        for (ExportTask et : tc.getExportTasks()) {
-            result.put(CONFIG_EXPORTS.concat(Integer.toString(i)), et.toString());
-            i++;
-        }
         // parameters
         Object val;
         for (TaskParameter tp : TaskParameter.values()) {
@@ -189,8 +182,6 @@ public class TaskContainerUtils {
                         throw new IllegalArgumentException("Illegal roi-limits pair - " + split);
                     }
                 }
-            } else if (key.startsWith(CONFIG_EXPORTS)) {
-                result.addExportTask(ExportTask.generateExportTask(e.getValue()));
             } else if (key.startsWith(CONFIG_PARAMETERS)) {
                 tp = TaskParameter.valueOf(key.replaceFirst(CONFIG_PARAMETERS, ""));
                 switch (tp) {
