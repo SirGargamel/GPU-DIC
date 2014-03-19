@@ -57,12 +57,46 @@ public class DataExportLine implements IDataExport<double[]> {
             throw new IllegalArgumentException("Not enough input parameters (position, x, y required).");
         }
 
-        // check if position is inside ROI
-        final double[] result;
-        if (OutputUtils.isPointsInsideROIs(dataParams[0], dataParams[1], rois)) {
-            result = exportData(tc, direction, dataParams);
-        } else {
-            result = new double[TaskContainerUtils.getRoundCount(tc)];
+        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        final double[] result = new double[roundCount];
+
+        final int x = dataParams[0];
+        final int y = dataParams[1];
+
+        // check if position is inside ROI        
+        double[][][] results;
+        for (int r = 0; r < roundCount; r++) {
+            if (OutputUtils.isPointInsideROIs(x, y, rois, tc, r)) {
+                results = tc.getPerPixelResult(r);
+                if (results == null || results.length < x || results[0].length < y) {
+                    throw new IllegalArgumentException("Illegal result data.");
+                }
+
+                switch (direction) {
+                    case X:
+                    case Y:
+                    case ABS:
+                        result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
+                        break;
+                    case DX:
+                        if (OutputUtils.isPointInsideROIs(x + 1, y, rois, tc, r)) {
+                            result[r] = ExportUtils.calculateDeformation(results, x, y, direction);
+                        }
+                        break;
+                    case DY:
+                        if (OutputUtils.isPointInsideROIs(x, y + 1, rois, tc, r)) {
+                            result[r] = ExportUtils.calculateDeformation(results, x, y, direction);
+                        }
+                        break;
+                    case DABS:
+                        if (OutputUtils.isPointInsideROIs(x + 1, y, rois, tc, r) && OutputUtils.isPointInsideROIs(x, y + 1, rois, tc, r)) {
+                            result[r] = ExportUtils.calculateDeformation(results, x, y, direction);
+                        }
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported direction.");
+                }
+            }
         }
 
         return result;

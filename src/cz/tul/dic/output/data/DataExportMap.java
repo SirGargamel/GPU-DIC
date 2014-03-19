@@ -11,7 +11,7 @@ public class DataExportMap implements IDataExport<double[][]> {
     @Override
     public double[][] exportData(final TaskContainer tc, Direction direction, final int[] dataParams) {
         if (dataParams == null || dataParams.length < 1) {
-            throw new IllegalArgumentException("Not wnough input parameters (position required).");
+            throw new IllegalArgumentException("Not enough input parameters (round required).");
         }
         final double[][][] results = tc.getPerPixelResult(dataParams[0]);
         if (results == null || results.length == 0 || results[0].length == 0) {
@@ -29,9 +29,7 @@ public class DataExportMap implements IDataExport<double[][]> {
                     case X:
                     case Y:
                     case ABS:
-                        if (!(x < 0 || y < 0 || x >= results.length || y >= results[x].length)) {
-                            result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
-                        }
+                        result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
                     case DX:
                     case DY:
@@ -54,7 +52,8 @@ public class DataExportMap implements IDataExport<double[][]> {
         if (dataParams == null || dataParams.length < 1) {
             throw new IllegalArgumentException("Not wnough input parameters (position required).");
         }
-        final double[][][] results = tc.getPerPixelResult(dataParams[0]);
+        final int round = dataParams[0];
+        final double[][][] results = tc.getPerPixelResult(round);
         if (results == null || results.length == 0 || results[0].length == 0) {
             throw new IllegalArgumentException("Illegal result data.");
         }
@@ -66,7 +65,7 @@ public class DataExportMap implements IDataExport<double[][]> {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if (!OutputUtils.isPointsInsideROIs(x, y, rois)) {
+                if (!OutputUtils.isPointInsideROIs(x, y, rois, tc, round)) {
                     continue;
                 }
 
@@ -77,9 +76,19 @@ public class DataExportMap implements IDataExport<double[][]> {
                         result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
                     case DX:
+                        if (OutputUtils.isPointInsideROIs(x + 1, y, rois, tc, round)) {
+                            result[x][y] = ExportUtils.calculateDeformation(results, x, y, direction);
+                        }
+                        break;
                     case DY:
+                        if (OutputUtils.isPointInsideROIs(x, y + 1, rois, tc, round)) {
+                            result[x][y] = ExportUtils.calculateDeformation(results, x, y, direction);
+                        }
+                        break;
                     case DABS:
-                        result[x][y] = ExportUtils.calculateDeformation(results, x, y, direction);
+                        if (OutputUtils.isPointInsideROIs(x + 1, y, rois, tc, round) && OutputUtils.isPointInsideROIs(x, y + 1, rois, tc, round)) {
+                            result[x][y] = ExportUtils.calculateDeformation(results, x, y, direction);
+                        }
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported direction.");

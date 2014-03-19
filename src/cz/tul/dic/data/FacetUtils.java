@@ -78,4 +78,18 @@ public class FacetUtils {
         }
     }
 
+    public static boolean isPointInsideFacet(final Facet f, final int x, final int y) {
+        boolean result = false;
+
+        final int[] pointData = f.getData();
+        for (int i = 0; i < pointData.length / 2; i++) {
+            if (x == pointData[i*2] && y == pointData[i*2 + 1]) {
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+
 }

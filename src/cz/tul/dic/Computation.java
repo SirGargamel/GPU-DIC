@@ -45,7 +45,7 @@ public class Computation {
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
-    private static final int SIZE_MAX = 35;
+    private static final int SIZE_MAX = 3;
     private static final int SIZE_STEP = 1;
     private static final Set<ExportTask> exports;
 
@@ -53,11 +53,14 @@ public class Computation {
         Configurator.defaultConfig().writer(new ConsoleWriter()).level(LOGGING_LEVEL).activate();
 
         IN_IMAGES = new LinkedList<>();
-        IN_IMAGES.add(new File("d:\\temp\\image000.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
+//        IN_IMAGES.add(new File("d:\\temp\\image000.bmp"));
+//        IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
+//        IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
+//        IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
+//        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
+        
+        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00000.bmp"));
+        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00004.bmp"));
 
         exports = new HashSet<>();
     }
@@ -69,8 +72,8 @@ public class Computation {
 //            for (KernelType kt : KernelType.values()) {
 //                tcs.add(generateTask(IN_IMAGES, size, kt));
 //            }            
-//            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
-            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC));
+            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
+//            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC));
         }
 
         // compute task        
@@ -127,8 +130,8 @@ public class Computation {
         tc.setFacetSize(facetSize);
 
         // facets
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
-//        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+//        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
 
         // deformations
@@ -172,11 +175,11 @@ public class Computation {
             exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.DY, new File(target.concat(String.format("%02d", round)).concat("-DY-").concat(ext)), new int[] {0}));
             exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.DABS, new File(target.concat(String.format("%02d", round)).concat("-DABS-").concat(ext)), new int[] {0}));
             
-            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-RC-").concat(ext)), new int[] {0}, circular.toArray(new ROI[0])));
-            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.DABS, new File(target.concat(String.format("%02d", round)).concat("-DABS-RC-").concat(ext)), new int[] {0}, circular.toArray(new ROI[0])));
-            
-            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-RR-").concat(ext)), new int[] {0}, rect.toArray(new ROI[0])));
-            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.DABS, new File(target.concat(String.format("%02d", round)).concat("-DABS-RR-").concat(ext)), new int[] {0}, rect.toArray(new ROI[0])));
+//            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-RC-").concat(ext)), new int[] {0}, circular.toArray(new ROI[0])));
+//            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.DABS, new File(target.concat(String.format("%02d", round)).concat("-DABS-RC-").concat(ext)), new int[] {0}, circular.toArray(new ROI[0])));
+//            
+//            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-RR-").concat(ext)), new int[] {0}, rect.toArray(new ROI[0])));
+//            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.DABS, new File(target.concat(String.format("%02d", round)).concat("-DABS-RR-").concat(ext)), new int[] {0}, rect.toArray(new ROI[0])));
         }
     }
 

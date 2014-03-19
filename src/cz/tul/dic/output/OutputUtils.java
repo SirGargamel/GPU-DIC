@@ -1,8 +1,12 @@
 package cz.tul.dic.output;
 
+import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.task.TaskContainer;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
@@ -40,7 +44,7 @@ public class OutputUtils {
 
         return result;
     }
-    
+
     public static void checkExportValidity(final Set<ExportTask> exports) {
         for (ExportTask et : exports) {
             if (!Exporter.isExportSupported(et)) {
@@ -48,21 +52,26 @@ public class OutputUtils {
             }
         }
     }
-    
-    public static boolean isPointsInsideROIs(final int x, final int y, final ROI[] rois) {
+
+    public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
         boolean result = false;
         
         for (ROI roi : rois) {
             if (roi == null) {
                 continue;
             }
-            
+
             if (roi.isPointInside(x, y)) {
-                result = true;
-                break;
+                // check facets                
+                for (Facet f : tc.getFacets(round, roi)) {
+                    if (FacetUtils.isPointInsideFacet(f, x, y)) {
+                        result = true;
+                        break;
+                    }
+                }
             }
         }
-        
+
         return result;
     }
 
