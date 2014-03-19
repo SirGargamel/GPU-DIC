@@ -55,6 +55,11 @@ public class CircularROI extends ROI {
     private static double dist2(final int x1, final int y1, final int x2, final int y2) {
         return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
     }
+    
+    @Override
+    public boolean isPointInside(int x, int y) {
+        return dist2(x, y, centerX, centerY) <= (radius * radius);
+    }
 
     @Override
     public String toString() {
@@ -65,6 +70,6 @@ public class CircularROI extends ROI {
         sb.append(SEPARATOR);
         sb.append(radius);
         return sb.toString();
-    }
+    }    
 
 }

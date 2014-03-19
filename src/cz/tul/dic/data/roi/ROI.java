@@ -37,6 +37,8 @@ public abstract class ROI {
 
     public abstract boolean isAreaInside(int x1, int y1, int x2, int y2);
     
+    public abstract boolean isPointInside(int x, int y);
+    
     @Override
     public abstract String toString();
 

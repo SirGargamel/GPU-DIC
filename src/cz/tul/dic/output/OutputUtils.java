@@ -1,5 +1,6 @@
 package cz.tul.dic.output;
 
+import cz.tul.dic.data.roi.ROI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -46,6 +47,23 @@ public class OutputUtils {
                 throw new IllegalArgumentException("Unsupported exeport task - " + et);
             }
         }
+    }
+    
+    public static boolean isPointsInsideROIs(final int x, final int y, final ROI[] rois) {
+        boolean result = false;
+        
+        for (ROI roi : rois) {
+            if (roi == null) {
+                continue;
+            }
+            
+            if (roi.isPointInside(x, y)) {
+                result = true;
+                break;
+            }
+        }
+        
+        return result;
     }
 
 }

@@ -48,11 +48,11 @@ public class TargetExportFile implements ITargetExport {
     private void exportImage(final double[][] data, final Object targetParams, int[] dataParams, final TaskContainer tc) throws IOException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParams.getClass());
-        }
+        }        
         if (dataParams.length < 1) {
             throw new IllegalArgumentException("Not enough data parameters.");
         }
-
+        
         final int position = dataParams[0];
         final File target = (File) targetParams;
         Utils.ensureDirectoryExistence(target);

@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.output;
 
+import cz.tul.dic.data.roi.ROI;
 import java.io.File;
 
 /**
@@ -19,6 +20,7 @@ public class ExportTask {
     private final Direction direction;
     private final File targetParam;
     private final int[] dataParams;
+    private final ROI[] rois;
 
     public static ExportTask generateExportTask(final String data) {
         final String[] split = data.split(SEPARATOR);
@@ -35,12 +37,17 @@ public class ExportTask {
         return result;
     }
 
-    public ExportTask(ExportMode mode, ExportTarget target, final Direction direction, final File targetParam, final int... dataParams) {
+    public ExportTask(final ExportMode mode, final ExportTarget target, final Direction direction, final File targetParam, final int[] dataParams, final ROI... rois) {
         this.mode = mode;
         this.target = target;
         this.direction = direction;
-        this.dataParams = dataParams;
         this.targetParam = targetParam;
+        this.dataParams = dataParams;
+        this.rois = rois;
+    }
+
+    public ExportTask(final ExportMode mode, final ExportTarget target, final Direction direction, final File targetParam, final int[] dataParams) {
+        this(mode, target, direction, targetParam, dataParams, (ROI) null);
     }
 
     public ExportMode getMode() {
@@ -57,6 +64,10 @@ public class ExportTask {
 
     public int[] getDataParams() {
         return dataParams;
+    }
+
+    public ROI[] getRois() {
+        return rois;
     }
 
     public File getTargetParam() {
@@ -77,7 +88,7 @@ public class ExportTask {
         sb.append(SEPARATOR);
         for (int i : dataParams) {
             sb.append(Integer.toString(i));
-            sb.append(SEPARATOR);
+        sb.append(SEPARATOR);
         }
         sb.setLength(sb.length() - SEPARATOR.length());
 

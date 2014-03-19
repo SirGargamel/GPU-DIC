@@ -64,4 +64,12 @@ public class RectangleROI extends ROI {
                 && (Math.max(y1, y2) <= this.y2);
     }
 
+    @Override
+    public boolean isPointInside(int x, int y) {
+        return (x >= this.x1)
+                && (y >= this.y1)
+                && (x <= this.x2)
+                && (y <= this.y2);
+    }
+
 }

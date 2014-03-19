@@ -1,23 +1,25 @@
 package cz.tul.dic.output.data;
 
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
+import cz.tul.dic.output.OutputUtils;
 
 public class DataExportLine implements IDataExport<double[]> {
 
     @Override
-    public double[] exportData(final TaskContainer tc, Direction direction, final int... params) {
-        if (params == null || params.length < 3) {
+    public double[] exportData(final TaskContainer tc, Direction direction, final int[] dataParams) {
+        if (dataParams == null || dataParams.length < 3) {
             throw new IllegalArgumentException("Not enough input parameters (position, x, y required).");
         }
 
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         final double[] result = new double[roundCount];
 
-        final int x = params[0];
-        final int y = params[1];
+        final int x = dataParams[0];
+        final int y = dataParams[1];
 
         double[][][] results;
         for (int r = 0; r < roundCount; r++) {
@@ -30,16 +32,37 @@ public class DataExportLine implements IDataExport<double[]> {
                 case X:
                 case Y:
                 case ABS:
-                    result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
+                    if (!(x < 0 || y < 0 || x >= results.length || y >= results[x].length)) {
+                        result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
+                    }
                     break;
                 case DX:
                 case DY:
                 case DABS:
-                    result[r] = ExportUtils.calculateDeformation(results, x, y, direction);
+                    if (!(x < 0 || y < 0 || (x + 1) >= results.length || (y + 1) >= results[x].length)) {
+                        result[r] = ExportUtils.calculateDeformation(results, x, y, direction);
+                    }
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported direction.");
             }
+        }
+
+        return result;
+    }
+
+    @Override
+    public double[] exportData(TaskContainer tc, Direction direction, int[] dataParams, ROI... rois) {
+        if (dataParams == null || dataParams.length < 3) {
+            throw new IllegalArgumentException("Not enough input parameters (position, x, y required).");
+        }
+
+        // check if position is inside ROI
+        final double[] result;
+        if (OutputUtils.isPointsInsideROIs(dataParams[0], dataParams[1], rois)) {
+            result = exportData(tc, direction, dataParams);
+        } else {
+            result = new double[TaskContainerUtils.getRoundCount(tc)];
         }
 
         return result;

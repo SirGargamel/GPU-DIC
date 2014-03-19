@@ -38,6 +38,10 @@ public class ExportUtils {
     public static double calculateDeformation(final double[][][] results, final int x, final int y, final Direction dir) {
         double result;
 
+        if (x < 0 || y < 0 || (x + 1) >= results.length || (y + 1) >= results[x].length) {
+            throw new IllegalArgumentException("Position outside of data range - [" + x + ";" + y + "]");
+        }
+
         switch (dir) {
             case DX:
                 result = results[x + 1][y][0] - results[x][y][0];
