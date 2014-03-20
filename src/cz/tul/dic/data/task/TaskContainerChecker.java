@@ -4,8 +4,8 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
-import cz.tul.dic.output.ExportTask;
-import cz.tul.dic.output.Exporter;
+import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.util.Set;
 
 /**
@@ -49,7 +49,20 @@ public class TaskContainerChecker {
         if (ts == null) {
             System.err.println("Adding default TaskSplit.");
             tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.NONE);
-        }       
+        }
+
+        final Object kernel = tc.getParameter(TaskParameter.KERNEL);
+        if (kernel == null) {
+            System.err.println("Adding default kernel.");
+            tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
+        }
+        
+        final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
+        if (facetGenMode == null) {
+            System.err.println("Adding default facet generator.");
+            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+            tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
+        }
     }
 
 }
