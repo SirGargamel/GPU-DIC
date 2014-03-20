@@ -31,4 +31,14 @@ public class ComputationException extends Exception {
         
         this.cause = cause;
     }
+    
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(cause);
+        sb.append(" - ");
+        sb.append(getLocalizedMessage());
+        
+        return sb.toString();
+    }
 }
