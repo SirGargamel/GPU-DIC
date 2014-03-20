@@ -28,7 +28,7 @@ public class SimpleFacetGenerator implements IFacetGenerator {
         }
 
         final int halfSize = facetSize / 2;
-        final Set<ROI> rois = tc.getRoi(round);
+        final Set<ROI> rois = tc.getRois(round);
 
         List<Facet> result;
         int roiW, roiH, wCount, hCount, gapX, gapY, centerX, centerY;

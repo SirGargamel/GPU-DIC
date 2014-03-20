@@ -156,7 +156,7 @@ public class Computation {
         // prepare ROIS
         final List<ROI> circular = new ArrayList<>(2);
         final List<ROI> rect = new ArrayList<>(1);
-        for (ROI roi : tc.getRoi(0)) {
+        for (ROI roi : tc.getRois(0)) {
             if (roi instanceof CircularROI) {
                 circular.add(roi);
             } else {

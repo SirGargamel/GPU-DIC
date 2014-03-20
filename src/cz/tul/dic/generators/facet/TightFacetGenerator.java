@@ -25,7 +25,7 @@ public class TightFacetGenerator implements IFacetGenerator {
         final int halfSize = facetSize / 2;
 
         // generate centers
-        final Set<ROI> rois = tc.getRoi(round);
+        final Set<ROI> rois = tc.getRois(round);
 
         List<Facet> result;
         int roiW, roiH, wCount, hCount, centerX, centerY, gapX, gapY;

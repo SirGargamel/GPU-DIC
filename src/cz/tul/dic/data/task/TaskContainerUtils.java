@@ -105,7 +105,7 @@ public class TaskContainerUtils {
         Set<ROI> rois, prevRoi = null;
         final StringBuilder sb = new StringBuilder();
         for (int round = 0; round < roundCount; round++) {
-            rois = tc.getRoi(round);
+            rois = tc.getRois(round);
             if (rois != prevRoi) {
                 sb.setLength(0);
                 for (ROI roi : rois) {

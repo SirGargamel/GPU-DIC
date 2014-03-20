@@ -19,7 +19,7 @@ public class DeformationGenerator {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         Set<ROI> rois, oldRois = null;
         for (int round = 0; round < roundCount; round++) {
-            rois = tc.getRoi(round);
+            rois = tc.getRois(round);
             if (rois != oldRois) {
                 for (ROI roi : rois) {
                     limits = tc.getDeformationLimits(round, roi);

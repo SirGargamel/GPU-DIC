@@ -29,7 +29,7 @@ public class TaskContainerChecker {
                 throw new IllegalArgumentException("NULL image found.");
             }
 
-            rois = tc.getRoi(round);
+            rois = tc.getRois(round);
             if (rois == null || rois.isEmpty()) {
                 System.err.println("Adding default ROI.");
                 tc.setRoi(new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1), round);

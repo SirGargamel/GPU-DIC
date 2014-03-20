@@ -86,7 +86,7 @@ public final class Engine {
         int facetCount, defArrayLength;
         List<double[]> bestResults;
 
-        for (ROI roi : tc.getRoi(round)) {
+        for (ROI roi : tc.getRois(round)) {
             defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
             kernel.prepareKernel(context, device, tc.getFacetSize(), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength);
 
@@ -177,7 +177,7 @@ public final class Engine {
         int x, y;
         Map<int[], double[]> deformedFacet;
         DeformationDegree degree;
-        for (ROI roi : tc.getRoi(round)) {
+        for (ROI roi : tc.getRois(round)) {
             facets = tc.getFacets(round, roi);
             results = tc.getResults(round, roi);
 

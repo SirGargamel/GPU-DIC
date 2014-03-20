@@ -107,7 +107,7 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public Set<ROI> getRoi(final int round) {
+    public Set<ROI> getRois(final int round) {
         return rois.getItem(round);
     }
 
