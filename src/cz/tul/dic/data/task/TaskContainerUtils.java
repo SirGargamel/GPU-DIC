@@ -177,7 +177,7 @@ public class TaskContainerUtils {
                     split = s.split(CONFIG_SEPARATOR_PAIRS);
                     if (split.length == 2) {
                         roi = ROI.generateROI(split[0]);
-                        result.setRoi(roi, index);
+                        result.addRoi(roi, index);
                         result.setDeformationLimits(doubleArrayFromString(split[1]), index, roi);
                     } else {
                         throw new IllegalArgumentException("Illegal roi-limits pair - " + split);

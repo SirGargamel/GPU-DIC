@@ -121,11 +121,11 @@ public class Computation {
 
         // select ROI 
         final ROI r1 = new RectangleROI(135, 19, 179, 200);
-        tc.setRoi(r1, 0);
+        tc.addRoi(r1, 0);
         final ROI r2 = new CircularROI(108, 101, 26);
-        tc.setRoi(r2, 0);
+        tc.addRoi(r2, 0);
         final ROI r3 = new CircularROI(203, 101, 26);
-        tc.setRoi(r3, 0);
+        tc.addRoi(r3, 0);
 
         // select facet size
         tc.setFacetSize(facetSize);
@@ -185,10 +185,13 @@ public class Computation {
     public static void commenceComputationDynamic() throws IOException {
         TaskContainer tc = new TaskContainer(IN_VIDEO_REAL);
         InputLoader.loadInput(tc);
+        
+        tc.addRoi(null, SIZE_MIN);
 
         try {
             long time = System.nanoTime();
-            ComplextTaskSolver.solveComplexTask(tc);
+            final ComplextTaskSolver cts = new ComplextTaskSolver();
+            cts.solveComplexTask(tc);
             time = System.nanoTime() - time;
             Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 

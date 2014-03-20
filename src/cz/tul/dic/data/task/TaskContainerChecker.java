@@ -32,7 +32,7 @@ public class TaskContainerChecker {
             rois = tc.getRois(round);
             if (rois == null || rois.isEmpty()) {
                 System.err.println("Adding default ROI.");
-                tc.setRoi(new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1), round);
+                tc.addRoi(new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1), round);
             } else {
                 for (ROI roi : rois) {
                     if (roi.getX1() < 0 || roi.getY1() < 0) {

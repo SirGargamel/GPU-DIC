@@ -111,7 +111,7 @@ public class TaskContainer implements Serializable {
         return rois.getItem(round);
     }
 
-    public void setRoi(final ROI roi, final int round) {
+    public void addRoi(final ROI roi, final int round) {
         Set<ROI> r = rois.getItem(round);
         if (r == null) {
             r = new HashSet<>(1);
