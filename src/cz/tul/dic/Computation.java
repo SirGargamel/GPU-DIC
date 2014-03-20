@@ -184,17 +184,20 @@ public class Computation {
 
     public static void commenceComputationDynamic() throws IOException {
         TaskContainer tc = new TaskContainer(IN_VIDEO_REAL);
-
         InputLoader.loadInput(tc);
 
-        long time = System.nanoTime();
-        ComplextTaskSolver.solveComplexTask(tc);
-        time = System.nanoTime() - time;
-        Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        try {
+            long time = System.nanoTime();
+            ComplextTaskSolver.solveComplexTask(tc);
+            time = System.nanoTime() - time;
+            Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
-        generateExports(tc);
-        for (ExportTask et : exports) {
-            Exporter.export(et, tc);
+            generateExports(tc);
+            for (ExportTask et : exports) {
+                Exporter.export(et, tc);
+            }
+        } catch (ComputationException ex) {
+            Logger.error(ex);
         }
     }
 
