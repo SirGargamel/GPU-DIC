@@ -75,39 +75,42 @@ public final class Engine {
     }
 
     public void computeTask(final TaskContainer tc) throws IOException {
-        final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
-
-        List<double[]> bestResults;
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        int facetCount, defArrayLength;
         for (int round = 0; round < roundCount; round++) {
-            for (ROI roi : tc.getRoi(round)) {
-                defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
-                kernel.prepareKernel(context, device, tc.getFacetSize(), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength);
-
-                facetCount = tc.getFacets(round, roi).size();
-                bestResults = new ArrayList<>(facetCount);
-                for (int i = 0; i < facetCount; i++) {
-                    bestResults.add(null);
-                }
-
-                final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, round, roi);
-                ComputationTask ct;
-                while (it.hasNext()) {
-                    ct = it.next();
-                    ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
-                    kernel.finishRound();
-                    // pick best results for this computation task and discard ct data                          
-                    pickBestResultsForTask(ct, bestResults, tc, round, roi);
-                }
-                // store data           
-                tc.setResult(bestResults, round, roi);
-            }
-            buildFinalResults(tc, round);
-            Logger.trace("Finished round {0} out of {1}.", round + 1, roundCount);
+            computeRound(tc, round);
         }
+    }
 
+    public void computeRound(final TaskContainer tc, final int round) throws IOException {
+        final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
+        int facetCount, defArrayLength;
+        List<double[]> bestResults;
+
+        for (ROI roi : tc.getRoi(round)) {
+            defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
+            kernel.prepareKernel(context, device, tc.getFacetSize(), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength);
+
+            facetCount = tc.getFacets(round, roi).size();
+            bestResults = new ArrayList<>(facetCount);
+            for (int i = 0; i < facetCount; i++) {
+                bestResults.add(null);
+            }
+
+            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, round, roi);
+            ComputationTask ct;
+            while (it.hasNext()) {
+                ct = it.next();
+                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
+                kernel.finishRound();
+                // pick best results for this computation task and discard ct data                          
+                pickBestResultsForTask(ct, bestResults, tc, round, roi);
+            }
+            // store data           
+            tc.setResult(bestResults, round, roi);
+        }
+        buildFinalResults(tc, round);
         kernel.finishComputation();
+        Logger.trace("Computed round {0}.", round + 1);
     }
 
     private void pickBestResultsForTask(final ComputationTask task, final List<double[]> bestResults, final TaskContainer tc, final int round, final ROI roi) {
