@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package cz.tul.dic.gui;
 
 import cz.tul.dic.Computation;
@@ -22,24 +21,23 @@ import javafx.scene.control.Label;
  * @author Petr Jecmen
  */
 public class FXMLDocumentController implements Initializable {
-    
+
     @FXML
     private Label label;
-    
+
     @FXML
-    private void handleButtonAction(ActionEvent event) throws IOException {        
-        label.setText("Commencing computation!");
-        Computation.commenceComputation();        
+    private void handleButtonAction(ActionEvent event) throws IOException {
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
             // TODO
-            Computation.commenceComputation();
+//            Computation.commenceComputationStatic();
+            Computation.commenceComputationDynamic();
         } catch (IOException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }    
-    
+    }
+
 }
