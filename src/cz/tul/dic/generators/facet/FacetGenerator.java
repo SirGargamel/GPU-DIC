@@ -11,12 +11,12 @@ import java.util.Map;
  */
 public class FacetGenerator {
 
-    private static final Map<FacetGeneratorMode, IFacetGenerator> generators;
+    private static final Map<FacetGeneratorMode, AbstractFacetGenerator> generators;
 
     static {
         generators = new HashMap<>();
 
-        IFacetGenerator fg = new SimpleFacetGenerator();
+        AbstractFacetGenerator fg = new SimpleFacetGenerator();
         generators.put(fg.getMode(), fg);
         fg = new TightFacetGenerator();
         generators.put(fg.getMode(), fg);

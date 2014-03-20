@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class SimpleFacetGenerator implements IFacetGenerator {
+public class SimpleFacetGenerator extends AbstractFacetGenerator {
 
     private static final int DEFAULT_SPACING = 1;
 
@@ -22,6 +22,8 @@ public class SimpleFacetGenerator implements IFacetGenerator {
             spacing = (int) o;
         }
         final int facetSize = tc.getFacetSize();
+        final int width = tc.getImage(0).getWidth();
+        final int height = tc.getImage(0).getHeight();
 
         if (spacing >= facetSize) {
             throw new IllegalArgumentException("Spacing cant must be smaller than facet size.");
@@ -50,7 +52,8 @@ public class SimpleFacetGenerator implements IFacetGenerator {
                 for (int x = 0; x < wCount; x++) {
                     centerX = gapX + roi.getX1() + halfSize + (x * (facetSize - spacing));
 
-                    if (roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
+                    if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height) 
+                            && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
                         result.add(Facet.createFacet(facetSize, centerX, centerY));
                     }
                 }

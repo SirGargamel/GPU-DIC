@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class TightFacetGenerator implements IFacetGenerator {
+public class TightFacetGenerator extends AbstractFacetGenerator {
 
     private static final int DEFAULT_SPACING = 2;
 
@@ -23,6 +23,9 @@ public class TightFacetGenerator implements IFacetGenerator {
         }
         final int facetSize = tc.getFacetSize();
         final int halfSize = facetSize / 2;
+        
+        final int width = tc.getImage(0).getWidth();
+        final int height = tc.getImage(0).getHeight();
 
         // generate centers
         final Set<ROI> rois = tc.getRois(round);
@@ -47,7 +50,8 @@ public class TightFacetGenerator implements IFacetGenerator {
                 for (int x = 0; x < wCount; x++) {
                     centerX = gapY + roi.getX1() + halfSize + (x * spacing);
 
-                    if (roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
+                    if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height) 
+                            && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
                         result.add(Facet.createFacet(facetSize, centerX, centerY));
                     }
                 }
@@ -55,7 +59,7 @@ public class TightFacetGenerator implements IFacetGenerator {
 
             tc.setFacets(result, round, roi);
         }
-    }
+    }        
 
     @Override
     public FacetGeneratorMode getMode() {

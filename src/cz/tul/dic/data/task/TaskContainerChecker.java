@@ -35,12 +35,12 @@ public class TaskContainerChecker {
                 tc.addRoi(new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1), round);
             } else {
                 for (ROI roi : rois) {
-                    if (roi.getX1() < 0 || roi.getY1() < 0) {
-                        throw new IllegalArgumentException("ROI coords must be positive.");
-                    }
-                    if (roi.getX2() >= img.getWidth() || roi.getY2() > img.getHeight()) {
-                        throw new IllegalArgumentException("ROI cannot be larger than image.");
-                    }
+//                    if (roi.getX1() < 0 || roi.getY1() < 0) {
+//                        throw new IllegalArgumentException("ROI coords must be positive.");
+//                    }
+//                    if (roi.getX2() >= img.getWidth() || roi.getY2() > img.getHeight()) {
+//                        throw new IllegalArgumentException("ROI cannot be larger than image.");
+//                    }
                 }
             }
         }
