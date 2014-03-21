@@ -1,14 +1,14 @@
 package cz.tul.dic.data.task;
 
+import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
-import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -219,6 +219,16 @@ public class TaskContainerUtils {
         for (int i = 0; i < split.length; i++) {
             result[i] = Double.valueOf(split[i]);
         }
+        return result;
+    }
+    
+    public static Set<Facet> getAllFacets(final TaskContainer tc, final int round) {
+        final Set<Facet> result = new HashSet<>();
+        
+        for (ROI roi : tc.getRois(round)) {
+            result.addAll(tc.getFacets(round, roi));
+        }
+        
         return result;
     }
 

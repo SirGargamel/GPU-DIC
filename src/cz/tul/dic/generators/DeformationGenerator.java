@@ -4,8 +4,6 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
-import java.util.Set;
 
 /**
  *
@@ -13,36 +11,29 @@ import java.util.Set;
  */
 public class DeformationGenerator {
 
-    public static void generateDeformations(final TaskContainer tc) {
+    public static void generateDeformations(final TaskContainer tc, final int round) {
         double[] limits, deformations;
         DeformationDegree degree;
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        Set<ROI> rois, oldRois = null;
-        for (int round = 0; round < roundCount; round++) {
-            rois = tc.getRois(round);
-            if (rois != oldRois) {
-                for (ROI roi : rois) {
-                    limits = tc.getDeformationLimits(round, roi);
-                    degree = DeformationUtils.getDegreeFromLimits(limits);
 
-                    switch (degree) {
-                        case ZERO:
-                            deformations = generateZeroDegree(limits);
-                            break;
-                        case FIRST:
-                            deformations = generateFirstDegree(limits);
-                            break;
-                        case SECOND:
-                            deformations = generateSecondDegree(limits);
-                            break;
-                        default:
-                            throw new UnsupportedOperationException("Unsupported degree of deformation - " + degree + ".");
+        for (ROI roi : tc.getRois(round)) {
+            limits = tc.getDeformationLimits(round, roi);
+            degree = DeformationUtils.getDegreeFromLimits(limits);
 
-                    }
-                    tc.setDeformations(deformations, round, roi);
-                }
+            switch (degree) {
+                case ZERO:
+                    deformations = generateZeroDegree(limits);
+                    break;
+                case FIRST:
+                    deformations = generateFirstDegree(limits);
+                    break;
+                case SECOND:
+                    deformations = generateSecondDegree(limits);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unsupported degree of deformation - " + degree + ".");
+
             }
-            oldRois = rois;
+            tc.setDeformations(deformations, round, roi);
         }
     }
 

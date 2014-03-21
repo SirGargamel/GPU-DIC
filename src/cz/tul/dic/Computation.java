@@ -99,10 +99,7 @@ public class Computation {
             loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfig"));
 //            System.out.println(loadedTc);
 
-            TaskContainerChecker.checkTaskValidity(tc);
-
-            FacetGenerator.generateFacets(tc);
-            DeformationGenerator.generateDeformations(tc);
+            TaskContainerChecker.checkTaskValidity(tc);            
 
             time = System.nanoTime();
             engine.computeTask(tc);
@@ -205,7 +202,7 @@ public class Computation {
             long time = System.nanoTime();            
             ComplextTaskSolver.solveComplexTask(tc);
             time = System.nanoTime() - time;
-            Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+            Logger.info("Finished dynamic task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
             for (ExportTask et : exports) {
                 Exporter.export(et, tc);

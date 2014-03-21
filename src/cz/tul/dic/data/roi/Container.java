@@ -36,10 +36,12 @@ public final class Container<T> implements Serializable {
             } else {
                 result = null;
             }
+        } else if (position < 0) {
+            return null;
         } else {
             result = data.get(position);
         }
         return result;
-    }        
+    }
 
 }

@@ -22,10 +22,9 @@ public class FacetGenerator {
         generators.put(fg.getMode(), fg);
     }
 
-    public static void generateFacets(final TaskContainer tc) {
+    public static void generateFacets(final TaskContainer tc, final int round) {
         final FacetGeneratorMode mode = (FacetGeneratorMode) tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
-        if (generators.containsKey(mode)) {
-            final int round = 0;
+        if (generators.containsKey(mode)) {            
             generators.get(mode).generateFacets(tc, round);
         } else {
             throw new IllegalArgumentException("Unsupported mode of facet generator - " + mode.toString());
