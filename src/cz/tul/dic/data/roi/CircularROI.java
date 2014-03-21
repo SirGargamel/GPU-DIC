@@ -44,7 +44,7 @@ public class CircularROI extends ROI {
 
     @Override
     public boolean isAreaInside(int x1, int y1, int x2, int y2) {
-        final double maxDist2 = radius * 2;
+        final double maxDist2 = radius * radius;
         
         return dist2(x1, y1, centerX, centerY) <= maxDist2
                 && dist2(x1, y2, centerX, centerY) <= maxDist2
