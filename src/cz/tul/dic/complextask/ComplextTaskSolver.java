@@ -23,6 +23,7 @@ import java.util.Set;
 public class ComplextTaskSolver {
 
     private static final int ROI_COUNT = 4;
+    private static final int MAX_SHIFT_DIFFERENCE = 3;
 
     public static void solveComplexTask(final TaskContainer tc) throws IOException, ComputationException {
         final Engine engine = new Engine();
@@ -64,7 +65,9 @@ public class ComplextTaskSolver {
             shift1 = (int) Math.round(FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(2)));
             shift2 = (int) Math.round(FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(3)));
             //// check if left equals right
-            // TODO
+            if (Math.abs(shift1 - shift2) > MAX_SHIFT_DIFFERENCE) {
+                throw new ComputationException(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH, Double.toString(shift1).concat(" vs ".concat(Double.toString(shift2))));
+            }
             //// generate new Circle ROIs
             rois = new HashSet<>(5);
             rois.add(sortedROIs.get(0));
