@@ -195,16 +195,15 @@ public class Computation {
         tc.addRoi(new CircularROI(202, 84, 26), 0);
 
         TaskContainerChecker.checkTaskValidity(tc);
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
+        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
         final String ext = String.format("%02d", tc.getFacetSize()).concat(".bmp");
         exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", 0)).concat("-X-").concat(ext)), new int[]{0}));
         exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", 0)).concat("-Y-").concat(ext)), new int[]{0}));
         exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", 0)).concat("-ABS-").concat(ext)), new int[]{0}));
 
         try {
-            long time = System.nanoTime();
-            final ComplextTaskSolver cts = new ComplextTaskSolver();
-            cts.solveComplexTask(tc);
+            long time = System.nanoTime();            
+            ComplextTaskSolver.solveComplexTask(tc);
             time = System.nanoTime() - time;
             Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
