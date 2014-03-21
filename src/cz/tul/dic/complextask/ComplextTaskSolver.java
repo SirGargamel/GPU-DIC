@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -24,6 +25,8 @@ public class ComplextTaskSolver {
 
     private static final int ROI_COUNT = 4;
     private static final int MAX_SHIFT_DIFFERENCE = 3;
+    private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 1.0, -5, 5, 0.25};
+    private static final double[] DEFAULT_DEF_RECT = new double[]{-4, 4, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};
 
     public static void solveComplexTask(final TaskContainer tc) throws IOException, ComputationException {
         final Engine engine = new Engine();
@@ -49,21 +52,23 @@ public class ComplextTaskSolver {
         // generate possible deformation for ROIs
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
-                tc.setDeformationLimits(new double[]{-1, 1, 1.0, -10, 1, 0.25}, 0, roi);
+                tc.setDeformationLimits(DEFAULT_DEF_CIRCLE, 0, roi);
             } else {
-                tc.setDeformationLimits(new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5}, 0, roi);
+                tc.setDeformationLimits(DEFAULT_DEF_RECT, 0, roi);
             }
         }
         // compute round 0
         engine.computeRound(tc, 0);
 
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        double shift1, shift2;
+        double shift1, shift2, shift;
         for (int round = 1; round < roundCount; round++) {
             // find new position of Circle ROIs
             //// determine shifts of circle ROIs from previous round
             shift1 = (int) Math.round(FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(2)));
             shift2 = (int) Math.round(FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(3)));
+            shift = (shift1 + shift2) / 2.0;
+            Logger.debug(shift1 + ", " + shift2);
             //// check if left equals right
             if (Math.abs(shift1 - shift2) > MAX_SHIFT_DIFFERENCE) {
                 throw new ComputationException(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH, Double.toString(shift1).concat(" vs ".concat(Double.toString(shift2))));
@@ -73,9 +78,9 @@ public class ComplextTaskSolver {
             rois.add(sortedROIs.get(0));
             rois.add(sortedROIs.get(1));
             CircularROI cRoi = (CircularROI) sortedROIs.get(2);
-            rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift1, cRoi.getRadius()));
+            rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift, cRoi.getRadius()));
             cRoi = (CircularROI) sortedROIs.get(3);
-            rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift2, cRoi.getRadius()));
+            rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift, cRoi.getRadius()));
             // generate ReactengleROI for  this round from new CircleROIs
             sortedROIs.clear();
             sortedROIs.addAll(rois);
@@ -86,12 +91,12 @@ public class ComplextTaskSolver {
             // generate limits
             //// TODO generate limits dynamically according to previous results
             for (ROI roi : rois) {
-                if (roi instanceof CircularROI) {
-                    tc.setDeformationLimits(new double[]{-1, 1, 1.0, -10, 1, 0.25}, 0, roi);
-                } else {
-                    tc.setDeformationLimits(new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5}, 0, roi);
-                }
+            if (roi instanceof CircularROI) {
+                tc.setDeformationLimits(DEFAULT_DEF_CIRCLE, round, roi);
+            } else {
+                tc.setDeformationLimits(DEFAULT_DEF_RECT, round, roi);
             }
+        }
             // compute round
             engine.computeRound(tc, round);
         }
