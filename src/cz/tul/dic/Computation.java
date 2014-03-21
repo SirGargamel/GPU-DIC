@@ -46,8 +46,9 @@ public class Computation {
     private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
-    private static final int SIZE_MAX = 30;
+    private static final int SIZE_MAX = 50;
     private static final int SIZE_STEP = 1;
+    private static final int SIZE_DYN = 19;
     private static final Set<ExportTask> exports;
 
     static {
@@ -182,11 +183,23 @@ public class Computation {
         }
     }
 
-    public static void commenceComputationDynamic() throws IOException {
+    public static void commenceComputationDynamic() throws IOException {        
         TaskContainer tc = new TaskContainer(IN_VIDEO_REAL);
         InputLoader.loadInput(tc);
-        
-        tc.addRoi(null, SIZE_MIN);
+
+        tc.setFacetSize(SIZE_DYN);
+
+        tc.addRoi(new CircularROI(108, 12, 26), 0);
+        tc.addRoi(new CircularROI(201, 7, 26), 0);
+        tc.addRoi(new CircularROI(108, 86, 26), 0);
+        tc.addRoi(new CircularROI(202, 84, 26), 0);
+
+        TaskContainerChecker.checkTaskValidity(tc);
+        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
+        final String ext = String.format("%02d", tc.getFacetSize()).concat(".bmp");
+        exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", 0)).concat("-X-").concat(ext)), new int[]{0}));
+        exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", 0)).concat("-Y-").concat(ext)), new int[]{0}));
+        exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", 0)).concat("-ABS-").concat(ext)), new int[]{0}));
 
         try {
             long time = System.nanoTime();
@@ -195,7 +208,6 @@ public class Computation {
             time = System.nanoTime() - time;
             Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
-            generateExports(tc);
             for (ExportTask et : exports) {
                 Exporter.export(et, tc);
             }
