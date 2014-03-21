@@ -50,22 +50,38 @@ public class FacetDeformationAnalyzator {
         }
 
         val = 0;
-        int maxCount = -1;
+        int count = -1;
         for (int i = 0; i < counterPos.length; i++) {
-            if (counterPos[i] > maxCount) {
-                maxCount = counterPos[i];
+            if (counterPos[i] > count) {
+                count = counterPos[i];
                 val = i;
             }
         }
         
         for (int i = 0; i < counterNeg.length; i++) {
-            if (counterNeg[i] > maxCount) {
-                maxCount = counterNeg[i];
+            if (counterNeg[i] > count) {
+                count = counterNeg[i];
                 val = -i;
             }
         }
+        
+        double result = 0, tmp;
+        count = 0;
+        for (Facet f : facets) {
+            facetData = f.getData();
+            for (int i = 0; i < facetSize2; i++) {
+                tmp = results[facetData[i * 2]][facetData[i * 2 + 1]][Coordinates.Y];
+                if (tmp >= val && (tmp - val) < 0.5) {
+                    result += tmp;
+                    count++;
+                } else if (tmp < val && (val - tmp) <= 0.5) {
+                    result += tmp;
+                    count++;
+                }
+            }
+        }
 
-        return val;
+        return result / (double) count;
     }
 
 }

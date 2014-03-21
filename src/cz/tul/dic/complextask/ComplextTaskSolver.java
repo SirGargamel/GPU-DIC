@@ -65,8 +65,8 @@ public class ComplextTaskSolver {
         for (int round = 1; round < roundCount; round++) {
             // find new position of Circle ROIs
             //// determine shifts of circle ROIs from previous round
-            shift1 = (int) Math.round(FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(2)));
-            shift2 = (int) Math.round(FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(3)));
+            shift1 = FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(2));
+            shift2 = FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(3));
             shift = (shift1 + shift2) / 2.0;
             Logger.debug(shift1 + ", " + shift2);
             //// check if left equals right
