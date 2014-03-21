@@ -4,7 +4,6 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.Container;
 import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.output.ExportTask;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -118,6 +117,10 @@ public class TaskContainer implements Serializable {
             rois.addItem(r, round);
         }
         r.add(roi);
+    }
+    
+    public void setROIs(final Set<ROI> rois, final int round) {
+        this.rois.addItem(rois, round);
     }
 
     public int getFacetSize() {

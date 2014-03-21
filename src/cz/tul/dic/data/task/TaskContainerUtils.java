@@ -27,7 +27,7 @@ public class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_PAIRS = "--";
     private static final String CONFIG_SIZE = "SIZE";
     private static final String CONFIG_PARAMETERS = "PARAM_";
-    private static final String CONFIG_ROIS = "ROI_";    
+    private static final String CONFIG_ROIS = "ROI_";
 
     public static int getRoundCount(final TaskContainer tc) {
         int counter = 0;
@@ -221,14 +221,18 @@ public class TaskContainerUtils {
         }
         return result;
     }
-    
+
     public static Set<Facet> getAllFacets(final TaskContainer tc, final int round) {
         final Set<Facet> result = new HashSet<>();
-        
+
+        List<Facet> tmp;
         for (ROI roi : tc.getRois(round)) {
-            result.addAll(tc.getFacets(round, roi));
+            tmp = tc.getFacets(round, roi);
+            if (tmp != null) {
+                result.addAll(tmp);
+            }
         }
-        
+
         return result;
     }
 

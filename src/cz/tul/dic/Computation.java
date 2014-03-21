@@ -99,7 +99,7 @@ public class Computation {
             loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfig"));
 //            System.out.println(loadedTc);
 
-            TaskContainerChecker.checkTaskValidity(tc);            
+            TaskContainerChecker.checkTaskValidity(tc);
 
             time = System.nanoTime();
             engine.computeTask(tc);
@@ -180,7 +180,7 @@ public class Computation {
         }
     }
 
-    public static void commenceComputationDynamic() throws IOException {        
+    public static void commenceComputationDynamic() throws IOException {
         TaskContainer tc = new TaskContainer(IN_VIDEO_REAL);
         InputLoader.loadInput(tc);
 
@@ -194,12 +194,14 @@ public class Computation {
         TaskContainerChecker.checkTaskValidity(tc);
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
         final String ext = String.format("%02d", tc.getFacetSize()).concat(".bmp");
-        exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", 0)).concat("-X-").concat(ext)), new int[]{0}));
-        exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", 0)).concat("-Y-").concat(ext)), new int[]{0}));
-        exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", 0)).concat("-ABS-").concat(ext)), new int[]{0}));
+        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), new int[]{round}));
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), new int[]{round}));
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), new int[]{round}));
+        }
 
         try {
-            long time = System.nanoTime();            
+            long time = System.nanoTime();
             ComplextTaskSolver.solveComplexTask(tc);
             time = System.nanoTime() - time;
             Logger.info("Finished dynamic task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");

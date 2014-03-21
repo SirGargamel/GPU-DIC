@@ -7,12 +7,12 @@ import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.generators.DeformationGenerator;
-import cz.tul.dic.generators.facet.FacetGenerator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -39,11 +39,13 @@ public class ComplextTaskSolver {
         if (counter != ROI_COUNT) {
             throw new ComputationException(ComputationExceptionCause.NOT_ENOUGH_ROIS, Integer.toString(counter));
         }
-
+        // generate rectangle ROI for round 0
         Image img = tc.getImage(0);
-        ROI rectangleRoi = generateRectangleROI(rois, img.getWidth(), img.getHeight());
+        List<ROI> sortedROIs = new ArrayList<>(rois);
+        Collections.sort(sortedROIs, new RoiSorter());
+        ROI rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
         tc.addRoi(rectangleRoi, 0);
-
+        // generate possible deformation for ROIs
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
                 tc.setDeformationLimits(new double[]{-1, 1, 1.0, -10, 1, 0.25}, 0, roi);
@@ -51,27 +53,48 @@ public class ComplextTaskSolver {
                 tc.setDeformationLimits(new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5}, 0, roi);
             }
         }
-
-        FacetGenerator.generateFacets(tc);
-        DeformationGenerator.generateDeformations(tc);
-
-        // generate rectangle ROI for round 0
-        // generate possible deformation for ROIs
         // compute round 0
         engine.computeRound(tc, 0);
 
-        // find new position of Circle ROIs
-        //// check if left equals right
-        // generate ReactengleROI for round 1 from new CircleROIs
-        // compute round 1
-        // REPEAT
+        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        double shift1, shift2;
+        for (int round = 1; round < roundCount; round++) {
+            // find new position of Circle ROIs
+            //// determine shifts of circle ROIs from previous round
+            shift1 = (int) Math.round(FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(2)));
+            shift2 = (int) Math.round(FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(3)));
+            //// check if left equals right
+            // TODO
+            //// generate new Circle ROIs
+            rois = new HashSet<>(5);
+            rois.add(sortedROIs.get(0));
+            rois.add(sortedROIs.get(1));
+            CircularROI cRoi = (CircularROI) sortedROIs.get(2);
+            rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift1, cRoi.getRadius()));
+            cRoi = (CircularROI) sortedROIs.get(3);
+            rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift2, cRoi.getRadius()));
+            // generate ReactengleROI for  this round from new CircleROIs
+            sortedROIs.clear();
+            sortedROIs.addAll(rois);
+            Collections.sort(sortedROIs, new RoiSorter());
+            rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
+            rois.add(rectangleRoi);
+            tc.setROIs(rois, round);
+            // generate limits
+            //// TODO generate limits dynamically according to previous results
+            for (ROI roi : rois) {
+                if (roi instanceof CircularROI) {
+                    tc.setDeformationLimits(new double[]{-1, 1, 1.0, -10, 1, 0.25}, 0, roi);
+                } else {
+                    tc.setDeformationLimits(new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5}, 0, roi);
+                }
+            }
+            // compute round
+            engine.computeRound(tc, round);
+        }
     }
 
-    private static ROI generateRectangleROI(final Set<ROI> circleRois, final int imageWidth, final int imageHeight) {
-        final List<ROI> sortedROIs = new ArrayList<>(ROI_COUNT);
-        sortedROIs.addAll(circleRois);
-        Collections.sort(sortedROIs, new RoiSorter());
-
+    private static ROI generateRectangleROI(final List<ROI> sortedROIs, final int imageWidth, final int imageHeight) {
         int xLeft = Math.min(sortedROIs.get(0).getX2(), sortedROIs.get(2).getX2());
         xLeft = Math.max(xLeft, 0);
         int yTop = Math.min(sortedROIs.get(0).getY1(), sortedROIs.get(1).getY1());
