@@ -2,9 +2,9 @@ package cz.tul.dic.data.roi;
 
 public class CircularROI extends ROI {
 
-    private final int centerX, centerY, radius;
+    private final double centerX, centerY, radius;
 
-    public CircularROI(int centerX, int centerY, int radius) {
+    public CircularROI(double centerX, double centerY, double radius) {
         super();
 
         this.centerX = centerX;
@@ -14,37 +14,37 @@ public class CircularROI extends ROI {
 
     @Override
     public int getX1() {
-        return centerX - radius;
+        return (int) Math.floor(centerX - radius);
     }
 
     @Override
     public int getY1() {
-        return centerY - radius;
+        return (int) Math.floor(centerY - radius);
     }
 
     @Override
     public int getX2() {
-        return centerX + radius;
+        return (int) Math.ceil(centerX + radius);
     }
 
     @Override
     public int getY2() {
-        return centerY + radius;
+        return (int) Math.ceil(centerY + radius);
     }
 
     @Override
     public int getWidth() {
-        return 2 * radius;
+        return (int) Math.ceil(2 * radius);
     }
 
     @Override
     public int getHeight() {
-        return 2 * radius;
+        return (int) Math.ceil(2 * radius);
     }
 
     @Override
     public boolean isAreaInside(int x1, int y1, int x2, int y2) {
-        final int maxDist2 = radius * radius;
+        final double maxDist2 = radius * 2;
         
         return dist2(x1, y1, centerX, centerY) <= maxDist2
                 && dist2(x1, y2, centerX, centerY) <= maxDist2
@@ -52,7 +52,7 @@ public class CircularROI extends ROI {
                 && dist2(x2, y2, centerX, centerY) <= maxDist2;
     }
 
-    private static double dist2(final int x1, final int y1, final int x2, final int y2) {
+    private static double dist2(final int x1, final int y1, final double x2, final double y2) {
         return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
     }
     
@@ -71,5 +71,17 @@ public class CircularROI extends ROI {
         sb.append(radius);
         return sb.toString();
     }    
+
+    public double getCenterX() {
+        return centerX;
+    }
+
+    public double getCenterY() {
+        return centerY;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
 
 }

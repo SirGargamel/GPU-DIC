@@ -2,9 +2,9 @@ package cz.tul.dic.data.roi;
 
 public class RectangleROI extends ROI {
 
-    private final int x1, y1, x2, y2;
+    private final double x1, y1, x2, y2;
 
-    public RectangleROI(int x1, int y1, int x2, int y2) {
+    public RectangleROI(double x1, double y1, double x2, double y2) {
         super();
 
         this.x1 = Math.min(x1, x2);
@@ -15,32 +15,32 @@ public class RectangleROI extends ROI {
 
     @Override
     public int getX1() {
-        return x1;
+        return (int) Math.floor(x1);
     }
 
     @Override
     public int getY1() {
-        return y1;
+        return (int) Math.floor(y1);
     }
 
     @Override
     public int getX2() {
-        return x2;
+        return (int) Math.ceil(x2);
     }
 
     @Override
     public int getY2() {
-        return y2;
+        return (int) Math.ceil(y2);
     }
 
     @Override
     public int getWidth() {
-        return x2 - x1;
+        return (int) Math.ceil(x2 - x1);
     }
 
     @Override
     public int getHeight() {
-        return y2 - y1;
+        return (int) Math.ceil(y2 - y1);
     }
 
     @Override
