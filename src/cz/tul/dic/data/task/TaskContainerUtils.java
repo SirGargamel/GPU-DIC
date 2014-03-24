@@ -1,5 +1,6 @@
 package cz.tul.dic.data.task;
 
+import cz.tul.dic.data.Config;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
@@ -10,9 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -26,7 +25,6 @@ public class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_DATA = ",,";
     private static final String CONFIG_SEPARATOR_FULL = ";;";
     private static final String CONFIG_SEPARATOR_PAIRS = "--";
-    private static final String CONFIG_SIZE = "SIZE";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
 
@@ -80,8 +78,8 @@ public class TaskContainerUtils {
         return result;
     }
 
-    public static Map<String, String> serializeTaskContainer(final TaskContainer tc) {
-        final Map<String, String> result = new LinkedHashMap<>();
+    public static Config serializeTaskContainer(final TaskContainer tc) {
+        final Config result = new Config();
         final int roundCount = getRoundCount(tc);
         // input
         final Object input = tc.getInput();
@@ -99,7 +97,7 @@ public class TaskContainerUtils {
             result.put(CONFIG_INPUT, sb.toString());
         } else {
             throw new IllegalArgumentException("Unsupported type of input.");
-        }                
+        }
         // rois, deformation limits, facetSizes        
         Set<ROI> rois, prevRoi = null;
         final StringBuilder sb = new StringBuilder();
@@ -145,10 +143,10 @@ public class TaskContainerUtils {
         return sb.toString();
     }
 
-    public static TaskContainer deserializeTaskContainer(final Map<String, String> data) {
+    public static TaskContainer deserializeTaskContainer(final Config config) {
         final TaskContainer result;
         // input
-        final String input = data.get(CONFIG_INPUT);
+        final String input = config.get(CONFIG_INPUT);
         if (input.contains(CONFIG_SEPARATOR_FULL)) {
             // list of images
             final String[] split = input.split(CONFIG_SEPARATOR_FULL);
@@ -160,14 +158,14 @@ public class TaskContainerUtils {
         } else {
             // video file
             result = new TaskContainer(new File(input));
-        }        
+        }
         // rois, exports, parameters
         String key;
         TaskParameter tp;
         int index;
         String[] split;
         ROI roi;
-        for (Entry<String, String> e : data.entrySet()) {
+        for (Entry<String, String> e : config.entrySet()) {
             key = e.getKey();
             if (key.startsWith(CONFIG_ROIS)) {
                 index = Integer.valueOf(key.replaceFirst(CONFIG_ROIS, ""));
@@ -235,7 +233,7 @@ public class TaskContainerUtils {
 
         return result;
     }
-    
+
     public static void setUniformFacetSize(final TaskContainer tc, final int round, final int facetSize) {
         for (ROI roi : tc.getRois(round)) {
             tc.addFacetSize(round, roi, facetSize);

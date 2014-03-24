@@ -16,7 +16,6 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import org.pmw.tinylog.Logger;
 
@@ -38,14 +37,14 @@ public class VideoLoader implements IInputLoader {
             throw new FileNotFoundException("VirtualDub is not available.");
         }
 
-        final File input = (File) in;        
+        final File input = (File) in;
         // create temp dir to store images
         tc.setParameter(TaskParameter.DIR, input.getParentFile());
         Config.setProjectDir(input.getParentFile());
         final File temp = Utils.getTempDir(tc);
         // check cache
         final List<File> files;
-        final Map<String, String> config = Config.loadConfig(input.getName());
+        Config config = Config.loadConfig(input.getName());
         if (!isCacheDataValid(input, temp, config)) {
             Logger.debug("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
             // prepare script
@@ -76,7 +75,7 @@ public class VideoLoader implements IInputLoader {
             }));
 
             // save config
-            config.clear();
+            config = new Config();
             config.put(PREFIX_MOD.concat(input.getName()), Long.toString(input.lastModified()));
             config.put(PREFIX_SIZE.concat(input.getName()), Long.toString(input.length()));
             for (File f : files) {
@@ -84,20 +83,20 @@ public class VideoLoader implements IInputLoader {
                 config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
             }
             Config.saveConfig(input.getName(), config);
-        } else {            
+        } else {
             files = convertCacheDataToFiles(input, temp, config);
         }
         // list of all bmp files inside temp dir with roght name        
         final ImageLoader il = new ImageLoader();
         final List<Image> result = il.loadData(files, tc);
-        
+
         tc.setParameter(TaskParameter.DIR, input.getParentFile());
         Config.setProjectDir(input.getParentFile());
 
         return result;
     }
 
-    private boolean isCacheDataValid(final File source, final File tempFolder, final Map<String, String> config) {
+    private boolean isCacheDataValid(final File source, final File tempFolder, final Config config) {
         boolean result = true;
 
         if (!tempFolder.isDirectory() || config == null || config.isEmpty()) {
@@ -160,7 +159,7 @@ public class VideoLoader implements IInputLoader {
         return result;
     }
 
-    private List<File> convertCacheDataToFiles(final File source, final File tempFolder, final Map<String, String> config) {
+    private List<File> convertCacheDataToFiles(final File source, final File tempFolder, final Config config) {
         final String baseTempPath = tempFolder.getAbsolutePath().concat(File.separator);
         File tempFile;
         final List<File> result = new LinkedList<>();

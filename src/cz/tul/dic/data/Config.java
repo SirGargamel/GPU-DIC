@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  *
@@ -19,6 +20,7 @@ public class Config {
     private static final String SEPARATOR = " :: ";
     private static File projectDir;
     private static boolean enableConfigs = true;
+    private final Map<String, String> data;
 
     public static void setProjectDir(final File dir) {
         if (dir.isDirectory()) {
@@ -30,9 +32,9 @@ public class Config {
         }
     }
 
-    public static Map<String, String> loadConfig(final String name) throws IOException {
+    public static Config loadConfig(final String name) throws IOException {
         final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(name).concat(EXT);
-        final Map<String, String> result = new LinkedHashMap<>();
+        final Config result = new Config();
 
         final File config = new File(configFileName);
         if (enableConfigs && config.exists()) {
@@ -53,10 +55,10 @@ public class Config {
         return result;
     }
 
-    public static void saveConfig(final String name, final Map<String, String> data) throws IOException {
+    public static void saveConfig(final String name, final Config config) throws IOException {
         final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(name).concat(EXT);
         try (FileWriter fw = new FileWriter(new File(configFileName))) {
-            for (Entry<String, String> e : data.entrySet()) {
+            for (Entry<String, String> e : config.entrySet()) {
                 fw.write(e.getKey());
                 fw.write(SEPARATOR);
                 fw.write(e.getValue());
@@ -67,6 +69,26 @@ public class Config {
 
     public static void enableConfigs(boolean enable) {
         enableConfigs = enable;
+    }
+    
+    public Config() {
+        data = new LinkedHashMap<>();
+    }
+    
+    public void put(final String key, final String value) {
+        data.put(key, value);
+    }
+    
+    public Set<Entry<String, String>> entrySet() {
+        return data.entrySet();
+    }
+    
+    public String get(final String key) {
+        return data.get(key);
+    }
+    
+    public boolean isEmpty() {
+        return data.isEmpty();
     }
 
 }

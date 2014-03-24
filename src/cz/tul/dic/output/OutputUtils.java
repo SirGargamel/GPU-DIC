@@ -1,12 +1,11 @@
 package cz.tul.dic.output;
 
+import cz.tul.dic.data.Config;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
@@ -19,8 +18,8 @@ public class OutputUtils {
 
     private static final String CONFIG_EXPORTS = "EXPORT_";
 
-    public static Map<String, String> serializeExports(final Set<ExportTask> exports) {
-        final Map<String, String> result = new HashMap<>();
+    public static Config serializeExports(final Set<ExportTask> exports) {
+        final Config result = new Config();
 
         int i = 0;
         for (ExportTask et : exports) {
@@ -31,10 +30,10 @@ public class OutputUtils {
         return result;
     }
 
-    public static Set<ExportTask> deserializeExports(final Map<String, String> data) {
+    public static Set<ExportTask> deserializeExports(final Config config) {
         final Set<ExportTask> result = new HashSet<>();
 
-        for (Map.Entry<String, String> e : data.entrySet()) {
+        for (Map.Entry<String, String> e : config.entrySet()) {
             if (e.getKey().startsWith(CONFIG_EXPORTS)) {
                 result.add(ExportTask.generateExportTask(e.getValue()));
             } else {
