@@ -177,6 +177,11 @@ public class Computation {
         TaskContainerUtils.setUniformFacetSize(tc, 0, SIZE_DYN);
 
         TaskContainerChecker.checkTaskValidity(tc);
+        
+        Config.saveConfig("taskConfigMinimal", TaskContainerUtils.serializeTaskContainer(tc));
+        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfigMinimal"));
+//            System.out.println(loadedTc);
+        
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
         final String ext = String.format("%02d", SIZE_DYN).concat(".bmp");
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
@@ -197,6 +202,10 @@ public class Computation {
         } catch (ComputationException ex) {
             Logger.error(ex);
         }
+
+        Config.saveConfig("taskConfigFinal", TaskContainerUtils.serializeTaskContainer(tc));
+        loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfigFinal"));
+//            System.out.println(loadedTc);
     }
 
 }

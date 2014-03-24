@@ -20,7 +20,7 @@ import java.util.Set;
 public class TaskContainer implements Serializable {
 
     // input data
-    private final Object input;    
+    private final Object input;
     private final Map<Object, Object> params;
     private final Container<Set<ROI>> rois;
     private final Container<Map<ROI, Integer>> facetSizes;
@@ -119,21 +119,25 @@ public class TaskContainer implements Serializable {
         }
         r.add(roi);
     }
-    
+
     public void setROIs(final Set<ROI> rois, final int round) {
         this.rois.addItem(rois, round);
+    }
+
+    public Map<ROI, Integer> getFacetSizes(final int round) {
+        return facetSizes.getItem(round);
     }
 
     public int getFacetSize(final int round, final ROI roi) {
         final Map<ROI, Integer> m = facetSizes.getItem(round);
         final int result = m == null ? -1 : m.get(roi);
-        return result;        
+        return result;
     }
 
     public void setFacetSizes(final Map<ROI, Integer> rois, final int round) {
         facetSizes.addItem(rois, round);
     }
-    
+
     public void addFacetSize(final int round, final ROI roi, final int facetSize) {
         Map<ROI, Integer> m = facetSizes.getItemPrecise(round);
         if (m == null) {
@@ -150,6 +154,10 @@ public class TaskContainer implements Serializable {
             deformationLimits.addItem(m, round);
         }
         m.put(roi, limits);
+    }
+
+    public Map<ROI, double[]> getDeformationLimits(final int round) {
+        return deformationLimits.getItem(round);
     }
 
     public double[] getDeformationLimits(final int round, final ROI roi) {

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -100,6 +101,8 @@ public class TaskContainerUtils {
         }
         // rois, deformation limits, facetSizes        
         Set<ROI> rois, prevRoi = null;
+        Map<ROI, Integer> fs, prevFs = null;
+        Map<ROI, double[]> limits, prevLimits = null;
         final StringBuilder sb = new StringBuilder();
         for (int round = 0; round < roundCount; round++) {
             rois = tc.getRois(round);
@@ -117,6 +120,31 @@ public class TaskContainerUtils {
 
                 result.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
                 prevRoi = rois;
+            } else {
+                // check if facetSizes or limits have changed
+                fs = tc.getFacetSizes(round);
+                if (fs != prevFs) {
+                    for (ROI roi : rois) {
+                        sb.append(roi.toString());
+                        sb.append(CONFIG_SEPARATOR_PAIRS);
+                        sb.append(toString(tc.getDeformationLimits(round, roi)));
+                        sb.append(CONFIG_SEPARATOR_PAIRS);
+                        sb.append(Integer.toString(tc.getFacetSize(round, roi)));
+                        sb.append(CONFIG_SEPARATOR_FULL);
+                    }
+                }
+
+                limits = tc.getDeformationLimits(round);
+                if (limits != prevLimits) {
+                    for (ROI roi : rois) {
+                        sb.append(roi.toString());
+                        sb.append(CONFIG_SEPARATOR_PAIRS);
+                        sb.append(toString(tc.getDeformationLimits(round, roi)));
+                        sb.append(CONFIG_SEPARATOR_PAIRS);
+                        sb.append(Integer.toString(tc.getFacetSize(round, roi)));
+                        sb.append(CONFIG_SEPARATOR_FULL);
+                    }
+                }
             }
         }
         // parameters
