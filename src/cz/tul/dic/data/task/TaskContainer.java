@@ -2,7 +2,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.roi.Container;
+import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.ROI;
 import java.io.Serializable;
 import java.util.Collections;
@@ -93,7 +93,7 @@ public class TaskContainer implements Serializable {
     }
 
     public void setFacets(final List<Facet> facets, final int round, final ROI roi) {
-        Map<ROI, List<Facet>> m = this.facets.getItem(round);
+        Map<ROI, List<Facet>> m = this.facets.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
             this.facets.addItem(m, round);
@@ -112,7 +112,7 @@ public class TaskContainer implements Serializable {
     }
 
     public void addRoi(final ROI roi, final int round) {
-        Set<ROI> r = rois.getItem(round);
+        Set<ROI> r = rois.getItemPrecise(round);
         if (r == null) {
             r = new HashSet<>(1);
             rois.addItem(r, round);
@@ -125,7 +125,9 @@ public class TaskContainer implements Serializable {
     }
 
     public int getFacetSize(final int round, final ROI roi) {
-        return facetSizes.getItem(round).get(roi);
+        final Map<ROI, Integer> m = facetSizes.getItem(round);
+        final int result = m == null ? -1 : m.get(roi);
+        return result;        
     }
 
     public void setFacetSizes(final Map<ROI, Integer> rois, final int round) {
@@ -133,7 +135,7 @@ public class TaskContainer implements Serializable {
     }
     
     public void addFacetSize(final int round, final ROI roi, final int facetSize) {
-        Map<ROI, Integer> m = facetSizes.getItem(round);
+        Map<ROI, Integer> m = facetSizes.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
             facetSizes.addItem(m, round);
@@ -142,7 +144,7 @@ public class TaskContainer implements Serializable {
     }
 
     public void setDeformationLimits(final double[] limits, final int round, final ROI roi) {
-        Map<ROI, double[]> m = deformationLimits.getItem(round);
+        Map<ROI, double[]> m = deformationLimits.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
             deformationLimits.addItem(m, round);
@@ -157,7 +159,7 @@ public class TaskContainer implements Serializable {
     }
 
     public void setDeformations(final double[] deformations, final int round, final ROI roi) {
-        Map<ROI, double[]> m = this.deformations.getItem(round);
+        Map<ROI, double[]> m = this.deformations.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
             this.deformations.addItem(m, round);
