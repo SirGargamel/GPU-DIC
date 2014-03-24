@@ -105,7 +105,7 @@ public final class Engine {
         
         for (ROI roi : currentROIs) {
             defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
-            kernel.prepareKernel(context, device, tc.getFacetSize(), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength);
+            kernel.prepareKernel(context, device, tc.getFacetSize(round, roi), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength);
             
             facetCount = tc.getFacets(round, roi).size();
             bestResults = new ArrayList<>(facetCount);

@@ -8,6 +8,7 @@ import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -98,10 +99,8 @@ public class TaskContainerUtils {
             result.put(CONFIG_INPUT, sb.toString());
         } else {
             throw new IllegalArgumentException("Unsupported type of input.");
-        }
-        // facet size
-        result.put(CONFIG_SIZE, Integer.toString(tc.getFacetSize()));
-        // rois, deformation limits        
+        }                
+        // rois, deformation limits, facetSizes        
         Set<ROI> rois, prevRoi = null;
         final StringBuilder sb = new StringBuilder();
         for (int round = 0; round < roundCount; round++) {
@@ -112,6 +111,8 @@ public class TaskContainerUtils {
                     sb.append(roi.toString());
                     sb.append(CONFIG_SEPARATOR_PAIRS);
                     sb.append(toString(tc.getDeformationLimits(round, roi)));
+                    sb.append(CONFIG_SEPARATOR_PAIRS);
+                    sb.append(Integer.toString(tc.getFacetSize(round, roi)));
                     sb.append(CONFIG_SEPARATOR_FULL);
                 }
                 sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
@@ -159,9 +160,7 @@ public class TaskContainerUtils {
         } else {
             // video file
             result = new TaskContainer(new File(input));
-        }
-        // facet size
-        result.setFacetSize(Integer.valueOf(data.get(CONFIG_SIZE)));
+        }        
         // rois, exports, parameters
         String key;
         TaskParameter tp;
@@ -175,12 +174,13 @@ public class TaskContainerUtils {
                 final String[] splitPairs = e.getValue().split(CONFIG_SEPARATOR_FULL);
                 for (String s : splitPairs) {
                     split = s.split(CONFIG_SEPARATOR_PAIRS);
-                    if (split.length == 2) {
+                    if (split.length == 3) {
                         roi = ROI.generateROI(split[0]);
                         result.addRoi(roi, index);
                         result.setDeformationLimits(doubleArrayFromString(split[1]), index, roi);
+                        result.addFacetSize(index, roi, Integer.decode(split[2]));
                     } else {
-                        throw new IllegalArgumentException("Illegal roi-limits pair - " + split);
+                        throw new IllegalArgumentException("Illegal roi-limits pair - " + Arrays.toString(split));
                     }
                 }
             } else if (key.startsWith(CONFIG_PARAMETERS)) {
@@ -234,6 +234,12 @@ public class TaskContainerUtils {
         }
 
         return result;
+    }
+    
+    public static void setUniformFacetSize(final TaskContainer tc, final int round, final int facetSize) {
+        for (ROI roi : tc.getRois(round)) {
+            tc.addFacetSize(round, roi, facetSize);
+        }
     }
 
 }

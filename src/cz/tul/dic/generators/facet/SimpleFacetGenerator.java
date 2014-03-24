@@ -21,22 +21,24 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
         } else {
             spacing = (int) o;
         }
-        final int facetSize = tc.getFacetSize();
         final int width = tc.getImage(0).getWidth();
         final int height = tc.getImage(0).getHeight();
 
-        if (spacing >= facetSize) {
-            throw new IllegalArgumentException("Spacing cant must be smaller than facet size.");
-        }
-
-        final int halfSize = facetSize / 2;
         final Set<ROI> rois = tc.getRois(round);
 
         List<Facet> result;
-        int roiW, roiH, wCount, hCount, gapX, gapY, centerX, centerY;
+        int roiW, roiH, wCount, hCount, gapX, gapY,
+                centerX, centerY, facetSize, halfSize;
         for (ROI roi : rois) {
             result = new ArrayList<>();
-            
+
+            facetSize = tc.getFacetSize(round, roi);
+            halfSize = facetSize / 2;
+
+            if (spacing >= facetSize) {
+                throw new IllegalArgumentException("Spacing cant must be smaller than facet size.");
+            }
+
             roiW = roi.getWidth();
             roiH = roi.getHeight();
 
@@ -52,15 +54,15 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
                 for (int x = 0; x < wCount; x++) {
                     centerX = gapX + roi.getX1() + halfSize + (x * (facetSize - spacing));
 
-                    if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height) 
+                    if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height)
                             && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
                         result.add(Facet.createFacet(facetSize, centerX, centerY));
                     }
                 }
             }
-            
+
             tc.setFacets(result, round, roi);
-        }        
+        }
     }
 
     @Override

@@ -15,7 +15,7 @@ public class FacetDeformationAnalyzator {
     public static double determineROIShift(final TaskContainer tc, final int round, final ROI roi) {
         final List<Facet> facets = tc.getFacets(round, roi);
         final double[][][] results = tc.getPerPixelResult(round);
-        final int facetSize = tc.getFacetSize();
+        final int facetSize = tc.getFacetSize(round, roi);
         final int facetSize2 = facetSize * facetSize;
 
         int[] counterPos = new int[10];

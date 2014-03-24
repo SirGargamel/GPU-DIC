@@ -7,12 +7,15 @@ import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.util.Set;
+import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
 public class TaskContainerChecker {
+    
+    private static final int DEFAULT_FACET_SIZE = 10;
 
     public static void checkTaskValidity(final TaskContainer tc) {
         // null data
@@ -22,7 +25,7 @@ public class TaskContainerChecker {
         }
 
         Image img;
-        Set<ROI> rois;
+        Set<ROI> rois;        
         for (int round = 0; round < roundCount; round++) {
             img = tc.getImage(round);
             if (img == null) {
@@ -31,35 +34,34 @@ public class TaskContainerChecker {
 
             rois = tc.getRois(round);
             if (rois == null || rois.isEmpty()) {
-                System.err.println("Adding default ROI.");
+                Logger.warn("Adding default ROI.");
                 tc.addRoi(new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1), round);
-            } else {
-                for (ROI roi : rois) {
-//                    if (roi.getX1() < 0 || roi.getY1() < 0) {
-//                        throw new IllegalArgumentException("ROI coords must be positive.");
-//                    }
-//                    if (roi.getX2() >= img.getWidth() || roi.getY2() > img.getHeight()) {
-//                        throw new IllegalArgumentException("ROI cannot be larger than image.");
-//                    }
+            }
+            
+            for (ROI roi : tc.getRois(round)) {
+                try {
+                    tc.getFacetSize(round, roi);
+                } catch (NullPointerException ex) {
+                    tc.addFacetSize(round, roi, DEFAULT_FACET_SIZE);
                 }
             }
         }
 
         final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
         if (ts == null) {
-            System.err.println("Adding default TaskSplit.");
+            Logger.warn("Adding default TaskSplit.");
             tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.NONE);
         }
 
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
         if (kernel == null) {
-            System.err.println("Adding default kernel.");
+            Logger.warn("Adding default kernel.");
             tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
         }
         
         final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
         if (facetGenMode == null) {
-            System.err.println("Adding default facet generator.");
+            Logger.warn("Adding default facet generator.");
             tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
             tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
         }

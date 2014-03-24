@@ -12,8 +12,6 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.KernelType;
-import cz.tul.dic.generators.DeformationGenerator;
-import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.Direction;
@@ -68,24 +66,13 @@ public class Computation {
     }
 
     public static void commenceComputationStatic() throws IOException {
-        final List<TaskContainer> tcs = new LinkedList<>();
-
-        for (int size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_STEP) {
-//            for (KernelType kt : KernelType.values()) {
-//                tcs.add(generateTask(IN_IMAGES, size, kt));
-//            }            
-//            tcs.add(generateTask(IN_IMAGES, size, KernelType.CL_1D_I_V_LL_MC));
-            tcs.add(generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D));
-        }
-
-        // compute task        
         final Engine engine = new Engine();
 
         long time;
         TaskContainer tc, loadedTc;
         Set<ExportTask> loadedExports;
-        while (!tcs.isEmpty()) {
-            tc = tcs.get(0);
+        for (int size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_STEP) {
+            tc = generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D);
 
             InputLoader.loadInput(tc);
 
@@ -107,9 +94,7 @@ public class Computation {
             for (ExportTask et : exports) {
                 Exporter.export(et, tc);
             }
-            Logger.info("Finished task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-
-            tcs.remove(0);
+            Logger.info("Finished task " + size + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
         }
         Logger.info("All done !!!");
     }
@@ -126,7 +111,7 @@ public class Computation {
         tc.addRoi(r3, 0);
 
         // select facet size
-        tc.setFacetSize(facetSize);
+        TaskContainerUtils.setUniformFacetSize(tc, 0, facetSize);
 
         // facets
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
@@ -163,7 +148,7 @@ public class Computation {
         }
 
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
-        final String ext = String.format("%02d", tc.getFacetSize()).concat(".bmp");
+        final String ext = String.format("%02d", tc.getFacetSize(0, rect.get(0))).concat(".bmp");
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
             exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), new int[]{round}));
             exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), new int[]{round}));
@@ -184,16 +169,16 @@ public class Computation {
         TaskContainer tc = new TaskContainer(IN_VIDEO_REAL);
         InputLoader.loadInput(tc);
 
-        tc.setFacetSize(SIZE_DYN);
-
         tc.addRoi(new CircularROI(108, 12, 26), 0);
         tc.addRoi(new CircularROI(201, 7, 26), 0);
         tc.addRoi(new CircularROI(108, 86, 26), 0);
         tc.addRoi(new CircularROI(202, 84, 26), 0);
 
+        TaskContainerUtils.setUniformFacetSize(tc, 0, SIZE_DYN);
+
         TaskContainerChecker.checkTaskValidity(tc);
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
-        final String ext = String.format("%02d", tc.getFacetSize()).concat(".bmp");
+        final String ext = String.format("%02d", SIZE_DYN).concat(".bmp");
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
             exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), new int[]{round}));
             exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), new int[]{round}));
@@ -204,7 +189,7 @@ public class Computation {
             long time = System.nanoTime();
             ComplextTaskSolver.solveComplexTask(tc);
             time = System.nanoTime() - time;
-            Logger.info("Finished dynamic task " + tc.getFacetSize() + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+            Logger.info("Finished dynamic task " + SIZE_DYN + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
             for (ExportTask et : exports) {
                 Exporter.export(et, tc);

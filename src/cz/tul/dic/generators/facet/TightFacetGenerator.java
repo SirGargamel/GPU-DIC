@@ -21,9 +21,7 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
         } else {
             spacing = (int) o;
         }
-        final int facetSize = tc.getFacetSize();
-        final int halfSize = facetSize / 2;
-        
+
         final int width = tc.getImage(0).getWidth();
         final int height = tc.getImage(0).getHeight();
 
@@ -31,9 +29,17 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
         final Set<ROI> rois = tc.getRois(round);
 
         List<Facet> result;
-        int roiW, roiH, wCount, hCount, centerX, centerY, gapX, gapY;
+        int roiW, roiH, wCount, hCount, centerX, centerY,
+                gapX, gapY, facetSize, halfSize;
         for (ROI roi : rois) {
             result = new ArrayList<>();
+
+            facetSize = tc.getFacetSize(round, roi);
+            halfSize = facetSize / 2;
+
+            if (spacing >= facetSize) {
+                throw new IllegalArgumentException("Spacing cant must be smaller than facet size.");
+            }
 
             roiW = roi.getWidth();
             roiH = roi.getHeight();
@@ -50,7 +56,7 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
                 for (int x = 0; x < wCount; x++) {
                     centerX = gapY + roi.getX1() + halfSize + (x * spacing);
 
-                    if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height) 
+                    if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height)
                             && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
                         result.add(Facet.createFacet(facetSize, centerX, centerY));
                     }
@@ -59,7 +65,7 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
 
             tc.setFacets(result, round, roi);
         }
-    }        
+    }
 
     @Override
     public FacetGeneratorMode getMode() {

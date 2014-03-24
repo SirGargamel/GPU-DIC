@@ -29,8 +29,8 @@ public class ComplextTaskSolver {
     private static final double[] DEFAULT_DEF_RECT = new double[]{-4, 4, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};
 
     public static void solveComplexTask(final TaskContainer tc) throws IOException, ComputationException {
-        final Engine engine = new Engine();
-
+        final Engine engine = new Engine();        
+        
         // check task
         //// 4x CircleROI is required
         Set<ROI> rois = tc.getRois(0);
@@ -44,11 +44,13 @@ public class ComplextTaskSolver {
             throw new ComputationException(ComputationExceptionCause.NOT_ENOUGH_ROIS, Integer.toString(counter));
         }
         // generate rectangle ROI for round 0
+        final int facetSize = tc.getFacetSize(0, rois.iterator().next());
         Image img = tc.getImage(0);
         List<ROI> sortedROIs = new ArrayList<>(rois);
         Collections.sort(sortedROIs, new RoiSorter());
         ROI rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
         tc.addRoi(rectangleRoi, 0);
+        tc.addFacetSize(0, rectangleRoi, facetSize);
         // generate possible deformation for ROIs
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
@@ -88,6 +90,7 @@ public class ComplextTaskSolver {
             rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
             rois.add(rectangleRoi);
             tc.setROIs(rois, round);
+            TaskContainerUtils.setUniformFacetSize(tc, round, facetSize);
             // generate limits
             //// TODO generate limits dynamically according to previous results
             for (ROI roi : rois) {

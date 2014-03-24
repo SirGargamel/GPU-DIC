@@ -20,10 +20,10 @@ import java.util.Set;
 public class TaskContainer implements Serializable {
 
     // input data
-    private final Object input;
-    private int facetSize;
+    private final Object input;    
     private final Map<Object, Object> params;
     private final Container<Set<ROI>> rois;
+    private final Container<Map<ROI, Integer>> facetSizes;
     private final Container<Map<ROI, double[]>> deformationLimits;
     // generated data
     private final List<Image> images;
@@ -36,6 +36,7 @@ public class TaskContainer implements Serializable {
         params = new HashMap<>();
         images = new LinkedList<>();
         rois = new Container<>();
+        facetSizes = new Container<>();
         facets = new Container<>();
         results = new LinkedList<>();
         finalResults = new LinkedList<>();
@@ -123,12 +124,21 @@ public class TaskContainer implements Serializable {
         this.rois.addItem(rois, round);
     }
 
-    public int getFacetSize() {
-        return facetSize;
+    public int getFacetSize(final int round, final ROI roi) {
+        return facetSizes.getItem(round).get(roi);
     }
 
-    public void setFacetSize(final int facetSize) {
-        this.facetSize = facetSize;
+    public void setFacetSizes(final Map<ROI, Integer> rois, final int round) {
+        facetSizes.addItem(rois, round);
+    }
+    
+    public void addFacetSize(final int round, final ROI roi, final int facetSize) {
+        Map<ROI, Integer> m = facetSizes.getItem(round);
+        if (m == null) {
+            m = new HashMap<>();
+            facetSizes.addItem(m, round);
+        }
+        m.put(roi, facetSize);
     }
 
     public void setDeformationLimits(final double[] limits, final int round, final ROI roi) {
