@@ -11,9 +11,9 @@ public abstract class ROI {
     public static ROI generateROI(final String data) {
         final String[] split = data.split(SEPARATOR);
         if (split.length == 4) {
-            return new RectangleROI(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]), Integer.valueOf(split[3]));
+            return new RectangleROI(Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]), Double.valueOf(split[3]));
         } else if (split.length == 3) {
-            return new CircularROI(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+            return new CircularROI(Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]));
         } else {
             throw new IllegalArgumentException("3 or 4 values required for ROI - " + data);
         }
