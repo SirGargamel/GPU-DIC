@@ -106,7 +106,9 @@ public class TaskContainerUtils {
         final StringBuilder sb = new StringBuilder();
         for (int round = 0; round < roundCount; round++) {
             rois = tc.getRois(round);
-            if (rois != prevRoi) {
+            fs = tc.getFacetSizes(round);
+            limits = tc.getDeformationLimits(round);
+            if (rois != prevRoi || fs != prevFs || limits != prevLimits) {
                 sb.setLength(0);
                 for (ROI roi : rois) {
                     sb.append(roi.toString());
@@ -120,31 +122,6 @@ public class TaskContainerUtils {
 
                 result.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
                 prevRoi = rois;
-            } else {
-                // check if facetSizes or limits have changed
-                fs = tc.getFacetSizes(round);
-                if (fs != prevFs) {
-                    for (ROI roi : rois) {
-                        sb.append(roi.toString());
-                        sb.append(CONFIG_SEPARATOR_PAIRS);
-                        sb.append(toString(tc.getDeformationLimits(round, roi)));
-                        sb.append(CONFIG_SEPARATOR_PAIRS);
-                        sb.append(Integer.toString(tc.getFacetSize(round, roi)));
-                        sb.append(CONFIG_SEPARATOR_FULL);
-                    }
-                }
-
-                limits = tc.getDeformationLimits(round);
-                if (limits != prevLimits) {
-                    for (ROI roi : rois) {
-                        sb.append(roi.toString());
-                        sb.append(CONFIG_SEPARATOR_PAIRS);
-                        sb.append(toString(tc.getDeformationLimits(round, roi)));
-                        sb.append(CONFIG_SEPARATOR_PAIRS);
-                        sb.append(Integer.toString(tc.getFacetSize(round, roi)));
-                        sb.append(CONFIG_SEPARATOR_FULL);
-                    }
-                }
             }
         }
         // parameters
