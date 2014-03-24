@@ -16,7 +16,7 @@ public class DataExportSequence implements IDataExport<List<double[][]>> {
         final DataExportMap mapExporter = new DataExportMap();
 
         for (int i = 0; i < roundCount; i++) {
-            result.add(mapExporter.exportData(tc, direction, dataParams));
+            result.add(mapExporter.exportData(tc, direction, new int[] {i}));
         }
 
         return result;
