@@ -62,6 +62,7 @@ public class Exporter {
         }
         targetExporter.exportData(
                 data,
+                et.getDirection(),
                 et.getTargetParam(),
                 et.getDataParams(),
                 tc);

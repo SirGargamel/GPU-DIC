@@ -2,6 +2,7 @@ package cz.tul.dic.output.target;
 
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportMode;
 import java.io.File;
 import java.io.FileWriter;
@@ -16,7 +17,7 @@ public class TargetExportCsv implements ITargetExport {
     private static final Format numberFormat = new DecimalFormat("###.##");
 
     @Override
-    public void exportData(Object data, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
+    public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
         if (data instanceof double[]) {            
             // export image
             exportLine((double[]) data, targetParam);
