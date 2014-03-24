@@ -10,21 +10,20 @@ import java.io.File;
  * @author Petr Jecmen
  */
 public enum TaskParameter {
-    
+
     DIR(File.class),
     FACET_GENERATOR_MODE(FacetGeneratorMode.class),
-    FACET_GENERATOR_SPACING(Integer.class),    
+    FACET_GENERATOR_SPACING(Integer.class),
     KERNEL(KernelType.class),
     TASK_SPLIT_VARIANT(TaskSplit.class),
-    TASK_SPLIT_VALUE(Integer.class),
-    ;
-    
+    TASK_SPLIT_VALUE(Integer.class),;
+
     private final Class type;
-    
+
     TaskParameter(final Class cls) {
         this.type = cls;
     }
-            
+
     public Class getType() {
         return type;
     }

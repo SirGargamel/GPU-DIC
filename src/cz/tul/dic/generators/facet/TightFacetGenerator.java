@@ -10,20 +10,15 @@ import java.util.Set;
 
 public class TightFacetGenerator extends AbstractFacetGenerator {
 
-    private static final int DEFAULT_SPACING = 2;
+    private static final int DEFAULT_SPACING = 1;
 
     @Override
     public void generateFacets(TaskContainer tc, int round) {
         final Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
-        final int spacing;
-        if (o == null) {
-            spacing = DEFAULT_SPACING;
-        } else {
-            spacing = (int) o;
-        }
+        final int spacing = o == null ? DEFAULT_SPACING : (int) o;
 
-        final int width = tc.getImage(0).getWidth();
-        final int height = tc.getImage(0).getHeight();
+        final int width = tc.getImage(round).getWidth();
+        final int height = tc.getImage(round).getHeight();
 
         // generate centers
         final Set<ROI> rois = tc.getRois(round);

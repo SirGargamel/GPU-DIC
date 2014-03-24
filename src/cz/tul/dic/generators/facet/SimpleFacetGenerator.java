@@ -15,14 +15,10 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
     @Override
     public void generateFacets(TaskContainer tc, final int round) {
         Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
-        final int spacing;
-        if (o == null) {
-            spacing = DEFAULT_SPACING;
-        } else {
-            spacing = (int) o;
-        }
-        final int width = tc.getImage(0).getWidth();
-        final int height = tc.getImage(0).getHeight();
+        final int spacing = o == null ? DEFAULT_SPACING : (int) o;
+
+        final int width = tc.getImage(round).getWidth();
+        final int height = tc.getImage(round).getHeight();
 
         final Set<ROI> rois = tc.getRois(round);
 
