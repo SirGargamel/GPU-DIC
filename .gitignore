@@ -2,3 +2,5 @@
 /nbproject/
 /dist/
 *.log
+/build.xml
+/manifest.mf
