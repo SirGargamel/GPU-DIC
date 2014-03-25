@@ -64,26 +64,8 @@ public class FacetDeformationAnalyzator {
                 val = -i;
             }
         }
-        
+
         return val / 10.0;
-
-//        double result = 0, tmp;
-//        count = 0;
-//        for (Facet f : facets) {
-//            facetData = f.getData();
-//            for (int i = 0; i < facetSize2; i++) {
-//                tmp = results[facetData[i * 2]][facetData[i * 2 + 1]][Coordinates.Y];
-//                if (tmp >= val && (tmp - val) < 0.5) {
-//                    result += tmp;
-//                    count++;
-//                } else if (tmp < val && (val - tmp) <= 0.5) {
-//                    result += tmp;
-//                    count++;
-//                }
-//            }
-//        }
-
-//        return result / (double) count;
     }
 
 }
