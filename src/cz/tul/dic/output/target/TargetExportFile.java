@@ -84,13 +84,15 @@ public class TargetExportFile implements ITargetExport {
             throw new IllegalArgumentException("Provided data length and round count mismatch.");
         }
         
-        double globalMax = -Double.MAX_VALUE, val;
+        double globalMaxPos = -Double.MAX_VALUE, globalMaxNeg = Double.MAX_VALUE;
         for (double[][] daa : data) {
             for (double[] da : daa) {
-                for (double d : da) {
-                    val = Math.abs(d);
-                    if (val > globalMax) {
-                        globalMax = val;
+                for (double d : da) {                    
+                    if (d > globalMaxPos) {
+                        globalMaxPos = d;
+                    }
+                    if (d < globalMaxNeg) {
+                        globalMaxNeg = d;
                     }
                 }
             }
@@ -108,7 +110,7 @@ public class TargetExportFile implements ITargetExport {
 //            exportImage(data.get(i), direction, target, new int[]{i}, tc);                        
             Utils.ensureDirectoryExistence(target);
             final BufferedImage background = tc.getImage(i);
-            final BufferedImage overlay = ExportUtils.createImageFromMap(data.get(i), direction, globalMax);
+            final BufferedImage overlay = ExportUtils.createImageFromMap(data.get(i), direction, globalMaxPos, globalMaxNeg);
 
             ImageIO.write(ExportUtils.overlayImage(background, overlay), "BMP", target);
         }

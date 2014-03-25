@@ -89,13 +89,14 @@ public class ExportUtils {
         final int width = mapData.length;
         final int height = mapData[1].length;
 
-        double max = -Double.MAX_VALUE;
-        double val;
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                val = Math.abs(mapData[x][y]);
-                if (val > max) {
-                    max = val;
+        double globalMaxPos = -Double.MAX_VALUE, globalMaxNeg = Double.MAX_VALUE;
+        for (double[] da : mapData) {
+            for (double d : da) {
+                if (d > globalMaxPos) {
+                    globalMaxPos = d;
+                }
+                if (d < globalMaxNeg) {
+                    globalMaxNeg = d;
                 }
             }
         }
@@ -107,7 +108,7 @@ public class ExportUtils {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                out.setRGB(x, y, deformationToRGB(mapData[x][y], max));
+                out.setRGB(x, y, deformationToRGB(mapData[x][y], globalMaxPos, globalMaxNeg));
             }
         }
 
@@ -116,11 +117,11 @@ public class ExportUtils {
             case DABS:
             case Y:
             case DY:
-                drawVertivalBar(out, max);
+                drawVertivalBar(out, globalMaxPos, globalMaxNeg);
                 break;
             case X:
             case DX:
-                drawHorizontalBar(out, max);
+                drawHorizontalBar(out, globalMaxPos, globalMaxNeg);
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported direction.");
@@ -128,14 +129,14 @@ public class ExportUtils {
 
         return out;
     }
-    
-    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, double max) {
+
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double maxPos, final double maxNeg) {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
 
         final int width = mapData.length;
-        final int height = mapData[1].length;        
+        final int height = mapData[1].length;
 
         final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
         Graphics2D g = out.createGraphics();
@@ -144,7 +145,7 @@ public class ExportUtils {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                out.setRGB(x, y, deformationToRGB(mapData[x][y], max));
+                out.setRGB(x, y, deformationToRGB(mapData[x][y], maxPos, maxNeg));
             }
         }
 
@@ -153,11 +154,11 @@ public class ExportUtils {
             case DABS:
             case Y:
             case DY:
-                drawVertivalBar(out, max);
+                drawVertivalBar(out, maxPos, maxNeg);
                 break;
             case X:
             case DX:
-                drawHorizontalBar(out, max);
+                drawHorizontalBar(out, maxPos, maxNeg);
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported direction.");
@@ -166,20 +167,20 @@ public class ExportUtils {
         return out;
     }
 
-    private static int deformationToRGB(final double val, final double max) {
+    private static int deformationToRGB(final double val, final double maxPos, final double maxNeg) {
         float h, s = 1, v = 1;
         if (val == 0) {
             h = 0.0f;
             v = 0.0f;
         } else if (val < 0) {
-            h = (float) ((1 - (-val) / max) * 0.2);
+            h = (float) ((1 - (-val) / maxNeg) * 0.2);
         } else {
-            h = (float) (val / max * 0.4 + 0.3);
+            h = (float) (val / maxPos * 0.4 + 0.3);
         }
         return Color.HSBtoRGB(h, s, v);
     }
 
-    private static void drawVertivalBar(final BufferedImage image, final double max) {
+    private static void drawVertivalBar(final BufferedImage image, final double maxPos, final double maxNeg) {
         final int height = image.getHeight();
         final int halfHeight = height / 2;
 
@@ -189,10 +190,10 @@ public class ExportUtils {
         final int x = image.getWidth() - 1 - BAR_SIZE;
 
         for (int y = 0; y < halfHeight; y++) {
-            g.setColor(new Color(deformationToRGB(y, halfHeight - 1)));
+            g.setColor(new Color(deformationToRGB(y, halfHeight - 1, 0)));
             g.drawRect(x, halfHeight + y, BAR_SIZE, 1);
 
-            g.setColor(new Color(deformationToRGB(-y, halfHeight - 1)));
+            g.setColor(new Color(deformationToRGB(-y, 0, halfHeight - 1)));
             g.drawRect(x, halfHeight - 1 - y, BAR_SIZE, 1);
         }
 
@@ -203,24 +204,24 @@ public class ExportUtils {
         val = nf.format(0.0);
         g.drawString(val, width - metrics.stringWidth(val), halfHeight - metrics.getHeight() / 2);
 
-        val = nf.format(max / 3.0);
+        val = nf.format(maxPos / 3.0);
         g.drawString(val, width - metrics.stringWidth(val), halfHeight + halfHeight / 3);
-        val = nf.format(max / 3.0 * 2);
+        val = nf.format(maxPos / 3.0 * 2);
         g.drawString(val, width - metrics.stringWidth(val), halfHeight + halfHeight / 3 * 2);
-        val = nf.format(max);
+        val = nf.format(maxPos);
         g.drawString(val, width - metrics.stringWidth(val), height - 2);
 
-        val = nf.format(-max / 3.0);
+        val = nf.format(maxNeg / 3.0);
         g.drawString(val, width - metrics.stringWidth(val), halfHeight - halfHeight / 3);
-        val = nf.format(-max / 3.0 * 2);
+        val = nf.format(maxNeg / 3.0 * 2);
         g.drawString(val, width - metrics.stringWidth(val), halfHeight - halfHeight / 3 * 2);
-        val = nf.format(-max);
+        val = nf.format(maxNeg);
         g.drawString(val, width - metrics.stringWidth(val), metrics.getHeight() / 3 * 2);
 
         g.dispose();
     }
 
-    private static void drawHorizontalBar(final BufferedImage image, final double max) {
+    private static void drawHorizontalBar(final BufferedImage image, final double maxPos, final double maxNeg) {
         final int width = image.getWidth();
         final int halfWidth = width / 2;
 
@@ -230,10 +231,10 @@ public class ExportUtils {
         final int y = image.getHeight() - 1 - BAR_SIZE;
 
         for (int x = 0; x < halfWidth; x++) {
-            g.setColor(new Color(deformationToRGB(x, halfWidth - 1)));
+            g.setColor(new Color(deformationToRGB(x, halfWidth - 1, 0)));
             g.drawRect(x + halfWidth, y, 1, BAR_SIZE);
 
-            g.setColor(new Color(deformationToRGB(-x, halfWidth - 1)));
+            g.setColor(new Color(deformationToRGB(-x, 0, halfWidth - 1)));
             g.drawRect(halfWidth - 1 - x, y, 1, BAR_SIZE);
         }
 
@@ -244,14 +245,14 @@ public class ExportUtils {
         val = nf.format(0.0);
         g.drawString("0.0", halfWidth - metrics.stringWidth(val) / 2, tY);
 
-        g.drawString(nf.format(max / 3.0), halfWidth + halfWidth / 3, tY);
-        g.drawString(nf.format(max / 3.0 * 2), halfWidth + halfWidth / 3 * 2, tY);
-        val = nf.format(max);
+        g.drawString(nf.format(maxPos / 3.0), halfWidth + halfWidth / 3, tY);
+        g.drawString(nf.format(maxPos / 3.0 * 2), halfWidth + halfWidth / 3 * 2, tY);
+        val = nf.format(maxPos);
         g.drawString(val, width - metrics.stringWidth(val), tY);
 
-        g.drawString(nf.format(-max / 3.0), halfWidth - halfWidth / 3, tY);
-        g.drawString(nf.format(-max / 3.0 * 2), halfWidth - halfWidth / 3 * 2, tY);
-        g.drawString(nf.format(-max), 0, tY);
+        g.drawString(nf.format(maxNeg / 3.0), halfWidth - halfWidth / 3, tY);
+        g.drawString(nf.format(maxNeg / 3.0 * 2), halfWidth - halfWidth / 3 * 2, tY);
+        g.drawString(nf.format(maxNeg), 0, tY);
 
         g.dispose();
     }
