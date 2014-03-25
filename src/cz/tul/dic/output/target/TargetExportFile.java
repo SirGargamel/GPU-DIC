@@ -18,6 +18,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 import javax.imageio.ImageIO;
 
@@ -31,7 +33,7 @@ public class TargetExportFile implements ITargetExport {
     private static final String SCRIPT_NAME = "scriptVideoJoin.vcf";
     private static final String SCRIPT_FILE = "%FILE%";
     private static final String SCRIPT_TARGET = "%TARGET%";
-    private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
+    private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");    
 
     @Override
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException {
@@ -82,15 +84,21 @@ public class TargetExportFile implements ITargetExport {
             throw new IllegalArgumentException("Provided data length and round count mismatch.");
         }
 
+        final int posCount = ((int) Math.log10(roundCount)) + 1;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < posCount; i++) {
+            sb.append("0");
+        }
+        final NumberFormat nf = new DecimalFormat(sb.toString());
         File target;
         for (int i = 0; i < roundCount; i++) {
-            target = new File(temp.getAbsolutePath() + File.separator + name + i + IMAGE_EXTENSION);
+            target = new File(temp.getAbsolutePath() + File.separator + name + nf.format(i) + IMAGE_EXTENSION);
             exportImage(data.get(i), direction, target, new int[]{i}, tc);
 
         }
         // prepare script
         String script = loadScript();
-        script = script.replace(SCRIPT_FILE, temp.getAbsolutePath() + File.separator + name + "0" + IMAGE_EXTENSION);
+        script = script.replace(SCRIPT_FILE, temp.getAbsolutePath() + File.separator + name + nf.format(0) + IMAGE_EXTENSION);
         script = script.replace(SCRIPT_TARGET, out.getAbsolutePath());
         final String scriptPath = temp.getAbsolutePath().concat(File.separator).concat(SCRIPT_NAME);
         saveScript(script, new File(scriptPath));
