@@ -88,7 +88,7 @@ public final class Engine {
     public void computeRound(final TaskContainer tc, final int round) throws IOException {
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         int facetCount, defArrayLength;
-        List<double[]> bestResults;                
+        List<double[][]> bestResults;                
         
         final Set<ROI> currentROIs = tc.getRois(round);
         if (!currentROIs.equals(tc.getRois(round - 1)) || TaskContainerUtils.getAllFacets(tc, round).isEmpty()) {
@@ -130,7 +130,7 @@ public final class Engine {
         Logger.trace("Computed round {0}.", round + 1);
     }
     
-    private void pickBestResultsForTask(final ComputationTask task, final List<double[]> bestResults, final TaskContainer tc, final int round, final ROI roi) {
+    private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final TaskContainer tc, final int round, final ROI roi) {
         final List<Facet> globalFacets = tc.getFacets(round, roi);
         final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc, round, roi);
         
@@ -140,8 +140,9 @@ public final class Engine {
         
         float val, best;
         final List<Integer> candidates = new ArrayList<>();
-        int baseIndex, bestIndex, globalFacetIndex;
+        int baseIndex, globalFacetIndex;
         float[] taskResults;
+        double[][] bestResult;
         for (int localFacetIndex = 0; localFacetIndex < facetCount; localFacetIndex++) {
             best = -Float.MAX_VALUE;
             
@@ -167,14 +168,18 @@ public final class Engine {
             
             if (candidates.isEmpty()) {
                 Logger.warn("No best value found for facet nr." + globalFacetIndex);
-                bestResults.set(globalFacetIndex, new double[]{0, 0});
+                bestResults.set(globalFacetIndex, new double[][]{{0, 0}});
             } else {
                 if (candidates.size() > 1) {
                     Collections.sort(candidates, candidatesComparator);
-                }
-                bestIndex = candidates.get(0);
+                }                
                 
-                bestResults.set(globalFacetIndex, TaskContainerUtils.extractDeformation(tc, bestIndex, round, roi));
+                bestResult = new double[candidates.size()][];
+                for (int i = 0; i < bestResult.length; i++) {
+                    bestResult[i] = TaskContainerUtils.extractDeformation(tc, candidates.get(i), round, roi);
+                }
+                
+                bestResults.set(globalFacetIndex, bestResult);
             }
         }
     }
@@ -188,7 +193,7 @@ public final class Engine {
         final int[][] counter = new int[width][height];
         
         List<Facet> facets;
-        List<double[]> results;
+        List<double[][]> results;
         Facet f;
         double[] d;
         int x, y;
@@ -198,11 +203,11 @@ public final class Engine {
             facets = tc.getFacets(round, roi);
             results = tc.getResults(round, roi);
             
-            degree = DeformationUtils.getDegree(results.get(0));
+            degree = DeformationUtils.getDegree(results.get(0)[0]);
             
             for (int i = 0; i < facets.size(); i++) {
                 f = facets.get(i);
-                d = results.get(i);
+                d = results.get(i)[0];
                 
                 deformedFacet = FacetUtils.deformFacet(f, d, degree);
                 for (Entry<int[], double[]> e : deformedFacet.entrySet()) {

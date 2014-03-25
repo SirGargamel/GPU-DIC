@@ -29,7 +29,7 @@ public class TaskContainer implements Serializable {
     private final List<Image> images;
     private final Container<Map<ROI, List<Facet>>> facets;
     private final Container<Map<ROI, double[]>> deformations;
-    private final List<Map<ROI, List<double[]>>> results;
+    private final List<Map<ROI, List<double[][]>>> results;
     private final List<double[][][]> finalResults;
 
     public TaskContainer(final Object input) {
@@ -182,12 +182,12 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public void setResult(final List<double[]> result, final int round, final ROI roi) {
+    public void setResult(final List<double[][]> result, final int round, final ROI roi) {
         while (results.size() <= round) {
             results.add(null);
         }
 
-        Map<ROI, List<double[]>> m = results.get(round);
+        Map<ROI, List<double[][]>> m = results.get(round);
         if (m == null) {
             m = new HashMap<>();
             results.add(round, m);
@@ -196,9 +196,9 @@ public class TaskContainer implements Serializable {
         m.put(roi, result);
     }
 
-    public List<double[]> getResults(final int round, final ROI roi) {
-        final Map<ROI, List<double[]>> m = results.get(round);
-        final List<double[]> result = m == null ? null : m.get(roi);
+    public List<double[][]> getResults(final int round, final ROI roi) {
+        final Map<ROI, List<double[][]>> m = results.get(round);
+        final List<double[][]> result = m == null ? null : m.get(roi);
         return result;
     }
 
