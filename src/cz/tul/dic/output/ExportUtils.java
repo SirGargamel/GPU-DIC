@@ -20,6 +20,7 @@ public class ExportUtils {
     private static final Color BACKGROUND_COLOR = Color.BLACK;
     private static final int BAR_SIZE = 20;
     private static final NumberFormat nf = new DecimalFormat("0.0");
+    private static final double BAR_LIMIT = 0.001;
 
     public static double calculateDisplacement(final double[] def, final Direction dir) {
         double result;
@@ -89,7 +90,7 @@ public class ExportUtils {
         final int width = mapData.length;
         final int height = mapData[1].length;
 
-        double globalMaxPos = -Double.MAX_VALUE, globalMaxNeg = Double.MAX_VALUE;
+        double globalMaxPos = 0, globalMaxNeg = 0;
         for (double[] da : mapData) {
             for (double d : da) {
                 if (d > globalMaxPos) {
@@ -115,6 +116,8 @@ public class ExportUtils {
         switch (dir) {
             case ABS:
             case DABS:
+                drawVertivalBar(out, globalMaxPos);
+                break;
             case Y:
             case DY:
                 drawVertivalBar(out, globalMaxPos, globalMaxNeg);
@@ -180,6 +183,42 @@ public class ExportUtils {
         return Color.HSBtoRGB(h, s, v);
     }
 
+    private static void drawVertivalBar(final BufferedImage image, final double max) {
+        final int height = image.getHeight();        
+
+        final Graphics2D g = image.createGraphics();
+        final FontMetrics metrics = g.getFontMetrics(g.getFont());
+
+        final int x = image.getWidth() - 1 - BAR_SIZE;
+
+        final int width = image.getWidth();
+        String val;
+        // positive part   
+        if (max > BAR_LIMIT) {
+            for (int y = 0; y < height; y++) {
+                g.setColor(new Color(deformationToRGB(y, height - 1, 0)));
+                g.drawRect(x, y, BAR_SIZE, 1);
+            }
+
+            g.setColor(Color.WHITE);
+            val = nf.format(max / 4.0);
+            g.drawString(val, width - metrics.stringWidth(val), height / 4);
+            val = nf.format(max / 2.0);
+            g.drawString(val, width - metrics.stringWidth(val), height / 2);
+            val = nf.format(max / 4.0 * 3);
+            g.drawString(val, width - metrics.stringWidth(val), height / 4 * 3);
+            val = nf.format(max);
+            g.drawString(val, width - metrics.stringWidth(val), height - 2);
+        }
+
+        // zero
+        g.setColor(Color.WHITE);
+        val = nf.format(0.0);
+        g.drawString(val, width - metrics.stringWidth(val), metrics.getHeight() / 3 * 2);
+
+        g.dispose();
+    }
+
     private static void drawVertivalBar(final BufferedImage image, final double maxPos, final double maxNeg) {
         final int height = image.getHeight();
         final int halfHeight = height / 2;
@@ -189,34 +228,45 @@ public class ExportUtils {
 
         final int x = image.getWidth() - 1 - BAR_SIZE;
 
-        for (int y = 0; y < halfHeight; y++) {
-            g.setColor(new Color(deformationToRGB(y, halfHeight - 1, 0)));
-            g.drawRect(x, halfHeight + y, BAR_SIZE, 1);
-
-            g.setColor(new Color(deformationToRGB(-y, 0, halfHeight - 1)));
-            g.drawRect(x, halfHeight - 1 - y, BAR_SIZE, 1);
-        }
-
         final int width = image.getWidth();
         String val;
 
+        // negative part
+        if (maxNeg < -BAR_LIMIT) {
+            for (int y = 0; y < halfHeight; y++) {
+                g.setColor(new Color(deformationToRGB(-y, 0, halfHeight - 1)));
+                g.drawRect(x, halfHeight - 1 - y, BAR_SIZE, 1);
+            }
+
+            g.setColor(Color.WHITE);
+            val = nf.format(maxNeg / 3.0);
+            g.drawString(val, width - metrics.stringWidth(val), halfHeight - halfHeight / 3);
+            val = nf.format(maxNeg / 3.0 * 2);
+            g.drawString(val, width - metrics.stringWidth(val), halfHeight - halfHeight / 3 * 2);
+            val = nf.format(maxNeg);
+            g.drawString(val, width - metrics.stringWidth(val), metrics.getHeight() / 3 * 2);
+        }
+
+        // positive part   
+        if (maxPos > BAR_LIMIT) {
+            for (int y = 0; y < halfHeight; y++) {
+                g.setColor(new Color(deformationToRGB(y, halfHeight - 1, 0)));
+                g.drawRect(x, halfHeight + y, BAR_SIZE, 1);
+            }
+
+            g.setColor(Color.WHITE);
+            val = nf.format(maxPos / 3.0);
+            g.drawString(val, width - metrics.stringWidth(val), halfHeight + halfHeight / 3);
+            val = nf.format(maxPos / 3.0 * 2);
+            g.drawString(val, width - metrics.stringWidth(val), halfHeight + halfHeight / 3 * 2);
+            val = nf.format(maxPos);
+            g.drawString(val, width - metrics.stringWidth(val), height - 2);
+        }
+
+        // zero
         g.setColor(Color.WHITE);
         val = nf.format(0.0);
-        g.drawString(val, width - metrics.stringWidth(val), halfHeight - metrics.getHeight() / 2);
-
-        val = nf.format(maxPos / 3.0);
-        g.drawString(val, width - metrics.stringWidth(val), halfHeight + halfHeight / 3);
-        val = nf.format(maxPos / 3.0 * 2);
-        g.drawString(val, width - metrics.stringWidth(val), halfHeight + halfHeight / 3 * 2);
-        val = nf.format(maxPos);
-        g.drawString(val, width - metrics.stringWidth(val), height - 2);
-
-        val = nf.format(maxNeg / 3.0);
-        g.drawString(val, width - metrics.stringWidth(val), halfHeight - halfHeight / 3);
-        val = nf.format(maxNeg / 3.0 * 2);
-        g.drawString(val, width - metrics.stringWidth(val), halfHeight - halfHeight / 3 * 2);
-        val = nf.format(maxNeg);
-        g.drawString(val, width - metrics.stringWidth(val), metrics.getHeight() / 3 * 2);
+        g.drawString(val, width - metrics.stringWidth(val), halfHeight + (metrics.getHeight() / 3));
 
         g.dispose();
     }
@@ -229,30 +279,39 @@ public class ExportUtils {
         final FontMetrics metrics = g.getFontMetrics(g.getFont());
 
         final int y = image.getHeight() - 1 - BAR_SIZE;
-
-        for (int x = 0; x < halfWidth; x++) {
-            g.setColor(new Color(deformationToRGB(x, halfWidth - 1, 0)));
-            g.drawRect(x + halfWidth, y, 1, BAR_SIZE);
-
-            g.setColor(new Color(deformationToRGB(-x, 0, halfWidth - 1)));
-            g.drawRect(halfWidth - 1 - x, y, 1, BAR_SIZE);
-        }
-
         final int tY = image.getHeight() - 5;
         String val;
+
+        // negative part
+        if (maxNeg < -BAR_LIMIT) {
+            for (int x = 0; x < halfWidth; x++) {
+                g.setColor(new Color(deformationToRGB(-x, 0, halfWidth - 1)));
+                g.drawRect(halfWidth - 1 - x, y, 1, BAR_SIZE);
+            }
+
+            g.setColor(Color.WHITE);
+            g.drawString(nf.format(maxNeg / 3.0), halfWidth - halfWidth / 3, tY);
+            g.drawString(nf.format(maxNeg / 3.0 * 2), halfWidth - halfWidth / 3 * 2, tY);
+            g.drawString(nf.format(maxNeg), 0, tY);
+        }
+
+        // positive part  
+        if (maxPos > BAR_LIMIT) {
+            for (int x = 0; x < halfWidth; x++) {
+                g.setColor(new Color(deformationToRGB(x, halfWidth - 1, 0)));
+                g.drawRect(x + halfWidth, y, 1, BAR_SIZE);
+            }
+
+            g.setColor(Color.WHITE);
+            g.drawString(nf.format(maxPos / 3.0), halfWidth + halfWidth / 3, tY);
+            g.drawString(nf.format(maxPos / 3.0 * 2), halfWidth + halfWidth / 3 * 2, tY);
+            val = nf.format(maxPos);
+            g.drawString(val, width - metrics.stringWidth(val), tY);
+        }
 
         g.setColor(Color.WHITE);
         val = nf.format(0.0);
         g.drawString("0.0", halfWidth - metrics.stringWidth(val) / 2, tY);
-
-        g.drawString(nf.format(maxPos / 3.0), halfWidth + halfWidth / 3, tY);
-        g.drawString(nf.format(maxPos / 3.0 * 2), halfWidth + halfWidth / 3 * 2, tY);
-        val = nf.format(maxPos);
-        g.drawString(val, width - metrics.stringWidth(val), tY);
-
-        g.drawString(nf.format(maxNeg / 3.0), halfWidth - halfWidth / 3, tY);
-        g.drawString(nf.format(maxNeg / 3.0 * 2), halfWidth - halfWidth / 3 * 2, tY);
-        g.drawString(nf.format(maxNeg), 0, tY);
 
         g.dispose();
     }
