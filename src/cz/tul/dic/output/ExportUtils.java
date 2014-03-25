@@ -130,15 +130,16 @@ public class ExportUtils {
     }
 
     private static int deformationToRGB(final double val, final double max) {
-        int result;
+        float h, s = 1, v = 1;
         if (val == 0) {
-            result = 0;
-        } else if (val > 0) {
-            result = ((int) (val / max * 255));
+            h = 0.0f;
+            v = 0.0f;
+        } else if (val < 0) {
+            h = (float) ((1 - (-val) / max) * 0.2);
         } else {
-            result = ((byte) ((-val) / max * 255)) << 16;
+            h = (float) (val / max * 0.4 + 0.3);
         }
-        return result;
+        return Color.HSBtoRGB(h, s, v);
     }
 
     private static void drawVertivalBar(final BufferedImage image, final double max) {
@@ -160,11 +161,11 @@ public class ExportUtils {
 
         final int width = image.getWidth();
         String val;
-        
+
         g.setColor(Color.WHITE);
         val = nf.format(0.0);
         g.drawString(val, width - metrics.stringWidth(val), halfHeight - metrics.getHeight() / 2);
-        
+
         val = nf.format(max / 3.0);
         g.drawString(val, width - metrics.stringWidth(val), halfHeight + halfHeight / 3);
         val = nf.format(max / 3.0 * 2);
@@ -201,11 +202,11 @@ public class ExportUtils {
 
         final int tY = image.getHeight() - 5;
         String val;
-        
+
         g.setColor(Color.WHITE);
         val = nf.format(0.0);
         g.drawString("0.0", halfWidth - metrics.stringWidth(val) / 2, tY);
-        
+
         g.drawString(nf.format(max / 3.0), halfWidth + halfWidth / 3, tY);
         g.drawString(nf.format(max / 3.0 * 2), halfWidth + halfWidth / 3 * 2, tY);
         val = nf.format(max);
