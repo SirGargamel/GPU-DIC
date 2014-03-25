@@ -33,14 +33,14 @@ public class TargetExportFile implements ITargetExport {
     private static final String SCRIPT_NAME = "scriptVideoJoin.vcf";
     private static final String SCRIPT_FILE = "%FILE%";
     private static final String SCRIPT_TARGET = "%TARGET%";
-    private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");    
+    private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException {
-        if (data instanceof double[][]) {            
+        if (data instanceof double[][]) {
             // export image
             exportImage((double[][]) data, direction, targetParam, dataParams, tc);
-        } else if (data instanceof List) {            
+        } else if (data instanceof List) {
             // export video
             exportVideo((List<double[][]>) data, direction, targetParam, tc);
         } else {
@@ -51,11 +51,11 @@ public class TargetExportFile implements ITargetExport {
     private void exportImage(final double[][] data, Direction direction, final Object targetParams, int[] dataParams, final TaskContainer tc) throws IOException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParams.getClass());
-        }        
+        }
         if (dataParams.length < 1) {
             throw new IllegalArgumentException("Not enough data parameters.");
         }
-        
+
         final int position = dataParams[0];
         final File target = (File) targetParams;
         Utils.ensureDirectoryExistence(target);
@@ -83,6 +83,18 @@ public class TargetExportFile implements ITargetExport {
         if (roundCount != data.size()) {
             throw new IllegalArgumentException("Provided data length and round count mismatch.");
         }
+        
+        double globalMax = -Double.MAX_VALUE, val;
+        for (double[][] daa : data) {
+            for (double[] da : daa) {
+                for (double d : da) {
+                    val = Math.abs(d);
+                    if (val > globalMax) {
+                        globalMax = val;
+                    }
+                }
+            }
+        }
 
         final int posCount = ((int) Math.log10(roundCount)) + 1;
         final StringBuilder sb = new StringBuilder();
@@ -93,8 +105,12 @@ public class TargetExportFile implements ITargetExport {
         File target;
         for (int i = 0; i < roundCount; i++) {
             target = new File(temp.getAbsolutePath() + File.separator + name + nf.format(i) + IMAGE_EXTENSION);
-            exportImage(data.get(i), direction, target, new int[]{i}, tc);
+//            exportImage(data.get(i), direction, target, new int[]{i}, tc);                        
+            Utils.ensureDirectoryExistence(target);
+            final BufferedImage background = tc.getImage(i);
+            final BufferedImage overlay = ExportUtils.createImageFromMap(data.get(i), direction, globalMax);
 
+            ImageIO.write(ExportUtils.overlayImage(background, overlay), "BMP", target);
         }
         // prepare script
         String script = loadScript();

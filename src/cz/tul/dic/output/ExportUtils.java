@@ -128,6 +128,43 @@ public class ExportUtils {
 
         return out;
     }
+    
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, double max) {
+        if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
+            throw new IllegalArgumentException("Illegal map data.");
+        }
+
+        final int width = mapData.length;
+        final int height = mapData[1].length;        
+
+        final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
+        Graphics2D g = out.createGraphics();
+        g.setColor(BACKGROUND_COLOR);
+        g.drawRect(0, 0, width, height);
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                out.setRGB(x, y, deformationToRGB(mapData[x][y], max));
+            }
+        }
+
+        switch (dir) {
+            case ABS:
+            case DABS:
+            case Y:
+            case DY:
+                drawVertivalBar(out, max);
+                break;
+            case X:
+            case DX:
+                drawHorizontalBar(out, max);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported direction.");
+        }
+
+        return out;
+    }
 
     private static int deformationToRGB(final double val, final double max) {
         float h, s = 1, v = 1;
