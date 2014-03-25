@@ -17,7 +17,7 @@ public class RoiSorter implements Comparator<ROI> {
         final int y22 = o2.getY2();
 
         final int result;
-        if ((y11 >= y21 && y11 <= y22) || (y12 >= y21 && y12 <= y22)) {
+        if (y11 >= y21 && y11 <= y22 || y12 >= y21 && y12 <= y22) {
             result = Integer.compare(o1.getX1(), o2.getX1());
         } else {
             result = Integer.compare(y11, y21);

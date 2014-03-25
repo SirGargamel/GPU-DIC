@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
 
 /**
  *
@@ -22,8 +21,8 @@ import javafx.scene.control.Label;
  */
 public class FXMLDocumentController implements Initializable {
 
-    @FXML
-    private Label label;
+//    @FXML
+//    private Label label;
 
     @FXML
     private void handleButtonAction(ActionEvent event) throws IOException {

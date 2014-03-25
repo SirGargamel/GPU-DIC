@@ -11,8 +11,8 @@ import java.util.List;
  */
 public interface IInputLoader {
 
-    public List<Image> loadData(final Object in, final TaskContainer tc) throws IOException;
+    List<Image> loadData(final Object in, final TaskContainer tc) throws IOException;
     
-    public Class getSupporteType();
+    Class getSupporteType();
     
 }

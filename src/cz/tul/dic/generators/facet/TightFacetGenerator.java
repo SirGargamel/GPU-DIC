@@ -42,14 +42,14 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
             wCount = (roiW - facetSize + spacing) / (spacing);
             hCount = (roiH - facetSize + spacing) / (spacing);
 
-            gapX = (roiW - (spacing * (wCount - 1) + facetSize)) / 2;
-            gapY = (roiH - (spacing * (hCount - 1) + facetSize)) / 2;
+            gapX = (roiW - spacing * (wCount - 1) + facetSize) / 2;
+            gapY = (roiH - spacing * (hCount - 1) + facetSize) / 2;
 
             for (int y = 0; y < hCount; y++) {
-                centerY = gapX + roi.getY1() + halfSize + (y * spacing);
+                centerY = gapX + roi.getY1() + halfSize + y * spacing;
 
                 for (int x = 0; x < wCount; x++) {
-                    centerX = gapY + roi.getX1() + halfSize + (x * spacing);
+                    centerX = gapY + roi.getX1() + halfSize + x * spacing;
 
                     if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height)
                             && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {

@@ -41,14 +41,14 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
             wCount = (roiW - spacing) / (facetSize - spacing);
             hCount = (roiH - spacing) / (facetSize - spacing);
 
-            gapX = (roiW - ((facetSize - spacing) * wCount + spacing)) / 2;
-            gapY = (roiH - ((facetSize - spacing) * hCount + spacing)) / 2;
+            gapX = (roiW - (facetSize - spacing) * wCount + spacing) / 2;
+            gapY = (roiH - (facetSize - spacing) * hCount + spacing) / 2;
 
             for (int y = 0; y < hCount; y++) {
-                centerY = gapY + roi.getY1() + halfSize + (y * (facetSize - spacing));
+                centerY = gapY + roi.getY1() + halfSize + y * (facetSize - spacing);
 
                 for (int x = 0; x < wCount; x++) {
-                    centerX = gapX + roi.getX1() + halfSize + (x * (facetSize - spacing));
+                    centerX = gapX + roi.getX1() + halfSize + x * (facetSize - spacing);
 
                     if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height)
                             && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {

@@ -58,18 +58,18 @@ public class RectangleROI extends ROI {
 
     @Override
     public boolean isAreaInside(int x1, int y1, int x2, int y2) {
-        return (Math.min(x1, x2) >= this.x1)
-                && (Math.min(y1, y2) >= this.y1)
-                && (Math.max(x1, x2) <= this.x2)
-                && (Math.max(y1, y2) <= this.y2);
+        return Math.min(x1, x2) >= this.x1
+                && Math.min(y1, y2) >= this.y1
+                && Math.max(x1, x2) <= this.x2
+                && Math.max(y1, y2) <= this.y2;
     }
 
     @Override
     public boolean isPointInside(int x, int y) {
-        return (x >= this.x1)
-                && (y >= this.y1)
-                && (x <= this.x2)
-                && (y <= this.y2);
+        return x >= this.x1
+                && y >= this.y1
+                && x <= this.x2
+                && y <= this.y2;
     }
 
 }
