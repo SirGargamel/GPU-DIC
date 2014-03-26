@@ -39,9 +39,9 @@ import org.pmw.tinylog.writers.ConsoleWriter;
 public class Computation {
 
     private static final LoggingLevel LOGGING_LEVEL = LoggingLevel.TRACE;
-    private static final File IN_VIDEO_REAL = new File("d:\\temp\\7202845m.avi");
-    private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
-    private static final List<File> IN_IMAGES;
+//    private static final File IN_VIDEO_REAL = new File("d:\\temp\\7202845m.avi");
+//    private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
+//    private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
     private static final int SIZE_MAX = 50;
@@ -52,27 +52,27 @@ public class Computation {
     static {
         Configurator.defaultConfig().writer(new ConsoleWriter()).level(LOGGING_LEVEL).activate();
 
-        IN_IMAGES = new LinkedList<>();
-//        IN_IMAGES.add(new File("d:\\temp\\image000.bmp"));
-//        IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
-//        IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
-//        IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
-//        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
-
-        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00000.bmp"));
-        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00004.bmp"));
+//        IN_IMAGES = new LinkedList<>();
+////        IN_IMAGES.add(new File("d:\\temp\\image000.bmp"));
+////        IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
+////        IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
+////        IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
+////        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
+//
+//        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00000.bmp"));
+//        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00004.bmp"));
 
         exports = new HashSet<>();
     }
 
-    public static void commenceComputationStatic() throws IOException {
+    public static void commenceComputationStatic(final Object in) throws IOException {
         final Engine engine = new Engine();
 
         long time;
         TaskContainer tc, loadedTc;
         Set<ExportTask> loadedExports;
         for (int size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_STEP) {
-            tc = generateTask(IN_VIDEO_REAL, size, KernelType.CL_1D_I_V_LL_MC_D);
+            tc = generateTask(in, size, KernelType.CL_1D_I_V_LL_MC_D);
 
             InputLoader.loadInput(tc);
 
@@ -165,8 +165,8 @@ public class Computation {
         }
     }
 
-    public static void commenceComputationDynamic() throws IOException {
-        TaskContainer tc = new TaskContainer(IN_VIDEO_REAL);
+    public static void commenceComputationDynamic(final Object in) throws IOException {
+        TaskContainer tc = new TaskContainer(in);
         InputLoader.loadInput(tc);
 
         final int roiRadius = 26;

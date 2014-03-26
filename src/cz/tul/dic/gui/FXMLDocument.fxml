@@ -6,9 +6,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="200" prefWidth="320" xmlns:fx="http://javafx.com/fxml" fx:controller="cz.tul.dic.gui.FXMLDocumentController">
+<AnchorPane id="AnchorPane" prefHeight="100" prefWidth="220" xmlns:fx="http://javafx.com/fxml" fx:controller="cz.tul.dic.gui.FXMLDocumentController">
     <children>
-        <Button layoutX="126" layoutY="90" text="RUN !" onAction="#handleButtonAction" fx:id="button" />
-        <Label layoutX="126" layoutY="120" minHeight="16" minWidth="69" fx:id="label" />
+        <Button layoutX="16" layoutY="10" text="Dynamic" onAction="#handleButtonActionDyn" fx:id="buttonDyn" />
+        <Button layoutX="16" layoutY="40" text="Static" onAction="#handleButtonActionStatic" fx:id="buttonStatic" />        
     </children>
 </AnchorPane>
