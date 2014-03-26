@@ -1,5 +1,7 @@
 package cz.tul.dic;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,14 +13,19 @@ import javafx.stage.Stage;
  * @author Petr Jecmen
  */
 public class DicMain extends Application {
-    
+
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/cz/tul/dic/gui/FXMLDocument.fxml"));
-        
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        ResourceBundle rb = ResourceBundle.getBundle("cz.tul.dic.gui.lang.Lang", Locale.getDefault());
+        fxmlLoader.setResources(rb);
+
+        Parent root = FXMLLoader.load(getClass().getResource("/cz/tul/dic/gui/MainWindow.fxml"), rb);
+
         Scene scene = new Scene(root);
-        
+
         stage.setScene(scene);
+        stage.setTitle(rb.getString("Title"));
         stage.show();
     }
 
@@ -33,5 +40,5 @@ public class DicMain extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
