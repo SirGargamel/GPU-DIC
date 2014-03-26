@@ -8,6 +8,7 @@ package cz.tul.dic.gui;
 import cz.tul.dic.Computation;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import org.controlsfx.dialog.Dialog;
+import org.controlsfx.dialog.Dialogs;
 
 /**
  *
@@ -41,6 +44,11 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionInput(ActionEvent event) throws IOException {
+        Dialogs.create()
+                        .title(Lang.getString("error"))
+                        .message(Lang.getString("IO", "TEST"))
+                        .showError();
+        
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(DEFAULT_DIR);
         fileChooser.getExtensionFilters().clear();
@@ -54,13 +62,18 @@ public class MainWindow implements Initializable {
             } else {
                 tc = new TaskContainer(fileList);
             }
-            InputLoader.loadInput(tc);
-            // TODO alert on IOException
-            // TODO enable rest of the buttons
-            buttonExpert.setDisable(false);
-            buttonROI.setDisable(false);
-            buttonRun.setDisable(false);
-            textFs.setDisable(false);
+            try {
+                InputLoader.loadInput(tc);
+                buttonExpert.setDisable(false);
+                buttonROI.setDisable(false);
+                buttonRun.setDisable(false);
+                textFs.setDisable(false);
+            } catch (IOException ex) {
+                Dialogs.create()
+                        .title(Lang.getString("error"))
+                        .message(Lang.getString("IO", ex.getLocalizedMessage()))
+                        .showWarning();
+            }
         }
     }
 
@@ -73,10 +86,16 @@ public class MainWindow implements Initializable {
                 TaskContainerUtils.setUniformFacetSize(tc, 0, fs);
                 Computation.commenceComputationDynamic(tc);
             } else {
-                // TODO warn no TC
+                Dialogs.create()
+                        .title(Lang.getString("error"))
+                        .message(Lang.getString("noTC"))
+                        .showError();
             }
         } catch (NumberFormatException ex) {
-            // TODO warn wrong input
+            Dialogs.create()
+                    .title(Lang.getString("error"))
+                    .message(Lang.getString("wrongFS"))
+                    .showError();
         }
     }
 
@@ -85,7 +104,10 @@ public class MainWindow implements Initializable {
         if (tc != null) {
             // TODO show dialog for ROI marking
         } else {
-            // TODO warn no TC
+            Dialogs.create()
+                    .title(Lang.getString("error"))
+                    .message(Lang.getString("noTC"))
+                    .showError();
         }
     }
 
@@ -94,7 +116,10 @@ public class MainWindow implements Initializable {
         if (tc != null) {
             // TODO show dialog for expert settings
         } else {
-            // TODO warn no TC
+            Dialogs.create()
+                    .title(Lang.getString("error"))
+                    .message(Lang.getString("noTC"))
+                    .showError();
         }
     }
 
@@ -103,7 +128,7 @@ public class MainWindow implements Initializable {
         buttonExpert.setDisable(true);
         buttonROI.setDisable(true);
         buttonRun.setDisable(true);
-        
+
         textFs.setText("7");
         textFs.setDisable(true);
     }
