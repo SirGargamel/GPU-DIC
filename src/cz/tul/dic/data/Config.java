@@ -17,22 +17,11 @@ import java.util.Set;
 public class Config {
 
     private static final String EXT = ".config";
-    private static final String SEPARATOR = " :: ";
-    private static File projectDir;
+    private static final String SEPARATOR = " :: ";    
     private static boolean enableConfigs = true;
-    private final Map<String, String> data;
+    private final Map<String, String> data;   
 
-    public static void setProjectDir(final File dir) {
-        if (dir.isDirectory()) {
-            projectDir = dir;
-        } else if (dir.isFile()) {
-            projectDir = dir.getParentFile();
-        } else {
-            throw new IllegalArgumentException("Illegal project directory - " + dir);
-        }
-    }
-
-    public static Config loadConfig(final String name) throws IOException {
+    public static Config loadConfig(final String name, final File projectDir) throws IOException {
         final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(name).concat(EXT);
         final Config result = new Config();
 
@@ -55,7 +44,7 @@ public class Config {
         return result;
     }
 
-    public static void saveConfig(final String name, final Config config) throws IOException {
+    public static void saveConfig(final String name, final File projectDir, final Config config) throws IOException {
         final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(name).concat(EXT);
         try (FileWriter fw = new FileWriter(new File(configFileName))) {
             for (Entry<String, String> e : config.entrySet()) {

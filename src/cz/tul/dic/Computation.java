@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.pmw.tinylog.Configurator;
@@ -61,12 +60,21 @@ public class Computation {
 //
 //        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00000.bmp"));
 //        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00004.bmp"));
-
         exports = new HashSet<>();
     }
 
     public static void commenceComputationStatic(final Object in) throws IOException {
         final Engine engine = new Engine();
+
+        final File parent;
+        if (in instanceof File) {
+            parent = ((File) in).getParentFile();
+        } else if (in instanceof List) {
+            final List<File> inL = (List<File>) in;
+            parent = inL.get(0).getParentFile();
+        } else {
+            throw new IllegalArgumentException("Unsupported type of input - " + in);
+        }
 
         long time;
         TaskContainer tc, loadedTc;
@@ -78,12 +86,12 @@ public class Computation {
 
             // generate exports
             generateExports(tc);
-            Config.saveConfig("exportsConfig", OutputUtils.serializeExports(exports));
-            loadedExports = OutputUtils.deserializeExports(Config.loadConfig("exportsConfig"));
+            Config.saveConfig("exportsConfig", parent, OutputUtils.serializeExports(exports));
+            loadedExports = OutputUtils.deserializeExports(Config.loadConfig("exportsConfig", parent));
 //            System.out.println(loadedExports);
 
-            Config.saveConfig("taskConfig", TaskContainerUtils.serializeTaskContainer(tc));
-            loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfig"));
+            Config.saveConfig("taskConfig", parent, TaskContainerUtils.serializeTaskContainer(tc));
+            loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfig", parent));
 //            System.out.println(loadedTc);
 
             TaskContainerChecker.checkTaskValidity(tc);
@@ -202,8 +210,18 @@ public class Computation {
             Logger.error(ex);
         }
 
-        Config.saveConfig("taskConfigFinal", TaskContainerUtils.serializeTaskContainer(tc));
-        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfigFinal"));
+        final File parent;
+        if (in instanceof File) {
+            parent = ((File) in).getParentFile();
+        } else if (in instanceof List) {
+            final List<File> inL = (List<File>) in;
+            parent = inL.get(0).getParentFile();
+        } else {
+            throw new IllegalArgumentException("Unsupported type of input - " + in);
+        }
+
+        Config.saveConfig("taskConfigFinal", parent, TaskContainerUtils.serializeTaskContainer(tc));
+        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfigFinal", parent));
 //        System.out.println(tc);
 //        System.out.println(loadedTc);
     }

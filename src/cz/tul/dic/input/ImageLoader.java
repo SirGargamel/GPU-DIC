@@ -26,8 +26,7 @@ public class ImageLoader implements IInputLoader {
         if (data.isEmpty()) {
             throw new IllegalArgumentException("No images.");
         } else {            
-            tc.setParameter(TaskParameter.DIR, data.get(0).getParentFile());
-            Config.setProjectDir(data.get(0).getParentFile());
+            tc.setParameter(TaskParameter.DIR, data.get(0).getParentFile());            
         }
 
         final List<Image> result = new ArrayList<>(data.size());
