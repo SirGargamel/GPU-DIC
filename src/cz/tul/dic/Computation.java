@@ -169,12 +169,13 @@ public class Computation {
         TaskContainer tc = new TaskContainer(IN_VIDEO_REAL);
         InputLoader.loadInput(tc);
 
-        tc.addRoi(new CircularROI(108, 12, 26), 0);
-        tc.addRoi(new CircularROI(201, 7, 26), 0);
-        tc.addRoi(new CircularROI(108, 86, 26), 0);
-        tc.addRoi(new CircularROI(202, 84, 26), 0);
+        final int roiRadius = 26;
+        tc.addRoi(new CircularROI(108, 12, roiRadius), 0);
+        tc.addRoi(new CircularROI(201, 7, roiRadius), 0);
+        tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
+        tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
 
-        TaskContainerUtils.setUniformFacetSize(tc, 0, SIZE_DYN);
+        TaskContainerUtils.setUniformFacetSize(tc, 0, roiRadius / 2);
 
         TaskContainerChecker.checkTaskValidity(tc);
 
