@@ -20,10 +20,10 @@ public class Lang {
     }
     
     public static String getString(final String key, String... params) {
-        String result = rb.getString(key);
+        String result = rb.getString(key).replaceAll("\\\\n", "\n");
         
         for (int i = 0; i < params.length; i++) {
-            result = result.replaceFirst("{".concat(Integer.toString(i).concat("}")), params[i]);
+            result = result.replaceAll("\\{".concat(Integer.toString(i).concat("\\}")), params[i]);
         }
         
         return result;
