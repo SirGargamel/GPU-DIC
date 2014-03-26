@@ -1,11 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.tul.dic.gui;
 
 import cz.tul.dic.Computation;
+import cz.tul.dic.data.Config;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.gui.lang.Lang;
@@ -21,7 +17,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
-import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.Dialogs;
 
 /**
@@ -45,10 +40,10 @@ public class MainWindow implements Initializable {
     @FXML
     private void handleButtonActionInput(ActionEvent event) throws IOException {
         Dialogs.create()
-                        .title(Lang.getString("error"))
-                        .message(Lang.getString("IO", "TEST"))
-                        .showError();
-        
+                .title(Lang.getString("error"))
+                .message(Lang.getString("IO", "TEST"))
+                .showError();
+
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(DEFAULT_DIR);
         fileChooser.getExtensionFilters().clear();
@@ -58,7 +53,27 @@ public class MainWindow implements Initializable {
         List<File> fileList = fileChooser.showOpenMultipleDialog(null);
         if (fileList != null && !fileList.isEmpty()) {
             if (fileList.size() == 1) {
-                tc = new TaskContainer(fileList.get(0));
+                final File in = fileList.get(0);
+                final String name = in.getName();
+                final String ext = name.substring(name.lastIndexOf(".") + 1);
+                switch (ext) {
+                    case "avi":
+                        tc = new TaskContainer(in);
+                        break;
+                    case "config":
+                        tc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig(name, in.getAbsoluteFile()));
+                        break;
+                    case "task":
+                        try {
+                            tc = TaskContainerUtils.readTaskFromFile(in);
+                        } catch (ClassNotFoundException | IOException ex) {
+                            // TODO show error during loading
+                        }
+                        break;
+                    default:
+                        // TODO show error not supported input
+                }
+
             } else {
                 tc = new TaskContainer(fileList);
             }
