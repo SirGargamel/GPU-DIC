@@ -8,6 +8,12 @@ import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -242,6 +248,19 @@ public class TaskContainerUtils {
     public static void setUniformFacetSize(final TaskContainer tc, final int round, final int facetSize) {
         for (ROI roi : tc.getRois(round)) {
             tc.addFacetSize(round, roi, facetSize);
+        }
+    }
+
+    public static TaskContainer readTaskFromFile(final File in) throws IOException, ClassNotFoundException {
+        TaskContainer result;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(in))) {
+            result = (TaskContainer) ois.readObject();
+        }
+        return result;
+    }
+    public static void dumpTaskToFile(final File target, final TaskContainer data) throws IOException {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
+            out.writeObject(data);
         }
     }
 
