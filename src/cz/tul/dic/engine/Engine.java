@@ -41,6 +41,7 @@ import org.pmw.tinylog.Logger;
  */
 public final class Engine {
     
+    private static final int BEST_RESULT_COUNT_MAX = 50;
     private static final Type DEVICE_TYPE = Type.GPU;
     private final CLPlatform platform;
     private final CLContext context;
@@ -140,7 +141,7 @@ public final class Engine {
         
         float val, best;
         final List<Integer> candidates = new ArrayList<>();
-        int baseIndex, globalFacetIndex;
+        int baseIndex, globalFacetIndex, l;
         float[] taskResults;
         double[][] bestResult;
         for (int localFacetIndex = 0; localFacetIndex < facetCount; localFacetIndex++) {
@@ -171,11 +172,12 @@ public final class Engine {
                 bestResults.set(globalFacetIndex, new double[][]{{0, 0}});
             } else {
                 if (candidates.size() > 1) {
-                    Collections.sort(candidates, candidatesComparator);
+                    Collections.sort(candidates, candidatesComparator);                    
                 }                
                 
-                bestResult = new double[candidates.size()][];
-                for (int i = 0; i < bestResult.length; i++) {
+                l = Math.min(candidates.size(), BEST_RESULT_COUNT_MAX);
+                bestResult = new double[l][];
+                for (int i = 0; i < l; i++) {
                     bestResult[i] = TaskContainerUtils.extractDeformation(tc, candidates.get(i), round, roi);
                 }
                 
