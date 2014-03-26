@@ -19,8 +19,14 @@ public class Lang {
         return rb;
     }
     
-    public static String getString(final String key) {
-        return rb.getString(key);
-    }
+    public static String getString(final String key, String... params) {
+        String result = rb.getString(key);
+        
+        for (int i = 0; i < params.length; i++) {
+            result = result.replaceFirst("{".concat(Integer.toString(i).concat("}")), params[i]);
+        }
+        
+        return result;
+    }        
     
 }
