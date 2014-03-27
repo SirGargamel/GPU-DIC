@@ -16,18 +16,17 @@ import java.util.Set;
  */
 public class Config {
 
-    private static final String NAME_SEPARATOR = ".";
+    private static final String NAME_SEPARATOR = "..";
     private static final String EXT = ".config";
-    private static final String SEPARATOR = " :: ";    
-    private static boolean enableConfigs = true;
-    private final Map<String, String> data;   
+    private static final String SEPARATOR = " :: ";
+    private final Map<String, String> data;
 
     public static Config loadConfig(final File projectDir, final String projectName, final ConfigType configType) throws IOException {
         final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(projectName).concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT);
         final Config result = new Config();
 
         final File config = new File(configFileName);
-        if (enableConfigs && config.exists()) {
+        if (config.exists()) {
             String line;
             String[] split;
             try (BufferedReader br = new BufferedReader(new FileReader(configFileName))) {
@@ -57,26 +56,41 @@ public class Config {
         }
     }
 
-    public static void enableConfigs(boolean enable) {
-        enableConfigs = enable;
+    public static ConfigType determineType(final File configFile) {
+        final String fileName = configFile.getName();
+        ConfigType type = null;
+        for (ConfigType ct : ConfigType.values()) {
+            if (fileName.contains(ct.toString())) {
+                type = ct;
+                break;
+            }
+        }
+        return type;
     }
     
+    public static File determineProjectFile(final File configFile) {
+        final String fullPath = configFile.getAbsolutePath();
+        final ConfigType ct = determineType(configFile);
+        final String projectFilePath = fullPath.replace(EXT, "").replace(ct.toString(), "").replace(NAME_SEPARATOR, "");
+        return new File(projectFilePath);
+    }
+
     public Config() {
         data = new LinkedHashMap<>();
     }
-    
+
     public void put(final String key, final String value) {
         data.put(key, value);
     }
-    
+
     public Set<Entry<String, String>> entrySet() {
         return data.entrySet();
     }
-    
+
     public String get(final String key) {
         return data.get(key);
     }
-    
+
     public boolean isEmpty() {
         return data.isEmpty();
     }

@@ -8,11 +8,14 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.output.OutputUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -29,6 +32,7 @@ public class MainWindow implements Initializable {
 
     private static final File DEFAULT_DIR = new File("D:\\temp");
     private TaskContainer tc;
+    private Set<ExportTask> exports;
 
     @FXML
     private TextField textFs;
@@ -41,17 +45,13 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionInput(ActionEvent event) throws IOException {
-        Dialogs.create()
-                .title(Lang.getString("error"))
-                .message(Lang.getString("IO", "TEST"))
-                .showError();
-
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(DEFAULT_DIR);
         fileChooser.getExtensionFilters().clear();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("AVI files (*.avi)", "*.avi"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files (*.bmp, *.jpg)", "*.bmp", "*.jpg"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*.config)", "*.config"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
         List<File> fileList = fileChooser.showOpenMultipleDialog(null);
         if (fileList != null && !fileList.isEmpty()) {
             if (fileList.size() == 1) {
@@ -63,7 +63,19 @@ public class MainWindow implements Initializable {
                         tc = new TaskContainer(in);
                         break;
                     case "config":
-                        tc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK));
+                        final ConfigType ct = Config.determineType(in);
+                        switch (ct) {
+                            case TASK:
+                                tc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK));
+                                break;
+                            case EXPORT:
+                                exports = OutputUtils.deserializeExports(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.EXPORT));
+                                break;
+                            case SEQUENCE:
+                                // find avi and load it
+                                tc = new TaskContainer(Config.determineProjectFile(in));
+                        }
+
                         break;
                     case "task":
                         try {
@@ -73,7 +85,7 @@ public class MainWindow implements Initializable {
                         }
                         break;
                     default:
-                        // TODO show error not supported input
+                    // TODO show error not supported input
                 }
 
             } else {
