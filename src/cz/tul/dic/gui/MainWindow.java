@@ -82,10 +82,17 @@ public class MainWindow implements Initializable {
                             tc = TaskContainerUtils.readTaskFromFile(in);
                         } catch (ClassNotFoundException | IOException ex) {
                             // TODO show error during loading
+                            Dialogs.create()
+                                .title(Lang.getString("error"))
+                                .message(Lang.getString("wrongBin"))
+                                .showWarning();
                         }
                         break;
-                    default:
-                    // TODO show error not supported input
+                    default:                        
+                        Dialogs.create()
+                                .title(Lang.getString("error"))
+                                .message(Lang.getString("wrongIn"))
+                                .showWarning();
                 }
 
             } else {
