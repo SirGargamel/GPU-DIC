@@ -2,6 +2,7 @@ package cz.tul.dic.input;
 
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.Config;
+import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -38,12 +39,11 @@ public class VideoLoader implements IInputLoader {
         }
 
         final File input = (File) in;
-        // create temp dir to store images
-        tc.setParameter(TaskParameter.DIR, input.getParentFile());        
+        // create temp dir to store images        
         final File temp = Utils.getTempDir(tc);
         // check cache
         final List<File> files;
-        Config config = Config.loadConfig(input.getName(), input.getParentFile());
+        Config config = Config.loadConfig(input.getParentFile(), input.getName(), ConfigType.SEQUENCE);
         if (!isCacheDataValid(input, temp, config)) {
             Logger.debug("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
             // prepare script
@@ -81,7 +81,7 @@ public class VideoLoader implements IInputLoader {
                 config.put(PREFIX_MOD.concat(f.getName()), Long.toString(f.lastModified()));
                 config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
             }
-            Config.saveConfig(input.getName(), input.getParentFile(), config);
+            Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.SEQUENCE, config);
         } else {
             files = convertCacheDataToFiles(input, temp, config);
         }
@@ -89,7 +89,8 @@ public class VideoLoader implements IInputLoader {
         final ImageLoader il = new ImageLoader();
         final List<Image> result = il.loadData(files, tc);
 
-        tc.setParameter(TaskParameter.DIR, input.getParentFile());        
+        tc.setParameter(TaskParameter.DIR, input.getParentFile());
+        tc.setParameter(TaskParameter.NAME, input.getName());
 
         return result;
     }

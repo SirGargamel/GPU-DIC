@@ -1,5 +1,7 @@
 package cz.tul.dic.data.task;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -17,7 +19,17 @@ public class TaskContainerChecker {
     
     private static final int DEFAULT_FACET_SIZE = 10;
 
-    public static void checkTaskValidity(final TaskContainer tc) {
+    public static void checkTaskValidity(final TaskContainer tc) throws ComputationException {
+        final Object name = tc.getParameter(TaskParameter.NAME);
+        if (name == null) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "no name");
+        }
+        
+        final Object dir = tc.getParameter(TaskParameter.DIR);
+        if (name == null) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "no dir");
+        }
+
         // null data
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         if (roundCount < 1) {

@@ -2,6 +2,7 @@ package cz.tul.dic;
 
 import cz.tul.dic.complextask.ComplextTaskSolver;
 import cz.tul.dic.data.Config;
+import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -63,18 +64,8 @@ public class Computation {
         exports = new HashSet<>();
     }
 
-    public static void commenceComputationStatic(final Object in) throws IOException {
+    public static void commenceComputationStatic(final Object in) throws IOException, ComputationException {
         final Engine engine = new Engine();
-
-        final File parent;
-        if (in instanceof File) {
-            parent = ((File) in).getParentFile();
-        } else if (in instanceof List) {
-            final List<File> inL = (List<File>) in;
-            parent = inL.get(0).getParentFile();
-        } else {
-            throw new IllegalArgumentException("Unsupported type of input - " + in);
-        }
 
         long time;
         TaskContainer tc, loadedTc;
@@ -86,12 +77,12 @@ public class Computation {
 
             // generate exports
             generateExports(tc);
-            Config.saveConfig("exportsConfig", parent, OutputUtils.serializeExports(exports));
-            loadedExports = OutputUtils.deserializeExports(Config.loadConfig("exportsConfig", parent));
+            Config.saveConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.EXPORT, OutputUtils.serializeExports(exports));
+            loadedExports = OutputUtils.deserializeExports(Config.loadConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.EXPORT));
 //            System.out.println(loadedExports);
 
-            Config.saveConfig("taskConfig", parent, TaskContainerUtils.serializeTaskContainer(tc));
-            loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfig", parent));
+            Config.saveConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.TASK, TaskContainerUtils.serializeTaskContainer(tc));
+            loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.TASK));
 //            System.out.println(loadedTc);
 
             TaskContainerChecker.checkTaskValidity(tc);
@@ -173,7 +164,7 @@ public class Computation {
         }
     }
 
-    public static void commenceComputationDynamic(final Object in) throws IOException {
+    public static void commenceComputationDynamic(final Object in) throws IOException, ComputationException {
         TaskContainer tc = new TaskContainer(in);
         InputLoader.loadInput(tc);
 
@@ -220,8 +211,8 @@ public class Computation {
             throw new IllegalArgumentException("Unsupported type of input - " + in);
         }
 
-        Config.saveConfig("taskConfigFinal", parent, TaskContainerUtils.serializeTaskContainer(tc));
-        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig("taskConfigFinal", parent));
+        Config.saveConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.TASK, TaskContainerUtils.serializeTaskContainer(tc));
+        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.TASK));
 //        System.out.println(tc);
 //        System.out.println(loadedTc);
     }

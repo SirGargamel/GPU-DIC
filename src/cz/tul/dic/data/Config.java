@@ -16,13 +16,14 @@ import java.util.Set;
  */
 public class Config {
 
+    private static final String NAME_SEPARATOR = ".";
     private static final String EXT = ".config";
     private static final String SEPARATOR = " :: ";    
     private static boolean enableConfigs = true;
     private final Map<String, String> data;   
 
-    public static Config loadConfig(final String name, final File projectDir) throws IOException {
-        final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(name).concat(EXT);
+    public static Config loadConfig(final File projectDir, final String projectName, final ConfigType configType) throws IOException {
+        final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(projectName).concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT);
         final Config result = new Config();
 
         final File config = new File(configFileName);
@@ -44,8 +45,8 @@ public class Config {
         return result;
     }
 
-    public static void saveConfig(final String name, final File projectDir, final Config config) throws IOException {
-        final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(name).concat(EXT);
+    public static void saveConfig(final File projectDir, final String projectName, final ConfigType configType, final Config config) throws IOException {
+        final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(projectName).concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT);
         try (FileWriter fw = new FileWriter(new File(configFileName))) {
             for (Entry<String, String> e : config.entrySet()) {
                 fw.write(e.getKey());

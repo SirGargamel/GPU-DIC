@@ -1,7 +1,9 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.Computation;
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Config;
+import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.gui.lang.Lang;
@@ -61,7 +63,7 @@ public class MainWindow implements Initializable {
                         tc = new TaskContainer(in);
                         break;
                     case "config":
-                        tc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig(name, in.getAbsoluteFile()));
+                        tc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK));
                         break;
                     case "task":
                         try {
@@ -93,7 +95,7 @@ public class MainWindow implements Initializable {
     }
 
     @FXML
-    private void handleButtonActionRun(ActionEvent event) throws IOException {
+    private void handleButtonActionRun(ActionEvent event) throws IOException, ComputationException {
         final String fsText = textFs.getText();
         try {
             final int fs = Integer.valueOf(fsText);
