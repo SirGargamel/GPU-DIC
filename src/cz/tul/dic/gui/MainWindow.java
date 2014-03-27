@@ -18,11 +18,16 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.controlsfx.dialog.Dialogs;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -83,12 +88,12 @@ public class MainWindow implements Initializable {
                         } catch (ClassNotFoundException | IOException ex) {
                             // TODO show error during loading
                             Dialogs.create()
-                                .title(Lang.getString("error"))
-                                .message(Lang.getString("wrongBin"))
-                                .showWarning();
+                                    .title(Lang.getString("error"))
+                                    .message(Lang.getString("wrongBin"))
+                                    .showWarning();
                         }
                         break;
-                    default:                        
+                    default:
                         Dialogs.create()
                                 .title(Lang.getString("error"))
                                 .message(Lang.getString("wrongIn"))
@@ -137,14 +142,25 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionROI(ActionEvent event) {
-        if (tc != null) {
-            // TODO show dialog for ROI marking
-        } else {
-            Dialogs.create()
-                    .title(Lang.getString("error"))
-                    .message(Lang.getString("noTC"))
-                    .showError();
+        Parent root;
+        try {
+            root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ROISelector.fxml"), Lang.getBundle());
+            Stage stage = new Stage();
+            stage.setTitle("Select ROIs");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+        } catch (IOException e) {
+            Logger.error("Error loading ROI dialog from JAR.\n{0}", e);
         }
+
+//        if (tc != null) {
+//            // TODO show dialog for ROI marking            
+//        } else {
+//            Dialogs.create()
+//                    .title(Lang.getString("error"))
+//                    .message(Lang.getString("noTC"))
+//                    .showError();
+//        }
     }
 
     @FXML
@@ -162,7 +178,7 @@ public class MainWindow implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         buttonExpert.setDisable(true);
-        buttonROI.setDisable(true);
+//        buttonROI.setDisable(true);
         buttonRun.setDisable(true);
 
         textFs.setText("7");
