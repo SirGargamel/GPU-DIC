@@ -1,10 +1,13 @@
 package cz.tul.dic.output;
 
 import cz.tul.dic.data.Config;
+import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +33,8 @@ public class OutputUtils {
         return result;
     }
 
-    public static Set<ExportTask> deserializeExports(final Config config) {
+    public static Set<ExportTask> deserializeExports(final File in) throws IOException {
+        final Config config = Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.EXPORT);
         final Set<ExportTask> result = new HashSet<>();
 
         for (Map.Entry<String, String> e : config.entrySet()) {

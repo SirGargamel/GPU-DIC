@@ -24,10 +24,9 @@ public class ImageLoader implements IInputLoader {
         final List<File> data = (List<File>) in;
         if (data.isEmpty()) {
             throw new IllegalArgumentException("No images.");
-        } else {            
+        } else {
             final File first = data.get(0);
-            tc.setParameter(TaskParameter.DIR, first.getParentFile());
-            tc.setParameter(TaskParameter.NAME, first.getName());
+            tc.setParameter(TaskParameter.IN, first);
         }
 
         final List<Image> result = new ArrayList<>(data.size());
@@ -47,7 +46,7 @@ public class ImageLoader implements IInputLoader {
                 sb.append(f.getName());
                 sb.append(", ");
             }
-            sb.setLength(sb.length()-2);
+            sb.setLength(sb.length() - 2);
             Logger.debug(sb.toString());
         }
 

@@ -40,7 +40,7 @@ public class VideoLoader implements IInputLoader {
 
         final File input = (File) in;
         // create temp dir to store images    
-        tc.setParameter(TaskParameter.DIR, input.getParentFile());
+        tc.setParameter(TaskParameter.IN, input);
         final File temp = Utils.getTempDir(tc);
         // check cache
         final List<File> files;
@@ -90,8 +90,7 @@ public class VideoLoader implements IInputLoader {
         final ImageLoader il = new ImageLoader();
         final List<Image> result = il.loadData(files, tc);
 
-        tc.setParameter(TaskParameter.DIR, input.getParentFile());
-        tc.setParameter(TaskParameter.NAME, input.getName());
+        tc.setParameter(TaskParameter.IN, input);
 
         return result;
     }

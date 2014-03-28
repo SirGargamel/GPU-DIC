@@ -11,11 +11,10 @@ import java.io.File;
  */
 public enum TaskParameter {
 
-    DIR(File.class),
+    IN(File.class),
     FACET_GENERATOR_MODE(FacetGeneratorMode.class),
     FACET_GENERATOR_SPACING(Integer.class),
-    KERNEL(KernelType.class),
-    NAME(String.class),
+    KERNEL(KernelType.class),    
     TASK_SPLIT_VARIANT(TaskSplit.class),
     TASK_SPLIT_VALUE(Integer.class),;
 

@@ -20,15 +20,10 @@ public class TaskContainerChecker {
     private static final int DEFAULT_FACET_SIZE = 10;
 
     public static void checkTaskValidity(final TaskContainer tc) throws ComputationException {
-        final Object name = tc.getParameter(TaskParameter.NAME);
-        if (name == null) {
+        final Object in = tc.getParameter(TaskParameter.IN);
+        if (in == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "no name");
-        }
-        
-        final Object dir = tc.getParameter(TaskParameter.DIR);
-        if (name == null) {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "no dir");
-        }
+        }                
 
         // null data
         final int roundCount = TaskContainerUtils.getRoundCount(tc);

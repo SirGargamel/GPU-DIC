@@ -70,10 +70,10 @@ public class MainWindow implements Initializable {
                         final ConfigType ct = Config.determineType(in);
                         switch (ct) {
                             case TASK:
-                                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskContainer(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK)));
+                                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskContainer(in));
                                 break;
                             case EXPORT:
-                                exports = OutputUtils.deserializeExports(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.EXPORT));
+                                exports = OutputUtils.deserializeExports(in);
                                 break;
                             case SEQUENCE:
                                 // find avi and load it                                
@@ -161,7 +161,7 @@ public class MainWindow implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         buttonExpert.setDisable(true);
-//        buttonROI.setDisable(true);
+        buttonROI.setDisable(true);
         buttonRun.setDisable(true);
 
         textFs.setText("7");

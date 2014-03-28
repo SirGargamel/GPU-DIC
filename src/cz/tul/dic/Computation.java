@@ -77,12 +77,13 @@ public class Computation {
 
             // generate exports
             generateExports(tc);
-            Config.saveConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.EXPORT, OutputUtils.serializeExports(exports));
-            loadedExports = OutputUtils.deserializeExports(Config.loadConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.EXPORT));
+            final File input = (File) tc.getParameter(TaskParameter.IN);
+            Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.EXPORT, OutputUtils.serializeExports(exports));
+            loadedExports = OutputUtils.deserializeExports((File) in);
 //            System.out.println(loadedExports);
 
-            Config.saveConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.TASK, TaskContainerUtils.serializeTaskContainer(tc));
-            loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.TASK));
+            Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.TASK, TaskContainerUtils.serializeTaskContainer(tc));
+            loadedTc = TaskContainerUtils.deserializeTaskContainer((File) in);
 //            System.out.println(loadedTc);
 
             TaskContainerChecker.checkTaskValidity(tc);
@@ -211,8 +212,9 @@ public class Computation {
             throw new IllegalArgumentException("Unsupported type of input - " + in);
         }
 
-        Config.saveConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.TASK, TaskContainerUtils.serializeTaskContainer(tc));
-        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig((File) tc.getParameter(TaskParameter.DIR), (String) tc.getParameter(TaskParameter.NAME), ConfigType.TASK));
+        final File input = (File) tc.getParameter(TaskParameter.IN);
+        Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.TASK, TaskContainerUtils.serializeTaskContainer(tc));
+        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainer((File) in);
 //        System.out.println(tc);
 //        System.out.println(loadedTc);
     }

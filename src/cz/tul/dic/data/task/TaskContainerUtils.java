@@ -1,6 +1,7 @@
 package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Config;
+import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
@@ -10,7 +11,6 @@ import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -154,7 +154,8 @@ public class TaskContainerUtils {
         return sb.toString();
     }
 
-    public static TaskContainer deserializeTaskContainer(final Config config) {
+    public static TaskContainer deserializeTaskContainer(final File in) throws IOException {
+        final Config config = Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK);        
         final TaskContainer result;
         // input
         final String input = config.get(CONFIG_INPUT);
@@ -195,7 +196,7 @@ public class TaskContainerUtils {
             } else if (key.startsWith(CONFIG_PARAMETERS)) {
                 tp = TaskParameter.valueOf(key.replaceFirst(CONFIG_PARAMETERS, ""));
                 switch (tp) {
-                    case DIR:
+                    case IN:
                         result.setParameter(tp, new File(e.getValue()));
                         break;
                     case FACET_GENERATOR_MODE:
