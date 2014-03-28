@@ -12,6 +12,7 @@ import java.util.Set;
 import javafx.collections.ObservableListBase;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ChoiceBox;
@@ -27,6 +28,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 
 public class ROISelector implements Initializable {
 
@@ -35,24 +37,26 @@ public class ROISelector implements Initializable {
     @FXML
     private ChoiceBox choiceRoi;
     private int index;
-    private double startX, startY;
+    private double lastX, lastY;
     private Set<Shape> rois;
-    private Shape actualShape;    
+    private Shape actualShape;
 
     @FXML
     private void handleButtonActionNext(ActionEvent event) {
         saveRois();
         changeIndex(1);
         displayImage();
+        actualShape = null;
+        event.consume();
     }
 
     private void saveRois() {
         final TaskContainer tc = Context.getInstance().getTc();
-        
+
         final cz.tul.dic.data.Image i = tc.getImage(index);
         final double dX = (imagePane.getWidth() - i.getWidth()) / 2.0;
         final double dY = (imagePane.getHeight() - i.getHeight()) / 2.0;
-        
+
         final Set<ROI> taskRois = new HashSet<>();
         taskRois.clear();
         double[] roiCoords = new double[2];
@@ -138,50 +142,109 @@ public class ROISelector implements Initializable {
         saveRois();
         changeIndex(-1);
         displayImage();
+        actualShape = null;
+        event.consume();
     }
 
     @FXML
     private void handleButtonActionDel(ActionEvent event) {
         rois.clear();
         imagePane.getChildren().clear();
+        actualShape = null;
+        event.consume();
     }
 
     @FXML
-    private void onMouseClick(MouseEvent event) {
-        startX = event.getSceneX();
-        startY = event.getSceneY();
+    private void onMousePressed(MouseEvent event) {
+        if (event.isPrimaryButtonDown()) {
+            lastX = event.getSceneX();
+            lastY = event.getSceneY();
 
-        if (RoiType.CIRCLE.equals(choiceRoi.getValue())) {
-            actualShape = new Circle(startX, startY, 10);
-        } else if (RoiType.RECTANGLE.equals(choiceRoi.getValue())) {
-            actualShape = new Rectangle(startX, startY, 10, 10);
+            final Shape s;
+            if (RoiType.CIRCLE.equals(choiceRoi.getValue())) {
+                s = new Circle(lastX, lastY, 5);
+            } else if (RoiType.RECTANGLE.equals(choiceRoi.getValue())) {
+                s = new Rectangle(lastX, lastY, 5, 5);
+            } else {
+                s = new Text("ERROR");
+            }
+
+            s.setFill(new Color(1, 1, 1, 0));
+            s.setStroke(new Color(1, 1, 1, 1));
+
+            s.setOnMousePressed(new EventHandler<MouseEvent>() {
+
+                @Override
+                public void handle(MouseEvent t) {
+                    if (t.isPrimaryButtonDown()) {
+                        s.setFill(new Color(1, 1, 1, 0.5));
+                        actualShape = s;
+                        lastX = t.getSceneX();
+                        lastY = t.getSceneY();
+                        t.consume();
+                    } else if (t.isSecondaryButtonDown()) {
+                        rois.remove(s);
+                        imagePane.getChildren().remove(s);
+                        actualShape = null;
+                        t.consume();
+                    }
+                }
+            });
+            s.setOnMouseDragged(new EventHandler<MouseEvent>() {
+
+                @Override
+                public void handle(MouseEvent t) {
+                    final double offsetX = t.getSceneX() - lastX;
+                    final double offsetY = t.getSceneY() - lastY;
+
+                    s.setLayoutX(s.getLayoutX() + offsetX);
+                    s.setLayoutY(s.getLayoutY() + offsetY);
+
+                    lastX = t.getSceneX();
+                    lastY = t.getSceneY();
+
+                    t.consume();
+                }
+            });
+            s.setOnMouseReleased(new EventHandler<MouseEvent>() {
+
+                @Override
+                public void handle(MouseEvent t) {
+                    if (!t.isDragDetect()) {
+                        s.setFill(new Color(1, 1, 1, 0));
+                        actualShape = null;
+                    }
+                    t.consume();
+                }
+            });
+
+            imagePane.getChildren().add(s);
+            rois.add(s);
+            actualShape = s;
+            event.consume();
         }
-
-        actualShape.setFill(new Color(1, 1, 1, 0));
-        actualShape.setStroke(new Color(1, 1, 1, 1));
-        imagePane.getChildren().add(actualShape);
     }
 
     @FXML
     private void onMouseDrag(MouseEvent event) {
         if (actualShape instanceof Circle) {
             Circle circle = (Circle) actualShape;
-            final double dx = startX - event.getSceneX();
-            final double dy = startY - event.getSceneY();
+            final double dx = lastX - event.getSceneX();
+            final double dy = lastY - event.getSceneY();
             final double radius = Math.sqrt(dx * dx + dy * dy);
             circle.setRadius(radius);
         } else if (actualShape instanceof Rectangle) {
             Rectangle rect = (Rectangle) actualShape;
-            final double dx = event.getSceneX() - startX;
-            final double dy = event.getSceneY() - startY;
+            final double dx = event.getSceneX() - lastX;
+            final double dy = event.getSceneY() - lastY;
             rect.setWidth(dx);
             rect.setHeight(dy);
         }
+        event.consume();
     }
 
     @FXML
     private void onMouseRelease(MouseEvent event) {
-        rois.add(actualShape);
         actualShape = null;
     }
 

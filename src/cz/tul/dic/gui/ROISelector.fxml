@@ -18,7 +18,7 @@
     <children>
         <ScrollPane prefHeight="200.0" prefWidth="200.0">
         <content>
-            <AnchorPane fx:id="imagePane" minHeight="0.0" minWidth="0.0" onMousePressed="#onMouseClick" onMouseDragged="#onMouseDrag" onMouseReleased="#onMouseRelease" prefHeight="606.0" prefWidth="645.0" />
+            <AnchorPane fx:id="imagePane" minHeight="0.0" minWidth="0.0" onMousePressed="#onMousePressed" onMouseDragged="#onMouseDrag" onMouseReleased="#onMouseRelease" prefHeight="606.0" prefWidth="645.0" />
         </content>
         </ScrollPane>
         <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" GridPane.columnIndex="1">
