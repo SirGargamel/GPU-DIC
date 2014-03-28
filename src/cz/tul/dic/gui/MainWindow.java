@@ -36,7 +36,6 @@ import org.pmw.tinylog.Logger;
 public class MainWindow implements Initializable {
 
     private static final File DEFAULT_DIR = new File("D:\\temp");
-    private TaskContainer tc;
     private Set<ExportTask> exports;
 
     @FXML
@@ -65,26 +64,26 @@ public class MainWindow implements Initializable {
                 final String ext = name.substring(name.lastIndexOf(".") + 1);
                 switch (ext) {
                     case "avi":
-                        tc = new TaskContainer(in);
+                        Context.getInstance().setTc(new TaskContainer(in));
                         break;
                     case "config":
                         final ConfigType ct = Config.determineType(in);
                         switch (ct) {
                             case TASK:
-                                tc = TaskContainerUtils.deserializeTaskContainer(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK));
+                                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskContainer(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK)));
                                 break;
                             case EXPORT:
                                 exports = OutputUtils.deserializeExports(Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.EXPORT));
                                 break;
                             case SEQUENCE:
-                                // find avi and load it
-                                tc = new TaskContainer(Config.determineProjectFile(in));
+                                // find avi and load it                                
+                                Context.getInstance().setTc(new TaskContainer(Config.determineProjectFile(in)));
                         }
 
                         break;
                     case "task":
                         try {
-                            tc = TaskContainerUtils.readTaskFromFile(in);
+                            Context.getInstance().setTc(TaskContainerUtils.readTaskFromFile(in));
                         } catch (ClassNotFoundException | IOException ex) {
                             // TODO show error during loading
                             Dialogs.create()
@@ -101,10 +100,10 @@ public class MainWindow implements Initializable {
                 }
 
             } else {
-                tc = new TaskContainer(fileList);
+                Context.getInstance().setTc(new TaskContainer(fileList));
             }
             try {
-                InputLoader.loadInput(tc);
+                InputLoader.loadInput(Context.getInstance().getTc());
                 buttonExpert.setDisable(false);
                 buttonROI.setDisable(false);
                 buttonRun.setDisable(false);
@@ -123,6 +122,7 @@ public class MainWindow implements Initializable {
         final String fsText = textFs.getText();
         try {
             final int fs = Integer.valueOf(fsText);
+            final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
                 TaskContainerUtils.setUniformFacetSize(tc, 0, fs);
                 Computation.commenceComputationDynamic(tc);
@@ -142,37 +142,20 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionROI(ActionEvent event) {
-        Parent root;
         try {
-            root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ROISelector.fxml"), Lang.getBundle());
-            Stage stage = new Stage();
+            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ROISelector.fxml"), Lang.getBundle());
+            final Stage stage = new Stage();
             stage.setTitle("Select ROIs");
             stage.setScene(new Scene(root));
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading ROI dialog from JAR.\n{0}", e);
         }
-
-//        if (tc != null) {
-//            // TODO show dialog for ROI marking            
-//        } else {
-//            Dialogs.create()
-//                    .title(Lang.getString("error"))
-//                    .message(Lang.getString("noTC"))
-//                    .showError();
-//        }
     }
 
     @FXML
     private void handleButtonActionExpert(ActionEvent event) {
-        if (tc != null) {
-            // TODO show dialog for expert settings
-        } else {
-            Dialogs.create()
-                    .title(Lang.getString("error"))
-                    .message(Lang.getString("noTC"))
-                    .showError();
-        }
+
     }
 
     @Override
