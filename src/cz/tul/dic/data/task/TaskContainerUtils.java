@@ -28,6 +28,7 @@ import java.util.Set;
  */
 public class TaskContainerUtils {
 
+    private static final String CONFIG_EMPTY = "NONE";
     private static final String CONFIG_INPUT = "INPUT";
     private static final String CONFIG_SEPARATOR_DATA = ",,";
     private static final String CONFIG_SEPARATOR_FULL = ";;";
@@ -141,17 +142,21 @@ public class TaskContainerUtils {
 
         final File in = (File) tc.getParameter(TaskParameter.IN);
         Config.saveConfig(in.getParentFile(), in.getName(), ConfigType.TASK, config);
-        
+
     }
 
     private static String toString(final double[] data) {
         final StringBuilder sb = new StringBuilder();
 
-        for (double d : data) {
-            sb.append(d);
-            sb.append(CONFIG_SEPARATOR_DATA);
+        if (data != null) {
+            for (double d : data) {
+                sb.append(d);
+                sb.append(CONFIG_SEPARATOR_DATA);
+            }
+            sb.setLength(sb.length() - CONFIG_SEPARATOR_DATA.length());
+        } else {
+            sb.append(CONFIG_EMPTY);
         }
-        sb.setLength(sb.length() - CONFIG_SEPARATOR_DATA.length());
 
         return sb.toString();
     }
@@ -226,10 +231,15 @@ public class TaskContainerUtils {
     }
 
     private static double[] doubleArrayFromString(final String data) {
-        final String[] split = data.split(CONFIG_SEPARATOR_DATA);
-        final double[] result = new double[split.length];
-        for (int i = 0; i < split.length; i++) {
-            result[i] = Double.valueOf(split[i]);
+        final double[] result;
+        if (data.equals(CONFIG_EMPTY)) {
+            result = null;
+        } else {
+            final String[] split = data.split(CONFIG_SEPARATOR_DATA);
+            result = new double[split.length];
+            for (int i = 0; i < split.length; i++) {
+                result[i] = Double.valueOf(split[i]);
+            }
         }
         return result;
     }
