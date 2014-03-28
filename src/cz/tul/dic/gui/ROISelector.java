@@ -235,8 +235,10 @@ public class ROISelector implements Initializable {
             circle.setRadius(radius);
         } else if (actualShape instanceof Rectangle) {
             Rectangle rect = (Rectangle) actualShape;
-            final double dx = event.getSceneX() - lastX;
-            final double dy = event.getSceneY() - lastY;
+            final double dx = Math.abs(event.getSceneX() - lastX);
+            final double dy = Math.abs(event.getSceneY() - lastY);
+            rect.setX(Math.min(event.getSceneX(), lastX));
+            rect.setY(Math.min(event.getSceneY(), lastY));
             rect.setWidth(dx);
             rect.setHeight(dy);
         }
