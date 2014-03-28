@@ -37,7 +37,7 @@ public class ROISelector implements Initializable {
     private int index;
     private double startX, startY;
     private Set<Shape> rois;
-    private Shape actualShape;
+    private Shape actualShape;    
 
     @FXML
     private void handleButtonActionNext(ActionEvent event) {
@@ -48,15 +48,23 @@ public class ROISelector implements Initializable {
 
     private void saveRois() {
         final TaskContainer tc = Context.getInstance().getTc();
+        
+        final cz.tul.dic.data.Image i = tc.getImage(index);
+        final double dX = (imagePane.getWidth() - i.getWidth()) / 2.0;
+        final double dY = (imagePane.getHeight() - i.getHeight()) / 2.0;
+        
         final Set<ROI> taskRois = new HashSet<>();
         taskRois.clear();
+        double[] roiCoords = new double[2];
         for (Shape s : rois) {
             if (s instanceof Rectangle) {
                 final Rectangle r = (Rectangle) s;
-                taskRois.add(new RectangleROI(r.getX(), r.getY(), r.getX() + r.getWidth(), r.getY() + r.getHeight()));
+                paneToImageXY(r.getX(), r.getY(), dX, dY, roiCoords);
+                taskRois.add(new RectangleROI(roiCoords[0], roiCoords[1], roiCoords[0] + r.getWidth(), roiCoords[1] + r.getHeight()));
             } else if (s instanceof Circle) {
                 final Circle c = (Circle) s;
-                taskRois.add(new CircularROI(c.getCenterX(), c.getCenterY(), c.getRadius()));
+                paneToImageXY(c.getCenterX(), c.getCenterY(), dX, dY, roiCoords);
+                taskRois.add(new CircularROI(roiCoords[0], roiCoords[1], c.getRadius()));
             }
         }
         tc.setROIs(taskRois, index);
@@ -74,7 +82,8 @@ public class ROISelector implements Initializable {
 
     private void displayImage() {
         final TaskContainer tc = Context.getInstance().getTc();
-        final Image img = SwingFXUtils.toFXImage(tc.getImage(index), null);
+        final cz.tul.dic.data.Image i = tc.getImage(index);
+        final Image img = SwingFXUtils.toFXImage(i, null);
 
         final Background b = new Background(new BackgroundImage(img, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT));
         imagePane.setBackground(b);
@@ -83,17 +92,24 @@ public class ROISelector implements Initializable {
     }
 
     private void loadRois() {
+        final cz.tul.dic.data.Image i = Context.getInstance().getTc().getImage(index);
+        final double dX = (imagePane.getWidth() - i.getWidth()) / 2.0;
+        final double dY = (imagePane.getHeight() - i.getHeight()) / 2.0;
+
         rois.clear();
         final TaskContainer tc = Context.getInstance().getTc();
         final Set<ROI> taskRois = tc.getRois(index);
         Shape s = null;
+        double[] roiCoords = new double[2];
         if (taskRois != null) {
             for (ROI r : taskRois) {
                 if (r instanceof RectangleROI) {
-                    s = new Rectangle(r.getX1(), r.getX2(), r.getWidth(), r.getHeight());
+                    imageToPaneXY(r.getX1(), r.getX2(), dX, dY, roiCoords);
+                    s = new Rectangle(roiCoords[0], roiCoords[1], r.getWidth(), r.getHeight());
                 } else if (r instanceof CircularROI) {
                     final CircularROI c = (CircularROI) r;
-                    s = new Circle(c.getCenterX(), c.getCenterY(), c.getRadius());
+                    imageToPaneXY(c.getCenterX(), c.getCenterY(), dX, dY, roiCoords);
+                    s = new Circle(roiCoords[0], roiCoords[1], c.getRadius());
                 }
                 if (s != null) {
                     rois.add(s);
@@ -105,6 +121,16 @@ public class ROISelector implements Initializable {
             imagePane.getChildren().clear();
             imagePane.getChildren().addAll(rois);
         }
+    }
+
+    private void imageToPaneXY(final double imageX, final double imageY, final double dX, final double dY, final double[] paneXY) {
+        paneXY[0] = imageX + dX;
+        paneXY[1] = imageY + dY;
+    }
+
+    private void paneToImageXY(final double paneX, final double paneY, final double dX, final double dY, final double[] imageXY) {
+        imageXY[0] = paneX - dX;
+        imageXY[1] = paneY - dY;
     }
 
     @FXML
