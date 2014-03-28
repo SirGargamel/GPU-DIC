@@ -23,16 +23,12 @@ import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
-import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 public class ROISelector implements Initializable {
-
-    @FXML
-    private GridPane gridPane;
 
     @FXML
     private AnchorPane imagePane;
@@ -43,14 +39,27 @@ public class ROISelector implements Initializable {
     private Set<Shape> rois;
     private Shape actualShape;
 
-    private void displayImage() {
+    @FXML
+    private void handleButtonActionNext(ActionEvent event) {
+        saveRois();
+        changeIndex(1);
+        displayImage();
+    }
+
+    private void saveRois() {
         final TaskContainer tc = Context.getInstance().getTc();
-        final Image img = SwingFXUtils.toFXImage(tc.getImage(index), null);
-
-        final Background b = new Background(new BackgroundImage(img, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT));
-        imagePane.setBackground(b);
-
-        loadRois();
+        final Set<ROI> taskRois = new HashSet<>();
+        taskRois.clear();
+        for (Shape s : rois) {
+            if (s instanceof Rectangle) {
+                final Rectangle r = (Rectangle) s;
+                taskRois.add(new RectangleROI(r.getX(), r.getY(), r.getX() + r.getWidth(), r.getY() + r.getHeight()));
+            } else if (s instanceof Circle) {
+                final Circle c = (Circle) s;
+                taskRois.add(new CircularROI(c.getCenterX(), c.getCenterY(), c.getRadius()));
+            }
+        }
+        tc.setROIs(taskRois, index);
     }
 
     private void changeIndex(int change) {
@@ -63,18 +72,46 @@ public class ROISelector implements Initializable {
         }
     }
 
-    @FXML
-    private void handleButtonActionNext(ActionEvent event) {
-        saveRois();
-        changeIndex(1);
-        displayImage();        
+    private void displayImage() {
+        final TaskContainer tc = Context.getInstance().getTc();
+        final Image img = SwingFXUtils.toFXImage(tc.getImage(index), null);
+
+        final Background b = new Background(new BackgroundImage(img, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT));
+        imagePane.setBackground(b);
+
+        loadRois();
+    }
+
+    private void loadRois() {
+        rois.clear();
+        final TaskContainer tc = Context.getInstance().getTc();
+        final Set<ROI> taskRois = tc.getRois(index);
+        Shape s = null;
+        if (taskRois != null) {
+            for (ROI r : taskRois) {
+                if (r instanceof RectangleROI) {
+                    s = new Rectangle(r.getX1(), r.getX2(), r.getWidth(), r.getHeight());
+                } else if (r instanceof CircularROI) {
+                    final CircularROI c = (CircularROI) r;
+                    s = new Circle(c.getCenterX(), c.getCenterY(), c.getRadius());
+                }
+                if (s != null) {
+                    rois.add(s);
+                    s.setFill(new Color(1, 1, 1, 0));
+                    s.setStroke(new Color(1, 1, 1, 1));
+                }
+            }
+
+            imagePane.getChildren().clear();
+            imagePane.getChildren().addAll(rois);
+        }
     }
 
     @FXML
     private void handleButtonActionPrev(ActionEvent event) {
         saveRois();
         changeIndex(-1);
-        displayImage();        
+        displayImage();
     }
 
     @FXML
@@ -124,7 +161,6 @@ public class ROISelector implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        index = 0;
         choiceRoi.setItems(new ObservableListBase() {
 
             @Override
@@ -140,48 +176,8 @@ public class ROISelector implements Initializable {
         choiceRoi.setValue(RoiType.CIRCLE);
         rois = new HashSet<>();
 
+        index = 0;
         displayImage();
-    }
-
-    private void saveRois() {
-        final TaskContainer tc = Context.getInstance().getTc();
-        final Set<ROI> taskRois = new HashSet<>();
-        taskRois.clear();
-        for (Shape s : rois) {
-            if (s instanceof Rectangle) {
-                final Rectangle r = (Rectangle) s;
-                taskRois.add(new RectangleROI(r.getX(), r.getY(), r.getX() + r.getWidth(), r.getY() + r.getHeight()));
-            } else if (s instanceof Circle) {
-                final Circle c = (Circle) s;
-                taskRois.add(new CircularROI(c.getCenterX(), c.getCenterY(), c.getRadius()));
-            }
-        }
-        tc.setROIs(taskRois, index);
-    }
-
-    private void loadRois() {
-        rois.clear();
-        final TaskContainer tc = Context.getInstance().getTc();
-        final Set<ROI> taskRois = tc.getRois(index);
-        Shape s = null;
-        if (taskRois != null) {
-            for (ROI r : taskRois) {
-                if (r instanceof RectangleROI) {
-                    s = new Rectangle(r.getX1(), r.getX2(), r.getWidth(), r.getHeight());
-                } else if (r instanceof CircularROI) {
-                    final CircularROI c = (CircularROI) r;
-                    s = new Circle(c.getCenterX(), c.getCenterY(), c.getRadius());
-                }
-                if (s != null) {
-                    rois.add(s);
-                    s.setFill(new Color(1, 1, 1, 0));
-                    s.setStroke(new Color(1, 1, 1, 1));
-                }
-            }
-
-            imagePane.getChildren().clear();
-            imagePane.getChildren().addAll(rois);
-        }
     }
 
 }
