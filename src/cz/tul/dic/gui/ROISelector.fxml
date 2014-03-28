@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="610.0" prefWidth="842.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.ROISelector">
+<children>
+    <GridPane fx:id="gridPane" gridLinesVisible="true" prefHeight="610.0" prefWidth="842.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <columnConstraints>
+        <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="552.0" />
+        <ColumnConstraints hgrow="NEVER" maxWidth="188" minWidth="188.0" prefWidth="188.0" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="21.0" vgrow="ALWAYS" />
+    </rowConstraints>
+    <children>
+        <ScrollPane prefHeight="200.0" prefWidth="200.0">
+        <content>
+            <AnchorPane fx:id="imagePane" minHeight="0.0" minWidth="0.0" onMousePressed="#onMouseClick" onMouseDragged="#onMouseDrag" onMouseReleased="#onMouseRelease" prefHeight="606.0" prefWidth="645.0" />
+        </content>
+        </ScrollPane>
+        <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" GridPane.columnIndex="1">
+        <children>
+            <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" text="%next" />
+            <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" text="%prev" />
+            <ChoiceBox fx:id="choiceRoi" prefWidth="150.0" />
+            <Button fx:id="buttonDel" mnemonicParsing="false" onAction="#handleButtonActionDel" text="%deleteAllROI" />
+        </children>
+        <GridPane.margin>
+            <Insets left="10.0" top="10.0" />
+        </GridPane.margin>        
+        </VBox>
+    </children>
+    </GridPane>
+</children>
+</AnchorPane>
