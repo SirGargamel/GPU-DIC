@@ -86,10 +86,12 @@ public class ExportTask {
         sb.append(SEPARATOR);
         sb.append(targetParam);
         sb.append(SEPARATOR);
-        for (int i : dataParams) {
-            sb.append(Integer.toString(i));
-        sb.append(SEPARATOR);
+        if (dataParams != null) {
+            for (int i : dataParams) {
+                sb.append(Integer.toString(i));
+            }            
         }
+        sb.append(SEPARATOR);
         sb.setLength(sb.length() - SEPARATOR.length());
 
         return sb.toString();

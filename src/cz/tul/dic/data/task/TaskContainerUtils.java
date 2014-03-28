@@ -162,7 +162,7 @@ public class TaskContainerUtils {
     }
 
     public static TaskContainer deserializeTaskContainerFromConfig(final File in) throws IOException {
-        final Config config = Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK);
+        final Config config = Config.loadConfig(in);
         final TaskContainer result;
         // input
         final String input = config.get(CONFIG_INPUT);

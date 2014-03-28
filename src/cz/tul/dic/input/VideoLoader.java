@@ -44,7 +44,7 @@ public class VideoLoader implements IInputLoader {
         final File temp = Utils.getTempDir(tc);
         // check cache
         final List<File> files;
-        Config config = Config.loadConfig(input.getParentFile(), input.getName(), ConfigType.SEQUENCE);
+        Config config = Config.loadConfig(Config.createConfigPath(input.getParentFile(), input.getName(), ConfigType.SEQUENCE));
         if (!isCacheDataValid(input, temp, config)) {
             Logger.debug("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
             // prepare script

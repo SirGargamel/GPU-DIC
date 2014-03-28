@@ -21,8 +21,8 @@ public class Config {
     private static final String SEPARATOR = " :: ";
     private final Map<String, String> data;
 
-    public static Config loadConfig(final File projectDir, final String projectName, final ConfigType configType) throws IOException {
-        final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(projectName).concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT);
+    public static Config loadConfig(final File configFile) throws IOException {
+        final String configFileName = configFile.getAbsolutePath();        
         final Config result = new Config();
 
         final File config = new File(configFileName);
@@ -42,6 +42,10 @@ public class Config {
             }
         }
         return result;
+    }
+    
+    public static File createConfigPath(final File projectDir, final String projectName, final ConfigType configType) {
+        return  new File(projectDir.getAbsolutePath().concat(File.separator).concat(projectName).concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT));
     }
 
     public static void saveConfig(final File projectDir, final String projectName, final ConfigType configType, final Config config) throws IOException {
@@ -67,7 +71,7 @@ public class Config {
         }
         return type;
     }
-    
+
     public static File determineProjectFile(final File configFile) {
         final String fullPath = configFile.getAbsolutePath();
         final ConfigType ct = determineType(configFile);

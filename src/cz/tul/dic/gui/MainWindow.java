@@ -4,15 +4,23 @@ import cz.tul.dic.Computation;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
+import cz.tul.dic.data.roi.CircularROI;
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.output.Direction;
+import cz.tul.dic.output.ExportMode;
+import cz.tul.dic.output.ExportTarget;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.OutputUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -70,7 +78,7 @@ public class MainWindow implements Initializable {
                         final ConfigType ct = Config.determineType(in);
                         switch (ct) {
                             case TASK:
-                                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskContainer(in));
+                                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskContainerFromConfig(in));
                                 break;
                             case EXPORT:
                                 exports = OutputUtils.deserializeExports(in);
@@ -154,13 +162,42 @@ public class MainWindow implements Initializable {
     }
 
     @FXML
-    private void handleButtonActionExpert(ActionEvent event) {
+    private void handleButtonActionExpert(ActionEvent event) throws ComputationException, IOException {
+        TaskContainer tc = new TaskContainer(new File("D:\\temp\\7202845m.avi"));
+        InputLoader.loadInput(tc);
 
+        final int roiRadius = 26;
+        tc.addRoi(new CircularROI(108, 12, roiRadius), 0);
+        tc.addRoi(new CircularROI(201, 7, roiRadius), 0);
+        tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
+        tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
+
+        for (ROI roi : tc.getRois(0)) {
+            tc.setDeformationLimits(new double[]{-1, 1, 1.0, -5, 5, 0.25}, 0, roi);
+        }
+
+        TaskContainerUtils.setUniformFacetSize(tc, 0, roiRadius / 2);
+        TaskContainerChecker.checkTaskValidity(tc);
+
+        final String target = new File("D:\\temp\\results").getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
+        final String ext = String.format("%02d", 19).concat(".bmp");
+        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), new int[]{round}));
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), new int[]{round}));
+            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), new int[]{round}));
+        }
+        exports.add(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.X, new File(target.concat("-X-").concat(ext).replace("bmp", "avi")), null));
+        exports.add(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.Y, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi")), null));
+
+        TaskContainerUtils.serializeTaskContainerToConfig(tc);
+        OutputUtils.serializeExports(exports, tc);
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        buttonExpert.setDisable(true);
+        exports = new HashSet<>();
+
+//        buttonExpert.setDisable(true);
         buttonROI.setDisable(true);
         buttonRun.setDisable(true);
 

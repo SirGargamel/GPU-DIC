@@ -36,7 +36,7 @@ public class OutputUtils {
     }
 
     public static Set<ExportTask> deserializeExports(final File in) throws IOException {
-        final Config config = Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.EXPORT);
+        final Config config = Config.loadConfig(Config.createConfigPath(in.getAbsoluteFile(), in.getName(), ConfigType.EXPORT));
         final Set<ExportTask> result = new HashSet<>();
 
         for (Map.Entry<String, String> e : config.entrySet()) {
@@ -60,7 +60,7 @@ public class OutputUtils {
 
     public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
         boolean result = false;
-        
+
         for (ROI roi : rois) {
             if (roi == null) {
                 continue;
