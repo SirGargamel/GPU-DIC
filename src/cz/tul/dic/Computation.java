@@ -1,8 +1,6 @@
 package cz.tul.dic;
 
 import cz.tul.dic.complextask.ComplextTaskSolver;
-import cz.tul.dic.data.Config;
-import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -78,12 +76,12 @@ public class Computation {
             // generate exports
             generateExports(tc);
             final File input = (File) tc.getParameter(TaskParameter.IN);
-            Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.EXPORT, OutputUtils.serializeExports(exports));
+            OutputUtils.serializeExports(exports, tc);
             loadedExports = OutputUtils.deserializeExports((File) in);
 //            System.out.println(loadedExports);
 
-            Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.TASK, TaskContainerUtils.serializeTaskContainer(tc));
-            loadedTc = TaskContainerUtils.deserializeTaskContainer((File) in);
+            TaskContainerUtils.serializeTaskContainerToConfig(tc);
+            loadedTc = TaskContainerUtils.deserializeTaskContainerFromConfig((File) in);
 //            System.out.println(loadedTc);
 
             TaskContainerChecker.checkTaskValidity(tc);
@@ -213,8 +211,8 @@ public class Computation {
         }
 
         final File input = (File) tc.getParameter(TaskParameter.IN);
-        Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.TASK, TaskContainerUtils.serializeTaskContainer(tc));
-        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainer((File) in);
+        TaskContainerUtils.serializeTaskContainerToConfig(tc);
+        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainerFromConfig((File) in);
 //        System.out.println(tc);
 //        System.out.println(loadedTc);
     }

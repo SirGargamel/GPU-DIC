@@ -6,6 +6,7 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -21,16 +22,17 @@ public class OutputUtils {
 
     private static final String CONFIG_EXPORTS = "EXPORT_";
 
-    public static Config serializeExports(final Set<ExportTask> exports) {
-        final Config result = new Config();
+    public static void serializeExports(final Set<ExportTask> exports, final TaskContainer tc) throws IOException {
+        final Config config = new Config();
 
         int i = 0;
         for (ExportTask et : exports) {
-            result.put(CONFIG_EXPORTS.concat(Integer.toString(i)), et.toString());
+            config.put(CONFIG_EXPORTS.concat(Integer.toString(i)), et.toString());
             i++;
         }
 
-        return result;
+        final File input = (File) tc.getParameter(TaskParameter.IN);
+        Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.EXPORT, config);
     }
 
     public static Set<ExportTask> deserializeExports(final File in) throws IOException {

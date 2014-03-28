@@ -85,14 +85,14 @@ public class TaskContainerUtils {
         return result;
     }
 
-    public static Config serializeTaskContainer(final TaskContainer tc) {
-        final Config result = new Config();
+    public static void serializeTaskContainerToConfig(final TaskContainer tc) throws IOException {
+        final Config config = new Config();
         final int roundCount = getRoundCount(tc);
         // input
         final Object input = tc.getInput();
         if (input instanceof File) {
             final File f = (File) input;
-            result.put(CONFIG_INPUT, f.getAbsolutePath());
+            config.put(CONFIG_INPUT, f.getAbsolutePath());
         } else if (input instanceof List) {
             final List<File> l = (List<File>) input;
             final StringBuilder sb = new StringBuilder();
@@ -101,7 +101,7 @@ public class TaskContainerUtils {
                 sb.append(CONFIG_SEPARATOR_FULL);
             }
             sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
-            result.put(CONFIG_INPUT, sb.toString());
+            config.put(CONFIG_INPUT, sb.toString());
         } else {
             throw new IllegalArgumentException("Unsupported type of input.");
         }
@@ -126,7 +126,7 @@ public class TaskContainerUtils {
                 }
                 sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
 
-                result.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
+                config.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
                 prevRoi = rois;
             }
         }
@@ -135,11 +135,13 @@ public class TaskContainerUtils {
         for (TaskParameter tp : TaskParameter.values()) {
             val = tc.getParameter(tp);
             if (val != null) {
-                result.put(CONFIG_PARAMETERS.concat(tp.name()), val.toString());
+                config.put(CONFIG_PARAMETERS.concat(tp.name()), val.toString());
             }
         }
 
-        return result;
+        final File in = (File) tc.getParameter(TaskParameter.IN);
+        Config.saveConfig(in.getParentFile(), in.getName(), ConfigType.TASK, config);
+        
     }
 
     private static String toString(final double[] data) {
@@ -154,8 +156,8 @@ public class TaskContainerUtils {
         return sb.toString();
     }
 
-    public static TaskContainer deserializeTaskContainer(final File in) throws IOException {
-        final Config config = Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK);        
+    public static TaskContainer deserializeTaskContainerFromConfig(final File in) throws IOException {
+        final Config config = Config.loadConfig(in.getAbsoluteFile(), in.getName(), ConfigType.TASK);
         final TaskContainer result;
         // input
         final String input = config.get(CONFIG_INPUT);
@@ -259,6 +261,7 @@ public class TaskContainerUtils {
         }
         return result;
     }
+
     public static void dumpTaskToFile(final File target, final TaskContainer data) throws IOException {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
             out.writeObject(data);
