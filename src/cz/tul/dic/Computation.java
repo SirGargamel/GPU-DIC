@@ -42,7 +42,7 @@ public class Computation {
     private static final int SIZE_MIN = 3;
     private static final int SIZE_MAX = 50;
     private static final int SIZE_STEP = 1;
-    private static final int SIZE_DYN = 19;    
+    private static final int SIZE_DYN = 19;
 
     static {
         Configurator.defaultConfig().writer(new ConsoleWriter()).level(LOGGING_LEVEL).activate();
@@ -81,7 +81,7 @@ public class Computation {
 
             time = System.nanoTime();
             engine.computeTask(tc);
-            time = System.nanoTime() - time;            
+            time = System.nanoTime() - time;
             for (ExportTask et : tc.getExports()) {
                 Exporter.export(et, tc);
             }
@@ -124,7 +124,7 @@ public class Computation {
         return tc;
     }
 
-    private static void generateExports(final TaskContainer tc) {        
+    private static void generateExports(final TaskContainer tc) {
         // prepare ROIS
         final List<ROI> circular = new ArrayList<>(2);
         final List<ROI> rect = new ArrayList<>(1);
@@ -177,7 +177,7 @@ public class Computation {
         }
         tc.addExport(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.X, new File(target.concat("-X-").concat(ext).replace("bmp", "avi")), null));
         tc.addExport(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.Y, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi")), null));
-        
+
         computeDynamicTask(tc);
 
         final File input = (File) tc.getParameter(TaskParameter.IN);
@@ -190,7 +190,8 @@ public class Computation {
     public static void computeDynamicTask(TaskContainer tc) throws IOException {
         try {
             long time = System.nanoTime();
-            ComplextTaskSolver.solveComplexTask(tc);
+            ComplextTaskSolver cts = new ComplextTaskSolver();
+            cts.solveComplexTask(tc);
             time = System.nanoTime() - time;
             Logger.info("Finished dynamic task " + SIZE_DYN + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 

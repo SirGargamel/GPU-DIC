@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Observable;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
 
@@ -21,7 +22,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class ComplextTaskSolver {
+public class ComplextTaskSolver extends Observable {
 
     private static final int ROI_COUNT = 4;
     private static final int MAX_SHIFT_DIFFERENCE = 3;
@@ -30,9 +31,13 @@ public class ComplextTaskSolver {
     private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 1.0, -5, 5, 0.25};
     private static final double[] DEFAULT_DEF_RECT = new double[]{-4, 4, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};
 
-    public static void solveComplexTask(final TaskContainer tc) throws IOException, ComputationException {
-        final Engine engine = new Engine();        
+    public void solveComplexTask(final TaskContainer tc) throws IOException, ComputationException {        
+        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        setChanged();
+        notifyObservers(new int[]{0, roundCount});
         
+        final Engine engine = new Engine();
+
         // check task
         //// 4x CircleROI is required
         Set<ROI> rois = tc.getRois(0);
@@ -72,10 +77,11 @@ public class ComplextTaskSolver {
                 tc.setDeformationLimits(DEFAULT_DEF_RECT, 0, roi);
             }
         }
-        // compute round 0
+        // compute round 0        
         engine.computeRound(tc, 0);
+        setChanged();
+        notifyObservers(new int[]{1, roundCount});
 
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
         double shift1, shift2, shift;
         for (int round = 1; round < roundCount; round++) {
             // find new position of Circle ROIs
@@ -108,14 +114,16 @@ public class ComplextTaskSolver {
             // generate limits
             //// TODO generate limits dynamically according to previous results
             for (ROI roi : rois) {
-            if (roi instanceof CircularROI) {
-                tc.setDeformationLimits(DEFAULT_DEF_CIRCLE, round, roi);
-            } else {
-                tc.setDeformationLimits(DEFAULT_DEF_RECT, round, roi);
+                if (roi instanceof CircularROI) {
+                    tc.setDeformationLimits(DEFAULT_DEF_CIRCLE, round, roi);
+                } else {
+                    tc.setDeformationLimits(DEFAULT_DEF_RECT, round, roi);
+                }
             }
-        }
             // compute round
             engine.computeRound(tc, round);
+            setChanged();
+            notifyObservers(new int[]{round + 1, roundCount});
         }
     }
 

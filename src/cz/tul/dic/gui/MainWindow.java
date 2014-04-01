@@ -1,7 +1,7 @@
 package cz.tul.dic.gui;
 
-import cz.tul.dic.Computation;
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.complextask.ComplextTaskSolver;
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.task.TaskContainer;
@@ -12,8 +12,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,7 +37,7 @@ import org.pmw.tinylog.Logger;
  */
 public class MainWindow implements Initializable {
 
-    private static final File DEFAULT_DIR = new File("D:\\temp");    
+    private static final File DEFAULT_DIR = new File("D:\\temp");
 
     @FXML
     private TextField textFs;
@@ -107,10 +110,16 @@ public class MainWindow implements Initializable {
                     try {
                         InputLoader.loadInput(Context.getInstance().getTc());
                         updateProgress(4, 5);
-                        buttonExpert.setDisable(false);
-                        buttonROI.setDisable(false);
-                        buttonRun.setDisable(false);
-                        textFs.setDisable(false);
+                        Platform.runLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                buttonRun.setDisable(false);
+                                buttonExpert.setDisable(false);
+                                textFs.setDisable(false);
+                                buttonROI.setDisable(false);
+                            }
+                        });
                     } catch (IOException ex) {
                         Dialogs.create()
                                 .title(Lang.getString("error"))
@@ -125,7 +134,7 @@ public class MainWindow implements Initializable {
             Dialogs.create()
                     .title(Lang.getString("Wait"))
                     .message(Lang.getString("LoadingData"))
-                    .masthead(null)                    
+                    .masthead(null)
                     .showWorkerProgress(worker);
 
             Thread th = new Thread(worker);
@@ -142,7 +151,17 @@ public class MainWindow implements Initializable {
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
                 TaskContainerUtils.setUniformFacetSize(tc, 0, fs);
-                Computation.commenceComputationDynamic(tc);
+                ComplextTaskSolver cts = new ComplextTaskSolver();
+                final Task<Object> worker = new ComputationObserver(cts, tc);
+                Dialogs.create()
+                        .title(Lang.getString("Wait"))
+                        .message(Lang.getString("Computing"))
+                        .masthead(null)
+                        .showWorkerProgress(worker);
+
+                Thread th = new Thread(worker);
+                th.setDaemon(true);
+                th.start();
             } else {
                 Dialogs.create()
                         .title(Lang.getString("error"))
@@ -244,7 +263,7 @@ public class MainWindow implements Initializable {
     }
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {        
+    public void initialize(URL url, ResourceBundle rb) {
         buttonExpert.setDisable(false);
         buttonROI.setDisable(true);
         buttonRun.setDisable(true);
@@ -253,4 +272,29 @@ public class MainWindow implements Initializable {
         textFs.setDisable(true);
     }
 
+    private static class ComputationObserver extends Task implements Observer {
+
+        private final ComplextTaskSolver cts;
+        private final TaskContainer tc;
+
+        public ComputationObserver(ComplextTaskSolver cts, final TaskContainer tc) {
+            this.cts = cts;
+            this.tc = tc;
+        }
+
+        @Override
+        protected Object call() throws Exception {
+            cts.addObserver(this);
+            cts.solveComplexTask(tc);
+            return null;
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+            if (arg instanceof int[]) {
+                final int[] data = (int[]) arg;
+                updateProgress(data[0], data[1]);
+            }
+        }
+    }
 }
