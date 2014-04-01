@@ -249,6 +249,11 @@ public class ROISelector implements Initializable {
     private void onMouseRelease(MouseEvent event) {
         actualShape = null;
     }
+    
+    @FXML
+    private void init(MouseEvent event) {
+        displayImage();
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -267,8 +272,7 @@ public class ROISelector implements Initializable {
         choiceRoi.setValue(RoiType.CIRCLE);
         rois = new HashSet<>();
 
-        index = 0;
-        displayImage();
+        index = 0;        
     }
 
 }
