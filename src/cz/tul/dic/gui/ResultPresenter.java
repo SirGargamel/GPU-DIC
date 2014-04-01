@@ -99,8 +99,7 @@ public class ResultPresenter implements Initializable {
 
     @FXML
     private void handleChoiceChange(ActionEvent event) {
-        dir = choiceDir.getSelectionModel().getSelectedItem();
-        changeIndex(0);
+        dir = choiceDir.getSelectionModel().getSelectedItem();        
         displayImage();
         event.consume();
     }
