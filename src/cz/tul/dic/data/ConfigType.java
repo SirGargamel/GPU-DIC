@@ -7,7 +7,6 @@ package cz.tul.dic.data;
 public enum ConfigType {
 
     TASK,
-    EXPORT,
     SEQUENCE
-    
+
 }

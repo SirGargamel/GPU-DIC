@@ -8,14 +8,12 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
-import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -37,8 +35,7 @@ import org.pmw.tinylog.Logger;
  */
 public class MainWindow implements Initializable {
 
-    private static final File DEFAULT_DIR = new File("D:\\temp");
-    private Set<ExportTask> exports;
+    private static final File DEFAULT_DIR = new File("D:\\temp");    
 
     @FXML
     private TextField textFs;
@@ -248,9 +245,7 @@ public class MainWindow implements Initializable {
     }
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        exports = new HashSet<>();
-
+    public void initialize(URL url, ResourceBundle rb) {        
         buttonExpert.setDisable(false);
         buttonROI.setDisable(true);
         buttonRun.setDisable(true);

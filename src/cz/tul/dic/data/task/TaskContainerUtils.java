@@ -8,6 +8,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
+import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,6 +30,7 @@ import java.util.Set;
 public class TaskContainerUtils {
 
     private static final String CONFIG_EMPTY = "NONE";
+    private static final String CONFIG_EXPORTS = "EXPORT_";
     private static final String CONFIG_INPUT = "INPUT";
     private static final String CONFIG_SEPARATOR_DATA = ",,";
     private static final String CONFIG_SEPARATOR_FULL = ";;";
@@ -139,6 +141,12 @@ public class TaskContainerUtils {
                 config.put(CONFIG_PARAMETERS.concat(tp.name()), val.toString());
             }
         }
+        // exports
+        int i = 0;
+        for (ExportTask et : tc.getExports()) {
+            config.put(CONFIG_EXPORTS.concat(Integer.toString(i)), et.toString());
+            i++;
+        }
 
         final File in = (File) tc.getParameter(TaskParameter.IN);
         Config.saveConfig(in.getParentFile(), in.getName(), ConfigType.TASK, config);
@@ -224,6 +232,8 @@ public class TaskContainerUtils {
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);
                 }
+            } else if (key.startsWith(CONFIG_EXPORTS)) {
+                result.addExport(ExportTask.generateExportTask(e.getValue()));
             }
         }
 

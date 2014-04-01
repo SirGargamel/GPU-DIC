@@ -4,6 +4,7 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.output.ExportTask;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -27,6 +28,7 @@ public class TaskContainer implements Serializable {
     private final Container<Set<ROI>> rois;
     private final Container<Map<ROI, Integer>> facetSizes;
     private final Container<Map<ROI, double[]>> deformationLimits;
+    private final Set<ExportTask> exports;
     // generated data
     private transient List<Image> images;
     private transient Container<Map<ROI, List<Facet>>> facets;
@@ -45,6 +47,7 @@ public class TaskContainer implements Serializable {
         finalResults = new LinkedList<>();
         deformations = new Container<>();
         deformationLimits = new Container<>();
+        exports = new HashSet<>();
 
         this.input = input;
     }
@@ -215,6 +218,14 @@ public class TaskContainer implements Serializable {
         }
 
         finalResults.set(round, result);
+    }
+    
+    public void addExport(final ExportTask et) {
+        exports.add(et);
+    }
+    
+    public Set<ExportTask> getExports() {
+        return Collections.unmodifiableSet(exports);
     }
     
     private void readObject(ObjectInputStream stream)
