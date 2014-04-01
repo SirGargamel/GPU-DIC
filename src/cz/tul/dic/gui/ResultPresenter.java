@@ -30,7 +30,7 @@ public class ResultPresenter implements Initializable {
     @FXML
     private AnchorPane imagePane;
     @FXML
-    private ComboBox<Direction> comboDir;
+    private ComboBox<Direction> choiceDir;
     @FXML
     private TextField textIndex;
     private int index;
@@ -98,8 +98,8 @@ public class ResultPresenter implements Initializable {
     }
 
     @FXML
-    private void handleChoiceChange(ActionEvent event) {        
-        dir = comboDir.getSelectionModel().getSelectedItem();
+    private void handleChoiceChange(ActionEvent event) {
+        dir = choiceDir.getSelectionModel().getSelectedItem();
         changeIndex(0);
         displayImage();
         event.consume();
@@ -127,10 +127,10 @@ public class ResultPresenter implements Initializable {
 
         ObservableList<Direction> comboBoxData = FXCollections.observableArrayList();
         comboBoxData.addAll(Direction.values());
-        comboDir.setItems(comboBoxData);
-                
+        choiceDir.setItems(comboBoxData);
+
         dir = Direction.ABS;
-        comboDir.setValue(dir);        
+        choiceDir.getSelectionModel().selectFirst();
     }
 
 }
