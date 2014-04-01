@@ -73,8 +73,8 @@ public class Computation {
             generateExports(tc);
             final File input = (File) tc.getParameter(TaskParameter.IN);
 
-            TaskContainerUtils.serializeTaskContainerToConfig(tc);
-            loadedTc = TaskContainerUtils.deserializeTaskContainerFromConfig((File) in);
+            TaskContainerUtils.serializeTaskToConfig(tc);
+            loadedTc = TaskContainerUtils.deserializeTaskFromConfig((File) in);
 //            System.out.println(loadedTc);
 
             TaskContainerChecker.checkTaskValidity(tc);
@@ -181,8 +181,8 @@ public class Computation {
         computeDynamicTask(tc);
 
         final File input = (File) tc.getParameter(TaskParameter.IN);
-        TaskContainerUtils.serializeTaskContainerToConfig(tc);
-        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainerFromConfig((File) in);
+        TaskContainerUtils.serializeTaskToConfig(tc);
+        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskFromConfig((File) in);
 //        System.out.println(tc);
 //        System.out.println(loadedTc);
     }

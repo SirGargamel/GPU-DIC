@@ -75,7 +75,7 @@ public class MainWindow implements Initializable {
                                 final ConfigType ct = Config.determineType(in);
                                 switch (ct) {
                                     case TASK:
-                                        Context.getInstance().setTc(TaskContainerUtils.deserializeTaskContainerFromConfig(in));
+                                        Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(in));
                                         break;
                                     case SEQUENCE:
                                         // find avi and load it                                                                 
@@ -85,7 +85,7 @@ public class MainWindow implements Initializable {
                             case "task":
                                 updateProgress(1, 5);
                                 try {
-                                    Context.getInstance().setTc(TaskContainerUtils.readTaskFromFile(in));
+                                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(in));
                                 } catch (ClassNotFoundException | IOException ex) {
                                     Dialogs.create()
                                             .title(Lang.getString("error"))
@@ -221,14 +221,14 @@ public class MainWindow implements Initializable {
 //        exports.add(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.X, new File(target.concat("-X-").concat(ext).replace("bmp", "avi")), null));
 //        exports.add(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.Y, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi")), null));
 //
-//        TaskContainerUtils.serializeTaskContainerToConfig(tc);
+//        TaskContainerUtils.serializeTaskToConfig(tc);
 //        OutputUtils.serializeExports(exports, tc);
 //
 //        // compute dynamic task
 //        Computation.computeDynamicTask(tc);
 //
 //        // serialize task container to binary file
-//        TaskContainerUtils.dumpTaskToFile(new File("D:\\temp\\task.task"), tc);
+//        TaskContainerUtils.serializeTaskToBinary(new File("D:\\temp\\task.task"), tc);
     }
 
     @FXML

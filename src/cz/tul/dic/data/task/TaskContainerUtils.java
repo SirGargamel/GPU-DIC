@@ -88,7 +88,7 @@ public class TaskContainerUtils {
         return result;
     }
 
-    public static void serializeTaskContainerToConfig(final TaskContainer tc) throws IOException {
+    public static void serializeTaskToConfig(final TaskContainer tc) throws IOException {
         final Config config = new Config();
         final int roundCount = getRoundCount(tc);
         // input
@@ -169,7 +169,7 @@ public class TaskContainerUtils {
         return sb.toString();
     }
 
-    public static TaskContainer deserializeTaskContainerFromConfig(final File in) throws IOException {
+    public static TaskContainer deserializeTaskFromConfig(final File in) throws IOException {
         final Config config = Config.loadConfig(in);
         final TaskContainer result;
         // input
@@ -272,20 +272,20 @@ public class TaskContainerUtils {
         for (ROI roi : tc.getRois(round)) {
             tc.addFacetSize(round, roi, facetSize);
         }
-    }
+    }    
 
-    public static TaskContainer readTaskFromFile(final File in) throws IOException, ClassNotFoundException {
+    public static void serializeTaskToBinary(final File target, final TaskContainer data) throws IOException {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
+            out.writeObject(data);
+        }
+    }
+    
+    public static TaskContainer deserializeTaskFromBinary(final File in) throws IOException, ClassNotFoundException {
         TaskContainer result;
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(in))) {
             result = (TaskContainer) ois.readObject();
         }
         return result;
-    }
-
-    public static void dumpTaskToFile(final File target, final TaskContainer data) throws IOException {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
-            out.writeObject(data);
-        }
     }
 
 }
