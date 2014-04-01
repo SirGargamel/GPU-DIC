@@ -37,6 +37,7 @@ public class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_PAIRS = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
+    private static final String EXTENSION_BINARY = ".task";
 
     public static int getRoundCount(final TaskContainer tc) {
         int counter = 0;
@@ -149,7 +150,7 @@ public class TaskContainerUtils {
         }
 
         final File in = (File) tc.getParameter(TaskParameter.IN);
-        Config.saveConfig(in.getParentFile(), in.getName(), ConfigType.TASK, config);
+        Config.saveConfig(in, ConfigType.TASK, config);
 
     }
 
@@ -274,9 +275,17 @@ public class TaskContainerUtils {
         }
     }    
 
-    public static void serializeTaskToBinary(final File target, final TaskContainer data) throws IOException {
+    public static void serializeTaskToBinary(final TaskContainer tc) throws IOException {
+        final File in = (File) tc.getParameter(TaskParameter.IN);
+        final File target;
+        if (in.getName().endsWith(EXTENSION_BINARY)) {
+            target = in;
+        } else {
+            target = new File(in.getAbsolutePath().concat(EXTENSION_BINARY));
+        }
+        
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
-            out.writeObject(data);
+            out.writeObject(tc);
         }
     }
     

@@ -48,8 +48,8 @@ public class Config {
         return  new File(projectDir.getAbsolutePath().concat(File.separator).concat(projectName).concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT));
     }
 
-    public static void saveConfig(final File projectDir, final String projectName, final ConfigType configType, final Config config) throws IOException {
-        final String configFileName = projectDir.getAbsolutePath().concat(File.separator).concat(projectName).concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT);
+    public static void saveConfig(final File in, final ConfigType configType, final Config config) throws IOException {
+        final String configFileName = in.getAbsolutePath().concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT);
         try (FileWriter fw = new FileWriter(new File(configFileName))) {
             for (Entry<String, String> e : config.entrySet()) {
                 fw.write(e.getKey());

@@ -82,7 +82,7 @@ public class VideoLoader implements IInputLoader {
                 config.put(PREFIX_MOD.concat(f.getName()), Long.toString(f.lastModified()));
                 config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
             }
-            Config.saveConfig(input.getParentFile(), input.getName(), ConfigType.SEQUENCE, config);
+            Config.saveConfig(input, ConfigType.SEQUENCE, config);
         } else {
             files = convertCacheDataToFiles(input, temp, config);
         }
