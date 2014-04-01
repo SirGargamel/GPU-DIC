@@ -186,7 +186,17 @@ public class Computation {
         }
         exports.add(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.X, new File(target.concat("-X-").concat(ext).replace("bmp", "avi")), null));
         exports.add(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.Y, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi")), null));
+        
+        computeDynamicTask(tc);
 
+        final File input = (File) tc.getParameter(TaskParameter.IN);
+        TaskContainerUtils.serializeTaskContainerToConfig(tc);
+        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainerFromConfig((File) in);
+//        System.out.println(tc);
+//        System.out.println(loadedTc);
+    }
+
+    public static void computeDynamicTask(TaskContainer tc) throws IOException {
         try {
             long time = System.nanoTime();
             ComplextTaskSolver.solveComplexTask(tc);
@@ -199,22 +209,6 @@ public class Computation {
         } catch (ComputationException ex) {
             Logger.error(ex);
         }
-
-        final File parent;
-        if (in instanceof File) {
-            parent = ((File) in).getParentFile();
-        } else if (in instanceof List) {
-            final List<File> inL = (List<File>) in;
-            parent = inL.get(0).getParentFile();
-        } else {
-            throw new IllegalArgumentException("Unsupported type of input - " + in);
-        }
-
-        final File input = (File) tc.getParameter(TaskParameter.IN);
-        TaskContainerUtils.serializeTaskContainerToConfig(tc);
-        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskContainerFromConfig((File) in);
-//        System.out.println(tc);
-//        System.out.println(loadedTc);
     }
 
 }

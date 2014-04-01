@@ -1,6 +1,8 @@
 package cz.tul.dic.data.roi;
 
-public class CircularROI extends ROI {
+import java.io.Serializable;
+
+public class CircularROI extends ROI implements Serializable {
 
     private final double centerX, centerY, radius;
 

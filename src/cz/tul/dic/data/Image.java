@@ -3,13 +3,14 @@ package cz.tul.dic.data;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import javax.imageio.ImageIO;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class Image extends BufferedImage {
+public class Image extends BufferedImage implements Serializable {
     
     private int[] grayScale;
     private boolean isEnabled;

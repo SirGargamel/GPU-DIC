@@ -1,10 +1,12 @@
 package cz.tul.dic.data.roi;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Petr Jecmen
  */
-public abstract class ROI {
+public abstract class ROI implements Serializable {
 
     static final String SEPARATOR = ";";
 

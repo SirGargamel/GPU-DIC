@@ -191,13 +191,32 @@ public class MainWindow implements Initializable {
 
         TaskContainerUtils.serializeTaskContainerToConfig(tc);
         OutputUtils.serializeExports(exports, tc);
+        
+        // compute dynamic task
+        Computation.computeDynamicTask(tc);
+        
+        // serialize task container to binary file
+        TaskContainerUtils.dumpTaskToFile(new File("D:\\temp\\task.task"), tc);
+    }
+    
+    @FXML
+    private void handleButtonActionResults(ActionEvent event) {
+        try {
+            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ResultPresenter.fxml"), Lang.getBundle());
+            final Stage stage = new Stage();
+            stage.setTitle(Lang.getString("Results"));
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+        } catch (IOException e) {
+            Logger.error("Error loading Results dialog from JAR.\n{0}", e);
+        }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         exports = new HashSet<>();
 
-//        buttonExpert.setDisable(true);
+        buttonExpert.setDisable(true);
         buttonROI.setDisable(true);
         buttonRun.setDisable(true);
 

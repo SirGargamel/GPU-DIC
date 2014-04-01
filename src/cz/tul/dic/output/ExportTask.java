@@ -18,7 +18,7 @@ public class ExportTask {
     private final ExportMode mode;
     private final ExportTarget target;
     private final Direction direction;
-    private final File targetParam;
+    private final Object targetParam;
     private final int[] dataParams;
     private final ROI[] rois;
 
@@ -37,7 +37,7 @@ public class ExportTask {
         return result;
     }
 
-    public ExportTask(final ExportMode mode, final ExportTarget target, final Direction direction, final File targetParam, final int[] dataParams, final ROI... rois) {
+    public ExportTask(final ExportMode mode, final ExportTarget target, final Direction direction, final Object targetParam, final int[] dataParams, final ROI... rois) {
         this.mode = mode;
         this.target = target;
         this.direction = direction;
@@ -46,7 +46,7 @@ public class ExportTask {
         this.rois = rois;
     }
 
-    public ExportTask(final ExportMode mode, final ExportTarget target, final Direction direction, final File targetParam, final int[] dataParams) {
+    public ExportTask(final ExportMode mode, final ExportTarget target, final Direction direction, final Object targetParam, final int[] dataParams) {
         this(mode, target, direction, targetParam, dataParams, (ROI) null);
     }
 
@@ -70,7 +70,7 @@ public class ExportTask {
         return rois;
     }
 
-    public File getTargetParam() {
+    public Object getTargetParam() {
         return targetParam;
     }
 

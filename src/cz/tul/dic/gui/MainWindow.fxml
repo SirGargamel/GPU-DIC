@@ -5,14 +5,15 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="160.0" prefWidth="240.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.MainWindow">
+<AnchorPane id="AnchorPane" prefHeight="175.0" prefWidth="240.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.MainWindow">
     <children>        
         <Button fx:id="buttonInput" layoutX="10.0" layoutY="10.0" onAction="#handleButtonActionInput" text="%Input" />
         <Label fx:id="labelFs" layoutX="10.0" layoutY="40.0" text="%fs" />
         <TextField fx:id="textFs" layoutX="130.0" layoutY="40.0" prefWidth="55.0" />
         <Button fx:id="buttonROI" layoutX="10.0" layoutY="70.0" onAction="#handleButtonActionROI" text="%ROI" />
         <Button fx:id="buttonRun" layoutX="10.0" layoutY="100.0" onAction="#handleButtonActionRun" text="%Run" />
-        <Button fx:id="buttonExpert" layoutX="130.0" layoutY="70.0" onAction="#handleButtonActionExpert" text="%Expert"/>                
+        <Button fx:id="buttonExpert" layoutX="130.0" layoutY="70.0" onAction="#handleButtonActionExpert" text="%Expert" />
+        <Button fx:id="buttonResults" layoutX="10.0" layoutY="135.0" onAction="#handleButtonActionResults" text="%Results" />                
     </children>
     <padding>
         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

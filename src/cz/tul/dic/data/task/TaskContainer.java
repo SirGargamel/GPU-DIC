@@ -4,6 +4,8 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.ROI;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,9 +28,10 @@ public class TaskContainer implements Serializable {
     private final Container<Map<ROI, Integer>> facetSizes;
     private final Container<Map<ROI, double[]>> deformationLimits;
     // generated data
-    private final List<Image> images;
-    private final Container<Map<ROI, List<Facet>>> facets;
-    private final Container<Map<ROI, double[]>> deformations;
+    private transient List<Image> images;
+    private transient Container<Map<ROI, List<Facet>>> facets;
+    private transient Container<Map<ROI, double[]>> deformations;
+    // results
     private final List<Map<ROI, List<double[][]>>> results;
     private final List<double[][][]> finalResults;
 
@@ -212,5 +215,13 @@ public class TaskContainer implements Serializable {
         }
 
         finalResults.set(round, result);
+    }
+    
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        images = new LinkedList<>();
+        facets = new Container<>();
+        deformations = new Container<>();
     }
 }

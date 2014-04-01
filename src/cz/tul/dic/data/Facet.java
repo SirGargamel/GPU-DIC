@@ -1,10 +1,12 @@
 package cz.tul.dic.data;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Petr Jecmen
  */
-public class Facet {
+public class Facet implements Serializable {
 
     private final int[] data;
     private final float[] center;
