@@ -9,7 +9,8 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
-import javafx.collections.ObservableListBase;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -35,7 +36,7 @@ public class ROISelector implements Initializable {
     @FXML
     private AnchorPane imagePane;
     @FXML
-    private ChoiceBox choiceRoi;
+    private ChoiceBox<RoiType> choiceRoi;
     private int index;
     private double lastX, lastY;
     private Set<Shape> rois;
@@ -249,7 +250,7 @@ public class ROISelector implements Initializable {
     private void onMouseRelease(MouseEvent event) {
         actualShape = null;
     }
-    
+
     @FXML
     private void init(MouseEvent event) {
         displayImage();
@@ -257,22 +258,14 @@ public class ROISelector implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        choiceRoi.setItems(new ObservableListBase() {
+        ObservableList<RoiType> comboBoxData = FXCollections.observableArrayList();
+        comboBoxData.addAll(RoiType.values());
+        choiceRoi.setItems(comboBoxData);
+        choiceRoi.getSelectionModel().selectFirst();
 
-            @Override
-            public Object get(int index) {
-                return RoiType.values()[index];
-            }
-
-            @Override
-            public int size() {
-                return RoiType.values().length;
-            }
-        });
-        choiceRoi.setValue(RoiType.CIRCLE);
         rois = new HashSet<>();
 
-        index = 0;        
+        index = 0;
     }
 
 }

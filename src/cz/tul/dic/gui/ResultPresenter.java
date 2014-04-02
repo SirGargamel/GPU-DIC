@@ -35,7 +35,6 @@ public class ResultPresenter implements Initializable {
     private TextField textIndex;
     private int index;
     private Timeline timeLine;
-    private Direction dir;
 
     @FXML
     private void handleButtonActionNext(ActionEvent event) {
@@ -59,7 +58,7 @@ public class ResultPresenter implements Initializable {
     }
 
     private void displayImage() {
-        final BufferedImage i = Context.getInstance().getMapResult(index, dir);
+        final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
         final Image img = SwingFXUtils.toFXImage(i, null);
 
         final Background b = new Background(new BackgroundImage(img, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT));
@@ -99,7 +98,6 @@ public class ResultPresenter implements Initializable {
 
     @FXML
     private void handleChoiceChange(ActionEvent event) {
-        dir = choiceDir.getSelectionModel().getSelectedItem();        
         displayImage();
         event.consume();
     }
@@ -128,7 +126,6 @@ public class ResultPresenter implements Initializable {
         comboBoxData.addAll(Direction.values());
         choiceDir.setItems(comboBoxData);
 
-        dir = Direction.ABS;
         choiceDir.getSelectionModel().selectFirst();
     }
 
