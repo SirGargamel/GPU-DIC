@@ -7,12 +7,13 @@ package cz.tul.dic.output;
 
 import cz.tul.dic.data.roi.ROI;
 import java.io.File;
+import java.io.Serializable;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class ExportTask {
+public class ExportTask implements Serializable {
 
     private static final String SEPARATOR = ";";
     private final ExportMode mode;
