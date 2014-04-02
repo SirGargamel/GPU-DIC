@@ -65,9 +65,12 @@ public class MainWindow implements Initializable {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
         List<File> fileList = fileChooser.showOpenMultipleDialog(null);
         if (fileList != null && !fileList.isEmpty()) {
-            Task<Object> worker = new Task<Object>() {
+            Task<String> worker = new Task<String>() {
                 @Override
-                protected Object call() throws Exception {
+                protected String call() throws Exception {
+                    String result = null;
+                    boolean error = false;
+
                     updateProgress(0, 5);
                     if (fileList.size() == 1) {
                         final File in = fileList.get(0);
@@ -95,17 +98,13 @@ public class MainWindow implements Initializable {
                                 try {
                                     Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(in));
                                 } catch (ClassNotFoundException | IOException ex) {
-                                    Dialogs.create()
-                                            .title(Lang.getString("error"))
-                                            .message(Lang.getString("wrongBin"))
-                                            .showWarning();
+                                    error = true;
+                                    result = Lang.getString("wrongBin");
                                 }
                                 break;
                             default:
-                                Dialogs.create()
-                                        .title(Lang.getString("error"))
-                                        .message(Lang.getString("wrongIn"))
-                                        .showWarning();
+                                error = true;
+                                result = Lang.getString("wrongIn");
                         }
                         updateProgress(2, 5);
                     } else {
@@ -113,40 +112,38 @@ public class MainWindow implements Initializable {
                         Context.getInstance().setTc(new TaskContainer(fileList));
                         updateProgress(2, 5);
                     }
-                    try {
-                        InputLoader.loadInput(Context.getInstance().getTc());
-                        updateProgress(4, 5);
-                        Platform.runLater(new Runnable() {
-
-                            @Override
-                            public void run() {
+                    if (!error) {
+                        try {
+                            InputLoader.loadInput(Context.getInstance().getTc());
+                            updateProgress(4, 5);
+                            Platform.runLater(() -> {
                                 buttonRun.setDisable(false);
                                 buttonExpert.setDisable(false);
                                 textFs.setDisable(false);
                                 buttonROI.setDisable(false);
                                 imagePane.displayImage();
-                            }
-                        });
-                    } catch (IOException ex) {
-                        Dialogs.create()
-                                .title(Lang.getString("error"))
-                                .message(Lang.getString("IO", ex.getLocalizedMessage()))
-                                .showWarning();
+                            });
+                        } catch (IOException ex) {
+                            result = Lang.getString("IO", ex.getLocalizedMessage());
+                        }
                     }
-                    updateProgress(5, 5);                    
-                    return null;
+                    updateProgress(5, 5);
+
+                    return result;
                 }
             };
-
-            Dialogs.create()
-                    .title(Lang.getString("Wait"))
-                    .message(Lang.getString("LoadingData"))
-                    .masthead(null)
-                    .showWorkerProgress(worker);
 
             Thread th = new Thread(worker);
             th.setDaemon(true);
             th.start();
+
+            final String err = worker.get();
+            if (err != null) {
+                Dialogs.create()
+                        .title(Lang.getString("error"))
+                        .message(err)
+                        .showWarning();
+            }
         }
     }
 
@@ -268,20 +265,20 @@ public class MainWindow implements Initializable {
             Logger.error("Error loading Results dialog from JAR.\n{0}", e);
         }
     }
-    
+
     @FXML
     private void handleButtonActionNext(ActionEvent event) {
         stopVideo();
         imagePane.nextImage();
         event.consume();
     }
-    
+
     private void stopVideo() {
         if (timeLine != null) {
             timeLine.stop();
         }
     }
-    
+
     @FXML
     private void handleButtonActionPrev(ActionEvent event) {
         stopVideo();
@@ -314,8 +311,8 @@ public class MainWindow implements Initializable {
         buttonRun.setDisable(true);
 
         textFs.setText("7");
-        textFs.setDisable(true);     
-        
+        textFs.setDisable(true);
+
         imagePane.initialize(url, rb);
     }
 
