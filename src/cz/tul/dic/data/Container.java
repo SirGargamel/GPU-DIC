@@ -15,21 +15,14 @@ public final class Container<T> implements Serializable {
 
     public Container() {
         data = new ArrayList<>();
-    }
+    }    
 
-    public void addItem(final T item) {
-        if (data == null) {
-            throw new NullPointerException();
-        }
-
-        data.add(item);
-    }
-
-    public void addItem(final T item, final int position) {
-        while (position > data.size()) {
+    public void setItem(final T item, final int position) {
+        while (position >= data.size()) {
             data.add(null);
         }
-        addItem(item);
+
+        data.set(position, item);
     }
 
     public T getItem(final int position) {
@@ -50,7 +43,7 @@ public final class Container<T> implements Serializable {
         }
         return result;
     }
-    
+
     public T getItemPrecise(final int position) {
         if (position < 0 || position >= data.size()) {
             return null;

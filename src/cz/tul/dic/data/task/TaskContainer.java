@@ -102,7 +102,7 @@ public class TaskContainer implements Serializable {
         Map<ROI, List<Facet>> m = this.facets.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
-            this.facets.addItem(m, round);
+            this.facets.setItem(m, round);
         }
         m.put(roi, facets);
     }
@@ -121,13 +121,13 @@ public class TaskContainer implements Serializable {
         Set<ROI> r = rois.getItemPrecise(round);
         if (r == null) {
             r = new HashSet<>(1);
-            rois.addItem(r, round);
+            rois.setItem(r, round);
         }
         r.add(roi);
     }
 
     public void setROIs(final Set<ROI> rois, final int round) {
-        this.rois.addItem(rois, round);
+        this.rois.setItem(rois, round);
     }
 
     public Map<ROI, Integer> getFacetSizes(final int round) {
@@ -141,14 +141,14 @@ public class TaskContainer implements Serializable {
     }
 
     public void setFacetSizes(final Map<ROI, Integer> rois, final int round) {
-        facetSizes.addItem(rois, round);
+        facetSizes.setItem(rois, round);
     }
 
     public void addFacetSize(final int round, final ROI roi, final int facetSize) {
         Map<ROI, Integer> m = facetSizes.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
-            facetSizes.addItem(m, round);
+            facetSizes.setItem(m, round);
         }
         m.put(roi, facetSize);
     }
@@ -157,7 +157,7 @@ public class TaskContainer implements Serializable {
         Map<ROI, double[]> m = deformationLimits.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
-            deformationLimits.addItem(m, round);
+            deformationLimits.setItem(m, round);
         }
         m.put(roi, limits);
     }
@@ -176,7 +176,7 @@ public class TaskContainer implements Serializable {
         Map<ROI, double[]> m = this.deformations.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
-            this.deformations.addItem(m, round);
+            this.deformations.setItem(m, round);
         }
 
         m.put(roi, deformations);
