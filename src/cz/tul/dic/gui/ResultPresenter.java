@@ -11,7 +11,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
@@ -73,15 +72,11 @@ public class ResultPresenter implements Initializable {
     @FXML
     private void handleButtonActionPlay(ActionEvent event) {
         stopVideo();
-        timeLine = new Timeline(new KeyFrame(Duration.millis(250), new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                boolean stop = changeIndex(1);
-                displayImage();
-                if (stop) {
-                    stopVideo();
-                }
+        timeLine = new Timeline(new KeyFrame(Duration.millis(250), (ActionEvent event1) -> {
+            boolean stop = changeIndex(1);
+            displayImage();
+            if (stop) {
+                stopVideo();
             }
         }));
         timeLine.setCycleCount(Timeline.INDEFINITE);
