@@ -1,13 +1,21 @@
 package cz.tul.dic.gui;
 
+import cz.tul.dic.Computation;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplextTaskSolver;
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
+import cz.tul.dic.data.roi.CircularROI;
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.output.Direction;
+import cz.tul.dic.output.ExportTarget;
+import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -195,62 +203,39 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionExpert(ActionEvent event) throws ComputationException, IOException {
-        Task<Object> worker = new Task<Object>() {
-            @Override
-            protected Object call() throws Exception {
-                for (int i = 0; i < 100; i++) {
-                    updateProgress(i, 99);
-                    updateMessage("progress: " + i);
-                    System.out.println("progress: " + i);
-                    Thread.sleep(100);
-                }
-                return null;
-            }
-        };
+        TaskContainer tc = new TaskContainer(new File("D:\\temp\\7202845m.avi"));
+        InputLoader.loadInput(tc);
 
-        Dialogs.create()
-                .title("Progress")
-                .message("Now Loading...")
-                .showWorkerProgress(worker);
+        final int roiRadius = 26;
+        tc.addRoi(new CircularROI(108, 12, roiRadius), 0);
+        tc.addRoi(new CircularROI(201, 7, roiRadius), 0);
+        tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
+        tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
 
-        Thread th = new Thread(worker);
-        th.setDaemon(true);
-        th.start();
+        for (ROI roi : tc.getRois(0)) {
+            tc.setDeformationLimits(new double[]{-1, 1, 1.0, -5, 5, 0.25}, 0, roi);
+        }
 
-//        TaskContainer tc = new TaskContainer(new File("D:\\temp\\7202845m.avi"));
-//        InputLoader.loadInput(tc);
-//
-//        final int roiRadius = 26;
-//        tc.addRoi(new CircularROI(108, 12, roiRadius), 0);
-//        tc.addRoi(new CircularROI(201, 7, roiRadius), 0);
-//        tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
-//        tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
-//
-//        for (ROI roi : tc.getRois(0)) {
-//            tc.setDeformationLimits(new double[]{-1, 1, 1.0, -5, 5, 0.25}, 0, roi);
-//        }
-//
-//        TaskContainerUtils.setUniformFacetSize(tc, 0, roiRadius / 2);
-//        TaskContainerChecker.checkTaskValidity(tc);
-//
-//        final String target = new File("D:\\temp\\results").getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
-//        final String ext = String.format("%02d", 19).concat(".bmp");
-//        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
-//            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.X, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), new int[]{round}));
-//            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.Y, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), new int[]{round}));
-//            exports.add(new ExportTask(ExportMode.MAP, ExportTarget.FILE, Direction.ABS, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), new int[]{round}));
-//        }
-//        exports.add(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.X, new File(target.concat("-X-").concat(ext).replace("bmp", "avi")), null));
-//        exports.add(new ExportTask(ExportMode.SEQUENCE, ExportTarget.FILE, Direction.Y, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi")), null));
-//
-//        TaskContainerUtils.serializeTaskToConfig(tc);
-//        OutputUtils.serializeExports(exports, tc);
-//
-//        // compute dynamic task
-//        Computation.computeDynamicTask(tc);
-//
-//        // serialize task container to binary file
-//        TaskContainerUtils.serializeTaskToBinary(new File("D:\\temp\\task.task"), tc);
+        TaskContainerUtils.setUniformFacetSize(tc, 0, roiRadius / 2);
+        TaskContainerChecker.checkTaskValidity(tc);
+
+        final String target = new File("D:\\temp\\results").getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
+        final String ext = String.format("%02d", 19).concat(".bmp");
+        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
+            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), round));
+        }
+        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).replace("bmp", "avi"))));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi"))));
+
+        TaskContainerUtils.serializeTaskToConfig(tc);        
+
+        // compute dynamic task
+        Computation.computeDynamicTask(tc);
+
+        // serialize task container to binary file
+        TaskContainerUtils.serializeTaskToBinary(tc);
     }
 
     @FXML
