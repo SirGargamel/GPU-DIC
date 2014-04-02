@@ -84,13 +84,12 @@ public class MainWindow implements Initializable {
                         final File in = fileList.get(0);
                         final String name = in.getName();
                         final String ext = name.substring(name.lastIndexOf(".") + 1);
+                        updateProgress(1, 5);
                         switch (ext) {
                             case "avi":
-                                updateProgress(1, 5);
                                 Context.getInstance().setTc(new TaskContainer(in));
                                 break;
                             case "config":
-                                updateProgress(1, 5);
                                 final ConfigType ct = Config.determineType(in);
                                 switch (ct) {
                                     case TASK:
@@ -102,7 +101,6 @@ public class MainWindow implements Initializable {
                                 }
                                 break;
                             case "task":
-                                updateProgress(1, 5);
                                 try {
                                     Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(in));
                                 } catch (ClassNotFoundException | IOException ex) {
@@ -229,7 +227,7 @@ public class MainWindow implements Initializable {
         tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).replace("bmp", "avi"))));
         tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi"))));
 
-        TaskContainerUtils.serializeTaskToConfig(tc);        
+        TaskContainerUtils.serializeTaskToConfig(tc);
 
         // compute dynamic task
         Computation.computeDynamicTask(tc);
@@ -274,7 +272,9 @@ public class MainWindow implements Initializable {
     private void handleButtonActionPlay(ActionEvent event) {
         stopVideo();
         timeLine = new Timeline(new KeyFrame(Duration.millis(250), (ActionEvent event1) -> {
-            imagePane.nextImage();
+            if (imagePane.nextImage()) {
+                stopVideo();
+            }
         }));
         timeLine.setCycleCount(Timeline.INDEFINITE);
         timeLine.play();

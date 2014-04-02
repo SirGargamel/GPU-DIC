@@ -39,23 +39,28 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
     private StringProperty imageIndexProperty;
     protected ImageView image;
 
-    public void nextImage() {
-        changeIndex(1);
+    public boolean nextImage() {
+        final boolean result = changeIndex(1);
         displayImage();
+        return result;
     }
 
-    protected void changeIndex(int change) {
+    protected boolean changeIndex(int change) {
+        boolean result = false;
         imageIndex += change;
 
         if (imageIndex < 0) {
             imageIndex = Context.getInstance().getTc().getImages().size() - 1;
+            result = true;
         } else if (imageIndex >= Context.getInstance().getTc().getImages().size()) {
             imageIndex = 0;
+            result = true;
         }
 
         if (imageIndexProperty != null) {
             imageIndexProperty.setValue(Integer.toString(imageIndex));
         }
+        return result;
     }
 
     public void displayImage() {
@@ -103,9 +108,10 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
         }
     }
 
-    public void previousImage() {
-        changeIndex(-1);
+    public boolean previousImage() {
+        final boolean result = changeIndex(-1);
         displayImage();
+        return result;
     }
 
     @Override
