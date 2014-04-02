@@ -3,52 +3,58 @@
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane id="AnchorPane" prefHeight="610.0" prefWidth="842.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.ResultPresenter">
-<children>
-    <GridPane fx:id="gridPane" gridLinesVisible="true" prefHeight="610.0" prefWidth="842.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-    <columnConstraints>
-        <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="552.0" />
-        <ColumnConstraints hgrow="NEVER" maxWidth="188" minWidth="188.0" prefWidth="188.0" />
-    </columnConstraints>
-    <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="21.0" vgrow="ALWAYS" />
-    </rowConstraints>
     <children>
-        <ScrollPane prefHeight="200.0" prefWidth="200.0">
-        <content>
-            <AnchorPane fx:id="imagePane" minHeight="0.0" minWidth="0.0" prefHeight="606.0" prefWidth="645.0" />
-        </content>
-        </ScrollPane>
-        <GridPane hgap="5.0" prefHeight="200.0" prefWidth="200.0" vgap="2.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
-        <children>
-            <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" text="%next" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" text="%prev" GridPane.rowIndex="1" />
-            <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#handleButtonActionPlay" text="%play" />
-            <Button fx:id="buttonStop" mnemonicParsing="false" onAction="#handleButtonActionStop" text="%stop" GridPane.columnIndex="1" />
-            <Label text="%Index" GridPane.rowIndex="2" />
-            <TextField fx:id="textIndex" onAction="#handleTextActionIndex" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <ComboBox fx:id="choiceDir" onAction="#handleChoiceChange" prefWidth="150.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
-<GridPane.margin>
-<Insets left="5.0" right="5.0" />
-</GridPane.margin></ComboBox>            
-        </children>
-        <GridPane.margin>
-            <Insets left="10.0" top="10.0" />
-        </GridPane.margin>
-        <columnConstraints>
-            <ColumnConstraints />
-            <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
-        </columnConstraints>
-        <rowConstraints>
-            <RowConstraints />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" />
-        </rowConstraints>        
+        <GridPane fx:id="gridPane" gridLinesVisible="true" prefHeight="610.0" prefWidth="842.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="552.0" />
+                <ColumnConstraints hgrow="NEVER" maxWidth="188" minWidth="188.0" prefWidth="188.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="21.0" vgrow="ALWAYS" />
+            </rowConstraints>
+            <children>
+                <ScrollPane prefHeight="200.0" prefWidth="200.0">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="606.0" prefWidth="645.0">
+                            <children>
+                                <ImageView fx:id="image" fitHeight="150.0" fitWidth="200.0" layoutX="107.5" layoutY="62.5" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </ScrollPane>
+                <GridPane hgap="5.0" prefHeight="200.0" prefWidth="200.0" vgap="2.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
+                    <children>
+                        <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" text="%next" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" text="%prev" GridPane.rowIndex="1" />
+                        <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#handleButtonActionPlay" text="%play" />
+                        <Button fx:id="buttonStop" mnemonicParsing="false" onAction="#handleButtonActionStop" text="%stop" GridPane.columnIndex="1" />
+                        <Label text="%Index" GridPane.rowIndex="2" />
+                        <TextField fx:id="textIndex" onAction="#handleTextActionIndex" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <ComboBox fx:id="choiceDir" onAction="#handleChoiceChange" prefWidth="150.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
+                            <GridPane.margin>
+                                <Insets left="5.0" right="5.0" />
+                            </GridPane.margin>
+                        </ComboBox>            
+                    </children>
+                    <GridPane.margin>
+                        <Insets left="10.0" top="10.0" />
+                    </GridPane.margin>
+                    <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                    </rowConstraints>        
+                </GridPane>
+            </children>
         </GridPane>
     </children>
-    </GridPane>
-</children>
 </AnchorPane>

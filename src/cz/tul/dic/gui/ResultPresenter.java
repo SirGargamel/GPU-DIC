@@ -17,22 +17,17 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
+import javafx.scene.image.ImageView;
 import javafx.util.Duration;
 
 public class ResultPresenter implements Initializable {
-
-    @FXML
-    private AnchorPane imagePane;
+    
     @FXML
     private ComboBox<Direction> choiceDir;
     @FXML
     private TextField textIndex;
+    @FXML
+    private ImageView image;
     private int index;
     private Timeline timeLine;
 
@@ -44,25 +39,28 @@ public class ResultPresenter implements Initializable {
         event.consume();
     }
 
-    private void changeIndex(int change) {
+    private boolean changeIndex(int change) {
+        boolean result = false;
         index += change;
 
         final int roundCount = TaskContainerUtils.getRoundCount(Context.getInstance().getTc());
         if (index < 0) {
             index = roundCount - 1;
+            result = true;
         } else if (index >= roundCount) {
             index = 0;
+            result = true;
         }
 
         textIndex.setText(Integer.toString(index));
+        return result;
     }
 
     private void displayImage() {
         final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
         final Image img = SwingFXUtils.toFXImage(i, null);
 
-        final Background b = new Background(new BackgroundImage(img, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT));
-        imagePane.setBackground(b);
+        image.setImage(img);
     }
 
     @FXML
@@ -79,8 +77,11 @@ public class ResultPresenter implements Initializable {
 
             @Override
             public void handle(ActionEvent event) {
-                changeIndex(1);
+                boolean stop = changeIndex(1);
                 displayImage();
+                if (stop) {
+                    stopVideo();
+                }
             }
         }));
         timeLine.setCycleCount(Timeline.INDEFINITE);
@@ -122,11 +123,15 @@ public class ResultPresenter implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         index = 0;
 
-        ObservableList<Direction> comboBoxData = FXCollections.observableArrayList();
+        final ObservableList<Direction> comboBoxData = FXCollections.observableArrayList();
         comboBoxData.addAll(Direction.values());
         choiceDir.setItems(comboBoxData);
 
         choiceDir.getSelectionModel().selectFirst();
+        
+        image.setPreserveRatio(true);
+        image.setFitHeight(0);
+        image.setFitWidth(0);
     }
 
 }
