@@ -59,7 +59,7 @@ public class InputPresenter extends AnchorPane implements Initializable, ChangeL
         }
     }
 
-    protected void displayImage() {
+    public void displayImage() {
         final TaskContainer tc = Context.getInstance().getTc();
         final cz.tul.dic.data.Image i = tc.getImage(imageIndex);
         final Image img = SwingFXUtils.toFXImage(i, null);

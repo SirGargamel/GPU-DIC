@@ -16,6 +16,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -28,6 +30,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.controlsfx.dialog.Dialogs;
 import org.pmw.tinylog.Logger;
 
@@ -47,6 +50,9 @@ public class MainWindow implements Initializable {
     private Button buttonROI;
     @FXML
     private Button buttonExpert;
+    @FXML
+    private InputPresenter imagePane;
+    private Timeline timeLine;
 
     @FXML
     private void handleButtonActionInput(ActionEvent event) throws IOException, InterruptedException, ExecutionException {
@@ -127,6 +133,7 @@ public class MainWindow implements Initializable {
                                 .showWarning();
                     }
                     updateProgress(5, 5);
+                    imagePane.displayImage();
                     return null;
                 }
             };
@@ -261,6 +268,44 @@ public class MainWindow implements Initializable {
             Logger.error("Error loading Results dialog from JAR.\n{0}", e);
         }
     }
+    
+    @FXML
+    private void handleButtonActionNext(ActionEvent event) {
+        stopVideo();
+        imagePane.nextImage();
+        event.consume();
+    }
+    
+    private void stopVideo() {
+        if (timeLine != null) {
+            timeLine.stop();
+        }
+    }
+    
+    @FXML
+    private void handleButtonActionPrev(ActionEvent event) {
+        stopVideo();
+        imagePane.previousImage();
+    }
+
+    @FXML
+    private void handleButtonActionPlay(ActionEvent event) {
+        stopVideo();
+        timeLine = new Timeline(new KeyFrame(Duration.millis(250), (ActionEvent event1) -> {
+            imagePane.nextImage();
+        }));
+        timeLine.setCycleCount(Timeline.INDEFINITE);
+        timeLine.play();
+
+        event.consume();
+    }
+
+    @FXML
+    private void handleButtonActionStop(ActionEvent event) {
+        stopVideo();
+
+        event.consume();
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -269,7 +314,9 @@ public class MainWindow implements Initializable {
         buttonRun.setDisable(true);
 
         textFs.setText("7");
-        textFs.setDisable(true);
+        textFs.setDisable(true);     
+        
+        imagePane.initialize(url, rb);
     }
 
     private static class ComputationObserver extends Task implements Observer {
