@@ -11,6 +11,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.beans.property.StringProperty;
@@ -18,13 +19,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -34,11 +32,12 @@ import javafx.scene.shape.Shape;
  *
  * @author Petr Jecmen
  */
-public class InputPresenter extends AnchorPane implements Initializable, ChangeListener<String> {
+public class InputPresenter extends ScrollPane implements Initializable, ChangeListener<String> {
 
     protected int imageIndex;
     protected Set<Shape> rois;
     private StringProperty imageIndexProperty;
+    protected ImageView image;
 
     public void nextImage() {
         changeIndex(1);
@@ -64,31 +63,28 @@ public class InputPresenter extends AnchorPane implements Initializable, ChangeL
         final cz.tul.dic.data.Image i = tc.getImage(imageIndex);
         final Image img = SwingFXUtils.toFXImage(i, null);
 
-        final Background b = new Background(new BackgroundImage(img, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT));
-        this.setBackground(b);
+        image.setImage(img);
+        image.setFitWidth(img.getWidth());
+        image.setFitHeight(img.getHeight());
 
+        setContent(null);
+        setContent(image);
+        
         loadRois();
     }
 
     void loadRois() {
-        final Image i = getBackground().getImages().get(0).getImage();
-        final double dX = (this.getWidth() - i.getWidth()) / 2.0;
-        final double dY = (this.getHeight() - i.getHeight()) / 2.0;
-
         rois.clear();
         final TaskContainer tc = Context.getInstance().getTc();
         final Set<ROI> taskRois = tc.getRois(imageIndex);
         Shape s = null;
-        double[] roiCoords = new double[2];
         if (taskRois != null) {
             for (ROI r : taskRois) {
                 if (r instanceof RectangleROI) {
-                    imageToPaneXY(r.getX1(), r.getY1(), dX, dY, roiCoords);
-                    s = new Rectangle(roiCoords[0], roiCoords[1], r.getWidth(), r.getHeight());
+                    s = new Rectangle(r.getX1(), r.getY1(), r.getWidth(), r.getHeight());
                 } else if (r instanceof CircularROI) {
                     final CircularROI c = (CircularROI) r;
-                    imageToPaneXY(c.getCenterX(), c.getCenterY(), dX, dY, roiCoords);
-                    s = new Circle(roiCoords[0], roiCoords[1], c.getRadius());
+                    s = new Circle(c.getCenterX(), c.getCenterY(), c.getRadius());
                 }
                 if (s != null) {
                     rois.add(s);
@@ -97,14 +93,14 @@ public class InputPresenter extends AnchorPane implements Initializable, ChangeL
                 }
             }
 
-            this.getChildren().clear();
-            this.getChildren().addAll(rois);
+            final Iterator<Node> it = getChildren().iterator();
+            while (it.hasNext()) {
+                if (it.next() instanceof Shape) {
+                    it.remove();
+                }
+            }
+            getChildren().addAll(rois);
         }
-    }
-
-    private void imageToPaneXY(final double imageX, final double imageY, final double dX, final double dY, final double[] paneXY) {
-        paneXY[0] = imageX + dX;
-        paneXY[1] = imageY + dY;
     }
 
     public void previousImage() {
@@ -116,6 +112,14 @@ public class InputPresenter extends AnchorPane implements Initializable, ChangeL
     public void initialize(URL url, ResourceBundle rb) {
         rois = new HashSet<>();
         imageIndex = 0;
+
+        setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+        setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+
+        image = new ImageView();
+//        image.setPreserveRatio(true);
+
+        setContent(image);
     }
 
     public void assignImageIndexTextField(final StringProperty imageIndexProperty) {

@@ -34,8 +34,12 @@
             </right>
             <center>
                 <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-                    <center>                                                
-                        <cz.tul.dic.gui.InputPresenter fx:id="imagePane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />                        
+                    <center>      
+                        <AnchorPane BorderPane.alignment="CENTER">
+                            <children>                                          
+                                <cz.tul.dic.gui.InputPresenter fx:id="imagePane" prefHeight="200.0" prefWidth="200.0"  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />                        
+                            </children>
+                        </AnchorPane>
                     </center>
                     <bottom>
                         <HBox maxHeight="30.0" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">

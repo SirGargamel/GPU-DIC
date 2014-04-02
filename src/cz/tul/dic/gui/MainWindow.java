@@ -124,6 +124,7 @@ public class MainWindow implements Initializable {
                                 buttonExpert.setDisable(false);
                                 textFs.setDisable(false);
                                 buttonROI.setDisable(false);
+                                imagePane.displayImage();
                             }
                         });
                     } catch (IOException ex) {
@@ -132,8 +133,7 @@ public class MainWindow implements Initializable {
                                 .message(Lang.getString("IO", ex.getLocalizedMessage()))
                                 .showWarning();
                     }
-                    updateProgress(5, 5);
-                    imagePane.displayImage();
+                    updateProgress(5, 5);                    
                     return null;
                 }
             };
