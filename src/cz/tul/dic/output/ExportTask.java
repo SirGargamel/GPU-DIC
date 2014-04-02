@@ -33,21 +33,33 @@ public class ExportTask {
             dataParams[i - 4] = Integer.valueOf(split[i]);
         }
 
-        final ExportTask result = new ExportTask(ExportMode.valueOf(split[0]), ExportTarget.valueOf(split[1]), Direction.valueOf(split[2]), new File(split[3]), dataParams);
+        final ExportTask result = new ExportTask(Direction.valueOf(split[2]), ExportMode.valueOf(split[0]), ExportTarget.valueOf(split[1]), new File(split[3]), dataParams);
         return result;
     }
+    
+    public static ExportTask generateMapExport(final Direction dir, final ExportTarget target, final Object targetArg, final int round, final ROI... rois) {
+        return new ExportTask(dir, ExportMode.MAP, target, targetArg, new int[] {round}, rois);
+    }
+    
+    public static ExportTask generateLineExport(final Direction dir, final ExportTarget target, final Object targetArg, final int x, final int y, final ROI... rois) {
+        return new ExportTask(dir, ExportMode.LINE, target, targetArg, new int[]{x, y}, rois);
+    }
+    
+    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final ROI... rois) {
+        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, null, rois);
+    }
 
-    public ExportTask(final ExportMode mode, final ExportTarget target, final Direction direction, final Object targetParam, final int[] dataParams, final ROI... rois) {
+    private ExportTask(final Direction direction, final ExportMode mode, final ExportTarget target, final Object targetParam, final int[] dataParams, final ROI... rois) {
         this.mode = mode;
         this.target = target;
         this.direction = direction;
         this.targetParam = targetParam;
         this.dataParams = dataParams;
-        this.rois = rois;
-    }
-
-    public ExportTask(final ExportMode mode, final ExportTarget target, final Direction direction, final Object targetParam, final int[] dataParams) {
-        this(mode, target, direction, targetParam, dataParams, (ROI) null);
+        if (rois == null || rois.length == 0) {
+            this.rois = null;
+        } else {
+            this.rois = rois;
+        }
     }
 
     public ExportMode getMode() {
@@ -89,7 +101,7 @@ public class ExportTask {
         if (dataParams != null) {
             for (int i : dataParams) {
                 sb.append(Integer.toString(i));
-            }            
+            }
         }
         sb.append(SEPARATOR);
         sb.setLength(sb.length() - SEPARATOR.length());
