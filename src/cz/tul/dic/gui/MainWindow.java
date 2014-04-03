@@ -120,6 +120,7 @@ public class MainWindow implements Initializable {
                     }
                     if (!error) {
                         try {
+                            updateProgress(3, 5);
                             InputLoader.loadInput(Context.getInstance().getTc());
                             updateProgress(4, 5);
                             Platform.runLater(() -> {
@@ -139,17 +140,32 @@ public class MainWindow implements Initializable {
                 }
             };
 
+            Dialogs.create()
+                    .title(Lang.getString("Wait"))
+                    .message(Lang.getString("LoadingData"))
+                    .showWorkerProgress(worker);
+
             Thread th = new Thread(worker);
             th.setDaemon(true);
             th.start();
 
-            final String err = worker.get();
-            if (err != null) {
-                Dialogs.create()
-                        .title(Lang.getString("error"))
-                        .message(err)
-                        .showWarning();
-            }
+            th = new Thread(() -> {
+                try {
+                    final String err = worker.get();
+                    if (err != null) {
+                        
+                        Dialogs.create()
+                                .title(Lang.getString("error"))
+                                .message(err)
+                                .showWarning();
+                        
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    System.out.println(ex);
+                }
+            });
+            th.setDaemon(true);
+            th.start();
         }
     }
 
