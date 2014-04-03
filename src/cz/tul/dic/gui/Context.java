@@ -71,13 +71,13 @@ public class Context {
         Map<Integer, Map<Direction, double[]>> m = exportCacheLines.get(x);
         if (m == null) {
             m = new HashMap<>();
-            exportCacheLines.put(x, m);
+            exportCacheLines.put(x, m);                        
         }
 
         Map<Direction, double[]> m2 = m.get(y);
         if (m2 == null) {
             m2 = new HashMap<>();
-            exportCacheLines.put(y, m);
+            m.put(y, m2);
         }
 
         double[] result = m2.get(dir);
@@ -121,7 +121,7 @@ public class Context {
         Map<Direction, double[]> m2 = m.get(y);
         if (m2 == null) {
             m2 = new HashMap<>();
-            exportCacheLines.put(y, m);
+            m.put(y, m2);
         }
 
         m2.put(dir, (double[]) data);

@@ -39,11 +39,11 @@ public class TargetExportGUI implements ITargetExport {
     }
 
     private void exportLine(final double[] data, Direction direction, final Object targetParam, int[] dataParams, final TaskContainer tc) {
-        if (dataParams.length < 1) {
+        if (dataParams.length < 2) {
             throw new IllegalArgumentException("Not enough data parameters.");
         }
         final Context context = (Context) targetParam;
-        context.storeMapExport(data, dataParams[0], ExportMode.LINE, direction);
+        context.storeLineExport(data, dataParams[0], dataParams[1], ExportMode.LINE, direction);
     }
 
     @Override

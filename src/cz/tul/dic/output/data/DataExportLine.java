@@ -11,8 +11,8 @@ public class DataExportLine implements IDataExport<double[]> {
 
     @Override
     public double[] exportData(final TaskContainer tc, Direction direction, final int[] dataParams) {
-        if (dataParams == null || dataParams.length < 3) {
-            throw new IllegalArgumentException("Not enough input parameters (position, x, y required).");
+        if (dataParams == null || dataParams.length < 2) {
+            throw new IllegalArgumentException("Not enough input parameters (x, y required).");
         }
 
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
