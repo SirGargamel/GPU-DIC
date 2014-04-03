@@ -9,6 +9,7 @@ import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.output.Exporter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -295,6 +296,12 @@ public class TaskContainerUtils {
             result = (TaskContainer) ois.readObject();
         }
         return result;
+    }
+    
+    public static void exportTask(final TaskContainer tc) throws IOException {
+        for (ExportTask et : tc.getExports()) {
+            Exporter.export(et, tc);
+        }
     }
 
 }
