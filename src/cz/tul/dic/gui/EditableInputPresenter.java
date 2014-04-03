@@ -25,17 +25,17 @@ public class EditableInputPresenter extends InputPresenter {
     private double lastX, lastY;
 
     @Override
-    public void nextImage() {
+    public boolean nextImage() {
         saveRois();        
         actualShape = null;
-        super.nextImage();
+        return super.nextImage();
     }
 
     @Override
-    public void previousImage() {
+    public boolean previousImage() {
         saveRois();
         actualShape = null;
-        super.previousImage();               
+        return super.previousImage();               
     }
 
     public void deleteAllRois() {
