@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ import org.pmw.tinylog.Logger;
 public final class Engine extends Observable {
 
     private static final int BEST_RESULT_COUNT_MAX = 50;
+    private static final double PRECISION = 100;
     private static final Type DEVICE_TYPE = Type.GPU;
     private final CLPlatform platform;
     private final CLContext context;
@@ -197,13 +199,14 @@ public final class Engine extends Observable {
         final int height = img.getHeight();
 
         final double[][][] finalResults = new double[width][height][];
-        final int[][] counter = new int[width][height];
-
+        final Map<Integer, Map<Integer, Integer>>[][] counter = new Map[width][height];
         List<Facet> facets;
         List<double[][]> results;
         Facet f;
         double[] d;
-        int x, y;
+        int x, y, valX, valY;
+        Map<Integer, Map<Integer, Integer>> map;
+        Map<Integer, Integer> mapX;
         Map<int[], double[]> deformedFacet;
         DeformationDegree degree;
         for (ROI roi : tc.getRois(round)) {
@@ -220,28 +223,47 @@ public final class Engine extends Observable {
                 for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];
-                    if (finalResults[x][y] == null) {
-                        finalResults[x][y] = new double[Coordinates.DIMENSION];
-                        System.arraycopy(d, 0, finalResults[x][y], 0, Coordinates.DIMENSION);
-                        counter[x][y] = 1;
+                    valX = (int) Math.round(PRECISION * d[Coordinates.X]);
+                    valY = (int) Math.round(PRECISION * d[Coordinates.Y]);
+
+                    map = counter[x][y];
+                    if (map == null) {
+                        map = new HashMap<>();
+                        counter[x][y] = map;
+                    }
+                    mapX = map.get(valX);
+                    if (mapX == null) {
+                        mapX = new HashMap<>();
+                        map.put(valX, mapX);
+                    }
+                    if (mapX.containsKey(valY)) {
+                        mapX.put(valY, mapX.get(valY) + 1);
                     } else {
-                        for (int k = 0; k < Coordinates.DIMENSION; k++) {
-                            finalResults[x][y][k] += d[k];
-                        }
-                        counter[x][y]++;
+                        mapX.put(valY, 1);
                     }
                 }
             }
         }
 
+        int maxCount, maxDx = 0, maxDy = 0, val;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                for (int k = 0; k < Coordinates.DIMENSION; k++) {
-                    if (counter[i][j] > 1) {
-                        finalResults[i][j][k] /= (double) counter[i][j];
-                    } else if (counter[i][j] == 0) {
-                        finalResults[i][j] = new double[Coordinates.DIMENSION];
+                maxCount = -1;
+                map = counter[i][j];
+                if (map == null) {
+                    finalResults[i][j] = new double[Coordinates.DIMENSION];
+                } else {
+                    for (Entry<Integer, Map<Integer, Integer>> dX : map.entrySet()) {
+                        for (Entry<Integer, Integer> dY : dX.getValue().entrySet()) {
+                            val = dY.getValue();
+                            if (val > maxCount) {
+                                maxCount = val;
+                                maxDx = dX.getKey();
+                                maxDy = dY.getKey();
+                            }
+                        }
                     }
+                    finalResults[i][j] = new double[]{maxDx / PRECISION, maxDy / PRECISION};
                 }
             }
         }
