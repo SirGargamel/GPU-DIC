@@ -34,7 +34,7 @@ public class ExpertSettings implements Initializable {
     @FXML
     private TextField textFGSpacing;
     @FXML
-    private TextField textTSValue;
+    private TextField textTSValue;    
 
     @FXML
     private void handleButtonActionOk(ActionEvent event) {

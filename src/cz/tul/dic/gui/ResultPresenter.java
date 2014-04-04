@@ -1,9 +1,13 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.Direction;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -12,8 +16,10 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.Axis;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -23,10 +29,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-import org.controlsfx.dialog.Dialog;
+import org.pmw.tinylog.Logger;
 
 public class ResultPresenter implements Initializable {
 
@@ -121,7 +127,7 @@ public class ResultPresenter implements Initializable {
         }
         event.consume();
     }
-    
+
     @FXML
     private void handleTextKeyTyped(KeyEvent keyEvent) {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
@@ -150,47 +156,63 @@ public class ResultPresenter implements Initializable {
         image.setFitWidth(0);
 
         image.setOnMouseClicked((MouseEvent t) -> {
-            final int x = (int) Math.round(t.getX());
-            final int y = (int) Math.round(t.getY());
-            final double[] line = Context.getInstance().getLineResult(x, y, choiceDir.getValue());
+            try {
+                final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
+                final Stage stage = new Stage();
 
-            final Axis xAxis = new NumberAxis(0, line.length, 1);
-            final Axis yAxis = new NumberAxis();
-            final LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
-            chart.setLegendVisible(false);
-            final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
-            chart.setPrefSize(width, PREF_SIZE_H);
+                final int x = (int) Math.round(t.getX());
+                final int y = (int) Math.round(t.getY());
+                final double[] line = Context.getInstance().getLineResult(x, y, choiceDir.getValue());
 
-            XYChart.Series series = new XYChart.Series();
-            double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
-            for (int i = 0; i < line.length; i++) {
-                series.getData().add(new XYChart.Data(i, line[i]));
-                if (line[i] < min) {
-                    min = line[i];
+                final LineChart<Number, Number> chart = (LineChart<Number, Number>) root.getChildrenUnmodifiable().get(0);
+                chart.setLegendVisible(false);
+                final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
+                chart.setPrefSize(width, PREF_SIZE_H);
+
+                chart.getData().clear();
+
+                final XYChart.Series series = new XYChart.Series();
+                double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+                for (int i = 0; i < line.length; i++) {
+                    series.getData().add(new XYChart.Data(i + 1, line[i]));
+
+                    if (line[i] < min) {
+                        min = line[i];
+                    }
+                    if (line[i] > max) {
+                        max = line[i];
+                    }
+
                 }
-                if (line[i] > max) {
-                    max = line[i];
+                chart.getData().add(series);
+
+                NumberAxis axis = (NumberAxis) chart.getXAxis();
+                axis.setTickUnit(1);
+                axis.setLowerBound(0);
+                axis.setUpperBound(line.length + 1);
+                
+                axis = (NumberAxis) chart.getYAxis();
+                if (Double.compare(min, max) == 0) {
+                    axis.setAutoRanging(false);
+                    axis.setTickUnit(1);
+                    axis.setLowerBound(min - 1);
+                    axis.setUpperBound(min + 1);
+                } else {
+                    axis.setAutoRanging(true);
                 }
+
+                stage.setOnShown((WindowEvent t2) -> {
+                    stage.setX(stage.getX() + x + 35);
+                    stage.setY(stage.getY() + y + 10);
+                });
+
+                stage.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(x).concat(";").concat(Integer.toString(y))));
+                stage.setScene(new Scene(root));
+                stage.setIconified(false);
+                stage.show();
+            } catch (IOException e) {
+                Logger.error("Error loading Results dialog from JAR.\n{0}", e);
             }
-            chart.getData().add(series);
-
-            series = new XYChart.Series();
-            series.getData().add(new XYChart.Data(index, min));
-            series.getData().add(new XYChart.Data(index, max));
-            chart.getData().add(series);
-
-            final Dialog d = new Dialog(image, String.format("%1d : %2d", x, y));
-            d.contentProperty().setValue(chart);
-            d.mastheadProperty().setValue(null);
-            d.setResizable(true);
-
-            final Window w = d.getWindow();
-            w.setOnShown((WindowEvent t2) -> {
-                w.setX(w.getX() + x + width / 2 + 10);
-                w.setY(w.getY() + y + PREF_SIZE_H / 2 + 10);
-            });            
-
-            d.show();            
         });
     }
 
