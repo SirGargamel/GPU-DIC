@@ -79,16 +79,10 @@ public class TaskContainer implements Serializable {
         Image img = null;
         for (int i = 0; i < images.size(); i++) {
             img = images.get(i);
-            if (img.isEnabled()) {
-                counter++;
-            }
+            counter++;
             if (counter == round) {
                 break;
             }
-        }
-
-        if (counter < round) {
-            throw new IllegalArgumentException("Illegal round number - " + round + ", total round count = " + counter);
         }
 
         return img;
@@ -219,15 +213,15 @@ public class TaskContainer implements Serializable {
 
         finalResults.set(round, result);
     }
-    
+
     public void addExport(final ExportTask et) {
         exports.add(et);
     }
-    
+
     public Set<ExportTask> getExports() {
         return Collections.unmodifiableSet(exports);
     }
-    
+
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
         stream.defaultReadObject();

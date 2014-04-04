@@ -11,9 +11,8 @@ import javax.imageio.ImageIO;
  * @author Petr Jecmen
  */
 public class Image extends BufferedImage implements Serializable {
-    
+
     private int[] grayScale;
-    private boolean isEnabled;
 
     public static Image loadImageFromDisk(final File in) throws IOException {
         if (!in.exists() || !in.isFile()) {
@@ -22,22 +21,21 @@ public class Image extends BufferedImage implements Serializable {
 
         final BufferedImage img = ImageIO.read(in);
         final Image result = new Image(img.getWidth(), img.getHeight(), img.getType());
-        result.getGraphics().drawImage(img, 0, 0, null);                     
+        result.getGraphics().drawImage(img, 0, 0, null);
 
         return result;
 
     }
 
     private Image(int width, int height, int imageType) {
-        super(width, height, imageType);   
-        isEnabled = true;
+        super(width, height, imageType);
     }
-    
+
     private void createBw() {
         final int width = getWidth();
         final int height = getHeight();
         grayScale = new int[width * height];
-        
+
         int val, r, g, b;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -55,16 +53,8 @@ public class Image extends BufferedImage implements Serializable {
         if (grayScale == null) {
             createBw();
         }
-        
+
         return grayScale;
-    }
-
-    public boolean isEnabled() {
-        return isEnabled;
-    }
-
-    public void setEnabled(boolean isEnabled) {
-        this.isEnabled = isEnabled;
     }
 
 }

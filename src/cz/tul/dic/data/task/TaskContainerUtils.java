@@ -3,7 +3,6 @@ package cz.tul.dic.data.task;
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.opencl.KernelType;
@@ -41,13 +40,11 @@ public class TaskContainerUtils {
     private static final String EXTENSION_BINARY = ".task";
 
     public static int getRoundCount(final TaskContainer tc) {
-        int counter = 0;
-        for (Image img : tc.getImages()) {
-            if (img.isEnabled()) {
-                counter++;
-            }
+        int size = 0;
+        if (tc != null) {
+            size = Math.max(tc.getImages().size() - 1, 0);
         }
-        return Math.max(counter - 1, 0);
+        return size;
     }
 
     public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi) {
@@ -274,7 +271,7 @@ public class TaskContainerUtils {
         for (ROI roi : tc.getRois(round)) {
             tc.addFacetSize(round, roi, facetSize);
         }
-    }    
+    }
 
     public static void serializeTaskToBinary(final TaskContainer tc) throws IOException {
         final File in = (File) tc.getParameter(TaskParameter.IN);
@@ -284,12 +281,12 @@ public class TaskContainerUtils {
         } else {
             target = new File(in.getAbsolutePath().concat(EXTENSION_BINARY));
         }
-        
+
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
             out.writeObject(tc);
         }
     }
-    
+
     public static TaskContainer deserializeTaskFromBinary(final File in) throws IOException, ClassNotFoundException {
         TaskContainer result;
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(in))) {
@@ -297,7 +294,7 @@ public class TaskContainerUtils {
         }
         return result;
     }
-    
+
     public static void exportTask(final TaskContainer tc) throws IOException {
         for (ExportTask et : tc.getExports()) {
             Exporter.export(et, tc);
