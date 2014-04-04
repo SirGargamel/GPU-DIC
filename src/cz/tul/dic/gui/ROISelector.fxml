@@ -5,30 +5,40 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="610.0" prefWidth="842.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.ROISelector" onMouseEntered="#init" >
+<AnchorPane id="AnchorPane" onMouseEntered="#init" prefHeight="291.0" prefWidth="503.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.ROISelector">
     <children>
-        <GridPane fx:id="gridPane" gridLinesVisible="true" prefHeight="610.0" prefWidth="842.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <columnConstraints>
-                <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="552.0" />
-                <ColumnConstraints hgrow="NEVER" maxWidth="188" minWidth="188.0" prefWidth="188.0" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="21.0" vgrow="ALWAYS" />
-            </rowConstraints>
-            <children>       
-                <cz.tul.dic.gui.EditableInputPresenter fx:id="imagePane" minHeight="0.0" minWidth="0.0" prefHeight="606.0" prefWidth="645.0" />        
-                <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" GridPane.columnIndex="1">
+        <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <center>
+                <cz.tul.dic.gui.EditableInputPresenter fx:id="imagePane" minHeight="0.0" minWidth="0.0" prefHeight="606.0" prefWidth="645.0" />
+            </center>
+            <bottom>
+                <HBox maxHeight="30.0" prefHeight="30.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
                     <children>
-                        <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" text="%next" />
                         <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" text="%prev" />
+                        <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" text="%next" />
+                    </children>
+                    <padding>
+                        <Insets bottom="5.0" left="5.0" top="5.0" />
+                    </padding>
+                </HBox>
+            </bottom>
+            <right>        
+                <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" BorderPane.alignment="CENTER" GridPane.columnIndex="1">
+                    <children>
                         <ChoiceBox fx:id="choiceRoi" prefWidth="150.0" />
                         <Button fx:id="buttonDel" mnemonicParsing="false" onAction="#handleButtonActionDel" text="%deleteAllROI" />
                     </children>
                     <GridPane.margin>
                         <Insets left="10.0" top="10.0" />
-                    </GridPane.margin>        
+                    </GridPane.margin>
+                    <BorderPane.margin>
+                        <Insets right="10.0" top="10.0" />
+                    </BorderPane.margin>
+                    <padding>
+                        <Insets left="5.0" />
+                    </padding>        
                 </VBox>
-            </children>
-        </GridPane>
+            </right>
+        </BorderPane>
     </children>
 </AnchorPane>
