@@ -21,6 +21,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
@@ -113,11 +114,19 @@ public class ResultPresenter implements Initializable {
     @FXML
     private void handleTextActionIndex(ActionEvent event) {
         try {
-            index = Integer.valueOf(textIndex.getText());
+            int newIndex = Integer.valueOf(textIndex.getText());
+            changeIndex(newIndex - index);
         } catch (NumberFormatException ex) {
             textIndex.setText(Integer.toString(index));
         }
         event.consume();
+    }
+    
+    @FXML
+    private void handleTextKeyTyped(KeyEvent keyEvent) {
+        if (!"0123456789".contains(keyEvent.getCharacter())) {
+            keyEvent.consume();
+        }
     }
 
     private void stopVideo() {

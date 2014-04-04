@@ -24,7 +24,7 @@
                     <children>
                         <Button fx:id="buttonROI" layoutX="10.0" layoutY="70.0" onAction="#handleButtonActionROI" text="%ROI" />
                         <Label fx:id="labelFs" layoutX="10.0" layoutY="40.0" text="%fs" />
-                        <TextField fx:id="textFs" layoutX="130.0" layoutY="40.0" prefWidth="55.0" BorderPane.alignment="CENTER" />
+                        <TextField fx:id="textFs" layoutX="130.0" layoutY="40.0" onKeyTyped="#handleTextKeyTyped" prefWidth="55.0" BorderPane.alignment="CENTER" />
                         <Button fx:id="buttonExpert" layoutX="130.0" layoutY="70.0" onAction="#handleButtonActionExpert" text="%Expert" />
                     </children>
                     <padding>
@@ -37,7 +37,7 @@
                     <center>      
                         <AnchorPane BorderPane.alignment="CENTER">
                             <children>                                          
-                                <cz.tul.dic.gui.InputPresenter fx:id="imagePane" prefHeight="200.0" prefWidth="200.0"  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />                        
+                                <cz.tul.dic.gui.InputPresenter fx:id="imagePane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />                        
                             </children>
                         </AnchorPane>
                     </center>

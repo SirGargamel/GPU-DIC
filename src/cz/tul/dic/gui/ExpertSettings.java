@@ -37,7 +37,7 @@ public class ExpertSettings implements Initializable {
     private TextField textTSValue;
 
     @FXML
-    private void handleButtonActionOk(ActionEvent event) {        
+    private void handleButtonActionOk(ActionEvent event) {
         final TaskContainer tc = Context.getInstance().getTc();
         if (tc != null) {
             tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, comboFGMode.getValue());
@@ -57,6 +57,13 @@ public class ExpertSettings implements Initializable {
     @FXML
     private void handleButtonActionCancel(ActionEvent event) {
         closeWindow();
+    }
+
+    @FXML
+    private void handleTextKeyTyped(KeyEvent keyEvent) {
+        if (!"0123456789".contains(keyEvent.getCharacter())) {
+            keyEvent.consume();
+        }
     }
 
     /**
@@ -113,14 +120,6 @@ public class ExpertSettings implements Initializable {
                 textTSValue.setText(o.toString());
             }
         }
-        
-        final EventHandler<KeyEvent> ke = (KeyEvent keyEvent) -> {
-            if (!"0123456789".contains(keyEvent.getCharacter())) {
-                keyEvent.consume();
-            }
-        };
-        textFGSpacing.addEventFilter(KeyEvent.KEY_TYPED, ke);
-        textTSValue.addEventFilter(KeyEvent.KEY_TYPED, ke);
     }
 
 }
