@@ -42,12 +42,12 @@
                         </AnchorPane>
                     </center>
                     <bottom>
-                        <HBox maxHeight="30.0" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                        <HBox maxHeight="30.0" prefHeight="100.0" spacing="5.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                             <children>
-                                <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" text="Pr" />
-                                <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#handleButtonActionPlay" text="Pl" />
-                                <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#handleButtonActionStop" text="Ps" />
-                                <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" text="N" />
+                                <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev"  />
+                                <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#handleButtonActionPlay" />
+                                <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#handleButtonActionStop" />
+                                <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" />
                             </children>
                         </HBox>
                     </bottom>

@@ -23,6 +23,7 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -46,6 +47,14 @@ public class ResultPresenter implements Initializable {
     private TextField textIndex;
     @FXML
     private ImageView image;
+    @FXML
+    private Button buttonPrev;
+    @FXML
+    private Button buttonPlay;
+    @FXML
+    private Button buttonPause;
+    @FXML
+    private Button buttonNext;
     private int index;
     private Timeline timeLine;
 
@@ -214,6 +223,34 @@ public class ResultPresenter implements Initializable {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
             }
         });
+        
+        Image img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/play_24x32.png"));
+        ImageView image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonPlay.setGraphic(image);
+
+        img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/pause_24x32.png"));
+        image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonPause.setGraphic(image);
+
+        img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/arrow_left_32x32.png"));
+        image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonPrev.setGraphic(image);
+
+        img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/arrow_right_32x32.png"));
+        image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonNext.setGraphic(image);
     }
 
 }

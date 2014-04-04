@@ -28,6 +28,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -52,6 +54,14 @@ public class MainWindow implements Initializable {
     private Button buttonROI;
     @FXML
     private Button buttonExpert;
+    @FXML
+    private Button buttonPrev;
+    @FXML
+    private Button buttonPlay;
+    @FXML
+    private Button buttonPause;
+    @FXML
+    private Button buttonNext;
     @FXML
     private InputPresenter imagePane;
     private Timeline timeLine;
@@ -147,12 +157,12 @@ public class MainWindow implements Initializable {
                 try {
                     final String err = worker.get();
                     if (err != null) {
-                        
+
                         Dialogs.create()
                                 .title(Lang.getString("error"))
                                 .message(err)
                                 .showWarning();
-                        
+
                     }
                 } catch (InterruptedException | ExecutionException ex) {
                     System.out.println(ex);
@@ -247,11 +257,11 @@ public class MainWindow implements Initializable {
 //
 //        // serialize task container to binary file
 //        TaskContainerUtils.serializeTaskToBinary(tc);
-        
+
         try {
-            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExpertSettings.fxml"), Lang.getBundle());            
-            final Stage stage = new Stage();                        
-            stage.setTitle(Lang.getString("Results"));            
+            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExpertSettings.fxml"), Lang.getBundle());
+            final Stage stage = new Stage();
+            stage.setTitle(Lang.getString("Results"));
             stage.setScene(new Scene(root));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
@@ -313,7 +323,7 @@ public class MainWindow implements Initializable {
 
         event.consume();
     }
-    
+
     @FXML
     private void handleTextKeyTyped(KeyEvent keyEvent) {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
@@ -331,6 +341,34 @@ public class MainWindow implements Initializable {
         textFs.setDisable(true);
 
         imagePane.initialize(url, rb);
+
+        Image img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/play_24x32.png"));
+        ImageView image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonPlay.setGraphic(image);
+
+        img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/pause_24x32.png"));
+        image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonPause.setGraphic(image);
+
+        img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/arrow_left_32x32.png"));
+        image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonPrev.setGraphic(image);
+
+        img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/arrow_right_32x32.png"));
+        image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonNext.setGraphic(image);
     }
 
     private static class ComputationObserver extends Task implements Observer {
