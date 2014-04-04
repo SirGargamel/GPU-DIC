@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="350.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.ExpertSettings">
+    <children>
+        <VBox layoutX="52.0" layoutY="22.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <BorderPane prefHeight="200.0" prefWidth="200.0">
+                    <left>
+                        <Label text="%FGVar" BorderPane.alignment="CENTER" HBox.hgrow="SOMETIMES" />
+                    </left>
+                    <right>
+                        <ComboBox fx:id="comboFGMode" prefWidth="150.0" BorderPane.alignment="CENTER" />
+                    </right>
+                    <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                    </VBox.margin>
+                </BorderPane>
+                <BorderPane prefHeight="200.0" prefWidth="200.0">
+                    <left>
+                        <Label text="%FGVal" BorderPane.alignment="CENTER" HBox.hgrow="SOMETIMES" />
+                    </left>
+                    <right>
+                        <TextField fx:id="textFGSpacing" prefHeight="25.0" prefWidth="50.0" text="1" BorderPane.alignment="CENTER" />
+                    </right>
+                    <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                    </VBox.margin>
+                </BorderPane>
+                <BorderPane prefHeight="200.0" prefWidth="200.0">
+                    <left>
+                        <Label text="%TSVar" BorderPane.alignment="CENTER" HBox.hgrow="SOMETIMES" />
+                    </left>
+                    <right>
+                        <ComboBox fx:id="comboTSVariant" prefWidth="150.0" BorderPane.alignment="CENTER" />
+                    </right>
+                    <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                    </VBox.margin>
+                </BorderPane>
+                <BorderPane prefHeight="200.0" prefWidth="200.0">
+                    <left>
+                        <Label text="%TSVal" BorderPane.alignment="CENTER" HBox.hgrow="SOMETIMES" />
+                    </left>
+                    <right>
+                        <TextField fx:id="textTSValue" prefHeight="25.0" prefWidth="50.0" text="100" BorderPane.alignment="CENTER" />
+                    </right>
+                    <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                    </VBox.margin>
+                </BorderPane>
+                <BorderPane prefHeight="200.0" prefWidth="200.0">
+                    <left>
+                        <Label text="%Kernel" BorderPane.alignment="CENTER" HBox.hgrow="SOMETIMES" />
+                    </left>
+                    <right>
+                        <ComboBox fx:id="comboKernel" prefWidth="150.0" BorderPane.alignment="CENTER" />
+                    </right>
+                    <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                    </VBox.margin>
+                </BorderPane>
+                <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="50.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#handleButtonActionOk" text="%Ok" />
+                        <Button mnemonicParsing="false" onAction="#handleButtonActionCancel" text="%Cancel" />
+                    </children>
+                    <padding>
+                        <Insets bottom="20.0" />
+                    </padding>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

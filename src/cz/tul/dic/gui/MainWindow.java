@@ -1,21 +1,13 @@
 package cz.tul.dic.gui;
 
-import cz.tul.dic.Computation;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplextTaskSolver;
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
-import cz.tul.dic.data.roi.CircularROI;
-import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
-import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportTarget;
-import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -37,6 +29,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.dialog.Dialogs;
@@ -217,39 +210,54 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionExpert(ActionEvent event) throws ComputationException, IOException {
-        TaskContainer tc = new TaskContainer(new File("D:\\temp\\7202845m.avi"));
-        InputLoader.loadInput(tc);
-
-        final int roiRadius = 26;
-        tc.addRoi(new CircularROI(108, 12, roiRadius), 0);
-        tc.addRoi(new CircularROI(201, 7, roiRadius), 0);
-        tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
-        tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
-
-        for (ROI roi : tc.getRois(0)) {
-            tc.setDeformationLimits(new double[]{-1, 1, 1.0, -5, 5, 0.25}, 0, roi);
+//        TaskContainer tc = new TaskContainer(new File("D:\\temp\\7202845m.avi"));
+//        InputLoader.loadInput(tc);
+//
+//        final int roiRadius = 26;
+//        tc.addRoi(new CircularROI(108, 12, roiRadius), 0);
+//        tc.addRoi(new CircularROI(201, 7, roiRadius), 0);
+//        tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
+//        tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
+//
+//        for (ROI roi : tc.getRois(0)) {
+//            tc.setDeformationLimits(new double[]{-1, 1, 1.0, -5, 5, 0.25}, 0, roi);
+//        }
+//
+//        TaskContainerUtils.setUniformFacetSize(tc, 0, roiRadius / 2);
+//        TaskContainerChecker.checkTaskValidity(tc);
+//
+//        final String target = new File("D:\\temp\\results").getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
+//        final String ext = String.format("%02d", 19).concat(".bmp");
+//        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
+//            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), round));
+//        }
+//        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).replace("bmp", "avi"))));
+//        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi"))));
+//
+//        TaskContainerUtils.serializeTaskToConfig(tc);
+//
+//        // compute dynamic task
+//        Computation.computeDynamicTask(tc);
+//        
+//        // export results
+//        TaskContainerUtils.exportTask(tc);
+//
+//        // serialize task container to binary file
+//        TaskContainerUtils.serializeTaskToBinary(tc);
+        
+        try {
+            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExpertSettings.fxml"), Lang.getBundle());            
+            final Stage stage = new Stage();                        
+            stage.setTitle(Lang.getString("Results"));            
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(imagePane.getScene().getWindow());
+            stage.showAndWait();
+        } catch (IOException e) {
+            Logger.error("Error loading Results dialog from JAR.\n{0}", e);
         }
-
-        TaskContainerUtils.setUniformFacetSize(tc, 0, roiRadius / 2);
-        TaskContainerChecker.checkTaskValidity(tc);
-
-        final String target = new File("D:\\temp\\results").getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
-        final String ext = String.format("%02d", 19).concat(".bmp");
-        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
-            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), round));
-        }
-        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).replace("bmp", "avi"))));
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi"))));
-
-        TaskContainerUtils.serializeTaskToConfig(tc);
-
-        // compute dynamic task
-        Computation.computeDynamicTask(tc);
-
-        // serialize task container to binary file
-        TaskContainerUtils.serializeTaskToBinary(tc);
     }
 
     @FXML
@@ -307,7 +315,7 @@ public class MainWindow implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        buttonExpert.setDisable(false);
+        buttonExpert.setDisable(true);
         buttonROI.setDisable(true);
         buttonRun.setDisable(true);
 
