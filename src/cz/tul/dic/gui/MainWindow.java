@@ -213,6 +213,8 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle("Select ROIs");
             stage.setScene(new Scene(root));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading ROI dialog from JAR.\n{0}", e);
@@ -278,6 +280,8 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Results"));
             stage.setScene(new Scene(root));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading Results dialog from JAR.\n{0}", e);
