@@ -7,6 +7,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
@@ -71,6 +72,12 @@ public class TaskContainerChecker {
             Logger.warn("Adding default facet generator.");
             tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
             tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
+        }
+        
+        final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
+        if (interpolation == null) {
+            Logger.warn("Adding default interpolation.");            
+            tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
         }
     }
 

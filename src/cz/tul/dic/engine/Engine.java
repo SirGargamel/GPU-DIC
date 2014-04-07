@@ -20,6 +20,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
 import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import java.io.IOException;
@@ -113,7 +114,7 @@ public final class Engine extends Observable {
 
         for (ROI roi : currentROIs) {
             defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
-            kernel.prepareKernel(context, device, tc.getFacetSize(round, roi), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength);
+            kernel.prepareKernel(context, device, tc.getFacetSize(round, roi), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength, (Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
 
             facetCount = tc.getFacets(round, roi).size();
             bestResults = new ArrayList<>(facetCount);

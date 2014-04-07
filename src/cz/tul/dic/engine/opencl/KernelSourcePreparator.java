@@ -1,9 +1,12 @@
 package cz.tul.dic.engine.opencl;
 
+import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,17 +19,19 @@ public class KernelSourcePreparator {
     private static final String REPLACE_DEFORMATION_X = "%DEF_X%";
     private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";
     private static final String REPLACE_DEFORMATION_DEGREE = "%DEF_D%";
+    private static final String REPLACE_INTERPOLATION = "%INT%";
     private static final String PLUS = " + ";
     private static final String MUL = " * ";
     private final String kernelName;
     private String kernel;
 
-    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization) throws IOException {
+    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization, final Interpolation interpolation) throws IOException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         kp.loadKernel();
         kp.prepareFacetSize(facetSize);
         kp.prepareDeformations(deg, deformationArrayLength, usesVectorization);
+        kp.prepareInterpolation(interpolation);
 
         return kp.kernel;
     }
@@ -115,5 +120,30 @@ public class KernelSourcePreparator {
                 throw new IllegalArgumentException("Unsupported degree of deformation");
         }
         kernel = kernel.replaceFirst(REPLACE_DEFORMATION_DEGREE, Integer.toString(deformationArrayLength));
+    }
+
+    private void prepareInterpolation(final Interpolation interpolation) {
+        String resourceName;
+        switch (interpolation) {
+            case BILINEAR:
+                resourceName = "interpolate-bilinear.cl";
+                break;
+            case BICUBIC:
+                resourceName = "interpolate-bicubic.cl";
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported type of interpolation.");
+        }
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(KernelSourcePreparator.class.getResourceAsStream("/cz/tul/dic/engine/opencl/interpolation/".concat(resourceName))))) {
+            final StringBuilder sb = new StringBuilder();
+            br.lines().forEachOrdered((String t) -> {
+                sb.append(t);
+                sb.append("\n");
+            });
+            kernel = kernel.replaceFirst(REPLACE_INTERPOLATION, sb.toString());
+        } catch (Exception ex) {
+            Logger.getLogger(KernelSourcePreparator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 }

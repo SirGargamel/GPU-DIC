@@ -1,6 +1,7 @@
 package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.task.splitter.TaskSplit;
+import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.io.File;
@@ -16,7 +17,8 @@ public enum TaskParameter {
     FACET_GENERATOR_SPACING(Integer.class),
     KERNEL(KernelType.class),    
     TASK_SPLIT_VARIANT(TaskSplit.class),
-    TASK_SPLIT_VALUE(Integer.class),;
+    TASK_SPLIT_VALUE(Integer.class),
+    INTERPOLATION(Interpolation.class);
 
     private final Class type;
 

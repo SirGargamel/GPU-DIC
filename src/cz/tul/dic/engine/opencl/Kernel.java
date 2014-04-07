@@ -15,6 +15,7 @@ import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -58,11 +59,11 @@ public abstract class Kernel {
         clRoundMem = new HashSet<>();
     }
 
-    public void prepareKernel(final CLContext context, final CLDevice device, final int facetSize, final DeformationDegree deg, final int defArrayLength) throws IOException {
+    public void prepareKernel(final CLContext context, final CLDevice device, final int facetSize, final DeformationDegree deg, final int defArrayLength, final Interpolation interpolation) throws IOException {
         this.context = context;
         this.device = device;
 
-        program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization())).build();
+        program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization(), interpolation)).build();
         clGlobalMem.add(program);
         kernel = program.createCLKernel(kernelName);
         clGlobalMem.add(kernel);
