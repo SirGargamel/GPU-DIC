@@ -64,6 +64,8 @@ public class MainWindow implements Initializable {
     @FXML
     private Button buttonNext;
     @FXML
+    private Button buttonResults;
+    @FXML
     private InputPresenter imagePane;
     private Timeline timeLine;
 
@@ -129,10 +131,7 @@ public class MainWindow implements Initializable {
                             InputLoader.loadInput(Context.getInstance().getTc());
                             updateProgress(4, 5);
                             Platform.runLater(() -> {
-                                buttonRun.setDisable(false);
-                                buttonExpert.setDisable(false);
-                                textFs.setDisable(false);
-                                buttonROI.setDisable(false);
+                                adjustConfigButtons(false);
                                 imagePane.displayImage();
                             });
                         } catch (IOException ex) {
@@ -158,7 +157,6 @@ public class MainWindow implements Initializable {
                 try {
                     final String err = worker.get();
                     if (err != null) {
-
                         Dialogs.create()
                                 .title(Lang.getString("error"))
                                 .message(err)
@@ -183,7 +181,7 @@ public class MainWindow implements Initializable {
             if (tc != null) {
                 TaskContainerChecker.checkTaskValidity(tc);
                 ComplextTaskSolver cts = new ComplextTaskSolver();
-                final Task<Object> worker = new ComputationObserver(cts, tc);
+                final Task<Exception> worker = new ComputationObserver(cts, tc);
                 Dialogs.create()
                         .title(Lang.getString("Wait"))
                         .message(Lang.getString("Computing"))
@@ -191,6 +189,27 @@ public class MainWindow implements Initializable {
                         .showWorkerProgress(worker);
 
                 Thread th = new Thread(worker);
+                th.setDaemon(true);
+                th.start();
+
+                th = new Thread(() -> {
+                    try {
+                        final Exception err = worker.get();
+                        if (err != null) {
+                            Dialogs.create()
+                                    .title(Lang.getString("Exception"))
+                                    .message(err.getLocalizedMessage())
+                                    .showWarning();
+
+                        } else {
+                            Platform.runLater(() -> {                                
+                                buttonResults.setDisable(false);
+                            });
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        System.out.println(ex);
+                    }
+                });
                 th.setDaemon(true);
                 th.start();
             } else {
@@ -338,12 +357,7 @@ public class MainWindow implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        buttonExpert.setDisable(true);
-        buttonROI.setDisable(true);
-        buttonRun.setDisable(true);
-
         textFs.setText("7");
-        textFs.setDisable(true);
 
         imagePane.initialize(url, rb);
 
@@ -374,6 +388,24 @@ public class MainWindow implements Initializable {
         image.setFitHeight(20);
         image.setPreserveRatio(true);
         buttonNext.setGraphic(image);
+
+        adjustImageButtons(true);
+        adjustConfigButtons(true);
+        buttonResults.setDisable(true);
+    }
+
+    private void adjustImageButtons(final boolean disabled) {
+        buttonPlay.setDisable(disabled);
+        buttonPause.setDisable(disabled);
+        buttonPrev.setDisable(disabled);
+        buttonNext.setDisable(disabled);
+    }
+
+    private void adjustConfigButtons(final boolean disabled) {
+        buttonExpert.setDisable(disabled);
+        buttonROI.setDisable(disabled);
+        buttonRun.setDisable(disabled);
+        textFs.setDisable(disabled);
     }
 
     private static class ComputationObserver extends Task implements Observer {
@@ -387,10 +419,15 @@ public class MainWindow implements Initializable {
         }
 
         @Override
-        protected Object call() throws Exception {
-            cts.addObserver(this);
-            cts.solveComplexTask(tc);
-            return null;
+        protected Exception call() throws Exception {
+            Exception result = null;
+            try {
+                cts.addObserver(this);
+                cts.solveComplexTask(tc);
+            } catch (ComputationException | IOException ex) {
+                result = ex;
+            }
+            return result;
         }
 
         @Override
