@@ -10,26 +10,13 @@ import java.util.List;
 public class DataExportSequence implements IDataExport<List<double[][]>> {
 
     @Override
-    public List<double[][]> exportData(TaskContainer tc, Direction direction, int[] dataParams) {
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        final List<double[][]> result = new ArrayList<>(roundCount);
-        final DataExportMap mapExporter = new DataExportMap();
-
-        for (int i = 0; i < roundCount; i++) {
-            result.add(mapExporter.exportData(tc, direction, new int[] {i}));
-        }
-
-        return result;
-    }
-
-    @Override
     public List<double[][]> exportData(TaskContainer tc, Direction direction, int[] dataParams, ROI[] rois) {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         final List<double[][]> result = new ArrayList<>(roundCount);
         final DataExportMap mapExporter = new DataExportMap();
 
         for (int i = 0; i < roundCount; i++) {
-            result.add(mapExporter.exportData(tc, direction, new int[] {i}, rois));
+            result.add(mapExporter.exportData(tc, direction, new int[]{i}, rois));
         }
 
         return result;

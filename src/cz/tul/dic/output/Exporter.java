@@ -1,6 +1,5 @@
 package cz.tul.dic.output;
 
-import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.data.DataExportLine;
 import cz.tul.dic.output.data.DataExportMap;
@@ -56,12 +55,7 @@ public class Exporter {
             throw new IllegalArgumentException("Unsupported export mode for this target - " + et.toString());
         }
 
-        ROI[] rois = et.getRois();
-        if (rois == null || rois.length == 0 || rois[0] == null) {
-            data = dataExporter.exportData(tc, et.getDirection(), et.getDataParams());
-        } else {
-            data = dataExporter.exportData(tc, et.getDirection(), et.getDataParams(), et.getRois());
-        }
+        data = dataExporter.exportData(tc, et.getDirection(), et.getDataParams(), et.getRois());
         targetExporter.exportData(
                 data,
                 et.getDirection(),

@@ -9,9 +9,7 @@ import cz.tul.dic.output.Direction;
  * @author Petr Jecmen
  * @param <O>
  */
-public interface IDataExport<O> {
-    
-    O exportData(final TaskContainer tc, final Direction direction, final int[] dataParams);
+public interface IDataExport<O> {        
     
     O exportData(final TaskContainer tc, final Direction direction, final int[] dataParams, final ROI... rois);
     
