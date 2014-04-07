@@ -17,14 +17,14 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public class TaskContainerChecker {
-    
+
     private static final int DEFAULT_FACET_SIZE = 10;
 
     public static void checkTaskValidity(final TaskContainer tc) throws ComputationException {
         final Object in = tc.getParameter(TaskParameter.IN);
         if (in == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "no name");
-        }                
+        }
 
         // null data
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
@@ -32,8 +32,19 @@ public class TaskContainerChecker {
             throw new IllegalArgumentException("Not enough enabled input images.");
         }
 
+        final Object fs = tc.getParameter(TaskParameter.FACET_SIZE);
+        final int facetSize;
+        if (fs == null) {
+            Logger.warn("Adding default facetSize.");
+            tc.setParameter(TaskParameter.FACET_SIZE, DEFAULT_FACET_SIZE);
+            facetSize = DEFAULT_FACET_SIZE;
+        } else {
+            facetSize = (int) fs;
+        }
+
         Image img;
-        Set<ROI> rois;        
+        Set<ROI> rois;
+        int fsz;
         for (int round = 0; round < roundCount; round++) {
             img = tc.getImage(round);
             if (img == null) {
@@ -45,12 +56,15 @@ public class TaskContainerChecker {
                 Logger.warn("Adding default ROI.");
                 tc.addRoi(new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1), round);
             }
-            
+
             for (ROI roi : tc.getRois(round)) {
                 try {
-                    tc.getFacetSize(round, roi);
+                    fsz = tc.getFacetSize(round, roi);
+                    if (fsz == -1) {
+                        tc.addFacetSize(round, roi, facetSize);
+                    }
                 } catch (NullPointerException ex) {
-                    tc.addFacetSize(round, roi, DEFAULT_FACET_SIZE);
+                    tc.addFacetSize(round, roi, facetSize);
                 }
             }
         }
@@ -66,17 +80,17 @@ public class TaskContainerChecker {
             Logger.warn("Adding default kernel.");
             tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
         }
-        
+
         final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
         if (facetGenMode == null) {
             Logger.warn("Adding default facet generator.");
             tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
             tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
         }
-        
+
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
         if (interpolation == null) {
-            Logger.warn("Adding default interpolation.");            
+            Logger.warn("Adding default interpolation.");
             tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
         }
     }

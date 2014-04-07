@@ -15,6 +15,7 @@ public enum TaskParameter {
     IN(File.class),
     FACET_GENERATOR_MODE(FacetGeneratorMode.class),
     FACET_GENERATOR_SPACING(Integer.class),
+    FACET_SIZE(Integer.class),
     KERNEL(KernelType.class),    
     TASK_SPLIT_VARIANT(TaskSplit.class),
     TASK_SPLIT_VALUE(Integer.class),

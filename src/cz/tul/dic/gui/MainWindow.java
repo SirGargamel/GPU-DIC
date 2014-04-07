@@ -7,6 +7,7 @@ import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
@@ -179,6 +180,7 @@ public class MainWindow implements Initializable {
             final int fs = Integer.valueOf(fsText);
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
+                tc.setParameter(TaskParameter.FACET_SIZE, fs);
                 TaskContainerChecker.checkTaskValidity(tc);
                 ComplextTaskSolver cts = new ComplextTaskSolver();
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
