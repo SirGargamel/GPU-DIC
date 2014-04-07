@@ -51,5 +51,9 @@ public final class Container<T> implements Serializable {
             return data.get(position);
         }
     }
+    
+    public void clear() {
+        data.clear();
+    }
 
 }

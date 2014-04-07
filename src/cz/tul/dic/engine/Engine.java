@@ -85,6 +85,7 @@ public final class Engine extends Observable {
 
     public void computeTask(final TaskContainer tc) throws IOException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        tc.clearComputationData();
         setChanged();
         notifyObservers(new int[]{0, roundCount});
         for (int round = 0; round < roundCount; round++) {

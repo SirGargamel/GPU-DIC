@@ -221,6 +221,13 @@ public class TaskContainer implements Serializable {
     public Set<ExportTask> getExports() {
         return Collections.unmodifiableSet(exports);
     }
+    
+    public void clearComputationData() {
+        facets.clear();
+        deformations.clear();
+        results.clear();
+        finalResults.clear();
+    }
 
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
