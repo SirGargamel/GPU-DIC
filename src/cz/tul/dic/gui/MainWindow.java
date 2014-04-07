@@ -129,12 +129,16 @@ public class MainWindow implements Initializable {
                     if (!error) {
                         try {
                             updateProgress(3, 5);
-                            InputLoader.loadInput(Context.getInstance().getTc());
+                            final TaskContainer tc = Context.getInstance().getTc(); 
+                            InputLoader.loadInput(tc);
                             updateProgress(4, 5);
                             Platform.runLater(() -> {
                                 adjustConfigButtons(false);
                                 adjustImageButtons(false);
                                 imagePane.displayImage();
+                                
+                                imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 128);
+                                imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 135);
                             });
                         } catch (IOException ex) {
                             result = Lang.getString("IO", ex.getLocalizedMessage());
