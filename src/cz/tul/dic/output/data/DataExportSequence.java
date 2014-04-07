@@ -29,7 +29,7 @@ public class DataExportSequence implements IDataExport<List<double[][]>> {
         final DataExportMap mapExporter = new DataExportMap();
 
         for (int i = 0; i < roundCount; i++) {
-            result.add(mapExporter.exportData(tc, direction, dataParams, rois));
+            result.add(mapExporter.exportData(tc, direction, new int[] {i}, rois));
         }
 
         return result;
