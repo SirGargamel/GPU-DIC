@@ -19,7 +19,7 @@ public class ExportUtils {
     private static final float ALPHA = 0.75f;
     private static final Color BACKGROUND_COLOR = Color.BLACK;
     private static final int BAR_SIZE = 20;
-    private static final NumberFormat nf = new DecimalFormat("0.0");
+    private static final NumberFormat nf = new DecimalFormat("0.0#");
     private static final double BAR_LIMIT = 0.001;
 
     public static double calculateDisplacement(final double[] def, final Direction dir) {
@@ -116,11 +116,11 @@ public class ExportUtils {
         switch (dir) {
             case ABS:
             case DABS:
-                drawVertivalBar(out, globalMaxPos);
+                drawVerticalBar(out, globalMaxPos);
                 break;
             case Y:
             case DY:
-                drawVertivalBar(out, globalMaxPos, globalMaxNeg);
+                drawVerticalBar(out, globalMaxPos, globalMaxNeg);
                 break;
             case X:
             case DX:
@@ -157,7 +157,7 @@ public class ExportUtils {
             case DABS:
             case Y:
             case DY:
-                drawVertivalBar(out, maxPos, maxNeg);
+                drawVerticalBar(out, maxPos, maxNeg);
                 break;
             case X:
             case DX:
@@ -171,19 +171,19 @@ public class ExportUtils {
     }
 
     private static int deformationToRGB(final double val, final double maxPos, final double maxNeg) {
-        float h, s = 1, v = 1;
+        float h, s = 1, b = 1;
         if (val == 0) {
             h = 0.0f;
-            v = 0.0f;
+            b = 0.0f;
         } else if (val < 0) {
-            h = (float) ((1 - (-val) / maxNeg) * 0.2);
+            h = (float) ((1 - (-val) / maxNeg) * 0.2);            
         } else {
-            h = (float) (val / maxPos * 0.4 + 0.3);
+            h = (float) (val / maxPos * 0.4 + 0.3);            
         }
-        return Color.HSBtoRGB(h, s, v);
+        return Color.HSBtoRGB(h, s, b);
     }
 
-    private static void drawVertivalBar(final BufferedImage image, final double max) {
+    private static void drawVerticalBar(final BufferedImage image, final double max) {
         final int height = image.getHeight();        
 
         final Graphics2D g = image.createGraphics();
@@ -219,7 +219,7 @@ public class ExportUtils {
         g.dispose();
     }
 
-    private static void drawVertivalBar(final BufferedImage image, final double maxPos, final double maxNeg) {
+    private static void drawVerticalBar(final BufferedImage image, final double maxPos, final double maxNeg) {
         final int height = image.getHeight();
         final int halfHeight = height / 2;
 
