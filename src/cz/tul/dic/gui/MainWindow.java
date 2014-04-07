@@ -111,6 +111,9 @@ public class MainWindow implements Initializable {
                             case "task":
                                 try {
                                     Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(in));
+                                    Platform.runLater(() -> {
+                                        buttonResults.setDisable(false);
+                                    });
                                 } catch (ClassNotFoundException | IOException ex) {
                                     error = true;
                                     result = Lang.getString("wrongBin");
@@ -129,14 +132,14 @@ public class MainWindow implements Initializable {
                     if (!error) {
                         try {
                             updateProgress(3, 5);
-                            final TaskContainer tc = Context.getInstance().getTc(); 
+                            final TaskContainer tc = Context.getInstance().getTc();
                             InputLoader.loadInput(tc);
                             updateProgress(4, 5);
                             Platform.runLater(() -> {
                                 adjustConfigButtons(false);
                                 adjustImageButtons(false);
                                 imagePane.displayImage();
-                                
+
                                 imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 128);
                                 imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 135);
                             });
@@ -209,7 +212,7 @@ public class MainWindow implements Initializable {
                                     .showWarning();
 
                         } else {
-                            Platform.runLater(() -> {                                
+                            Platform.runLater(() -> {
                                 buttonResults.setDisable(false);
                             });
                         }
