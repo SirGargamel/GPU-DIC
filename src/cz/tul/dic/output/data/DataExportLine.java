@@ -78,21 +78,10 @@ public class DataExportLine implements IDataExport<double[]> {
                     case ABS:
                         result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
-                    case DX:
-                        if (OutputUtils.isPointInsideROIs(x + 1, y, rois, tc, r)) {
-                            result[r] = ExportUtils.calculateDeformation(results, x, y, direction);
-                        }
-                        break;
-                    case DY:
-                        if (OutputUtils.isPointInsideROIs(x, y + 1, rois, tc, r)) {
-                            result[r] = ExportUtils.calculateDeformation(results, x, y, direction);
-                        }
-                        break;
+                    case DX:                        
+                    case DY:                        
                     case DABS:
-                        if (OutputUtils.isPointInsideROIs(x + 1, y, rois, tc, r) && OutputUtils.isPointInsideROIs(x, y + 1, rois, tc, r)) {
-                            result[r] = ExportUtils.calculateDeformation(results, x, y, direction);
-                        }
-                        break;
+                        throw new IllegalArgumentException("Not yet supported.");
                     default:
                         throw new IllegalArgumentException("Unsupported direction.");
                 }

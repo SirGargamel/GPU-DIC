@@ -34,10 +34,7 @@ public class DataExportMap implements IDataExport<double[][]> {
                     case DX:
                     case DY:
                     case DABS:
-                        if (!(x < 0 || y < 0 || (x + 1) >= results.length || (y + 1) >= results[x].length)) {
-                            result[x][y] = ExportUtils.calculateDeformation(results, x, y, direction);
-                        }
-                        break;
+                        throw new IllegalArgumentException("Not yet supported.");                        
                     default:
                         throw new IllegalArgumentException("Unsupported direction.");
                 }
@@ -75,21 +72,10 @@ public class DataExportMap implements IDataExport<double[][]> {
                     case ABS:
                         result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
-                    case DX:
-                        if (OutputUtils.isPointInsideROIs(x + 1, y, rois, tc, round)) {
-                            result[x][y] = ExportUtils.calculateDeformation(results, x, y, direction);
-                        }
-                        break;
-                    case DY:
-                        if (OutputUtils.isPointInsideROIs(x, y + 1, rois, tc, round)) {
-                            result[x][y] = ExportUtils.calculateDeformation(results, x, y, direction);
-                        }
-                        break;
+                    case DX:                        
+                    case DY:                        
                     case DABS:
-                        if (OutputUtils.isPointInsideROIs(x + 1, y, rois, tc, round) && OutputUtils.isPointInsideROIs(x, y + 1, rois, tc, round)) {
-                            result[x][y] = ExportUtils.calculateDeformation(results, x, y, direction);
-                        }
-                        break;
+                        throw new IllegalArgumentException("Not yet supported.");
                     default:
                         throw new IllegalArgumentException("Unsupported direction.");
                 }
