@@ -133,6 +133,7 @@ public class MainWindow implements Initializable {
                             updateProgress(4, 5);
                             Platform.runLater(() -> {
                                 adjustConfigButtons(false);
+                                adjustImageButtons(false);
                                 imagePane.displayImage();
                             });
                         } catch (IOException ex) {
