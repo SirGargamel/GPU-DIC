@@ -37,6 +37,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
 import org.pmw.tinylog.Logger;
 
@@ -66,6 +67,8 @@ public class MainWindow implements Initializable {
     private Button buttonNext;
     @FXML
     private Button buttonResults;
+    @FXML
+    private Button buttonSave;
     @FXML
     private InputPresenter imagePane;
     private Timeline timeLine;
@@ -142,8 +145,11 @@ public class MainWindow implements Initializable {
 
                                 imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 143);
                                 imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 114);
-                                
-                                textFs.setText(tc.getParameter(TaskParameter.FACET_SIZE).toString());
+
+                                final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
+                                if (o != null) {
+                                    textFs.setText(o.toString());
+                                }
                             });
                         } catch (IOException ex) {
                             result = Lang.getString("IO", ex.getLocalizedMessage());
@@ -180,6 +186,24 @@ public class MainWindow implements Initializable {
             });
             th.setDaemon(true);
             th.start();
+        }
+    }
+
+    @FXML
+    private void handleButtonActionSave(ActionEvent event) throws IOException {
+        final String c1 = Lang.getString("TypeConfig");
+        final String t1 = Lang.getString("TypeConfigD");
+        final String c2 = Lang.getString("TypeBinary");
+        final String t2 = Lang.getString("TypeBinaryD");
+        final Action a = Dialogs.create()
+                .title(Lang.getString("Save"))
+                .message(Lang.getString("ChooseDataType"))
+                .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2));
+        final String val = a.textProperty().get();
+        if (val.equals(c1)) {
+            TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc());
+        } else if (val.equals(c2)) {
+            TaskContainerUtils.serializeTaskToBinary(Context.getInstance().getTc());
         }
     }
 
@@ -419,6 +443,7 @@ public class MainWindow implements Initializable {
         buttonROI.setDisable(disabled);
         buttonRun.setDisable(disabled);
         textFs.setDisable(disabled);
+        buttonSave.setDisable(disabled);
     }
 
     private static class ComputationObserver extends Task implements Observer {

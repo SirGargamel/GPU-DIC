@@ -39,7 +39,10 @@
                 <HBox maxHeight="30.0" prefHeight="100.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
                     <children>
                         <Button fx:id="buttonRun" layoutX="10.0" layoutY="100.0" onAction="#handleButtonActionRun" text="%Run" />
-                        <Button fx:id="buttonResults" layoutX="10.0" layoutY="135.0" onAction="#handleButtonActionResults" text="%Results" />
+                        <Button fx:id="buttonResults" layoutX="10.0" layoutY="135.0" onAction="#handleButtonActionResults" text="%Results" /><Button fx:id="buttonSave" mnemonicParsing="false" onAction="#handleButtonActionSave" text="%Save">
+<HBox.margin>
+<Insets />
+</HBox.margin></Button>
                     </children>
 <BorderPane.margin>
 <Insets left="2.0" />
