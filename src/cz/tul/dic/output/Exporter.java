@@ -12,6 +12,7 @@ import cz.tul.dic.output.target.TargetExportGUI;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -55,13 +56,17 @@ public class Exporter {
             throw new IllegalArgumentException("Unsupported export mode for this target - " + et.toString());
         }
 
-        data = dataExporter.exportData(tc, et.getDirection(), et.getDataParams(), et.getRois());
-        targetExporter.exportData(
-                data,
-                et.getDirection(),
-                et.getTargetParam(),
-                et.getDataParams(),
-                tc);
+        try {
+            data = dataExporter.exportData(tc, et.getDirection(), et.getDataParams(), et.getRois());
+            targetExporter.exportData(
+                    data,
+                    et.getDirection(),
+                    et.getTargetParam(),
+                    et.getDataParams(),
+                    tc);
+        } catch (IndexOutOfBoundsException | NullPointerException ex) {
+            Logger.warn(ex, "Export failed due to invalid input data.");
+        }
     }
 
     public static boolean isExportSupported(final ExportTask et) {

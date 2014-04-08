@@ -85,9 +85,10 @@ public class ResultPresenter implements Initializable {
 
     private void displayImage() {
         final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
-        final Image img = SwingFXUtils.toFXImage(i, null);
-
-        image.setImage(img);
+        if (i != null) {
+            final Image img = SwingFXUtils.toFXImage(i, null);
+            image.setImage(img);
+        }
     }
 
     @FXML
@@ -199,7 +200,7 @@ public class ResultPresenter implements Initializable {
                 axis.setTickUnit(1);
                 axis.setLowerBound(0);
                 axis.setUpperBound(line.length + 1);
-                
+
                 axis = (NumberAxis) chart.getYAxis();
                 if (Double.compare(min, max) == 0) {
                     axis.setAutoRanging(false);
@@ -223,7 +224,7 @@ public class ResultPresenter implements Initializable {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
             }
         });
-        
+
         Image img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/play_24x32.png"));
         ImageView image = new ImageView(img);
         image.setFitWidth(20);
