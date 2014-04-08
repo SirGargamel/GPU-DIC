@@ -219,6 +219,9 @@ public class TaskContainerUtils {
                     case FACET_GENERATOR_SPACING:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
+                    case FACET_SIZE:
+                        result.setParameter(tp, Integer.valueOf(e.getValue()));
+                        break;
                     case KERNEL:
                         result.setParameter(tp, KernelType.valueOf(e.getValue()));
                         break;
