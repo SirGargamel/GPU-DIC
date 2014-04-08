@@ -211,6 +211,7 @@ public class MainWindow implements Initializable {
                                     .title(Lang.getString("Exception"))
                                     .message(err.getLocalizedMessage())
                                     .showWarning();
+                            Logger.error(err);
 
                         } else {
                             Platform.runLater(() -> {
