@@ -29,6 +29,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -140,8 +141,8 @@ public class MainWindow implements Initializable {
                                 adjustImageButtons(false);
                                 imagePane.displayImage();
 
-                                imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 128);
-                                imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 135);
+                                imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 143);
+                                imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 114);
                             });
                         } catch (IOException ex) {
                             result = Lang.getString("IO", ex.getLocalizedMessage());
