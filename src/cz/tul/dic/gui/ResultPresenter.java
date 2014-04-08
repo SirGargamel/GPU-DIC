@@ -1,13 +1,17 @@
 package cz.tul.dic.gui;
 
+import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.Direction;
+import cz.tul.dic.output.ExportTarget;
+import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.output.Exporter;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -33,6 +37,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import org.controlsfx.control.action.Action;
+import org.controlsfx.dialog.Dialogs;
 import org.pmw.tinylog.Logger;
 
 public class ResultPresenter implements Initializable {
@@ -40,6 +46,9 @@ public class ResultPresenter implements Initializable {
     private static final int PREF_SIZE_W_BASE = 30;
     private static final int PREF_SIZE_W_M = 5;
     private static final int PREF_SIZE_H = 30;
+    private static final String EXT_SEQUENCE = ".avi";
+    private static final String EXT_IMAGE = ".bmp";
+    private static final String EXT_CSV = ".avi";
 
     @FXML
     private ComboBox<Direction> choiceDir;
@@ -143,6 +152,59 @@ public class ResultPresenter implements Initializable {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
             keyEvent.consume();
         }
+    }
+
+    @FXML
+    private void handleButtonActionSave(ActionEvent event) throws IOException {
+        final String c1 = Lang.getString("TypeMap");
+        final String t1 = Lang.getString("TypeMapD");
+        final String c2 = Lang.getString("TypeLine");
+        final String t2 = Lang.getString("TypeLineD");
+        final String c3 = Lang.getString("TypeSequence");
+        final String t3 = Lang.getString("TypeSequenceD");
+        final Action a = Dialogs.create()
+                .title(Lang.getString("Save"))
+                .message(Lang.getString("ChooseDataType"))
+                .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2), new Dialogs.CommandLink(c3, t3));
+        final String val = a.textProperty().get();
+        if (val.equals(c1)) {
+            final ExportTarget et = determineTarget();
+            if (et != null) {
+                final TaskContainer tc = Context.getInstance().getTc();
+                final String fileName = tc.getParameter(TaskParameter.IN).toString().concat(Integer.toString(index)).concat(EXT_IMAGE);
+                Exporter.export(ExportTask.generateMapExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName), index), tc);
+            }
+        } else if (val.equals(c2)) {
+            final ExportTarget et = determineTarget();
+            if (et != null) {
+                final TaskContainer tc = Context.getInstance().getTc();
+                final String fileName = tc.getParameter(TaskParameter.IN).toString().concat(Integer.toString(index)).concat(EXT_CSV);
+                Exporter.export(ExportTask.generateMapExport(choiceDir.getValue(), ExportTarget.CSV, new File(fileName), index), tc);
+            }
+        } else if (val.equals(c3)) {
+            final TaskContainer tc = Context.getInstance().getTc();
+            final String fileName = tc.getParameter(TaskParameter.IN).toString().concat(EXT_SEQUENCE);
+            Exporter.export(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName)), tc);
+        }
+    }
+
+    private ExportTarget determineTarget() {
+        final String c1 = Lang.getString("TypeImage");
+        final String c2 = Lang.getString("TypeCsv");
+        final Action a = Dialogs.create()
+                .title(Lang.getString("Save"))
+                .message(Lang.getString("ChooseDataType"))
+                .showCommandLinks(null, new Dialogs.CommandLink(c1, null), new Dialogs.CommandLink(c2, null));
+        final String val = a.textProperty().get();
+        final ExportTarget result;
+        if (val.equals(c1)) {
+            result = ExportTarget.FILE;
+        } else if (val.equals(c2)) {
+            result = ExportTarget.CSV;
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private void stopVideo() {
