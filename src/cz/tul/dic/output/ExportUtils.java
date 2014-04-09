@@ -18,7 +18,7 @@ public class ExportUtils {
     private static final int IMAGE_TYPE = BufferedImage.TYPE_3BYTE_BGR;
     private static final float ALPHA = 0.75f;
     private static final Color BACKGROUND_COLOR = Color.BLACK;
-    private static final int BAR_SIZE = 20;
+    private static final int BAR_SIZE = 25;
     private static final NumberFormat nf = new DecimalFormat("0.0#");
     private static final double BAR_LIMIT = 0.001;
 
@@ -210,25 +210,25 @@ public class ExportUtils {
         // positive part   
         if (max > BAR_LIMIT) {
             for (int y = 0; y < height; y++) {
-                g.setColor(new Color(deformationToRGB(y, height - 1, 0)));
+                g.setColor(new Color(deformationToRGB(height - 1 - y, height - 1, 0)));
                 g.drawRect(x, y, BAR_SIZE, 1);
             }
 
             g.setColor(Color.WHITE);
             val = nf.format(max / 4.0);
-            g.drawString(val, width - metrics.stringWidth(val), height / 4);
+            g.drawString(val, width - BAR_SIZE, height / 4 * 3);
             val = nf.format(max / 2.0);
-            g.drawString(val, width - metrics.stringWidth(val), height / 2);
+            g.drawString(val, width - BAR_SIZE, height / 2);
             val = nf.format(max / 4.0 * 3);
-            g.drawString(val, width - metrics.stringWidth(val), height / 4 * 3);
+            g.drawString(val, width - BAR_SIZE, height / 4);
             val = nf.format(max);
-            g.drawString(val, width - metrics.stringWidth(val), height - 2);
+            g.drawString(val, width - BAR_SIZE, metrics.getHeight() / 3 * 2);
         }
 
         // zero
         g.setColor(Color.WHITE);
         val = nf.format(0.0);
-        g.drawString(val, width - metrics.stringWidth(val), metrics.getHeight() / 3 * 2);
+        g.drawString(val, width - BAR_SIZE, height - 2);
 
         g.dispose();
     }
