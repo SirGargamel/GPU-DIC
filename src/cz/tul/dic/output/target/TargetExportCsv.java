@@ -13,8 +13,7 @@ import java.text.Format;
 public class TargetExportCsv implements ITargetExport {
 
     private static final String SEPARATOR_VALUE = ",";
-    private static final String SEPARATOR_LINE = "\n";
-    private static final Format numberFormat = new DecimalFormat("###.##");
+    private static final String SEPARATOR_LINE = "\n";    
 
     @Override
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
@@ -40,7 +39,7 @@ public class TargetExportCsv implements ITargetExport {
         try (FileWriter out = new FileWriter(target)) {
             for (double[] data1 : data) {
                 for (int x = 0; x < data1.length; x++) {
-                    out.append(numberFormat.format(data1[x]));
+                    out.append(Double.toString(data1[x]));
                     out.append(SEPARATOR_VALUE);
                 }
                 out.append(SEPARATOR_LINE);
@@ -57,7 +56,7 @@ public class TargetExportCsv implements ITargetExport {
 
         try (FileWriter out = new FileWriter(target)) {
             for (int i = 0; i < data.length; i++) {
-                out.append(numberFormat.format(data[i]));
+                out.append(Double.toString(data[i]));
                 out.append(SEPARATOR_VALUE);
             }
             out.append(SEPARATOR_LINE);
