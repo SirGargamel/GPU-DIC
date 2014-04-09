@@ -35,11 +35,14 @@ public class TargetExportCsv implements ITargetExport {
 
         final File target = (File) targetParam;
         Utils.ensureDirectoryExistence(target);
+        
+        final int width= data.length;
+        final int height = data[0].length;
 
         try (FileWriter out = new FileWriter(target)) {
-            for (double[] data1 : data) {
-                for (int x = 0; x < data1.length; x++) {
-                    out.append(Double.toString(data1[x]));
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    out.append(Double.toString(data[x][y]));
                     out.append(SEPARATOR_VALUE);
                 }
                 out.append(SEPARATOR_LINE);
