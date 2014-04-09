@@ -10,15 +10,7 @@ import java.util.Set;
  *
  * @author Petr Jecmen
  */
-public class OutputUtils {
-
-    public static void checkExportValidity(final Set<ExportTask> exports) {
-        for (ExportTask et : exports) {
-            if (!Exporter.isExportSupported(et)) {
-                throw new IllegalArgumentException("Unsupported exeport task - " + et);
-            }
-        }
-    }
+public class OutputUtils {    
 
     public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
         boolean result = false;
