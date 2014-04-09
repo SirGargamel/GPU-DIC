@@ -9,7 +9,6 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.engine.Engine;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,7 +29,7 @@ public class ComplextTaskSolver extends Observable {
     private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 1.0, -5, 5, 0.25};
     private static final double[] DEFAULT_DEF_RECT = new double[]{-4, 4, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};
 
-    public void solveComplexTask(final TaskContainer tc) throws IOException, ComputationException {        
+    public void solveComplexTask(final TaskContainer tc) throws ComputationException {        
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         tc.clearComputationData();
         
@@ -48,7 +47,7 @@ public class ComplextTaskSolver extends Observable {
                 counter++;
                 tc.addFacetSize(0, roi, DEFAULT_FS_CIRCLE);
             } else {
-                throw new ComputationException(ComputationExceptionCause.NOT_ENOUGH_ROIS, "Only circular ROIs needed.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Only circular ROIs needed.");
             }
         }
         if (counter != ROI_COUNT) {

@@ -23,13 +23,13 @@ public class TaskContainerChecker {
     public static void checkTaskValidity(final TaskContainer tc) throws ComputationException {
         final Object in = tc.getParameter(TaskParameter.IN);
         if (in == null) {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "no name");
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No input.");
         }
 
         // null data
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         if (roundCount < 1) {
-            throw new IllegalArgumentException("Not enough enabled input images.");
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Not enough input images.");
         }
 
         final Object fs = tc.getParameter(TaskParameter.FACET_SIZE);
@@ -48,7 +48,7 @@ public class TaskContainerChecker {
         for (int round = 0; round < roundCount; round++) {
             img = tc.getImage(round);
             if (img == null) {
-                throw new IllegalArgumentException("NULL image found.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL image found.");
             }
 
             rois = tc.getRois(round);

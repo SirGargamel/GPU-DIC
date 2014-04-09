@@ -6,6 +6,7 @@ import com.jogamp.opencl.CLDevice.Type;
 import com.jogamp.opencl.CLErrorHandler;
 import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.util.Filter;
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
@@ -23,7 +24,6 @@ import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,7 +83,7 @@ public final class Engine extends Observable {
         });
     }
 
-    public void computeTask(final TaskContainer tc) throws IOException {
+    public void computeTask(final TaskContainer tc) throws ComputationException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         tc.clearComputationData();
         setChanged();
@@ -95,7 +95,7 @@ public final class Engine extends Observable {
         }
     }
 
-    public void computeRound(final TaskContainer tc, final int round) throws IOException {
+    public void computeRound(final TaskContainer tc, final int round) throws ComputationException {
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         int facetCount, defArrayLength;
         List<double[][]> bestResults;
@@ -140,7 +140,7 @@ public final class Engine extends Observable {
         Logger.trace("Computed round {0}.", round + 1);
     }
 
-    private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final TaskContainer tc, final int round, final ROI roi) {
+    private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final TaskContainer tc, final int round, final ROI roi) throws ComputationException {
         final List<Facet> globalFacets = tc.getFacets(round, roi);
         final Comparator<Integer> candidatesComparator = new DeformationResultSorter(tc, round, roi);
 
@@ -195,7 +195,7 @@ public final class Engine extends Observable {
         }
     }
 
-    private void buildFinalResults(final TaskContainer tc, final int round) {
+    private void buildFinalResults(final TaskContainer tc, final int round) throws ComputationException {
         final Image img = tc.getImage(round);
         final int width = img.getWidth();
         final int height = img.getHeight();

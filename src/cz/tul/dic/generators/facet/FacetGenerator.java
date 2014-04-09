@@ -1,6 +1,7 @@
 package cz.tul.dic.generators.facet;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public class FacetGenerator {
         if (generators.containsKey(mode)) {            
             generators.get(mode).generateFacets(tc, round);
         } else {
-            throw new IllegalArgumentException("Unsupported mode of facet generator - " + mode.toString());
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported mode of facet generator - " + mode.toString());
         }
     }
 

@@ -1,5 +1,7 @@
 package cz.tul.dic.generators;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
@@ -11,7 +13,7 @@ import cz.tul.dic.data.task.TaskContainer;
  */
 public class DeformationGenerator {
 
-    public static void generateDeformations(final TaskContainer tc, final int round) {
+    public static void generateDeformations(final TaskContainer tc, final int round) throws ComputationException {
         double[] limits, deformations;
         DeformationDegree degree;
 
@@ -30,16 +32,16 @@ public class DeformationGenerator {
                     deformations = generateSecondDegree(limits);
                     break;
                 default:
-                    throw new UnsupportedOperationException("Unsupported degree of deformation - " + degree + ".");
+                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation - " + degree + ".");
 
             }
             tc.setDeformations(deformations, round, roi);
         }
     }
 
-    private static double[] generateZeroDegree(final double[] limits) {
+    private static double[] generateZeroDegree(final double[] limits) throws ComputationException {
         if (limits.length < 6) {
-            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + limits.length + ", required 6.");
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal number of deformation parameters - received " + limits.length + ", required 6.");
         }
 
         final int coeffCount = 2;
@@ -63,9 +65,9 @@ public class DeformationGenerator {
         return result;
     }
 
-    private static double[] generateFirstDegree(final double[] limits) {
+    private static double[] generateFirstDegree(final double[] limits) throws ComputationException {
         if (limits.length < 18) {
-            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + limits.length + ", required 18.");
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal number of deformation parameters - received " + limits.length + ", required 18.");
         }
 
         final int coeffCount = 6;
@@ -105,9 +107,9 @@ public class DeformationGenerator {
         return result;
     }
 
-    private static double[] generateSecondDegree(final double[] limits) {
+    private static double[] generateSecondDegree(final double[] limits) throws ComputationException {
         if (limits.length < 36) {
-            throw new IllegalArgumentException("Illegal number of deformation parameters - received " + limits.length + ", required 36.");
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal number of deformation parameters - received " + limits.length + ", required 36.");
         }
 
         final int coeffCount = 12;

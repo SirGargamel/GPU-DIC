@@ -1,5 +1,7 @@
 package cz.tul.dic.output.data;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -10,7 +12,7 @@ import cz.tul.dic.output.OutputUtils;
 public class DataExportLine implements IDataExport<double[]> {
 
     @Override
-    public double[] exportData(TaskContainer tc, Direction direction, int[] dataParams, ROI... rois) {
+    public double[] exportData(TaskContainer tc, Direction direction, int[] dataParams, ROI... rois) throws ComputationException {
         if (dataParams == null || dataParams.length < 3) {
             throw new IllegalArgumentException("Not enough input parameters (position, x, y required).");
         }
@@ -39,9 +41,9 @@ public class DataExportLine implements IDataExport<double[]> {
                     case DX:
                     case DY:
                     case DABS:
-                        throw new IllegalArgumentException("Not yet supported.");
+                        throw new UnsupportedOperationException("Not yet supported.");
                     default:
-                        throw new IllegalArgumentException("Unsupported direction.");
+                        throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                 }
             }
         }

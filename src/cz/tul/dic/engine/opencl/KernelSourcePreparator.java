@@ -1,5 +1,7 @@
 package cz.tul.dic.engine.opencl;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import java.io.BufferedReader;
@@ -25,7 +27,7 @@ public class KernelSourcePreparator {
     private final String kernelName;
     private String kernel;
 
-    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization, final Interpolation interpolation) throws IOException {
+    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization, final Interpolation interpolation) throws IOException, ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         kp.loadKernel();
@@ -55,7 +57,7 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(REPLACE_FACET_SIZE, Integer.toString(facetSize));
     }
 
-    private void prepareDeformations(final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization) {
+    private void prepareDeformations(final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization) throws ComputationException {
         final String x, y, dx, dy;
         if (usesVectorization) {
             x = "coords.x";
@@ -115,14 +117,14 @@ public class KernelSourcePreparator {
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
                 break;
             case SECOND:
-                throw new IllegalArgumentException("Second degree not supported yet");
+                throw new UnsupportedOperationException("Second degree not supported yet");
             default:
-                throw new IllegalArgumentException("Unsupported degree of deformation");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation");
         }
         kernel = kernel.replaceFirst(REPLACE_DEFORMATION_DEGREE, Integer.toString(deformationArrayLength));
     }
 
-    private void prepareInterpolation(final Interpolation interpolation) {
+    private void prepareInterpolation(final Interpolation interpolation) throws ComputationException {
         String resourceName;
         switch (interpolation) {
             case BILINEAR:
@@ -132,7 +134,7 @@ public class KernelSourcePreparator {
                 resourceName = "interpolate-bicubic.cl";
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported type of interpolation.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of interpolation.");
         }
         try (final BufferedReader br = new BufferedReader(new InputStreamReader(KernelSourcePreparator.class.getResourceAsStream("/cz/tul/dic/engine/opencl/interpolation/".concat(resourceName))))) {
             final StringBuilder sb = new StringBuilder();

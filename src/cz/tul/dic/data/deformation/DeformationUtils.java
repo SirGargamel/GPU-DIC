@@ -1,5 +1,8 @@
 package cz.tul.dic.data.deformation;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
+
 /**
  *
  * @author Petr Jecmen
@@ -23,7 +26,7 @@ public class DeformationUtils {
         return Math.sqrt(result);
     }
 
-    public static DeformationDegree getDegreeFromLimits(final double[] limits) {
+    public static DeformationDegree getDegreeFromLimits(final double[] limits) throws ComputationException {
         final DeformationDegree result;
         switch (limits.length) {
             case 6:
@@ -36,12 +39,12 @@ public class DeformationUtils {
                 result = DeformationDegree.SECOND;
                 break;
             default:
-                throw new IllegalArgumentException("Illegal count of deofmation limits - " + limits.length);
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal count of deformation limits - " + limits.length);
         }
         return result;
     }
     
-    public static DeformationDegree getDegree(final double[] limits) {
+    public static DeformationDegree getDegree(final double[] limits) throws ComputationException {
         final DeformationDegree result;
         switch (limits.length) {
             case 2:
@@ -54,7 +57,7 @@ public class DeformationUtils {
                 result = DeformationDegree.SECOND;
                 break;
             default:
-                throw new IllegalArgumentException("Illegal count of deofmation limits - " + limits.length);
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal count of deformation limits - " + limits.length);
         }
         return result;
     }

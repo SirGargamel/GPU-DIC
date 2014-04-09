@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.output.target;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -36,7 +37,7 @@ public class TargetExportFile implements ITargetExport {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException {
+    public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException, ComputationException {
         if (data instanceof double[][]) {
             // export image
             exportImage((double[][]) data, direction, targetParam, dataParams, tc);
@@ -48,7 +49,7 @@ public class TargetExportFile implements ITargetExport {
         }
     }
 
-    private void exportImage(final double[][] data, Direction direction, final Object targetParams, int[] dataParams, final TaskContainer tc) throws IOException {
+    private void exportImage(final double[][] data, Direction direction, final Object targetParams, int[] dataParams, final TaskContainer tc) throws IOException, ComputationException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParams.getClass());
         }
@@ -66,7 +67,7 @@ public class TargetExportFile implements ITargetExport {
         ImageIO.write(ExportUtils.overlayImage(background, overlay), "BMP", target);
     }
 
-    private void exportVideo(final List<double[][]> data, Direction direction, final Object targetParams, TaskContainer tc) throws IOException {
+    private void exportVideo(final List<double[][]> data, Direction direction, final Object targetParams, TaskContainer tc) throws IOException, ComputationException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Input parameter has to be the target file. - " + targetParams);
         }
@@ -107,7 +108,6 @@ public class TargetExportFile implements ITargetExport {
         File target;
         for (int i = 0; i < roundCount; i++) {
             target = new File(temp.getAbsolutePath() + File.separator + name + nf.format(i) + IMAGE_EXTENSION);
-//            exportImage(data.get(i), direction, target, new int[]{i}, tc);                        
             Utils.ensureDirectoryExistence(target);
             final BufferedImage background = tc.getImage(i);
             final BufferedImage overlay = ExportUtils.createImageFromMap(data.get(i), direction, globalMaxPos, globalMaxNeg);

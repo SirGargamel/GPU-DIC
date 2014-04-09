@@ -16,7 +16,7 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
     public void generateFacets(TaskContainer tc, final int round) throws ComputationException {
         Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
         if (o == null) {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "No facet generator spacing.");
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No facet generator spacing.");
         }
         
         final int spacing = (int) o;
@@ -36,7 +36,7 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
             halfSize = facetSize / 2;
 
             if (spacing >= facetSize) {
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "Spacing must be smaller than facet size.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Spacing must be smaller than facet size.");
             }
 
             roiW = roi.getWidth();

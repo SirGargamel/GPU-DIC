@@ -1,5 +1,6 @@
 package cz.tul.dic.gui;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportMode;
@@ -47,7 +48,7 @@ public class Context {
         exportCacheLines.clear();
     }
 
-    public BufferedImage getMapResult(final int round, final Direction dir) {
+    public BufferedImage getMapResult(final int round, final Direction dir) throws ComputationException {
         Map<Direction, BufferedImage> m = exportCacheImages.get(round);
         if (m == null) {
             m = new HashMap<>();
@@ -67,7 +68,7 @@ public class Context {
         return result;
     }
 
-    public double[] getLineResult(final int x, final int y, final Direction dir) {
+    public double[] getLineResult(final int x, final int y, final Direction dir) throws ComputationException {
         Map<Integer, Map<Direction, double[]>> m = exportCacheLines.get(x);
         if (m == null) {
             m = new HashMap<>();

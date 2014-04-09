@@ -1,5 +1,7 @@
 package cz.tul.dic.data.task.splitter;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
@@ -22,7 +24,7 @@ public abstract class TaskSplitter implements Iterator<ComputationTask> {
         this.roi = roi;
     }
 
-    public static Iterator<ComputationTask> prepareSplitter(final TaskContainer tc, final int round, final ROI roi) {
+    public static Iterator<ComputationTask> prepareSplitter(final TaskContainer tc, final int round, final ROI roi) throws ComputationException {
         final TaskSplit ts = (TaskSplit) tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
 
         switch (ts) {
@@ -32,7 +34,7 @@ public abstract class TaskSplitter implements Iterator<ComputationTask> {
                 return new StaticSplit(tc, round, roi);
             case DYNAMIC_MEMORY:
             default:
-                throw new IllegalArgumentException("Unsupported type of task splitting - " + ts);
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of task splitting - " + ts);
         }
     }
 

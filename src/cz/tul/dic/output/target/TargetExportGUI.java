@@ -1,5 +1,6 @@
 package cz.tul.dic.output.target;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.output.Direction;
@@ -11,7 +12,7 @@ import java.io.IOException;
 public class TargetExportGUI implements ITargetExport {
 
     @Override
-    public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
+    public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException, ComputationException {
         if (!(targetParam instanceof Context)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
@@ -25,7 +26,7 @@ public class TargetExportGUI implements ITargetExport {
 
     }
 
-    private void exportImage(final double[][] data, Direction direction, final Object targetParam, int[] dataParams, final TaskContainer tc) {
+    private void exportImage(final double[][] data, Direction direction, final Object targetParam, int[] dataParams, final TaskContainer tc) throws ComputationException {
         if (dataParams.length < 1) {
             throw new IllegalArgumentException("Not enough data parameters.");
         }

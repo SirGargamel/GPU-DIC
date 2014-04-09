@@ -1,5 +1,6 @@
 package cz.tul.dic.engine;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
@@ -24,11 +25,15 @@ public class DeformationResultSorter implements Comparator<Integer> {
 
     @Override
     public int compare(Integer o1, Integer o2) {
-        final double[] deformations = tc.getDeformations(round, roi);
-        final int deformationLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
-        return Double.compare(
-                DeformationUtils.getAbs(deformations, o1, deformationLength),
-                DeformationUtils.getAbs(deformations, o2, deformationLength));
+        try {
+            final double[] deformations = tc.getDeformations(round, roi);
+            final int deformationLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
+            return Double.compare(
+                    DeformationUtils.getAbs(deformations, o1, deformationLength),
+                    DeformationUtils.getAbs(deformations, o2, deformationLength));
+        } catch (ComputationException ex) {
+            return 0;
+        }
     }
 
 }

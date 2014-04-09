@@ -1,5 +1,6 @@
 package cz.tul.dic.gui;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -94,10 +96,14 @@ public class ResultPresenter implements Initializable {
     }
 
     private void displayImage() {
-        final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
-        if (i != null) {
-            final Image img = SwingFXUtils.toFXImage(i, null);
-            image.setImage(img);
+        try {
+            final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
+            if (i != null) {
+                final Image img = SwingFXUtils.toFXImage(i, null);
+                image.setImage(img);
+            }
+        } catch (ComputationException ex) {            
+            Logger.warn(ex);
         }
     }
 
@@ -156,7 +162,7 @@ public class ResultPresenter implements Initializable {
     }
 
     @FXML
-    private void handleButtonActionSave(ActionEvent event) throws IOException {
+    private void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
         final String c1 = Lang.getString("TypeMap");
         final String t1 = Lang.getString("TypeMapD");
         final String c2 = Lang.getString("TypeLine");
@@ -285,36 +291,38 @@ public class ResultPresenter implements Initializable {
                 stage.show();
             } catch (IOException e) {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
+            } catch (ComputationException ex) {
+                java.util.logging.Logger.getLogger(ResultPresenter.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
 
         Image img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/play_24x32.png"));
-        ImageView image = new ImageView(img);
-        image.setFitWidth(20);
-        image.setFitHeight(20);
-        image.setPreserveRatio(true);
-        buttonPlay.setGraphic(image);
+        ImageView imgV = new ImageView(img);
+        imgV.setFitWidth(20);
+        imgV.setFitHeight(20);
+        imgV.setPreserveRatio(true);
+        buttonPlay.setGraphic(imgV);
 
         img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/pause_24x32.png"));
-        image = new ImageView(img);
-        image.setFitWidth(20);
-        image.setFitHeight(20);
-        image.setPreserveRatio(true);
-        buttonPause.setGraphic(image);
+        imgV = new ImageView(img);
+        imgV.setFitWidth(20);
+        imgV.setFitHeight(20);
+        imgV.setPreserveRatio(true);
+        buttonPause.setGraphic(imgV);
 
         img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/arrow_left_32x32.png"));
-        image = new ImageView(img);
-        image.setFitWidth(20);
-        image.setFitHeight(20);
-        image.setPreserveRatio(true);
-        buttonPrev.setGraphic(image);
+        imgV = new ImageView(img);
+        imgV.setFitWidth(20);
+        imgV.setFitHeight(20);
+        imgV.setPreserveRatio(true);
+        buttonPrev.setGraphic(imgV);
 
         img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/arrow_right_32x32.png"));
-        image = new ImageView(img);
-        image.setFitWidth(20);
-        image.setFitHeight(20);
-        image.setPreserveRatio(true);
-        buttonNext.setGraphic(image);
+        imgV = new ImageView(img);
+        imgV.setFitWidth(20);
+        imgV.setFitHeight(20);
+        imgV.setPreserveRatio(true);
+        buttonNext.setGraphic(imgV);
     }
 
 }

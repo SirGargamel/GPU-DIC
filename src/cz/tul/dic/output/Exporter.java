@@ -1,5 +1,7 @@
 package cz.tul.dic.output;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.data.DataExportLine;
 import cz.tul.dic.output.data.DataExportMap;
@@ -35,7 +37,7 @@ public class Exporter {
         targetExporters.put(ExportTarget.GUI, new TargetExportGUI());
     }
 
-    public static void export(final ExportTask et, final TaskContainer tc) throws IOException {
+    public static void export(final ExportTask et, final TaskContainer tc) throws IOException, ComputationException {
         IDataExport dataExporter;
         ITargetExport targetExporter;
         ExportTarget target;
@@ -46,14 +48,14 @@ public class Exporter {
         if (targetExporters.containsKey(target)) {
             targetExporter = targetExporters.get(target);
         } else {
-            throw new IllegalArgumentException("Unsupported export target - " + et.toString());
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported export target - " + et.toString());
         }
 
         mode = et.getMode();
         if (dataExporters.containsKey(mode)) {
             dataExporter = dataExporters.get(mode);
         } else {
-            throw new IllegalArgumentException("Unsupported export mode for this target - " + et.toString());
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported export mode for this target - " + et.toString());
         }
 
         try {

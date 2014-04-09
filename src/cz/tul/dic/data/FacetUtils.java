@@ -1,5 +1,7 @@
 package cz.tul.dic.data;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,7 @@ public class FacetUtils {
         CACHE = new HashMap<>();
     }
 
-    public static Map<int[], double[]> deformFacet(final Facet facet, final double[] deformation, final DeformationDegree degree) {
+    public static Map<int[], double[]> deformFacet(final Facet facet, final double[] deformation, final DeformationDegree degree) throws ComputationException {
         final int[] data = facet.getData();
         final float[] center = facet.getCenter();
         final int facetArea = data.length / Coordinates.DIMENSION;
@@ -60,7 +62,7 @@ public class FacetUtils {
         return CACHE;
     }
 
-    private static void deform(final int x, final int y, final float dx, final float dy, final double[] deformation, final float[] result, final DeformationDegree degree) {
+    private static void deform(final int x, final int y, final float dx, final float dy, final double[] deformation, final float[] result, final DeformationDegree degree) throws ComputationException {
         result[Coordinates.X] = x;
         result[Coordinates.Y] = y;
         switch (degree) {
@@ -73,7 +75,7 @@ public class FacetUtils {
                 break;
             case SECOND:
             default:
-                throw new IllegalArgumentException("Unsupported degree of deformation.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation.");
 
         }
     }

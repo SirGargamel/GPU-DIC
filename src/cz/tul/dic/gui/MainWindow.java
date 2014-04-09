@@ -1,5 +1,6 @@
 package cz.tul.dic.gui;
 
+import cz.tul.dic.Computation;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplextTaskSolver;
 import cz.tul.dic.data.Config;
@@ -394,6 +395,12 @@ public class MainWindow implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        try {
+            Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), 10);
+        } catch (IOException | ComputationException ex) {
+            System.err.println(ex);
+        }
+        
         textFs.setText("7");
 
         imagePane.initialize(url, rb);
@@ -462,7 +469,7 @@ public class MainWindow implements Initializable {
             try {
                 cts.addObserver(this);
                 cts.solveComplexTask(tc);
-            } catch (ComputationException | IOException ex) {
+            } catch (ComputationException ex) {
                 result = ex;
             }
             return result;

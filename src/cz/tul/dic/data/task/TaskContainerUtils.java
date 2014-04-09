@@ -1,5 +1,7 @@
 package cz.tul.dic.data.task;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Facet;
@@ -47,14 +49,14 @@ public class TaskContainerUtils {
         return size;
     }
 
-    public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi) {
+    public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi) throws ComputationException {
         final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
         final int result = tc.getDeformations(round, roi).length / deformationArrayLength;
 
         return result;
     }
 
-    public static int getDeformationArrayLength(final TaskContainer tc, final int round, final ROI roi) {
+    public static int getDeformationArrayLength(final TaskContainer tc, final int round, final ROI roi) throws ComputationException {
         int result;
 
         final double[] limits = tc.getDeformationLimits(round, roi);
@@ -69,13 +71,13 @@ public class TaskContainerUtils {
                 result = 12;
                 break;
             default:
-                throw new IllegalArgumentException("Illegal deformation parameters set.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal deformation parameters set.");
         }
 
         return result;
     }
 
-    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi) {
+    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi) throws ComputationException {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
@@ -298,7 +300,7 @@ public class TaskContainerUtils {
         return result;
     }
 
-    public static void exportTask(final TaskContainer tc) throws IOException {
+    public static void exportTask(final TaskContainer tc) throws IOException, ComputationException {
         for (ExportTask et : tc.getExports()) {
             Exporter.export(et, tc);
         }

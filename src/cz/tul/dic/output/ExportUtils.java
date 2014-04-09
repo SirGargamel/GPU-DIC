@@ -1,5 +1,7 @@
 package cz.tul.dic.output;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -25,7 +27,7 @@ public class ExportUtils {
     private static final NumberFormat nf = new DecimalFormat("0.0#");
     private static final double BAR_LIMIT = 0.001;
 
-    public static double calculateDisplacement(final double[] def, final Direction dir) {
+    public static double calculateDisplacement(final double[] def, final Direction dir) throws ComputationException {
         double result;
         switch (dir) {
             case X:
@@ -38,13 +40,13 @@ public class ExportUtils {
                 result = Math.sqrt(def[0] * def[0] + def[1] * def[1]);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported direction.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
         }
 
         return result;
     }
 
-    public static double calculateDeformation(final double[][][] results, final int x, final int y, final Direction dir) {
+    public static double calculateDeformation(final double[][][] results, final int x, final int y, final Direction dir) throws ComputationException {
         double result;
 
         if (x < 0 || y < 0 || (x + 1) >= results.length || (y + 1) >= results[x].length) {
@@ -64,7 +66,7 @@ public class ExportUtils {
                 result = Math.sqrt(val1 * val1 + val2 * val2);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported direction.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
         }
 
         return result;
@@ -85,7 +87,7 @@ public class ExportUtils {
         return out;
     }
 
-    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir) {
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir) throws ComputationException {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
@@ -141,13 +143,13 @@ public class ExportUtils {
                 drawHorizontalBar(out, max, min);
                 break;
             default:
-                throw new UnsupportedOperationException("Unsupported direction.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
         }
 
         return out;
     }
 
-    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double max, final double min) {
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double max, final double min) throws ComputationException {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
@@ -178,7 +180,7 @@ public class ExportUtils {
                 drawHorizontalBar(out, max, min);
                 break;
             default:
-                throw new UnsupportedOperationException("Unsupported direction.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
         }
 
         return out;

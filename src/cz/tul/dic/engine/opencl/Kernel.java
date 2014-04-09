@@ -11,6 +11,8 @@ import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.CLResource;
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
@@ -59,20 +61,24 @@ public abstract class Kernel {
         clRoundMem = new HashSet<>();
     }
 
-    public void prepareKernel(final CLContext context, final CLDevice device, final int facetSize, final DeformationDegree deg, final int defArrayLength, final Interpolation interpolation) throws IOException {
-        this.context = context;
-        this.device = device;
-
-        program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization(), interpolation)).build();
-        clGlobalMem.add(program);
-        kernel = program.createCLKernel(kernelName);
-        clGlobalMem.add(kernel);
-        if (isDriven()) {
-            queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
-        } else {
-            queue = device.createCommandQueue();
+    public void prepareKernel(final CLContext context, final CLDevice device, final int facetSize, final DeformationDegree deg, final int defArrayLength, final Interpolation interpolation) throws ComputationException {
+        try {
+            this.context = context;
+            this.device = device;
+            
+            program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization(), interpolation)).build();
+            clGlobalMem.add(program);
+            kernel = program.createCLKernel(kernelName);
+            clGlobalMem.add(kernel);
+            if (isDriven()) {
+                queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
+            } else {
+                queue = device.createCommandQueue();
+            }
+            clGlobalMem.add(queue);
+        } catch (IOException ex) {
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
         }
-        clGlobalMem.add(queue);
     }
 
     public float[] compute(Image imageA, Image imageB, List<Facet> facets, double[] deformations, int deformationLength) {

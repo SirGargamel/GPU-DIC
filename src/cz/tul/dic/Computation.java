@@ -154,7 +154,7 @@ public class Computation {
         }
     }
 
-    public static void commenceComputationDynamic(final Object in) throws IOException, ComputationException {
+    public static void commenceComputationDynamic(final Object in, final int facetSize) throws IOException, ComputationException {
         TaskContainer tc = new TaskContainer(in);
         InputLoader.loadInput(tc);
 
@@ -164,7 +164,7 @@ public class Computation {
         tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
         tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
 
-        tc.setParameter(TaskParameter.FACET_SIZE, roiRadius / 2);
+        tc.setParameter(TaskParameter.FACET_SIZE, facetSize);
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
         tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BILINEAR);
