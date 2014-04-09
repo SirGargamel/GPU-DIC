@@ -95,7 +95,7 @@ public class ExportUtils {
             for (int y = 0; y < height; y++) {
                 val = mapData[x][y];
                 if (val > max) {
-                    max = val;                    
+                    max = val;
                 }
                 if (val < min) {
                     min = val;
@@ -181,21 +181,24 @@ public class ExportUtils {
         return out;
     }
 
-    private static int deformationToRGB(final double val, final double maxPos, final double maxNeg) {
+    private static int deformationToRGB(final double val, final double max, final double min) {
         float h, s = 1, b = 1;
+        double fract;
         if (val == 0) {
             h = 0.0f;
             b = 0.0f;
         } else if (val < 0) {
-            h = (float) ((1 - (-val) / maxNeg) * 0.2);            
+            fract = val / min;
+            h = (float) ((90 / 360.0) - (fract * (110 / 360.0)));
         } else {
-            h = (float) (val / maxPos * 0.4 + 0.3);            
+            fract = val / max;
+            h = (float) (fract * (160 / 360.0) + (90 / 360.0));
         }
         return Color.HSBtoRGB(h, s, b);
     }
 
     private static void drawVerticalBar(final BufferedImage image, final double max) {
-        final int height = image.getHeight();        
+        final int height = image.getHeight();
 
         final Graphics2D g = image.createGraphics();
         final FontMetrics metrics = g.getFontMetrics(g.getFont());
@@ -245,7 +248,7 @@ public class ExportUtils {
         // negative part
         if (maxNeg < -BAR_LIMIT) {
             for (int y = 0; y < halfHeight; y++) {
-                g.setColor(new Color(deformationToRGB(-y, 0, halfHeight - 1)));
+                g.setColor(new Color(deformationToRGB(-y, 0, -halfHeight + 1)));
                 g.drawRect(x, halfHeight - 1 - y, BAR_SIZE, 1);
             }
 
@@ -296,7 +299,7 @@ public class ExportUtils {
         // negative part
         if (min < -BAR_LIMIT) {
             for (int x = 0; x < halfWidth; x++) {
-                g.setColor(new Color(deformationToRGB(-x, 0, halfWidth - 1)));
+                g.setColor(new Color(deformationToRGB(-x, 0, -halfWidth + 1)));
                 g.drawRect(halfWidth - 1 - x, y, 1, BAR_SIZE);
             }
 
