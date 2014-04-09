@@ -66,6 +66,7 @@ public class ResultPresenter implements Initializable {
     private Button buttonNext;
     private int index;
     private Timeline timeLine;
+    private int lastX, lastY;
 
     @FXML
     private void handleButtonActionNext(ActionEvent event) {
@@ -179,7 +180,7 @@ public class ResultPresenter implements Initializable {
             if (et != null) {
                 final TaskContainer tc = Context.getInstance().getTc();
                 final String fileName = tc.getParameter(TaskParameter.IN).toString().concat(Integer.toString(index)).concat(EXT_CSV);
-                Exporter.export(ExportTask.generateMapExport(choiceDir.getValue(), ExportTarget.CSV, new File(fileName), index), tc);
+                Exporter.export(ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(fileName), lastX, lastY), tc);
             }
         } else if (val.equals(c3)) {
             final TaskContainer tc = Context.getInstance().getTc();
@@ -232,9 +233,9 @@ public class ResultPresenter implements Initializable {
                 final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
                 final Stage stage = new Stage();
 
-                final int x = (int) Math.round(t.getX());
-                final int y = (int) Math.round(t.getY());
-                final double[] line = Context.getInstance().getLineResult(x, y, choiceDir.getValue());
+                lastX = (int) Math.round(t.getX());
+                lastY = (int) Math.round(t.getY());
+                final double[] line = Context.getInstance().getLineResult(lastX, lastY, choiceDir.getValue());
 
                 final LineChart<Number, Number> chart = (LineChart<Number, Number>) root.getChildrenUnmodifiable().get(0);
                 chart.setLegendVisible(false);
@@ -274,11 +275,11 @@ public class ResultPresenter implements Initializable {
                 }
 
                 stage.setOnShown((WindowEvent t2) -> {
-                    stage.setX(stage.getX() + x + 35);
-                    stage.setY(stage.getY() + y + 10);
+                    stage.setX(stage.getX() + lastX + 35);
+                    stage.setY(stage.getY() + lastY + 10);
                 });
 
-                stage.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(x).concat(";").concat(Integer.toString(y))));
+                stage.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(lastX).concat(";").concat(Integer.toString(lastY))));
                 stage.setScene(new Scene(root));
                 stage.setIconified(false);
                 stage.show();
