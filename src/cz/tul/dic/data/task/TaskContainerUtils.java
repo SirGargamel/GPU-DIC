@@ -98,6 +98,7 @@ public class TaskContainerUtils {
             final File f = (File) input;
             config.put(CONFIG_INPUT, f.getAbsolutePath());
         } else if (input instanceof List) {
+            @SuppressWarnings("unchecked")
             final List<File> l = (List<File>) input;
             final StringBuilder sb = new StringBuilder();
             for (File f : l) {

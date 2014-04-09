@@ -453,7 +453,7 @@ public class MainWindow implements Initializable {
         buttonSave.setDisable(disabled);
     }
 
-    private static class ComputationObserver extends Task implements Observer {
+    private static class ComputationObserver extends Task<Exception> implements Observer {
 
         private final ComplextTaskSolver cts;
         private final TaskContainer tc;

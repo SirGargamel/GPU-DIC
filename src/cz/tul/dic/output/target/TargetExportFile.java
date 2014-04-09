@@ -37,6 +37,7 @@ public class TargetExportFile implements ITargetExport {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
+    @SuppressWarnings("unchecked")
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException, ComputationException {
         if (data instanceof double[][]) {
             // export image
@@ -84,11 +85,11 @@ public class TargetExportFile implements ITargetExport {
         if (roundCount != data.size()) {
             throw new IllegalArgumentException("Provided data length and round count mismatch.");
         }
-        
+
         double globalMaxPos = -Double.MAX_VALUE, globalMaxNeg = Double.MAX_VALUE;
         for (double[][] daa : data) {
             for (double[] da : daa) {
-                for (double d : da) {                    
+                for (double d : da) {
                     if (d > globalMaxPos) {
                         globalMaxPos = d;
                     }

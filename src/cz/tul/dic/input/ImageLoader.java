@@ -13,14 +13,16 @@ import org.pmw.tinylog.LoggingLevel;
 
 public class ImageLoader implements IInputLoader {
 
-    private static final Class TYPE = List.class;
+    private static final Class<?> TYPE = List.class;
 
     @Override
-    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {
-        if (!TYPE.isAssignableFrom(in.getClass())) {
+    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {        
+        final Class<?> c = in.getClass();
+        if (!TYPE.isAssignableFrom(c)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
         }
 
+        @SuppressWarnings("unchecked")
         final List<File> data = (List<File>) in;
         if (data.isEmpty()) {
             throw new IllegalArgumentException("No images.");

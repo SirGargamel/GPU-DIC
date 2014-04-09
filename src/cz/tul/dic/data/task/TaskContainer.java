@@ -57,10 +57,14 @@ public class TaskContainer implements Serializable {
     }
 
     public void setParameter(final TaskParameter key, final Object value) {
-        if (value != null && key.getType().isAssignableFrom(value.getClass())) {
-            params.put(key, value);
-        } else if (key != null && value != null) {
-            throw new IllegalArgumentException("Illegal value datatype - " + value.getClass().getSimpleName() + ", required " + key.getType().getSimpleName());
+        if (value != null && key != null) {
+            final Class<?> cK = key.getType();
+            final Class<?> cV = value.getClass();
+            if (cK.isAssignableFrom(cV)) {
+                params.put(key, value);
+            } else {
+                throw new IllegalArgumentException("Illegal value datatype - " + value.getClass().getSimpleName() + ", required " + key.getType().getSimpleName());
+            }
         } else {
             throw new IllegalArgumentException("Null values not supported.");
         }
@@ -135,7 +139,7 @@ public class TaskContainer implements Serializable {
             result = m.get(roi);
         } else {
             result = (int) getParameter(TaskParameter.FACET_SIZE);
-        }        
+        }
         return result;
     }
 
@@ -226,7 +230,7 @@ public class TaskContainer implements Serializable {
     public Set<ExportTask> getExports() {
         return Collections.unmodifiableSet(exports);
     }
-    
+
     public void clearComputationData() {
         facets.clear();
         deformations.clear();

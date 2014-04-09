@@ -52,6 +52,7 @@ public final class Engine extends Observable {
     private final CLDevice device;
 
     public Engine() {
+        @SuppressWarnings("unchecked")
         final CLPlatform tmpP = CLPlatform.getDefault(new Filter<CLPlatform>() {
 
             @Override
@@ -201,6 +202,7 @@ public final class Engine extends Observable {
         final int height = img.getHeight();
 
         final double[][][] finalResults = new double[width][height][];
+        @SuppressWarnings("unchecked")
         final Map<Integer, Map<Integer, Integer>>[][] counter = new Map[width][height];
         List<Facet> facets;
         List<double[][]> results;

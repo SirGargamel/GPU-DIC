@@ -243,6 +243,7 @@ public class ResultPresenter implements Initializable {
                 lastY = (int) Math.round(t.getY());
                 final double[] line = Context.getInstance().getLineResult(lastX, lastY, choiceDir.getValue());
 
+                @SuppressWarnings("unchecked")
                 final LineChart<Number, Number> chart = (LineChart<Number, Number>) root.getChildrenUnmodifiable().get(0);
                 chart.setLegendVisible(false);
                 final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
@@ -250,10 +251,10 @@ public class ResultPresenter implements Initializable {
 
                 chart.getData().clear();
 
-                final XYChart.Series series = new XYChart.Series();
+                final XYChart.Series<Number, Number> series = new XYChart.Series<>();
                 double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
                 for (int i = 0; i < line.length; i++) {
-                    series.getData().add(new XYChart.Data(i + 1, line[i]));
+                    series.getData().add(new XYChart.Data<>(i + 1, line[i]));
 
                     if (line[i] < min) {
                         min = line[i];
