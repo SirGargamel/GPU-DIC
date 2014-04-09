@@ -130,7 +130,12 @@ public class TaskContainer implements Serializable {
 
     public int getFacetSize(final int round, final ROI roi) {
         final Map<ROI, Integer> m = facetSizes.getItem(round);
-        final int result = m == null ? -1 : m.get(roi);
+        final int result;
+        if (m != null && m.containsKey(roi)) {
+            result = m.get(roi);
+        } else {
+            result = (int) getParameter(TaskParameter.FACET_SIZE);
+        }        
         return result;
     }
 
