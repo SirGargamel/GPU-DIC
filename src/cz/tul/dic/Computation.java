@@ -11,6 +11,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.Direction;
@@ -163,25 +164,34 @@ public class Computation {
         tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
         tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
 
-        TaskContainerUtils.setUniformFacetSize(tc, 0, roiRadius / 2);
+        tc.setParameter(TaskParameter.FACET_SIZE, roiRadius / 2);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
+        tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BILINEAR);
+        tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
 
         TaskContainerChecker.checkTaskValidity(tc);
 
+        TaskContainerUtils.serializeTaskToConfig(tc);
+
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
-        final String ext = String.format("%02d", SIZE_DYN).concat(".bmp");
+        final String ext = String.format("%02d", SIZE_DYN);
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
-            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext).concat(".csv")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext).concat(".csv")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext).concat(".csv")), round));
         }
-        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).replace("bmp", "avi"))));
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi"))));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).concat(".avi"))));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).concat(".avi"))));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.ABS, ExportTarget.FILE, new File(target.concat("-ABS-").concat(ext).concat(".avi"))));
 
         computeDynamicTask(tc);
 
-        final File input = (File) tc.getParameter(TaskParameter.IN);
-        TaskContainerUtils.serializeTaskToConfig(tc);
-        TaskContainer loadedTc = TaskContainerUtils.deserializeTaskFromConfig((File) in);
+        TaskContainerUtils.serializeTaskToBinary(tc);
+        TaskContainerUtils.exportTask(tc);
 //        System.out.println(tc);
 //        System.out.println(loadedTc);
     }
