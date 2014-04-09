@@ -1,5 +1,7 @@
 package cz.tul.dic.generators.facet;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -10,12 +12,14 @@ import java.util.Set;
 
 public class TightFacetGenerator extends AbstractFacetGenerator {
 
-    private static final int DEFAULT_SPACING = 1;
-
     @Override
-    public void generateFacets(TaskContainer tc, int round) {
+    public void generateFacets(TaskContainer tc, int round) throws ComputationException {
         final Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
-        final int spacing = o == null ? DEFAULT_SPACING : (int) o;
+        if (o == null) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "No facet generator spacing.");
+        }
+
+        final int spacing = (int) o;
 
         final int width = tc.getImage(round).getWidth();
         final int height = tc.getImage(round).getHeight();
@@ -33,7 +37,7 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
             halfSize = facetSize / 2;
 
             if (spacing >= facetSize) {
-                throw new IllegalArgumentException("Spacing cant must be smaller than facet size.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_CONTAINER, "Spacing cant must be smaller than facet size.");
             }
 
             roiW = roi.getWidth();

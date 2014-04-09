@@ -1,5 +1,6 @@
 package cz.tul.dic.generators.facet;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 
 /**
@@ -8,7 +9,7 @@ import cz.tul.dic.data.task.TaskContainer;
  */
 public abstract class AbstractFacetGenerator {
 
-    public abstract void generateFacets(final TaskContainer tc, final int round);
+    public abstract void generateFacets(final TaskContainer tc, final int round) throws ComputationException;
     
     public abstract FacetGeneratorMode getMode();
     
