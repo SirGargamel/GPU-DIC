@@ -114,13 +114,16 @@ public class TargetExportFile implements ITargetExport {
             final BufferedImage overlay = ExportUtils.createImageFromMap(data.get(i), direction, globalMaxPos, globalMaxNeg);
 
             ImageIO.write(ExportUtils.overlayImage(background, overlay), "BMP", target);
+            Utils.markTempFilesForDeletion(tc, target);
         }
         // prepare script
         String script = loadScript();
         script = script.replace(SCRIPT_FILE, temp.getAbsolutePath() + File.separator + name + nf.format(0) + IMAGE_EXTENSION);
         script = script.replace(SCRIPT_TARGET, out.getAbsolutePath());
         final String scriptPath = temp.getAbsolutePath().concat(File.separator).concat(SCRIPT_NAME);
-        saveScript(script, new File(scriptPath));
+        final File scriptFile = new File(scriptPath);
+        saveScript(script, scriptFile);
+        Utils.markTempFilesForDeletion(tc, scriptFile);
         // launch virtualdub to strip video to images
         final String[] command = {
             extendBackslashes(VIRTUAL_DUB.getAbsolutePath()),

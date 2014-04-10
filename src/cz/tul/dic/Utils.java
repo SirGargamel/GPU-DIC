@@ -3,7 +3,11 @@ package cz.tul.dic;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import java.io.File;
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
 
@@ -14,16 +18,28 @@ import org.pmw.tinylog.LoggingLevel;
 public class Utils {
 
     private static final String TEMP_DIR_NAME = "temp";
+    private static final Map<TaskContainer, List<File>> tempFiles;
+
+    static {
+        tempFiles = new HashMap<>();
+    }
 
     public static File getTempDir(final TaskContainer tc) {
         final File in = (File) (tc.getParameter(TaskParameter.IN));
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
-        if (!temp.exists()) {
-            temp.mkdirs();
-        }
+        ensureDirectoryExistence(temp);
 
         return temp;
+    }
+
+    public static void markTempFilesForDeletion(final TaskContainer tc, final File... filesForDeletion) {
+        List<File> f = tempFiles.get(tc);
+        if (f == null) {
+            f = new LinkedList<>();
+            tempFiles.put(tc, f);
+        }
+        f.addAll(Arrays.asList(filesForDeletion));
     }
 
     public static void deleteTempDir(final TaskContainer tc) {
@@ -31,24 +47,17 @@ public class Utils {
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         if (temp.exists()) {
-            Logger.trace("Deleting temp folder {0} and all of its contents.", temp.getAbsolutePath());
+            Logger.trace("Deleting files inside temp folder {0}.", temp.getAbsolutePath());
 
-            File[] list = temp.listFiles();
+            List<File> list = tempFiles.get(tc);
             for (File f : list) {
                 if (!f.delete()) {
-                    try {
-                        throw new IOException("Error deleting " + f.getAbsolutePath());
-                    } catch (IOException ex) {
-                        System.err.println(ex.getLocalizedMessage());
-                    }
+                    Logger.warn("Error deleting " + f.getAbsolutePath());
                 }
             }
-            if (!temp.delete()) {
-                try {
-                    throw new IOException("Error deleting " + temp.getAbsolutePath());
-                } catch (IOException ex) {
-                    System.err.println(ex.getLocalizedMessage());
-                }
+            list.clear();
+            if (temp.listFiles().length == 0 && !temp.delete()) {
+                Logger.warn("Error deleting " + temp.getAbsolutePath());
             }
         }
     }
