@@ -41,8 +41,7 @@ public class Computation {
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
     private static final int SIZE_MAX = 50;
-    private static final int SIZE_STEP = 1;
-    private static final int SIZE_DYN = 19;
+    private static final int SIZE_STEP = 1;    
 
     static {
         Configurator.defaultConfig().writer(new ConsoleWriter()).level(LOGGING_LEVEL).activate();
@@ -175,7 +174,7 @@ public class Computation {
         TaskContainerUtils.serializeTaskToConfig(tc);
 
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
-        final String ext = String.format("%02d", SIZE_DYN);
+        final String ext = String.format("%02d", facetSize);
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
             tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext).concat(".bmp")), round));
@@ -184,9 +183,9 @@ public class Computation {
             tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext).concat(".csv")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext).concat(".csv")), round));
         }
-        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).concat(".avi"))));
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).concat(".avi"))));
-        tc.addExport(ExportTask.generateSequenceExport(Direction.ABS, ExportTarget.FILE, new File(target.concat("-ABS-").concat(ext).concat(".avi"))));
+//        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).concat(".avi"))));
+//        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).concat(".avi"))));
+//        tc.addExport(ExportTask.generateSequenceExport(Direction.ABS, ExportTarget.FILE, new File(target.concat("-ABS-").concat(ext).concat(".avi"))));
 
         computeDynamicTask(tc);
 
@@ -202,7 +201,7 @@ public class Computation {
             ComplextTaskSolver cts = new ComplextTaskSolver();
             cts.solveComplexTask(tc);
             time = System.nanoTime() - time;
-            Logger.info("Finished dynamic task " + SIZE_DYN + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+            Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
             for (ExportTask et : tc.getExports()) {
                 Exporter.export(et, tc);
