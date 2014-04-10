@@ -1,5 +1,6 @@
 package cz.tul.dic.data;
 
+import cz.tul.dic.Utils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -16,17 +17,28 @@ import java.util.Set;
  */
 public class Config {
 
-    private static final String NAME_SEPARATOR = "..";
     private static final String EXT = ".config";
     private static final String SEPARATOR = " :: ";
     private final Map<String, String> data;
 
-    public static Config loadConfig(final File configFile) throws IOException {
-        final String configFileName = configFile.getAbsolutePath();        
-        final Config result = new Config();
+    public static Config loadConfig(final File in, final ConfigType configType) throws IOException {
+        final String configFileName;
+        switch (configType) {
+            case TASK:
+                configFileName = in.getAbsolutePath().concat(EXT);
+                break;
+            case SEQUENCE:
+                configFileName = Utils.getTempDir(in).getAbsolutePath().concat(File.separator).concat(in.getName()).concat(EXT);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported type of config - " + configType);
+        }
+        final Config result;
 
         final File config = new File(configFileName);
         if (config.exists()) {
+            result = new Config();
+
             String line;
             String[] split;
             try (BufferedReader br = new BufferedReader(new FileReader(configFileName))) {
@@ -40,16 +52,24 @@ public class Config {
                     }
                 }
             }
+        } else {
+            result = null;
         }
         return result;
     }
-    
-    public static File createConfigPath(final File projectDir, final String projectName, final ConfigType configType) {
-        return  new File(projectDir.getAbsolutePath().concat(File.separator).concat(projectName).concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT));
-    }
 
     public static void saveConfig(final File in, final ConfigType configType, final Config config) throws IOException {
-        final String configFileName = in.getAbsolutePath().concat(NAME_SEPARATOR).concat(configType.toString()).concat(EXT);
+        final String configFileName;
+        switch (configType) {
+            case TASK:
+                configFileName = in.getAbsolutePath().concat(EXT);
+                break;
+            case SEQUENCE:
+                configFileName = Utils.getTempDir(in).getAbsolutePath().concat(File.separator).concat(in.getName()).concat(EXT);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported type of config - " + configType);
+        }
         try (FileWriter fw = new FileWriter(new File(configFileName))) {
             for (Entry<String, String> e : config.entrySet()) {
                 fw.write(e.getKey());
@@ -75,7 +95,7 @@ public class Config {
     public static File determineProjectFile(final File configFile) {
         final String fullPath = configFile.getAbsolutePath();
         final ConfigType ct = determineType(configFile);
-        final String projectFilePath = fullPath.replace(EXT, "").replace(ct.toString(), "").replace(NAME_SEPARATOR, "");
+        final String projectFilePath = fullPath.replace(EXT, "").replace(ct.toString(), "");
         return new File(projectFilePath);
     }
 

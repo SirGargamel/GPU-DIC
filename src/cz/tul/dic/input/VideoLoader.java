@@ -41,10 +41,10 @@ public class VideoLoader implements IInputLoader {
         final File input = (File) in;
         // create temp dir to store images    
         tc.setParameter(TaskParameter.IN, input);
-        final File temp = Utils.getTempDir(tc);
+        final File temp = Utils.getTempDir(input);
         // check cache
         final List<File> files;
-        Config config = Config.loadConfig(Config.createConfigPath(input.getParentFile(), input.getName(), ConfigType.SEQUENCE));
+        Config config = Config.loadConfig(input, ConfigType.SEQUENCE);
         if (!isCacheDataValid(input, temp, config)) {
             Logger.debug("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
             // prepare script

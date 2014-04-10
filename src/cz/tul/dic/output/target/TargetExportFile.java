@@ -9,6 +9,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportMode;
 import cz.tul.dic.output.ExportUtils;
@@ -79,7 +80,7 @@ public class TargetExportFile implements ITargetExport {
 
         final String name = fullName.substring(0, fullName.lastIndexOf("."));
 
-        final File temp = Utils.getTempDir(tc);
+        final File temp = Utils.getTempDir((File) tc.getParameter(TaskParameter.IN));
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
 
         if (roundCount != data.size()) {
