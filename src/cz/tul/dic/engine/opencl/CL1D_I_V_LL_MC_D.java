@@ -31,12 +31,13 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             final int facetSize, final int facetCount) {
         final int facetArea = facetSize * facetSize;
         final int lws0base = calculateLws0base(kernel);
-        final int lws0;
+        int lws0;
         if (deformationCount > facetArea) {
             lws0 = EngineMath.roundUp(lws0base, facetArea);
         } else {
             lws0 = EngineMath.roundUp(lws0base, deformationCount);
         }
+        lws0 = Math.min(lws0, device.getMaxWorkItemSizes()[0]);
 
         int groupCountPerFacet = deformationCount / lws0;
         if (deformationCount % lws0 > 0) {
