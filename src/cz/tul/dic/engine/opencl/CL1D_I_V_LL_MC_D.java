@@ -1,12 +1,10 @@
 package cz.tul.dic.engine.opencl;
 
-import com.jogamp.common.nio.Buffers;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
 import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLKernel;
-import com.jogamp.opencl.llb.CLKernelBinding;
 import cz.tul.dic.engine.EngineMath;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -15,6 +13,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
 
     private static final int ARGUMENT_INDEX_COUNT = 11;
     private static final int ARGUMENT_INDEX_BASE = 12;
+    private static final int LWS0_BASE = 0;
     private final WorkSizeManager wsm;
 
     public CL1D_I_V_LL_MC_D() {
@@ -84,9 +83,10 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     }
 
     private int calculateLws0base(final CLKernel kernel) {
-        final IntBuffer val = Buffers.newDirectIntBuffer(2);
-        context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), queue.getDevice().getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
-        return val.get(0);
+//        final IntBuffer val = Buffers.newDirectIntBuffer(5);
+//        context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), queue.getDevice().getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
+//        return val.get(0);
+        return LWS0_BASE;
     }
 
     @Override
