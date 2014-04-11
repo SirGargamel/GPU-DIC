@@ -26,8 +26,8 @@ public class ComplextTaskSolver extends Observable {
     private static final int ROI_COUNT = 4;
     private static final int MAX_SHIFT_DIFFERENCE = 3;
     private static final int DEFAULT_FS_CIRCLE = 15;    
-    private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 1.0, -5, 5, 0.25};
-    private static final double[] DEFAULT_DEF_RECT = new double[]{-4, 4, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};
+    private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 0.5, -5, 5, 0.25};
+    private static final double[] DEFAULT_DEF_RECT = new double[]{-5, 5, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1};
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException {        
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
