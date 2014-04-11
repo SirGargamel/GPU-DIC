@@ -7,7 +7,6 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
-import cz.tul.dic.output.OutputUtils;
 
 public class DataExportLine implements IDataExport<double[]> {
 
@@ -26,7 +25,7 @@ public class DataExportLine implements IDataExport<double[]> {
         // check if position is inside ROI        
         double[][][] results;
         for (int r = 0; r < roundCount; r++) {
-            if (OutputUtils.isPointInsideROIs(x, y, rois, tc, r)) {
+            if (ExportUtils.isPointInsideROIs(x, y, rois, tc, r)) {
                 results = tc.getPerPixelResult(r);
                 if (results == null || results.length < x || results[0].length < y) {
                     throw new IllegalArgumentException("Illegal result data.");

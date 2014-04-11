@@ -2,6 +2,10 @@ package cz.tul.dic.output;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.FacetUtils;
+import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.task.TaskContainer;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -27,6 +31,32 @@ public class ExportUtils {
     private static final NumberFormat nf = new DecimalFormat("0.0#");
     private static final double BAR_LIMIT = 0.001;
 
+    public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
+        boolean result = false;
+
+        if (rois != null) {
+            for (ROI roi : rois) {
+                if (roi == null) {
+                    continue;
+                }
+
+                if (roi.isPointInside(x, y)) {
+                    // check facets                
+                    for (Facet f : tc.getFacets(round, roi)) {
+                        if (FacetUtils.isPointInsideFacet(f, x, y)) {
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            result = true;
+        }
+
+        return result;
+    }
+    
     public static double calculateDisplacement(final double[] def, final Direction dir) throws ComputationException {
         double result;
         switch (dir) {
