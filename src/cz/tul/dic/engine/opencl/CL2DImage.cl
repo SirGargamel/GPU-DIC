@@ -57,7 +57,7 @@ kernel void CL2DImage(
         facetI[i] = read_imageui(imageA, sampler, (int2)(facets[index], facets[index + 1])).x;        
         meanF += facetI[i];
         
-        deformedI[i] = interpolate(deformedFacet[i2], deformedFacet[i2+1], imageB);        
+        deformedI[i] = interpolate((float2)(deformedFacet[i2], deformedFacet[i2+1]), imageB);        
         meanG += deformedI[i];
     } 
     meanF /= (float) facetSize2;
