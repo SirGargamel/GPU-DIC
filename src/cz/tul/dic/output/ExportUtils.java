@@ -30,6 +30,10 @@ public class ExportUtils {
     private static final int BAR_SIZE_HOR = 15;
     private static final NumberFormat nf = new DecimalFormat("0.0#");
     private static final double BAR_LIMIT = 0.001;
+    private static final double COLOR_CENTER = 75 / 360.0;
+    private static final double COLOR_GAP = 5 / 360.0;
+    private static final double COLOR_RANGE_POS = 160 / 360.0;
+    private static final double COLOR_RANGE_NEG = 75 / 360.0;
 
     public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
         boolean result = false;
@@ -224,10 +228,10 @@ public class ExportUtils {
             b = 0.0f;
         } else if (val < 0) {
             fract = val / min;
-            h = (float) ((90 / 360.0) - (fract * (110 / 360.0)));
+            h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
         } else {
             fract = val / max;
-            h = (float) (fract * (160 / 360.0) + (90 / 360.0));
+            h = (float) (fract * COLOR_RANGE_POS + COLOR_CENTER + COLOR_GAP);
         }
         return Color.HSBtoRGB(h, s, b);
     }
