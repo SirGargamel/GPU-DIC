@@ -1,20 +1,6 @@
 constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
-inline int interpolate(const float x, const float y, read_only image2d_t image) {
-    const float ix = floor(x);
-    const float dx = x - ix;
-    
-    const float iy = floor(y);
-    const float dy = y - iy;
-
-    const float intensity = 
-        read_imageui(image, sampler, (float2)(ix, iy)).x * (1 - dx) * (1 - dy)
-        + read_imageui(image, sampler, (float2)(ix+1, iy)).x * dx * (1 - dy)
-        + read_imageui(image, sampler, (float2)(ix, iy+1)).x * (1 - dx) * dy
-        + read_imageui(image, sampler, (float2)(ix+1, iy+1)).x * dx * dy;               
-
-    return intensity;    
-}
+%INT%
 
 kernel void CL2DImage(
     read_only image2d_t imageA, read_only image2d_t imageB, 

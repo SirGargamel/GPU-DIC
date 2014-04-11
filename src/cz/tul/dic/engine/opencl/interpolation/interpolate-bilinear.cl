@@ -1,4 +1,4 @@
-int interpolate(const float2 coords, read_only image2d_t image) {
+inline int interpolate(const float2 coords, read_only image2d_t image) {
     const float ix = floor(coords.x);
     const float dx = coords.x - ix;
     
