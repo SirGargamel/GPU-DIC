@@ -227,8 +227,8 @@ public final class Engine extends Observable {
                 for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];
-                    valX = (int) Math.round(PRECISION * d[Coordinates.X]);
-                    valY = (int) Math.round(PRECISION * d[Coordinates.Y]);
+                    valX = (int) Math.round(PRECISION * e.getValue()[Coordinates.X]);
+                    valY = (int) Math.round(PRECISION * e.getValue()[Coordinates.Y]);
 
                     map = counter[x][y];
                     if (map == null) {
@@ -249,14 +249,16 @@ public final class Engine extends Observable {
             }
         }
 
-        int maxCount, maxDx = 0, maxDy = 0, val;
+        int maxCount, maxDx, maxDy, val;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                maxCount = -1;
                 map = counter[i][j];
                 if (map == null) {
                     finalResults[i][j] = new double[Coordinates.DIMENSION];
                 } else {
+                    maxCount = -1;
+                    maxDx = 0;
+                    maxDy = 0;
                     for (Entry<Integer, Map<Integer, Integer>> dX : map.entrySet()) {
                         for (Entry<Integer, Integer> dY : dX.getValue().entrySet()) {
                             val = dY.getValue();
