@@ -25,40 +25,42 @@ public class ComplextTaskSolver extends Observable {
 
     private static final int ROI_COUNT = 4;
     private static final int MAX_SHIFT_DIFFERENCE = 3;
-    private static final int DEFAULT_FS_CIRCLE = 15;    
+    private static final int ROI_CIRCLE_FS_DENOM = 3;
     private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 0.5, -5, 5, 0.25};
-    private static final double[] DEFAULT_DEF_RECT = new double[]{-5, 5, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1};
+    private static final double[] DEFAULT_DEF_RECT = new double[]{-5, 5, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};    
 
-    public void solveComplexTask(final TaskContainer tc) throws ComputationException {        
+    public void solveComplexTask(final TaskContainer tc) throws ComputationException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         tc.clearComputationData();
-        
+
         setChanged();
         notifyObservers(new int[]{0, roundCount});
-        
+
         final Engine engine = new Engine();
 
         // check task
         //// 4x CircleROI is required
         Set<ROI> rois = tc.getRois(0);
-        int counter = 0;        
+        int counter = 0;
+        CircularROI cr;
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
                 counter++;
-                tc.addFacetSize(0, roi, DEFAULT_FS_CIRCLE);
+                cr = (CircularROI) roi;
+                tc.addFacetSize(0, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
             } else {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Only circular ROIs needed.");
             }
         }
         if (counter != ROI_COUNT) {
             throw new ComputationException(ComputationExceptionCause.NOT_ENOUGH_ROIS, Integer.toString(counter));
-        }                
+        }
         // generate rectangle ROI for round 0        
         Image img = tc.getImage(0);
         List<ROI> sortedROIs = new ArrayList<>(rois);
         Collections.sort(sortedROIs, new RoiSorter());
         ROI rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
-        tc.addRoi(rectangleRoi, 0);        
+        tc.addRoi(rectangleRoi, 0);
         // generate possible deformation for ROIs
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
@@ -96,14 +98,15 @@ public class ComplextTaskSolver extends Observable {
             sortedROIs.clear();
             sortedROIs.addAll(rois);
             Collections.sort(sortedROIs, new RoiSorter());
-            rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());            
-            tc.setROIs(rois, round);
-            TaskContainerUtils.setUniformFacetSize(tc, round, DEFAULT_FS_CIRCLE);
-            rois.add(rectangleRoi);            
+            tc.setROIs(rois, round);            
+            rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
+            rois.add(rectangleRoi);
             // generate limits
             //// TODO generate limits dynamically according to previous results
             for (ROI roi : rois) {
                 if (roi instanceof CircularROI) {
+                    cr = (CircularROI) roi;
+                    tc.addFacetSize(round, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
                     tc.setDeformationLimits(DEFAULT_DEF_CIRCLE, round, roi);
                 } else {
                     tc.setDeformationLimits(DEFAULT_DEF_RECT, round, roi);
