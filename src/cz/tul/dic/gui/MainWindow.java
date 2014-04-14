@@ -396,7 +396,7 @@ public class MainWindow implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            for (int size = 15; size < 35; size++) {
+            for (int size = 20; size <= 35; size++) {
                 Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
             }
         } catch (IOException | ComputationException ex) {
