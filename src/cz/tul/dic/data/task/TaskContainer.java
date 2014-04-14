@@ -30,8 +30,6 @@ public class TaskContainer implements Serializable {
     private final Set<ExportTask> exports;
     // generated data
     private transient List<Image> images;
-//    private transient Container<Map<ROI, List<Facet>>> facets;
-//    private transient Container<Map<ROI, double[]>> deformations;
     // results
     private final List<Map<ROI, List<double[][]>>> results;
     private final List<double[][][]> finalResults;
@@ -92,21 +90,6 @@ public class TaskContainer implements Serializable {
     public List<Image> getImages() {
         return Collections.unmodifiableList(images);
     }
-
-//    public void setFacets(final List<Facet> facets, final int round, final ROI roi) {
-//        Map<ROI, List<Facet>> m = this.facets.getItemPrecise(round);
-//        if (m == null) {
-//            m = new HashMap<>();
-//            this.facets.setItem(m, round);
-//        }
-//        m.put(roi, facets);
-//    }
-//
-//    public List<Facet> getFacets(final int position, final ROI roi) {
-//        final Map<ROI, List<Facet>> m = facets.getItem(position);
-//        final List<Facet> result = m == null ? null : m.get(roi);
-//        return result;
-//    }
 
     public Set<ROI> getRois(final int round) {
         return rois.getItem(round);
@@ -171,22 +154,6 @@ public class TaskContainer implements Serializable {
         final double[] result = m == null ? null : m.get(roi);
         return result;
     }
-
-//    public void setDeformations(final double[] deformations, final int round, final ROI roi) {
-//        Map<ROI, double[]> m = this.deformations.getItemPrecise(round);
-//        if (m == null) {
-//            m = new HashMap<>();
-//            this.deformations.setItem(m, round);
-//        }
-//
-//        m.put(roi, deformations);
-//    }
-//
-//    public double[] getDeformations(final int round, final ROI roi) {
-//        final Map<ROI, double[]> m = this.deformations.getItem(round);
-//        final double[] result = m == null ? null : m.get(roi);
-//        return result;
-//    }
 
     public void setResult(final List<double[][]> result, final int round, final ROI roi) {
         while (results.size() <= round) {
