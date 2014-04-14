@@ -232,9 +232,7 @@ public final class Engine extends Observable {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 map = counter[i][j];
-                if (map == null) {
-                    finalResults[i][j] = new double[Coordinates.DIMENSION];
-                } else {
+                if (map != null) {
                     maxCount = -1;
                     maxDx = 0;
                     maxDy = 0;

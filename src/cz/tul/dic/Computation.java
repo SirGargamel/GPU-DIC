@@ -167,7 +167,7 @@ public class Computation {
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
         tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BILINEAR);
-//        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
+        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
         tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
         tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
 

@@ -17,10 +17,10 @@ public class FacetDeformationAnalyzator {
         int[] counterPos = new int[50];
         int[] counterNeg = new int[50];
 
-        int val;
+        int val;        
         for (int x = roi.getX1(); x <= roi.getX2(); x++) {
             for (int y = roi.getY1(); y <= roi.getY2(); y++) {
-                if (roi.isPointInside(x, y)) {
+                if (roi.isPointInside(x, y) && results[x][y] != null) {
                     val = (int) Math.round(10 * results[x][y][Coordinates.Y]);
                     if (val >= 0) {
                         if (val >= counterPos.length) {
