@@ -175,8 +175,8 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public double[][][] getPerPixelResult(final int position) {
-        return finalResults.get(position);
+    public double[][][] getPerPixelResult(final int round) {
+        return finalResults.get(round);
     }
 
     public void setPerPixelResult(final double[][][] result, final int round) {
