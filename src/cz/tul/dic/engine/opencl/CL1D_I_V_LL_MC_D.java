@@ -13,7 +13,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
 
     private static final int ARGUMENT_INDEX_COUNT = 11;
     private static final int ARGUMENT_INDEX_BASE = 12;
-    private static final int LWS0_BASE = 0;
+    private static final int LWS0_BASE = 32;
     private final WorkSizeManager wsm;
 
     public CL1D_I_V_LL_MC_D() {
