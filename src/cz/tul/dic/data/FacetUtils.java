@@ -49,12 +49,12 @@ public class FacetUtils {
             deform(x, y, dx, dy, deformation, newCoords, degree);
 
             pos = e.getKey();
-            pos[0] = x;
-            pos[1] = y;
+            pos[Coordinates.X] = x;
+            pos[Coordinates.Y] = y;
 
             def = e.getValue();
-            def[0] = newCoords[Coordinates.X] - x;
-            def[1] = newCoords[Coordinates.Y] - y;
+            def[Coordinates.X] = newCoords[Coordinates.X] - x;
+            def[Coordinates.Y] = newCoords[Coordinates.Y] - y;
 
             i++;
         }
