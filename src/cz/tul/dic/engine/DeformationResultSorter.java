@@ -16,17 +16,18 @@ public class DeformationResultSorter implements Comparator<Integer> {
     private final TaskContainer tc;
     private final int round;
     private final ROI roi;
+    private final double[] deformations;
 
-    public DeformationResultSorter(TaskContainer tc, final int round, final ROI roi) {
+    public DeformationResultSorter(TaskContainer tc, final int round, final ROI roi, final double[] deformations) {
         this.tc = tc;
         this.round = round;
         this.roi = roi;
+        this.deformations = deformations;
     }
 
     @Override
     public int compare(Integer o1, Integer o2) {
-        try {
-            final double[] deformations = tc.getDeformations(round, roi);
+        try {            
             final int deformationLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
             return Double.compare(
                     DeformationUtils.getAbs(deformations, o1, deformationLength),

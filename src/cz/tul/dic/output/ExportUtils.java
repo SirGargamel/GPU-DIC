@@ -2,8 +2,6 @@ package cz.tul.dic.output;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import java.awt.AlphaComposite;
@@ -46,12 +44,8 @@ public class ExportUtils {
 
                 if (roi.isPointInside(x, y)) {
                     // check facets                
-                    for (Facet f : tc.getFacets(round, roi)) {
-                        if (FacetUtils.isPointInsideFacet(f, x, y)) {
-                            result = true;
-                            break;
-                        }
-                    }
+                    result = true;
+                    break;
                 }
             }
         } else {
@@ -60,7 +54,7 @@ public class ExportUtils {
 
         return result;
     }
-    
+
     public static double calculateDisplacement(final double[] def, final Direction dir) throws ComputationException {
         double result;
         switch (dir) {

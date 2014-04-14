@@ -164,9 +164,11 @@ public class Computation {
         tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
 
         tc.setParameter(TaskParameter.FACET_SIZE, facetSize);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
         tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BILINEAR);
+//        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
+        tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
         tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
 
         TaskContainerChecker.checkTaskValidity(tc);
@@ -179,9 +181,9 @@ public class Computation {
             tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext).concat(".csv")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext).concat(".csv")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext).concat(".csv")), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext).concat(".csv")), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext).concat(".csv")), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.CSV, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext).concat(".csv")), round));
         }
 //        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).concat(".avi"))));
 //        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).concat(".avi"))));

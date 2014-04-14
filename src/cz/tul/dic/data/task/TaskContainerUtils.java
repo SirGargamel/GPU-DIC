@@ -49,9 +49,9 @@ public class TaskContainerUtils {
         return size;
     }
 
-    public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi) throws ComputationException {
+    public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi, final double[] deformations) throws ComputationException {
         final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
-        final int result = tc.getDeformations(round, roi).length / deformationArrayLength;
+        final int result = deformations.length / deformationArrayLength;
 
         return result;
     }
@@ -77,14 +77,14 @@ public class TaskContainerUtils {
         return result;
     }
 
-    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi) throws ComputationException {
+    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi, final double[] deformations) throws ComputationException {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
 
         final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
         final double[] result = new double[deformationArrayLength];
-        System.arraycopy(tc.getDeformations(round, roi), deformationArrayLength * index, result, 0, deformationArrayLength);
+        System.arraycopy(deformations, deformationArrayLength * index, result, 0, deformationArrayLength);
 
         return result;
     }
@@ -259,14 +259,14 @@ public class TaskContainerUtils {
         return result;
     }
 
-    public static Set<Facet> getAllFacets(final TaskContainer tc, final int round) {
+    public static Set<Facet> getAllFacets(final Map<ROI, List<Facet>> facets) {
         final Set<Facet> result = new HashSet<>();
 
-        List<Facet> tmp;
-        for (ROI roi : tc.getRois(round)) {
-            tmp = tc.getFacets(round, roi);
-            if (tmp != null) {
-                result.addAll(tmp);
+        if (facets != null) {
+            for (List<Facet> l : facets.values()) {
+                if (l != null) {
+                    result.addAll(l);
+                }
             }
         }
 

@@ -5,16 +5,17 @@
  */
 package cz.tul.dic.data.task.splitter;
 
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
+import java.util.List;
 
 public class NoSplit extends TaskSplitter {
 
     private boolean hasNext;
 
-    public NoSplit(TaskContainer tc, int round, final ROI roi) {
-        super(tc, round, roi);
+    public NoSplit(TaskContainer tc, int round, final List<Facet> facets, final double[] deformations) {
+        super(tc, round, facets, deformations);
 
         hasNext = true;
     }
@@ -27,7 +28,7 @@ public class NoSplit extends TaskSplitter {
     @Override
     public ComputationTask next() {        
         hasNext = false;
-        return new ComputationTask(tc.getImage(round), tc.getImage(round + 1), tc.getFacets(round, roi), tc.getDeformations(round, roi));
+        return new ComputationTask(tc.getImage(round), tc.getImage(round + 1), facets, deformations);
     }
 
     @Override

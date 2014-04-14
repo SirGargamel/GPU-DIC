@@ -46,7 +46,7 @@ public class ComplextTaskSolver extends Observable {
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
-        tc.clearComputationData();
+        tc.clearResultData();
 
         setChanged();
         notifyObservers(new int[]{0, roundCount});

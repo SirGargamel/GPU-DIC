@@ -6,6 +6,8 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -13,9 +15,11 @@ import cz.tul.dic.data.task.TaskContainer;
  */
 public class DeformationGenerator {
 
-    public static void generateDeformations(final TaskContainer tc, final int round) throws ComputationException {
+    public static Map<ROI, double[]> generateDeformations(final TaskContainer tc, final int round) throws ComputationException {
         double[] limits, deformations;
         DeformationDegree degree;
+
+        final Map<ROI, double[]> result = new HashMap<>();
 
         for (ROI roi : tc.getRois(round)) {
             limits = tc.getDeformationLimits(round, roi);
@@ -35,8 +39,10 @@ public class DeformationGenerator {
                     throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation - " + degree + ".");
 
             }
-            tc.setDeformations(deformations, round, roi);
+            result.put(roi, deformations);
         }
+
+        return result;
     }
 
     private static double[] generateZeroDegree(final double[] limits) throws ComputationException {

@@ -7,30 +7,34 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.roi.ROI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class SimpleFacetGenerator extends AbstractFacetGenerator {    
+public class SimpleFacetGenerator extends AbstractFacetGenerator {
 
     @Override
-    public void generateFacets(TaskContainer tc, final int round) throws ComputationException {
+    public Map<ROI, List<Facet>> generateFacets(TaskContainer tc, final int round) throws ComputationException {
         Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No facet generator spacing.");
-        }
-        
+        }        
+
         final int spacing = (int) o;
 
         final int width = tc.getImage(round).getWidth();
         final int height = tc.getImage(round).getHeight();
 
         final Set<ROI> rois = tc.getRois(round);
+        final Map<ROI, List<Facet>> result = new HashMap<>(rois.size());
 
-        List<Facet> result;
+        List<Facet> facets;
         int roiW, roiH, wCount, hCount, gapX, gapY,
                 centerX, centerY, facetSize, halfSize;
+        Map<ROI, List<Facet>> m;
         for (ROI roi : rois) {
-            result = new ArrayList<>();
+            facets = new ArrayList<>();
 
             facetSize = tc.getFacetSize(round, roi);
             halfSize = facetSize / 2;
@@ -56,13 +60,15 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
 
                     if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height)
                             && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
-                        result.add(Facet.createFacet(facetSize, centerX, centerY));
+                        facets.add(Facet.createFacet(facetSize, centerX, centerY));
                     }
                 }
             }
 
-            tc.setFacets(result, round, roi);
+            result.put(roi, facets);
         }
+
+        return result;
     }
 
     @Override

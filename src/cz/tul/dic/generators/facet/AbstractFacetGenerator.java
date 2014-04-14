@@ -1,7 +1,11 @@
 package cz.tul.dic.generators.facet;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -9,7 +13,7 @@ import cz.tul.dic.data.task.TaskContainer;
  */
 public abstract class AbstractFacetGenerator {
 
-    public abstract void generateFacets(final TaskContainer tc, final int round) throws ComputationException;
+    public abstract Map<ROI, List<Facet>> generateFacets(final TaskContainer tc, final int round) throws ComputationException;
     
     public abstract FacetGeneratorMode getMode();
     

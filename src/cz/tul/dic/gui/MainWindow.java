@@ -396,11 +396,13 @@ public class MainWindow implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), 10);
+            for (int size = 15; size < 35; size++) {
+                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
+            }
         } catch (IOException | ComputationException ex) {
             System.err.println(ex);
         }
-        
+
         textFs.setText("7");
 
         imagePane.initialize(url, rb);
