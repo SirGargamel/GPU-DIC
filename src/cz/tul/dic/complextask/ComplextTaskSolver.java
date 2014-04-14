@@ -27,7 +27,22 @@ public class ComplextTaskSolver extends Observable {
     private static final int MAX_SHIFT_DIFFERENCE = 3;
     private static final int ROI_CIRCLE_FS_DENOM = 3;
     private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 0.5, -5, 5, 0.25};
-    private static final double[] DEFAULT_DEF_RECT = new double[]{-5, 5, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};    
+    private static final double[] DEFAULT_DEF_RECT = new double[]{-5, 5, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};
+    private double[] deformationCircle, deformationRect;
+
+    public ComplextTaskSolver() {
+        deformationCircle = DEFAULT_DEF_CIRCLE;
+        deformationRect = DEFAULT_DEF_RECT;
+    }
+
+    public void setDeformationCircle(double[] deformationCircle) {
+        this.deformationCircle = deformationCircle;
+    }
+
+    public void setDeformationRect(double[] deformationRect) {
+        this.deformationRect = deformationRect;
+    }
+    
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
@@ -64,9 +79,9 @@ public class ComplextTaskSolver extends Observable {
         // generate possible deformation for ROIs
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
-                tc.setDeformationLimits(DEFAULT_DEF_CIRCLE, 0, roi);
+                tc.setDeformationLimits(deformationCircle, 0, roi);
             } else {
-                tc.setDeformationLimits(DEFAULT_DEF_RECT, 0, roi);
+                tc.setDeformationLimits(deformationRect, 0, roi);
             }
         }
         // compute round 0        
@@ -107,9 +122,9 @@ public class ComplextTaskSolver extends Observable {
                 if (roi instanceof CircularROI) {
                     cr = (CircularROI) roi;
                     tc.addFacetSize(round, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
-                    tc.setDeformationLimits(DEFAULT_DEF_CIRCLE, round, roi);
+                    tc.setDeformationLimits(deformationCircle, round, roi);
                 } else {
-                    tc.setDeformationLimits(DEFAULT_DEF_RECT, round, roi);
+                    tc.setDeformationLimits(deformationRect, round, roi);
                 }
             }
             // compute round
