@@ -18,6 +18,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
+import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -27,7 +28,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ import org.pmw.tinylog.Logger;
 public final class Engine extends Observable {
 
     private static final int BEST_RESULT_COUNT_MAX = 50;
-    private static final double PRECISION = 100;
+    private static final double PRECISION = 0.1;
     private static final Type DEVICE_TYPE = Type.GPU;
     private final CLPlatform platform;
     private final CLContext context;
@@ -182,14 +182,13 @@ public final class Engine extends Observable {
 
         final double[][][] finalResults = new double[width][height][];
         @SuppressWarnings("unchecked")
-        final Map<Integer, Map<Integer, Integer>>[][] counter = new Map[width][height];
+        final Analyzer2D[][] counters = new Analyzer2D[width][height];
         List<Facet> facets;
         List<double[][]> results;
         Facet f;
         double[] d;
-        int x, y, valX, valY;
-        Map<Integer, Map<Integer, Integer>> map;
-        Map<Integer, Integer> mapX;
+        int x, y;
+        Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
         DeformationDegree degree;
         for (ROI roi : tc.getRois(round)) {
@@ -206,47 +205,23 @@ public final class Engine extends Observable {
                 for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];
-                    valX = (int) Math.round(PRECISION * e.getValue()[Coordinates.X]);
-                    valY = (int) Math.round(PRECISION * e.getValue()[Coordinates.Y]);
 
-                    map = counter[x][y];
-                    if (map == null) {
-                        map = new HashMap<>();
-                        counter[x][y] = map;
+                    counter = counters[x][y];
+                    if (counter == null) {
+                        counter = new Analyzer2D();
+                        counter.setPrecision(PRECISION);
+                        counters[x][y] = counter;
                     }
-                    mapX = map.get(valX);
-                    if (mapX == null) {
-                        mapX = new HashMap<>();
-                        map.put(valX, mapX);
-                    }
-                    if (mapX.containsKey(valY)) {
-                        mapX.put(valY, mapX.get(valY) + 1);
-                    } else {
-                        mapX.put(valY, 1);
-                    }
+                    counter.addValue(e.getValue());
                 }
             }
         }
-
-        int maxCount, maxDx, maxDy, val;
+        
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                map = counter[i][j];
-                if (map != null) {
-                    maxCount = -1;
-                    maxDx = 0;
-                    maxDy = 0;
-                    for (Entry<Integer, Map<Integer, Integer>> dX : map.entrySet()) {
-                        for (Entry<Integer, Integer> dY : dX.getValue().entrySet()) {
-                            val = dY.getValue();
-                            if (val > maxCount) {
-                                maxCount = val;
-                                maxDx = dX.getKey();
-                                maxDy = dY.getKey();
-                            }
-                        }
-                    }
-                    finalResults[i][j] = new double[]{maxDx / PRECISION, maxDy / PRECISION};
+                counter = counters[i][j];
+                if (counter != null) {
+                    finalResults[i][j] = counter.findMajorValue();
                 }
             }
         }
