@@ -30,6 +30,9 @@ public class DataExportLine implements IDataExport<double[]> {
                 if (results == null || results.length < x || results[0].length < y) {
                     throw new IllegalArgumentException("Illegal result data.");
                 }
+                if (results[x][y] == null) {
+                    continue;
+                }
 
                 switch (direction) {
                     case X:

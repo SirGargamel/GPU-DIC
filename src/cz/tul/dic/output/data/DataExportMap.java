@@ -27,7 +27,7 @@ public class DataExportMap implements IDataExport<double[][]> {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if (!ExportUtils.isPointInsideROIs(x, y, rois, tc, round)) {
+                if (!ExportUtils.isPointInsideROIs(x, y, rois, tc, round) || results[x][y] == null) {
                     continue;
                 }
 
