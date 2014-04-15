@@ -210,7 +210,7 @@ public final class Engine extends Observable {
         List<Facet> facets;
         List<double[][]> results;
         Facet f;
-        double[] d, newC;
+        double[] d;
         int x, y;
         Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
@@ -229,7 +229,6 @@ public final class Engine extends Observable {
                 for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];
-                    newC = new double[]{e.getValue()[0], e.getValue()[1]};
 
                     counter = counters[x][y];
                     if (counter == null) {
@@ -237,7 +236,7 @@ public final class Engine extends Observable {
                         counter.setPrecision(PRECISION);
                         counters[x][y] = counter;
                     }
-                    counter.addValue(newC);
+                    counter.addValue(e.getValue());
                 }
             }
         }
