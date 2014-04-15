@@ -16,33 +16,34 @@ import java.util.Map;
 public class DeformationGenerator {
 
     public static Map<ROI, double[]> generateDeformations(final TaskContainer tc, final int round) throws ComputationException {
-        double[] limits, deformations;
-        DeformationDegree degree;
-
         final Map<ROI, double[]> result = new HashMap<>();
 
         for (ROI roi : tc.getRois(round)) {
-            limits = tc.getDeformationLimits(round, roi);
-            degree = DeformationUtils.getDegreeFromLimits(limits);
-
-            switch (degree) {
-                case ZERO:
-                    deformations = generateZeroDegree(limits);
-                    break;
-                case FIRST:
-                    deformations = generateFirstDegree(limits);
-                    break;
-                case SECOND:
-                    deformations = generateSecondDegree(limits);
-                    break;
-                default:
-                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation - " + degree + ".");
-
-            }
-            result.put(roi, deformations);
+            result.put(roi, generateDeformations(tc.getDeformationLimits(round, roi)));
         }
 
         return result;
+    }
+
+    public static double[] generateDeformations(final double[] limits) throws ComputationException {
+        final DeformationDegree degree = DeformationUtils.getDegreeFromLimits(limits);
+        final double[] deformations;
+
+        switch (degree) {
+            case ZERO:
+                deformations = generateZeroDegree(limits);
+                break;
+            case FIRST:
+                deformations = generateFirstDegree(limits);
+                break;
+            case SECOND:
+                deformations = generateSecondDegree(limits);
+                break;
+            default:
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation - " + degree + ".");
+
+        }
+        return deformations;
     }
 
     private static double[] generateZeroDegree(final double[] limits) throws ComputationException {
