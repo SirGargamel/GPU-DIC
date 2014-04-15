@@ -43,7 +43,7 @@ import org.pmw.tinylog.Logger;
 public final class Engine extends Observable {
 
     private static final int BEST_RESULT_COUNT_MAX = 50;
-    private static final double PRECISION = 0.1;
+    private static final double PRECISION = 0.01;
     private static final Type DEVICE_TYPE = Type.GPU;
     private final CLPlatform platform;
     private final CLContext context;
@@ -180,13 +180,12 @@ public final class Engine extends Observable {
         final int width = img.getWidth();
         final int height = img.getHeight();
 
-        final double[][][] finalResults = new double[width][height][];
-        @SuppressWarnings("unchecked")
+        final double[][][] finalResults = new double[width][height][];        
         final Analyzer2D[][] counters = new Analyzer2D[width][height];
         List<Facet> facets;
         List<double[][]> results;
         Facet f;
-        double[] d;
+        double[] d, newC;
         int x, y;
         Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
@@ -205,14 +204,15 @@ public final class Engine extends Observable {
                 for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];
-
+                    newC = new double[]{e.getValue()[0], e.getValue()[1]};
+                    
                     counter = counters[x][y];
                     if (counter == null) {
                         counter = new Analyzer2D();
                         counter.setPrecision(PRECISION);
                         counters[x][y] = counter;
                     }
-                    counter.addValue(e.getValue());
+                    counter.addValue(newC);
                 }
             }
         }

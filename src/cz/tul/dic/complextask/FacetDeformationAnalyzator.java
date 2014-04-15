@@ -11,7 +11,7 @@ import cz.tul.dic.engine.cluster.Analyzer1D;
  */
 public class FacetDeformationAnalyzator {
     
-    private static final double PRECISION = 0.5;
+    private static final double PRECISION = 0.1;
 
     public static double determineROIShift(final TaskContainer tc, final int round, final ROI roi) {
         final double[][][] results = tc.getPerPixelResult(round);

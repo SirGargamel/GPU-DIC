@@ -1,7 +1,7 @@
 package cz.tul.dic.engine.cluster;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -11,11 +11,11 @@ import java.util.Set;
 public abstract class ClusterAnalyzer<T> {
     
     private static final double DEFAULT_PRECISION = 0.1;
-    protected Set<T> values;
+    protected List<T> values;
     protected double precision;
     
     public ClusterAnalyzer(){
-        values = new HashSet<>();
+        values = new LinkedList<>();
         precision = DEFAULT_PRECISION;
     }
     
