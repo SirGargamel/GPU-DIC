@@ -199,6 +199,8 @@ public class ExportUtils {
         switch (dir) {
             case ABS:
             case DABS:
+                drawVerticalBar(out, max);
+                break;
             case Y:
             case DY:
                 drawVerticalBar(out, max, min);
