@@ -26,6 +26,7 @@ import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -48,6 +49,8 @@ public final class Engine extends Observable {
     private final CLPlatform platform;
     private final CLContext context;
     private final CLDevice device;
+    Map<ROI, List<Facet>> cacheFacets;
+    Map<ROI, double[]> cacheDeformations;
 
     public Engine() {
         @SuppressWarnings("unchecked")
@@ -90,8 +93,30 @@ public final class Engine extends Observable {
         List<double[][]> bestResults;
 
         final Set<ROI> currentROIs = tc.getRois(round);
-        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, round);
-        final Map<ROI, double[]> deformations = DeformationGenerator.generateDeformations(tc, round);
+        final Map<ROI, List<Facet>> facets;
+        final Map<ROI, double[]> deformations;
+
+        if (cacheFacets == null || !currentROIs.equals(tc.getRois(round - 1))) {
+            facets = FacetGenerator.generateFacets(tc, round);
+            deformations = DeformationGenerator.generateDeformations(tc, round);
+        } else {
+            facets = cacheFacets;
+            boolean different = false;
+            for (ROI roi : currentROIs) {
+                if (!Arrays.equals(tc.getDeformationLimits(round, roi), tc.getDeformationLimits(round - 1, roi))) {
+                    different = true;
+                    break;
+                }
+            }
+            if (different) {
+                deformations = DeformationGenerator.generateDeformations(tc, round);
+            } else {
+                deformations = cacheDeformations;
+            }
+        }
+
+        cacheFacets = facets;
+        cacheDeformations = deformations;
 
         for (ROI roi : currentROIs) {
             defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
@@ -180,7 +205,7 @@ public final class Engine extends Observable {
         final int width = img.getWidth();
         final int height = img.getHeight();
 
-        final double[][][] finalResults = new double[width][height][];        
+        final double[][][] finalResults = new double[width][height][];
         final Analyzer2D[][] counters = new Analyzer2D[width][height];
         List<Facet> facets;
         List<double[][]> results;
@@ -205,7 +230,7 @@ public final class Engine extends Observable {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];
                     newC = new double[]{e.getValue()[0], e.getValue()[1]};
-                    
+
                     counter = counters[x][y];
                     if (counter == null) {
                         counter = new Analyzer2D();
@@ -216,7 +241,7 @@ public final class Engine extends Observable {
                 }
             }
         }
-        
+
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 counter = counters[i][j];
