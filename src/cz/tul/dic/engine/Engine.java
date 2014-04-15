@@ -26,9 +26,9 @@ import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,7 @@ public final class Engine extends Observable {
     private final CLContext context;
     private final CLDevice device;
     Map<ROI, List<Facet>> cacheFacets;
-    Map<ROI, double[]> cacheDeformations;
+    Map<double[], double[]> cacheDeformations;
 
     public Engine() {
         @SuppressWarnings("unchecked")
@@ -73,6 +73,8 @@ public final class Engine extends Observable {
         context.addCLErrorHandler((String string, ByteBuffer bb, long l) -> {
             System.err.println("CLError - " + string);
         });
+
+        cacheDeformations = new HashMap<>();
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException {
@@ -94,29 +96,26 @@ public final class Engine extends Observable {
 
         final Set<ROI> currentROIs = tc.getRois(round);
         final Map<ROI, List<Facet>> facets;
-        final Map<ROI, double[]> deformations;
+        final Map<ROI, double[]> deformations = new HashMap<>();
 
         if (cacheFacets == null || !currentROIs.equals(tc.getRois(round - 1))) {
             facets = FacetGenerator.generateFacets(tc, round);
-            deformations = DeformationGenerator.generateDeformations(tc, round);
         } else {
             facets = cacheFacets;
-            boolean different = false;
-            for (ROI roi : currentROIs) {
-                if (!Arrays.equals(tc.getDeformationLimits(round, roi), tc.getDeformationLimits(round - 1, roi))) {
-                    different = true;
-                    break;
-                }
-            }
-            if (different) {
-                deformations = DeformationGenerator.generateDeformations(tc, round);
-            } else {
-                deformations = cacheDeformations;
-            }
         }
-
         cacheFacets = facets;
-        cacheDeformations = deformations;
+
+        double[] limits, data;
+        for (ROI roi : currentROIs) {
+            limits = tc.getDeformationLimits(round, roi);
+            if (cacheDeformations.containsKey(limits)) {
+                deformations.put(roi, cacheDeformations.get(limits));
+            } else {
+                data = DeformationGenerator.generateDeformations(limits);
+                deformations.put(roi, data);
+                cacheDeformations.put(limits, data);
+            }
+        }        
 
         for (ROI roi : currentROIs) {
             defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
