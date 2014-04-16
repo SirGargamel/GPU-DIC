@@ -124,24 +124,38 @@ public class ComplextTaskSolver extends Observable {
     private void computeRound(final TaskContainer tc, final int r, final int nextR, final int prevR, final List<ROI> sortedROIs) throws ComputationException {
         // find new position of Circle ROIs
         //// determine shifts of circle ROIs from previous round
-        final double shift1 = FacetDeformationAnalyzator.determineROIShift(tc, prevR, sortedROIs.get(2));
-        final double shift2 = FacetDeformationAnalyzator.determineROIShift(tc, prevR, sortedROIs.get(3));
-        final double shift = (shift1 + shift2) / 2.0;
-        Logger.debug(shift1 + ", " + shift2);
+        final double shift0 = FacetDeformationAnalyzator.determineROIShift(tc, prevR, sortedROIs.get(0));
+        final double shift1 = FacetDeformationAnalyzator.determineROIShift(tc, prevR, sortedROIs.get(1));
+        final double shift2 = FacetDeformationAnalyzator.determineROIShift(tc, prevR, sortedROIs.get(2));
+        final double shift3 = FacetDeformationAnalyzator.determineROIShift(tc, prevR, sortedROIs.get(3));
+        Logger.debug(shift2 + ", " + shift3);
         //// check if left equals right
-        if (Math.abs(shift1 - shift2) > MAX_SHIFT_DIFFERENCE) {
-            Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat(" - ").concat(Double.toString(shift1)).concat(" vs ".concat(Double.toString(shift2))));
+        if (Math.abs(shift2 - shift3) > MAX_SHIFT_DIFFERENCE) {
+            Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat(" - ").concat(Double.toString(shift2)).concat(" vs ".concat(Double.toString(shift3))));
 //                throw new ComputationException(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH, Double.toString(shift1).concat(" vs ".concat(Double.toString(shift2))));
         }
         //// generate new Circle ROIs
         final Set<ROI> rois = new HashSet<>(5);
-        rois.add(sortedROIs.get(0));
-        rois.add(sortedROIs.get(1));
-        CircularROI cRoi = (CircularROI) sortedROIs.get(2);
-        rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift, cRoi.getRadius()));
+        CircularROI cRoi = (CircularROI) sortedROIs.get(0);
+        CircularROI newRoi = new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift0, cRoi.getRadius());
+        sortedROIs.set(0, newRoi);
+        rois.add(newRoi);
+
+        cRoi = (CircularROI) sortedROIs.get(1);
+        newRoi = new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift1, cRoi.getRadius());
+        sortedROIs.set(1, newRoi);
+        rois.add(newRoi);
+
+        cRoi = (CircularROI) sortedROIs.get(2);
+        newRoi = new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift2, cRoi.getRadius());
+        sortedROIs.set(2, newRoi);
+        rois.add(newRoi);
+
         cRoi = (CircularROI) sortedROIs.get(3);
-        rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift, cRoi.getRadius()));
-        // generate ReactengleROI for  this round from new CircleROIs
+        newRoi = new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift3, cRoi.getRadius());
+        sortedROIs.set(3, newRoi);
+        rois.add(newRoi);
+        // generate RectangleROI for  this round from new CircleROIs
         sortedROIs.clear();
         sortedROIs.addAll(rois);
         Collections.sort(sortedROIs, new RoiSorter());
