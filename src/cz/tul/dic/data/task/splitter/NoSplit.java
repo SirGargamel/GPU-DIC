@@ -14,8 +14,8 @@ public class NoSplit extends TaskSplitter {
 
     private boolean hasNext;
 
-    public NoSplit(TaskContainer tc, int round, final List<Facet> facets, final double[] deformations) {
-        super(tc, round, facets, deformations);
+    public NoSplit(TaskContainer tc, int index1, int index2, final List<Facet> facets, final double[] deformations) {
+        super(tc, index1, index2, facets, deformations);
 
         hasNext = true;
     }
@@ -28,7 +28,7 @@ public class NoSplit extends TaskSplitter {
     @Override
     public ComputationTask next() {        
         hasNext = false;
-        return new ComputationTask(tc.getImage(round), tc.getImage(round + 1), facets, deformations);
+        return new ComputationTask(tc.getImage(index1), tc.getImage(index2), facets, deformations);
     }
 
     @Override

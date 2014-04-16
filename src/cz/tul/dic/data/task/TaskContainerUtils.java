@@ -46,7 +46,15 @@ public class TaskContainerUtils {
     public static int getRoundCount(final TaskContainer tc) {
         int size = 0;
         if (tc != null) {
-            size = Math.max(tc.getImages().size() - 1, 0);
+            final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);
+            if (roundData == null) {
+                size = Math.max(tc.getImages().size() - 1, 0);
+            } else {
+                final int[] limit = (int[]) roundData;
+                for (int i = 0; i < limit.length; i += 2) {
+                    size += limit[i + 1] - limit[i];
+                }
+            }
         }
         return size;
     }
@@ -241,7 +249,7 @@ public class TaskContainerUtils {
                         break;
                     case TASK_SPLIT_VALUE:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
-                        break;                    
+                        break;
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);
                 }

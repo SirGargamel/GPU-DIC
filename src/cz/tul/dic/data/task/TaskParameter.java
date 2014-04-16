@@ -21,7 +21,8 @@ public enum TaskParameter {
     TASK_SPLIT_VARIANT(TaskSplit.class),
     TASK_SPLIT_VALUE(Integer.class),
     INTERPOLATION(Interpolation.class),
-    RESULT_COMPILATION(ResultCompilation.class);
+    RESULT_COMPILATION(ResultCompilation.class),
+    ROUND_LIMITS(int[].class);
 
     private final Class type;
 

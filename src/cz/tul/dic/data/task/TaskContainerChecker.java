@@ -27,10 +27,24 @@ public class TaskContainerChecker {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No input.");
         }
 
-        // null data
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);
+        final int roundCount;
+        if (roundData == null) {
+            tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, tc.getImages().size() - 1});
+        } else {
+            final int[] limit = (int[]) roundData;
+            if (limit.length % 2 != 0) {
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal limits for enabled rounds.");
+            }
+            for (int i = 0; i < limit.length; i += 2) {
+                if (limit[i + 1] <= limit[i]) {
+                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal limits for enabled rounds.");
+                }
+            }
+        }
+        roundCount = TaskContainerUtils.getRoundCount(tc);
         if (roundCount < 1) {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Not enough input images.");
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No rounds for computation.");
         }
 
         final Object fs = tc.getParameter(TaskParameter.FACET_SIZE);
@@ -94,7 +108,7 @@ public class TaskContainerChecker {
             Logger.warn("Adding default interpolation.");
             tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
         }
-        
+
         final Object resultCompilation = tc.getParameter(TaskParameter.RESULT_COMPILATION);
         if (resultCompilation == null) {
             Logger.warn("Adding default result compilator.");

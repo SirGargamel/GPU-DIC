@@ -84,24 +84,30 @@ public final class Engine extends Observable {
         tc.clearResultData();
         setChanged();
         notifyObservers(new int[]{0, roundCount});
-        for (int round = 0; round < roundCount; round++) {
-            computeRound(tc, round);
-            setChanged();
-            notifyObservers(new int[]{round, roundCount});
+
+        final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
+        int currentRound = 0;
+        for (int round = 0; round < rounds.length; round += 2) {
+            for (int r = rounds[round]; r <= rounds[round + 1]; r++) {
+                computeRound(tc, r, r + 1);
+                currentRound++;
+                setChanged();
+                notifyObservers(new int[]{currentRound, roundCount});
+            }
         }
     }
 
-    public void computeRound(final TaskContainer tc, final int round) throws ComputationException {
+    public void computeRound(final TaskContainer tc, final int index1, final int index2) throws ComputationException {
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         int facetCount, defArrayLength;
         List<double[][]> bestResults;
 
-        final Set<ROI> currentROIs = tc.getRois(round);
+        final Set<ROI> currentROIs = tc.getRois(index1);
         final Map<ROI, List<Facet>> facets;
         final Map<ROI, double[]> deformations = new HashMap<>();
 
-        if (cacheFacets == null || !currentROIs.equals(tc.getRois(round - 1))) {
-            facets = FacetGenerator.generateFacets(tc, round);
+        if (cacheFacets == null || !currentROIs.equals(tc.getRois(index1 - 1))) {
+            facets = FacetGenerator.generateFacets(tc, index1);
         } else {
             facets = cacheFacets;
         }
@@ -109,7 +115,7 @@ public final class Engine extends Observable {
 
         double[] limits, data;
         for (ROI roi : currentROIs) {
-            limits = tc.getDeformationLimits(round, roi);
+            limits = tc.getDeformationLimits(index1, roi);
             if (cacheDeformations.containsKey(limits)) {
                 deformations.put(roi, cacheDeformations.get(limits));
             } else {
@@ -120,8 +126,8 @@ public final class Engine extends Observable {
         }
 
         for (ROI roi : currentROIs) {
-            defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
-            kernel.prepareKernel(context, device, tc.getFacetSize(round, roi), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(round, roi)), defArrayLength, (Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
+            defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, index1, roi);
+            kernel.prepareKernel(context, device, tc.getFacetSize(index1, roi), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(index1, roi)), defArrayLength, (Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
 
             facetCount = facets.get(roi).size();
             bestResults = new ArrayList<>(facetCount);
@@ -129,21 +135,21 @@ public final class Engine extends Observable {
                 bestResults.add(null);
             }
 
-            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, round, facets.get(roi), deformations.get(roi));
+            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, index1, index2, facets.get(roi), deformations.get(roi));
             ComputationTask ct;
             while (it.hasNext()) {
                 ct = it.next();
                 ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
                 kernel.finishRound();
                 // pick best results for this computation task and discard ct data                          
-                pickBestResultsForTask(ct, bestResults, tc, round, roi, facets, deformations);
+                pickBestResultsForTask(ct, bestResults, tc, index1, roi, facets, deformations);
             }
             // store data           
-            tc.setResult(bestResults, round, roi);
+            tc.setResult(bestResults, index1, roi);
         }
-        buildFinalResults(tc, round, facets);
+        buildFinalResults(tc, index1, facets);
         kernel.finishComputation();
-        Logger.trace("Computed round {0}.", round + 1);
+        Logger.trace("Computed round {0}.", index1 + 1);
     }
 
     private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final TaskContainer tc, final int round, final ROI roi, final Map<ROI, List<Facet>> facetMap, final Map<ROI, double[]> deformationMap) throws ComputationException {

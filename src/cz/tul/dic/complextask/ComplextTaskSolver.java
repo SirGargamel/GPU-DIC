@@ -8,6 +8,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,27 +43,30 @@ public class ComplextTaskSolver extends Observable {
     public void setDeformationRect(double[] deformationRect) {
         this.deformationRect = deformationRect;
     }
-    
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         tc.clearResultData();
 
+        final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
+        int currentRound = 0;
+        final int baseRound = rounds[0];
+
         setChanged();
-        notifyObservers(new int[]{0, roundCount});
+        notifyObservers(new int[]{currentRound, roundCount});
 
         final Engine engine = new Engine();
 
         // check task
         //// 4x CircleROI is required
-        Set<ROI> rois = tc.getRois(0);
+        Set<ROI> rois = tc.getRois(baseRound);
         int counter = 0;
         CircularROI cr;
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
                 counter++;
                 cr = (CircularROI) roi;
-                tc.addFacetSize(0, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
+                tc.addFacetSize(baseRound, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
             } else {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Only circular ROIs needed.");
             }
@@ -70,68 +74,82 @@ public class ComplextTaskSolver extends Observable {
         if (counter != ROI_COUNT) {
             throw new ComputationException(ComputationExceptionCause.NOT_ENOUGH_ROIS, Integer.toString(counter));
         }
-        // generate rectangle ROI for round 0        
-        Image img = tc.getImage(0);
+        // generate rectangle ROI for base round       
+        Image img = tc.getImage(baseRound);
         List<ROI> sortedROIs = new ArrayList<>(rois);
         Collections.sort(sortedROIs, new RoiSorter());
         ROI rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
-        tc.addRoi(rectangleRoi, 0);
+        tc.addRoi(rectangleRoi, baseRound);
         // generate possible deformation for ROIs
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
-                tc.setDeformationLimits(deformationCircle, 0, roi);
+                tc.setDeformationLimits(deformationCircle, baseRound, roi);
             } else {
-                tc.setDeformationLimits(deformationRect, 0, roi);
+                tc.setDeformationLimits(deformationRect, baseRound, roi);
             }
         }
         // compute round 0        
-        engine.computeRound(tc, 0);
+        engine.computeRound(tc, baseRound, baseRound + 1);
+
+        currentRound++;
         setChanged();
-        notifyObservers(new int[]{1, roundCount});
+        notifyObservers(new int[]{currentRound, roundCount});
 
         double shift1, shift2, shift;
-        for (int round = 1; round < roundCount; round++) {
-            // find new position of Circle ROIs
-            //// determine shifts of circle ROIs from previous round
-            shift1 = FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(2));
-            shift2 = FacetDeformationAnalyzator.determineROIShift(tc, round - 1, sortedROIs.get(3));
-            shift = (shift1 + shift2) / 2.0;
-            Logger.debug(shift1 + ", " + shift2);
-            //// check if left equals right
-            if (Math.abs(shift1 - shift2) > MAX_SHIFT_DIFFERENCE) {
-                Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat(" - ").concat(Double.toString(shift1)).concat(" vs ".concat(Double.toString(shift2))));
-//                throw new ComputationException(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH, Double.toString(shift1).concat(" vs ".concat(Double.toString(shift2))));
-            }
-            //// generate new Circle ROIs
-            rois = new HashSet<>(5);
-            rois.add(sortedROIs.get(0));
-            rois.add(sortedROIs.get(1));
-            CircularROI cRoi = (CircularROI) sortedROIs.get(2);
-            rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift, cRoi.getRadius()));
-            cRoi = (CircularROI) sortedROIs.get(3);
-            rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift, cRoi.getRadius()));
-            // generate ReactengleROI for  this round from new CircleROIs
-            sortedROIs.clear();
-            sortedROIs.addAll(rois);
-            Collections.sort(sortedROIs, new RoiSorter());
-            tc.setROIs(rois, round);            
-            rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
-            rois.add(rectangleRoi);
-            // generate limits
-            //// TODO generate limits dynamically according to previous results
-            for (ROI roi : rois) {
-                if (roi instanceof CircularROI) {
-                    cr = (CircularROI) roi;
-                    tc.addFacetSize(round, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
-                    tc.setDeformationLimits(deformationCircle, round, roi);
-                } else {
-                    tc.setDeformationLimits(deformationRect, round, roi);
+        boolean skip = true;
+        int prevR = baseRound;
+        for (int round = 0; round < rounds.length; round += 2) {
+            for (int r = rounds[round]; r <= rounds[round + 1]; r++) {
+                if (skip) {
+                    skip = false;
+                    continue;
                 }
+                
+                // find new position of Circle ROIs
+                //// determine shifts of circle ROIs from previous round
+                shift1 = FacetDeformationAnalyzator.determineROIShift(tc, prevR, sortedROIs.get(2));
+                shift2 = FacetDeformationAnalyzator.determineROIShift(tc, prevR, sortedROIs.get(3));
+                shift = (shift1 + shift2) / 2.0;
+                Logger.debug(shift1 + ", " + shift2);
+                //// check if left equals right
+                if (Math.abs(shift1 - shift2) > MAX_SHIFT_DIFFERENCE) {
+                    Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat(" - ").concat(Double.toString(shift1)).concat(" vs ".concat(Double.toString(shift2))));
+//                throw new ComputationException(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH, Double.toString(shift1).concat(" vs ".concat(Double.toString(shift2))));
+                }
+                //// generate new Circle ROIs
+                rois = new HashSet<>(5);
+                rois.add(sortedROIs.get(0));
+                rois.add(sortedROIs.get(1));
+                CircularROI cRoi = (CircularROI) sortedROIs.get(2);
+                rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift, cRoi.getRadius()));
+                cRoi = (CircularROI) sortedROIs.get(3);
+                rois.add(new CircularROI(cRoi.getCenterX(), cRoi.getCenterY() + shift, cRoi.getRadius()));
+                // generate ReactengleROI for  this round from new CircleROIs
+                sortedROIs.clear();
+                sortedROIs.addAll(rois);
+                Collections.sort(sortedROIs, new RoiSorter());
+                tc.setROIs(rois, r);
+                rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
+                rois.add(rectangleRoi);
+                // generate limits
+                //// TODO generate limits dynamically according to previous results
+                for (ROI roi : rois) {
+                    if (roi instanceof CircularROI) {
+                        cr = (CircularROI) roi;
+                        tc.addFacetSize(r, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
+                        tc.setDeformationLimits(deformationCircle, r, roi);
+                    } else {
+                        tc.setDeformationLimits(deformationRect, r, roi);
+                    }
+                }
+                // compute round
+                engine.computeRound(tc, r, r + 1);
+                currentRound++;
+                setChanged();
+                notifyObservers(new int[]{currentRound, roundCount});
+                
+                prevR = r;
             }
-            // compute round
-            engine.computeRound(tc, round);
-            setChanged();
-            notifyObservers(new int[]{round + 1, roundCount});
         }
     }
 

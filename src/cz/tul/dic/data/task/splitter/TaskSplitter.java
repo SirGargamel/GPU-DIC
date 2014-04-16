@@ -17,25 +17,26 @@ import java.util.List;
 public abstract class TaskSplitter implements Iterator<ComputationTask> {
 
     protected final TaskContainer tc;
-    protected final int round;
+    protected final int index1, index2;
     protected final List<Facet> facets;
     protected final double[] deformations;
 
-    public TaskSplitter(final TaskContainer tc, final int round, final List<Facet> facets, final double[] deformations) {
+    public TaskSplitter(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations) {
         this.tc = tc;
-        this.round = round;
+        this.index1 = index1;
+        this.index2 = index2;
         this.facets = facets;
         this.deformations = deformations;
     }
 
-    public static Iterator<ComputationTask> prepareSplitter(final TaskContainer tc, final int round, final List<Facet> facets, final double[] deformations) throws ComputationException {
+    public static Iterator<ComputationTask> prepareSplitter(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations) throws ComputationException {
         final TaskSplit ts = (TaskSplit) tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
 
         switch (ts) {
             case NONE:
-                return new NoSplit(tc, round, facets, deformations);
+                return new NoSplit(tc, index1, index2, facets, deformations);
             case STATIC:
-                return new StaticSplit(tc, round, facets, deformations);
+                return new StaticSplit(tc, index1, index2, facets, deformations);
             case DYNAMIC_MEMORY:
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of task splitting - " + ts);
