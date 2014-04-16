@@ -14,6 +14,7 @@ import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -85,109 +86,113 @@ public class MainWindow implements Initializable {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
         List<File> fileList = fileChooser.showOpenMultipleDialog(null);
         if (fileList != null && !fileList.isEmpty()) {
-            Task<String> worker = new Task<String>() {
-                @Override
-                protected String call() throws Exception {
-                    String result = null;
-                    boolean error = false;
-
-                    updateProgress(0, 5);
-                    if (fileList.size() == 1) {
-                        final File in = fileList.get(0);
-                        final String name = in.getName();
-                        final String ext = name.substring(name.lastIndexOf(".") + 1);
-                        updateProgress(1, 5);
-                        switch (ext) {
-                            case "avi":
-                                Context.getInstance().setTc(new TaskContainer(in));
-                                break;
-                            case "config":
-                                final ConfigType ct = Config.determineType(in);
-                                switch (ct) {
-                                    case TASK:
-                                        Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(in));
-                                        break;
-                                    case SEQUENCE:
-                                        // find avi and load it                                                                 
-                                        Context.getInstance().setTc(new TaskContainer(Config.determineProjectFile(in)));
-                                }
-                                break;
-                            case "task":
-                                try {
-                                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(in));
-                                    Platform.runLater(() -> {
-                                        buttonResults.setDisable(false);
-                                    });
-                                } catch (ClassNotFoundException | IOException ex) {
-                                    error = true;
-                                    result = Lang.getString("wrongBin");
-                                }
-                                break;
-                            default:
-                                error = true;
-                                result = Lang.getString("wrongIn");
-                        }
-                        updateProgress(2, 5);
-                    } else {
-                        updateProgress(1, 5);
-                        Context.getInstance().setTc(new TaskContainer(fileList));
-                        updateProgress(2, 5);
-                    }
-                    if (!error) {
-                        try {
-                            updateProgress(3, 5);
-                            final TaskContainer tc = Context.getInstance().getTc();
-                            InputLoader.loadInput(tc);
-                            updateProgress(4, 5);
-                            Platform.runLater(() -> {
-                                adjustConfigButtons(false);
-                                adjustImageButtons(false);
-                                imagePane.displayImage();
-
-                                imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 143);
-                                imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 114);
-
-                                final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
-                                if (o != null) {
-                                    textFs.setText(o.toString());
-                                }
-                            });
-                        } catch (IOException ex) {
-                            result = Lang.getString("IO", ex.getLocalizedMessage());
-                        }
-                    }
-                    updateProgress(5, 5);
-
-                    return result;
-                }
-            };
-
-            Dialogs.create()
-                    .title(Lang.getString("Wait"))
-                    .message(Lang.getString("LoadingData"))
-                    .showWorkerProgress(worker);
-
-            Thread th = new Thread(worker);
-            th.setDaemon(true);
-            th.start();
-
-            th = new Thread(() -> {
-                try {
-                    final String err = worker.get();
-                    if (err != null) {
-                        Dialogs.create()
-                                .title(Lang.getString("error"))
-                                .message(err)
-                                .showWarning();
-
-                    }
-                } catch (InterruptedException | ExecutionException ex) {
-                    System.out.println(ex);
-                }
-            });
-            th.setDaemon(true);
-            th.start();
+            loadInput(fileList);
         }
+    }
+
+    private void loadInput(List<File> fileList) {
+        Task<String> worker = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                String result = null;
+                boolean error = false;
+
+                updateProgress(0, 5);
+                if (fileList.size() == 1) {
+                    final File in = fileList.get(0);
+                    final String name = in.getName();
+                    final String ext = name.substring(name.lastIndexOf(".") + 1);
+                    updateProgress(1, 5);
+                    switch (ext) {
+                        case "avi":
+                            Context.getInstance().setTc(new TaskContainer(in));
+                            break;
+                        case "config":
+                            final ConfigType ct = Config.determineType(in);
+                            switch (ct) {
+                                case TASK:
+                                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(in));
+                                    break;
+                                case SEQUENCE:
+                                    // find avi and load it
+                                    Context.getInstance().setTc(new TaskContainer(Config.determineProjectFile(in)));
+                            }
+                            break;
+                        case "task":
+                            try {
+                                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(in));
+                                Platform.runLater(() -> {
+                                    buttonResults.setDisable(false);
+                                });
+                            } catch (ClassNotFoundException | IOException ex) {
+                                error = true;
+                                result = Lang.getString("wrongBin");
+                            }
+                            break;
+                        default:
+                            error = true;
+                            result = Lang.getString("wrongIn");
+                    }
+                    updateProgress(2, 5);
+                } else {
+                    updateProgress(1, 5);
+                    Context.getInstance().setTc(new TaskContainer(fileList));
+                    updateProgress(2, 5);
+                }
+                if (!error) {
+                    try {
+                        updateProgress(3, 5);
+                        final TaskContainer tc = Context.getInstance().getTc();
+                        InputLoader.loadInput(tc);
+                        updateProgress(4, 5);
+                        Platform.runLater(() -> {
+                            adjustConfigButtons(false);
+                            adjustImageButtons(false);
+                            imagePane.displayImage();
+
+                            imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 143);
+                            imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 114);
+
+                            final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
+                            if (o != null) {
+                                textFs.setText(o.toString());
+                            }
+                        });
+                    } catch (IOException ex) {
+                        result = Lang.getString("IO", ex.getLocalizedMessage());
+                    }
+                }
+                updateProgress(5, 5);
+
+                return result;
+            }
+        };
+
+        Dialogs.create()
+                .title(Lang.getString("Wait"))
+                .message(Lang.getString("LoadingData"))
+                .showWorkerProgress(worker);
+
+        Thread th = new Thread(worker);
+        th.setDaemon(true);
+        th.start();
+
+        th = new Thread(() -> {
+            try {
+                final String err = worker.get();
+                if (err != null) {
+                    Dialogs.create()
+                            .title(Lang.getString("error"))
+                            .message(err)
+                            .showWarning();
+
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                System.out.println(ex);
+            }
+        });
+        th.setDaemon(true);
+        th.start();
     }
 
     @FXML
@@ -395,14 +400,6 @@ public class MainWindow implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        try {
-            for (int size = 20; size <= 35; size++) {
-                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
-            }
-        } catch (IOException | ComputationException ex) {
-            System.err.println(ex);
-        }
-
         textFs.setText("7");
 
         imagePane.initialize(url, rb);
@@ -438,6 +435,24 @@ public class MainWindow implements Initializable {
         adjustImageButtons(true);
         adjustConfigButtons(true);
         buttonResults.setDisable(true);
+
+//        try {
+//            final int val1 = 20;
+//            final int val2 = 30;
+//            for (int size = val1; size <= val1; size++) {
+//                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
+//            }
+//        } catch (IOException | ComputationException ex) {
+//            System.err.println(ex);
+//        }  
+        try {
+            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
+            final TaskContainer tc = Context.getInstance().getTc();
+            InputLoader.loadInput(tc);
+            Computation.commenceComputationDynamic(tc);
+        } catch (IOException | ComputationException ex) {
+            System.err.println(ex);
+        }
     }
 
     private void adjustImageButtons(final boolean disabled) {
