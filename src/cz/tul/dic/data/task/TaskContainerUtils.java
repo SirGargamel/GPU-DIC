@@ -7,7 +7,9 @@ import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
+import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -225,15 +227,21 @@ public class TaskContainerUtils {
                     case FACET_SIZE:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
+                    case INTERPOLATION:
+                        result.setParameter(tp, Interpolation.valueOf(e.getValue()));
+                        break;
                     case KERNEL:
                         result.setParameter(tp, KernelType.valueOf(e.getValue()));
+                        break;
+                    case RESULT_COMPILATION:
+                        result.setParameter(tp, ResultCompilation.valueOf(e.getValue()));
                         break;
                     case TASK_SPLIT_VARIANT:
                         result.setParameter(tp, TaskSplit.valueOf(e.getValue()));
                         break;
                     case TASK_SPLIT_VALUE:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
-                        break;
+                        break;                    
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);
                 }

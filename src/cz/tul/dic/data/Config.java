@@ -23,15 +23,19 @@ public class Config {
 
     public static Config loadConfig(final File in, final ConfigType configType) throws IOException {
         final String configFileName;
-        switch (configType) {
-            case TASK:
-                configFileName = in.getAbsolutePath().concat(EXT);
-                break;
-            case SEQUENCE:
-                configFileName = Utils.getTempDir(in).getAbsolutePath().concat(File.separator).concat(in.getName()).concat(EXT);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported type of config - " + configType);
+        if (in.getName().endsWith(EXT)) {
+            configFileName = in.getAbsolutePath();
+        } else {
+            switch (configType) {
+                case TASK:
+                    configFileName = in.getAbsolutePath().concat(EXT);
+                    break;
+                case SEQUENCE:
+                    configFileName = Utils.getTempDir(in).getAbsolutePath().concat(File.separator).concat(in.getName()).concat(EXT);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported type of config - " + configType);
+            }
         }
         final Config result;
 
@@ -81,21 +85,34 @@ public class Config {
     }
 
     public static ConfigType determineType(final File configFile) {
-        final String fileName = configFile.getName();
-        ConfigType type = null;
-        for (ConfigType ct : ConfigType.values()) {
-            if (fileName.contains(ct.toString())) {
-                type = ct;
+        final String fileName = configFile.getName().replace(EXT, "");
+        final File[] files = configFile.getParentFile().listFiles();
+
+        ConfigType type = ConfigType.SEQUENCE;
+        for (File f : files) {
+            if (f.getName().equals(fileName)) {
+                type = ConfigType.TASK;
                 break;
             }
         }
+
         return type;
     }
 
     public static File determineProjectFile(final File configFile) {
-        final String fullPath = configFile.getAbsolutePath();
         final ConfigType ct = determineType(configFile);
-        final String projectFilePath = fullPath.replace(EXT, "").replace(ct.toString(), "");
+        final String projectFilePath;
+        switch (ct) {
+            case TASK:
+                projectFilePath = configFile.getAbsolutePath().replace(EXT, "");
+                break;
+            case SEQUENCE:
+                projectFilePath = configFile.getParentFile().getParentFile().getAbsolutePath().concat(File.separator).concat(configFile.getName()).replace(EXT, "");
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported type of config - " + ct);
+        }
+
         return new File(projectFilePath);
     }
 
