@@ -1,15 +1,42 @@
 package cz.tul.dic.engine.cluster;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class Analyzer2D extends ClusterAnalyzer<double[]> {
 
     final Map<Integer, Map<Integer, Integer>> counter = new HashMap<>();
+    final List<double[]> values;
+
+    public Analyzer2D() {
+        values = new LinkedList<>();
+    }
 
     @Override
     public double[] findMajorValue() {
+        int valX, valY;
+        Map<Integer, Integer> m;
+        for (double[] val : values) {
+            valX = (int) Math.round(val[0] / precision);
+            valY = (int) Math.round(val[1] / precision);
+
+            if (counter.containsKey(valX)) {
+                m = counter.get(valX);
+            } else {
+                m = new HashMap<>();
+                counter.put(valX, m);
+            }
+
+            if (m.containsKey(valY)) {
+                m.put(valY, m.get(valY) + 1);
+            } else {
+                m.put(valY, 1);
+            }
+        }
+
         int maxCount = -1;
         int maxDx = 0;
         int maxDy = 0;
@@ -29,22 +56,11 @@ public class Analyzer2D extends ClusterAnalyzer<double[]> {
 
     @Override
     public void addValue(double[] val) {
-        final int valX = (int) Math.round(val[0] / precision);
-        final int valY = (int) Math.round(val[1] / precision);
+        values.add(new double[]{val[0], val[1]});
+    }
 
-        Map<Integer, Integer> m;
-        if (counter.containsKey(valX)) {
-            m = counter.get(valX);
-        } else {
-            m = new HashMap<>();
-            counter.put(valX, m);
-        }
-
-        if (m.containsKey(valY)) {
-            m.put(valY, m.get(valY) + 1);
-        } else {
-            m.put(valY, 1);
-        }
+    public List<double[]> listValues() {
+        return values;
     }
 
 }

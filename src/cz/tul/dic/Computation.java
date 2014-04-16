@@ -10,6 +10,7 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
@@ -41,7 +42,7 @@ public class Computation {
     private static final File OUT_DIR = new File("D:\\temp\\results");
     private static final int SIZE_MIN = 3;
     private static final int SIZE_MAX = 50;
-    private static final int SIZE_STEP = 1;    
+    private static final int SIZE_STEP = 1;
 
     static {
         Configurator.defaultConfig().writer(new ConsoleWriter()).level(LOGGING_LEVEL).activate();
@@ -166,10 +167,11 @@ public class Computation {
         tc.setParameter(TaskParameter.FACET_SIZE, facetSize);
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
-        tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BILINEAR);
-        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
-        tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
+        tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
+        tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
         tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
+//        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
+//        tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
 
         TaskContainerChecker.checkTaskValidity(tc);
 
@@ -187,12 +189,12 @@ public class Computation {
         }
 //        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).concat(".avi"))));
 //        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).concat(".avi"))));
-//        tc.addExport(ExportTask.generateSequenceExport(Direction.ABS, ExportTarget.FILE, new File(target.concat("-ABS-").concat(ext).concat(".avi"))));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.ABS, ExportTarget.FILE, new File(target.concat("-ABS-").concat(ext).concat(".avi"))));
 
         computeDynamicTask(tc);
 
-        TaskContainerUtils.serializeTaskToBinary(tc);
-        TaskContainerUtils.exportTask(tc);
+//        TaskContainerUtils.serializeTaskToBinary(tc);
+//        TaskContainerUtils.exportTask(tc);
 //        System.out.println(tc);
 //        System.out.println(loadedTc);
     }

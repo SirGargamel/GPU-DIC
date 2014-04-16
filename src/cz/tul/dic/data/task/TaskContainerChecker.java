@@ -6,6 +6,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
+import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
@@ -92,6 +93,12 @@ public class TaskContainerChecker {
         if (interpolation == null) {
             Logger.warn("Adding default interpolation.");
             tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
+        }
+        
+        final Object resultCompilation = tc.getParameter(TaskParameter.RESULT_COMPILATION);
+        if (resultCompilation == null) {
+            Logger.warn("Adding default result compilator.");
+            tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
         }
     }
 

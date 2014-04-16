@@ -6,6 +6,7 @@ import com.jogamp.opencl.CLDevice.Type;
 import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.util.Filter;
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
@@ -44,7 +45,7 @@ import org.pmw.tinylog.Logger;
 public final class Engine extends Observable {
 
     private static final int BEST_RESULT_COUNT_MAX = 50;
-    private static final double PRECISION = 0.01;
+    private static final double PRECISION = 0.5;
     private static final Type DEVICE_TYPE = Type.GPU;
     private final CLPlatform platform;
     private final CLContext context;
@@ -115,7 +116,7 @@ public final class Engine extends Observable {
                 deformations.put(roi, data);
                 cacheDeformations.put(limits, data);
             }
-        }        
+        }
 
         for (ROI roi : currentROIs) {
             defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, round, roi);
@@ -240,16 +241,47 @@ public final class Engine extends Observable {
             }
         }
 
+        double[] majorVal, val = new double[2];
+        int count;
+        double maxDist2 = 4 * PRECISION * PRECISION;
+        final ResultCompilation rc = (ResultCompilation) tc.getParameter(TaskParameter.RESULT_COMPILATION);
+        if (rc == null) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No result compilation method.");
+        }
+
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 counter = counters[i][j];
                 if (counter != null) {
-                    finalResults[i][j] = counter.findMajorValue();
+                    majorVal = counter.findMajorValue();
+                    if (rc.equals(ResultCompilation.MAJOR)) {
+                        finalResults[i][j] = new double[]{majorVal[0], majorVal[1]};
+                    } else if (rc.equals(ResultCompilation.MAJOR_AVERAGING)) {
+                        count = 0;
+                        val[0] = 0;
+                        val[1] = 0;
+
+                        for (double[] vals : counter.listValues()) {
+                            if (dist2(vals, majorVal) <= maxDist2) {
+                                val[0] += vals[0];
+                                val[1] += vals[1];
+                                count++;
+                            }
+                        }
+
+                        finalResults[i][j] = new double[]{val[0] / (double) count, val[1] / (double) count};
+                    } else {
+                      throw new UnsupportedOperationException("Unsupported method of result compilation - " + rc);
+                    }
                 }
             }
         }
 
         tc.setPerPixelResult(finalResults, round);
+    }
+
+    private static double dist2(final double[] val1, final double[] val2) {
+        return (val2[0] - val1[0]) * (val2[0] - val1[0]) + (val2[1] - val1[1]) * (val2[1] - val1[1]);
     }
 
 }
