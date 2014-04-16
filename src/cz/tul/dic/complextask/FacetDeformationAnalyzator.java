@@ -20,7 +20,7 @@ public class FacetDeformationAnalyzator {
 
         for (int x = roi.getX1(); x <= roi.getX2(); x++) {
             for (int y = roi.getY1(); y <= roi.getY2(); y++) {
-                if (roi.isPointInside(x, y) && results[x][y] != null) {
+                if (x > 0 && y > 0 && roi.isPointInside(x, y) && results[x][y] != null) {
                     analyzer.addValue(results[x][y][Coordinates.Y]);
                 }
             }
