@@ -95,7 +95,7 @@ public class TaskContainer implements Serializable {
         return rois.getItem(round);
     }
 
-    public void addRoi(final ROI roi, final int round) {
+    public void addRoi(final int round, final ROI roi) {
         Set<ROI> r = rois.getItemPrecise(round);
         if (r == null) {
             r = new HashSet<>(1);
@@ -104,7 +104,7 @@ public class TaskContainer implements Serializable {
         r.add(roi);
     }
 
-    public void setROIs(final Set<ROI> rois, final int round) {
+    public void setROIs(final int round, final Set<ROI> rois) {
         this.rois.setItem(rois, round);
     }
 
@@ -123,8 +123,8 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public void setFacetSizes(final Map<ROI, Integer> rois, final int round) {
-        facetSizes.setItem(rois, round);
+    public void setFacetSizes(final int round, final Map<ROI, Integer> sizes) {
+        facetSizes.setItem(sizes, round);
     }
 
     public void addFacetSize(final int round, final ROI roi, final int facetSize) {
@@ -136,7 +136,7 @@ public class TaskContainer implements Serializable {
         m.put(roi, facetSize);
     }
 
-    public void setDeformationLimits(final double[] limits, final int round, final ROI roi) {
+    public void setDeformationLimits(final int round, final ROI roi, final double[] limits) {
         Map<ROI, double[]> m = deformationLimits.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
@@ -155,7 +155,7 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public void setResult(final List<double[][]> result, final int round, final ROI roi) {
+    public void setResult(final int round, final ROI roi, final List<double[][]> result) {
         while (results.size() <= round) {
             results.add(null);
         }
@@ -179,7 +179,7 @@ public class TaskContainer implements Serializable {
         return finalResults.get(round);
     }
 
-    public void setPerPixelResult(final double[][][] result, final int round) {
+    public void setPerPixelResult(final int round, final double[][][] result) {
         while (finalResults.size() <= round) {
             finalResults.add(null);
         }

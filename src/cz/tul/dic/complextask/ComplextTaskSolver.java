@@ -80,13 +80,13 @@ public class ComplextTaskSolver extends Observable {
         List<ROI> sortedROIs = new ArrayList<>(rois);
         Collections.sort(sortedROIs, new RoiSorter());
         ROI rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
-        tc.addRoi(rectangleRoi, baseRound);
+        tc.addRoi(baseRound, rectangleRoi);
         // generate possible deformation for ROIs
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
-                tc.setDeformationLimits(deformationCircle, baseRound, roi);
+                tc.setDeformationLimits(baseRound, roi, deformationCircle);
             } else {
-                tc.setDeformationLimits(deformationRect, baseRound, roi);
+                tc.setDeformationLimits(baseRound, roi, deformationRect);
             }
         }
         // compute round 0        
@@ -145,7 +145,7 @@ public class ComplextTaskSolver extends Observable {
         sortedROIs.clear();
         sortedROIs.addAll(rois);
         Collections.sort(sortedROIs, new RoiSorter());
-        tc.setROIs(rois, r);
+        tc.setROIs(r, rois);
         Image img = tc.getImage(r);
         final ROI rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
         rois.add(rectangleRoi);
@@ -156,9 +156,9 @@ public class ComplextTaskSolver extends Observable {
             if (roi instanceof CircularROI) {
                 cr = (CircularROI) roi;
                 tc.addFacetSize(r, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
-                tc.setDeformationLimits(deformationCircle, r, roi);
+                tc.setDeformationLimits(r, roi, deformationCircle);
             } else {
-                tc.setDeformationLimits(deformationRect, r, roi);
+                tc.setDeformationLimits(r, roi, deformationRect);
             }
         }
         // compute round

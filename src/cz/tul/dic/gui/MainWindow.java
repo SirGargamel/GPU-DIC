@@ -437,16 +437,20 @@ public class MainWindow implements Initializable {
         buttonResults.setDisable(true);
  
         try {
-            final int val1 = 20;
-            final int val2 = 30;
-            for (int size = val1; size <= val1; size++) {
-                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
-            }
+            // 7202845m
+            // 9905121m
+            // 9820088m
+            
+//            final int val1 = 20;
+//            final int val2 = 30;
+//            for (int size = val1; size <= val1; size++) {
+//                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
+//            }
 
-//            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
-//            final TaskContainer tc = Context.getInstance().getTc();
-//            InputLoader.loadInput(tc);
-//            Computation.commenceComputationDynamic(tc);
+            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+            final TaskContainer tc = Context.getInstance().getTc();
+            InputLoader.loadInput(tc);
+            Computation.commenceComputationDynamic(tc);
         } catch (IOException | ComputationException ex) {
             System.err.println(ex);
         }

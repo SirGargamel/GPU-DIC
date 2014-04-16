@@ -64,7 +64,7 @@ public class EditableInputPresenter extends InputPresenter {
                 taskRois.add(new CircularROI(c.getCenterX() + c.getTranslateX(), c.getCenterY() + c.getTranslateY(), c.getRadius()));
             }
         });
-        tc.setROIs(taskRois, imageIndex);
+        tc.setROIs(imageIndex, taskRois);
     }
 
     @Override

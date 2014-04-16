@@ -152,7 +152,7 @@ public final class Engine extends Observable {
                 pickBestResultsForTask(ct, bestResults, tc, index1, roi, facets, deformations);
             }
             // store data           
-            tc.setResult(bestResults, index1, roi);
+            tc.setResult(index1, roi, bestResults);
         }
         buildFinalResults(tc, index1, facets);
         kernel.finishComputation();
@@ -304,7 +304,7 @@ public final class Engine extends Observable {
             }
         }
 
-        tc.setPerPixelResult(finalResults, round);
+        tc.setPerPixelResult(round, finalResults);
     }
 
     private static double dist2(final double[] val1, final double[] val2) {

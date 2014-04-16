@@ -95,11 +95,11 @@ public class Computation {
 
         // select ROI 
         final ROI r1 = new RectangleROI(135, 19, 179, 200);
-        tc.addRoi(r1, 0);
+        tc.addRoi(0, r1);
         final ROI r2 = new CircularROI(108, 101, 26);
-        tc.addRoi(r2, 0);
+        tc.addRoi(0, r2);
         final ROI r3 = new CircularROI(203, 101, 26);
-        tc.addRoi(r3, 0);
+        tc.addRoi(0, r3);
 
         // select facet size
         TaskContainerUtils.setUniformFacetSize(tc, 0, facetSize);
@@ -110,9 +110,9 @@ public class Computation {
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
 
         // deformations
-        tc.setDeformationLimits(new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5}, 0, r1);
-        tc.setDeformationLimits(new double[]{-1, 1, 0.5, -10, 1, 0.5}, 0, r2);
-        tc.setDeformationLimits(new double[]{-1, 1, 0.5, -10, 1, 0.5}, 0, r3);
+        tc.setDeformationLimits(0, r1, new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});
+        tc.setDeformationLimits(0, r2, new double[]{-1, 1, 0.5, -10, 1, 0.5});
+        tc.setDeformationLimits(0, r3, new double[]{-1, 1, 0.5, -10, 1, 0.5});
 
         // task
         tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
@@ -159,10 +159,10 @@ public class Computation {
         InputLoader.loadInput(tc);
 
         final int roiRadius = 26;
-        tc.addRoi(new CircularROI(108, 12, roiRadius), 0);
-        tc.addRoi(new CircularROI(201, 7, roiRadius), 0);
-        tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
-        tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
+        tc.addRoi(0, new CircularROI(108, 12, roiRadius));
+        tc.addRoi(0, new CircularROI(201, 7, roiRadius));
+        tc.addRoi(0, new CircularROI(108, 86, roiRadius));
+        tc.addRoi(0, new CircularROI(202, 84, roiRadius));
 
         tc.setParameter(TaskParameter.FACET_SIZE, facetSize);
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
