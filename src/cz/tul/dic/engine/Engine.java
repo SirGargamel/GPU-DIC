@@ -88,7 +88,14 @@ public final class Engine extends Observable {
         final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
         int currentRound = 0;
         for (int round = 0; round < rounds.length; round += 2) {
-            for (int r = rounds[round]; r <= rounds[round + 1]; r++) {
+            if (round > 0) {
+                computeRound(tc, rounds[round - 1], rounds[round]);
+                currentRound++;
+                setChanged();
+                notifyObservers(new int[]{currentRound, roundCount});
+            }
+
+            for (int r = rounds[round]; r < rounds[round + 1]; r++) {
                 computeRound(tc, r, r + 1);
                 currentRound++;
                 setChanged();

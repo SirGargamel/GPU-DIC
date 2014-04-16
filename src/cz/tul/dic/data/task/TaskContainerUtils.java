@@ -54,6 +54,7 @@ public class TaskContainerUtils {
                 for (int i = 0; i < limit.length; i += 2) {
                     size += limit[i + 1] - limit[i];
                 }
+                size += (limit.length / 2) - 1;
             }
         }
         return size;
