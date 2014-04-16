@@ -149,7 +149,9 @@ public class TaskContainerUtils {
         Object val;
         for (TaskParameter tp : TaskParameter.values()) {
             val = tc.getParameter(tp);
-            if (val != null) {
+            if (val instanceof int[]) {
+                config.put(CONFIG_PARAMETERS.concat(tp.name()), toString((int[]) val));
+            } else if (val != null) {
                 config.put(CONFIG_PARAMETERS.concat(tp.name()), val.toString());
             }
         }
@@ -166,6 +168,22 @@ public class TaskContainerUtils {
     }
 
     private static String toString(final double[] data) {
+        final StringBuilder sb = new StringBuilder();
+
+        if (data != null) {
+            for (double d : data) {
+                sb.append(d);
+                sb.append(CONFIG_SEPARATOR_DATA);
+            }
+            sb.setLength(sb.length() - CONFIG_SEPARATOR_DATA.length());
+        } else {
+            sb.append(CONFIG_EMPTY);
+        }
+
+        return sb.toString();
+    }
+
+    private static String toString(final int[] data) {
         final StringBuilder sb = new StringBuilder();
 
         if (data != null) {
@@ -249,6 +267,8 @@ public class TaskContainerUtils {
                         break;
                     case TASK_SPLIT_VALUE:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
+                    case ROUND_LIMITS:
+                        result.setParameter(tp, intArrayFromString(e.getValue()));
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);
@@ -270,6 +290,20 @@ public class TaskContainerUtils {
             result = new double[split.length];
             for (int i = 0; i < split.length; i++) {
                 result[i] = Double.valueOf(split[i]);
+            }
+        }
+        return result;
+    }
+
+    private static int[] intArrayFromString(final String data) {
+        final int[] result;
+        if (data.equals(CONFIG_EMPTY)) {
+            result = null;
+        } else {
+            final String[] split = data.split(CONFIG_SEPARATOR_DATA);
+            result = new int[split.length];
+            for (int i = 0; i < split.length; i++) {
+                result[i] = Integer.valueOf(split[i]);
             }
         }
         return result;
