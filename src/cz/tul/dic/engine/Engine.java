@@ -14,6 +14,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -215,6 +216,9 @@ public final class Engine extends Observable {
         Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
         DeformationDegree degree;
+        StringBuilder sb = new StringBuilder();
+
+        System.out.println("Round " + round);
         for (ROI roi : tc.getRois(round)) {
             facets = facetMap.get(roi);
             results = tc.getResults(round, roi);
@@ -224,6 +228,16 @@ public final class Engine extends Observable {
             for (int i = 0; i < facets.size(); i++) {
                 f = facets.get(i);
                 d = results.get(i)[0];
+
+                if (roi instanceof RectangleROI) {
+                    sb.setLength(0);
+                    for (double val : d) {
+                        sb.append(val);
+                        sb.append(";");
+                    }
+                    sb.setLength(sb.length() - 1);
+                    System.out.println(sb.toString());
+                }
 
                 deformedFacet = FacetUtils.deformFacet(f, d, degree);
                 for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
@@ -271,7 +285,7 @@ public final class Engine extends Observable {
 
                         finalResults[i][j] = new double[]{val[0] / (double) count, val[1] / (double) count};
                     } else {
-                      throw new UnsupportedOperationException("Unsupported method of result compilation - " + rc);
+                        throw new UnsupportedOperationException("Unsupported method of result compilation - " + rc);
                     }
                 }
             }
