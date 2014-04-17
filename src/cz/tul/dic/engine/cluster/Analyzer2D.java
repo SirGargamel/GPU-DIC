@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 
 public class Analyzer2D extends ClusterAnalyzer<double[]> {
 
-    final Map<Integer, Map<Integer, Integer>> counter = new HashMap<>();
-    final List<double[]> values;
+    private final Map<Integer, Map<Integer, Integer>> counter = new HashMap<>();
+    private final List<double[]> values;
 
     public Analyzer2D() {
         values = new LinkedList<>();
