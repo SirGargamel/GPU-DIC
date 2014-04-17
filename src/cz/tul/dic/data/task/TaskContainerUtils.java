@@ -268,6 +268,7 @@ public class TaskContainerUtils {
                         break;
                     case TASK_SPLIT_VALUE:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
+                        break;
                     case ROUND_LIMITS:
                         result.setParameter(tp, intArrayFromString(e.getValue()));
                         break;
