@@ -81,6 +81,7 @@ public class ComplextTaskSolver extends Observable {
         Collections.sort(sortedROIs, new RoiSorter());
         ROI rectangleRoi = generateRectangleROI(sortedROIs, img.getWidth(), img.getHeight());
         tc.addRoi(baseRound, rectangleRoi);
+        rois.add(rectangleRoi);
         // generate possible deformation for ROIs
         for (ROI roi : rois) {
             if (roi instanceof CircularROI) {
@@ -89,7 +90,7 @@ public class ComplextTaskSolver extends Observable {
                 tc.setDeformationLimits(baseRound, roi, deformationRect);
             }
         }
-        // compute round 0        
+        // compute first round     
         engine.computeRound(tc, baseRound, baseRound + 1);
 
         currentRound++;
