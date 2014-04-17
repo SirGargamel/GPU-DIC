@@ -10,9 +10,14 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.output.ExportMode;
+import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.output.Exporter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Set;
@@ -47,7 +52,7 @@ public class ComplextTaskSolver extends Observable {
         this.deformationRect = deformationRect;
     }
 
-    public void solveComplexTask(final TaskContainer tc) throws ComputationException {
+    public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         tc.clearResultData();
 
@@ -96,6 +101,7 @@ public class ComplextTaskSolver extends Observable {
         currentRound++;
         setChanged();
         notifyObservers(new int[]{currentRound, roundCount});
+        exportRound(tc, baseRound);
 
         boolean skip = true;
         int prevR = baseRound;
@@ -105,6 +111,7 @@ public class ComplextTaskSolver extends Observable {
                 currentRound++;
                 setChanged();
                 notifyObservers(new int[]{currentRound, roundCount});
+                exportRound(tc, rounds[round - 1]);
             }
 
             for (int r = rounds[round]; r < rounds[round + 1]; r++) {
@@ -118,6 +125,7 @@ public class ComplextTaskSolver extends Observable {
                 setChanged();
                 notifyObservers(new int[]{currentRound, roundCount});
                 prevR = r;
+                exportRound(tc, r);
             }
         }
     }
@@ -197,6 +205,18 @@ public class ComplextTaskSolver extends Observable {
                 yTop,
                 xRight,
                 yBottom);
+    }
+
+    private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
+        Iterator<ExportTask> it = tc.getExports().iterator();
+        ExportTask et;
+        while (it.hasNext()) {
+            et = it.next();
+            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round) {
+                Exporter.export(et, tc);
+                it.remove();
+            }
+        }
     }
 
 }

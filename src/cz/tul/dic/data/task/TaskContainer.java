@@ -192,7 +192,7 @@ public class TaskContainer implements Serializable {
     }
 
     public Set<ExportTask> getExports() {
-        return Collections.unmodifiableSet(exports);
+        return exports;
     }
 
     public void clearResultData() {
