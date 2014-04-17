@@ -27,7 +27,7 @@ public class ComplextTaskSolver extends Observable {
     private static final int ROI_COUNT = 4;
     private static final int MAX_SHIFT_DIFFERENCE = 3;
     private static final int ROI_CIRCLE_FS_DENOM = 3;
-    private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 0.5, -5, 5, 0.25};
+    private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 0.5, -5, 5, 0.5};
     private static final double[] DEFAULT_DEF_RECT = new double[]{-5, 5, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};
     private double[] deformationCircle, deformationRect;
     private final Engine engine;
@@ -132,8 +132,10 @@ public class ComplextTaskSolver extends Observable {
         Logger.debug(shift2 + ", " + shift3);
         //// check if left equals right
         if (Math.abs(shift2 - shift3) > MAX_SHIFT_DIFFERENCE) {
-            Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat(" - ").concat(Double.toString(shift2)).concat(" vs ".concat(Double.toString(shift3))));
-//                throw new ComputationException(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH, Double.toString(shift1).concat(" vs ".concat(Double.toString(shift2))));
+            Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat("-LOWER- ").concat(Double.toString(shift2)).concat(" vs ".concat(Double.toString(shift3))));
+        }
+        if (Math.abs(shift0 - shift0) > MAX_SHIFT_DIFFERENCE) {
+            Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat("-UPPER- ").concat(Double.toString(shift0)).concat(" vs ".concat(Double.toString(shift1))));
         }
         //// generate new Circle ROIs
         final Set<ROI> rois = new HashSet<>(5);
