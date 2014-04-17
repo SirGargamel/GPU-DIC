@@ -17,7 +17,7 @@ public class DataExportMap implements IDataExport<double[][]> {
         final int round = dataParams[0];
         final double[][][] results = tc.getPerPixelResult(round);
         if (results == null || results.length == 0 || results[0].length == 0) {
-            throw new NullPointerException("Invalid result data.");
+            return null;
         }
 
         final int width = results.length;

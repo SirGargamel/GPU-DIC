@@ -33,10 +33,14 @@ public class TargetExportGUI implements ITargetExport {
 
         final int position = dataParams[0];
         final BufferedImage background = tc.getImage(position);
-        final BufferedImage overlay = ExportUtils.createImageFromMap((double[][]) data, direction);
-
         final Context context = (Context) targetParam;
-        context.storeMapExport(ExportUtils.overlayImage(background, overlay), position, ExportMode.MAP, direction);
+        final BufferedImage overlay;
+        if (data != null) {
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction));
+        } else {
+            overlay = background;
+        }
+        context.storeMapExport(overlay, position, ExportMode.MAP, direction);
     }
 
     private void exportLine(final double[] data, Direction direction, final Object targetParam, int[] dataParams, final TaskContainer tc) {

@@ -7,20 +7,18 @@ import cz.tul.dic.output.ExportMode;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.Format;
 
 public class TargetExportCsv implements ITargetExport {
 
     private static final String SEPARATOR_VALUE = ",";
-    private static final String SEPARATOR_LINE = "\n";    
+    private static final String SEPARATOR_LINE = "\n";
 
     @Override
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
-        if (data instanceof double[]) {            
+        if (data instanceof double[]) {
             // export image
             exportLine((double[]) data, targetParam);
-        } else if (data instanceof double[][]) {            
+        } else if (data instanceof double[][]) {
             // export map
             exportMap((double[][]) data, targetParam);
         } else {
@@ -35,17 +33,18 @@ public class TargetExportCsv implements ITargetExport {
 
         final File target = (File) targetParam;
         Utils.ensureDirectoryExistence(target);
-        
-        final int width= data.length;
-        final int height = data[0].length;
 
         try (FileWriter out = new FileWriter(target)) {
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    out.append(Double.toString(data[x][y]));
-                    out.append(SEPARATOR_VALUE);
+            if (data != null) {
+                final int width = data.length;
+                final int height = data[0].length;
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        out.append(Double.toString(data[x][y]));
+                        out.append(SEPARATOR_VALUE);
+                    }
+                    out.append(SEPARATOR_LINE);
                 }
-                out.append(SEPARATOR_LINE);
             }
         }
     }
@@ -58,11 +57,13 @@ public class TargetExportCsv implements ITargetExport {
         final File target = (File) targetParam;
 
         try (FileWriter out = new FileWriter(target)) {
-            for (int i = 0; i < data.length; i++) {
-                out.append(Double.toString(data[i]));
-                out.append(SEPARATOR_VALUE);
+            if (data != null) {
+                for (int i = 0; i < data.length; i++) {
+                    out.append(Double.toString(data[i]));
+                    out.append(SEPARATOR_VALUE);
+                }
+                out.append(SEPARATOR_LINE);
             }
-            out.append(SEPARATOR_LINE);
         }
     }
 

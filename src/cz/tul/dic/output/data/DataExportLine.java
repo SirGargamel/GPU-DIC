@@ -27,25 +27,22 @@ public class DataExportLine implements IDataExport<double[]> {
         for (int r = 0; r < roundCount; r++) {
             if (ExportUtils.isPointInsideROIs(x, y, rois, tc, r)) {
                 results = tc.getPerPixelResult(r);
-                if (results == null || results.length < x || results[0].length < y) {
-                    throw new IllegalArgumentException("Illegal result data.");
-                }
-                if (results[x][y] == null) {
-                    continue;
-                }
-
-                switch (direction) {
-                    case X:
-                    case Y:
-                    case ABS:
-                        result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
-                        break;
-                    case DX:
-                    case DY:
-                    case DABS:
-                        throw new UnsupportedOperationException("Not yet supported.");
-                    default:
-                        throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                if (results == null || results.length < x || results[0].length < y || results[x][y] == null) {
+                    result[r] = 0;
+                } else {
+                    switch (direction) {
+                        case X:
+                        case Y:
+                        case ABS:
+                            result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
+                            break;
+                        case DX:
+                        case DY:
+                        case DABS:
+                            throw new UnsupportedOperationException("Not yet supported.");
+                        default:
+                            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                    }
                 }
             }
         }

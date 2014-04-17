@@ -64,9 +64,14 @@ public class TargetExportFile implements ITargetExport {
         Utils.ensureDirectoryExistence(target);
 
         final BufferedImage background = tc.getImage(position);
-        final BufferedImage overlay = ExportUtils.createImageFromMap(data, direction);
+        final BufferedImage overlay;
+        if (data != null) {
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(data, direction));
+        } else {
+            overlay = background;
+        }
 
-        ImageIO.write(ExportUtils.overlayImage(background, overlay), "BMP", target);
+        ImageIO.write(overlay, "BMP", target);
     }
 
     private void exportVideo(final List<double[][]> data, Direction direction, final Object targetParams, TaskContainer tc) throws IOException, ComputationException {
@@ -108,13 +113,20 @@ public class TargetExportFile implements ITargetExport {
         }
         final NumberFormat nf = new DecimalFormat(sb.toString());
         File target;
+        double[][] map;
         for (int i = 0; i < roundCount; i++) {
             target = new File(temp.getAbsolutePath() + File.separator + name + nf.format(i) + IMAGE_EXTENSION);
             Utils.ensureDirectoryExistence(target);
             final BufferedImage background = tc.getImage(i);
-            final BufferedImage overlay = ExportUtils.createImageFromMap(data.get(i), direction, globalMaxPos, globalMaxNeg);
+            final BufferedImage overlay;
+            map = data.get(i);
+            if (map != null) {
+                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(map, direction, globalMaxPos, globalMaxNeg));
+            } else {
+                overlay = background;
+            }
 
-            ImageIO.write(ExportUtils.overlayImage(background, overlay), "BMP", target);
+            ImageIO.write(overlay, "BMP", target);
             Utils.markTempFilesForDeletion(tc, target);
         }
         // prepare script
