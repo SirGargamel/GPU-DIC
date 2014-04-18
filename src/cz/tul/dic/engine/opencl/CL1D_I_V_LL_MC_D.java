@@ -56,14 +56,13 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         // copy data and execute kernel
         wsm.setMaxCount(facetCount);
         wsm.reset();
-        int facetSubCount = wsm.getWorkSize();
-        int facetGlobalWorkSize;
+        int facetGlobalWorkSize, facetSubCount;
         long time;
         CLEvent event;
         int actualBase = 0, counter = 0;
-        final CLEventList eventList = new CLEventList((int) Math.ceil(facetCount / (double) facetSubCount));
+        final CLEventList eventList = new CLEventList(facetCount);
         while (actualBase < facetCount) {
-            facetSubCount = Math.min(wsm.getWorkSize(), facetCount);
+            facetSubCount = Math.min(wsm.getWorkSize(), facetCount - actualBase);
             facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationCount) * facetSubCount;
 
             kernel.setArg(ARGUMENT_INDEX_BASE, actualBase);
