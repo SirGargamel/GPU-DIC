@@ -167,7 +167,7 @@ public class Computation {
         tc.setParameter(TaskParameter.FACET_SIZE, facetSize);
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
-        tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
+        tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BILINEAR);
         tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
         tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
 //        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
@@ -177,7 +177,7 @@ public class Computation {
 
 //        TaskContainerUtils.serializeTaskToConfig(tc);
 
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
+        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File)tc.getParameter(TaskParameter.IN)).getName()).concat("-");
         final String ext = String.format("%02d", facetSize);
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
             tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext).concat(".bmp")), round));
@@ -197,14 +197,14 @@ public class Computation {
     public static void commenceComputationDynamic(final TaskContainer tc) throws IOException, ComputationException {
         TaskContainerChecker.checkTaskValidity(tc);        
 
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
+        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File)tc.getParameter(TaskParameter.IN)).getName()).concat("-");
         final String ext = String.format("%02d", tc.getParameter(TaskParameter.FACET_SIZE));
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
             tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext).concat(".bmp")), round));
         }
-        tc.addExport(ExportTask.generateSequenceExport(Direction.ABS, ExportTarget.FILE, new File(target.concat("-ABS-").concat(ext).concat(".avi"))));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.ABS, ExportTarget.FILE, new File(target.concat("ABS-").concat(ext).concat(".avi"))));
 
         computeDynamicTask(tc);
 
