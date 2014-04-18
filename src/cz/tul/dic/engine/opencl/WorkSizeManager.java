@@ -15,7 +15,7 @@ public class WorkSizeManager {
     private static final int MAX_TIME_BASE = 1_000_000_000;
     private static final double MAX_TIME;
     private static final double LIMIT_RATIO = 0.75;
-    private static final int INITIAL_WORK_SIZE = 32;
+    private static final int INITIAL_WORK_SIZE = 1;
     private final Map<Integer, Long> timeData;
     private int workSize, max;
 
