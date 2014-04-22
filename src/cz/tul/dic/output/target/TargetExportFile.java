@@ -46,7 +46,7 @@ public class TargetExportFile implements ITargetExport {
         } else if (data instanceof List) {
             // export video
             exportVideo((List<double[][]>) data, direction, targetParam, tc);
-        } else {
+        } else if (data != null) {
             throw new IllegalArgumentException("Unsupported data for file export - " + data.getClass());
         }
     }
