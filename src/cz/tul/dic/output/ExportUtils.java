@@ -296,7 +296,7 @@ public class ExportUtils {
             }
             g.drawString(nf.format(maxNeg), width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
 
-            g.drawString(nf.format(0.0), width - BAR_SIZE_VERT + minusWidth, halfHeight);
+            g.drawString(nf.format(0.0), width - BAR_SIZE_VERT + minusWidth, halfHeight - 1);
         }
 
         // positive part        
@@ -314,7 +314,7 @@ public class ExportUtils {
                 g.drawString(nf.format(maxPos / 2.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 2);
             }
             g.drawString(nf.format(maxPos), width - BAR_SIZE_VERT + minusWidth, height - 2);
-            g.drawString(nf.format(0.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + (metrics.getHeight() * 2 / 3));
+            g.drawString(nf.format(0.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + (metrics.getHeight() * 2 / 3 + 1));
         }
 
         g.dispose();
