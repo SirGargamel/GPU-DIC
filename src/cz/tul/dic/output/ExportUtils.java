@@ -32,6 +32,8 @@ public class ExportUtils {
     private static final double COLOR_GAP = 5 / 360.0;
     private static final double COLOR_RANGE_POS = 160 / 360.0;
     private static final double COLOR_RANGE_NEG = 75 / 360.0;
+    private static final int LIMIT_WIDTH = 180;
+    private static final int LIMIT_HEIGHT = 180;
 
     public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
         boolean result = false;
@@ -241,7 +243,6 @@ public class ExportUtils {
         final int x = image.getWidth() - 1 - BAR_SIZE_VERTA;
 
         final int width = image.getWidth();
-        String val;
         // positive part   
         if (max > BAR_LIMIT) {
             for (int y = 0; y < height; y++) {
@@ -250,20 +251,18 @@ public class ExportUtils {
             }
 
             g.setColor(COLOR_TEXT);
-            val = nf.format(max / 4.0);
-            g.drawString(val, width - BAR_SIZE_VERTA, height / 4 * 3);
-            val = nf.format(max / 2.0);
-            g.drawString(val, width - BAR_SIZE_VERTA, height / 2);
-            val = nf.format(max / 4.0 * 3);
-            g.drawString(val, width - BAR_SIZE_VERTA, height / 4);
-            val = nf.format(max);
-            g.drawString(val, width - BAR_SIZE_VERTA, metrics.getHeight() / 3 * 2);
+
+            if (height > LIMIT_HEIGHT) {
+                g.drawString(nf.format(max / 4.0), width - BAR_SIZE_VERTA, height / 4 * 3);
+                g.drawString(nf.format(max / 4.0 * 3), width - BAR_SIZE_VERTA, height / 4);
+            }
+            g.drawString(nf.format(max / 2.0), width - BAR_SIZE_VERTA, height / 2);
+            g.drawString(nf.format(max), width - BAR_SIZE_VERTA, metrics.getHeight() / 3 * 2);
         }
 
         // zero
         g.setColor(COLOR_TEXT);
-        val = nf.format(0.0);
-        g.drawString(val, width - BAR_SIZE_VERTA, height - 2);
+        g.drawString(nf.format(0.0), width - BAR_SIZE_VERTA, height - 2);
 
         g.dispose();
     }
@@ -278,7 +277,7 @@ public class ExportUtils {
         final int x = image.getWidth() - 1 - BAR_SIZE_VERT;
 
         final int width = image.getWidth();
-        String val;
+        final int minusWidth = metrics.stringWidth("-");
 
         // negative part
         if (maxNeg < -BAR_LIMIT) {
@@ -288,15 +287,19 @@ public class ExportUtils {
             }
 
             g.setColor(COLOR_TEXT);
-            val = nf.format(maxNeg / 3.0);
-            g.drawString(val, width - BAR_SIZE_VERT, halfHeight - halfHeight / 3);
-            val = nf.format(maxNeg / 3.0 * 2);
-            g.drawString(val, width - BAR_SIZE_VERT, halfHeight - halfHeight / 3 * 2);
-            val = nf.format(maxNeg);
-            g.drawString(val, width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
+
+            if (height > LIMIT_HEIGHT) {
+                g.drawString(nf.format(maxNeg / 3.0), width - BAR_SIZE_VERT, halfHeight - halfHeight / 3);
+                g.drawString(nf.format(maxNeg / 3.0 * 2), width - BAR_SIZE_VERT, halfHeight - halfHeight / 3 * 2);
+            } else {
+                g.drawString(nf.format(maxNeg / 2.0), width - BAR_SIZE_VERT, metrics.getHeight() - halfHeight / 2);
+            }
+            g.drawString(nf.format(maxNeg), width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
+
+            g.drawString(nf.format(0.0), width - BAR_SIZE_VERT + minusWidth, halfHeight);
         }
 
-        // positive part   
+        // positive part        
         if (maxPos > BAR_LIMIT) {
             for (int y = 0; y < halfHeight; y++) {
                 g.setColor(new Color(deformationToRGB(y, halfHeight - 1, 0)));
@@ -304,18 +307,15 @@ public class ExportUtils {
             }
 
             g.setColor(COLOR_TEXT);
-            val = nf.format(maxPos / 3.0);
-            g.drawString(val, width - BAR_SIZE_VERT, halfHeight + halfHeight / 3);
-            val = nf.format(maxPos / 3.0 * 2);
-            g.drawString(val, width - BAR_SIZE_VERT, halfHeight + halfHeight / 3 * 2);
-            val = nf.format(maxPos);
-            g.drawString(val, width - BAR_SIZE_VERT, height - 2);
+            if (height > LIMIT_HEIGHT) {
+                g.drawString(nf.format(maxPos / 3.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 3);
+                g.drawString(nf.format(maxPos / 3.0 * 2), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 3 * 2);
+            } else {
+                g.drawString(nf.format(maxPos / 2.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 2);
+            }
+            g.drawString(nf.format(maxPos), width - BAR_SIZE_VERT + minusWidth, height - 2);
+            g.drawString(nf.format(0.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + (metrics.getHeight() * 2 / 3));
         }
-
-        // zero
-        g.setColor(COLOR_TEXT);
-        val = nf.format(0.0);
-        g.drawString(val, width - BAR_SIZE_VERT, halfHeight + (metrics.getHeight() / 3));
 
         g.dispose();
     }
@@ -329,6 +329,7 @@ public class ExportUtils {
 
         final int y = image.getHeight() - 1 - BAR_SIZE_HOR;
         final int tY = image.getHeight() - 3;
+        final int tWidth = metrics.stringWidth(nf.format(max));
         String val;
 
         // negative part
@@ -339,8 +340,12 @@ public class ExportUtils {
             }
 
             g.setColor(COLOR_TEXT);
-            g.drawString(nf.format(min / 3.0), halfWidth - halfWidth / 3, tY);
-            g.drawString(nf.format(min / 3.0 * 2), halfWidth - halfWidth / 3 * 2, tY);
+            if (width > LIMIT_WIDTH) {
+                g.drawString(nf.format(min / 3.0), halfWidth - halfWidth / 3, tY);
+                g.drawString(nf.format(min / 3.0 * 2), halfWidth - halfWidth / 3 * 2, tY);
+            } else {
+                g.drawString(nf.format(min / 2.0), halfWidth - halfWidth / 2 - tWidth / 2, tY);
+            }
             g.drawString(nf.format(min), 0, tY);
         }
 
@@ -352,10 +357,14 @@ public class ExportUtils {
             }
 
             g.setColor(COLOR_TEXT);
-            g.drawString(nf.format(max / 3.0), halfWidth + halfWidth / 3, tY);
-            g.drawString(nf.format(max / 3.0 * 2), halfWidth + halfWidth / 3 * 2, tY);
-            val = nf.format(max);
-            g.drawString(val, width - metrics.stringWidth(val), tY);
+            if (width > LIMIT_WIDTH) {
+                g.drawString(nf.format(max / 3.0), halfWidth + halfWidth / 3 - tWidth, tY);
+                g.drawString(nf.format(max / 3.0 * 2), halfWidth + halfWidth / 3 * 2 - tWidth, tY);
+            } else {
+                g.drawString(nf.format(max / 2.0), halfWidth + halfWidth / 2 - tWidth / 2, tY);
+            }
+
+            g.drawString(nf.format(max), width - tWidth, tY);
         }
 
         g.setColor(COLOR_TEXT);
