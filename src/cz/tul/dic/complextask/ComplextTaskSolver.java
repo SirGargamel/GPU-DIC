@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Set;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -21,15 +22,6 @@ import java.util.Set;
  */
 public class ComplextTaskSolver extends Observable {
 
-//    private static final int ROI_COUNT = 4;
-//    private static final int MAX_SHIFT_DIFFERENCE = 3;
-    private static final int ROI_CIRCLE_FS_DENOM = 3;
-//    private static final double[] DEFAULT_DEF_CIRCLE = new double[]{-1, 1, 0.5, -5, 5, 0.5};
-//    private static final double[] DEFAULT_DEF_RECT = new double[]{-5, 5, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5};
-//    private static final int DEFAULT_DEF_RECT_PRECISION_SH = 10;
-//    private static final int DEFAULT_DEF_RECT_PRECISION_EL = 5;
-//    private static final double MINIMAL_SHIFT = 0.25;
-//    private double[] deformationLimitsCircle, deformationLimitsRect;
     private final Engine engine;
 
     public ComplextTaskSolver() {
@@ -39,13 +31,6 @@ public class ComplextTaskSolver extends Observable {
         engine = new Engine();
     }
 
-//    public void setDeformationCircle(double[] deformationCircle) {
-//        this.deformationLimitsCircle = deformationCircle;
-//    }
-//
-//    public void setDeformationRect(double[] deformationRect) {
-//        this.deformationLimitsRect = deformationRect;
-//    }
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         tc.clearResultData();
@@ -57,27 +42,25 @@ public class ComplextTaskSolver extends Observable {
         setChanged();
         notifyObservers(new int[]{currentRound, roundCount});
 
-        final RoiManager rm = new RoiManager(tc.getRois(baseRound));
+        final RoiManager rm = new RoiManager(tc, baseRound);
 
-        final Set<ROI> rois = rm.getROIs();
-        tc.setROIs(baseRound, rois);
-        for (ROI roi : rois) {
-            if (roi instanceof CircularROI) {
-                tc.addFacetSize(baseRound, roi, (int) (((CircularROI) roi).getRadius() / ROI_CIRCLE_FS_DENOM));
-                tc.setDeformationLimits(baseRound, roi, rm.getDefLimitsCircle());
-            } else {
-                tc.setDeformationLimits(baseRound, roi, rm.getDefLimitsRect());
-            }
-        }
-        // compute first round     
-        engine.computeRound(tc, baseRound, baseRound + 1);
-
-        currentRound++;
-        setChanged();
-        notifyObservers(new int[]{currentRound, roundCount});
-        exportRound(tc, baseRound);
-
-        boolean skip = true;
+//        final Set<ROI> rois = rm.getROIs();
+//        tc.setROIs(baseRound, rois);
+//        for (ROI roi : rois) {
+//            if (roi instanceof CircularROI) {
+//                tc.addFacetSize(baseRound, roi, (int) (((CircularROI) roi).getRadius() / ROI_CIRCLE_FS_DENOM));
+//                tc.setDeformationLimits(baseRound, roi, rm.getDefLimitsCircle());
+//            } else {
+//                tc.setDeformationLimits(baseRound, roi, rm.getDefLimitsRect());
+//            }
+//        }
+//        // compute first round     
+//        engine.computeRound(tc, baseRound, baseRound + 1);
+//
+//        currentRound++;
+//        setChanged();
+//        notifyObservers(new int[]{currentRound, roundCount});        
+//        exportRound(tc, baseRound);
         int prevR = baseRound;
         for (int round = 0; round < rounds.length; round += 2) {
             if (round > 0) {
@@ -89,11 +72,6 @@ public class ComplextTaskSolver extends Observable {
             }
 
             for (int r = rounds[round]; r < rounds[round + 1]; r++) {
-                if (skip) {
-                    skip = false;
-                    continue;
-                }
-
                 computeRound(tc, r, r + 1, prevR, rm);
                 currentRound++;
                 setChanged();
@@ -105,21 +83,14 @@ public class ComplextTaskSolver extends Observable {
     }
 
     private void computeRound(final TaskContainer tc, final int r, final int nextR, final int prevR, final RoiManager rm) throws ComputationException {
-        rm.detectROIShifts(tc, prevR, r);
-        tc.setROIs(r, rm.getROIs());
-
-        CircularROI cr;
-        for (ROI roi : rm.getROIs()) {
-            if (roi instanceof CircularROI) {
-                cr = (CircularROI) roi;
-                tc.addFacetSize(r, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
-                tc.setDeformationLimits(r, roi, rm.getDefLimitsCircle());
-            } else {
-                tc.setDeformationLimits(r, roi, rm.getDefLimitsRect());
-            }
-        }
-        // compute round
         engine.computeRound(tc, r, nextR);
+
+        if (rm.areLimitsReached(tc, r)) {
+            Logger.debug("Computing round nr." + (r + 1) + " again.");
+            engine.computeRound(tc, r, nextR);
+        }
+
+        rm.generateNextRound(tc, prevR, r);
     }
 
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
