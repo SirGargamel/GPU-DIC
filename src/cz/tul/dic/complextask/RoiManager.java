@@ -35,7 +35,8 @@ public class RoiManager {
         -5, 5, PRECISION_RECT_ZERO, -5, 5, PRECISION_RECT_ZERO,
         -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST};
     private static final int MAX_SHIFT_X = 5;
-    private static final double ADJUST_COEFF = 2.0;
+    private static final double ADJUST_COEFF_UP = 1.5;
+    private static final double ADJUST_COEFF_DOWN = 2;
     private final TaskContainer tc;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private RectangleROI rect;
@@ -186,40 +187,40 @@ public class RoiManager {
 
     private void increaseLimitsRect(final boolean[] reached) {
         if (reached[Coordinates.X * 2]) {
-            defLimitsRect[0] = ADJUST_COEFF * defLimitsRect[0];
-            defLimitsRect[6] = ADJUST_COEFF * defLimitsRect[6];
-            defLimitsRect[12] = ADJUST_COEFF * defLimitsRect[12];
+            defLimitsRect[0] = ADJUST_COEFF_UP * defLimitsRect[0];
+            defLimitsRect[6] = ADJUST_COEFF_UP * defLimitsRect[6];
+            defLimitsRect[12] = ADJUST_COEFF_UP * defLimitsRect[12];
         }
         if (reached[Coordinates.X * 2 + 1]) {
-            defLimitsRect[1] = ADJUST_COEFF * defLimitsRect[1];
-            defLimitsRect[7] = ADJUST_COEFF * defLimitsRect[7];
-            defLimitsRect[13] = ADJUST_COEFF * defLimitsRect[13];
+            defLimitsRect[1] = ADJUST_COEFF_UP * defLimitsRect[1];
+            defLimitsRect[7] = ADJUST_COEFF_UP * defLimitsRect[7];
+            defLimitsRect[13] = ADJUST_COEFF_UP * defLimitsRect[13];
         }
         if (reached[Coordinates.Y * 2]) {
-            defLimitsRect[3] = ADJUST_COEFF * defLimitsRect[3];
-            defLimitsRect[9] = ADJUST_COEFF * defLimitsRect[9];
-            defLimitsRect[15] = ADJUST_COEFF * defLimitsRect[15];
+            defLimitsRect[3] = ADJUST_COEFF_UP * defLimitsRect[3];
+            defLimitsRect[9] = ADJUST_COEFF_UP * defLimitsRect[9];
+            defLimitsRect[15] = ADJUST_COEFF_UP * defLimitsRect[15];
         }
         if (reached[Coordinates.Y * 2 + 1]) {
-            defLimitsRect[4] = ADJUST_COEFF * defLimitsRect[4];
-            defLimitsRect[10] = ADJUST_COEFF * defLimitsRect[10];
-            defLimitsRect[16] = ADJUST_COEFF * defLimitsRect[16];
+            defLimitsRect[4] = ADJUST_COEFF_UP * defLimitsRect[4];
+            defLimitsRect[10] = ADJUST_COEFF_UP * defLimitsRect[10];
+            defLimitsRect[16] = ADJUST_COEFF_UP * defLimitsRect[16];
         }
         Logger.debug("Expanded rect limits - " + Utils.toString(defLimitsRect));
     }
 
     private void increaseLimitsCircle(final boolean[] reached) {
         if (reached[Coordinates.X * 2]) {
-            defLimitsCircle[0] = ADJUST_COEFF * defLimitsCircle[0];
+            defLimitsCircle[0] = ADJUST_COEFF_UP * defLimitsCircle[0];
         }
         if (reached[Coordinates.X * 2 + 1]) {
-            defLimitsCircle[1] = ADJUST_COEFF * defLimitsCircle[1];
+            defLimitsCircle[1] = ADJUST_COEFF_UP * defLimitsCircle[1];
         }
         if (reached[Coordinates.Y * 2]) {
-            defLimitsCircle[3] = ADJUST_COEFF * defLimitsCircle[3];
+            defLimitsCircle[3] = ADJUST_COEFF_UP * defLimitsCircle[3];
         }
         if (reached[Coordinates.Y * 2 + 1]) {
-            defLimitsCircle[4] = ADJUST_COEFF * defLimitsCircle[4];
+            defLimitsCircle[4] = ADJUST_COEFF_UP * defLimitsCircle[4];
         }
         Logger.debug("Expanded circle limits - " + Utils.toString(defLimitsCircle));
     }
@@ -279,10 +280,10 @@ public class RoiManager {
         double val = Math.max(shift0, shift1);
         if (val < 0) {
             result[3] = adjustValue(val, defLimitsCircle[3]);
-            result[4] = -result[3] / ADJUST_COEFF;
+            result[4] = -result[3] / ADJUST_COEFF_UP;
         } else {
             result[4] = adjustValue(val, defLimitsCircle[4]);
-            result[3] = -result[4] / ADJUST_COEFF;
+            result[3] = -result[4] / ADJUST_COEFF_UP;
         }
 
         defLimitsCircle = result;
@@ -345,11 +346,11 @@ public class RoiManager {
 
         final double result;
         if (val <= (lim / 3.0)) {
-            result = elong / ADJUST_COEFF;
+            result = elong / ADJUST_COEFF_DOWN;
         } else if (val <= (lim * 2 / 3.0)) {
             result = elong;
         } else {
-            result = elong * ADJUST_COEFF;
+            result = elong * ADJUST_COEFF_UP;
         }
         return result;
     }
