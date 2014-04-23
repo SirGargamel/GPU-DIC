@@ -35,7 +35,7 @@ public class RoiManager {
         -5, 5, PRECISION_RECT_ZERO, -5, 5, PRECISION_RECT_ZERO,
         -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST};
     private static final int MAX_SHIFT_X = 5;
-    private static final double ADJUST_COEFF = 1.5;
+    private static final double ADJUST_COEFF = 2.0;
     private final TaskContainer tc;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private RectangleROI rect;
@@ -297,10 +297,10 @@ public class RoiManager {
     private void estimateNewRectangleDeformationLimits(final int round) {
         final double values[] = findLimits(round, rect);
 
-        final double[] result = new double[18];
+        final double[] result = new double[18];        
         // U
         result[0] = adjustValue(values[0], defLimitsRect[0]);
-        result[1] = adjustValue(values[1], defLimitsRect[1]);
+        result[1] = adjustValue(values[1], defLimitsRect[1]);                
         // V
         result[3] = adjustValue(values[2], defLimitsRect[3]);
         result[4] = adjustValue(values[3], defLimitsRect[4]);
@@ -316,6 +316,13 @@ public class RoiManager {
         // VY
         result[15] = adjustElongation(values[2], defLimitsRect[3], defLimitsRect[15]);
         result[16] = adjustElongation(values[3], defLimitsRect[4], defLimitsRect[16]);
+        // Steps
+        result[2] = defLimitsRect[2];
+        result[5] = defLimitsRect[5];
+        result[8] = defLimitsRect[8];
+        result[11] = defLimitsRect[11];
+        result[14] = defLimitsRect[14];
+        result[17] = defLimitsRect[17];
 
         for (int i = 0; i < result.length; i++) {
             if (result[i] != defLimitsRect[i]) {
@@ -329,7 +336,7 @@ public class RoiManager {
     }
 
     private static double adjustElongation(final double value, final double limit, final double elong) {
-        if (Math.signum(limit) != Math.signum(value)) {
+        if (value != 0 && Math.signum(limit) != Math.signum(value)) {
             Logger.debug("Signum mismatch - {0} vs {1}", new Object[]{value, limit});
             return value;
         }
