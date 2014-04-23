@@ -20,24 +20,27 @@ public abstract class TaskSplitter implements Iterator<ComputationTask> {
     protected final int index1, index2;
     protected final List<Facet> facets;
     protected final double[] deformations;
+    protected final ROI roi;
 
-    public TaskSplitter(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations) {
+    public TaskSplitter(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations, final ROI roi) {
         this.tc = tc;
         this.index1 = index1;
         this.index2 = index2;
         this.facets = facets;
         this.deformations = deformations;
+        this.roi = roi;
     }
 
-    public static Iterator<ComputationTask> prepareSplitter(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations) throws ComputationException {
+    public static Iterator<ComputationTask> prepareSplitter(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations, final ROI roi) throws ComputationException {
         final TaskSplit ts = (TaskSplit) tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
 
         switch (ts) {
             case NONE:
-                return new NoSplit(tc, index1, index2, facets, deformations);
+                return new NoSplit(tc, index1, index2, facets, deformations, roi);
             case STATIC:
-                return new StaticSplit(tc, index1, index2, facets, deformations);
-            case DYNAMIC_MEMORY:
+                return new StaticSplit(tc, index1, index2, facets, deformations, roi);                            
+            case DYNAMIC:
+                return new OpenCLSplitter(tc, index1, index2, facets, deformations, roi);
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of task splitting - " + ts);
         }

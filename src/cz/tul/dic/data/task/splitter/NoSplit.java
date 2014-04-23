@@ -6,6 +6,7 @@
 package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import java.util.List;
@@ -14,8 +15,8 @@ public class NoSplit extends TaskSplitter {
 
     private boolean hasNext;
 
-    public NoSplit(TaskContainer tc, int index1, int index2, final List<Facet> facets, final double[] deformations) {
-        super(tc, index1, index2, facets, deformations);
+    public NoSplit(TaskContainer tc, int index1, int index2, final List<Facet> facets, final double[] deformations, final ROI roi) {
+        super(tc, index1, index2, facets, deformations, roi);
 
         hasNext = true;
     }

@@ -8,6 +8,6 @@ public enum TaskSplit {
 
     NONE,
     STATIC,
-    DYNAMIC_MEMORY
+    DYNAMIC
     
 }

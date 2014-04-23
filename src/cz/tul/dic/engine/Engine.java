@@ -2,9 +2,6 @@ package cz.tul.dic.engine;
 
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
-import com.jogamp.opencl.CLDevice.Type;
-import com.jogamp.opencl.CLPlatform;
-import com.jogamp.opencl.util.Filter;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
@@ -20,13 +17,13 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
 import cz.tul.dic.engine.cluster.Analyzer2D;
+import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,33 +44,13 @@ public final class Engine extends Observable {
 
     private static final int BEST_RESULT_COUNT_MAX = 50;
     private static final double PRECISION = 0.5;
-    private static final Type DEVICE_TYPE = Type.GPU;
-    private final CLPlatform platform;
     private final CLContext context;
-    private final CLDevice device;    
+    private final CLDevice device;
     private final Map<double[], double[]> cacheDeformations;
 
     public Engine() {
-        @SuppressWarnings("unchecked")
-        final CLPlatform tmpP = CLPlatform.getDefault((Filter<CLPlatform>) (CLPlatform i) -> i.getMaxFlopsDevice(Type.GPU) != null && i.listCLDevices(CLDevice.Type.CPU).length == 0);
-        if (tmpP == null) {
-            platform = CLPlatform.getDefault();
-        } else {
-            platform = tmpP;
-        }
-
-        final CLDevice tmpD = platform.getMaxFlopsDevice(DEVICE_TYPE);
-        if (tmpD == null) {
-            device = platform.getMaxFlopsDevice();
-        } else {
-            device = tmpD;
-        }
-        System.out.println("Using " + device);
-
-        context = CLContext.create(device);
-        context.addCLErrorHandler((String string, ByteBuffer bb, long l) -> {
-            System.err.println("CLError - " + string);
-        });
+        device = DeviceManager.getDevice();
+        context = DeviceManager.getContext();
 
         cacheDeformations = new HashMap<>();
     }
@@ -138,7 +115,7 @@ public final class Engine extends Observable {
                 bestResults.add(null);
             }
 
-            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, index1, index2, facets.get(roi), deformations.get(roi));
+            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(tc, index1, index2, facets.get(roi), deformations.get(roi), roi);
             ComputationTask ct;
             while (it.hasNext()) {
                 ct = it.next();
@@ -303,7 +280,7 @@ public final class Engine extends Observable {
         }
 
         tc.setDisplacement(round, finalResults);
-    }        
+    }
 
     private static double dist2(final double[] val1, final double[] val2) {
         double a = val2[0] - val1[0];
