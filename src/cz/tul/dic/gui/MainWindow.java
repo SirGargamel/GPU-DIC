@@ -14,7 +14,6 @@ import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -435,22 +434,35 @@ public class MainWindow implements Initializable {
         adjustImageButtons(true);
         adjustConfigButtons(true);
         buttonResults.setDisable(true);
- 
+
         try {
             // 7202845m
             // 9905121m
             // 9820088m
-            
-//            final int val1 = 20;
-//            final int val2 = 30;
-//            for (int size = val1; size <= val1; size++) {
-//                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
-//            }
 
-            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-            final TaskContainer tc = Context.getInstance().getTc();
-            InputLoader.loadInput(tc);
-            Computation.commenceComputationDynamic(tc);
+            final int val1 = 25;
+            final int val2 = 30;
+            for (int size = val1; size <= val2; size++) {
+//                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
+
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+                TaskContainer tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputationDynamic(tc);
+                
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
+                tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputationDynamic(tc);
+                
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
+                tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputationDynamic(tc);
+            }
         } catch (IOException | ComputationException ex) {
             System.err.println(ex);
         }
