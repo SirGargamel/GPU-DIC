@@ -49,9 +49,8 @@ public final class Engine extends Observable {
     private static final Type DEVICE_TYPE = Type.GPU;
     private final CLPlatform platform;
     private final CLContext context;
-    private final CLDevice device;
-    Map<ROI, List<Facet>> cacheFacets;
-    Map<double[], double[]> cacheDeformations;
+    private final CLDevice device;    
+    private final Map<double[], double[]> cacheDeformations;
 
     public Engine() {
         @SuppressWarnings("unchecked")
@@ -112,12 +111,7 @@ public final class Engine extends Observable {
         final Map<ROI, List<Facet>> facets;
         final Map<ROI, double[]> deformations = new HashMap<>();
 
-        if (cacheFacets == null || !currentROIs.equals(tc.getRois(index1 - 1))) {
-            facets = FacetGenerator.generateFacets(tc, index1);
-        } else {
-            facets = cacheFacets;
-        }
-        cacheFacets = facets;
+        facets = FacetGenerator.generateFacets(tc, index1);
 
         double[] limits, data;
         for (ROI roi : currentROIs) {
@@ -250,7 +244,6 @@ public final class Engine extends Observable {
 //                    sb.setLength(sb.length() - 1);
 //                    System.out.println(sb.toString());
 //                }
-
                 deformedFacet = FacetUtils.deformFacet(f, d, degree);
                 for (Entry<int[], double[]> e : deformedFacet.entrySet()) {
                     x = e.getKey()[Coordinates.X];
