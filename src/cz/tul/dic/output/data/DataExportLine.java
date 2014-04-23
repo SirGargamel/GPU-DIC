@@ -26,20 +26,35 @@ public class DataExportLine implements IDataExport<double[]> {
         double[][][] results;
         for (int r = 0; r < roundCount; r++) {
             if (ExportUtils.isPointInsideROIs(x, y, rois, tc, r)) {
-                results = tc.getPerPixelResult(r);
+                switch (direction) {
+                    case Dx:
+                    case Dy:
+                    case Dabs:
+                        results = tc.getDisplacement(r);
+                        break;
+                    case Exx:
+                    case Eyy:
+                    case Exy:
+                    case Eabs:
+                        results = tc.getStrain(r);
+                    default:
+                        throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                }
+                
                 if (results == null || results.length < x || results[0].length < y || results[x][y] == null) {
                     result[r] = 0;
                 } else {
                     switch (direction) {
-                        case X:
-                        case Y:
-                        case ABS:
+                        case Dx:
+                        case Dy:
+                        case Dabs:
                             result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
                             break;
-                        case DX:
-                        case DY:
-                        case DABS:
-                            throw new UnsupportedOperationException("Not yet supported.");
+                        case Exx:
+                        case Eyy:
+                        case Exy:
+                        case Eabs:
+                            result[r] = ExportUtils.calculateStrain(results[x][y], direction);
                         default:
                             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                     }

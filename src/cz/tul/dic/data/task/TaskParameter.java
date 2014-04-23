@@ -4,6 +4,7 @@ import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.engine.strain.StrainEstimationType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.io.File;
 
@@ -22,7 +23,8 @@ public enum TaskParameter {
     TASK_SPLIT_VALUE(Integer.class),
     INTERPOLATION(Interpolation.class),
     RESULT_COMPILATION(ResultCompilation.class),
-    ROUND_LIMITS(int[].class);
+    ROUND_LIMITS(int[].class),
+    STRAIN_ESTIMATION_METHOD(StrainEstimationType.class);
 
     private final Class type;
 

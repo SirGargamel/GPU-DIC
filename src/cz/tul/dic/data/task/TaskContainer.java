@@ -32,17 +32,18 @@ public class TaskContainer implements Serializable {
     private transient List<Image> images;
     // results
     private final List<Map<ROI, List<double[][]>>> results;
-    private final List<double[][][]> finalResults;
+    private final List<double[][][]> displacement, strain;
 
     public TaskContainer(final Object input) {
         params = new HashMap<>();
         images = new LinkedList<>();
         rois = new Container<>();
         facetSizes = new Container<>();
-        results = new LinkedList<>();
-        finalResults = new LinkedList<>();
+        results = new LinkedList<>();        
         deformationLimits = new Container<>();
         exports = new HashSet<>();
+        displacement = new LinkedList<>();
+        strain = new LinkedList<>();
 
         this.input = input;
     }
@@ -175,16 +176,28 @@ public class TaskContainer implements Serializable {
         return result;
     }
 
-    public double[][][] getPerPixelResult(final int round) {
-        return finalResults.get(round);
+    public double[][][] getDisplacement(final int round) {
+        return displacement.get(round);
     }
 
-    public void setPerPixelResult(final int round, final double[][][] result) {
-        while (finalResults.size() <= round) {
-            finalResults.add(null);
+    public void setDisplacement(final int round, final double[][][] result) {
+        while (displacement.size() <= round) {
+            displacement.add(null);
         }
 
-        finalResults.set(round, result);
+        displacement.set(round, result);
+    }
+    
+    public double[][][] getStrain(final int round) {
+        return strain.get(round);
+    }
+
+    public void setStrain(final int round, final double[][][] result) {
+        while (strain.size() <= round) {
+            strain.add(null);
+        }
+
+        strain.set(round, result);
     }
 
     public void addExport(final ExportTask et) {
@@ -197,7 +210,7 @@ public class TaskContainer implements Serializable {
 
     public void clearResultData() {
         results.clear();
-        finalResults.clear();
+        displacement.clear();
     }
 
     private void readObject(ObjectInputStream stream)

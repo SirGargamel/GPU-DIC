@@ -15,7 +15,22 @@ public class DataExportMap implements IDataExport<double[][]> {
             throw new IllegalArgumentException("Not wnough input parameters (position required).");
         }
         final int round = dataParams[0];
-        final double[][][] results = tc.getPerPixelResult(round);
+        final double[][][] results;
+        switch (direction) {
+            case Dx:
+            case Dy:
+            case Dabs:
+                results = tc.getDisplacement(round);
+                break;
+            case Exx:
+            case Eyy:
+            case Exy:
+            case Eabs:
+                results = tc.getStrain(round);
+                break;
+            default:
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+        }
         if (results == null || results.length == 0 || results[0].length == 0) {
             return null;
         }
@@ -32,15 +47,17 @@ public class DataExportMap implements IDataExport<double[][]> {
                 }
 
                 switch (direction) {
-                    case X:
-                    case Y:
-                    case ABS:
+                    case Dx:
+                    case Dy:
+                    case Dabs:
                         result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
-                    case DX:
-                    case DY:
-                    case DABS:
-                        throw new UnsupportedOperationException("Not yet supported.");
+                    case Exx:
+                    case Eyy:
+                    case Exy:
+                    case Eabs:
+                        result[x][y] = ExportUtils.calculateStrain(results[x][y], direction);
+                        break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                 }

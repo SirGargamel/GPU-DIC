@@ -6,11 +6,12 @@ package cz.tul.dic.output;
  */
 public enum Direction {
 
-    X,
-    Y,
-    ABS,
-    DX,
-    DY,
-    DABS;
+    Dx,
+    Dy,
+    Dabs,
+    Exx,
+    Eyy,
+    Exy,
+    Eabs;
 
 }

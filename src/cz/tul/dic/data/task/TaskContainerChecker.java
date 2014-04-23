@@ -9,6 +9,7 @@ import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.strain.StrainEstimationType;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
@@ -113,6 +114,12 @@ public class TaskContainerChecker {
         if (resultCompilation == null) {
             Logger.warn("Adding default result compilator.");
             tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
+        }
+        
+        final Object strainEstimation = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
+        if (strainEstimation == null) {
+            Logger.warn("Adding default strain estimator.");
+            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationType.DIFFERENTIATION);
         }
     }
 

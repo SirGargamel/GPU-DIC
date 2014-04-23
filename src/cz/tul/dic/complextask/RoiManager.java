@@ -106,7 +106,7 @@ public class RoiManager {
         Arrays.fill(reachedRect, false);
         Arrays.fill(reachedCircle, false);
 
-        final double[][][] results = tc.getPerPixelResult(round);
+        final double[][][] results = tc.getDisplacement(round);
         double[] limits, values;
         if (results != null) {
             for (ROI roi : tc.getRois(round)) {
@@ -155,7 +155,7 @@ public class RoiManager {
 
         final int width = tc.getImage(round).getWidth();
         final int height = tc.getImage(round).getHeight();
-        final double[][][] results = tc.getPerPixelResult(round);
+        final double[][][] results = tc.getDisplacement(round);
 
         if (results != null) {
             for (int x = roi.getX1(); x <= roi.getX2(); x++) {
@@ -256,7 +256,7 @@ public class RoiManager {
     }
 
     private double determineROIShift(final int round, final ROI roi) {
-        final double[][][] results = tc.getPerPixelResult(round);
+        final double[][][] results = tc.getDisplacement(round);
         final Analyzer1D analyzer = new Analyzer1D();
         analyzer.setPrecision(PRECISION);
 

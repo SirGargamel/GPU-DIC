@@ -60,13 +60,13 @@ public class ExportUtils {
     public static double calculateDisplacement(final double[] def, final Direction dir) throws ComputationException {
         double result;
         switch (dir) {
-            case X:
+            case Dx:
                 result = def[0];
                 break;
-            case Y:
+            case Dy:
                 result = def[1];
                 break;
-            case ABS:
+            case Dabs:
                 result = Math.sqrt(def[0] * def[0] + def[1] * def[1]);
                 break;
             default:
@@ -76,24 +76,24 @@ public class ExportUtils {
         return result;
     }
 
-    public static double calculateDeformation(final double[][][] results, final int x, final int y, final Direction dir) throws ComputationException {
-        double result;
-
-        if (x < 0 || y < 0 || (x + 1) >= results.length || (y + 1) >= results[x].length) {
-            throw new IllegalArgumentException("Position outside of data range - [" + x + ";" + y + "]");
-        }
+    public static double calculateStrain(final double[] results, final Direction dir) throws ComputationException {
+        double result;        
 
         switch (dir) {
-            case DX:
-                result = results[x + 1][y][0] - results[x][y][0];
+            case Exx:
+                result = results[0];
                 break;
-            case DY:
-                result = results[x][y + 1][1] - results[x][y][1];
+            case Eyy:
+                result = results[1];
                 break;
-            case DABS:
-                final double val1 = results[x + 1][y][0] - results[x][y][0];
-                final double val2 = results[x][y + 1][1] - results[x][y][1];
-                result = Math.sqrt(val1 * val1 + val2 * val2);
+            case Exy:
+                result = results[2];
+                break;
+            case Eabs:
+                final double val1 = results[0];
+                final double val2 = results[1];
+                final double val3 = results[2];
+                result = Math.sqrt(val1 * val1 + val2 * val2 + val3 * val3);
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
@@ -160,16 +160,17 @@ public class ExportUtils {
         }
 
         switch (dir) {
-            case ABS:
-            case DABS:
+            case Dabs:
+            case Eabs:
+            case Exy:
                 drawVerticalBar(out, max);
                 break;
-            case Y:
-            case DY:
+            case Dy:
+            case Eyy:
                 drawVerticalBar(out, max, min);
                 break;
-            case X:
-            case DX:
+            case Dx:
+            case Exx:
                 drawHorizontalBar(out, max, min);
                 break;
             default:
@@ -199,16 +200,17 @@ public class ExportUtils {
         }
 
         switch (dir) {
-            case ABS:
-            case DABS:
+            case Dabs:
+            case Eabs:
+            case Exy:
                 drawVerticalBar(out, max);
                 break;
-            case Y:
-            case DY:
+            case Dy:
+            case Eyy:
                 drawVerticalBar(out, max, min);
                 break;
-            case X:
-            case DX:
+            case Dx:
+            case Exx:
                 drawHorizontalBar(out, max, min);
                 break;
             default:

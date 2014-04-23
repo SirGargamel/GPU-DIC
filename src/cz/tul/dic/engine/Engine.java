@@ -23,6 +23,7 @@ import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import java.nio.ByteBuffer;
@@ -103,6 +104,7 @@ public final class Engine extends Observable {
     }
 
     public void computeRound(final TaskContainer tc, final int index1, final int index2) throws ComputationException {
+        Logger.trace("Preparing round {0}.", index1 + 1);
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         int facetCount, defArrayLength;
         List<double[][]> bestResults;
@@ -125,6 +127,7 @@ public final class Engine extends Observable {
             }
         }
 
+        Logger.trace("Computing round {0}.", index1 + 1);
         for (ROI roi : currentROIs) {
             defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, index1, roi);
             kernel.prepareKernel(context, device, tc.getFacetSize(index1, roi), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(index1, roi)), defArrayLength, (Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
@@ -147,9 +150,12 @@ public final class Engine extends Observable {
             // store data           
             tc.setResult(index1, roi, bestResults);
         }
+        Logger.trace("Building results for round {0}.", index1 + 1);
         buildFinalResults(tc, index1, facets);
+        Logger.trace("Estimating straing for round {0}.", index1 + 1);
+        StrainEstimator.computeStrain(tc, index1);
         kernel.finishComputation();
-        Logger.trace("Computed round {0}.", index1 + 1);
+        Logger.debug("Computed round {0}.", index1 + 1);
     }
 
     private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final TaskContainer tc, final int round, final ROI roi, final Map<ROI, List<Facet>> facetMap, final Map<ROI, double[]> deformationMap) throws ComputationException {
@@ -296,8 +302,8 @@ public final class Engine extends Observable {
             }
         }
 
-        tc.setPerPixelResult(round, finalResults);
-    }
+        tc.setDisplacement(round, finalResults);
+    }        
 
     private static double dist2(final double[] val1, final double[] val2) {
         double a = val2[0] - val1[0];
