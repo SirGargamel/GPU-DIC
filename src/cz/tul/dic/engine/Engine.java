@@ -152,7 +152,7 @@ public final class Engine extends Observable {
         }
         Logger.trace("Building results for round {0}.", index1 + 1);
         buildFinalResults(tc, index1, facets);
-        Logger.trace("Estimating straing for round {0}.", index1 + 1);
+        Logger.trace("Estimating strain for round {0}.", index1 + 1);
         StrainEstimator.computeStrain(tc, index1);
         kernel.finishComputation();
         Logger.debug("Computed round {0}.", index1 + 1);
