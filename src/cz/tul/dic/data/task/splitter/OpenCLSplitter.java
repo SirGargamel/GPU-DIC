@@ -33,14 +33,17 @@ public class OpenCLSplitter extends TaskSplitter {
         super(tc, index1, index2, facets, deformations, roi);
 
         long dataSize = 0;
+        // image size
         dataSize += tc.getImage(index1).getHeight() * tc.getImage(index1).getWidth() * SIZE_PIXEL;
+        // two images per round
         dataSize *= 2;
+        // deformations
         dataSize += deformations.length * SIZE_FLOAT;
         // RESERVE
-        dataSize += 10 * SIZE_INT;
+        dataSize += 32 * SIZE_INT;
 
         fixedDataSize = dataSize;
-        
+
         checkIfHasNext();
     }
 
@@ -55,8 +58,6 @@ public class OpenCLSplitter extends TaskSplitter {
 
     @Override
     public ComputationTask next() {
-        final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
-
         final int rest = facets.size() - index;
         int defArrayLength;
         try {
@@ -65,13 +66,11 @@ public class OpenCLSplitter extends TaskSplitter {
             defArrayLength = 36;
             Logger.warn(ex);
         }
+        final int fs = tc.getFacetSize(index1, roi);
 
         int taskSize = rest;
-        long mem = computeMemorySize(rest, tc.getFacetSize(index1, roi), defArrayLength);
-
-        while (mem > maxMem) {
+        while (!isMemOk(taskSize, fs, defArrayLength)) {
             taskSize /= 2;
-            mem = computeMemorySize(rest, tc.getFacetSize(index1, roi), defArrayLength);
         }
 
         final List<Facet> sublist = new ArrayList<>(taskSize);
@@ -90,15 +89,18 @@ public class OpenCLSplitter extends TaskSplitter {
         return new ComputationTask(tc.getImage(index1), tc.getImage(index2), sublist, deformations);
     }
 
-    private long computeMemorySize(final int facetCount, final int facetSize, final int deformationCount) {
-        long result = fixedDataSize;
+    private boolean isMemOk(final int facetCount, final int facetSize, final int deformationArraySize) {
+        final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
+        final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;
+        final long resultSize = facetCount * (deformations.length / deformationArraySize) * SIZE_FLOAT;
+        final long fullSize = fixedDataSize + facetDataSize + facetCentersSize + resultSize;
 
-        // facet data
-        result += facetSize * facetSize * 2 * SIZE_INT * facetCount;
-        // facet centers
-        result += 2 * SIZE_FLOAT * facetCount;
-        // results
-        result += facetCount * deformationCount * SIZE_FLOAT;
+        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
+        final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
+        boolean result = fullSize < maxMem;
+        result &= resultSize < maxAllocMem;
+        result &= facetDataSize < maxAllocMem;
+        result &= facetCentersSize < maxAllocMem;
 
         return result;
     }
