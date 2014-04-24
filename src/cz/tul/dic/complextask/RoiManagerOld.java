@@ -21,7 +21,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class RoiManager {
+public class RoiManagerOld {
 
     private static final double PRECISION = 0.1;
     private static final int ROI_CIRCLE_FS_DENOM = 3;
@@ -42,7 +42,7 @@ public class RoiManager {
     private RectangleROI rect;
     private double[] defLimitsCircle, defLimitsRect;
 
-    public RoiManager(final TaskContainer tc, final int initialRound) throws ComputationException {
+    public RoiManagerOld(final TaskContainer tc, final int initialRound) throws ComputationException {
         this.tc = tc;
 
         final List<CircularROI> cRois = new ArrayList<>(4);

@@ -218,4 +218,13 @@ public class TaskContainer implements Serializable {
         stream.defaultReadObject();
         images = new LinkedList<>();
     }
+    
+    public TaskContainer cloneInputTask(final int round) {
+        final TaskContainer result = new TaskContainer(input);
+        result.images = images;
+        result.params.putAll(params);        
+        result.exports.addAll(exports);
+        
+        return result;
+    }
 }

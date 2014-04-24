@@ -1,8 +1,6 @@
 package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.roi.CircularROI;
-import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -13,8 +11,6 @@ import cz.tul.dic.output.Exporter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Observable;
-import java.util.Set;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -31,7 +27,7 @@ public class ComplextTaskSolver extends Observable {
         engine = new Engine();
     }
 
-    public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
+    public TaskContainer solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
         final int roundCount = TaskContainerUtils.getRoundCount(tc);
         tc.clearResultData();
 
@@ -42,55 +38,38 @@ public class ComplextTaskSolver extends Observable {
         setChanged();
         notifyObservers(new int[]{currentRound, roundCount});
 
-        final RoiManager rm = new RoiManager(tc, baseRound);
-
-//        final Set<ROI> rois = rm.getROIs();
-//        tc.setROIs(baseRound, rois);
-//        for (ROI roi : rois) {
-//            if (roi instanceof CircularROI) {
-//                tc.addFacetSize(baseRound, roi, (int) (((CircularROI) roi).getRadius() / ROI_CIRCLE_FS_DENOM));
-//                tc.setDeformationLimits(baseRound, roi, rm.getDefLimitsCircle());
-//            } else {
-//                tc.setDeformationLimits(baseRound, roi, rm.getDefLimitsRect());
-//            }
-//        }
-//        // compute first round     
-//        engine.computeRound(tc, baseRound, baseRound + 1);
-//
-//        currentRound++;
-//        setChanged();
-//        notifyObservers(new int[]{currentRound, roundCount});        
-//        exportRound(tc, baseRound);
-        int prevR = baseRound;
+//        final RoiManagerOld rm = new RoiManagerOld(tc, baseRound);
+        final CircleROIManager crm = new CircleROIManager(tc, baseRound);
+        final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound); 
+        
+        final TaskContainer tcR = rrm.getTc();
+        
         for (int round = 0; round < rounds.length; round += 2) {
             if (round > 0) {
-                computeRound(tc, rounds[round - 1], rounds[round], prevR, rm);
+                computeRound(rounds[round - 1], rounds[round], crm);
+                computeRound(rounds[round - 1], rounds[round], rrm);
                 currentRound++;
                 setChanged();
                 notifyObservers(new int[]{currentRound, roundCount});
-                exportRound(tc, rounds[round - 1]);
+                exportRound(tcR, rounds[round - 1]);
             }
 
             for (int r = rounds[round]; r < rounds[round + 1]; r++) {
-                computeRound(tc, r, r + 1, prevR, rm);
+                computeRound(r, r+1, crm);
+                computeRound(r, r+1, rrm);
                 currentRound++;
                 setChanged();
-                notifyObservers(new int[]{currentRound, roundCount});
-                prevR = r;
-                exportRound(tc, r);
+                notifyObservers(new int[]{currentRound, roundCount});                
+                exportRound(tcR, r);
             }
         }
+        
+        return tcR;
     }
 
-    private void computeRound(final TaskContainer tc, final int r, final int nextR, final int prevR, final RoiManager rm) throws ComputationException {
-        engine.computeRound(tc, r, nextR);
-
-        if (rm.areLimitsReached(tc, r)) {
-            Logger.debug("Computing round nr." + (r + 1) + " again.");
-            engine.computeRound(tc, r, nextR);
-        }
-
-        rm.generateNextRound(tc, prevR, r);
+    private void computeRound(final int r, final int nextR, final ROIManager rm) throws ComputationException {
+        engine.computeRound(rm.getTc(), r, nextR);
+        rm.generateNextRound(r, nextR);
     }
 
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {

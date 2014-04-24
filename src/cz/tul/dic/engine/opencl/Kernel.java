@@ -110,7 +110,9 @@ public abstract class Kernel {
         queue.putWriteBuffer(clDeformations, false);
         final int deformationCount = deformations.length / deformationLength;
 
+        System.out.println(facetCount + "-" + deformationCount);
         clResults = context.createFloatBuffer(facetCount * deformationCount, CLMemory.Mem.WRITE_ONLY);
+        
         clRoundMem.add(clResults);
 
         runKernel(clImageA, clImageB,

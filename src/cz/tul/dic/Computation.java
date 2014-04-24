@@ -171,7 +171,7 @@ public class Computation {
         tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
         tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
 //        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
-//        tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
+//        tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);        
 
         TaskContainerChecker.checkTaskValidity(tc);
 
@@ -222,12 +222,12 @@ public class Computation {
         try {
             long time = System.nanoTime();
             ComplextTaskSolver cts = new ComplextTaskSolver();
-            cts.solveComplexTask(tc);
+            final TaskContainer result = cts.solveComplexTask(tc);
             time = System.nanoTime() - time;
             Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
-            for (ExportTask et : tc.getExports()) {
-                Exporter.export(et, tc);
+            for (ExportTask et : result.getExports()) {
+                Exporter.export(et, result);
             }
         } catch (ComputationException ex) {
             Logger.error(ex);
