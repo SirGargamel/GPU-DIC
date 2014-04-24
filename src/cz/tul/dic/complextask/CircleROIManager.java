@@ -27,7 +27,7 @@ public class CircleROIManager extends ROIManager {
     private static final double PRECISION_CIRC_ZERO = 0.5;
     private static final double[] DEFAULT_DEF_LIM_CIRCLE = new double[]{-1, 1, PRECISION_CIRC_ZERO, -5, 5, PRECISION_CIRC_ZERO};
     private static final double ADJUST_COEFF_UP = 2.0;
-    private static final double ADJUST_COEFF_DOWN = 1.5;
+    private static final double ADJUST_COEFF_DOWN = 0.75;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private double shiftTop, shiftBottom;
 
@@ -145,12 +145,12 @@ public class CircleROIManager extends ROIManager {
         final double lim = Math.abs(limit);
 
         final double result;
-        if (val <= (lim / 3.0)) {
-            result = value / ADJUST_COEFF_DOWN;
-        } else if (val <= (lim * 2 / 3.0)) {
-            result = value;
+        if (val < (lim / 3.0)) {
+            result = lim * ADJUST_COEFF_DOWN;
+        } else if (val < (lim * 2 / 3.0)) {
+            result = lim;
         } else {
-            result = value * ADJUST_COEFF_UP;
+            result = lim * ADJUST_COEFF_UP;
         }
         return result;
     }
