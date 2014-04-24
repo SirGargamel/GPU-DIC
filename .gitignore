@@ -4,3 +4,4 @@
 *.log
 /build.xml
 /manifest.mf
+/cov-int/
