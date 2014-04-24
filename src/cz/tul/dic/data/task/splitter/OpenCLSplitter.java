@@ -95,12 +95,12 @@ public class OpenCLSplitter extends TaskSplitter {
         final long resultSize = facetCount * (deformations.length / deformationArraySize) * SIZE_FLOAT;
         final long fullSize = fixedDataSize + facetDataSize + facetCentersSize + resultSize;
 
-        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
+        final long maxAllocMem = Math.min(DeviceManager.getDevice().getMaxMemAllocSize(), Integer.MAX_VALUE);
         final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
-        boolean result = fullSize < maxMem;
-        result &= resultSize < maxAllocMem;
-        result &= facetDataSize < maxAllocMem;
-        result &= facetCentersSize < maxAllocMem;
+        boolean result = fullSize > 0 && fullSize < maxMem;
+        result &= resultSize > 0 && resultSize < maxAllocMem;
+        result &= facetDataSize > 0 && facetDataSize < maxAllocMem;
+        result &= facetCentersSize > 0 && facetCentersSize < maxAllocMem;
 
         return result;
     }
