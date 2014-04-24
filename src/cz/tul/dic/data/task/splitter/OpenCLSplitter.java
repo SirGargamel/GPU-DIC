@@ -61,7 +61,7 @@ public class OpenCLSplitter extends TaskSplitter {
         final int rest = facets.size() - index;
         int defArrayLength;
         try {
-            defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, index, roi);
+            defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, index1, roi);
         } catch (ComputationException ex) {
             defArrayLength = 36;
             Logger.warn(ex);
