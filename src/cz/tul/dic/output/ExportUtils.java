@@ -77,7 +77,7 @@ public class ExportUtils {
     }
 
     public static double calculateStrain(final double[] results, final Direction dir) throws ComputationException {
-        double result;        
+        double result;
 
         switch (dir) {
             case Exx:
@@ -162,11 +162,11 @@ public class ExportUtils {
         switch (dir) {
             case Dabs:
             case Eabs:
-            case Exy:
                 drawVerticalBar(out, max);
                 break;
             case Dy:
             case Eyy:
+            case Exy:
                 drawVerticalBar(out, max, min);
                 break;
             case Dx:
