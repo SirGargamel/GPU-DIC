@@ -11,8 +11,11 @@ import java.nio.IntBuffer;
 
 public class CL1D_I_V_LL_MC_D extends Kernel {
 
-    private static final int ARGUMENT_INDEX_COUNT = 11;
-    private static final int ARGUMENT_INDEX_BASE = 12;
+    private static final int ARGUMENT_INDEX_G_COUNT = 10;
+    private static final int ARGUMENT_INDEX_F_COUNT = 11;
+    private static final int ARGUMENT_INDEX_F_BASE = 12;
+    private static final int ARGUMENT_INDEX_D_COUNT = 13;
+    private static final int ARGUMENT_INDEX_D_BASE = 14;
     private static final int LWS0_BASE = 32;
     private final WorkSizeManager wsm;
 
@@ -29,19 +32,13 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount) {
         final int facetArea = facetSize * facetSize;
-        final int lws0base = calculateLws0base(kernel);
-        int lws0;
-        if (deformationCount > facetArea) {
-            lws0 = EngineMath.roundUp(lws0base, facetArea);
-        } else {
-            lws0 = EngineMath.roundUp(lws0base, deformationCount);
-        }
+        int lws0 = EngineMath.roundUp(calculateLws0base(kernel), facetArea);
         lws0 = Math.min(lws0, device.getMaxWorkItemSizes()[0]);
 
-        int groupCountPerFacet = deformationCount / lws0;
-        if (deformationCount % lws0 > 0) {
-            groupCountPerFacet++;
-        }
+//        int groupCountPerFacet = deformationCount / lws0;
+//        if (deformationCount % lws0 > 0) {
+//            groupCountPerFacet++;
+//        }
 
         kernel.rewind();
         kernel.putArgs(imgA, imgB, facetData, facetCenters, deformations, results)
@@ -49,34 +46,58 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 .putArg(deformationCount)
                 .putArg(facetSize)
                 .putArg(facetCount)
-                .putArg(groupCountPerFacet)
+                .putArg(0)
+                .putArg(0)
+                .putArg(0)
                 .putArg(0)
                 .putArg(0);
         kernel.rewind();
         // copy data and execute kernel
-        wsm.setMaxCount(facetCount);
+        wsm.setMaxFacetCount(facetCount);
+        wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        int facetGlobalWorkSize, facetSubCount;
+        int facetGlobalWorkSize, facetSubCount = 1, deformationSubCount;
         long time;
         CLEvent event;
-        int actualBase = 0, counter = 0;
+        int actualBaseFacet = 0, actualBaseDeformation;
+        int groupCountPerFacet, counter = 0;
         final CLEventList eventList = new CLEventList(facetCount);
-        while (actualBase < facetCount) {
-            facetSubCount = Math.min(wsm.getWorkSize(), facetCount - actualBase);
-            facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationCount) * facetSubCount;
+        while (actualBaseFacet < facetCount) {
+            actualBaseDeformation = 0;
 
-            kernel.setArg(ARGUMENT_INDEX_BASE, actualBase);
-            kernel.setArg(ARGUMENT_INDEX_COUNT, facetSubCount);
-            queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0, eventList);
+            while (actualBaseDeformation < deformationCount) {
+                facetSubCount = Math.min(wsm.getFacetCount(), facetCount - actualBaseFacet);
+                deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - actualBaseDeformation);
+                
+//                System.out.print(facetSubCount + ", " + deformationSubCount + "-");
 
-            queue.putWaitForEvent(eventList, counter, true);
-            event = eventList.getEvent(counter);
-            time = event.getProfilingInfo(CLEvent.ProfilingCommand.END) - event.getProfilingInfo(CLEvent.ProfilingCommand.START);
-            wsm.storeTime(facetSubCount, time);
+                facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationSubCount) * facetSubCount;
 
-            actualBase += facetSubCount;
-            counter++;
+                groupCountPerFacet = deformationSubCount / lws0;
+                if (deformationCount % lws0 > 0) {
+                    groupCountPerFacet++;
+                }
+
+                kernel.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerFacet);
+                kernel.setArg(ARGUMENT_INDEX_F_BASE, actualBaseFacet);
+                kernel.setArg(ARGUMENT_INDEX_F_COUNT, facetSubCount);
+                kernel.setArg(ARGUMENT_INDEX_D_BASE, actualBaseDeformation);
+                kernel.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
+                queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0, eventList);
+
+                queue.putWaitForEvent(eventList, counter, true);
+                event = eventList.getEvent(counter);
+                time = event.getProfilingInfo(CLEvent.ProfilingCommand.END) - event.getProfilingInfo(CLEvent.ProfilingCommand.START);
+                wsm.storeTime(facetSubCount, deformationSubCount, time);
+//                System.out.print(time / 1_000_000_000 + "; ");
+
+                actualBaseDeformation += deformationSubCount;
+                counter++;
+            }
+
+            actualBaseFacet += facetSubCount;
         }
+//        System.out.println();
 
         eventList.release();
     }

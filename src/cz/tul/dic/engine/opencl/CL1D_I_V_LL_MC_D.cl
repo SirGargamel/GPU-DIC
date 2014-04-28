@@ -10,7 +10,8 @@ kernel void CL1D_I_V_LL_MC_D(
     const int imageWidth, const int deformationCount,
     const int facetSize, const int facetCount,
     const int groupCountPerFacet,
-    const int facetSubCount, const int facetBase) 
+    const int facetSubCount, const int facetBase,
+    const int deformationSubCount, const int deformationBase) 
 {        
     //// ID checks    
     // facet
@@ -26,7 +27,7 @@ kernel void CL1D_I_V_LL_MC_D(
     const int deformationId = groupSubId * groupSize + localId;    
     // index computation
     const int facetSize2 = facetSize * facetSize;
-    const int baseIndexDeformation = deformationId * %DEF_D%;
+    const int baseIndexDeformation = (deformationBase + deformationId) * %DEF_D%;
     // load facet to local memory    
     local int2 facetLocal[-1*-1];
     int index;
@@ -51,7 +52,7 @@ kernel void CL1D_I_V_LL_MC_D(
         }
     }        
     barrier(CLK_LOCAL_MEM_FENCE);
-    if (deformationId >= deformationCount) {
+    if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
         return;
     }
     // deform facet

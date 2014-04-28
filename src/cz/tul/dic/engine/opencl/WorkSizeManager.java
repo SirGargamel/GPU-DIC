@@ -3,21 +3,27 @@ package cz.tul.dic.engine.opencl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class WorkSizeManager {
+public final class WorkSizeManager {
 
-    private static final double MAX_TIME_WIN = 2;
-    private static final double MAX_TIME_LIN = 5;
-    private static final int MAX_TIME_BASE = 1_000_000_000;
-    private static final double MAX_TIME;
+    private static final long MAX_TIME_WIN = 2;
+    private static final long MAX_TIME_LIN = 5;
+    private static final long MAX_TIME_BASE = 1_000_000_000; // 1s
+    private static final long MAX_TIME;
     private static final double LIMIT_RATIO = 0.75;
-    private static final int INITIAL_WORK_SIZE = 1;
-    private final Map<Integer, Long> timeData;
-    private int workSize, max;
+    private static final int INITIAL_WORK_SIZE_F = 1;
+    private static final int INITIAL_WORK_SIZE_D = 1_000;
+    private static final double GROWTH_LIMIT_A = 0.5;
+    private static final double GROWTH_LIMIT_B = 0.75;
+    private static final double GROWTH_FACTOR_A = 2;
+    private static final double GROWTH_FACTOR_B = 1.5;
+    private final Map<Integer, Map<Integer, Long>> timeData;
+    private int workSizeF, workSizeD, maxF, maxD;
 
     static {
         final String os = System.getProperty("os.name").toLowerCase();
@@ -30,58 +36,98 @@ public class WorkSizeManager {
 
     public WorkSizeManager() {
         timeData = new HashMap<>();
-        workSize = INITIAL_WORK_SIZE;
+        reset();
     }
 
-    public int getWorkSize() {
-        return workSize;
+    public int getFacetCount() {
+        return workSizeF;
     }
 
-    public void setMaxCount(final int max) {
-        this.max = max;
+    public int getDeformationCount() {
+        return workSizeD;
+    }
+
+    public void setMaxFacetCount(final int max) {
+        this.maxF = max;
+    }
+
+    public void setMaxDeformationCount(final int max) {
+        this.maxD = max;
     }
 
     public void reset() {
-        workSize = INITIAL_WORK_SIZE;
+        workSizeF = INITIAL_WORK_SIZE_F;
+        workSizeD = INITIAL_WORK_SIZE_D;
         timeData.clear();
     }
 
-    public void storeTime(final int workSize, final long time) {
-        timeData.put(workSize, time);
+    public void storeTime(final int workSizeF, final int workSizeD, final long time) {
+        Map<Integer, Long> m = timeData.get(workSizeF);
+        if (m == null) {
+            m = new TreeMap<>();
+            timeData.put(workSizeF, m);
+        }
+
+        m.put(workSizeD, time);
         computeNextWorkSize();
     }
 
     private void computeNextWorkSize() {
-        int maxCount = 0;
-        long maxTime = -1;
-
-        if (timeData.isEmpty()) {
-            maxCount = INITIAL_WORK_SIZE;
-        } else if (timeData.size() == 1) {
-            maxTime = timeData.values().iterator().next();
-            maxCount = computeNewCount(INITIAL_WORK_SIZE, maxTime);
-        } else if (timeData.size() > 1) {
-            for (Entry<Integer, Long> e : timeData.entrySet()) {
-                if (e.getKey() > maxCount) {
-                    maxCount = e.getKey();
-                    maxTime = e.getValue();
-                }
-            }
-            maxCount = computeNewCount(maxCount, maxTime);
+        if (!timeData.isEmpty()) {
+            final long[] max = findMaxValue();
+            final int[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
+            workSizeF = newMax[0];
+            workSizeD = newMax[1];
         }
-
-        workSize = maxCount;
     }
 
-    private int computeNewCount(final int oldCount, final long time) {
-        int result;
-        if (oldCount < max) {
-            final long timePerFacet = time / oldCount;
-            final int maxCount = (int) (MAX_TIME / timePerFacet);
-            result = (int) (maxCount / LIMIT_RATIO);
-        } else {
-            result = Math.min(max, oldCount);
+    private long[] findMaxValue() {
+        final long[] result = new long[]{0, 0, -1};
+
+        long t;
+        int f, d;
+        for (Entry<Integer, Map<Integer, Long>> e : timeData.entrySet()) {
+            for (Entry<Integer, Long> e2 : e.getValue().entrySet()) {
+                t = e2.getValue();
+                if (t < MAX_TIME) {
+                    f = e.getKey();
+                    d = e2.getKey();
+                    if ((f == result[0] && d > result[1])
+                            || f > result[0]) {
+                        result[0] = f;
+                        result[1] = d;
+                        result[2] = t;
+                    }
+                }
+            }
         }
+
         return result;
+    }
+
+    private int[] computeNewCount(final int oldMaxF, final int oldMaxD, final long time) {
+        final int[] result = new int[]{oldMaxF, oldMaxD};
+        if (oldMaxD < maxD) {
+            result[1] = adjustValue(time, MAX_TIME, oldMaxD, maxD);
+        } else {
+            result[0] = adjustValue(time, MAX_TIME, oldMaxF, maxF);
+        }
+
+        return result;
+    }
+
+    private int adjustValue(final long currentTime, final long maxTime, final int value, final int maxValue) {
+        final double ratio = currentTime / (double) maxTime;
+
+        final int result;
+        if (ratio < GROWTH_LIMIT_A) {
+            result = (int) Math.floor(value * GROWTH_FACTOR_A);
+        } else if (ratio < GROWTH_LIMIT_B) {
+            result = (int) Math.floor(value * GROWTH_FACTOR_B);
+        } else {
+            result = value;
+        }
+
+        return Math.min(result, maxValue);
     }
 }
