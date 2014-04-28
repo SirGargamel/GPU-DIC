@@ -49,9 +49,7 @@ public final class Engine extends Observable {
 
     public Engine() {
         device = DeviceManager.getDevice();
-        context = DeviceManager.getContext();
-
-        cacheDeformations = new HashMap<>();
+        context = DeviceManager.getContext();       
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException {
