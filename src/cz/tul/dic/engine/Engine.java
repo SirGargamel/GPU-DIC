@@ -45,8 +45,7 @@ public final class Engine extends Observable {
     private static final int BEST_RESULT_COUNT_MAX = 50;
     private static final double PRECISION = 0.5;
     private final CLContext context;
-    private final CLDevice device;
-    private final Map<double[], double[]> cacheDeformations;
+    private final CLDevice device;    
 
     public Engine() {
         device = DeviceManager.getDevice();
@@ -92,16 +91,8 @@ public final class Engine extends Observable {
 
         facets = FacetGenerator.generateFacets(tc, index1);
 
-        double[] limits, data;
         for (ROI roi : currentROIs) {
-            limits = tc.getDeformationLimits(index1, roi);
-            if (cacheDeformations.containsKey(limits)) {
-                deformations.put(roi, cacheDeformations.get(limits));
-            } else {
-                data = DeformationGenerator.generateDeformations(limits);
-                deformations.put(roi, data);
-                cacheDeformations.put(limits, data);
-            }
+            deformations.put(roi, DeformationGenerator.generateDeformations(tc.getDeformationLimits(index1, roi)));
         }
 
         Logger.trace("Computing round {0}.", index1 + 1);
