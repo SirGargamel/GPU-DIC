@@ -434,13 +434,17 @@ public class MainWindow implements Initializable {
         adjustImageButtons(true);
         adjustConfigButtons(true);
         buttonResults.setDisable(true);
+        
+        performComputationTest();
+    }
 
+    private void performComputationTest() {
         try {
             // 7202845m
             // 9905121m
             // 9820088m
 
-            final int val1 = 25;
+            final int val1 = 20;
             final int val2 = 30;
             for (int size = val1; size <= val2; size++) {
 //                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
@@ -450,13 +454,13 @@ public class MainWindow implements Initializable {
                 InputLoader.loadInput(tc);
                 tc.setParameter(TaskParameter.FACET_SIZE, size);
                 Computation.commenceComputationDynamic(tc);
-                
+
                 Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
                 tc = Context.getInstance().getTc();
                 InputLoader.loadInput(tc);
                 tc.setParameter(TaskParameter.FACET_SIZE, size);
                 Computation.commenceComputationDynamic(tc);
-                
+
                 Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
                 tc = Context.getInstance().getTc();
                 InputLoader.loadInput(tc);
