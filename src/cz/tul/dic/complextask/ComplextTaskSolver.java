@@ -40,10 +40,10 @@ public class ComplextTaskSolver extends Observable {
 
 //        final RoiManagerOld rm = new RoiManagerOld(tc, baseRound);
         final CircleROIManager crm = new CircleROIManager(tc, baseRound);
-        final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound); 
-        
+        final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
+
         final TaskContainer tcR = rrm.getTc();
-        
+
         for (int round = 0; round < rounds.length; round += 2) {
             if (round > 0) {
                 computeRound(rounds[round - 1], rounds[round], crm);
@@ -55,15 +55,15 @@ public class ComplextTaskSolver extends Observable {
             }
 
             for (int r = rounds[round]; r < rounds[round + 1]; r++) {
-                computeRound(r, r+1, crm);
-                computeRound(r, r+1, rrm);
+                computeRound(r, r + 1, crm);
+                computeRound(r, r + 1, rrm);
                 currentRound++;
                 setChanged();
-                notifyObservers(new int[]{currentRound, roundCount});                
+                notifyObservers(new int[]{currentRound, roundCount});
                 exportRound(tcR, r);
             }
         }
-        
+
         return tcR;
     }
 
@@ -82,6 +82,18 @@ public class ComplextTaskSolver extends Observable {
                 it.remove();
             }
         }
+    }
+
+    public boolean isValidComplexTask(final TaskContainer tc) {
+        boolean result = true;
+        try {
+            final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
+            final int baseRound = rounds[0];
+            final CircleROIManager crm = new CircleROIManager(tc, baseRound);
+        } catch (ComputationException ex) {
+            result = false;
+        }
+        return result;
     }
 
 }

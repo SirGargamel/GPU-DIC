@@ -7,6 +7,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.Engine;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
@@ -544,8 +545,14 @@ public class MainWindow implements Initializable {
         protected Exception call() throws Exception {
             Exception result = null;
             try {
-                cts.addObserver(this);
-                cts.solveComplexTask(tc);
+                if (cts.isValidComplexTask(tc)) {
+                    cts.addObserver(this);
+                    cts.solveComplexTask(tc);
+                } else {
+                    final Engine engine = new Engine();
+                    engine.addObserver(this);
+                    engine.computeTask(tc);
+                }
             } catch (ComputationException ex) {
                 result = ex;
             }
