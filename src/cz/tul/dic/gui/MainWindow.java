@@ -17,6 +17,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import java.util.prefs.Preferences;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -46,7 +47,7 @@ import org.pmw.tinylog.Logger;
  */
 public class MainWindow implements Initializable {
 
-    private static final File DEFAULT_DIR = new File("D:\\temp");
+    private static final String LAST_DIR = "lastDir";
 
     @FXML
     private TextField textFs;
@@ -75,7 +76,10 @@ public class MainWindow implements Initializable {
     @FXML
     private void handleButtonActionInput(ActionEvent event) throws IOException, InterruptedException, ExecutionException {
         final FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(DEFAULT_DIR);
+        final String lastDir = Preferences.userRoot().get(LAST_DIR, null);
+        if (lastDir != null) {
+            fileChooser.setInitialDirectory(new File(lastDir));
+        }
         fileChooser.getExtensionFilters().clear();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("AVI files (*.avi)", "*.avi"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files (*.bmp, *.jpg)", "*.bmp", "*.jpg"));
@@ -84,6 +88,7 @@ public class MainWindow implements Initializable {
         List<File> fileList = fileChooser.showOpenMultipleDialog(null);
         if (fileList != null && !fileList.isEmpty()) {
             loadInput(fileList);
+            Preferences.userRoot().put(LAST_DIR, fileList.get(0).getAbsolutePath());
         }
     }
 
