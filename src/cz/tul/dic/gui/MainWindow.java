@@ -78,7 +78,11 @@ public class MainWindow implements Initializable {
         final FileChooser fileChooser = new FileChooser();
         final String lastDir = Preferences.userRoot().get(LAST_DIR, null);
         if (lastDir != null) {
-            fileChooser.setInitialDirectory(new File(lastDir));
+            File last = new File(lastDir);
+            if (!last.isDirectory()) {
+                last = last.getParentFile();
+            }
+            fileChooser.setInitialDirectory(last);
         }
         fileChooser.getExtensionFilters().clear();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("AVI files (*.avi)", "*.avi"));
@@ -444,33 +448,39 @@ public class MainWindow implements Initializable {
 
     private void performComputationTest() {
         try {
+            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+            TaskContainer tc = Context.getInstance().getTc();
+            InputLoader.loadInput(tc);
+            tc.setParameter(TaskParameter.FACET_SIZE, 20);
+            Computation.commenceComputationDynamic(tc);
+            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
+
             // 7202845m
             // 9905121m
             // 9820088m
-
-            final int val1 = 20;
-            final int val2 = 30;
-            for (int size = val1; size <= val2; size++) {
-//                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
-
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-                TaskContainer tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamic(tc);
-
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
-                tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamic(tc);
-
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
-                tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamic(tc);
-            }
+//            final int val1 = 20;
+//            final int val2 = 30;
+//            for (int size = val1; size <= val2; size++) {
+////                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
+//
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+//                TaskContainer tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamic(tc);
+//
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamic(tc);
+//
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamic(tc);
+//            }
         } catch (IOException | ComputationException ex) {
             System.err.println(ex);
         }
