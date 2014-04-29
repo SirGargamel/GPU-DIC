@@ -40,10 +40,9 @@ public class VideoLoader implements IInputLoader {
         }
 
         final File input = (File) in;
-        final File sequenceConfigFile = new File(Utils.getTempDir(input).getAbsolutePath().concat(File.separator).concat(input.getName()).concat(TaskContainerUtils.EXT_CONFIG));
-        // create temp dir to store images    
-        tc.setParameter(TaskParameter.IN, input);
         final File temp = Utils.getTempDir(input);
+        final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(TaskContainerUtils.EXT_CONFIG));
+        tc.setParameter(TaskParameter.IN, input);
         // check cache
         final List<File> files;
         Config config = Config.loadConfig(sequenceConfigFile);
@@ -72,7 +71,7 @@ public class VideoLoader implements IInputLoader {
 
                 @Override
                 public boolean accept(File dir, String name) {
-                    return name.startsWith(input.getName());
+                    return name.startsWith(input.getName()) && !name.endsWith(TaskContainerUtils.EXT_CONFIG);
                 }
             }));
 
@@ -131,7 +130,7 @@ public class VideoLoader implements IInputLoader {
                             break;
                         }
                     }
-                } else {
+                } else if (key.startsWith(PREFIX_MOD)) {
                     fileName = key.replaceFirst(PREFIX_MOD, "");
                     if (fileName.equals(source.getName())) {
                         valueFile = source.lastModified();
