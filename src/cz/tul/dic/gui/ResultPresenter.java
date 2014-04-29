@@ -51,6 +51,7 @@ public class ResultPresenter implements Initializable {
     private static final String EXT_SEQUENCE = ".avi";
     private static final String EXT_IMAGE = ".bmp";
     private static final String EXT_CSV = ".avi";
+    private static final String DELIMITER = "-";
 
     @FXML
     private ComboBox<Direction> choiceDir;
@@ -102,7 +103,7 @@ public class ResultPresenter implements Initializable {
                 final Image img = SwingFXUtils.toFXImage(i, null);
                 image.setImage(img);
             }
-        } catch (ComputationException ex) {            
+        } catch (ComputationException ex) {
             Logger.warn(ex);
         }
     }
@@ -170,27 +171,27 @@ public class ResultPresenter implements Initializable {
         final String c3 = Lang.getString("TypeSequence");
         final String t3 = Lang.getString("TypeSequenceD");
         final Action a = Dialogs.create()
+                .masthead(null)
                 .title(Lang.getString("Save"))
                 .message(Lang.getString("ChooseDataType"))
                 .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2), new Dialogs.CommandLink(c3, t3));
         final String val = a.textProperty().get();
+        final TaskContainer tc = Context.getInstance().getTc();
+        final String baseName = tc.getParameter(TaskParameter.IN).toString();
         if (val.equals(c1)) {
             final ExportTarget et = determineTarget();
             if (et != null) {
-                final TaskContainer tc = Context.getInstance().getTc();
-                final String fileName = tc.getParameter(TaskParameter.IN).toString().concat(Integer.toString(index)).concat(EXT_IMAGE);
+                final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(DELIMITER).concat(Integer.toString(index)).concat(EXT_IMAGE);
                 Exporter.export(ExportTask.generateMapExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName), index), tc);
             }
         } else if (val.equals(c2)) {
             final ExportTarget et = determineTarget();
             if (et != null) {
-                final TaskContainer tc = Context.getInstance().getTc();
-                final String fileName = tc.getParameter(TaskParameter.IN).toString().concat(Integer.toString(index)).concat(EXT_CSV);
+                final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(DELIMITER).concat(Integer.toString(index)).concat(EXT_CSV);
                 Exporter.export(ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(fileName), lastX, lastY), tc);
             }
         } else if (val.equals(c3)) {
-            final TaskContainer tc = Context.getInstance().getTc();
-            final String fileName = tc.getParameter(TaskParameter.IN).toString().concat(EXT_SEQUENCE);
+            final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(EXT_SEQUENCE);
             Exporter.export(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName)), tc);
         }
     }
