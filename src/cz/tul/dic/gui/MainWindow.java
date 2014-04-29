@@ -175,18 +175,25 @@ public class MainWindow implements Initializable {
         th.start();
 
         th = new Thread(() -> {
-            try {
-                final String err = worker.get();
-                if (err != null) {
+            Platform.runLater(() -> {
+                try {
+                    final String err = worker.get();
+                    if (err != null) {
+                        Dialogs.create()
+                                .title(Lang.getString("error"))
+                                .masthead(null)
+                                .message(err)
+                                .showWarning();
+
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
                     Dialogs.create()
                             .title(Lang.getString("error"))
-                            .message(err)
-                            .showWarning();
-
+                            .masthead(null)
+                            .message(ex.getLocalizedMessage())
+                            .showException(ex);
                 }
-            } catch (InterruptedException | ExecutionException ex) {
-                System.out.println(ex);
-            }
+            });
         });
         th.setDaemon(true);
         th.start();
