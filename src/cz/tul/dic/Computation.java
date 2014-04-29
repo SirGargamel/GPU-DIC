@@ -179,9 +179,9 @@ public class Computation {
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File) tc.getParameter(TaskParameter.IN)).getName()).concat("-");
         final String ext = String.format("%02d", facetSize);
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Dx-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Dy-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Dabs-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat("-Dx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat("-Dy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("-Dabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
         }
         tc.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("Dabs-").concat(ext).concat(".avi"))));
 
@@ -196,16 +196,16 @@ public class Computation {
     public static void commenceComputationDynamic(final TaskContainer tc) throws IOException, ComputationException {
         TaskContainerChecker.checkTaskValidity(tc);
 
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File) tc.getParameter(TaskParameter.IN)).getName()).concat("-");
+        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File) tc.getParameter(TaskParameter.IN)).getName());
         final String ext = String.format("%02d", tc.getParameter(TaskParameter.FACET_SIZE));
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Dx-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Dy-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Dabs-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Exx-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Eyy-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Exy-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Eabs-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat("-Dx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat("-Dy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("-Dabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, new File(target.concat("-Exx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(target.concat("-Eyy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(target.concat("-Exy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
+            tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(target.concat("-Eabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
         }
         tc.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("Dabs-").concat(ext).concat(".avi"))));
         tc.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, new File(target.concat("Eabs-").concat(ext).concat(".avi"))));
