@@ -12,6 +12,7 @@ import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -75,21 +76,21 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionInput(ActionEvent event) throws IOException, InterruptedException, ExecutionException {
-        final FileChooser fileChooser = new FileChooser();
+        final FileChooser fc = new FileChooser();
         final String lastDir = Preferences.userRoot().get(LAST_DIR, null);
         if (lastDir != null) {
             File last = new File(lastDir);
             if (!last.isDirectory()) {
                 last = last.getParentFile();
             }
-            fileChooser.setInitialDirectory(last);
+            fc.setInitialDirectory(last);
         }
-        fileChooser.getExtensionFilters().clear();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("AVI files (*.avi)", "*.avi"));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files (*.bmp, *.jpg)", "*.bmp", "*.jpg"));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*.config)", "*..TASK.config", "*..EXPORT.config"));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
-        List<File> fileList = fileChooser.showOpenMultipleDialog(null);
+        fc.getExtensionFilters().clear();
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("AVI files (*.avi)", "*.avi"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files (*.bmp, *.jpg)", "*.bmp", "*.jpg"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*.config)", "*.config"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
+        List<File> fileList = fc.showOpenMultipleDialog(null);
         if (fileList != null && !fileList.isEmpty()) {
             loadInput(fileList);
             Preferences.userRoot().put(LAST_DIR, fileList.get(0).getAbsolutePath());
@@ -206,24 +207,37 @@ public class MainWindow implements Initializable {
         final String c2 = Lang.getString("TypeBinary");
         final String t2 = Lang.getString("TypeBinaryD");
         final Action a = Dialogs.create()
+                .masthead(null)
                 .title(Lang.getString("Save"))
                 .message(Lang.getString("ChooseDataType"))
                 .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2));
         final String val = a.textProperty().get();
-        // pick target file        
-        final FileChooser fc = new FileChooser();
-        fc.setInitialDirectory((File) Context.getInstance().getTc().getParameter(TaskParameter.IN));
-        File target = fc.showSaveDialog(null);
-        if (val.equals(c1)) {
-            if (!target.getName().endsWith(TaskContainerUtils.EXT_CONFIG)) {
-                target = new File(target.getAbsolutePath().concat(TaskContainerUtils.EXT_CONFIG));
+        if (!val.equals("@@dlg.cancel.button")) {
+            // pick target file        
+            final FileChooser fc = new FileChooser();
+            final File in = (File) Context.getInstance().getTc().getParameter(TaskParameter.IN);
+            fc.setInitialDirectory(in.getParentFile());
+            fc.getExtensionFilters().clear();
+            if (val.equals(c1)) {
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*.config)", "*.config"));
+            } else if (val.equals(c2)) {
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
             }
-            TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc(), target);
-        } else if (val.equals(c2)) {
-            if (!target.getName().endsWith(TaskContainerUtils.EXT_BINARY)) {
-                target = new File(target.getAbsolutePath().concat(TaskContainerUtils.EXT_BINARY));
+
+            File target = fc.showSaveDialog(null);
+            if (target != null) {
+                if (val.equals(c1)) {
+                    if (!target.getName().endsWith(TaskContainerUtils.EXT_CONFIG)) {
+                        target = new File(target.getAbsolutePath().concat(TaskContainerUtils.EXT_CONFIG));
+                    }
+                    TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc(), target);
+                } else if (val.equals(c2)) {
+                    if (!target.getName().endsWith(TaskContainerUtils.EXT_BINARY)) {
+                        target = new File(target.getAbsolutePath().concat(TaskContainerUtils.EXT_BINARY));
+                    }
+                    TaskContainerUtils.serializeTaskToBinary(Context.getInstance().getTc(), target);
+                }
             }
-            TaskContainerUtils.serializeTaskToBinary(Context.getInstance().getTc(), target);
         }
     }
 
@@ -451,6 +465,9 @@ public class MainWindow implements Initializable {
         adjustResultButtons(true);
 
 //        performComputationTest();
+        final List<File> fileList = new ArrayList<>(1);
+        fileList.add(new File("D:\\temp\\7202845m.avi.test.task"));
+        loadInput(fileList);
     }
 
     private void performComputationTest() {
