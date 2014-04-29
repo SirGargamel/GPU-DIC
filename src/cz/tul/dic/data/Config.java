@@ -1,6 +1,5 @@
 package cz.tul.dic.data;
 
-import cz.tul.dic.Utils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -17,35 +16,18 @@ import java.util.Set;
  */
 public class Config {
 
-    private static final String EXT = ".config";
     private static final String SEPARATOR = " :: ";
+    private static final String CLASS_ID = Config.class.getSimpleName();
     private final Map<String, String> data;
 
-    public static Config loadConfig(final File in, final ConfigType configType) throws IOException {
-        final String configFileName;
-        if (in.getName().endsWith(EXT)) {
-            configFileName = in.getAbsolutePath();
-        } else {
-            switch (configType) {
-                case TASK:
-                    configFileName = in.getAbsolutePath().concat(EXT);
-                    break;
-                case SEQUENCE:
-                    configFileName = Utils.getTempDir(in).getAbsolutePath().concat(File.separator).concat(in.getName()).concat(EXT);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported type of config - " + configType);
-            }
-        }
+    public static Config loadConfig(final File in) throws IOException {
         final Config result;
-
-        final File config = new File(configFileName);
-        if (config.exists()) {
+        if (in.exists()) {
             result = new Config();
 
             String line;
             String[] split;
-            try (BufferedReader br = new BufferedReader(new FileReader(configFileName))) {
+            try (BufferedReader br = new BufferedReader(new FileReader(in))) {
                 while (br.ready()) {
                     line = br.readLine();
                     split = line.split(SEPARATOR);
@@ -62,19 +44,9 @@ public class Config {
         return result;
     }
 
-    public static void saveConfig(final File in, final ConfigType configType, final Config config) throws IOException {
-        final String configFileName;
-        switch (configType) {
-            case TASK:
-                configFileName = in.getAbsolutePath().concat(EXT);
-                break;
-            case SEQUENCE:
-                configFileName = Utils.getTempDir(in).getAbsolutePath().concat(File.separator).concat(in.getName()).concat(EXT);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported type of config - " + configType);
-        }
-        try (FileWriter fw = new FileWriter(new File(configFileName))) {
+    public static void saveConfig(final Config config, final ConfigType configType, final File target) throws IOException {
+        config.put(CLASS_ID, configType.toString());
+        try (FileWriter fw = new FileWriter(target)) {
             for (Entry<String, String> e : config.entrySet()) {
                 fw.write(e.getKey());
                 fw.write(SEPARATOR);
@@ -84,36 +56,9 @@ public class Config {
         }
     }
 
-    public static ConfigType determineType(final File configFile) {
-        final String fileName = configFile.getName().replace(EXT, "");
-        final File[] files = configFile.getParentFile().listFiles();
-
-        ConfigType type = ConfigType.SEQUENCE;
-        for (File f : files) {
-            if (f.getName().equals(fileName)) {
-                type = ConfigType.TASK;
-                break;
-            }
-        }
-
-        return type;
-    }
-
-    public static File determineProjectFile(final File configFile) {
-        final ConfigType ct = determineType(configFile);
-        final String projectFilePath;
-        switch (ct) {
-            case TASK:
-                projectFilePath = configFile.getAbsolutePath().replace(EXT, "");
-                break;
-            case SEQUENCE:
-                projectFilePath = configFile.getParentFile().getParentFile().getAbsolutePath().concat(File.separator).concat(configFile.getName()).replace(EXT, "");
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported type of config - " + ct);
-        }
-
-        return new File(projectFilePath);
+    public static ConfigType determineType(final Config configFile) {
+        final String configType = configFile.get(CLASS_ID);
+        return ConfigType.valueOf(configType);
     }
 
     public Config() {

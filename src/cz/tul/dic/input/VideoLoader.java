@@ -5,6 +5,7 @@ import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,12 +40,13 @@ public class VideoLoader implements IInputLoader {
         }
 
         final File input = (File) in;
+        final File sequenceConfigFile = new File(Utils.getTempDir(input).getAbsolutePath().concat(File.separator).concat(input.getName()).concat(TaskContainerUtils.EXT_CONFIG));
         // create temp dir to store images    
         tc.setParameter(TaskParameter.IN, input);
         final File temp = Utils.getTempDir(input);
         // check cache
         final List<File> files;
-        Config config = Config.loadConfig(input, ConfigType.SEQUENCE);
+        Config config = Config.loadConfig(sequenceConfigFile);
         if (!isCacheDataValid(input, temp, config)) {
             Logger.debug("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
             // prepare script
@@ -82,7 +84,7 @@ public class VideoLoader implements IInputLoader {
                 config.put(PREFIX_MOD.concat(f.getName()), Long.toString(f.lastModified()));
                 config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
             }
-            Config.saveConfig(input, ConfigType.SEQUENCE, config);
+            Config.saveConfig(config, ConfigType.SEQUENCE, sequenceConfigFile);
         } else {
             files = convertCacheDataToFiles(input, temp, config);
         }
@@ -98,7 +100,7 @@ public class VideoLoader implements IInputLoader {
     private boolean isCacheDataValid(final File source, final File tempFolder, final Config config) {
         boolean result = true;
 
-        if (!tempFolder.isDirectory() || config == null || config.isEmpty()) {
+        if (!tempFolder.isDirectory() || config == null || config.isEmpty() || !Config.determineType(config).equals(ConfigType.SEQUENCE)) {
             result = false;
         } else {
             final String baseTempPath = tempFolder.getAbsolutePath().concat(File.separator);

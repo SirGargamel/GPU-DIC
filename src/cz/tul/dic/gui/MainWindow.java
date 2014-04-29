@@ -3,8 +3,6 @@ package cz.tul.dic.gui;
 import cz.tul.dic.Computation;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplextTaskSolver;
-import cz.tul.dic.data.Config;
-import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -107,21 +105,13 @@ public class MainWindow implements Initializable {
                             Context.getInstance().setTc(new TaskContainer(in));
                             break;
                         case "config":
-                            final ConfigType ct = Config.determineType(in);
-                            switch (ct) {
-                                case TASK:
-                                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(in));
-                                    break;
-                                case SEQUENCE:
-                                    // find avi and load it
-                                    Context.getInstance().setTc(new TaskContainer(Config.determineProjectFile(in)));
-                            }
+                            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(in));
                             break;
                         case "task":
                             try {
                                 Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(in));
                                 Platform.runLater(() -> {
-                                    buttonResults.setDisable(false);
+                                    adjustResultButtons(false);
                                 });
                             } catch (ClassNotFoundException | IOException ex) {
                                 error = true;
@@ -132,12 +122,11 @@ public class MainWindow implements Initializable {
                             error = true;
                             result = Lang.getString("wrongIn");
                     }
-                    updateProgress(2, 5);
                 } else {
                     updateProgress(1, 5);
                     Context.getInstance().setTc(new TaskContainer(fileList));
-                    updateProgress(2, 5);
                 }
+                updateProgress(2, 5);
                 if (!error) {
                     try {
                         updateProgress(3, 5);
@@ -205,10 +194,20 @@ public class MainWindow implements Initializable {
                 .message(Lang.getString("ChooseDataType"))
                 .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2));
         final String val = a.textProperty().get();
+        // pick target file        
+        final FileChooser fc = new FileChooser();
+        fc.setInitialDirectory((File) Context.getInstance().getTc().getParameter(TaskParameter.IN));
+        File target = fc.showSaveDialog(null);
         if (val.equals(c1)) {
-            TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc());
+            if (!target.getName().endsWith(TaskContainerUtils.EXT_CONFIG)) {
+                target = new File(target.getAbsolutePath().concat(TaskContainerUtils.EXT_CONFIG));
+            }
+            TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc(), target);
         } else if (val.equals(c2)) {
-            TaskContainerUtils.serializeTaskToBinary(Context.getInstance().getTc());
+            if (!target.getName().endsWith(TaskContainerUtils.EXT_BINARY)) {
+                target = new File(target.getAbsolutePath().concat(TaskContainerUtils.EXT_BINARY));
+            }
+            TaskContainerUtils.serializeTaskToBinary(Context.getInstance().getTc(), target);
         }
     }
 
@@ -433,9 +432,9 @@ public class MainWindow implements Initializable {
 
         adjustImageButtons(true);
         adjustConfigButtons(true);
-        buttonResults.setDisable(true);
-        
-        performComputationTest();
+        adjustResultButtons(true);
+
+//        performComputationTest();
     }
 
     private void performComputationTest() {
@@ -484,6 +483,11 @@ public class MainWindow implements Initializable {
         buttonROI.setDisable(disabled);
         buttonRun.setDisable(disabled);
         textFs.setDisable(disabled);
+        buttonSave.setDisable(disabled);
+    }
+
+    private void adjustResultButtons(final boolean disabled) {
+        buttonResults.setDisable(disabled);
         buttonSave.setDisable(disabled);
     }
 

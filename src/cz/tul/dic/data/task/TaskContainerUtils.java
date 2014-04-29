@@ -33,6 +33,8 @@ import java.util.Set;
  */
 public class TaskContainerUtils {
 
+    public static final String EXT_BINARY = ".task";
+    public static final String EXT_CONFIG = ".config";
     private static final String CONFIG_EMPTY = "NONE";
     private static final String CONFIG_EXPORTS = "EXPORT_";
     private static final String CONFIG_INPUT = "INPUT";
@@ -40,8 +42,7 @@ public class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_FULL = ";;";
     private static final String CONFIG_SEPARATOR_PAIRS = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
-    private static final String CONFIG_ROIS = "ROI_";
-    private static final String EXTENSION_BINARY = ".task";
+    private static final String CONFIG_ROIS = "ROI_";    
 
     public static int getRoundCount(final TaskContainer tc) {
         int size = 0;
@@ -100,7 +101,7 @@ public class TaskContainerUtils {
         return result;
     }
 
-    public static void serializeTaskToConfig(final TaskContainer tc) throws IOException {
+    public static void serializeTaskToConfig(final TaskContainer tc, final File out) throws IOException {
         final Config config = new Config();
         final int roundCount = getRoundCount(tc);
         // input
@@ -164,7 +165,7 @@ public class TaskContainerUtils {
         }
 
         final File in = (File) tc.getParameter(TaskParameter.IN);
-        Config.saveConfig(in, ConfigType.TASK, config);
+        Config.saveConfig(config, ConfigType.TASK, out);
 
     }
 
@@ -200,8 +201,12 @@ public class TaskContainerUtils {
         return sb.toString();
     }
 
-    public static TaskContainer deserializeTaskFromConfig(final File in) throws IOException {
-        final Config config = Config.loadConfig(in, ConfigType.TASK);
+    public static TaskContainer deserializeTaskFromConfig(final File in) throws IOException, ComputationException {
+        final Config config = Config.loadConfig(in);
+        if (!Config.determineType(config).equals(ConfigType.TASK)) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_CONFIG, "Not a task config.");
+        }
+
         final TaskContainer result;
         // input
         final String input = config.get(CONFIG_INPUT);
@@ -331,15 +336,7 @@ public class TaskContainerUtils {
         }
     }
 
-    public static void serializeTaskToBinary(final TaskContainer tc) throws IOException {
-        final File in = (File) tc.getParameter(TaskParameter.IN);
-        final File target;
-        if (in.getName().endsWith(EXTENSION_BINARY)) {
-            target = in;
-        } else {
-            target = new File(in.getAbsolutePath().concat(EXTENSION_BINARY));
-        }
-
+    public static void serializeTaskToBinary(final TaskContainer tc, final File target) throws IOException {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
             out.writeObject(tc);
         }

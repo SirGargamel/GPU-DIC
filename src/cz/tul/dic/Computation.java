@@ -1,6 +1,7 @@
 package cz.tul.dic;
 
 import cz.tul.dic.complextask.ComplextTaskSolver;
+import cz.tul.dic.data.Config;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -23,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
@@ -63,7 +63,6 @@ public class Computation {
 
         long time;
         TaskContainer tc, loadedTc;
-        Set<ExportTask> loadedExports;
         for (int size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_STEP) {
             tc = generateTask(in, size, KernelType.CL_1D_I_V_LL_MC_D);
 
@@ -72,9 +71,10 @@ public class Computation {
             // generate exports
             generateExports(tc);
             final File input = (File) tc.getParameter(TaskParameter.IN);
+            final File target = new File(input.getAbsolutePath().concat(TaskContainerUtils.EXT_CONFIG));
 
-            TaskContainerUtils.serializeTaskToConfig(tc);
-            loadedTc = TaskContainerUtils.deserializeTaskFromConfig((File) in);
+            TaskContainerUtils.serializeTaskToConfig(tc, target);
+            loadedTc = TaskContainerUtils.deserializeTaskFromConfig(target);
 //            System.out.println(loadedTc);
 
             TaskContainerChecker.checkTaskValidity(tc);
