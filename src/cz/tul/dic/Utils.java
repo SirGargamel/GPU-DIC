@@ -16,22 +16,22 @@ import org.pmw.tinylog.LoggingLevel;
  * @author Petr Jecmen
  */
 public class Utils {
-    
+
     private static final String TEMP_DIR_NAME = "temp";
     private static final Map<TaskContainer, List<File>> tempFiles;
-    
+
     static {
         tempFiles = new HashMap<>();
     }
-    
-    public static File getTempDir(final File in) {        
+
+    public static File getTempDir(final File in) {
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         ensureDirectoryExistence(temp);
-        
+
         return temp;
     }
-    
+
     public static void markTempFilesForDeletion(final TaskContainer tc, final File... filesForDeletion) {
         List<File> f = tempFiles.get(tc);
         if (f == null) {
@@ -40,14 +40,14 @@ public class Utils {
         }
         f.addAll(Arrays.asList(filesForDeletion));
     }
-    
+
     public static void deleteTempDir(final TaskContainer tc) {
         final File in = (File) (tc.getParameter(TaskParameter.IN));
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         if (temp.exists()) {
             Logger.trace("Deleting files inside temp folder {0}.", temp.getAbsolutePath());
-            
+
             List<File> list = tempFiles.get(tc);
             for (File f : list) {
                 if (!f.delete()) {
@@ -60,20 +60,13 @@ public class Utils {
             }
         }
     }
-    
+
     public static void ensureDirectoryExistence(final File file) {
-        if (file.isDirectory()) {
-            if (!file.exists()) {
-                file.mkdirs();
-            }
-        } else {
-            final File dir = file.getParentFile();
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+        if (!file.exists()) {
+            file.mkdirs();
         }
     }
-    
+
     public static boolean isLevelLogged(final LoggingLevel testedLevel) {
         final LoggingLevel currentLevel = Logger.getLoggingLevel();
         int indexTestedLevel = 0, indexCurrentLevel = 1;
@@ -88,7 +81,7 @@ public class Utils {
         }
         return indexCurrentLevel < indexTestedLevel;
     }
-    
+
     public static String toString(final double[] data) {
         final StringBuilder sb = new StringBuilder();
         for (double d : data) {
@@ -98,5 +91,5 @@ public class Utils {
         sb.setLength(sb.length() - 2);
         return sb.toString();
     }
-    
+
 }
