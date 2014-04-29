@@ -1,12 +1,13 @@
 package cz.tul.dic.engine.strain;
 
 import cz.tul.dic.data.task.TaskContainer;
+import org.pmw.tinylog.Logger;
 
 public class Differentiator extends StrainEstimator {
 
     @Override
     void estimateStrain(TaskContainer tc, int round) {
-        final double[][][] displacement = tc.getDisplacement(round);
+        final double[][][] displacement = smooth(tc.getDisplacement(round));
         if (displacement != null) {
             final int width = displacement.length;
             final int height = displacement[0].length;
@@ -41,6 +42,7 @@ public class Differentiator extends StrainEstimator {
     }
 
     private static double[][][] smooth(final double[][][] data) {
+        Logger.warn("TODO smoothing of displacement data.");
         final double[][][] result = new double[data.length][data[0].length][data[0][0].length];
 
         for (int x = 0; x < result.length; x++) {
