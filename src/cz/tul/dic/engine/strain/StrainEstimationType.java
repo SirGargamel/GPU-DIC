@@ -6,5 +6,6 @@ package cz.tul.dic.engine.strain;
  */
 public enum StrainEstimationType {
 
-    DIFFERENTIATION,;
+    DIFFERENTIATION,
+    LOCAL_LEAST_SQUARES;
 }

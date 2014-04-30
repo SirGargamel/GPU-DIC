@@ -18,6 +18,7 @@ public abstract class StrainEstimator {
     static {
         data = new HashMap<>();
         data.put(StrainEstimationType.DIFFERENTIATION, new Differentiator());
+        data.put(StrainEstimationType.LOCAL_LEAST_SQUARES, new LocalLeastSquare());
     }
     
     abstract void estimateStrain(final TaskContainer tc, final int round);

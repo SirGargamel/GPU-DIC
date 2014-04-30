@@ -119,7 +119,7 @@ public class TaskContainerChecker {
         final Object strainEstimation = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (strainEstimation == null) {
             Logger.warn("Adding default strain estimator.");
-            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationType.DIFFERENTIATION);
+            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationType.LOCAL_LEAST_SQUARES);
         }
     }
 

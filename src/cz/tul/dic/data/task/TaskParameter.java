@@ -24,7 +24,8 @@ public enum TaskParameter {
     INTERPOLATION(Interpolation.class),
     RESULT_COMPILATION(ResultCompilation.class),
     ROUND_LIMITS(int[].class),
-    STRAIN_ESTIMATION_METHOD(StrainEstimationType.class);
+    STRAIN_ESTIMATION_METHOD(StrainEstimationType.class),
+    STRAIN_PARAMETER(Integer.class);
 
     private final Class type;
 
