@@ -61,7 +61,7 @@ public class TargetExportFile implements ITargetExport {
 
         final int position = dataParams[0];
         final File target = (File) targetParams;
-        Utils.ensureDirectoryExistence(target);
+        Utils.ensureDirectoryExistence(target.getParentFile());
 
         final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay;
@@ -80,7 +80,7 @@ public class TargetExportFile implements ITargetExport {
         }
 
         final File out = (File) targetParams;
-        Utils.ensureDirectoryExistence(out);
+        Utils.ensureDirectoryExistence(out.getParentFile());
         final String fullName = out.getName();
 
         final String name = fullName.substring(0, fullName.lastIndexOf("."));
@@ -116,7 +116,7 @@ public class TargetExportFile implements ITargetExport {
         double[][] map;
         for (int i = 0; i < roundCount; i++) {
             target = new File(temp.getAbsolutePath() + File.separator + name + nf.format(i) + IMAGE_EXTENSION);
-            Utils.ensureDirectoryExistence(target);
+            Utils.ensureDirectoryExistence(target.getParentFile());
             final BufferedImage background = tc.getImage(i);
             final BufferedImage overlay;
             map = data.get(i);

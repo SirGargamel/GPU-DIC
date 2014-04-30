@@ -32,7 +32,7 @@ public class TargetExportCsv implements ITargetExport {
         }
 
         final File target = (File) targetParam;
-        Utils.ensureDirectoryExistence(target);
+        Utils.ensureDirectoryExistence(target.getParentFile());
 
         try (FileWriter out = new FileWriter(target)) {
             if (data != null) {

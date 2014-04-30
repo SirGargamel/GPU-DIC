@@ -61,15 +61,9 @@ public class Utils {
         }
     }
 
-    public static void ensureDirectoryExistence(final File file) {
-        final File f;
-        if (file.isFile()) {
-            f = file.getParentFile();
-        } else {
-            f = file;
-        }
-        if (!f.exists()) {
-            f.mkdirs();
+    public static void ensureDirectoryExistence(final File file) {        
+        if (!file.exists()) {
+            file.mkdirs();
         }
     }
 
