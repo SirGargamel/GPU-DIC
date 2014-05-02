@@ -7,6 +7,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.ResultCompilation;
+import cz.tul.dic.engine.displacement.DisplacementCalculationType;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimationType;
@@ -120,6 +121,12 @@ public class TaskContainerChecker {
         if (strainEstimation == null) {
             Logger.warn("Adding default strain estimator.");
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationType.LOCAL_LEAST_SQUARES);
+        }
+        
+        final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE);
+        if (displacementCalculator == null) {
+            Logger.warn("Adding default displacement calculator.");
+            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE, DisplacementCalculationType.FIND_MAX_AND_AVERAGE);
         }
     }
 

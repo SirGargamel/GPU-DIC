@@ -2,6 +2,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.ResultCompilation;
+import cz.tul.dic.engine.displacement.DisplacementCalculationType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.strain.StrainEstimationType;
@@ -24,6 +25,7 @@ public enum TaskParameter {
     INTERPOLATION(Interpolation.class),
     RESULT_COMPILATION(ResultCompilation.class),
     ROUND_LIMITS(int[].class),
+    DISPLACEMENT_CALCULATION_TYPE(DisplacementCalculationType.class),
     STRAIN_ESTIMATION_METHOD(StrainEstimationType.class),
     STRAIN_PARAMETER(Integer.class);
 
