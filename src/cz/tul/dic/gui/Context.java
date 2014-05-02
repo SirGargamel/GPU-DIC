@@ -58,7 +58,7 @@ public class Context {
         BufferedImage result = m.get(dir);
         if (result == null) {
             try {
-                Exporter.export(ExportTask.generateMapExport(dir, ExportTarget.GUI, this, round), tc);
+                Exporter.export(tc, ExportTask.generateMapExport(dir, ExportTarget.GUI, this, round));
                 result = m.get(dir);
             } catch (IOException ex) {
                 Logger.error(ex, "Unexpected IO error.");
@@ -84,7 +84,7 @@ public class Context {
         double[] result = m2.get(dir);
         if (result == null) {
             try {
-                Exporter.export(ExportTask.generateLineExport(dir, ExportTarget.GUI, this, x, y), tc);
+                Exporter.export(tc, ExportTask.generateLineExport(dir, ExportTarget.GUI, this, x, y));
                 result = m2.get(dir);
             } catch (IOException ex) {
                 Logger.error(ex, "Unexpected IO error.");

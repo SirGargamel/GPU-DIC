@@ -37,7 +37,7 @@ public class Exporter {
         targetExporters.put(ExportTarget.GUI, new TargetExportGUI());
     }
 
-    public static void export(final ExportTask et, final TaskContainer tc) throws IOException, ComputationException {
+    public static void export(final TaskContainer tc, final ExportTask et) throws IOException, ComputationException {
         IDataExport dataExporter;
         ITargetExport targetExporter;
         ExportTarget target;
@@ -68,6 +68,12 @@ public class Exporter {
                     tc);
         } catch (IndexOutOfBoundsException | NullPointerException ex) {
             Logger.warn(ex, "Export failed due to invalid input data.");
+        }
+    }
+    
+    public static void export(final TaskContainer tc) throws IOException, ComputationException {
+        for (ExportTask et : tc.getExports()) {
+            export(tc, et);
         }
     }
 

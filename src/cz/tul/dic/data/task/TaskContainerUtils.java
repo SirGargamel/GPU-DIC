@@ -373,7 +373,7 @@ public class TaskContainerUtils {
 
     public static void exportTask(final TaskContainer tc) throws IOException, ComputationException {
         for (ExportTask et : tc.getExports()) {
-            Exporter.export(et, tc);
+            Exporter.export(tc, et);
         }
     }
 

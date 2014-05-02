@@ -3,6 +3,7 @@ package cz.tul.dic.engine.strain;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,12 @@ public abstract class StrainEstimator {
         } else {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported strain estimation - " + type.toString());
         }        
+    }
+    
+    public static void computeStrain(final TaskContainer tc) throws ComputationException {
+        for (int r : TaskContainerUtils.getListOfRounds(tc)) {
+            computeStrain(tc, r);
+        }
     }
     
 }

@@ -78,7 +78,7 @@ public class ComplextTaskSolver extends Observable {
         while (it.hasNext()) {
             et = it.next();
             if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round) {
-                Exporter.export(et, tc);
+                Exporter.export(tc, et);
                 it.remove();
             }
         }

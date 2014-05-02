@@ -182,17 +182,17 @@ public class ResultPresenter implements Initializable {
             final ExportTarget et = determineTarget();
             if (et != null) {
                 final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(DELIMITER).concat(Integer.toString(index)).concat(EXT_IMAGE);
-                Exporter.export(ExportTask.generateMapExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName), index), tc);
+                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName), index));
             }
         } else if (val.equals(c2)) {
             final ExportTarget et = determineTarget();
             if (et != null) {
                 final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(DELIMITER).concat(Integer.toString(index)).concat(EXT_CSV);
-                Exporter.export(ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(fileName), lastX, lastY), tc);
+                Exporter.export(tc, ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(fileName), lastX, lastY));
             }
         } else if (val.equals(c3)) {
             final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(EXT_SEQUENCE);
-            Exporter.export(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName)), tc);
+            Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName)));
         }
     }
 

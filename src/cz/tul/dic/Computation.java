@@ -83,7 +83,7 @@ public class Computation {
             engine.computeTask(tc);
             time = System.nanoTime() - time;
             for (ExportTask et : tc.getExports()) {
-                Exporter.export(et, tc);
+                Exporter.export(tc, et);
             }
             Logger.info("Finished task " + size + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
         }
@@ -227,7 +227,7 @@ public class Computation {
             Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
             for (ExportTask et : result.getExports()) {
-                Exporter.export(et, result);
+                Exporter.export(result, et);
             }
         } catch (ComputationException ex) {
             Logger.error(ex);
@@ -245,22 +245,22 @@ public class Computation {
 
         final TaskContainer result = computeDynamicTask(tc);
         // displacement export
+        result.getExports().clear();
         for (int r : TaskContainerUtils.getListOfRounds(result)) {
             result.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dx), r));
             result.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dy), r));
             result.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dabs), r));
             result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
         }
-        for (ExportTask et : result.getExports()) {
-            Exporter.export(et, result);
-        }
+        Exporter.export(result);
+
         // strain sweep and export
         for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             result.setParameter(TaskParameter.STRAIN_PARAMETER, strainParam);
-            result.getExports().clear();
+            StrainEstimator.computeStrain(result);
 
+            result.getExports().clear();
             for (int r : TaskContainerUtils.getListOfRounds(result)) {
-                StrainEstimator.computeStrain(result, r);
                 result.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Exx), r));
                 result.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eyy), r));
                 result.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Exy), r));
@@ -268,9 +268,7 @@ public class Computation {
             }
             result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
 
-            for (ExportTask et : result.getExports()) {
-                Exporter.export(et, result);
-            }
+            Exporter.export(result);
         }
     }
 
