@@ -238,17 +238,14 @@ public class Computation {
         final File in = (File) tc.getParameter(TaskParameter.IN);
         final Object facetSize = tc.getParameter(TaskParameter.FACET_SIZE);
         final Object strainParam = tc.getParameter(TaskParameter.STRAIN_PARAMETER);
+        final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
         for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(false, round, in.getName(), facetSize, strainParam, Direction.Dx), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(false, round, in.getName(), facetSize, strainParam, Direction.Dy), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(false, round, in.getName(), facetSize, strainParam, Direction.Dabs), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(false, round, in.getName(), facetSize, strainParam, Direction.Exx), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(false, round, in.getName(), facetSize, strainParam, Direction.Eyy), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(false, round, in.getName(), facetSize, strainParam, Direction.Exy), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(false, round, in.getName(), facetSize, strainParam, Direction.Eabs), round));
+            for (Direction d : Direction.values()) {
+                tc.addExport(ExportTask.generateMapExport(d, ExportTarget.FILE, generateTargetFile(false, round, in.getName(), facetSize, strainParam, facetGenMode, d), round));
+            }            
         }
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, Direction.Dabs)));
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, Direction.Eabs)));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Dabs)));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
 
         computeDynamicTask(tc);
     }
