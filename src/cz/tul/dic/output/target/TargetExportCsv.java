@@ -21,7 +21,7 @@ public class TargetExportCsv implements ITargetExport {
         } else if (data instanceof double[][]) {
             // export map
             exportMap((double[][]) data, targetParam);
-        } else {
+        } else if (data != null) {
             throw new IllegalArgumentException("Unsupported data for CSV export - " + data.getClass());
         }
     }
