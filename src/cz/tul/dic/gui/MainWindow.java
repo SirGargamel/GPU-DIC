@@ -217,12 +217,14 @@ public class MainWindow implements Initializable {
             // pick target file        
             final FileChooser fc = new FileChooser();
             final File in = (File) Context.getInstance().getTc().getParameter(TaskParameter.IN);
-            fc.setInitialDirectory(in.getParentFile());
+            fc.setInitialDirectory(in.getParentFile());            
             fc.getExtensionFilters().clear();
             if (val.equals(c1)) {
-                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*.config)", "*.config"));
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*".concat(TaskContainerUtils.EXT_CONFIG).concat(")"), "*".concat(TaskContainerUtils.EXT_CONFIG)));
+                fc.setInitialFileName(in.getName().concat(TaskContainerUtils.EXT_CONFIG));
             } else if (val.equals(c2)) {
-                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*".concat(TaskContainerUtils.EXT_BINARY).concat(")"), "*".concat(TaskContainerUtils.EXT_BINARY)));
+                fc.setInitialFileName(in.getName().concat(TaskContainerUtils.EXT_BINARY));
             }
 
             File target = fc.showSaveDialog(null);
