@@ -8,12 +8,12 @@ import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -465,35 +465,40 @@ public class MainWindow implements Initializable {
         adjustConfigButtons(true);
         adjustResultButtons(true);
 
-//        performComputationTest();
-        final List<File> fileList = new ArrayList<>(1);
-        fileList.add(new File("D:\\temp\\7202845m.avi.test.task"));
-        loadInput(fileList);
+        performComputationTest();
+//        final List<File> fileList = new ArrayList<>(1);
+//        fileList.add(new File("D:\\temp\\7202845m.avi.test.task"));
+//        loadInput(fileList);
     }
 
     private void performComputationTest() {
         try {
-            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-            TaskContainer tc = Context.getInstance().getTc();
-            InputLoader.loadInput(tc);
-            tc.setParameter(TaskParameter.FACET_SIZE, 20);
-            Computation.commenceComputationDynamic(tc);
-            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
+//            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+//            TaskContainer tc = Context.getInstance().getTc();
+//            InputLoader.loadInput(tc);
+//            tc.setParameter(TaskParameter.FACET_SIZE, 20);
+//            Computation.commenceComputationDynamic(tc);
+//            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 
             // 7202845m
             // 9905121m
             // 9820088m
-//            final int val1 = 20;
-//            final int val2 = 30;
-//            for (int size = val1; size <= val2; size++) {
-////                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
-//
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-//                TaskContainer tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamic(tc);
-//
+            final int val1 = 10;
+            final int val2 = 30;
+            for (int size = val1; size <= val2; size++) {
+                for (int strainP = 10; strainP <= 30; strainP++) {
+                    for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
+//                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
+
+                        Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+                        TaskContainer tc = Context.getInstance().getTc();
+                        InputLoader.loadInput(tc);
+                        tc.setParameter(TaskParameter.FACET_SIZE, size);
+                        tc.setParameter(TaskParameter.STRAIN_PARAMETER, strainP);
+                        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
+//                        Computation.commenceComputationDynamic(tc);
+                        Computation.commenceComputationDynamicDirExport(tc);
+
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
 //                tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
@@ -505,7 +510,9 @@ public class MainWindow implements Initializable {
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputationDynamic(tc);
-//            }
+                    }
+                }
+            }
         } catch (IOException | ComputationException ex) {
             System.err.println(ex);
         }
