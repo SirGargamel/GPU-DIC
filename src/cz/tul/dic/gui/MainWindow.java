@@ -217,7 +217,7 @@ public class MainWindow implements Initializable {
             // pick target file        
             final FileChooser fc = new FileChooser();
             final File in = (File) Context.getInstance().getTc().getParameter(TaskParameter.IN);
-            fc.setInitialDirectory(in.getParentFile());            
+            fc.setInitialDirectory(in.getParentFile());
             fc.getExtensionFilters().clear();
             if (val.equals(c1)) {
                 fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*".concat(TaskContainerUtils.EXT_CONFIG).concat(")"), "*".concat(TaskContainerUtils.EXT_CONFIG)));
@@ -488,18 +488,16 @@ public class MainWindow implements Initializable {
             final int val1 = 10;
             final int val2 = 30;
             for (int size = val1; size <= val2; size++) {
-                for (int strainP = 10; strainP <= 30; strainP++) {
-                    for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
-//                Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
+                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
+//                    Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
 
-                        Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-                        TaskContainer tc = Context.getInstance().getTc();
-                        InputLoader.loadInput(tc);
-                        tc.setParameter(TaskParameter.FACET_SIZE, size);
-                        tc.setParameter(TaskParameter.STRAIN_PARAMETER, strainP);
-                        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
-//                        Computation.commenceComputationDynamic(tc);
-                        Computation.commenceComputationDynamicDirExport(tc);
+                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+                    TaskContainer tc = Context.getInstance().getTc();
+                    InputLoader.loadInput(tc);
+                    tc.setParameter(TaskParameter.FACET_SIZE, size);                    
+                    tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
+//                    Computation.commenceComputationDynamic(tc);
+                    Computation.commenceComputationDynamicStrainParamSweep(tc, 10, 30);
 
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
 //                tc = Context.getInstance().getTc();
@@ -512,7 +510,6 @@ public class MainWindow implements Initializable {
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputationDynamic(tc);
-                    }
                 }
             }
         } catch (IOException | ComputationException ex) {
