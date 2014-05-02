@@ -82,9 +82,7 @@ public class Computation {
             time = System.nanoTime();
             engine.computeTask(tc);
             time = System.nanoTime() - time;
-            for (ExportTask et : tc.getExports()) {
-                Exporter.export(tc, et);
-            }
+            Exporter.export(tc);
             Logger.info("Finished task " + size + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
         }
         Logger.info("All done !!!");
@@ -226,9 +224,7 @@ public class Computation {
             time = System.nanoTime() - time;
             Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
-            for (ExportTask et : result.getExports()) {
-                Exporter.export(result, et);
-            }
+            Exporter.export(result);
         } catch (ComputationException ex) {
             Logger.error(ex);
         }

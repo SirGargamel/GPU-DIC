@@ -369,12 +369,6 @@ public class TaskContainerUtils {
             result = (TaskContainer) ois.readObject();
         }
         return result;
-    }
-
-    public static void exportTask(final TaskContainer tc) throws IOException, ComputationException {
-        for (ExportTask et : tc.getExports()) {
-            Exporter.export(tc, et);
-        }
-    }
+    }    
 
 }
