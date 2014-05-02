@@ -77,6 +77,7 @@ public class TaskContainerUtils {
                         result.add(r);
                     }
                 }
+                result.remove(result.size() - 1);
             }
         }
         return result;
@@ -369,6 +370,6 @@ public class TaskContainerUtils {
             result = (TaskContainer) ois.readObject();
         }
         return result;
-    }    
+    }
 
 }
