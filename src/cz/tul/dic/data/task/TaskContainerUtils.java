@@ -22,6 +22,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,7 +43,7 @@ public class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_FULL = ";;";
     private static final String CONFIG_SEPARATOR_PAIRS = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
-    private static final String CONFIG_ROIS = "ROI_";    
+    private static final String CONFIG_ROIS = "ROI_";
 
     public static int getRoundCount(final TaskContainer tc) {
         int size = 0;
@@ -59,6 +60,26 @@ public class TaskContainerUtils {
             }
         }
         return size;
+    }
+
+    public static List<Integer> getListOfRounds(final TaskContainer tc) {
+        final List<Integer> result = new LinkedList<>();
+        if (tc != null) {
+            final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);
+            if (roundData == null) {
+                for (int r = 0; r < tc.getImages().size(); r++) {
+                    result.add(r);
+                }
+            } else {
+                final int[] limit = (int[]) roundData;
+                for (int i = 0; i < limit.length; i += 2) {
+                    for (int r = limit[i]; r <= limit[i + 1]; r++) {
+                        result.add(r);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi, final double[] deformations) throws ComputationException {

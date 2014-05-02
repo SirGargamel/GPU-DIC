@@ -245,14 +245,11 @@ public class Computation {
 
         final TaskContainer result = computeDynamicTask(tc);
         // displacement export
-        final int[] rounds = (int[]) result.getParameter(TaskParameter.ROUND_LIMITS);
-        for (int round = 0; round < rounds.length; round += 2) {
-            for (int r = rounds[round]; r < rounds[round + 1]; r++) {
-                result.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dx), r));
-                result.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dy), r));
-                result.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dabs), r));
-                result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
-            }
+        for (int r : TaskContainerUtils.getListOfRounds(result)) {
+            result.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dx), r));
+            result.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dy), r));
+            result.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dabs), r));
+            result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
         }
         for (ExportTask et : result.getExports()) {
             Exporter.export(et, result);
@@ -262,14 +259,12 @@ public class Computation {
             result.setParameter(TaskParameter.STRAIN_PARAMETER, strainParam);
             result.getExports().clear();
 
-            for (int round = 0; round < rounds.length; round += 2) {
-                for (int r = rounds[round]; r < rounds[round + 1]; r++) {
-                    StrainEstimator.computeStrain(result, r);
-                    result.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Exx), r));
-                    result.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eyy), r));
-                    result.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Exy), r));
-                    result.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs), r));
-                }
+            for (int r : TaskContainerUtils.getListOfRounds(result)) {
+                StrainEstimator.computeStrain(result, r);
+                result.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Exx), r));
+                result.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eyy), r));
+                result.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Exy), r));
+                result.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs), r));
             }
             result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
 
