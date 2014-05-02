@@ -107,7 +107,7 @@ public abstract class Kernel {
         queue.putWriteBuffer(clFacetCenters, false);
 
         clDeformations = generateDeformations(deformations);
-        queue.putWriteBuffer(clDeformations, false);
+        queue.putWriteBuffer(clDeformations, true);
         final int deformationCount = deformations.length / deformationLength;
 
         System.out.println(facetCount + "-" + deformationCount);

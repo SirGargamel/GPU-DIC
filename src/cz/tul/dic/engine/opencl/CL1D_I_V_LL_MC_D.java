@@ -61,7 +61,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         CLEvent event;
         int actualBaseFacet = 0, actualBaseDeformation;
         int groupCountPerFacet, counter = 0;
-        final CLEventList eventList = new CLEventList(facetCount);
+        final CLEventList eventList = new CLEventList(facetCount * 2);
         while (actualBaseFacet < facetCount) {
             actualBaseDeformation = 0;
 
