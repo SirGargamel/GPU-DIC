@@ -5,6 +5,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.output.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -38,8 +39,7 @@ public class ComplextTaskSolver extends Observable {
         setChanged();
         notifyObservers(new int[]{currentRound, roundCount});
 
-//        final RoiManagerOld rm = new RoiManagerOld(tc, baseRound);
-        final CircleROIManager crm = new CircleROIManager(tc, baseRound);
+        final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
 
         final TaskContainer tcR = rrm.getTc();
@@ -89,7 +89,7 @@ public class ComplextTaskSolver extends Observable {
         try {
             final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
             final int baseRound = rounds[0];
-            final CircleROIManager crm = new CircleROIManager(tc, baseRound);
+            final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         } catch (ComputationException ex) {
             result = false;
         }

@@ -8,7 +8,9 @@ import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.cluster.Analyzer1D;
+import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,7 +33,17 @@ public class CircleROIManager extends ROIManager {
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private double shiftTop, shiftBottom;
 
-    public CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
+    public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) throws ComputationException {
+        final TaskContainer tcC = tc.cloneInputTask();
+        
+        tcC.setROIs(initialRound, tc.getRois(initialRound));
+        tcC.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tcC.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);        
+        
+        return new CircleROIManager(tcC, initialRound);
+    }
+    
+    private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
         final List<CircularROI> cRois = new ArrayList<>(4);
