@@ -219,7 +219,7 @@ public class TaskContainer implements Serializable {
         images = new LinkedList<>();
     }
     
-    public TaskContainer cloneInputTask(final int round) {
+    public TaskContainer cloneInputTask() {
         final TaskContainer result = new TaskContainer(input);
         result.images = images;
         result.params.putAll(params);        
