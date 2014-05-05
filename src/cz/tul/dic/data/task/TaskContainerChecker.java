@@ -29,8 +29,7 @@ public class TaskContainerChecker {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No input.");
         }
 
-        final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);
-        final int roundCount;
+        final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);        
         if (roundData == null) {
             tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, tc.getImages().size() - 1});
         } else {
@@ -44,7 +43,7 @@ public class TaskContainerChecker {
                 }
             }
         }
-        roundCount = TaskContainerUtils.getRoundCount(tc);
+        final int roundCount = TaskContainerUtils.getRounds(tc).size();
         if (roundCount < 1) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No rounds for computation.");
         }
@@ -62,7 +61,7 @@ public class TaskContainerChecker {
         Image img;
         Set<ROI> rois;
         int fsz;
-        for (int round = 0; round < roundCount; round++) {
+        for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
             img = tc.getImage(round);
             if (img == null) {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL image found.");

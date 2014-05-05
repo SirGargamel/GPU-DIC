@@ -12,7 +12,6 @@ import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.output.ExportTask;
-import cz.tul.dic.output.Exporter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -22,11 +21,11 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  *
@@ -45,42 +44,32 @@ public class TaskContainerUtils {
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
 
-    public static int getRoundCount(final TaskContainer tc) {
-        int size = 0;
+    public static Map<Integer, Integer> getRounds(final TaskContainer tc) {
+        final Map<Integer, Integer> result = new TreeMap<>();
         if (tc != null) {
             final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);
             if (roundData == null) {
-                size = Math.max(tc.getImages().size() - 1, 0);
-            } else {
-                final int[] limit = (int[]) roundData;
-                for (int i = 0; i < limit.length; i += 2) {
-                    size += limit[i + 1] - limit[i];
+                for (int r = 0; r < tc.getImages().size() - 1; r++) {
+                    result.put(r, r + 1);
                 }
-                size += (limit.length / 2) - 1;
-            }
-        }
-        return size;
-    }
+            } else {
+                final int[] rounds = (int[]) roundData;
+                for (int round = 0; round < rounds.length; round += 2) {
+                    if (round > 0) {
+                        result.put(rounds[round - 1], rounds[round]);
+                    }
 
-    public static List<Integer> getListOfRounds(final TaskContainer tc) {
-        final List<Integer> result = new LinkedList<>();
-        if (tc != null) {
-            final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);
-            if (roundData == null) {
-                for (int r = 0; r < tc.getImages().size(); r++) {
-                    result.add(r);
-                }
-            } else {
-                final int[] limit = (int[]) roundData;
-                for (int i = 0; i < limit.length; i += 2) {
-                    for (int r = limit[i]; r <= limit[i + 1]; r++) {
-                        result.add(r);
+                    for (int r = rounds[round]; r < rounds[round + 1]; r++) {
+                        result.put(r, r + 1);
                     }
                 }
-                result.remove(result.size() - 1);
             }
         }
         return result;
+    }
+    
+    public static int getMaxRoundCount(final TaskContainer tc) {
+        return tc.getImages().size() - 1;
     }
 
     public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi, final double[] deformations) throws ComputationException {
@@ -125,7 +114,7 @@ public class TaskContainerUtils {
 
     public static void serializeTaskToConfig(final TaskContainer tc, final File out) throws IOException {
         final Config config = new Config();
-        final int roundCount = getRoundCount(tc);
+        final int roundCount = getMaxRoundCount(tc);
         // input
         final Object input = tc.getInput();
         if (input instanceof File) {

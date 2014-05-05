@@ -335,7 +335,7 @@ public class MainWindow implements Initializable {
 //
 //        final String target = new File("D:\\temp\\results").getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
 //        final String ext = String.format("%02d", 19).concat(".bmp");
-//        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
+//        for (int round = 0; round < TaskContainerUtils.getMaxRoundCount(tc); round++) {
 //            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), round));
 //            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), round));
 //            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), round));

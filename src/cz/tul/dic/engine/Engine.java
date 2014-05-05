@@ -19,6 +19,10 @@ import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
+import cz.tul.dic.output.ExportMode;
+import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.output.Exporter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,27 +49,33 @@ public final class Engine extends Observable {
         context = DeviceManager.getContext();
     }
 
-    public void computeTask(final TaskContainer tc) throws ComputationException {
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+    public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
+        final int roundCount = TaskContainerUtils.getRounds(tc).size();
         tc.clearResultData();
         setChanged();
-        notifyObservers(new int[]{0, roundCount});
+        notifyObservers(new int[]{0, roundCount});       
+        
+        int r, nextR, currentRound = 0;
+        for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
+            r = e.getKey();
+            nextR = e.getValue();
 
-        final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
-        int currentRound = 0;
-        for (int round = 0; round < rounds.length; round += 2) {
-            if (round > 0) {
-                computeRound(tc, rounds[round - 1], rounds[round]);
-                currentRound++;
-                setChanged();
-                notifyObservers(new int[]{currentRound, roundCount});
-            }
-
-            for (int r = rounds[round]; r < rounds[round + 1]; r++) {
-                computeRound(tc, r, r + 1);
-                currentRound++;
-                setChanged();
-                notifyObservers(new int[]{currentRound, roundCount});
+            computeRound(tc, r, nextR);
+            currentRound++;
+            setChanged();
+            notifyObservers(new int[]{currentRound, roundCount});
+            exportRound(tc, r);
+        }
+    }
+    
+    private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
+        Iterator<ExportTask> it = tc.getExports().iterator();
+        ExportTask et;
+        while (it.hasNext()) {
+            et = it.next();
+            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round) {
+                Exporter.export(tc, et);
+                it.remove();
             }
         }
     }

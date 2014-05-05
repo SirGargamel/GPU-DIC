@@ -136,7 +136,7 @@ public class Computation {
 
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
         final String ext = String.format("%02d", tc.getFacetSize(0, rect.get(0))).concat(".bmp");
-        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
+        for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), round));
@@ -176,7 +176,7 @@ public class Computation {
 //        TaskContainerUtils.serializeTaskToConfig(tc);
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File) tc.getParameter(TaskParameter.IN)).getName()).concat("-");
         final String ext = String.format("%02d", facetSize);
-        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
+        for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat("-Dx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat("-Dy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("-Dabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
@@ -196,7 +196,7 @@ public class Computation {
 
         final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File) tc.getParameter(TaskParameter.IN)).getName());
         final String ext = String.format("%02d", tc.getParameter(TaskParameter.FACET_SIZE));
-        for (int round = 0; round < TaskContainerUtils.getRoundCount(tc); round++) {
+        for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat("-Dx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat("-Dy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("-Dabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
@@ -242,12 +242,12 @@ public class Computation {
         final TaskContainer result = computeDynamicTask(tc);
         // displacement export
         result.getExports().clear();
-        for (int r : TaskContainerUtils.getListOfRounds(result)) {
+        for (int r : TaskContainerUtils.getRounds(result).keySet()) {
             result.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dx), r));
             result.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dy), r));
             result.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, facetGenMode, Direction.Dabs), r));
-            result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
         }
+//        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
         Exporter.export(result);
 
         // strain sweep and export
@@ -256,13 +256,13 @@ public class Computation {
             StrainEstimator.computeStrain(result);
 
             result.getExports().clear();
-            for (int r : TaskContainerUtils.getListOfRounds(result)) {
+            for (int r : TaskContainerUtils.getRounds(result).keySet()) {
                 result.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Exx), r));
                 result.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eyy), r));
                 result.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Exy), r));
                 result.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(false, r, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs), r));
             }
-            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
+//            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
 
             Exporter.export(result);
         }

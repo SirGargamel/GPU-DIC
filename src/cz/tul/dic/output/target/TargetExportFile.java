@@ -8,7 +8,6 @@ package cz.tul.dic.output.target;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportMode;
@@ -86,27 +85,24 @@ public class TargetExportFile implements ITargetExport {
         final String name = fullName.substring(0, fullName.lastIndexOf("."));
 
         final File temp = Utils.getTempDir((File) tc.getParameter(TaskParameter.IN));
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
-
-        if (roundCount != data.size()) {
-            throw new IllegalArgumentException("Provided data length and round count mismatch.");
-        }
 
         double globalMaxPos = -Double.MAX_VALUE, globalMaxNeg = Double.MAX_VALUE;
         for (double[][] daa : data) {
-            for (double[] da : daa) {
-                for (double d : da) {
-                    if (d > globalMaxPos) {
-                        globalMaxPos = d;
-                    }
-                    if (d < globalMaxNeg) {
-                        globalMaxNeg = d;
+            if (daa != null) {
+                for (double[] da : daa) {
+                    for (double d : da) {
+                        if (d > globalMaxPos) {
+                            globalMaxPos = d;
+                        }
+                        if (d < globalMaxNeg) {
+                            globalMaxNeg = d;
+                        }
                     }
                 }
             }
         }
 
-        final int posCount = ((int) Math.log10(roundCount)) + 1;
+        final int posCount = ((int) Math.log10(data.size())) + 1;
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < posCount; i++) {
             sb.append("0");
@@ -114,7 +110,7 @@ public class TargetExportFile implements ITargetExport {
         final NumberFormat nf = new DecimalFormat(sb.toString());
         File target;
         double[][] map;
-        for (int i = 0; i < roundCount; i++) {
+        for (int i = 0; i < data.size(); i++) {
             target = new File(temp.getAbsolutePath() + File.separator + name + nf.format(i) + IMAGE_EXTENSION);
             Utils.ensureDirectoryExistence(target.getParentFile());
             final BufferedImage background = tc.getImage(i);

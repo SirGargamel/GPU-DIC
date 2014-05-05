@@ -5,12 +5,12 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.output.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Observable;
 
 /**
@@ -29,7 +29,7 @@ public class ComplextTaskSolver extends Observable {
     }
 
     public TaskContainer solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
-        final int roundCount = TaskContainerUtils.getRoundCount(tc);
+        final int roundCount = TaskContainerUtils.getRounds(tc).size();
         tc.clearResultData();
 
         final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
@@ -41,27 +41,19 @@ public class ComplextTaskSolver extends Observable {
 
         final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
-
         final TaskContainer tcR = rrm.getTc();
 
-        for (int round = 0; round < rounds.length; round += 2) {
-            if (round > 0) {
-                computeRound(rounds[round - 1], rounds[round], crm);
-                computeRound(rounds[round - 1], rounds[round], rrm);
-                currentRound++;
-                setChanged();
-                notifyObservers(new int[]{currentRound, roundCount});
-                exportRound(tcR, rounds[round - 1]);
-            }
+        int r, nextR;
+        for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
+            r = e.getKey();
+            nextR = e.getValue();
 
-            for (int r = rounds[round]; r < rounds[round + 1]; r++) {
-                computeRound(r, r + 1, crm);
-                computeRound(r, r + 1, rrm);
-                currentRound++;
-                setChanged();
-                notifyObservers(new int[]{currentRound, roundCount});
-                exportRound(tcR, r);
-            }
+            computeRound(r, nextR, crm);
+            computeRound(r, nextR, rrm);
+            currentRound++;
+            setChanged();
+            notifyObservers(new int[]{currentRound, roundCount});
+            exportRound(tcR, r);
         }
 
         return tcR;

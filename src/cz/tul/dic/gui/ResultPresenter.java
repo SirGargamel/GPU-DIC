@@ -83,7 +83,7 @@ public class ResultPresenter implements Initializable {
         boolean result = false;
         index += change;
 
-        final int roundCount = TaskContainerUtils.getRoundCount(Context.getInstance().getTc());
+        final int roundCount = TaskContainerUtils.getMaxRoundCount(Context.getInstance().getTc());
         if (index < 0) {
             index = roundCount - 1;
             result = true;

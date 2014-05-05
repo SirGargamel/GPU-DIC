@@ -39,7 +39,7 @@ public abstract class StrainEstimator {
     }
     
     public static void computeStrain(final TaskContainer tc) throws ComputationException {
-        for (int r : TaskContainerUtils.getListOfRounds(tc)) {
+        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
             computeStrain(tc, r);
         }
     }
