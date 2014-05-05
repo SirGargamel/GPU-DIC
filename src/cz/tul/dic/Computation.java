@@ -204,10 +204,10 @@ public class Computation {
             tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(target.concat("-Eyy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(target.concat("-Exy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
             tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(target.concat("-Eabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.CSV, new File(target.concat("-Exx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.CSV, new File(target.concat("-Eyy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.CSV, new File(target.concat("-Exy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.CSV, new File(target.concat("-Eabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.CSV, new File(target.concat("-Exx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.CSV, new File(target.concat("-Eyy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.CSV, new File(target.concat("-Exy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.CSV, new File(target.concat("-Eabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
         }
         tc.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("-Dabs-").concat(ext).concat(".avi"))));
         tc.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, new File(target.concat("-Eabs-").concat(ext).concat(".avi"))));

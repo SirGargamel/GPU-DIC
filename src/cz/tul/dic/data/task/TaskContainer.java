@@ -39,11 +39,11 @@ public class TaskContainer implements Serializable {
         images = new LinkedList<>();
         rois = new Container<>();
         facetSizes = new Container<>();
-        results = new LinkedList<>();        
         deformationLimits = new Container<>();
         exports = new HashSet<>();
-        displacement = new LinkedList<>();
-        strain = new LinkedList<>();
+        results = Collections.synchronizedList(new LinkedList<>());
+        displacement = Collections.synchronizedList(new LinkedList<>());
+        strain = Collections.synchronizedList(new LinkedList<>());
 
         this.input = input;
     }
@@ -72,6 +72,9 @@ public class TaskContainer implements Serializable {
 
     public void addImage(final Image image) {
         images.add(image);
+        results.add(null);
+        displacement.add(null);
+        strain.add(null);
     }
 
     public Image getImage(final int round) {
@@ -157,10 +160,6 @@ public class TaskContainer implements Serializable {
     }
 
     public void setResult(final int round, final ROI roi, final List<double[][]> result) {
-        while (results.size() <= round) {
-            results.add(null);
-        }
-
         Map<ROI, List<double[][]>> m = results.get(round);
         if (m == null) {
             m = new HashMap<>();
@@ -187,16 +186,12 @@ public class TaskContainer implements Serializable {
 
         displacement.set(round, result);
     }
-    
+
     public double[][][] getStrain(final int round) {
         return strain.get(round);
     }
 
     public void setStrain(final int round, final double[][][] result) {
-        while (strain.size() <= round) {
-            strain.add(null);
-        }
-
         strain.set(round, result);
     }
 
@@ -211,6 +206,13 @@ public class TaskContainer implements Serializable {
     public void clearResultData() {
         results.clear();
         displacement.clear();
+        strain.clear();
+
+        for (int i = 0; i < TaskContainerUtils.getMaxRoundCount(this); i++) {
+            results.add(null);
+            displacement.add(null);
+            strain.add(null);
+        }
     }
 
     private void readObject(ObjectInputStream stream)
@@ -218,13 +220,13 @@ public class TaskContainer implements Serializable {
         stream.defaultReadObject();
         images = new LinkedList<>();
     }
-    
+
     public TaskContainer cloneInputTask() {
         final TaskContainer result = new TaskContainer(input);
         result.images = images;
-        result.params.putAll(params);        
+        result.params.putAll(params);
         result.exports.addAll(exports);
-        
+
         return result;
     }
 }

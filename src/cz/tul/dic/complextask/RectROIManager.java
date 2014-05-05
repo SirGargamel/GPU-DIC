@@ -66,6 +66,7 @@ public class RectROIManager extends ROIManager {
         tcR.setROIs(initialRound, rois);
         
         tc.getRois(initialRound).remove(rect);
+        tcR.clearResultData();
 
         return new RectROIManager(tcR, crm, initialRound);
     }
