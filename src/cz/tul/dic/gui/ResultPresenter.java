@@ -310,11 +310,16 @@ public class ResultPresenter implements Initializable {
     private void actualizeCharts(final Direction dir) {
         final Iterator<Entry<Stage, ChartHandler>> it = charts.entrySet().iterator();
         Entry<Stage, ChartHandler> e;
+        Stage s;
+        ChartHandler ch;
         while (it.hasNext()) {
             e = it.next();
-            if (e.getKey().isShowing()) {
+            s = e.getKey();
+            if (s.isShowing()) {
                 try {
-                    e.getValue().displayData(dir);
+                    ch = e.getValue();
+                    ch.displayData(dir);                    
+                    s.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(ch.getX()).concat(";").concat(Integer.toString(ch.getY()))));
                 } catch (ComputationException ex) {
                     Logger.warn(ex, "Error obtaining line data for chart");
                 }
@@ -375,6 +380,15 @@ public class ResultPresenter implements Initializable {
                 axis.setAutoRanging(true);
             }
         }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+        
     }
 
 }
