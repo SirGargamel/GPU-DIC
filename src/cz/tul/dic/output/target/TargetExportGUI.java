@@ -20,7 +20,7 @@ public class TargetExportGUI implements ITargetExport {
             exportImage((double[][]) data, direction, targetParam, dataParams, tc);
         } else if (data instanceof double[]) {
             exportLine((double[]) data, direction, targetParam, dataParams, tc);
-        } else {
+        } else if (data != null) {
             throw new IllegalArgumentException("Illegal type of data - " + targetParam.getClass());
         }
 
