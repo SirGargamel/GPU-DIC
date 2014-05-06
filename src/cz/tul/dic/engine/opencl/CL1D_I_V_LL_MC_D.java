@@ -61,11 +61,16 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         CLEvent event;
         int actualBaseFacet = 0, actualBaseDeformation;
         int groupCountPerFacet, counter = 0;
-        final CLEventList eventList = new CLEventList(facetCount * 2);
+        CLEventList eventList = new CLEventList(facetCount * 2);
         while (actualBaseFacet < facetCount) {
             actualBaseDeformation = 0;
 
             while (actualBaseDeformation < deformationCount) {
+                if (counter == eventList.size()) {
+                    eventList = new CLEventList(facetCount * 2);
+                    counter = 0;
+                }
+                
                 facetSubCount = Math.min(wsm.getFacetCount(), facetCount - actualBaseFacet);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - actualBaseDeformation);
                 
