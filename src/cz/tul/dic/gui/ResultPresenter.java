@@ -75,9 +75,11 @@ public class ResultPresenter implements Initializable {
     private Timeline timeLine;
     private int lastX, lastY;
     private final Map<Stage, ChartHandler> charts;
+    private boolean inited;
 
     public ResultPresenter() {
         charts = new HashMap<>();
+        inited = false;
     }
 
     @FXML
@@ -251,8 +253,8 @@ public class ResultPresenter implements Initializable {
                 lastY = (int) Math.round(t.getY());
                 final double[] line = Context.getInstance().getLineResult(lastX, lastY, choiceDir.getValue());
                 if (line != null) {
-                    final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
-                    final Stage stage = new Stage();
+                    final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());                    
+                    final Stage stage = new Stage();                    
 
                     @SuppressWarnings("unchecked")
                     final LineChart<Number, Number> chart = (LineChart<Number, Number>) root.getChildrenUnmodifiable().get(0);
@@ -270,6 +272,17 @@ public class ResultPresenter implements Initializable {
                     stage.setScene(new Scene(root));
                     stage.setIconified(false);
                     stage.show();
+
+                    if (!inited) {
+                        final Stage mainStage = (Stage) buttonNext.getScene().getWindow();
+                        mainStage.setOnCloseRequest((WindowEvent event) -> {
+                            for (Stage s : charts.keySet()) {
+                                s.close();
+                            }
+                            charts.clear();
+                        });
+                        inited = true;
+                    }
                 }
             } catch (IOException e) {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
@@ -318,7 +331,7 @@ public class ResultPresenter implements Initializable {
             if (s.isShowing()) {
                 try {
                     ch = e.getValue();
-                    ch.displayData(dir);                    
+                    ch.displayData(dir);
                     s.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(ch.getX()).concat(";").concat(Integer.toString(ch.getY()))));
                 } catch (ComputationException ex) {
                     Logger.warn(ex, "Error obtaining line data for chart");
@@ -388,7 +401,7 @@ public class ResultPresenter implements Initializable {
         public int getY() {
             return y;
         }
-        
+
     }
 
 }
