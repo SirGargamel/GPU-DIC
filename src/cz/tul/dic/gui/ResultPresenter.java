@@ -13,6 +13,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javafx.animation.KeyFrame;
@@ -70,6 +74,11 @@ public class ResultPresenter implements Initializable {
     private int index;
     private Timeline timeLine;
     private int lastX, lastY;
+    private final Map<Stage, ChartHandler> charts;
+
+    public ResultPresenter() {
+        charts = new HashMap<>();
+    }
 
     @FXML
     private void handleButtonActionNext(ActionEvent event) {
@@ -141,6 +150,7 @@ public class ResultPresenter implements Initializable {
     @FXML
     private void handleChoiceChange(ActionEvent event) {
         displayImage();
+        actualizeCharts(choiceDir.getValue());
         event.consume();
     }
 
@@ -237,60 +247,30 @@ public class ResultPresenter implements Initializable {
 
         image.setOnMouseClicked((MouseEvent t) -> {
             try {
-                final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
-                final Stage stage = new Stage();
-
                 lastX = (int) Math.round(t.getX());
                 lastY = (int) Math.round(t.getY());
                 final double[] line = Context.getInstance().getLineResult(lastX, lastY, choiceDir.getValue());
+                if (line != null) {
+                    final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
+                    final Stage stage = new Stage();
 
-                @SuppressWarnings("unchecked")
-                final LineChart<Number, Number> chart = (LineChart<Number, Number>) root.getChildrenUnmodifiable().get(0);
-                chart.setLegendVisible(false);
-                final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
-                chart.setPrefSize(width, PREF_SIZE_H);
+                    @SuppressWarnings("unchecked")
+                    final LineChart<Number, Number> chart = (LineChart<Number, Number>) root.getChildrenUnmodifiable().get(0);
 
-                chart.getData().clear();
+                    final ChartHandler ch = new ChartHandler(lastX, lastY, chart);
+                    charts.put(stage, ch);
+                    ch.displayData(choiceDir.getValue());
 
-                final XYChart.Series<Number, Number> series = new XYChart.Series<>();
-                double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
-                for (int i = 0; i < line.length; i++) {
-                    series.getData().add(new XYChart.Data<>(i + 1, line[i]));
+                    stage.setOnShown((WindowEvent t2) -> {
+                        stage.setX(stage.getX() + lastX + 35);
+                        stage.setY(stage.getY() + lastY + 10);
+                    });
 
-                    if (line[i] < min) {
-                        min = line[i];
-                    }
-                    if (line[i] > max) {
-                        max = line[i];
-                    }
-
+                    stage.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(lastX).concat(";").concat(Integer.toString(lastY))));
+                    stage.setScene(new Scene(root));
+                    stage.setIconified(false);
+                    stage.show();
                 }
-                chart.getData().add(series);
-
-                NumberAxis axis = (NumberAxis) chart.getXAxis();
-                axis.setTickUnit(1);
-                axis.setLowerBound(0);
-                axis.setUpperBound(line.length + 1);
-
-                axis = (NumberAxis) chart.getYAxis();
-                if (Double.compare(min, max) == 0) {
-                    axis.setAutoRanging(false);
-                    axis.setTickUnit(1);
-                    axis.setLowerBound(min - 1);
-                    axis.setUpperBound(min + 1);
-                } else {
-                    axis.setAutoRanging(true);
-                }
-
-                stage.setOnShown((WindowEvent t2) -> {
-                    stage.setX(stage.getX() + lastX + 35);
-                    stage.setY(stage.getY() + lastY + 10);
-                });
-
-                stage.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(lastX).concat(";").concat(Integer.toString(lastY))));
-                stage.setScene(new Scene(root));
-                stage.setIconified(false);
-                stage.show();
             } catch (IOException e) {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
             } catch (ComputationException ex) {
@@ -325,6 +305,76 @@ public class ResultPresenter implements Initializable {
         imgV.setFitHeight(20);
         imgV.setPreserveRatio(true);
         buttonNext.setGraphic(imgV);
+    }
+
+    private void actualizeCharts(final Direction dir) {
+        final Iterator<Entry<Stage, ChartHandler>> it = charts.entrySet().iterator();
+        Entry<Stage, ChartHandler> e;
+        while (it.hasNext()) {
+            e = it.next();
+            if (e.getKey().isShowing()) {
+                try {
+                    e.getValue().displayData(dir);
+                } catch (ComputationException ex) {
+                    Logger.warn(ex, "Error obtaining line data for chart");
+                }
+            } else {
+                it.remove();
+            }
+        }
+    }
+
+    private static class ChartHandler {
+
+        private final int x, y;
+        private final LineChart<Number, Number> chart;
+
+        public ChartHandler(int x, int y, LineChart<Number, Number> chart) {
+            this.x = x;
+            this.y = y;
+            this.chart = chart;
+
+            chart.setLegendVisible(false);
+        }
+
+        public void displayData(final Direction dir) throws ComputationException {
+            final double[] line = Context.getInstance().getLineResult(x, y, dir);
+
+            final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
+            chart.setPrefSize(width, PREF_SIZE_H);
+
+            chart.getData().clear();
+
+            final XYChart.Series<Number, Number> series = new XYChart.Series<>();
+            double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+            for (int i = 0; i < line.length; i++) {
+                series.getData().add(new XYChart.Data<>(i + 1, line[i]));
+
+                if (line[i] < min) {
+                    min = line[i];
+                }
+                if (line[i] > max) {
+                    max = line[i];
+                }
+
+            }
+            chart.getData().add(series);
+
+            NumberAxis axis = (NumberAxis) chart.getXAxis();
+            axis.setTickUnit(1);
+            axis.setLowerBound(0);
+            axis.setUpperBound(line.length + 1);
+
+            axis = (NumberAxis) chart.getYAxis();
+            if (Double.compare(min, max) == 0) {
+                axis.setAutoRanging(false);
+                axis.setTickUnit(1);
+                axis.setLowerBound(min - 1);
+                axis.setUpperBound(min + 1);
+            } else {
+                axis.setAutoRanging(true);
+            }
+        }
     }
 
 }
