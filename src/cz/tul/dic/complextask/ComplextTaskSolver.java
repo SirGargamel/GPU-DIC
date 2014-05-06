@@ -28,7 +28,7 @@ public class ComplextTaskSolver extends Observable {
         engine = new Engine();
     }
 
-    public TaskContainer solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
+    public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
         final int roundCount = TaskContainerUtils.getRounds(tc).size();
         tc.clearResultData();
 
@@ -54,9 +54,11 @@ public class ComplextTaskSolver extends Observable {
             setChanged();
             notifyObservers(new int[]{currentRound, roundCount});
             exportRound(tcR, r);
-        }
-
-        return tcR;
+            
+            tc.setResults(r, tcR.getResults(r));
+            tc.setDisplacement(r, tcR.getDisplacement(r));
+            tc.setStrain(r, tcR.getStrain(r));            
+        }        
     }
 
     private void computeRound(final int r, final int nextR, final ROIManager rm) throws ComputationException {

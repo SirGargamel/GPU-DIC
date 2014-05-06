@@ -168,11 +168,23 @@ public class TaskContainer implements Serializable {
 
         m.put(roi, result);
     }
+    
+    public void setResults(final int round, final Map<ROI, List<double[][]>> result) {
+        while (results.size() <= round) {
+            results.add(null);
+        }
+        
+        results.set(round, result);
+    }
 
-    public List<double[][]> getResults(final int round, final ROI roi) {
+    public List<double[][]> getResult(final int round, final ROI roi) {
         final Map<ROI, List<double[][]>> m = results.get(round);
         final List<double[][]> result = m == null ? null : m.get(roi);
         return result;
+    }
+    
+    public Map<ROI, List<double[][]>> getResults(final int round) {
+        return results.get(round);
     }
 
     public double[][][] getDisplacement(final int round) {
