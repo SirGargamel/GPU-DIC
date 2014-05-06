@@ -37,6 +37,7 @@ public class DataExportLine implements IDataExport<double[]> {
                     case Exy:
                     case Eabs:
                         results = tc.getStrain(r);
+                        break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                 }
@@ -55,6 +56,7 @@ public class DataExportLine implements IDataExport<double[]> {
                         case Exy:
                         case Eabs:
                             result[r] = ExportUtils.calculateStrain(results[x][y], direction);
+                            break;
                         default:
                             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                     }
