@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="cz.tul.dic.gui.ExportEditor">
+<children><BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<center><VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+<children><HBox prefHeight="100.0" prefWidth="200.0" /><HBox prefHeight="100.0" prefWidth="200.0" />
+</children></VBox>
+</center>
+<bottom><BorderPane prefHeight="40.0" BorderPane.alignment="CENTER">
+<right><Button fx:id="buttonAdd" mnemonicParsing="false" text="%Add" BorderPane.alignment="CENTER">
+<BorderPane.margin>
+<Insets bottom="3.0" right="5.0" />
+</BorderPane.margin></Button>
+</right>
+<left><HBox fillHeight="false" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+<children><Button fx:id="buttonOk" mnemonicParsing="false" text="%Ok">
+<HBox.margin>
+<Insets left="5.0" />
+</HBox.margin></Button><Button fx:id="buttonCancel" mnemonicParsing="false" onAction="#handleButtonActionCancel" text="%Cancel">
+<HBox.margin>
+<Insets left="5.0" />
+</HBox.margin></Button>
+</children>
+<BorderPane.margin>
+<Insets top="5.0" />
+</BorderPane.margin></HBox>
+</left></BorderPane>
+</bottom></BorderPane>
+</children>
+</AnchorPane>

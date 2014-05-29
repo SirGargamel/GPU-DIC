@@ -52,7 +52,7 @@
             <right>
                 <VBox spacing="5.0" BorderPane.alignment="CENTER">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#handleButtonActionInput" text="%Input" />
+                        <Button mnemonicParsing="false" onAction="#handleButtonActionInput" text="%Input" /><Button fx:id="buttonExport" mnemonicParsing="false" onAction="#handleButtonActionExport" text="%Export" />
                         <Button fx:id="buttonROI" layoutX="10.0" layoutY="70.0" onAction="#handleButtonActionROI" text="%ROI" />
                         <Label fx:id="labelFs" layoutX="10.0" layoutY="40.0" text="%fs" />
                         <TextField fx:id="textFs" layoutX="130.0" layoutY="40.0" onKeyTyped="#handleTextKeyTyped" prefWidth="55.0" BorderPane.alignment="CENTER" />

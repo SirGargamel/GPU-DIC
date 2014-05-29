@@ -60,6 +60,8 @@ public class MainWindow implements Initializable {
     @FXML
     private Button buttonExpert;
     @FXML
+    private Button buttonExport;
+    @FXML
     private Button buttonPrev;
     @FXML
     private Button buttonPlay;
@@ -316,54 +318,32 @@ public class MainWindow implements Initializable {
     }
 
     @FXML
-    private void handleButtonActionExpert(ActionEvent event) throws ComputationException, IOException {
-//        TaskContainer tc = new TaskContainer(new File("D:\\temp\\7202845m.avi"));
-//        InputLoader.loadInput(tc);
-//
-//        final int roiRadius = 26;
-//        tc.addRoi(new CircularROI(108, 12, roiRadius), 0);
-//        tc.addRoi(new CircularROI(201, 7, roiRadius), 0);
-//        tc.addRoi(new CircularROI(108, 86, roiRadius), 0);
-//        tc.addRoi(new CircularROI(202, 84, roiRadius), 0);
-//
-//        for (ROI roi : tc.getRois(0)) {
-//            tc.setDeformationLimits(new double[]{-1, 1, 1.0, -5, 5, 0.25}, 0, roi);
-//        }
-//
-//        TaskContainerUtils.setUniformFacetSize(tc, 0, roiRadius / 2);
-//        TaskContainerChecker.checkTaskValidity(tc);
-//
-//        final String target = new File("D:\\temp\\results").getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
-//        final String ext = String.format("%02d", 19).concat(".bmp");
-//        for (int round = 0; round < TaskContainerUtils.getMaxRoundCount(tc); round++) {
-//            tc.addExport(ExportTask.generateMapExport(Direction.X, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.Y, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.ABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), round));
-//        }
-//        tc.addExport(ExportTask.generateSequenceExport(Direction.X, ExportTarget.FILE, new File(target.concat("-X-").concat(ext).replace("bmp", "avi"))));
-//        tc.addExport(ExportTask.generateSequenceExport(Direction.Y, ExportTarget.FILE, new File(target.concat("-Y-").concat(ext).replace("bmp", "avi"))));
-//
-//        TaskContainerUtils.serializeTaskToConfig(tc);
-//
-//        // compute dynamic task
-//        Computation.computeDynamicTask(tc);
-//        
-//        // export results
-//        TaskContainerUtils.exportTask(tc);
-//
-//        // serialize task container to binary file
-//        TaskContainerUtils.serializeTaskToBinary(tc);
-
+    private void handleButtonActionExport(ActionEvent event) {
         try {
-            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExpertSettings.fxml"), Lang.getBundle());
+            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExportEditor.fxml"), Lang.getBundle());
             final Stage stage = new Stage();
-            stage.setTitle(Lang.getString("Results"));
+            stage.setTitle(Lang.getString("Export"));
             stage.setScene(new Scene(root));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading Results dialog from JAR.\n{0}", e);
+            Logger.error("Error loading Export dialog from JAR.\n{0}", e);
+        }
+    }
+
+    @FXML
+    private void handleButtonActionExpert(ActionEvent event) throws ComputationException, IOException {
+        try {
+            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExpertSettings.fxml"), Lang.getBundle());
+            final Stage stage = new Stage();
+            stage.setTitle(Lang.getString("Expert"));
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(imagePane.getScene().getWindow());
+            stage.showAndWait();
+        } catch (IOException e) {
+            Logger.error("Error loading Expert settings dialog from JAR.\n{0}", e);
         }
     }
 
@@ -467,7 +447,7 @@ public class MainWindow implements Initializable {
         adjustConfigButtons(true);
         adjustResultButtons(true);
 
-        performComputationTest();
+//        performComputationTest();
 //        final List<File> fileList = new ArrayList<>(1);
 //        fileList.add(new File("D:\\temp\\7202845m.avi.test.task"));
 //        loadInput(fileList);
@@ -475,13 +455,13 @@ public class MainWindow implements Initializable {
 
     private void performComputationTest() {
         try {
-            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-            TaskContainer tc = Context.getInstance().getTc();
-            InputLoader.loadInput(tc);
-            tc.setParameter(TaskParameter.FACET_SIZE, 20);
-            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-            Computation.commenceComputationDynamic(tc);
-
+//            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+//            TaskContainer tc = Context.getInstance().getTc();
+//            InputLoader.loadInput(tc);
+//            tc.setParameter(TaskParameter.FACET_SIZE, 20);
+//            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+//            Computation.commenceComputationDynamic(tc);
+//
 //            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 
             // 7202845m
@@ -493,25 +473,25 @@ public class MainWindow implements Initializable {
                 for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                    Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
 
-//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-//                    TaskContainer tc = Context.getInstance().getTc();
-//                    InputLoader.loadInput(tc);
-//                    tc.setParameter(TaskParameter.FACET_SIZE, size);                    
-//                    tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
-////                    Computation.commenceComputationDynamic(tc);
-//                    Computation.commenceComputationDynamicStrainParamSweep(tc, 10, 30);
+                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+                    TaskContainer tc = Context.getInstance().getTc();
+                    InputLoader.loadInput(tc);
+                    tc.setParameter(TaskParameter.FACET_SIZE, size);
+                    tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
+//                    Computation.commenceComputationDynamic(tc);
+                    Computation.commenceComputationDynamicStrainParamSweep(tc, 10, 30);
 
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamic(tc);
-//
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamic(tc);
+                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
+                    tc = Context.getInstance().getTc();
+                    InputLoader.loadInput(tc);
+                    tc.setParameter(TaskParameter.FACET_SIZE, size);
+                    Computation.commenceComputationDynamic(tc);
+
+                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
+                    tc = Context.getInstance().getTc();
+                    InputLoader.loadInput(tc);
+                    tc.setParameter(TaskParameter.FACET_SIZE, size);
+                    Computation.commenceComputationDynamic(tc);
                 }
             }
         } catch (IOException | ComputationException ex) {
@@ -528,6 +508,7 @@ public class MainWindow implements Initializable {
 
     private void adjustConfigButtons(final boolean disabled) {
         buttonExpert.setDisable(disabled);
+        buttonExport.setDisable(disabled);
         buttonROI.setDisable(disabled);
         buttonRun.setDisable(disabled);
         textFs.setDisable(disabled);
