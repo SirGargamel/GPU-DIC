@@ -7,10 +7,12 @@ import cz.tul.dic.data.roi.RoiType;
 import cz.tul.dic.data.task.TaskContainer;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -40,7 +42,14 @@ public class EditableInputPresenter extends InputPresenter {
 
     public void deleteAllRois() {
         rois.clear();
-        this.getChildren().clear();
+        final Iterator<Node> it = this.getChildren().iterator();
+        Node n;
+        while (it.hasNext()) {
+            n = it.next();
+            if (n instanceof Shape) {
+                it.remove();
+            }
+        }        
         actualShape = null;
         saveRois();
     }
