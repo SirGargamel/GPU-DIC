@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -28,7 +27,7 @@ public class EditableInputPresenter extends InputPresenter {
 
     @Override
     public boolean nextImage() {
-        saveRois();        
+        saveRois();
         actualShape = null;
         return super.nextImage();
     }
@@ -37,7 +36,7 @@ public class EditableInputPresenter extends InputPresenter {
     public boolean previousImage() {
         saveRois();
         actualShape = null;
-        return super.previousImage();               
+        return super.previousImage();
     }
 
     public void deleteAllRois() {
@@ -49,22 +48,21 @@ public class EditableInputPresenter extends InputPresenter {
             if (n instanceof Shape) {
                 it.remove();
             }
-        }        
+        }
         actualShape = null;
         saveRois();
     }
 
-    private void saveRois() {        
+    private void saveRois() {
         final TaskContainer tc = Context.getInstance().getTc();
-        
+
 //        final double dX = (this.getWidth() - i.getWidth()) / 2.0;
 //        final double dY = (this.getHeight() - i.getHeight()) / 2.0;
-
         final Set<ROI> taskRois = new HashSet<>();
 //        double[] roiCoords = new double[2];
         rois.stream().forEach((s) -> {
-            if (s instanceof Rectangle) {                
-                final Rectangle r = (Rectangle) s;                
+            if (s instanceof Rectangle) {
+                final Rectangle r = (Rectangle) s;
 //                paneToImageXY(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), dX, dY, roiCoords);
                 taskRois.add(new RectangleROI(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), r.getX() + r.getTranslateX() + r.getWidth(), r.getY() + r.getTranslateY() + r.getHeight()));
             } else if (s instanceof Circle) {
@@ -84,11 +82,6 @@ public class EditableInputPresenter extends InputPresenter {
         });
     }
 
-    private void paneToImageXY(final double paneX, final double paneY, final double dX, final double dY, final double[] imageXY) {
-        imageXY[0] = paneX - dX;
-        imageXY[1] = paneY - dY;
-    }
-
     public void setRoiTypeProperty(final ReadOnlyProperty<RoiType> roiType) {
         this.roiType = roiType;
     }
@@ -100,13 +93,9 @@ public class EditableInputPresenter extends InputPresenter {
         setOnMousePressed((MouseEvent t) -> {
             onMousePressed(t);
         });
-        setOnMouseDragged((MouseEvent t) -> {
-            onMouseDrag(t);
-        });
         setOnMouseReleased((MouseEvent t) -> {
             onMouseRelease(t);
         });
-
     }
 
     private void onMousePressed(MouseEvent event) {
@@ -117,9 +106,9 @@ public class EditableInputPresenter extends InputPresenter {
             final Shape s;
             final RoiType type = roiType.getValue();
             if (RoiType.CIRCLE.equals(type)) {
-                s = new Circle(lastX, lastY, 5);
+                s = new Circle(lastX, lastY, 0);
             } else if (RoiType.RECTANGLE.equals(type)) {
-                s = new Rectangle(lastX, lastY, 5, 5);
+                s = new Rectangle(lastX, lastY, 0, 0);
             } else {
                 s = new Text("ERROR");
             }
@@ -155,27 +144,24 @@ public class EditableInputPresenter extends InputPresenter {
             final double offsetX = t.getSceneX() - lastX;
             final double offsetY = t.getSceneY() - lastY;
 
-//            s.setLayoutX(s.getLayoutX() + offsetX);
-//            s.setLayoutY(s.getLayoutY() + offsetY);
             s.setTranslateX(s.getTranslateX() + offsetX);
             s.setTranslateY(s.getTranslateY() + offsetY);
 
             lastX = t.getSceneX();
-            lastY = t.getSceneY();                        
+            lastY = t.getSceneY();
 
             t.consume();
         });
         s.setOnMouseReleased((MouseEvent t) -> {
             if (!t.isDragDetect()) {
                 s.setFill(new Color(1, 1, 1, 0));
-                actualShape = null;               
+                actualShape = null;
             }
             t.consume();
         });
     }
 
-    @FXML
-    private void onMouseDrag(MouseEvent event) {
+    private void onMouseRelease(MouseEvent event) {
         if (actualShape instanceof Circle) {
             Circle circle = (Circle) actualShape;
             final double dx = lastX - event.getSceneX();
@@ -191,11 +177,6 @@ public class EditableInputPresenter extends InputPresenter {
             rect.setWidth(dx);
             rect.setHeight(dy);
         }
-        event.consume();
-    }
-
-    @FXML
-    private void onMouseRelease(MouseEvent event) {
         actualShape = null;
     }
 
