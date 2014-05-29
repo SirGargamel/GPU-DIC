@@ -12,6 +12,13 @@ import org.pmw.tinylog.Logger;
 public class LocalLeastSquare extends StrainEstimator {
 
     private static final int DEFAULT_M = 15;
+    private static final int INDEX_A0 = 0;
+    private static final int INDEX_A1 = 1;
+    private static final int INDEX_A2 = 2;
+    private static final int INDEX_B0 = 3;
+    private static final int INDEX_B1 = 4;
+    private static final int INDEX_B2 = 5;
+    
 
     @Override
     void estimateStrain(TaskContainer tc, int round) {
@@ -97,7 +104,7 @@ public class LocalLeastSquare extends StrainEstimator {
     }
 
     private double[] computeStrains(final double[] coeffs) {
-        return new double[]{coeffs[1], coeffs[5], 0.5 * (coeffs[4] + coeffs[3]), 0.5 * (coeffs[4] - coeffs[3])};
+        return new double[]{coeffs[INDEX_A1], coeffs[INDEX_B2], 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]), 0.5 * (coeffs[INDEX_B1] - coeffs[INDEX_A2])};
     }
 
 }
