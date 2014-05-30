@@ -67,7 +67,9 @@ public class TargetExportFile implements ITargetExport {
                 for (int i = 0; i < dataList.size(); i++) {
 
                     if (image) {
-                        exportImage(dataList.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION_IMAGE), new int[]{i}, tc);
+                        if (dataList.get(i) != null) {
+                            exportImage(dataList.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION_IMAGE), new int[]{i}, tc);
+                        }
                     } else {
                         Exporter.exportData(new ExportTask(direction, ExportMode.SEQUENCE, ExportTarget.CSV, new File(subTarget + "-" + nf.format(i) + EXTENSION_CSV), null), tc, dataList.get(i));
                     }
