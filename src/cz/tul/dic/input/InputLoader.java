@@ -49,7 +49,7 @@ public class InputLoader {
                 tc.addImage(images.get(i));
             }
             // print statistics
-            if (Utils.isLevelLogged(LoggingLevel.DEBUG)) {
+            if (Utils.isLevelLogged(LoggingLevel.TRACE)) {
                 final StringBuilder sb = new StringBuilder();
                 sb.append("InputLoader statistics - loaded ");
                 sb.append(images.size());
@@ -57,7 +57,7 @@ public class InputLoader {
                 sb.append(in);
                 sb.append(" using ");
                 sb.append(loader.getClass());                                
-                Logger.debug(sb.toString());
+                Logger.trace(sb.toString());
             }
         } else {
             throw new IllegalArgumentException("Unsupported type of input data - " + cls.toString());

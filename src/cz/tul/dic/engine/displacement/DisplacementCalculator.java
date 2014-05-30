@@ -14,6 +14,7 @@ import cz.tul.dic.engine.strain.StrainEstimator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -29,6 +30,8 @@ public abstract class DisplacementCalculator {
     }        
     
     public static void computeDisplacement(final TaskContainer tc, final int round, final Map<ROI, List<Facet>> facetMap) throws ComputationException {
+        Logger.trace("Computing displacement for round {0}.", round);
+        
         final Object o = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL displacement calculation type.");

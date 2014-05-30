@@ -74,7 +74,7 @@ public class OpenCLSplitter extends TaskSplitter {
                     }
                     checkedDeformations = DeformationGenerator.generateDeformations(limits);
                 } catch (ComputationException ex) {
-                    Logger.warn("Failed to generate deformations.");
+                    Logger.error("Failed to generate deformations.");
                     Logger.trace(ex);
                 }
             } while (!isMemOk(checkedDeformations, rest, fs, defArrayLength));                        

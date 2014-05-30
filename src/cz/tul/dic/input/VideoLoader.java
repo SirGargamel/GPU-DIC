@@ -47,7 +47,7 @@ public class VideoLoader implements IInputLoader {
         final List<File> files;
         Config config = Config.loadConfig(sequenceConfigFile);
         if (!isCacheDataValid(input, temp, config)) {
-            Logger.debug("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
+            Logger.trace("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
             // prepare script
             String script = loadScript();
             script = script.replace(SCRIPT_FILE, input.getAbsolutePath());
@@ -174,7 +174,7 @@ public class VideoLoader implements IInputLoader {
                 }
             }
         }
-        Logger.debug("Found valid cache data for file {0}, importing {1} images.", source.getAbsolutePath(), result.size());
+        Logger.trace("Found valid cache data for file {0}, importing {1} images.", source.getAbsolutePath(), result.size());
         return result;
     }
 

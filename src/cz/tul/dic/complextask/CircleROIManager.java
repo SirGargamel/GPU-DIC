@@ -84,7 +84,7 @@ public class CircleROIManager extends ROIManager {
         final double shift1 = determineROIShift(round, topRight);
         final double shift2 = determineROIShift(round, bottomLeft);
         final double shift3 = determineROIShift(round, bottomRight);
-        Logger.debug(shift2 + ", " + shift3);
+        Logger.trace(shift2 + ", " + shift3);
         //// check if left equals right
         if (Math.abs(shift2 - shift3) > MAX_SHIFT_DIFFERENCE) {
             Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat("-LOWER- ").concat(Double.toString(shift2)).concat(" vs ".concat(Double.toString(shift3))));
@@ -151,7 +151,7 @@ public class CircleROIManager extends ROIManager {
 
     private static double adjustValue(final double value, final double limit) {
         if (value != 0 && Math.signum(limit) != Math.signum(value)) {
-            Logger.debug("Signum mismatch - {0} vs {1}", new Object[]{value, limit});
+            Logger.warn("Signum mismatch - {0} vs {1}", new Object[]{value, limit});
             return value;
         }
         final double val = Math.abs(value);

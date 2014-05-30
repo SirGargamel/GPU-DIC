@@ -143,7 +143,7 @@ public class RectROIManager extends ROIManager {
 
     private static double adjustElongation(final double value, final double limit, final double elong) {
         if (value != 0 && Math.signum(limit) != Math.signum(value)) {
-            Logger.debug("Signum mismatch - {0} vs {1}", new Object[]{value, limit});
+            Logger.trace("Signum mismatch - {0} vs {1}", new Object[]{value, limit});
             return value;
         }
         final double val = Math.abs(value);

@@ -7,6 +7,7 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import java.util.HashMap;
 import java.util.Map;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -25,6 +26,8 @@ public abstract class StrainEstimator {
     abstract void estimateStrain(final TaskContainer tc, final int round);
     
     public static void computeStrain(final TaskContainer tc, final int round) throws ComputationException {
+        Logger.trace("Estimating strain for round {0}.", round);
+        
         final Object o = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL strain estimation type.");

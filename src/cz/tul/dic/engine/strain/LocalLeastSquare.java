@@ -93,7 +93,7 @@ public class LocalLeastSquare extends StrainEstimator {
                 beta = regression.estimateRegressionParameters();
                 System.arraycopy(beta, 0, result, 3, 3);                
             } catch (MathIllegalArgumentException ex) {
-                Logger.debug(ex.getLocalizedMessage());
+                Logger.trace(ex.getLocalizedMessage());
                 // singular matrix, let solution be zeroes
             }
         } else {

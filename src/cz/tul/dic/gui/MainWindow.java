@@ -11,14 +11,21 @@ import cz.tul.dic.engine.Engine;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.output.Direction;
+import cz.tul.dic.output.ExportTarget;
+import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.output.Exporter;
+import cz.tul.dic.output.target.TargetExportFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -49,6 +56,7 @@ import org.pmw.tinylog.Logger;
  */
 public class MainWindow implements Initializable {
 
+    private static final boolean TEST_CASE = true;
     private static final String LAST_DIR = "lastDir";
 
     @FXML
@@ -147,16 +155,18 @@ public class MainWindow implements Initializable {
                         InputLoader.loadInput(tc);
                         updateProgress(4, 5);
                         Platform.runLater(() -> {
-                            adjustConfigButtons(false);
-                            adjustImageButtons(false);
-                            imagePane.displayImage();
+                            if (imagePane != null && imagePane.getScene() != null) {
+                                adjustConfigButtons(false);
+                                adjustImageButtons(false);
+                                imagePane.displayImage();
 
-                            imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 143);
-                            imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 114);
+                                imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 143);
+                                imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 114);
 
-                            final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
-                            if (o != null) {
-                                textFs.setText(o.toString());
+                                final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
+                                if (o != null) {
+                                    textFs.setText(o.toString());
+                                }
                             }
                         });
                     } catch (IOException ex) {
@@ -447,22 +457,35 @@ public class MainWindow implements Initializable {
         adjustConfigButtons(true);
         adjustResultButtons(true);
 
-//        performComputationTest();
-//        final List<File> fileList = new ArrayList<>(1);
-//        fileList.add(new File("D:\\temp\\7202845m.avi.test.task"));
-//        loadInput(fileList);
+        if (TEST_CASE) {
+//            performComputationTest();    
+            
+//            try {
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(new File("D:\\temp\\7202845m.avi.test.task")));
+//
+//                TaskContainer tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.getExports().clear();
+//                tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File("D:\\temp\\results\\export.avi"), ExportTask.EXPORT_SEQUENCE_AVI));
+//                tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File("D:\\temp\\results\\export.avi"), ExportTask.EXPORT_SEQUENCE_BMP));
+//                tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File("D:\\temp\\results\\export.avi"), ExportTask.EXPORT_SEQUENCE_CSV));
+//                Exporter.export(tc);
+//            } catch (IOException | ComputationException | ClassNotFoundException ex) {
+//                java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+        }
     }
 
     private void performComputationTest() {
         try {
-//            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-//            TaskContainer tc = Context.getInstance().getTc();
-//            InputLoader.loadInput(tc);
-//            tc.setParameter(TaskParameter.FACET_SIZE, 20);
-//            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-//            Computation.commenceComputationDynamic(tc);
-//
-//            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
+            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+            TaskContainer tc = Context.getInstance().getTc();
+            InputLoader.loadInput(tc);
+            tc.setParameter(TaskParameter.FACET_SIZE, 20);
+            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+            Computation.commenceComputationDynamic(tc);
+
+            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 
             // 7202845m
             // 9905121m
@@ -473,25 +496,24 @@ public class MainWindow implements Initializable {
                 for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                    Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
 
-                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-                    TaskContainer tc = Context.getInstance().getTc();
-                    InputLoader.loadInput(tc);
-                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-                    tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
+//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+//                    TaskContainer tc = Context.getInstance().getTc();
+//                    InputLoader.loadInput(tc);
+//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                    tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
+////                    Computation.commenceComputationDynamic(tc);
+//                    Computation.commenceComputationDynamicStrainParamSweep(tc, 10, 30);
+//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
+//                    tc = Context.getInstance().getTc();
+//                    InputLoader.loadInput(tc);
+//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                    Computation.commenceComputationDynamic(tc);
-                    Computation.commenceComputationDynamicStrainParamSweep(tc, 10, 30);
-
-                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
-                    tc = Context.getInstance().getTc();
-                    InputLoader.loadInput(tc);
-                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-                    Computation.commenceComputationDynamic(tc);
-
-                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
-                    tc = Context.getInstance().getTc();
-                    InputLoader.loadInput(tc);
-                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-                    Computation.commenceComputationDynamic(tc);
+//
+//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
+//                    tc = Context.getInstance().getTc();
+//                    InputLoader.loadInput(tc);
+//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                    Computation.commenceComputationDynamic(tc);
                 }
             }
         } catch (IOException | ComputationException ex) {

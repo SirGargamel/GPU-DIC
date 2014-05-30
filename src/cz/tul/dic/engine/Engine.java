@@ -120,8 +120,7 @@ public final class Engine extends Observable {
             tc.setResult(index1, roi, bestResults);
         }
         Logger.trace("Building results for round {0}.", index1 + 1);
-        DisplacementCalculator.computeDisplacement(tc, index1, facets);
-        Logger.trace("Estimating strain for round {0}.", index1 + 1);
+        DisplacementCalculator.computeDisplacement(tc, index1, facets);        
         StrainEstimator.computeStrain(tc, index1);
         kernel.finishComputation();
         Logger.debug("Computed round {0}.", index1 + 1);

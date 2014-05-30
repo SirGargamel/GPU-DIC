@@ -143,7 +143,7 @@ public class KernelSourcePreparator {
             });
             kernel = kernel.replaceFirst(REPLACE_INTERPOLATION, sb.toString());
         } catch (Exception ex) {
-            Logger.warn(ex);
+            Logger.error(ex);
         }
 
     }

@@ -39,19 +39,6 @@ public class ImageLoader implements IInputLoader {
             result.add(img);
         }
 
-        if (Utils.isLevelLogged(LoggingLevel.DEBUG)) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("Loaded ");
-            sb.append(result.size());
-            sb.append(" images - ");
-            for (File f : data) {
-                sb.append(f.getName());
-                sb.append(", ");
-            }
-            sb.setLength(sb.length() - 2);
-            Logger.debug(sb.toString());
-        }
-
         return result;
     }
 
