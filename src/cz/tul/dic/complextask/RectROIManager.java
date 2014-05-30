@@ -2,6 +2,7 @@ package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.Constants;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
@@ -19,12 +20,7 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public class RectROIManager extends ROIManager {
-
-    private static final double PRECISION_RECT_ZERO = 0.5;
-    private static final double PRECISION_RECT_FIRST = 0.25;
-    private static final double[] DEFAULT_DEF_LIM_RECT = new double[]{
-        -5, 5, PRECISION_RECT_ZERO, -5, 5, PRECISION_RECT_ZERO,
-        -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST, -0.5, 0.5, PRECISION_RECT_FIRST};
+    
     private static final double ADJUST_COEFF_UP = 2.0;
     private static final double ADJUST_COEFF_DOWN = 0.75;
     private final CircleROIManager crm;
@@ -89,7 +85,7 @@ public class RectROIManager extends ROIManager {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No ReactangleROI specified.");
         }
 
-        defLimits = DEFAULT_DEF_LIM_RECT;
+        defLimits = Constants.DEFORMATION_LIMITS_FIRST;
         
         setRois(initialRound);
     }

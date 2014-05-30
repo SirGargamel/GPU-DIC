@@ -2,6 +2,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.Constants;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -61,6 +62,7 @@ public class TaskContainerChecker {
         Image img;
         Set<ROI> rois;
         int fsz;
+        double[] limits;
         for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
             img = tc.getImage(round);
             if (img == null) {
@@ -82,7 +84,13 @@ public class TaskContainerChecker {
                 } catch (NullPointerException ex) {
                     tc.addFacetSize(round, roi, facetSize);
                 }
-            }
+                
+                limits = tc.getDeformationLimits(round, roi);
+                if (limits == null) {
+                    Logger.warn("Adding default deformation limits for {0} in round {1}.", roi, round);
+                    tc.setDeformationLimits(round, roi, Constants.DEFORMATION_LIMITS_FIRST);
+                }
+            }                        
         }
 
         final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);

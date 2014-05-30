@@ -2,6 +2,7 @@ package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.Constants;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.roi.CircularROI;
@@ -25,9 +26,7 @@ import org.pmw.tinylog.Logger;
 public class CircleROIManager extends ROIManager {
 
     private static final int MAX_SHIFT_DIFFERENCE = 3;
-    private static final int ROI_CIRCLE_FS_DENOM = 3;
-    private static final double PRECISION_CIRC_ZERO = 0.5;
-    private static final double[] DEFAULT_DEF_LIM_CIRCLE = new double[]{-1, 1, PRECISION_CIRC_ZERO, -5, 5, PRECISION_CIRC_ZERO};
+    private static final int ROI_CIRCLE_FS_DENOM = 3;        
     private static final double ADJUST_COEFF_UP = 2.0;
     private static final double ADJUST_COEFF_DOWN = 0.75;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
@@ -69,7 +68,7 @@ public class CircleROIManager extends ROIManager {
         bottomLeft = cRois.get(2);
         bottomRight = cRois.get(3);
 
-        defLimits = DEFAULT_DEF_LIM_CIRCLE;
+        defLimits = Constants.DEFORMATION_LIMITS_ZERO;
         setROIs(initialRound);
         if (rect != null) {
             tc.addRoi(initialRound, rect);
