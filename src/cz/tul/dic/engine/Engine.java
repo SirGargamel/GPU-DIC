@@ -40,7 +40,7 @@ import org.pmw.tinylog.Logger;
  */
 public final class Engine extends Observable {
 
-    private static final int BEST_RESULT_COUNT_MAX = 50;    
+    private static final int BEST_RESULT_COUNT_MAX = 50;
     private final CLContext context;
     private final CLDevice device;
 
@@ -53,8 +53,8 @@ public final class Engine extends Observable {
         final int roundCount = TaskContainerUtils.getRounds(tc).size();
         tc.clearResultData();
         setChanged();
-        notifyObservers(new int[]{0, roundCount});       
-        
+        notifyObservers(new int[]{0, roundCount});
+
         int r, nextR, currentRound = 0;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             r = e.getKey();
@@ -67,7 +67,7 @@ public final class Engine extends Observable {
             exportRound(tc, r);
         }
     }
-    
+
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
         Iterator<ExportTask> it = tc.getExports().iterator();
         ExportTask et;
@@ -81,22 +81,36 @@ public final class Engine extends Observable {
     }
 
     public void computeRound(final TaskContainer tc, final int index1, final int index2) throws ComputationException {
-        Logger.trace("Preparing round {0}.", index1 + 1);
+        Logger.trace("Computing round {0}.", index1 + 1);
+
         final Kernel kernel = Kernel.createKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
-        int facetCount, defArrayLength;
-        List<double[][]> bestResults;
+        Logger.trace("Kernel prepared.");
 
-        final Set<ROI> currentROIs = tc.getRois(index1);
-        final Map<ROI, List<Facet>> facets;
+        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, index1);
+        Logger.trace("Facets generated.");
+
         final Map<ROI, double[]> deformations = new HashMap<>();
-
-        facets = FacetGenerator.generateFacets(tc, index1);
-
-        for (ROI roi : currentROIs) {
+        for (ROI roi : tc.getRois(index1)) {
             deformations.put(roi, DeformationGenerator.generateDeformations(tc.getDeformationLimits(index1, roi)));
         }
+        Logger.trace("Deformations generated.");
 
-        Logger.trace("Computing round {0}.", index1 + 1);
+        computeCorrelations(tc, index1, index2, kernel, facets, deformations);
+
+        DisplacementCalculator.computeDisplacement(tc, index1, facets);
+
+        StrainEstimator.computeStrain(tc, index1);
+
+        kernel.finishComputation();
+        Logger.debug("Computed round {0}.", index1);
+    }
+
+    private void computeCorrelations(final TaskContainer tc, final int index1, final int index2, final Kernel kernel, final Map<ROI, List<Facet>> facets, final Map<ROI, double[]> deformations) throws ComputationException {
+        final Set<ROI> currentROIs = tc.getRois(index1);
+
+        int defArrayLength;
+        int facetCount;
+        List<double[][]> bestResults;
         for (ROI roi : currentROIs) {
             defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, index1, roi);
             kernel.prepareKernel(context, device, tc.getFacetSize(index1, roi), DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(index1, roi)), defArrayLength, (Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
@@ -119,11 +133,7 @@ public final class Engine extends Observable {
             // store data           
             tc.setResult(index1, roi, bestResults);
         }
-        Logger.trace("Building results for round {0}.", index1 + 1);
-        DisplacementCalculator.computeDisplacement(tc, index1, facets);        
-        StrainEstimator.computeStrain(tc, index1);
-        kernel.finishComputation();
-        Logger.debug("Computed round {0}.", index1 + 1);
+        Logger.trace("Correlations computed.");
     }
 
     private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final TaskContainer tc, final int round, final ROI roi, final Map<ROI, List<Facet>> facetMap, final Map<ROI, double[]> deformationMap) throws ComputationException {

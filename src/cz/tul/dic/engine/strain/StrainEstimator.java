@@ -25,9 +25,7 @@ public abstract class StrainEstimator {
     
     abstract void estimateStrain(final TaskContainer tc, final int round);
     
-    public static void computeStrain(final TaskContainer tc, final int round) throws ComputationException {
-        Logger.trace("Estimating strain for round {0}.", round);
-        
+    public static void computeStrain(final TaskContainer tc, final int round) throws ComputationException {                
         final Object o = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL strain estimation type.");
@@ -38,7 +36,9 @@ public abstract class StrainEstimator {
             data.get(type).estimateStrain(tc, round);
         } else {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported strain estimation - " + type.toString());
-        }        
+        }       
+        
+        Logger.trace("Strain  calculated for round {0} using {1}.", round, type);
     }
     
     public static void computeStrain(final TaskContainer tc) throws ComputationException {
