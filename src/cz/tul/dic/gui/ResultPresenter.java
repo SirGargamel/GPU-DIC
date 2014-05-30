@@ -204,7 +204,7 @@ public class ResultPresenter implements Initializable {
             }
         } else if (val.equals(c3)) {
             final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(EXT_SEQUENCE);
-            Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName)));
+            Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName), determineType()));
         }
     }
 
@@ -223,6 +223,26 @@ public class ResultPresenter implements Initializable {
             result = ExportTarget.CSV;
         } else {
             result = null;
+        }
+        return result;
+    }
+    
+    private int determineType() {
+        final String c1 = Lang.getString("TypeAvi");
+        final String c2 = Lang.getString("TypeImage");
+        final String c3 = Lang.getString("TypeCsv");        
+        final Action a = Dialogs.create()
+                .title(Lang.getString("Save"))
+                .message(Lang.getString("ChooseSequenceType"))
+                .showCommandLinks(null, new Dialogs.CommandLink(c1, null), new Dialogs.CommandLink(c2, null), new Dialogs.CommandLink(c3, null));
+        final String val = a.textProperty().get();
+        final int result;
+        if (val.equals(c1)) {
+            result = ExportTask.EXPORT_SEQUENCE_AVI;
+        } else if (val.equals(c2)) {
+            result = ExportTask.EXPORT_SEQUENCE_BMP;
+        } else {
+            result = ExportTask.EXPORT_SEQUENCE_CSV;
         }
         return result;
     }

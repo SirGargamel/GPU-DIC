@@ -8,7 +8,7 @@ import cz.tul.dic.output.Direction;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataExportSequence implements IDataExport<List<double[][]>> {
+public class DataExportSequence implements IDataExport<List<double[][]>> {        
 
     @Override
     public List<double[][]> exportData(TaskContainer tc, Direction direction, int[] dataParams, ROI[] rois) throws ComputationException {

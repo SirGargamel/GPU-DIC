@@ -15,6 +15,9 @@ import java.io.Serializable;
  */
 public class ExportTask implements Serializable {
 
+    public static final int EXPORT_SEQUENCE_AVI = 0;
+    public static final int EXPORT_SEQUENCE_CSV = 1;
+    public static final int EXPORT_SEQUENCE_BMP = 2;
     private static final String SEPARATOR = ";";
     private final ExportMode mode;
     private final ExportTarget target;
@@ -37,20 +40,20 @@ public class ExportTask implements Serializable {
         final ExportTask result = new ExportTask(Direction.valueOf(split[2]), ExportMode.valueOf(split[0]), ExportTarget.valueOf(split[1]), new File(split[3]), dataParams);
         return result;
     }
-    
+
     public static ExportTask generateMapExport(final Direction dir, final ExportTarget target, final Object targetArg, final int round, final ROI... rois) {
-        return new ExportTask(dir, ExportMode.MAP, target, targetArg, new int[] {round}, rois);
+        return new ExportTask(dir, ExportMode.MAP, target, targetArg, new int[]{round}, rois);
     }
-    
+
     public static ExportTask generateLineExport(final Direction dir, final ExportTarget target, final Object targetArg, final int x, final int y, final ROI... rois) {
         return new ExportTask(dir, ExportMode.LINE, target, targetArg, new int[]{x, y}, rois);
     }
-    
-    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final ROI... rois) {
-        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, null, rois);
+
+    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final int mode, final ROI... rois) {
+        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, new int[]{mode}, rois);
     }
 
-    private ExportTask(final Direction direction, final ExportMode mode, final ExportTarget target, final Object targetParam, final int[] dataParams, final ROI... rois) {
+    public ExportTask(final Direction direction, final ExportMode mode, final ExportTarget target, final Object targetParam, final int[] dataParams, final ROI... rois) {
         this.mode = mode;
         this.target = target;
         this.direction = direction;

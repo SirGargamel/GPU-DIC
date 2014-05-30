@@ -11,7 +11,10 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportMode;
+import cz.tul.dic.output.ExportTarget;
+import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.ExportUtils;
+import cz.tul.dic.output.Exporter;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,7 +33,8 @@ import javax.imageio.ImageIO;
  */
 public class TargetExportFile implements ITargetExport {
 
-    private static final String IMAGE_EXTENSION = ".bmp";
+    private static final String EXTENSION_IMAGE = ".bmp";
+    private static final String EXTENSION_CSV = ".csv";
     private static final String SCRIPT_NAME = "scriptVideoJoin.vcf";
     private static final String SCRIPT_FILE = "%FILE%";
     private static final String SCRIPT_TARGET = "%TARGET%";
@@ -43,8 +47,32 @@ public class TargetExportFile implements ITargetExport {
             // export image
             exportImage((double[][]) data, direction, targetParam, dataParams, tc);
         } else if (data instanceof List) {
+            List<double[][]> dataList = (List<double[][]>) data;
             // export video
-            exportVideo((List<double[][]>) data, direction, targetParam, tc);
+            if (dataParams == null || dataParams[0] == ExportTask.EXPORT_SEQUENCE_AVI) {
+                exportVideo(dataList, direction, targetParam, tc);
+            } else if (dataParams[0] == ExportTask.EXPORT_SEQUENCE_BMP || dataParams[0] == ExportTask.EXPORT_SEQUENCE_CSV) {
+                boolean image = dataParams[0] == ExportTask.EXPORT_SEQUENCE_BMP;
+
+                final File target = (File) targetParam;
+                final String path = target.getAbsolutePath();
+                final String subTarget = path.substring(0, path.lastIndexOf("."));
+
+                final int posCount = ((int) Math.log10(dataList.size())) + 1;
+                final StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < posCount; i++) {
+                    sb.append("0");
+                }
+                final NumberFormat nf = new DecimalFormat(sb.toString());
+                for (int i = 0; i < dataList.size(); i++) {
+
+                    if (image) {
+                        exportImage(dataList.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION_IMAGE), new int[]{i}, tc);
+                    } else {
+                        Exporter.exportData(new ExportTask(direction, ExportMode.SEQUENCE, ExportTarget.CSV, new File(subTarget + "-" + nf.format(i) + EXTENSION_CSV), null), tc, dataList.get(i));
+                    }
+                }
+            }
         } else if (data != null) {
             throw new IllegalArgumentException("Unsupported data for file export - " + data.getClass());
         }
@@ -111,7 +139,7 @@ public class TargetExportFile implements ITargetExport {
         File target;
         double[][] map;
         for (int i = 0; i < data.size(); i++) {
-            target = new File(temp.getAbsolutePath() + File.separator + name + nf.format(i) + IMAGE_EXTENSION);
+            target = new File(temp.getAbsolutePath() + File.separator + name + nf.format(i) + EXTENSION_IMAGE);
             Utils.ensureDirectoryExistence(target.getParentFile());
             final BufferedImage background = tc.getImage(i);
             final BufferedImage overlay;
@@ -127,7 +155,7 @@ public class TargetExportFile implements ITargetExport {
         }
         // prepare script
         String script = loadScript();
-        script = script.replace(SCRIPT_FILE, temp.getAbsolutePath() + File.separator + name + nf.format(0) + IMAGE_EXTENSION);
+        script = script.replace(SCRIPT_FILE, temp.getAbsolutePath() + File.separator + name + nf.format(0) + EXTENSION_IMAGE);
         script = script.replace(SCRIPT_TARGET, out.getAbsolutePath());
         final String scriptPath = temp.getAbsolutePath().concat(File.separator).concat(SCRIPT_NAME);
         final File scriptFile = new File(scriptPath);

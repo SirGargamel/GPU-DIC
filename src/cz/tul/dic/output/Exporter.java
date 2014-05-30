@@ -39,17 +39,8 @@ public class Exporter {
 
     public static void export(final TaskContainer tc, final ExportTask et) throws IOException, ComputationException {
         IDataExport dataExporter;
-        ITargetExport targetExporter;
-        ExportTarget target;
         ExportMode mode;
-        final Object data;
-
-        target = et.getTarget();
-        if (targetExporters.containsKey(target)) {
-            targetExporter = targetExporters.get(target);
-        } else {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported export target - " + et.toString());
-        }
+        final Object data;                
 
         mode = et.getMode();
         if (dataExporters.containsKey(mode)) {
@@ -60,6 +51,27 @@ public class Exporter {
 
         try {
             data = dataExporter.exportData(tc, et.getDirection(), et.getDataParams(), et.getRois());
+            exportData(et, tc, data);
+        } catch (IndexOutOfBoundsException | NullPointerException ex) {
+            Logger.warn(ex, "Export failed due to invalid input data.");
+        }
+    }
+
+    public static void export(final TaskContainer tc) throws IOException, ComputationException {
+        for (ExportTask et : tc.getExports()) {
+            export(tc, et);
+        }
+    }
+
+    public static void exportData(final ExportTask et, final TaskContainer tc, final Object data) throws ComputationException, IOException {
+        final ExportTarget target = et.getTarget();
+        ITargetExport targetExporter;
+        if (targetExporters.containsKey(target)) {
+            targetExporter = targetExporters.get(target);
+        } else {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported export target - " + et.toString());
+        }
+        try {
             targetExporter.exportData(
                     data,
                     et.getDirection(),
@@ -68,12 +80,6 @@ public class Exporter {
                     tc);
         } catch (IndexOutOfBoundsException | NullPointerException ex) {
             Logger.warn(ex, "Export failed due to invalid input data.");
-        }
-    }
-    
-    public static void export(final TaskContainer tc) throws IOException, ComputationException {
-        for (ExportTask et : tc.getExports()) {
-            export(tc, et);
         }
     }
 
