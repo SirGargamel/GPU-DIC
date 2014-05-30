@@ -3,6 +3,7 @@ package cz.tul.dic.data.task;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportTask;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -36,7 +38,6 @@ public class TaskContainer implements Serializable {
 
     public TaskContainer(final Object input) {
         params = new HashMap<>();
-        images = new LinkedList<>();
         rois = new Container<>();
         facetSizes = new Container<>();
         deformationLimits = new Container<>();
@@ -70,7 +71,21 @@ public class TaskContainer implements Serializable {
         return params.get(key);
     }
 
+    private void prepareImages() {
+        try {
+            images = new LinkedList<>();
+            InputLoader.loadInput(this);
+        } catch (IOException ex) {
+            Logger.error("Error loading input files");
+            Logger.trace(ex);
+        }
+    }
+
     public void addImage(final Image image) {
+        if (images == null) {
+            prepareImages();
+        }
+
         images.add(image);
         results.add(null);
         displacement.add(null);
@@ -78,6 +93,10 @@ public class TaskContainer implements Serializable {
     }
 
     public Image getImage(final int round) {
+        if (images == null) {
+            prepareImages();
+        }
+
         int counter = -1;
         Image img = null;
         for (int i = 0; i < images.size(); i++) {
@@ -168,12 +187,12 @@ public class TaskContainer implements Serializable {
 
         m.put(roi, result);
     }
-    
+
     public void setResults(final int round, final Map<ROI, List<double[][]>> result) {
         while (results.size() <= round) {
             results.add(null);
         }
-        
+
         results.set(round, result);
     }
 
@@ -182,7 +201,7 @@ public class TaskContainer implements Serializable {
         final List<double[][]> result = m == null ? null : m.get(roi);
         return result;
     }
-    
+
     public Map<ROI, List<double[][]>> getResults(final int round) {
         return results.get(round);
     }
@@ -230,7 +249,6 @@ public class TaskContainer implements Serializable {
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        images = new LinkedList<>();
     }
 
     public TaskContainer cloneInputTask() {
