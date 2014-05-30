@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.output;
 
-import cz.tul.dic.data.roi.ROI;
 import java.io.File;
 import java.io.Serializable;
 
@@ -23,8 +22,7 @@ public class ExportTask implements Serializable {
     private final ExportTarget target;
     private final Direction direction;
     private final Object targetParam;
-    private final int[] dataParams;
-    private final ROI[] rois;
+    private final int[] dataParams;    
 
     public static ExportTask generateExportTask(final String data) {
         final String[] split = data.split(SEPARATOR);
@@ -41,29 +39,24 @@ public class ExportTask implements Serializable {
         return result;
     }
 
-    public static ExportTask generateMapExport(final Direction dir, final ExportTarget target, final Object targetArg, final int round, final ROI... rois) {
-        return new ExportTask(dir, ExportMode.MAP, target, targetArg, new int[]{round}, rois);
+    public static ExportTask generateMapExport(final Direction dir, final ExportTarget target, final Object targetArg, final int round) {
+        return new ExportTask(dir, ExportMode.MAP, target, targetArg, new int[]{round});
     }
 
-    public static ExportTask generateLineExport(final Direction dir, final ExportTarget target, final Object targetArg, final int x, final int y, final ROI... rois) {
-        return new ExportTask(dir, ExportMode.LINE, target, targetArg, new int[]{x, y}, rois);
+    public static ExportTask generateLineExport(final Direction dir, final ExportTarget target, final Object targetArg, final int x, final int y) {
+        return new ExportTask(dir, ExportMode.LINE, target, targetArg, new int[]{x, y});
     }
 
-    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final int mode, final ROI... rois) {
-        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, new int[]{mode}, rois);
+    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final int mode) {
+        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, new int[]{mode});
     }
 
-    public ExportTask(final Direction direction, final ExportMode mode, final ExportTarget target, final Object targetParam, final int[] dataParams, final ROI... rois) {
+    public ExportTask(final Direction direction, final ExportMode mode, final ExportTarget target, final Object targetParam, final int[] dataParams) {
         this.mode = mode;
         this.target = target;
         this.direction = direction;
         this.targetParam = targetParam;
         this.dataParams = dataParams;
-        if (rois == null || rois.length == 0) {
-            this.rois = null;
-        } else {
-            this.rois = rois;
-        }
     }
 
     public ExportMode getMode() {
@@ -80,11 +73,7 @@ public class ExportTask implements Serializable {
 
     public int[] getDataParams() {
         return dataParams;
-    }
-
-    public ROI[] getRois() {
-        return rois;
-    }
+    }  
 
     public Object getTargetParam() {
         return targetParam;

@@ -12,6 +12,6 @@ import cz.tul.dic.output.Direction;
  */
 public interface IDataExport<O> {        
     
-    O exportData(final TaskContainer tc, final Direction direction, final int[] dataParams, final ROI... rois) throws ComputationException;
+    O exportData(final TaskContainer tc, final Direction direction, final int[] dataParams) throws ComputationException;
     
 }

@@ -50,7 +50,7 @@ public class Exporter {
         }
 
         try {
-            data = dataExporter.exportData(tc, et.getDirection(), et.getDataParams(), et.getRois());
+            data = dataExporter.exportData(tc, et.getDirection(), et.getDataParams());
             exportData(et, tc, data);
         } catch (IndexOutOfBoundsException | NullPointerException ex) {
             Logger.warn(ex, "Export failed due to invalid input data.");

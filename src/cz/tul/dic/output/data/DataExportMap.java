@@ -10,7 +10,7 @@ import cz.tul.dic.output.ExportUtils;
 public class DataExportMap implements IDataExport<double[][]> {
 
     @Override
-    public double[][] exportData(TaskContainer tc, Direction direction, int[] dataParams, ROI... rois) throws ComputationException {
+    public double[][] exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {
         if (dataParams == null || dataParams.length < 1) {
             throw new IllegalArgumentException("Not wnough input parameters (position required).");
         }
@@ -42,7 +42,7 @@ public class DataExportMap implements IDataExport<double[][]> {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if (!ExportUtils.isPointInsideROIs(x, y, rois, tc, round) || results[x][y] == null) {
+                if (results[x][y] == null) {
                     continue;
                 }
 

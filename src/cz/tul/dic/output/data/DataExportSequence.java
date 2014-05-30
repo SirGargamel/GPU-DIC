@@ -11,12 +11,12 @@ import java.util.List;
 public class DataExportSequence implements IDataExport<List<double[][]>> {        
 
     @Override
-    public List<double[][]> exportData(TaskContainer tc, Direction direction, int[] dataParams, ROI[] rois) throws ComputationException {
+    public List<double[][]> exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {
         final List<double[][]> result = new ArrayList<>();
         final DataExportMap mapExporter = new DataExportMap();
 
         for (int r = 0; r < TaskContainerUtils.getMaxRoundCount(tc); r++) {
-            result.add(mapExporter.exportData(tc, direction, new int[]{r}, rois));
+            result.add(mapExporter.exportData(tc, direction, new int[]{r}));
         }
 
         return result;

@@ -11,7 +11,7 @@ import cz.tul.dic.output.ExportUtils;
 public class DataExportLine implements IDataExport<double[]> {
 
     @Override
-    public double[] exportData(TaskContainer tc, Direction direction, int[] dataParams, ROI... rois) throws ComputationException {
+    public double[] exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {
         if (dataParams == null || dataParams.length < 2) {
             throw new IllegalArgumentException("Not enough input parameters (position [x, y] required).");
         }
@@ -25,41 +25,39 @@ public class DataExportLine implements IDataExport<double[]> {
         // check if position is inside ROI        
         double[][][] results;
         for (int r = 0; r < roundCount; r++) {
-            if (ExportUtils.isPointInsideROIs(x, y, rois, tc, r)) {
+            switch (direction) {
+                case Dx:
+                case Dy:
+                case Dabs:
+                    results = tc.getDisplacement(r);
+                    break;
+                case Exx:
+                case Eyy:
+                case Exy:
+                case Eabs:
+                    results = tc.getStrain(r);
+                    break;
+                default:
+                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+            }
+
+            if (results == null || results.length < x || results[0].length < y || results[x][y] == null) {
+                result[r] = 0;
+            } else {
                 switch (direction) {
                     case Dx:
                     case Dy:
                     case Dabs:
-                        results = tc.getDisplacement(r);
+                        result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        results = tc.getStrain(r);
+                        result[r] = ExportUtils.calculateStrain(results[x][y], direction);
                         break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
-                }
-                
-                if (results == null || results.length < x || results[0].length < y || results[x][y] == null) {
-                    result[r] = 0;
-                } else {
-                    switch (direction) {
-                        case Dx:
-                        case Dy:
-                        case Dabs:
-                            result[r] = ExportUtils.calculateDisplacement(results[x][y], direction);
-                            break;
-                        case Exx:
-                        case Eyy:
-                        case Exy:
-                        case Eabs:
-                            result[r] = ExportUtils.calculateStrain(results[x][y], direction);
-                            break;
-                        default:
-                            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
-                    }
                 }
             }
         }

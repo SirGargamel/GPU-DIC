@@ -143,11 +143,9 @@ public class Computation {
 
 //            tc.addExport(ExportTask.generateMapExport(Direction.DX, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DX-").concat(ext)), round));
 //            tc.addExport(ExportTask.generateMapExport(Direction.DY, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DY-").concat(ext)), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.DABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DABS-").concat(ext)), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-RC-").concat(ext)), round, circular.toArray(new ROI[0])));
+//            tc.addExport(ExportTask.generateMapExport(Direction.DABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DABS-").concat(ext)), round));            
 //            tc.addExport(ExportTask.generateMapExport(Direction.DABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DABS-RC-").concat(ext)),round, circular.toArray(new ROI[0])));
-
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-RR-").concat(ext)), round, rect.toArray(new ROI[0])));
+            
 //            tc.addExport(ExportTask.generateMapExport(Direction.DABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DABS-RR-").concat(ext)), round, rect.toArray(new ROI[0])));
         }
     }
