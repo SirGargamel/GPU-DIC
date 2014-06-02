@@ -54,20 +54,14 @@ public class TaskContainerUtils {
                 }
             } else {
                 final int[] rounds = (int[]) roundData;
-                for (int round = 0; round < rounds.length; round += 2) {
-                    if (round > 0) {
-                        result.put(rounds[round - 1], rounds[round]);
-                    }
-
-                    for (int r = rounds[round]; r < rounds[round + 1]; r++) {
-                        result.put(r, r + 1);
-                    }
+                for (int round = rounds[0]; round < rounds[1]; round++) {
+                    result.put(round, round + 1);
                 }
             }
         }
         return result;
     }
-    
+
     public static int getMaxRoundCount(final TaskContainer tc) {
         return tc.getImages().size() - 1;
     }
