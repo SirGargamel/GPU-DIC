@@ -42,7 +42,7 @@ public class OpenCLSplitter extends TaskSplitter {
     }
 
     private void checkIfHasNext() {
-        hasNext = index < facets.size() - 1;
+        hasNext = index < facets.size();
     }
 
     @Override
