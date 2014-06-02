@@ -83,7 +83,7 @@ public class TaskContainer implements Serializable {
 
     public void addImage(final Image image) {
         if (images == null) {
-            prepareImages();
+            images = new LinkedList<>();
         }
 
         images.add(image);
