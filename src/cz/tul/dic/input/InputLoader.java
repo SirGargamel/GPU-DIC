@@ -39,6 +39,7 @@ public class InputLoader {
             for (Class<?> c : loaders.keySet()) {
                 if (c.isAssignableFrom(cls)) {
                     loader = loaders.get(c);
+                    break;
                 }
             }
         }
