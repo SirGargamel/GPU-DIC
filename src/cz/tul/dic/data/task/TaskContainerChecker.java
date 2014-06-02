@@ -22,15 +22,13 @@ import org.pmw.tinylog.Logger;
  */
 public class TaskContainerChecker {
 
-    private static final int DEFAULT_FACET_SIZE = 10;
-
     public static void checkTaskValidity(final TaskContainer tc) throws ComputationException {
         final Object in = tc.getParameter(TaskParameter.IN);
         if (in == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No input.");
         }
 
-        final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);        
+        final Object roundData = tc.getParameter(TaskParameter.ROUND_LIMITS);
         if (roundData == null) {
             tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, tc.getImages().size() - 1});
         } else {
@@ -53,8 +51,8 @@ public class TaskContainerChecker {
         final int facetSize;
         if (fs == null) {
             Logger.warn("Adding default facetSize.");
-            tc.setParameter(TaskParameter.FACET_SIZE, DEFAULT_FACET_SIZE);
-            facetSize = DEFAULT_FACET_SIZE;
+            tc.setParameter(TaskParameter.FACET_SIZE, 10);
+            facetSize = 10;
         } else {
             facetSize = (int) fs;
         }
@@ -84,19 +82,19 @@ public class TaskContainerChecker {
                 } catch (NullPointerException ex) {
                     tc.addFacetSize(round, roi, facetSize);
                 }
-                
+
                 limits = tc.getDeformationLimits(round, roi);
                 if (limits == null) {
                     Logger.warn("Adding default deformation limits for {0} in round {1}.", roi, round);
                     tc.setDeformationLimits(round, roi, Constants.DEFORMATION_LIMITS_FIRST);
                 }
-            }                        
+            }
         }
 
         final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
         if (ts == null) {
             Logger.warn("Adding default TaskSplit.");
-            tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.NONE);
+            tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.DYNAMIC);
         }
 
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
@@ -115,7 +113,7 @@ public class TaskContainerChecker {
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
         if (interpolation == null) {
             Logger.warn("Adding default interpolation.");
-            tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
+            tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BILINEAR);
         }
 
         final Object resultCompilation = tc.getParameter(TaskParameter.RESULT_COMPILATION);
@@ -123,13 +121,13 @@ public class TaskContainerChecker {
             Logger.warn("Adding default result compilator.");
             tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
         }
-        
+
         final Object strainEstimation = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (strainEstimation == null) {
             Logger.warn("Adding default strain estimator.");
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationType.LOCAL_LEAST_SQUARES);
         }
-        
+
         final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE);
         if (displacementCalculator == null) {
             Logger.warn("Adding default displacement calculator.");
