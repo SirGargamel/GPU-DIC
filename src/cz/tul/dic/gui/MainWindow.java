@@ -293,7 +293,7 @@ public class MainWindow implements Initializable {
                             });
                         }
                     } catch (InterruptedException | ExecutionException ex) {
-                        System.out.println(ex);
+                        Logger.error(ex);
                     }
                 });
                 th.setDaemon(true);

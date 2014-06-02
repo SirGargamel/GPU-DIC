@@ -41,7 +41,7 @@ public abstract class Kernel {
             case CL_1D_I_V_LL_MC_D:
                 return new CL1D_I_V_LL_MC_D();
             default:
-                System.out.println("Using default kernel.");
+                Logger.warn("Using default kernel.");
                 return new CL1D_I_V_LL_MC_D();
         }
     }
@@ -110,7 +110,7 @@ public abstract class Kernel {
         queue.putWriteBuffer(clDeformations, true);
         final int deformationCount = deformations.length / deformationLength;
 
-        System.out.println(facetCount + "-" + deformationCount);
+        Logger.trace(facetCount + "-" + deformationCount);
         clResults = context.createFloatBuffer(facetCount * deformationCount, CLMemory.Mem.WRITE_ONLY);
         
         clRoundMem.add(clResults);

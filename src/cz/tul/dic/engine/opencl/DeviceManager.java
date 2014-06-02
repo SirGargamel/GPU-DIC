@@ -5,6 +5,7 @@ import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.util.Filter;
 import java.nio.ByteBuffer;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -32,11 +33,11 @@ public class DeviceManager {
         } else {
             device = tmpD;
         }
-        System.out.println("Using " + device);
+        Logger.debug("Using " + device);        
 
         context = CLContext.create(device);
         context.addCLErrorHandler((String string, ByteBuffer bb, long l) -> {
-            System.err.println("CLError - " + string);
+            Logger.error("CLError - " + string);
         });
     }
 
