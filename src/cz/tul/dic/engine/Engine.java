@@ -8,6 +8,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
@@ -52,6 +53,7 @@ public final class Engine extends Observable {
     public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
         final int roundCount = TaskContainerUtils.getRounds(tc).size();
         tc.clearResultData();
+        TaskContainerChecker.checkTaskValidity(tc);
         setChanged();
         notifyObservers(new int[]{0, roundCount});
 
