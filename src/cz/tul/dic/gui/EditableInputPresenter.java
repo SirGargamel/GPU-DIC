@@ -56,18 +56,13 @@ public class EditableInputPresenter extends InputPresenter {
     private void saveRois() {
         final TaskContainer tc = Context.getInstance().getTc();
 
-//        final double dX = (this.getWidth() - i.getWidth()) / 2.0;
-//        final double dY = (this.getHeight() - i.getHeight()) / 2.0;
         final Set<ROI> taskRois = new HashSet<>();
-//        double[] roiCoords = new double[2];
         rois.stream().forEach((s) -> {
             if (s instanceof Rectangle) {
                 final Rectangle r = (Rectangle) s;
-//                paneToImageXY(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), dX, dY, roiCoords);
                 taskRois.add(new RectangleROI(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), r.getX() + r.getTranslateX() + r.getWidth(), r.getY() + r.getTranslateY() + r.getHeight()));
             } else if (s instanceof Circle) {
                 final Circle c = (Circle) s;
-//                paneToImageXY(c.getCenterX() + c.getTranslateX(), c.getCenterY() + c.getTranslateY(), dX, dY, roiCoords);
                 taskRois.add(new CircularROI(c.getCenterX() + c.getTranslateX(), c.getCenterY() + c.getTranslateY(), c.getRadius()));
             }
         });
@@ -178,6 +173,7 @@ public class EditableInputPresenter extends InputPresenter {
             rect.setHeight(dy);
         }
         actualShape = null;
+        saveRois();
     }
 
 }
