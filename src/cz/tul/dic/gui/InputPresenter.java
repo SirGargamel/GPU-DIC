@@ -12,6 +12,8 @@ import cz.tul.dic.data.task.TaskContainer;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.beans.property.StringProperty;
@@ -32,7 +34,7 @@ import javafx.scene.shape.Shape;
  *
  * @author Petr Jecmen
  */
-public class InputPresenter extends ScrollPane implements Initializable, ChangeListener<String> {
+public class InputPresenter extends ScrollPane implements Initializable, ChangeListener<String>, Observer {
 
     protected int imageIndex;
     protected Set<Shape> rois;
@@ -141,6 +143,11 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
         } catch (NumberFormatException ex) {
             imageIndexProperty.setValue(t);
         }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        displayImage();
     }
 
 }

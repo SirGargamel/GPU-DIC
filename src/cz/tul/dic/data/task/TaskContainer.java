@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
 
@@ -21,7 +22,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class TaskContainer implements Serializable {
+public class TaskContainer extends Observable implements Serializable {
 
     // input data
     private final Object input;
@@ -125,10 +126,16 @@ public class TaskContainer implements Serializable {
             rois.setItem(r, round);
         }
         r.add(roi);
+        
+        setChanged();
+        notifyObservers();
     }
 
     public void setROIs(final int round, final Set<ROI> rois) {
         this.rois.setItem(rois, round);
+        
+        setChanged();
+        notifyObservers();
     }
 
     public Map<ROI, Integer> getFacetSizes(final int round) {
@@ -216,6 +223,9 @@ public class TaskContainer implements Serializable {
         }
 
         displacement.set(round, result);
+        
+        setChanged();
+        notifyObservers();
     }
 
     public double[][][] getStrain(final int round) {
@@ -224,6 +234,9 @@ public class TaskContainer implements Serializable {
 
     public void setStrain(final int round, final double[][][] result) {
         strain.set(round, result);
+        
+        setChanged();
+        notifyObservers();
     }
 
     public void addExport(final ExportTask et) {

@@ -145,6 +145,7 @@ public class MainWindow implements Initializable {
                     try {
                         updateProgress(3, 5);
                         final TaskContainer tc = Context.getInstance().getTc();
+                        tc.addObserver(imagePane);
                         InputLoader.loadInput(tc);
                         updateProgress(4, 5);
                         Platform.runLater(() -> {
@@ -461,7 +462,7 @@ public class MainWindow implements Initializable {
 
         adjustImageButtons(true);
         adjustConfigButtons(true);
-        adjustResultButtons(true);
+        adjustResultButtons(true);                
 
         if (TEST_CASE) {
 //            performComputationTest();    

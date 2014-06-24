@@ -34,19 +34,12 @@ public class ROISelector implements Initializable {
 
     @FXML
     private void handleButtonActionPrev(ActionEvent event) {
-//        saveRois();
-//        changeIndex(-1);
-//        displayImage();
-//        actualShape = null;
         imagePane.previousImage();
         event.consume();
     }
 
     @FXML
     private void handleButtonActionDel(ActionEvent event) {
-//        rois.clear();
-//        imagePane.getChildren().clear();
-//        actualShape = null;
         imagePane.deleteAllRois();
         event.consume();
     }
@@ -57,6 +50,7 @@ public class ROISelector implements Initializable {
             imagePane.displayImage();
             displayed = true;
         }
+        Context.getInstance().getTc().addObserver(imagePane);
         event.consume();
     }
 
