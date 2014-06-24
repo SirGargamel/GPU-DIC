@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -91,6 +92,9 @@ public class EditableInputPresenter extends InputPresenter {
         setOnMouseReleased((MouseEvent t) -> {
             onMouseRelease(t);
         });
+        image.setOnMouseDragged((MouseEvent event) -> {
+            onMouseDrag(event);
+        });
     }
 
     private void onMousePressed(MouseEvent event) {
@@ -155,8 +159,12 @@ public class EditableInputPresenter extends InputPresenter {
             t.consume();
         });
     }
-
-    private void onMouseRelease(MouseEvent event) {
+    
+    private void onMouseDrag(MouseEvent event) {
+        handleShapeSize(event);
+    }
+    
+    private void handleShapeSize(MouseEvent event) {
         if (actualShape instanceof Circle) {
             Circle circle = (Circle) actualShape;
             final double dx = lastX - event.getSceneX();
@@ -172,6 +180,10 @@ public class EditableInputPresenter extends InputPresenter {
             rect.setWidth(dx);
             rect.setHeight(dy);
         }
+    }
+
+    private void onMouseRelease(MouseEvent event) {
+        handleShapeSize(event);
         actualShape = null;
         saveRois();
     }
