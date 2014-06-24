@@ -11,21 +11,14 @@ import cz.tul.dic.engine.Engine;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
-import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportTarget;
-import cz.tul.dic.output.ExportTask;
-import cz.tul.dic.output.Exporter;
-import cz.tul.dic.output.target.TargetExportFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -215,6 +208,8 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionSave(ActionEvent event) throws IOException {
+        saveFacetSize();
+
         final String c1 = Lang.getString("TypeConfig");
         final String t1 = Lang.getString("TypeConfigD");
         final String c2 = Lang.getString("TypeBinary");
@@ -258,12 +253,10 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionRun(ActionEvent event) throws IOException, ComputationException {
-        final String fsText = textFs.getText();
         try {
-            final int fs = Integer.valueOf(fsText);
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
-                tc.setParameter(TaskParameter.FACET_SIZE, fs);
+                saveFacetSize();
                 TaskContainerChecker.checkTaskValidity(tc);
                 ComplextTaskSolver cts = new ComplextTaskSolver();
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
@@ -416,6 +409,19 @@ public class MainWindow implements Initializable {
     private void handleTextKeyTyped(KeyEvent keyEvent) {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
             keyEvent.consume();
+        } else {
+            saveFacetSize();
+        }
+    }
+
+    private void saveFacetSize() {
+        final String text = textFs.getText();
+        if (!text.isEmpty()) {
+            final int fs = Integer.valueOf(text);
+            final TaskContainer tc = Context.getInstance().getTc();
+            if (tc != null) {
+                tc.setParameter(TaskParameter.FACET_SIZE, fs);
+            }
         }
     }
 
@@ -459,7 +465,7 @@ public class MainWindow implements Initializable {
 
         if (TEST_CASE) {
 //            performComputationTest();    
-            
+
 //            try {
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(new File("D:\\temp\\7202845m.avi.test.task")));
 //
