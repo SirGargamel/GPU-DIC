@@ -113,7 +113,10 @@ public class ResultPresenter implements Initializable {
             if (i != null) {
                 final Image img = SwingFXUtils.toFXImage(i, null);
                 image.setImage(img);
+            } else {
+                image.setImage(null);
             }
+                  
         } catch (ComputationException ex) {
             Logger.warn(ex);
         }
