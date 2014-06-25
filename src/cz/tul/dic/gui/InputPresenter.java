@@ -16,6 +16,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.Set;
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -70,14 +71,16 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
         final cz.tul.dic.data.Image i = tc.getImage(imageIndex);
         final Image img = SwingFXUtils.toFXImage(i, null);
 
-        image.setImage(img);
-        image.setFitWidth(img.getWidth());
-        image.setFitHeight(img.getHeight());
+        Platform.runLater(() -> {
+            image.setImage(img);
+            image.setFitWidth(img.getWidth());
+            image.setFitHeight(img.getHeight());
 
-        setContent(null);
-        setContent(image);
-        
-        loadRois();
+            setContent(null);
+            setContent(image);
+
+            loadRois();
+        });
     }
 
     void loadRois() {
