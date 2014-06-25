@@ -25,12 +25,7 @@ import org.junit.Test;
  */
 public class EngineTest {
 
-    private static final int ROUND = 0;
-    private final Engine engine;
-
-    public EngineTest() {
-        engine = new Engine();
-    }
+    private static final int ROUND = 0;        
 
     @BeforeClass
     public static void setUpClass() {
