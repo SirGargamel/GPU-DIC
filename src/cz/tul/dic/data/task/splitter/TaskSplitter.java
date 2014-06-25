@@ -3,10 +3,9 @@ package cz.tul.dic.data.task.splitter;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskParameter;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,31 +15,27 @@ import java.util.List;
  */
 public abstract class TaskSplitter implements Iterator<ComputationTask> {
 
-    protected final TaskContainer tc;
-    protected final int index1, index2;
+    protected final Image image1, image2;
     protected final List<Facet> facets;
     protected final double[] deformations;
     protected final ROI roi;
 
-    public TaskSplitter(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations, final ROI roi) {
-        this.tc = tc;
-        this.index1 = index1;
-        this.index2 = index2;
+    public TaskSplitter(final Image image1, Image image2, final List<Facet> facets, final double[] deformations, final ROI roi) {
+        this.image1 = image1;
+        this.image2 = image2;
         this.facets = facets;
         this.deformations = deformations;
         this.roi = roi;
     }
 
-    public static Iterator<ComputationTask> prepareSplitter(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations, final ROI roi) throws ComputationException {
-        final TaskSplit ts = (TaskSplit) tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
-
+    public static Iterator<ComputationTask> prepareSplitter(Image image1, Image image2, final List<Facet> facets, final double[] deformations, final ROI roi, final TaskSplit ts, final Object taskSplitValue) throws ComputationException {
         switch (ts) {
             case NONE:
-                return new NoSplit(tc, index1, index2, facets, deformations, roi);
+                return new NoSplit(image1, image2, facets, deformations, roi);
             case STATIC:
-                return new StaticSplit(tc, index1, index2, facets, deformations, roi);                            
+                return new StaticSplit(image1, image2, facets, deformations, roi, taskSplitValue);
             case DYNAMIC:
-                return new OpenCLSplitter(tc, index1, index2, facets, deformations, roi);
+                return new OpenCLSplitter(image1, image2, facets, deformations, roi, taskSplitValue);
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of task splitting - " + ts);
         }

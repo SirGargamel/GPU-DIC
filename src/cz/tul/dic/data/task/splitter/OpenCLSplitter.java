@@ -6,11 +6,11 @@
 package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.generators.DeformationGenerator;
 import java.util.ArrayList;
@@ -25,13 +25,25 @@ public class OpenCLSplitter extends TaskSplitter {
 
     private static final int SIZE_INT = 4;
     private static final int SIZE_FLOAT = 4;
-    private static final int SIZE_PIXEL = 4;    
+    private static final int SIZE_PIXEL = 4;
     private static final double COEFF_LIMIT_ADJUST = 1.5;
+    private final int defArrayLength, facetSize;
+    private final double[] defLimits;
     private boolean hasNext;
     private int index;
 
-    public OpenCLSplitter(TaskContainer tc, int index1, int index2, List<Facet> facets, double[] deformations, ROI roi) {
-        super(tc, index1, index2, facets, deformations, roi);
+    public OpenCLSplitter(Image image1, Image image2, List<Facet> facets, double[] deformations, ROI roi, final Object taskSplitValue) throws ComputationException {
+        super(image1, image2, facets, deformations, roi);
+
+        if (taskSplitValue instanceof Object[]) {
+            final Object[] vals = (Object[]) taskSplitValue;
+
+            defArrayLength = (int) vals[0];
+            facetSize = (int) vals[1];
+            defLimits = (double[]) vals[2];
+        } else {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal data passed to OpenCLSplitter");
+        }
 
         checkIfHasNext();
     }
@@ -48,36 +60,27 @@ public class OpenCLSplitter extends TaskSplitter {
     @Override
     public ComputationTask next() {
         final int rest = facets.size() - index;
-        int defArrayLength;
-        try {
-            defArrayLength = TaskContainerUtils.getDeformationArrayLength(tc, index1, roi);
-        } catch (ComputationException ex) {
-            defArrayLength = 36;
-            Logger.warn(ex);
-        }
-        final int fs = tc.getFacetSize(index1, roi);
 
         int taskSize = rest;
-        while (taskSize > 1 && !isMemOk(deformations, taskSize, fs, defArrayLength)) {
+        while (taskSize > 1 && !isMemOk(deformations, taskSize, facetSize, defArrayLength)) {
             taskSize /= 2;
         }
-        
+
         double[] checkedDeformations = null;
-        if (taskSize == 1 && !isMemOk(deformations, taskSize, fs, defArrayLength)) {
+        if (taskSize == 1 && !isMemOk(deformations, taskSize, facetSize, defArrayLength)) {
             Logger.warn("Too many deformations to try, lowering limits.");
-            
-            final double[] limits = tc.getDeformationLimits(index1, roi);
+
             do {
                 try {
-                    for (int i = 2; i < limits.length; i += 3) {
-                        limits[i] *= COEFF_LIMIT_ADJUST;
+                    for (int i = 2; i < defLimits.length; i += 3) {
+                        defLimits[i] *= COEFF_LIMIT_ADJUST;
                     }
-                    checkedDeformations = DeformationGenerator.generateDeformations(limits);
+                    checkedDeformations = DeformationGenerator.generateDeformations(defLimits);
                 } catch (ComputationException ex) {
                     Logger.error("Failed to generate deformations.");
                     Logger.trace(ex);
                 }
-            } while (!isMemOk(checkedDeformations, rest, fs, defArrayLength));                        
+            } while (!isMemOk(checkedDeformations, rest, facetSize, defArrayLength));
         } else {
             checkedDeformations = deformations;
         }
@@ -95,12 +98,12 @@ public class OpenCLSplitter extends TaskSplitter {
 
         checkIfHasNext();
 
-        return new ComputationTask(tc.getImage(index1), tc.getImage(index2), sublist, checkedDeformations);
+        return new ComputationTask(image1, image2, sublist, checkedDeformations);
     }
 
     private boolean isMemOk(final double[] deformations, final int facetCount, final int facetSize, final int deformationArraySize) {
-        final long imageSize = tc.getImage(index1).getHeight() * tc.getImage(index1).getWidth() * SIZE_PIXEL * 2;                
-        final long deformationsSize = deformations.length * SIZE_FLOAT;        
+        final long imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
+        final long deformationsSize = deformations.length * SIZE_FLOAT;
         final long reserve = 32 * SIZE_INT;
         final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
         final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;

@@ -1,10 +1,9 @@
 package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskParameter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,11 +14,10 @@ public class StaticSplit extends TaskSplitter {
     private boolean hasNext;
     private int index;
 
-    public StaticSplit(final TaskContainer tc, final int index1, final int index2, final List<Facet> facets, final double[] deformations, final ROI roi) {
-        super(tc, index1, index2, facets, deformations, roi);
-
-        final Object o = this.tc.getParameter(TaskParameter.TASK_SPLIT_VALUE);
-        split = o == null ? SPLIT_DEFAULT : (int) o;
+    public StaticSplit(Image image1, Image image2, final List<Facet> facets, final double[] deformations, final ROI roi, final Object taskSplitValue) {
+        super(image1, image2, facets, deformations, roi);
+        
+        split = taskSplitValue == null ? SPLIT_DEFAULT : (int) taskSplitValue;
 
         checkIfHasNext();
     }
@@ -48,6 +46,6 @@ public class StaticSplit extends TaskSplitter {
 
         checkIfHasNext();
 
-        return new ComputationTask(tc.getImage(index1), tc.getImage(index2), sublist, deformations);
+        return new ComputationTask(image1, image2, sublist, deformations);
     }    
 }

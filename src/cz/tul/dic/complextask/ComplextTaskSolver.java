@@ -4,7 +4,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.output.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -18,15 +18,6 @@ import java.util.Observable;
  * @author Petr Jecmen
  */
 public class ComplextTaskSolver extends Observable {
-
-    private final Engine engine;
-
-    public ComplextTaskSolver() {
-//        deformationLimitsCircle = DEFAULT_DEF_CIRCLE;
-//        deformationLimitsRect = DEFAULT_DEF_RECT;
-
-        engine = new Engine();
-    }
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
         final int roundCount = TaskContainerUtils.getRounds(tc).size();
@@ -54,15 +45,15 @@ public class ComplextTaskSolver extends Observable {
             setChanged();
             notifyObservers(new int[]{currentRound, roundCount});
             exportRound(tcR, r);
-            
+
             tc.setResults(r, tcR.getResults(r));
             tc.setDisplacement(r, tcR.getDisplacement(r));
-            tc.setStrain(r, tcR.getStrain(r));            
-        }        
+            tc.setStrain(r, tcR.getStrain(r));
+        }
     }
 
     private void computeRound(final int r, final int nextR, final ROIManager rm) throws ComputationException {
-        engine.computeRound(rm.getTc(), r, nextR);
+        EngineUtils.getInstance().computeRound(rm.getTc(), r, nextR);
         rm.generateNextRound(r, nextR);
     }
 

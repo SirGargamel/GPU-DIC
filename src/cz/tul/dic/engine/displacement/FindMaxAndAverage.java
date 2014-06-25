@@ -58,6 +58,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
 //                    sb.setLength(sb.length() - 1);
 //                    System.out.println(sb.toString());
 //                }
+                
                 deformedFacet = FacetUtils.deformFacet(f, d, degree);
                 for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
                     x = e.getKey()[Coordinates.X];

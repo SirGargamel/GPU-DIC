@@ -2,7 +2,6 @@ package cz.tul.dic.generators.facet;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.Container;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;

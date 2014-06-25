@@ -9,7 +9,7 @@ import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplit;
-import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -58,9 +58,7 @@ public class Computation {
 //        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00004.bmp"));        
     }
 
-    public static void commenceComputationStatic(final Object in) throws IOException, ComputationException {
-        final Engine engine = new Engine();
-
+    public static void commenceComputationStatic(final Object in) throws IOException, ComputationException {        
         long time;
         TaskContainer tc, loadedTc;
         for (int size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_STEP) {
@@ -80,7 +78,7 @@ public class Computation {
             TaskContainerChecker.checkTaskValidity(tc);
 
             time = System.nanoTime();
-            engine.computeTask(tc);
+            EngineUtils.getInstance().computeTask(tc);
             time = System.nanoTime() - time;
             Exporter.export(tc);
             Logger.info("Finished task " + size + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");

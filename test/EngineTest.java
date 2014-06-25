@@ -5,8 +5,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.opencl.Kernel;
-import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +78,7 @@ public class EngineTest {
         
         tc.setParameter(TaskParameter.FACET_SIZE, 10);        
 
-        engine.computeTask(tc);
+        EngineUtils.getInstance().computeTask(tc);
 
         return tc;
     }
