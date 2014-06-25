@@ -102,7 +102,7 @@ public class TaskContainerChecker {
         if (facetGenMode == null) {
             Logger.warn("Adding default facet generator.");
             tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
-            tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 2);
+            tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
         }
 
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
