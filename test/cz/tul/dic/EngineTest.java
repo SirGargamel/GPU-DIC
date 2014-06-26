@@ -86,22 +86,22 @@ public class EngineTest {
     
     @Test
     public void testFirstOrderFull() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeTask("out_0_0_0.5_0_0_0", DEF_FIRST_F);
+        TaskContainer tc = prepareAndComputeTask("out_0_0_1_0_0_0", DEF_FIRST_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_-0.5_0_0_0", DEF_FIRST_F);
+        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0_0_0_0.5", DEF_FIRST_F);
+        tc = prepareAndComputeTask("out_0_0_0_0_0_1", DEF_FIRST_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0_0_0_-0.5", DEF_FIRST_F);
+        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0.5_0_0_0.5", DEF_FIRST_F);
+        tc = prepareAndComputeTask("out_0_0_1_0_0_1", DEF_FIRST_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0.5_0_0_-0.5", DEF_FIRST_F);
+        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST_F);
         checkResultsBack(tc);
     }
 
