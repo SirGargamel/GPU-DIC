@@ -1,11 +1,13 @@
+package cz.tul.dic;
 
-import cz.tul.dic.ComputationException;
+
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.EngineUtils;
+import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -32,24 +30,8 @@ public class EngineTest {
     private static final int ROUND = 0;
     private static final double[] DEF_ZERO = new double[]{-6, 6, 1, -6, 6, 1};
     private static final double[] DEF_ZERO_F = new double[]{-6, 6, 1, -6, 6, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    private static final double[] DEF_FIRST = new double[]{0, 0, 0, 0, 0, 0, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25};
-    private static final double[] DEF_FIRST_F = new double[]{-1, 1, 1, -1, 1, 1, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25};
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
+    private static final double[] DEF_FIRST = new double[]{0, 0, 0, 0, 0, 0, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25};
+    private static final double[] DEF_FIRST_F = new double[]{-1, 1, 1, -1, 1, 1, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25};    
 
     @Test
     public void testZeroOrder() throws URISyntaxException, IOException, ComputationException {
@@ -136,7 +118,9 @@ public class EngineTest {
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
 
-        tc.setParameter(TaskParameter.FACET_SIZE, 10);
+        tc.setParameter(TaskParameter.FACET_SIZE, 11);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
 
         EngineUtils.getInstance().computeTask(tc);
 
@@ -145,7 +129,7 @@ public class EngineTest {
 
     private void checkResultsBack(final TaskContainer tc) {
         final Image img1 = tc.getImage(ROUND);
-        final Image img2 = tc.getImage(ROUND + 2);
+        final Image img2 = tc.getImage(ROUND + 1);
         double[][][] results = tc.getDisplacement(ROUND);
 
         // displacement map
