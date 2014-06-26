@@ -37,9 +37,9 @@ public abstract class ROI implements Serializable {
 
     public abstract int getHeight();
 
-    public abstract boolean isAreaInside(int x1, int y1, int x2, int y2);
+    public abstract boolean isAreaInside(double x1, double y1, double x2, double y2);
     
-    public abstract boolean isPointInside(int x, int y);
+    public abstract boolean isPointInside(double x, double y);
     
     @Override
     public abstract String toString();

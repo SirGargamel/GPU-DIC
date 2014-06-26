@@ -59,7 +59,7 @@ public class RectangleROI extends ROI implements Serializable {
     }
 
     @Override
-    public boolean isAreaInside(int x1, int y1, int x2, int y2) {
+    public boolean isAreaInside(double x1, double y1, double x2, double y2) {
         return Math.min(x1, x2) >= this.x1
                 && Math.min(y1, y2) >= this.y1
                 && Math.max(x1, x2) <= this.x2
@@ -67,7 +67,7 @@ public class RectangleROI extends ROI implements Serializable {
     }
 
     @Override
-    public boolean isPointInside(int x, int y) {
+    public boolean isPointInside(double x, double y) {
         return x >= this.x1
                 && y >= this.y1
                 && x <= this.x2

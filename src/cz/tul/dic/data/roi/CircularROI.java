@@ -45,7 +45,7 @@ public class CircularROI extends ROI implements Serializable {
     }
 
     @Override
-    public boolean isAreaInside(int x1, int y1, int x2, int y2) {
+    public boolean isAreaInside(double x1, double y1, double x2, double y2) {
         final double maxDist2 = radius * radius;
         
         return dist2(x1, y1, centerX, centerY) <= maxDist2
@@ -54,12 +54,12 @@ public class CircularROI extends ROI implements Serializable {
                 && dist2(x2, y2, centerX, centerY) <= maxDist2;
     }
 
-    private static double dist2(final int x1, final int y1, final double x2, final double y2) {
+    private static double dist2(final double x1, final double y1, final double x2, final double y2) {
         return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
     }
     
     @Override
-    public boolean isPointInside(int x, int y) {
+    public boolean isPointInside(double x, double y) {
         return dist2(x, y, centerX, centerY) <= (radius * radius);
     }
 
