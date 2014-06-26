@@ -36,7 +36,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
         DeformationDegree degree;
-        StringBuilder sb = new StringBuilder();
+//        StringBuilder sb = new StringBuilder();
 //        System.out.println("Round " + round);
 
         for (ROI roi : tc.getRois(round)) {
