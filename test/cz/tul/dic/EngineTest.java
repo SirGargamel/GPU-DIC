@@ -30,8 +30,8 @@ public class EngineTest {
     private static final int ROUND = 0;
     private static final double[] DEF_ZERO = new double[]{-6, 6, 1, -6, 6, 1};
     private static final double[] DEF_ZERO_F = new double[]{-6, 6, 1, -6, 6, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    private static final double[] DEF_FIRST = new double[]{0, 0, 0, 0, 0, 0, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25, -0.5, 0.5, 0.25};
-    private static final double[] DEF_FIRST_F = new double[]{-1, 1, 1, -1, 1, 1, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25, -1.0, 1.0, 0.25};    
+    private static final double[] DEF_FIRST = new double[]{0, 0, 0, 0, 0, 0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};
+    private static final double[] DEF_FIRST_F = new double[]{-1, 1, 1, -1, 1, 1, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};    
 
     @Test
     public void testZeroOrder() throws URISyntaxException, IOException, ComputationException {
@@ -65,22 +65,22 @@ public class EngineTest {
 
     @Test
     public void testFirstOrder() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeTask("out_0_0_0.5_0_0_0", DEF_FIRST);
+        TaskContainer tc = prepareAndComputeTask("out_0_0_1_0_0_0", DEF_FIRST);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_-0.5_0_0_0", DEF_FIRST);
+        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0_0_0_0.5", DEF_FIRST);
+        tc = prepareAndComputeTask("out_0_0_0_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0_0_0_-0.5", DEF_FIRST);
+        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0.5_0_0_0.5", DEF_FIRST);
+        tc = prepareAndComputeTask("out_0_0_1_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0.5_0_0_-0.5", DEF_FIRST);
+        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST);
         checkResultsBack(tc);
     }
     
