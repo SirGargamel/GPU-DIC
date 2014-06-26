@@ -53,8 +53,8 @@ public class DeformationGenerator {
 
         final int coeffCount = 2;
         int size = coeffCount;
-        size *= (limits[1] - limits[0]) / limits[2] + 1;
-        size *= (limits[4] - limits[3]) / limits[5] + 1;
+        size *= computeSize(limits, 0);
+        size *= computeSize(limits, 3);
 
         final double[] result = new double[size];
 
@@ -66,9 +66,26 @@ public class DeformationGenerator {
                 result[index] = u;
                 result[index + 1] = v;
                 i++;
+
+                if (limits[5] == 0) {
+                    break;
+                }
+            }
+            if (limits[2] == 0) {
+                break;
             }
         }
 
+        return result;
+    }
+
+    private static int computeSize(final double[] limits, final int base) {
+        final int result;
+        if (limits[base + 2] != 0 && limits[base] != limits[base + 1]) {
+            result = (int) ((limits[base + 1] - limits[base]) / limits[base + 2] + 1);
+        } else {
+            result = 1;
+        }
         return result;
     }
 
@@ -79,12 +96,12 @@ public class DeformationGenerator {
 
         final int coeffCount = 6;
         int size = coeffCount;
-        size *= (limits[1] - limits[0]) / limits[2] + 1;
-        size *= (limits[4] - limits[3]) / limits[5] + 1;
-        size *= (limits[7] - limits[6]) / limits[8] + 1;
-        size *= (limits[10] - limits[9]) / limits[11] + 1;
-        size *= (limits[13] - limits[12]) / limits[14] + 1;
-        size *= (limits[16] - limits[15]) / limits[17] + 1;
+        size *= computeSize(limits, 0);
+        size *= computeSize(limits, 3);
+        size *= computeSize(limits, 6);
+        size *= computeSize(limits, 9);
+        size *= computeSize(limits, 12);
+        size *= computeSize(limits, 15);
 
         final double[] result = new double[size];
 
@@ -104,10 +121,29 @@ public class DeformationGenerator {
                                 result[index + 4] = vx;
                                 result[index + 5] = vy;
                                 i++;
+
+                                if (limits[17] == 0) {
+                                    break;
+                                }
+                            }
+                            if (limits[14] == 0) {
+                                break;
                             }
                         }
+                        if (limits[11] == 0) {
+                            break;
+                        }
+                    }
+                    if (limits[8] == 0) {
+                        break;
                     }
                 }
+                if (limits[5] == 0) {
+                    break;
+                }
+            }
+            if (limits[2] == 0) {
+                break;
             }
         }
 
@@ -121,18 +157,18 @@ public class DeformationGenerator {
 
         final int coeffCount = 12;
         int size = coeffCount;
-        size *= (limits[1] - limits[0]) / limits[2] + 1;
-        size *= (limits[4] - limits[3]) / limits[5] + 1;
-        size *= (limits[7] - limits[6]) / limits[8] + 1;
-        size *= (limits[10] - limits[9]) / limits[11] + 1;
-        size *= (limits[13] - limits[12]) / limits[14] + 1;
-        size *= (limits[16] - limits[15]) / limits[17] + 1;
-        size *= (limits[19] - limits[18]) / limits[20] + 1;
-        size *= (limits[22] - limits[21]) / limits[23] + 1;
-        size *= (limits[25] - limits[24]) / limits[26] + 1;
-        size *= (limits[28] - limits[27]) / limits[29] + 1;
-        size *= (limits[31] - limits[30]) / limits[32] + 1;
-        size *= (limits[34] - limits[33]) / limits[35] + 1;
+        size *= computeSize(limits, 0);
+        size *= computeSize(limits, 3);
+        size *= computeSize(limits, 6);
+        size *= computeSize(limits, 9);
+        size *= computeSize(limits, 12);
+        size *= computeSize(limits, 15);
+        size *= computeSize(limits, 18);
+        size *= computeSize(limits, 21);
+        size *= computeSize(limits, 24);
+        size *= computeSize(limits, 27);
+        size *= computeSize(limits, 30);
+        size *= computeSize(limits, 33);
 
         final double[] result = new double[size];
 
@@ -164,16 +200,53 @@ public class DeformationGenerator {
                                                         result[index + 10] = vxy;
                                                         result[index + 11] = vyy;
                                                         i++;
+
+                                                        if (limits[35] == 0) {
+                                                            break;
+                                                        }
+                                                    }
+                                                    if (limits[32] == 0) {
+                                                        break;
                                                     }
                                                 }
+                                                if (limits[29] == 0) {
+                                                    break;
+                                                }
+                                            }
+                                            if (limits[26] == 0) {
+                                                break;
                                             }
                                         }
+                                        if (limits[23] == 0) {
+                                            break;
+                                        }
+                                    }
+                                    if (limits[20] == 0) {
+                                        break;
                                     }
                                 }
+                                if (limits[17] == 0) {
+                                    break;
+                                }
+                            }
+                            if (limits[14] == 0) {
+                                break;
                             }
                         }
+                        if (limits[11] == 0) {
+                            break;
+                        }
+                    }
+                    if (limits[8] == 0) {
+                        break;
                     }
                 }
+                if (limits[5] == 0) {
+                    break;
+                }
+            }
+            if (limits[2] == 0) {
+                break;
             }
         }
 
