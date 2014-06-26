@@ -69,19 +69,19 @@ public class EngineTest {
         TaskContainer tc = prepareAndComputeTask("out_0_0_1_0_0_0", DEF_FIRST);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST);
+//        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST);
 //        checkResultsBack(tc);
 
         tc = prepareAndComputeTask("out_0_0_0_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST);
+//        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST);
 //        checkResultsBack(tc);
 
         tc = prepareAndComputeTask("out_0_0_1_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST);
+//        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST);
 //        checkResultsBack(tc);
     }
     
@@ -90,19 +90,19 @@ public class EngineTest {
         TaskContainer tc = prepareAndComputeTask("out_0_0_1_0_0_0", DEF_FIRST_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST_F);
+//        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST_F);
 //        checkResultsBack(tc);
 
         tc = prepareAndComputeTask("out_0_0_0_0_0_1", DEF_FIRST_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST_F);
+//        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST_F);
 //        checkResultsBack(tc);
 
         tc = prepareAndComputeTask("out_0_0_1_0_0_1", DEF_FIRST_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST_F);
+//        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST_F);
 //        checkResultsBack(tc);
     }
 
