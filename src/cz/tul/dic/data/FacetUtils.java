@@ -21,7 +21,7 @@ public class FacetUtils {
 
     public static Map<int[], double[]> deformFacet(final Facet facet, final double[] deformation, final DeformationDegree degree) throws ComputationException {
         final int[] data = facet.getData();
-        final float[] center = facet.getCenter();
+        final double[] center = facet.getCenter();
         final int facetArea = data.length / Coordinates.DIMENSION;
 
         if (CACHE.size() != facetArea) {
@@ -35,8 +35,8 @@ public class FacetUtils {
         }
 
         int x, y, i = 0;
-        float dx, dy;
-        final float[] newCoords = new float[Coordinates.DIMENSION];
+        double dx, dy;
+        final double[] newCoords = new double[Coordinates.DIMENSION];
         int[] pos;
         double[] def;
         for (Entry<int[], double[]> e : CACHE.entrySet()) {
@@ -62,7 +62,7 @@ public class FacetUtils {
         return CACHE;
     }
 
-    private static void deform(final int x, final int y, final float dx, final float dy, final double[] deformation, final float[] result, final DeformationDegree degree) throws ComputationException {
+    private static void deform(final int x, final int y, final double dx, final double dy, final double[] deformation, final double[] result, final DeformationDegree degree) throws ComputationException {
         result[Coordinates.X] = x;
         result[Coordinates.Y] = y;
         switch (degree) {
