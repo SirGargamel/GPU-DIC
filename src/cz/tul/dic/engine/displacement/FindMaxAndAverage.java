@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class FindMaxAndAverage extends DisplacementCalculator {
 
-    private static final double PRECISION = 0.5;
+    private static final double PRECISION = 1.0;
 
     @Override
     public void buildFinalResults(TaskContainer tc, int round, Map<ROI, List<Facet>> facetMap) throws ComputationException {
