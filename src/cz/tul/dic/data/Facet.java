@@ -9,10 +9,10 @@ import java.io.Serializable;
 public class Facet implements Serializable {
 
     private final int[] data;
-    private final float[] center;
+    private final double[] center;
     private final int size;
 
-    private Facet(int[] data, float[] center, int size) {
+    private Facet(int[] data, double[] center, int size) {
         this.data = data;
         this.center = center;
         this.size = size;
@@ -22,7 +22,7 @@ public class Facet implements Serializable {
         return data;
     }
 
-    public float[] getCenter() {
+    public double[] getCenter() {
         return center;
     }
 
@@ -30,7 +30,7 @@ public class Facet implements Serializable {
         return size;
     }
 
-    public static Facet createFacet(int size, float... center) {
+    public static Facet createFacet(int size, double... center) {
         if (center.length < Coordinates.DIMENSION) {
             throw new IllegalArgumentException("Not enough coordinates for facet center (" + (Coordinates.DIMENSION - center.length) + " more needed).");
         }

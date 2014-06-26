@@ -213,10 +213,12 @@ public abstract class Kernel {
         final float[] data = new float[facets.size() * dataSize];
 
         int pointer = 0;
-        float[] centerData;
+        double[] centerData;
         for (Facet f : facets) {
             centerData = f.getCenter();
-            System.arraycopy(centerData, 0, data, pointer, dataSize);
+            for (int i = 0; i < dataSize; i++) {
+                data[pointer + i] = (float) centerData[i];
+            }            
             pointer += dataSize;
         }
 

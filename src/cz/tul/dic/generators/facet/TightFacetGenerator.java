@@ -32,8 +32,8 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
 
         List<Facet> facets;
         int roiW, roiH, wCount, hCount,
-                gapX, gapY, facetSize, halfSize;
-        float centerX, centerY;
+                gapX, gapY, facetSize;
+        double centerX, centerY, halfSize;
         Map<ROI, List<Facet>> m;
         for (ROI roi : rois) {
             facets = new ArrayList<>();

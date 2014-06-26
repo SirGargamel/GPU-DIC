@@ -19,7 +19,7 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
         Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No facet generator spacing.");
-        }        
+        }
 
         final int spacing = (int) o;
 
@@ -30,8 +30,8 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
         final Map<ROI, List<Facet>> result = new HashMap<>(rois.size());
 
         List<Facet> facets;
-        int roiW, roiH, wCount, hCount, gapX, gapY,
-                centerX, centerY, facetSize, halfSize;
+        int roiW, roiH, wCount, hCount, gapX, gapY, facetSize;
+        double centerX, centerY, halfSize;
         Map<ROI, List<Facet>> m;
         for (ROI roi : rois) {
             facets = new ArrayList<>();
