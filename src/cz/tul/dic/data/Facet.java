@@ -30,17 +30,14 @@ public class Facet implements Serializable {
         return size;
     }
 
-    public static Facet createFacet(int size, double... center) {
-        if (center.length < Coordinates.DIMENSION) {
-            throw new IllegalArgumentException("Not enough coordinates for facet center (" + (Coordinates.DIMENSION - center.length) + " more needed).");
+    public static Facet createFacet(int size, int... topLeft) {
+        if (topLeft.length < Coordinates.DIMENSION) {
+            throw new IllegalArgumentException("Not enough coordinates for facet center (" + (Coordinates.DIMENSION - topLeft.length) + " more needed).");
         }
 
         final int halfSize = size / 2;
-        final int centerX = (int) Math.floor(center[Coordinates.X]);
-        final int topLeftX = centerX - halfSize;
-        
-        final int centerY = (int) Math.floor(center[Coordinates.Y]);
-        final int topLeftY = centerY - halfSize;
+        final double centerX = topLeft[Coordinates.X] + halfSize;
+        final double centerY = topLeft[Coordinates.Y] + halfSize;
 
         final int[] data = new int[size * size * Coordinates.DIMENSION];
 
@@ -49,11 +46,11 @@ public class Facet implements Serializable {
             for (int y = 0; y < size; y++) {
                 index = (x * size + y) * Coordinates.DIMENSION;
 
-                data[index] = topLeftX + x;
-                data[index + 1] = topLeftY + y;
+                data[index] = topLeft[Coordinates.X] + x;
+                data[index + 1] = topLeft[Coordinates.Y] + y;
             }
         }
-        final Facet result = new Facet(data, center, size);
+        final Facet result = new Facet(data, new double[]{centerX, centerY}, size);
         return result;
     }
 

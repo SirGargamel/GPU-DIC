@@ -37,12 +37,12 @@ public class RectangleROI extends ROI implements Serializable {
 
     @Override
     public int getWidth() {
-        return (int) Math.ceil(x2 - x1);
+        return (int) Math.ceil(x2 - x1 + 1);
     }
 
     @Override
     public int getHeight() {
-        return (int) Math.ceil(y2 - y1);
+        return (int) Math.ceil(y2 - y1 + 1);
     }
 
     @Override

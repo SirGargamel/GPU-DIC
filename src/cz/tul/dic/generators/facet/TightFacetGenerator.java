@@ -31,15 +31,11 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
         final Map<ROI, List<Facet>> result = new HashMap<>(rois.size());
 
         List<Facet> facets;
-        int roiW, roiH, wCount, hCount,
-                gapX, gapY, facetSize;
-        double centerX, centerY, halfSize;
-        Map<ROI, List<Facet>> m;
+        int roiW, roiH, wCount, hCount, gapX, gapY, facetSize, topLeftX, topLeftY;
         for (ROI roi : rois) {
             facets = new ArrayList<>();
 
-            facetSize = tc.getFacetSize(round, roi);
-            halfSize = facetSize / 2;
+            facetSize = tc.getFacetSize(round, roi);            
 
             if (spacing >= facetSize) {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Spacing cant must be smaller than facet size.");
@@ -55,14 +51,14 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
             gapY = (roiH - (spacing * (hCount - 1) + facetSize)) / 2;
 
             for (int y = 0; y < hCount; y++) {
-                centerY = gapX + roi.getY1() + halfSize + (y * spacing);
+                topLeftY = gapX + roi.getY1() + (y * spacing);
 
                 for (int x = 0; x < wCount; x++) {
-                    centerX = gapY + roi.getX1() + halfSize + (x * spacing);
+                    topLeftX = gapY + roi.getX1() + (x * spacing);
 
-                    if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height)
-                            && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
-                        facets.add(Facet.createFacet(facetSize, centerX, centerY));
+                    if (checkAreaValidity(topLeftX, topLeftY, topLeftX + facetSize - 1, topLeftY + facetSize - 1, width, height)
+                            && roi.isAreaInside(topLeftX, topLeftY, topLeftX + facetSize - 1, topLeftY + facetSize - 1)) {
+                        facets.add(Facet.createFacet(facetSize, topLeftX, topLeftY));
                     }
                 }
             }

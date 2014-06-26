@@ -30,14 +30,11 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
         final Map<ROI, List<Facet>> result = new HashMap<>(rois.size());
 
         List<Facet> facets;
-        int roiW, roiH, wCount, hCount, gapX, gapY, facetSize;
-        double centerX, centerY, halfSize;
-        Map<ROI, List<Facet>> m;
+        int roiW, roiH, wCount, hCount, gapX, gapY, facetSize, topLeftX, topLeftY;
         for (ROI roi : rois) {
             facets = new ArrayList<>();
 
             facetSize = tc.getFacetSize(round, roi);
-            halfSize = facetSize / 2;
 
             if (spacing >= facetSize) {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Spacing must be smaller than facet size.");
@@ -49,18 +46,18 @@ public class SimpleFacetGenerator extends AbstractFacetGenerator {
             wCount = (roiW - spacing) / (facetSize - spacing);
             hCount = (roiH - spacing) / (facetSize - spacing);
 
-            gapX = (roiW - (facetSize - spacing) * wCount + spacing) / 2;
-            gapY = (roiH - (facetSize - spacing) * hCount + spacing) / 2;
+            gapX = (roiW - ((facetSize - spacing) * wCount + spacing)) / 2;
+            gapY = (roiH - ((facetSize - spacing) * hCount + spacing)) / 2;
 
             for (int y = 0; y < hCount; y++) {
-                centerY = gapY + roi.getY1() + halfSize + y * (facetSize - spacing);
+                topLeftY = gapY + roi.getY1() + y * (facetSize - spacing);
 
                 for (int x = 0; x < wCount; x++) {
-                    centerX = gapX + roi.getX1() + halfSize + x * (facetSize - spacing);
+                    topLeftX = gapX + roi.getX1() + x * (facetSize - spacing);
 
-                    if (checkAreaValidity(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, width, height)
-                            && roi.isAreaInside(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize)) {
-                        facets.add(Facet.createFacet(facetSize, centerX, centerY));
+                    if (checkAreaValidity(topLeftX, topLeftY, topLeftX + facetSize - 1, topLeftY + facetSize - 1, width, height)
+                            && roi.isAreaInside(topLeftX, topLeftY, topLeftX + facetSize - 1, topLeftY + facetSize - 1)) {
+                        facets.add(Facet.createFacet(facetSize, topLeftX, topLeftY));
                     }
                 }
             }
