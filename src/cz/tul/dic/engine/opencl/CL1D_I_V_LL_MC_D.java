@@ -32,13 +32,8 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount) {
         final int facetArea = facetSize * facetSize;
-        int lws0 = EngineMath.roundUp(calculateLws0base(kernel), facetArea);
+        int lws0 = EngineMath.roundUp(calculateLws0base(), facetArea);
         lws0 = Math.min(lws0, device.getMaxWorkItemSizes()[0]);
-
-//        int groupCountPerFacet = deformationCount / lws0;
-//        if (deformationCount % lws0 > 0) {
-//            groupCountPerFacet++;
-//        }
 
         kernel.rewind();
         kernel.putArgs(imgA, imgB, facetData, facetCenters, deformations, results)
@@ -59,22 +54,20 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         int facetGlobalWorkSize, facetSubCount = 1, deformationSubCount;
         long time;
         CLEvent event;
-        int actualBaseFacet = 0, actualBaseDeformation;
+        int currentBaseFacet = 0, currentBaseDeformation;
         int groupCountPerFacet, counter = 0;
         CLEventList eventList = new CLEventList(facetCount * 2);
-        while (actualBaseFacet < facetCount) {
-            actualBaseDeformation = 0;
+        while (currentBaseFacet < facetCount) {
+            currentBaseDeformation = 0;
 
-            while (actualBaseDeformation < deformationCount) {
+            while (currentBaseDeformation < deformationCount) {
                 if (counter == eventList.size()) {
                     eventList = new CLEventList(facetCount * 2);
                     counter = 0;
                 }
-                
-                facetSubCount = Math.min(wsm.getFacetCount(), facetCount - actualBaseFacet);
-                deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - actualBaseDeformation);
-                
-//                System.out.print(facetSubCount + ", " + deformationSubCount + "-");
+
+                facetSubCount = Math.min(wsm.getFacetCount(), facetCount - currentBaseFacet);
+                deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);                
 
                 facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationSubCount) * facetSubCount;
 
@@ -84,30 +77,28 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 }
 
                 kernel.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerFacet);
-                kernel.setArg(ARGUMENT_INDEX_F_BASE, actualBaseFacet);
                 kernel.setArg(ARGUMENT_INDEX_F_COUNT, facetSubCount);
-                kernel.setArg(ARGUMENT_INDEX_D_BASE, actualBaseDeformation);
+                kernel.setArg(ARGUMENT_INDEX_F_BASE, currentBaseFacet);
                 kernel.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
+                kernel.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
                 queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0, eventList);
 
                 queue.putWaitForEvent(eventList, counter, true);
                 event = eventList.getEvent(counter);
                 time = event.getProfilingInfo(CLEvent.ProfilingCommand.END) - event.getProfilingInfo(CLEvent.ProfilingCommand.START);
                 wsm.storeTime(facetSubCount, deformationSubCount, time);
-//                System.out.print(time / 1_000_000_000 + "; ");
 
-                actualBaseDeformation += deformationSubCount;
+                currentBaseDeformation += deformationSubCount;
                 counter++;
             }
 
-            actualBaseFacet += facetSubCount;
+            currentBaseFacet += facetSubCount;
         }
-//        System.out.println();
 
         eventList.release();
     }
 
-    private int calculateLws0base(final CLKernel kernel) {
+    private int calculateLws0base() {
 //        final IntBuffer val = Buffers.newDirectIntBuffer(5);
 //        context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), queue.getDevice().getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
 //        return val.get(0);

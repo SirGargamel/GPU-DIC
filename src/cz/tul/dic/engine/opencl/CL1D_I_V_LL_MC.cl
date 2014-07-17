@@ -17,15 +17,10 @@ kernel void CL1D_I_V_LL_MC(
     const size_t facetId = groupId / groupCountPerFacet;
     if (facetId >= facetCount) {
         return;
-    }       
-    // deformation    
-    const int groupSubId = groupId % groupCountPerFacet;
+    }                 
     const size_t localId = get_local_id(0);
-    const size_t groupSize = get_local_size(0);
-    const int deformationId = groupSubId * groupSize + localId;    
-    // index computation
-    const int facetSize2 = facetSize * facetSize;
-    const int baseIndexDeformation = deformationId * %DEF_D%;
+    const size_t groupSize = get_local_size(0);        
+    const int facetSize2 = facetSize * facetSize;    
     // load facet to local memory    
     local int2 facetLocal[-1*-1];
     int index;
@@ -50,9 +45,12 @@ kernel void CL1D_I_V_LL_MC(
         }
     }        
     barrier(CLK_LOCAL_MEM_FENCE);
+    const int groupSubId = groupId % groupCountPerFacet;
+    const int deformationId = groupSubId * groupSize + localId;    
     if (deformationId >= deformationCount) {
         return;
     }
+    const int baseIndexDeformation = deformationId * %DEF_D%;
     // deform facet
     float2 deformedFacet[-1*-1];
     float2 coords, def; 
@@ -61,10 +59,7 @@ kernel void CL1D_I_V_LL_MC(
 
         def = coords - facetCenters[facetId];
         
-//        deformedFacet[i] = (float2)(
-//            coords.x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * def.x + deformations[baseIndexDeformation + 4] * def.y, 
-//            coords.y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * def.x + deformations[baseIndexDeformation + 5] * def.y);
-    deformedFacet[i] = (float2)(%DEF_X%, %DEF_Y%);
+        deformedFacet[i] = (float2)(%DEF_X%, %DEF_Y%);
     }
     // compute correlation using ZNCC
     float deformedI[-1*-1];

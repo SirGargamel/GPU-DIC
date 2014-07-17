@@ -46,7 +46,7 @@ public class EngineTest {
         0, 0, 0, 0, 0, 0,
         -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
     private static final double[] DEF_FIRST_F = new double[]{
-        -5, 5, 1, -5, 5, 1,
+        -0, 3, 1, -0, 3, 1,
         -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
 
     @Test
@@ -69,7 +69,7 @@ public class EngineTest {
                     errors.add(checkResultsBack(tc));
                 }
             }
-        }
+        }        
 
         errors.remove(null);
         Assert.assertEquals(errors.toString(), 0, errors.size());
@@ -169,5 +169,5 @@ public class EngineTest {
         } else {
             return null;
         }
-    }    
+    }
 }
