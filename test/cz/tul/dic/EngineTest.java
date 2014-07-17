@@ -7,6 +7,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.EngineUtils;
+import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
@@ -36,49 +37,49 @@ public class EngineTest {
 
     @Test
     public void testZeroOrder() throws URISyntaxException, IOException, ComputationException {
-        TaskContainer tc = prepareAndComputeTask("out_0_0", DEF_ZERO);
+        TaskContainer tc = prepareAndComputeTaskDefault("out_0_0", DEF_ZERO);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_5_0", DEF_ZERO);
+        tc = prepareAndComputeTaskDefault("out_5_0", DEF_ZERO);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_-5", DEF_ZERO);
+        tc = prepareAndComputeTaskDefault("out_0_-5", DEF_ZERO);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_-5_5", DEF_ZERO);
+        tc = prepareAndComputeTaskDefault("out_-5_5", DEF_ZERO);
         checkResultsBack(tc);
     }
     
     @Test
     public void testZeroOrderFull() throws URISyntaxException, IOException, ComputationException {
-        TaskContainer tc = prepareAndComputeTask("out_0_0", DEF_ZERO_F);
+        TaskContainer tc = prepareAndComputeTaskDefault("out_0_0", DEF_ZERO_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_5_0", DEF_ZERO_F);
+        tc = prepareAndComputeTaskDefault("out_5_0", DEF_ZERO_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_-5", DEF_ZERO_F);
+        tc = prepareAndComputeTaskDefault("out_0_-5", DEF_ZERO_F);
         checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_-5_5", DEF_ZERO_F);
+        tc = prepareAndComputeTaskDefault("out_-5_5", DEF_ZERO_F);
         checkResultsBack(tc);
     }
 
     @Test
     public void testFirstOrder() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeTask("out_0_0_1_0_0_0", DEF_FIRST);
+        TaskContainer tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_0", DEF_FIRST);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST);
 //        checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0_0_0_1", DEF_FIRST);
+        tc = prepareAndComputeTaskDefault("out_0_0_0_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST);
 //        checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_1_0_0_1", DEF_FIRST);
+        tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST);
@@ -87,26 +88,26 @@ public class EngineTest {
     
     @Test
     public void testFirstOrderFull() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeTask("out_0_0_1_0_0_0", DEF_FIRST_F);
+        TaskContainer tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_0", DEF_FIRST_F);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST_F);
 //        checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_0_0_0_1", DEF_FIRST_F);
+        tc = prepareAndComputeTaskDefault("out_0_0_0_0_0_1", DEF_FIRST_F);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST_F);
 //        checkResultsBack(tc);
 
-        tc = prepareAndComputeTask("out_0_0_1_0_0_1", DEF_FIRST_F);
+        tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_1", DEF_FIRST_F);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST_F);
 //        checkResultsBack(tc);
     }
-
-    private TaskContainer prepareAndComputeTask(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
+    
+    private TaskContainer prepareAndComputeTaskDefault(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
@@ -122,6 +123,47 @@ public class EngineTest {
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
+
+        EngineUtils.getInstance().computeTask(tc);
+
+        return tc;
+    }
+    
+    @Test
+    public void testBicubicInterpolation() throws IOException, URISyntaxException, ComputationException {
+        TaskContainer tc = prepareAndComputeTaskBicubic("out_0_0", DEF_ZERO);
+        checkResultsBack(tc);
+
+        tc = prepareAndComputeTaskBicubic("out_-5_5", DEF_ZERO);
+        checkResultsBack(tc);
+        
+        tc = prepareAndComputeTaskBicubic("out_-5_5", DEF_ZERO_F);
+        checkResultsBack(tc);
+        
+        tc = prepareAndComputeTaskBicubic("out_0_0_1_0_0_1", DEF_FIRST);
+        checkResultsBack(tc);
+        
+        tc = prepareAndComputeTaskBicubic("out_0_0_1_0_0_0", DEF_FIRST_F);
+        checkResultsBack(tc);                
+    }
+
+    private TaskContainer prepareAndComputeTaskBicubic(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
+        final List<File> input = new ArrayList<>(2);
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
+
+        TaskContainer tc = new TaskContainer(input);
+        InputLoader.loadInput(tc);
+
+        ROI roi = new RectangleROI(10, 10, 20, 20);
+
+        tc.addRoi(ROUND, roi);
+        tc.setDeformationLimits(ROUND, roi, deformations);
+
+        tc.setParameter(TaskParameter.FACET_SIZE, 11);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
+        tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
 
         EngineUtils.getInstance().computeTask(tc);
 
