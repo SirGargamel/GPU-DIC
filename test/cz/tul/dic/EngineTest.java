@@ -1,6 +1,5 @@
 package cz.tul.dic;
 
-
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -30,10 +29,17 @@ public class EngineTest {
 
     private static final int ROUND = 0;
     private static final int BACKGROUND = -16777216;
-    private static final double[] DEF_ZERO = new double[]{-6, 6, 1, -6, 6, 1};
-    private static final double[] DEF_ZERO_F = new double[]{-6, 6, 1, -6, 6, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    private static final double[] DEF_FIRST = new double[]{0, 0, 0, 0, 0, 0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};
-    private static final double[] DEF_FIRST_F = new double[]{-1, 1, 1, -1, 1, 1, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};    
+    private static final double[] DEF_ZERO = new double[]{
+        -6, 6, 1, -6, 6, 1};
+    private static final double[] DEF_ZERO_F = new double[]{
+        -6, 6, 1, -6, 6, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private static final double[] DEF_FIRST = new double[]{
+        0, 0, 0, 0, 0, 0,
+        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};
+    private static final double[] DEF_FIRST_F = new double[]{
+        -1, 1, 1, -1, 1, 1,
+        -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0};
 
     @Test
     public void testZeroOrder() throws URISyntaxException, IOException, ComputationException {
@@ -49,7 +55,7 @@ public class EngineTest {
         tc = prepareAndComputeTaskDefault("out_-5_5", DEF_ZERO);
         checkResultsBack(tc);
     }
-    
+
     @Test
     public void testZeroOrderFull() throws URISyntaxException, IOException, ComputationException {
         TaskContainer tc = prepareAndComputeTaskDefault("out_0_0", DEF_ZERO_F);
@@ -72,20 +78,18 @@ public class EngineTest {
 
 //        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST);
 //        checkResultsBack(tc);
-
         tc = prepareAndComputeTaskDefault("out_0_0_0_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST);
 //        checkResultsBack(tc);
-
         tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST);
 //        checkResultsBack(tc);
     }
-    
+
     @Test
     public void testFirstOrderFull() throws IOException, URISyntaxException, ComputationException {
         TaskContainer tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_0", DEF_FIRST_F);
@@ -93,20 +97,18 @@ public class EngineTest {
 
 //        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST_F);
 //        checkResultsBack(tc);
-
         tc = prepareAndComputeTaskDefault("out_0_0_0_0_0_1", DEF_FIRST_F);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST_F);
 //        checkResultsBack(tc);
-
         tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_1", DEF_FIRST_F);
         checkResultsBack(tc);
 
 //        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST_F);
 //        checkResultsBack(tc);
     }
-    
+
     private TaskContainer prepareAndComputeTaskDefault(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
@@ -128,7 +130,7 @@ public class EngineTest {
 
         return tc;
     }
-    
+
     @Test
     public void testBicubicInterpolation() throws IOException, URISyntaxException, ComputationException {
         TaskContainer tc = prepareAndComputeTaskBicubic("out_0_0", DEF_ZERO);
@@ -136,15 +138,15 @@ public class EngineTest {
 
         tc = prepareAndComputeTaskBicubic("out_-5_5", DEF_ZERO);
         checkResultsBack(tc);
-        
+
         tc = prepareAndComputeTaskBicubic("out_-5_5", DEF_ZERO_F);
         checkResultsBack(tc);
-        
+
         tc = prepareAndComputeTaskBicubic("out_0_0_1_0_0_1", DEF_FIRST);
         checkResultsBack(tc);
-        
+
         tc = prepareAndComputeTaskBicubic("out_0_0_1_0_0_0", DEF_FIRST_F);
-        checkResultsBack(tc);                
+        checkResultsBack(tc);
     }
 
     private TaskContainer prepareAndComputeTaskBicubic(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {

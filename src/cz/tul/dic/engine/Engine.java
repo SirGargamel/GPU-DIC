@@ -15,6 +15,7 @@ import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -55,15 +56,15 @@ public final class Engine extends Observable {
         final List<double[][]> result = computeCorrelations(image1, image2, roi, kernel, facets, deformations, defArrayLength, defDegree, facetSize, taskSplitValue);
 
         kernel.finishComputation();
-        
+
         return result;
 
     }
 
     private List<double[][]> computeCorrelations(
             Image image1, Image image2,
-            ROI roi, final Kernel kernel, final List<Facet> facets,
-            final double[] deformations, int defArrayLength, DeformationDegree defDegree,
+            ROI roi, final Kernel kernel, List<Facet> facets,
+            double[] deformations, int defArrayLength, DeformationDegree defDegree,
             int facetSize, Object taskSplitValue) throws ComputationException {
         final List<double[][]> result = new ArrayList<>(facets.size());
         for (int i = 0; i < facets.size(); i++) {
@@ -102,6 +103,14 @@ public final class Engine extends Observable {
             best = -Float.MAX_VALUE;
 
             taskResults = task.getResults();
+
+            // DEBUG
+//            System.out.println(Arrays.toString(taskResults));
+//            final float[] sort = new float[taskResults.length];
+//            System.arraycopy(taskResults, 0, sort, 0, taskResults.length);
+//            Arrays.sort(sort);
+//            System.out.println(Arrays.toString(sort));
+
             baseIndex = localFacetIndex * deformationCount;
 
             for (int def = 0; def < deformationCount; def++) {
