@@ -36,18 +36,18 @@ public class EngineTest {
     private static final String[] DEF_ZERO_FILES = new String[]{
         "out_0_0", "out_5_0", "out_0_-5", "out_-5_5"};
     private static final double[] DEF_ZERO = new double[]{
-        -6, 6, 1, -6, 6, 1};
+        -10, 10, 1, -10, 10, 1};
     private static final double[] DEF_ZERO_F = new double[]{
-        -6, 6, 1, -6, 6, 1,
+        -10, 10, 1, -10, 10, 1,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     private static final String[] DEF_FIRST_FILES = new String[]{
         "out_0_0_1_0_0_0", "out_0_0_0_0_0_1", "out_0_0_1_0_0_1"};
     private static final double[] DEF_FIRST = new double[]{
         0, 0, 0, 0, 0, 0,
-        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};
+        -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
     private static final double[] DEF_FIRST_F = new double[]{
-        -1, 1, 1, -1, 1, 1,
-        -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0};
+        -5, 5, 1, -5, 5, 1,
+        -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
 
     @Test
     public void testEngine() throws IOException, URISyntaxException, ComputationException {
@@ -71,7 +71,7 @@ public class EngineTest {
             }
         }
 
-        errors.remove(null);        
+        errors.remove(null);
         Assert.assertEquals(errors.toString(), 0, errors.size());
     }
 
@@ -150,7 +150,7 @@ public class EngineTest {
                     if (l != null) {
                         if (!l.contains(color)) {
                             errorCount++;
-                            System.out.println(x + "; " + y);
+//                            System.out.println(x + "; " + y);
                         }
                     }
                 }
@@ -158,61 +158,16 @@ public class EngineTest {
         }
 
         if (errorCount > 0) {
-            final StringBuilder sb = new StringBuilder();            
+            final StringBuilder sb = new StringBuilder();
             sb.append("\n");
             sb.append(tc.getParameter(TaskParameter.KERNEL));
             sb.append("; ");
             sb.append(tc.getParameter(TaskParameter.INTERPOLATION));
             sb.append("; ");
-            sb.append(Arrays.toString(tc.getDeformationLimits(0).values().iterator().next()));            
+            sb.append(Arrays.toString(tc.getDeformationLimits(0).values().iterator().next()));
             return sb.toString();
         } else {
             return null;
         }
-    }
-
-    /////////////////////////////////
-    private void checkResults(final TaskContainer tc, final double dx, final double dy) {
-        double[][][] results = tc.getDisplacement(ROUND);
-        for (double[][] dAA : results) {
-            for (double[] dA : dAA) {
-                if (dA != null) {
-                    assert (dA.length == 2);
-                    assert (dA[0] == dx);
-                    assert (dA[1] == dy);
-                }
-            }
-        }
-    }
-
-    private void checkResultsDirect(final TaskContainer tc) {
-        final Image img1 = tc.getImage(ROUND);
-        final Image img2 = tc.getImage(ROUND + 2);
-
-        double[][][] results = tc.getDisplacement(ROUND);
-
-        double[] def;
-        for (int x = 0; x < results.length; x++) {
-            for (int y = 0; y < results[x].length; y++) {
-                def = results[x][y];
-                if (def != null) {
-                    assert (def.length == 2);
-                    assert (pixelEquals(img1, img2, x, y, def));
-                }
-            }
-        }
-    }
-
-    private boolean pixelEquals(final Image img1, final Image img2, final int x, final int y, final double[] def) {
-        final int newX = (int) (x + def[0]);
-        final int newY = (int) (y + def[1]);
-
-        assert (newX > 0 && newX < img2.getWidth());
-        assert (newY > 0 && newY < img2.getHeight());
-
-        final int c1 = img1.getRGB(x, y);
-        final int c2 = img2.getRGB(newX, newY);
-
-        return c1 == c2;
-    }
+    }    
 }
