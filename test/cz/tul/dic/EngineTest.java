@@ -6,6 +6,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.EngineUtils;
+import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import cz.tul.dic.input.InputLoader;
@@ -14,10 +15,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,11 +33,15 @@ public class EngineTest {
 
     private static final int ROUND = 0;
     private static final int BACKGROUND = -16777216;
+    private static final String[] DEF_ZERO_FILES = new String[]{
+        "out_0_0", "out_5_0", "out_0_-5", "out_-5_5"};
     private static final double[] DEF_ZERO = new double[]{
         -6, 6, 1, -6, 6, 1};
     private static final double[] DEF_ZERO_F = new double[]{
         -6, 6, 1, -6, 6, 1,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private static final String[] DEF_FIRST_FILES = new String[]{
+        "out_0_0_1_0_0_0", "out_0_0_0_0_0_1", "out_0_0_1_0_0_1"};
     private static final double[] DEF_FIRST = new double[]{
         0, 0, 0, 0, 0, 0,
         -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};
@@ -42,74 +50,32 @@ public class EngineTest {
         -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0};
 
     @Test
-    public void testZeroOrder() throws URISyntaxException, IOException, ComputationException {
-        TaskContainer tc = prepareAndComputeTaskDefault("out_0_0", DEF_ZERO);
-        checkResultsBack(tc);
+    public void testEngine() throws IOException, URISyntaxException, ComputationException {
+        TaskContainer tc;
+        Set<String> errors = new HashSet<>();
+        for (KernelType kt : KernelType.values()) {
+            for (Interpolation i : Interpolation.values()) {
+                for (String s : DEF_ZERO_FILES) {
+                    tc = generateTask(s, DEF_ZERO, kt, i);
+                    errors.add(checkResultsBack(tc));
+                    tc = generateTask(s, DEF_ZERO_F, kt, i);
+                    errors.add(checkResultsBack(tc));
+                }
 
-        tc = prepareAndComputeTaskDefault("out_5_0", DEF_ZERO);
-        checkResultsBack(tc);
+                for (String s : DEF_FIRST_FILES) {
+                    tc = generateTask(s, DEF_FIRST, kt, i);
+                    errors.add(checkResultsBack(tc));
+                    tc = generateTask(s, DEF_FIRST_F, kt, i);
+                    errors.add(checkResultsBack(tc));
+                }
+            }
+        }
 
-        tc = prepareAndComputeTaskDefault("out_0_-5", DEF_ZERO);
-        checkResultsBack(tc);
-
-        tc = prepareAndComputeTaskDefault("out_-5_5", DEF_ZERO);
-        checkResultsBack(tc);
+        errors.remove(null);        
+        Assert.assertEquals(errors.toString(), 0, errors.size());
     }
 
-    @Test
-    public void testZeroOrderFull() throws URISyntaxException, IOException, ComputationException {
-        TaskContainer tc = prepareAndComputeTaskDefault("out_0_0", DEF_ZERO_F);
-        checkResultsBack(tc);
-
-        tc = prepareAndComputeTaskDefault("out_5_0", DEF_ZERO_F);
-        checkResultsBack(tc);
-
-        tc = prepareAndComputeTaskDefault("out_0_-5", DEF_ZERO_F);
-        checkResultsBack(tc);
-
-        tc = prepareAndComputeTaskDefault("out_-5_5", DEF_ZERO_F);
-        checkResultsBack(tc);
-    }
-
-    @Test
-    public void testFirstOrder() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_0", DEF_FIRST);
-        checkResultsBack(tc);
-
-//        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST);
-//        checkResultsBack(tc);
-        tc = prepareAndComputeTaskDefault("out_0_0_0_0_0_1", DEF_FIRST);
-        checkResultsBack(tc);
-
-//        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST);
-//        checkResultsBack(tc);
-        tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_1", DEF_FIRST);
-        checkResultsBack(tc);
-
-//        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST);
-//        checkResultsBack(tc);
-    }
-
-    @Test
-    public void testFirstOrderFull() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_0", DEF_FIRST_F);
-        checkResultsBack(tc);
-
-//        tc = prepareAndComputeTask("out_0_0_-1_0_0_0", DEF_FIRST_F);
-//        checkResultsBack(tc);
-        tc = prepareAndComputeTaskDefault("out_0_0_0_0_0_1", DEF_FIRST_F);
-        checkResultsBack(tc);
-
-//        tc = prepareAndComputeTask("out_0_0_0_0_0_-1", DEF_FIRST_F);
-//        checkResultsBack(tc);
-        tc = prepareAndComputeTaskDefault("out_0_0_1_0_0_1", DEF_FIRST_F);
-        checkResultsBack(tc);
-
-//        tc = prepareAndComputeTask("out_0_0_1_0_0_-1", DEF_FIRST_F);
-//        checkResultsBack(tc);
-    }
-
-    private TaskContainer prepareAndComputeTaskDefault(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
+    private TaskContainer generateTask(final String outFilename, final double[] deformations, final KernelType kernel, final Interpolation interpolation) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
@@ -125,54 +91,15 @@ public class EngineTest {
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
+        tc.setParameter(TaskParameter.KERNEL, kernel);
+        tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
 
         EngineUtils.getInstance().computeTask(tc);
 
         return tc;
     }
 
-    @Test
-    public void testBicubicInterpolation() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeTaskBicubic("out_0_0", DEF_ZERO);
-        checkResultsBack(tc);
-
-        tc = prepareAndComputeTaskBicubic("out_-5_5", DEF_ZERO);
-        checkResultsBack(tc);
-
-        tc = prepareAndComputeTaskBicubic("out_-5_5", DEF_ZERO_F);
-        checkResultsBack(tc);
-
-        tc = prepareAndComputeTaskBicubic("out_0_0_1_0_0_1", DEF_FIRST);
-        checkResultsBack(tc);
-
-        tc = prepareAndComputeTaskBicubic("out_0_0_1_0_0_0", DEF_FIRST_F);
-        checkResultsBack(tc);
-    }
-
-    private TaskContainer prepareAndComputeTaskBicubic(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
-        final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
-
-        TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
-
-        ROI roi = new RectangleROI(10, 10, 20, 20);
-
-        tc.addRoi(ROUND, roi);
-        tc.setDeformationLimits(ROUND, roi, deformations);
-
-        tc.setParameter(TaskParameter.FACET_SIZE, 11);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
-        tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BICUBIC);
-
-        EngineUtils.getInstance().computeTask(tc);
-
-        return tc;
-    }
-
-    private void checkResultsBack(final TaskContainer tc) {
+    private String checkResultsBack(final TaskContainer tc) {
         final Image img1 = tc.getImage(ROUND);
         final Image img2 = tc.getImage(ROUND + 1);
         double[][][] results = tc.getDisplacement(ROUND);
@@ -230,7 +157,18 @@ public class EngineTest {
             }
         }
 
-        Assert.assertEquals(0, errorCount);
+        if (errorCount > 0) {
+            final StringBuilder sb = new StringBuilder();            
+            sb.append("\n");
+            sb.append(tc.getParameter(TaskParameter.KERNEL));
+            sb.append("; ");
+            sb.append(tc.getParameter(TaskParameter.INTERPOLATION));
+            sb.append("; ");
+            sb.append(Arrays.toString(tc.getDeformationLimits(0).values().iterator().next()));            
+            return sb.toString();
+        } else {
+            return null;
+        }
     }
 
     /////////////////////////////////
