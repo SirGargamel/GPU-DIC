@@ -3,7 +3,6 @@ package cz.tul.dic.complextask;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.Constants;
-import cz.tul.dic.Utils;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
@@ -13,6 +12,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -145,7 +145,7 @@ public class CircleROIManager extends ROIManager {
         }
 
         defLimits = result;
-        Logger.debug("New circle limits - " + Utils.toString(defLimits));
+        Logger.debug("New circle limits - " + Arrays.toString(defLimits));
     }
 
     private static double adjustValue(final double value, final double limit) {

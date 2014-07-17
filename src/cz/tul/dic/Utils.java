@@ -82,14 +82,4 @@ public class Utils {
         return indexCurrentLevel < indexTestedLevel;
     }
 
-    public static String toString(final double[] data) {
-        final StringBuilder sb = new StringBuilder();
-        for (double d : data) {
-            sb.append(d);
-            sb.append("; ");
-        }
-        sb.setLength(sb.length() - 2);
-        return sb.toString();
-    }
-
 }

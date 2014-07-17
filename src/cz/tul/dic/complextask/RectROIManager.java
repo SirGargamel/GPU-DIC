@@ -10,6 +10,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -129,7 +130,7 @@ public class RectROIManager extends ROIManager {
 
         for (int i = 0; i < result.length; i++) {
             if (result[i] != defLimits[i]) {
-                Logger.debug("New rect limits - " + Utils.toString(result));
+                Logger.debug("New rect limits - " + Arrays.toString(result));
                 break;
             }
         }
