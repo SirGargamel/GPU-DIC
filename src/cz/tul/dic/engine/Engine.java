@@ -2,7 +2,9 @@ package cz.tul.dic.engine;
 
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
+import com.jogamp.opencl.CLException;
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
@@ -15,7 +17,6 @@ import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -71,16 +72,20 @@ public final class Engine extends Observable {
             result.add(null);
         }
 
-        kernel.prepareKernel(context, device, facetSize, defDegree, defArrayLength, interpolation);
+        try {
+            kernel.prepareKernel(context, device, facetSize, defDegree, defArrayLength, interpolation);
 
-        final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(image1, image2, facets, deformations, roi, taskSplitVariant, taskSplitValue);
-        ComputationTask ct;
-        while (it.hasNext()) {
-            ct = it.next();
-            ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
-            kernel.finishRound();
-            // pick best results for this computation task and discard ct data                          
-            pickBestResultsForTask(ct, result, facets, deformations, defArrayLength);
+            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(image1, image2, facets, deformations, roi, taskSplitVariant, taskSplitValue);
+            ComputationTask ct;
+            while (it.hasNext()) {
+                ct = it.next();
+                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
+                kernel.finishRound();
+                // pick best results for this computation task and discard ct data                          
+                pickBestResultsForTask(ct, result, facets, deformations, defArrayLength);
+            }
+        } catch (CLException ex) {
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getCLErrorString());
         }
 
         Logger.trace("Correlations computed.");
@@ -110,7 +115,6 @@ public final class Engine extends Observable {
 //            System.arraycopy(taskResults, 0, sort, 0, taskResults.length);
 //            Arrays.sort(sort);
 //            System.out.println(Arrays.toString(sort));
-
             baseIndex = localFacetIndex * deformationCount;
 
             for (int def = 0; def < deformationCount; def++) {
