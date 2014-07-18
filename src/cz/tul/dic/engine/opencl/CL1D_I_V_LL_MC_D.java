@@ -3,8 +3,8 @@ package cz.tul.dic.engine.opencl;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
+import com.jogamp.opencl.CLException;
 import com.jogamp.opencl.CLImage2d;
-import com.jogamp.opencl.CLKernel;
 import cz.tul.dic.engine.EngineMath;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -56,18 +56,18 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         CLEvent event;
         int currentBaseFacet = 0, currentBaseDeformation;
         int groupCountPerFacet, counter = 0;
-        CLEventList eventList = new CLEventList(facetCount * 2);
+        CLEventList eventList = new CLEventList(facetCount);
         while (currentBaseFacet < facetCount) {
             currentBaseDeformation = 0;
 
             while (currentBaseDeformation < deformationCount) {
-                if (counter == eventList.size()) {
-                    eventList = new CLEventList(facetCount * 2);
-                    counter = 0;
-                }
+                if (counter == eventList.capacity()) {
+                    eventList = new CLEventList(facetCount);
+                    counter = 0;                    
+                }                
 
                 facetSubCount = Math.min(wsm.getFacetCount(), facetCount - currentBaseFacet);
-                deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);                
+                deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
                 facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationSubCount) * facetSubCount;
 
