@@ -5,6 +5,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -55,18 +56,22 @@ public class EngineTest {
         Set<String> errors = new HashSet<>();
         for (KernelType kt : KernelType.values()) {
             for (Interpolation i : Interpolation.values()) {
-                for (String s : DEF_ZERO_FILES) {
-                    tc = generateTask(s, DEF_ZERO, kt, i);
-                    errors.add(checkResultsBack(tc));
-                    tc = generateTask(s, DEF_ZERO_F, kt, i);
-                    errors.add(checkResultsBack(tc));
-                }
+                for (TaskSplit ts : TaskSplit.values()) {
+                    for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
+                        for (String s : DEF_ZERO_FILES) {
+                            tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm);
+                            errors.add(checkResultsBack(tc));
+                            tc = generateTask(s, DEF_ZERO_F, kt, i, ts, fgm);
+                            errors.add(checkResultsBack(tc));
+                        }
 
-                for (String s : DEF_FIRST_FILES) {
-                    tc = generateTask(s, DEF_FIRST, kt, i);
-                    errors.add(checkResultsBack(tc));
-                    tc = generateTask(s, DEF_FIRST_F, kt, i);
-                    errors.add(checkResultsBack(tc));
+                        for (String s : DEF_FIRST_FILES) {
+                            tc = generateTask(s, DEF_FIRST, kt, i, ts, fgm);
+                            errors.add(checkResultsBack(tc));
+                            tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm);
+                            errors.add(checkResultsBack(tc));
+                        }
+                    }
                 }
             }
         }
@@ -75,7 +80,10 @@ public class EngineTest {
         Assert.assertEquals(errors.toString(), 0, errors.size());
     }
 
-    private TaskContainer generateTask(final String outFilename, final double[] deformations, final KernelType kernel, final Interpolation interpolation) throws IOException, URISyntaxException, ComputationException {
+    private TaskContainer generateTask(
+            final String outFilename, final double[] deformations,
+            final KernelType kernel, final Interpolation interpolation,
+            final TaskSplit taskSplit, final FacetGeneratorMode fgm) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
@@ -93,6 +101,8 @@ public class EngineTest {
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
         tc.setParameter(TaskParameter.KERNEL, kernel);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
+        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, taskSplit);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
 
         EngineUtils.getInstance().computeTask(tc);
 
