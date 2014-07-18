@@ -50,7 +50,7 @@ public class EngineTest {
         -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
 
     @Test
-    public void testEngine() throws IOException, URISyntaxException, ComputationException {
+    public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
         TaskContainer tc;
         Set<String> errors = new HashSet<>();
         for (KernelType kt : KernelType.values()) {
@@ -69,7 +69,7 @@ public class EngineTest {
                     errors.add(checkResultsBack(tc));
                 }
             }
-        }        
+        }
 
         errors.remove(null);
         Assert.assertEquals(errors.toString(), 0, errors.size());
@@ -90,9 +90,51 @@ public class EngineTest {
 
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
         tc.setParameter(TaskParameter.KERNEL, kernel);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
+
+        EngineUtils.getInstance().computeTask(tc);
+
+        return tc;
+    }
+
+    @Test
+    public void testEngineDefault() throws IOException, URISyntaxException, ComputationException {
+        TaskContainer tc;
+        Set<String> errors = new HashSet<>();
+
+        for (String s : DEF_ZERO_FILES) {
+            tc = generateTask(s, DEF_ZERO);
+            errors.add(checkResultsBack(tc));
+            tc = generateTask(s, DEF_ZERO_F);
+            errors.add(checkResultsBack(tc));
+        }
+        for (String s : DEF_FIRST_FILES) {
+            tc = generateTask(s, DEF_FIRST);
+            errors.add(checkResultsBack(tc));
+            tc = generateTask(s, DEF_FIRST_F);
+            errors.add(checkResultsBack(tc));
+        }
+
+        errors.remove(null);
+        Assert.assertEquals(errors.toString(), 0, errors.size());
+    }
+
+    private TaskContainer generateTask(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
+        final List<File> input = new ArrayList<>(2);
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
+
+        TaskContainer tc = new TaskContainer(input);
+        InputLoader.loadInput(tc);
+
+        ROI roi = new RectangleROI(10, 10, 20, 20);
+
+        tc.addRoi(ROUND, roi);
+        tc.setDeformationLimits(ROUND, roi, deformations);
+
+        tc.setParameter(TaskParameter.FACET_SIZE, 11);
 
         EngineUtils.getInstance().computeTask(tc);
 
