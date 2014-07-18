@@ -276,10 +276,13 @@ public class MainWindow implements Initializable {
                     try {
                         final Exception err = worker.get();
                         if (err != null) {
-                            Dialogs.create()
-                                    .title(Lang.getString("Exception"))
-                                    .message(err.getLocalizedMessage())
-                                    .showWarning();
+                            Platform.runLater(() -> {
+                                Dialogs.create()
+                                        .title(Lang.getString("Exception"))
+                                        .message(err.getLocalizedMessage())
+                                        .masthead(null)
+                                        .showWarning();
+                            });
                             Logger.error(err);
 
                         } else {
@@ -463,7 +466,7 @@ public class MainWindow implements Initializable {
 
         adjustImageButtons(true);
         adjustConfigButtons(true);
-        adjustResultButtons(true);                
+        adjustResultButtons(true);
 
         if (TEST_CASE) {
 //            performComputationTest();    
@@ -567,7 +570,7 @@ public class MainWindow implements Initializable {
                 if (cts.isValidComplexTask(tc)) {
                     cts.addObserver(this);
                     cts.solveComplexTask(tc);
-                } else {                    
+                } else {
                     EngineUtils.getInstance().addObserver(this);
                     EngineUtils.getInstance().computeTask(tc);
                 }

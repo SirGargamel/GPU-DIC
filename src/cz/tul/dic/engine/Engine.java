@@ -85,7 +85,7 @@ public final class Engine extends Observable {
                 pickBestResultsForTask(ct, result, facets, deformations, defArrayLength);
             }
         } catch (CLException ex) {
-            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getCLErrorString());
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
         }
 
         Logger.trace("Correlations computed.");
