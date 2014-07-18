@@ -26,7 +26,7 @@ public class OpenCLSplitter extends TaskSplitter {
     private static final int SIZE_INT = 4;
     private static final int SIZE_FLOAT = 4;
     private static final int SIZE_PIXEL = 4;
-    private static final double COEFF_LIMIT_ADJUST = 1.5;
+    private static final double COEFF_LIMIT_ADJUST = 2.0;
     private final int defArrayLength, facetSize;
     private final double[] defLimits;
     private boolean hasNext;
@@ -102,22 +102,28 @@ public class OpenCLSplitter extends TaskSplitter {
     }
 
     private boolean isMemOk(final double[] deformations, final int facetCount, final int facetSize, final int deformationArraySize) {
-        final long imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
-        final long deformationsSize = deformations.length * SIZE_FLOAT;
-        final long reserve = 32 * SIZE_INT;
-        final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
-        final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;
-        final long resultSize = facetCount * (deformations.length / deformationArraySize) * SIZE_FLOAT;
-        final long fullSize = imageSize + deformationsSize + reserve + facetDataSize + facetCentersSize + resultSize;
+        final int imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
+        final int deformationsSize = deformations.length * SIZE_FLOAT;
+        final int reserve = 32 * SIZE_INT;
+        final int facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
+        final int facetCentersSize = 2 * SIZE_FLOAT * facetCount;
+        final int resultSize = facetCount * (deformations.length / deformationArraySize) * SIZE_FLOAT;
+        final int fullSize = imageSize + deformationsSize + reserve + facetDataSize + facetCentersSize + resultSize;
 
-        final long maxAllocMem = Math.min(DeviceManager.getDevice().getMaxMemAllocSize(), Integer.MAX_VALUE);
+        final long maxAllocMem = Math.min(DeviceManager.getDevice().getMaxMemAllocSize() * 3 / 4, Integer.MAX_VALUE);
         final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
         boolean result = fullSize > 0 && fullSize < maxMem;
+        result &= (deformations.length / deformationArraySize) <= (Integer.MAX_VALUE / (facetCount * SIZE_FLOAT));    // int overflow check
+        result &= resultSize <= Integer.MAX_VALUE && resultSize > 0 && resultSize < maxAllocMem;
         result &= imageSize <= Integer.MAX_VALUE && imageSize > 0 && imageSize < maxAllocMem;
         result &= deformationsSize <= Integer.MAX_VALUE && deformationsSize > 0 && deformationsSize < maxAllocMem;
-        result &= resultSize <= Integer.MAX_VALUE && resultSize > 0 && resultSize < maxAllocMem;
         result &= facetDataSize <= Integer.MAX_VALUE && facetDataSize > 0 && facetDataSize < maxAllocMem;
         result &= facetCentersSize <= Integer.MAX_VALUE && facetCentersSize > 0 && facetCentersSize < maxAllocMem;
+
+//        System.out.print(result + " - ");
+//        System.out.print(Arrays.toString(new long[]{deformations.length / deformationArraySize, facetCount}));
+//        System.out.print(" - ");
+//        System.out.println(Arrays.toString(new long[]{deformationsSize, facetDataSize, facetCentersSize, facetCentersSize, resultSize, fullSize, maxAllocMem, maxMem}));
 
         return result;
     }
