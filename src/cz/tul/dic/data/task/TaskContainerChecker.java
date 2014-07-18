@@ -5,13 +5,6 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
-import cz.tul.dic.data.task.splitter.TaskSplit;
-import cz.tul.dic.engine.ResultCompilation;
-import cz.tul.dic.engine.displacement.DisplacementCalculation;
-import cz.tul.dic.engine.opencl.KernelType;
-import cz.tul.dic.engine.opencl.interpolation.Interpolation;
-import cz.tul.dic.engine.strain.StrainEstimation;
-import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
 
@@ -19,9 +12,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class TaskContainerChecker {
-
-    
+public class TaskContainerChecker {    
 
     public static void checkTaskValidity(final TaskContainer tc) throws ComputationException {
         final Object in = tc.getParameter(TaskParameter.IN);
