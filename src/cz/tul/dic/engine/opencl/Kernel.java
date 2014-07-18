@@ -109,8 +109,8 @@ public abstract class Kernel {
         clDeformations = generateDeformations(deformations);
         queue.putWriteBuffer(clDeformations, true);
         final int deformationCount = deformations.length / deformationLength;
-
-        Logger.trace(facetCount + "-" + deformationCount);
+        
+        Logger.trace("Computing task " + facetCount + " facets, " + deformationCount + " deformations.");
         clResults = context.createFloatBuffer(facetCount * deformationCount, CLMemory.Mem.WRITE_ONLY);
         
         clRoundMem.add(clResults);
