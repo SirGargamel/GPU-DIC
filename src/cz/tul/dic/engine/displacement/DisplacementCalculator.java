@@ -17,11 +17,11 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class DisplacementCalculator {
 
-    private static final Map<DisplacementCalculationType, DisplacementCalculator> data;
+    private static final Map<DisplacementCalculation, DisplacementCalculator> data;
 
     static {
         data = new HashMap<>();
-        data.put(DisplacementCalculationType.FIND_MAX_AND_AVERAGE, new FindMaxAndAverage());
+        data.put(DisplacementCalculation.FIND_MAX_AND_AVERAGE, new FindMaxAndAverage());
     }
 
     public static void computeDisplacement(final TaskContainer tc, final int round, final Map<ROI, List<Facet>> facetMap) throws ComputationException {
@@ -29,7 +29,7 @@ public abstract class DisplacementCalculator {
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL displacement calculation type.");
         }
-        final DisplacementCalculationType type = (DisplacementCalculationType) o;
+        final DisplacementCalculation type = (DisplacementCalculation) o;
 
         if (data.containsKey(type)) {
             data.get(type).buildFinalResults(tc, round, facetMap);

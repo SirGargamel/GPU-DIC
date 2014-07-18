@@ -1,5 +1,6 @@
 package cz.tul.dic.gui;
 
+import cz.tul.dic.data.task.DefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplit;
@@ -90,31 +91,33 @@ public class ExpertSettings implements Initializable {
         comboBoxData4.addAll(Interpolation.values());
         comboInterpolation.setItems(comboBoxData4);
 
+        comboFGMode.getSelectionModel().select(DefaultValues.DEFAULT_FACET_GENERATOR);
+        comboTSVariant.getSelectionModel().select(DefaultValues.DEFAULT_TASK_SPLIT);
+        comboKernel.getSelectionModel().select(DefaultValues.DEFAULT_KERNEL);
+        comboInterpolation.getSelectionModel().select(DefaultValues.DEFAULT_INTERPOLATION);
+        textFGSpacing.setText(String.valueOf(DefaultValues.DEFAULT_FACET_SPACING));
+        textTSValue.setText(String.valueOf(DefaultValues.DEFAULT_TASK_SPLIT_VALUE));
+
         final TaskContainer tc = Context.getInstance().getTc();
-        if (tc == null) {
-            comboFGMode.getSelectionModel().selectFirst();
-            comboTSVariant.getSelectionModel().selectFirst();
-            comboKernel.getSelectionModel().selectFirst();
-        } else {
+        if (tc != null) {
             Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
             if (o != null) {
                 comboFGMode.getSelectionModel().select((FacetGeneratorMode) o);
-            } else {
-                comboFGMode.getSelectionModel().selectFirst();
             }
 
             o = tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
             if (o != null) {
                 comboTSVariant.getSelectionModel().select((TaskSplit) o);
-            } else {
-                comboTSVariant.getSelectionModel().selectFirst();
             }
 
             o = tc.getParameter(TaskParameter.KERNEL);
             if (o != null) {
                 comboKernel.getSelectionModel().select((KernelType) o);
-            } else {
-                comboKernel.getSelectionModel().selectFirst();
+            }
+            
+            o = tc.getParameter(TaskParameter.INTERPOLATION);
+            if (o != null) {
+                comboInterpolation.getSelectionModel().select((Interpolation) o);
             }
 
             o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
@@ -124,14 +127,7 @@ public class ExpertSettings implements Initializable {
             o = tc.getParameter(TaskParameter.TASK_SPLIT_VALUE);
             if (o != null) {
                 textTSValue.setText(o.toString());
-            }
-
-            o = tc.getParameter(TaskParameter.INTERPOLATION);
-            if (o != null) {
-                comboInterpolation.getSelectionModel().select((Interpolation) o);
-            } else {
-                comboInterpolation.getSelectionModel().selectFirst();
-            }
+            }            
         }
     }
 

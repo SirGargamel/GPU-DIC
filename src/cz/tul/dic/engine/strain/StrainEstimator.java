@@ -15,12 +15,12 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class StrainEstimator {
     
-    private static final Map<StrainEstimationType, StrainEstimator> data;
+    private static final Map<StrainEstimation, StrainEstimator> data;
     
     static {
         data = new HashMap<>();
-        data.put(StrainEstimationType.DIFFERENTIATION, new Differentiator());
-        data.put(StrainEstimationType.LOCAL_LEAST_SQUARES, new LocalLeastSquare());
+        data.put(StrainEstimation.DIFFERENTIATION, new Differentiator());
+        data.put(StrainEstimation.LOCAL_LEAST_SQUARES, new LocalLeastSquare());
     }
     
     abstract void estimateStrain(final TaskContainer tc, final int round);
@@ -30,7 +30,7 @@ public abstract class StrainEstimator {
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL strain estimation type.");
         }
-        final StrainEstimationType type = (StrainEstimationType) o;
+        final StrainEstimation type = (StrainEstimation) o;
         
         if (data.containsKey(type)) {
             data.get(type).estimateStrain(tc, round);

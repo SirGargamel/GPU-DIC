@@ -5,7 +5,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.ResultCompilation;
-import cz.tul.dic.engine.displacement.DisplacementCalculationType;
+import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
@@ -54,7 +54,7 @@ public class DisplacementCalculatorTest {
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
         tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
-        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE, DisplacementCalculationType.FIND_MAX_AND_AVERAGE);
+        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE, DisplacementCalculation.FIND_MAX_AND_AVERAGE);
         tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
 
         final List<double[][]> result = new ArrayList<>(1);

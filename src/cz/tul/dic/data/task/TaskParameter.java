@@ -2,10 +2,10 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.task.splitter.TaskSplit;
 import cz.tul.dic.engine.ResultCompilation;
-import cz.tul.dic.engine.displacement.DisplacementCalculationType;
+import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.KernelType;
-import cz.tul.dic.engine.strain.StrainEstimationType;
+import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 import java.io.File;
 
@@ -25,8 +25,8 @@ public enum TaskParameter {
     INTERPOLATION(Interpolation.class),
     RESULT_COMPILATION(ResultCompilation.class),
     ROUND_LIMITS(int[].class),
-    DISPLACEMENT_CALCULATION_TYPE(DisplacementCalculationType.class),
-    STRAIN_ESTIMATION_METHOD(StrainEstimationType.class),
+    DISPLACEMENT_CALCULATION_TYPE(DisplacementCalculation.class),
+    STRAIN_ESTIMATION_METHOD(StrainEstimation.class),
     STRAIN_PARAMETER(Integer.class);
 
     private final Class type;

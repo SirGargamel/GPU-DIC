@@ -2,11 +2,11 @@ package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.Constants;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
+import cz.tul.dic.data.task.DefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.cluster.Analyzer1D;
@@ -68,7 +68,7 @@ public class CircleROIManager extends ROIManager {
         bottomLeft = cRois.get(2);
         bottomRight = cRois.get(3);
 
-        defLimits = Constants.DEFORMATION_LIMITS_ZERO;
+        defLimits = DefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO;
         setROIs(initialRound);
         if (rect != null) {
             tc.addRoi(initialRound, rect);
