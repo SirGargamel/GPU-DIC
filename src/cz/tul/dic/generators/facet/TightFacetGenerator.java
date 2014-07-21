@@ -35,12 +35,7 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
         for (ROI roi : rois) {
             facets = new ArrayList<>();
 
-            facetSize = tc.getFacetSize(round, roi);            
-
-            if (spacing >= facetSize) {
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Spacing cant must be smaller than facet size.");
-            }
-
+            facetSize = tc.getFacetSize(round, roi);
             roiW = roi.getWidth();
             roiH = roi.getHeight();
 
