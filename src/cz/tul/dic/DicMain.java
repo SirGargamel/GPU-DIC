@@ -11,7 +11,6 @@ import javafx.stage.Stage;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.LoggingLevel;
 import org.pmw.tinylog.writers.ConsoleWriter;
-import org.pmw.tinylog.writers.FileWriter;
 
 /**
  *
@@ -42,7 +41,7 @@ public class DicMain extends Application {
                 //                .writer(new FileWriter("log.txt"))
                 .writer(new ConsoleWriter())
                 .level(LoggingLevel.TRACE)
-                .formatPattern("[{level}: {class}.{method}()]\\n  {message}")                
+//                .formatPattern("[{level}: {class}.{method}()]\\n  {message}")                
                 .activate();
     }
 
