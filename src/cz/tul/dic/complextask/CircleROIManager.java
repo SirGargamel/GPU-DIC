@@ -26,7 +26,7 @@ import org.pmw.tinylog.Logger;
 public class CircleROIManager extends ROIManager {
 
     private static final int MAX_SHIFT_DIFFERENCE = 3;
-    private static final int ROI_CIRCLE_FS_DENOM = 3;        
+    private static final int ROI_CIRCLE_FS_DENOM = 3;
     private static final double ADJUST_COEFF_UP = 2.0;
     private static final double ADJUST_COEFF_DOWN = 0.75;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
@@ -34,27 +34,29 @@ public class CircleROIManager extends ROIManager {
 
     public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) throws ComputationException {
         final TaskContainer tcC = tc.cloneInputTask();
-        
+
         tcC.setROIs(initialRound, tc.getRois(initialRound));
         tcC.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tcC.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);    
+        tcC.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
         tcC.clearResultData();
-        
+
         return new CircleROIManager(tcC, initialRound);
     }
-    
+
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
         final List<CircularROI> cRois = new ArrayList<>(4);
         ROI rect = null;
-        for (ROI r : tc.getRois(initialRound)) {
-            if (r instanceof CircularROI) {
-                cRois.add((CircularROI) r);
-            } else if (!(r instanceof RectangleROI)) {
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of ROI - " + r.getClass());
-            } else {
-                rect = r;
+        if (tc.getRois(initialRound) != null) {
+            for (ROI r : tc.getRois(initialRound)) {
+                if (r instanceof CircularROI) {
+                    cRois.add((CircularROI) r);
+                } else if (!(r instanceof RectangleROI)) {
+                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of ROI - " + r.getClass());
+                } else {
+                    rect = r;
+                }
             }
         }
 

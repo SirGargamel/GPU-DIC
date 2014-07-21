@@ -17,7 +17,7 @@ import java.util.Observable;
  *
  * @author Petr Jecmen
  */
-public class ComplextTaskSolver extends Observable {
+public class ComplexTaskSolver extends Observable {
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
         final int roundCount = TaskContainerUtils.getRounds(tc).size();

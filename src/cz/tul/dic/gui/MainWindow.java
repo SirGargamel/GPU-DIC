@@ -2,7 +2,7 @@ package cz.tul.dic.gui;
 
 import cz.tul.dic.Computation;
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.complextask.ComplextTaskSolver;
+import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -260,7 +260,7 @@ public class MainWindow implements Initializable {
             if (tc != null) {
                 saveFacetSize();
                 TaskContainerChecker.checkTaskValidity(tc);
-                ComplextTaskSolver cts = new ComplextTaskSolver();
+                ComplexTaskSolver cts = new ComplexTaskSolver();
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
                 Dialogs.create()
                         .title(Lang.getString("Wait"))
@@ -555,10 +555,10 @@ public class MainWindow implements Initializable {
 
     private static class ComputationObserver extends Task<Exception> implements Observer {
 
-        private final ComplextTaskSolver cts;
+        private final ComplexTaskSolver cts;
         private final TaskContainer tc;
 
-        public ComputationObserver(ComplextTaskSolver cts, final TaskContainer tc) {
+        public ComputationObserver(ComplexTaskSolver cts, final TaskContainer tc) {
             this.cts = cts;
             this.tc = tc;
         }

@@ -1,6 +1,6 @@
 package cz.tul.dic;
 
-import cz.tul.dic.complextask.ComplextTaskSolver;
+import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -214,7 +214,7 @@ public class Computation {
     public static void computeDynamicTask(TaskContainer tc) throws IOException {
         try {
             long time = System.nanoTime();
-            ComplextTaskSolver cts = new ComplextTaskSolver();
+            ComplexTaskSolver cts = new ComplexTaskSolver();
             cts.solveComplexTask(tc);
             time = System.nanoTime() - time;
             Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
