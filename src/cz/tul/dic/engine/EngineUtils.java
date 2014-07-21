@@ -78,7 +78,7 @@ public class EngineUtils extends Observable {
     }
 
     public void computeRound(final TaskContainer tc, final int index1, final int index2) throws ComputationException {
-        Logger.trace("Computing round {0}.", index1 + 1);
+        Logger.trace("Computing round {0}.", index1 + 1);                
 
         final Engine engine = new Engine();
         // prepare parameters
@@ -102,7 +102,7 @@ public class EngineUtils extends Observable {
         // compute round        
         for (ROI roi : tc.getRois(index1)) {
             // OpenCL splitter needs dynamic data
-            if (taskSplit.equals(TaskSplit.DYNAMIC)) {
+            if (taskSplit != null && taskSplit.equals(TaskSplit.DYNAMIC)) {
                 taskSplitValue = new Object[]{
                     TaskContainerUtils.getDeformationArrayLength(tc, index1, roi),
                     tc.getFacetSize(index1, roi),
