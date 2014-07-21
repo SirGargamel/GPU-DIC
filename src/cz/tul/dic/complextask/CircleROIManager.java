@@ -179,7 +179,7 @@ public class CircleROIManager extends ROIManager {
         CircularROI cr;
         for (ROI roi : rois) {
             cr = (CircularROI) roi;
-            tc.addFacetSize(round, roi, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM));
+            tc.addFacetSize(round, roi, Math.max(1, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM)));
             tc.setDeformationLimits(round, roi, defLimits);
         }
     }
