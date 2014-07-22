@@ -54,7 +54,7 @@ public class EditableInputPresenter extends InputPresenter {
         saveRois();
     }
 
-    private void saveRois() {
+    public void saveRois() {
         final TaskContainer tc = Context.getInstance().getTc();
 
         final Set<ROI> taskRois = new HashSet<>();
