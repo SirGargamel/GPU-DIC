@@ -26,7 +26,7 @@ public class OpenCLSplitter extends TaskSplitter {
     private static final int SIZE_INT = 4;
     private static final int SIZE_FLOAT = 4;
     private static final int SIZE_PIXEL = 4;
-    private static final double COEFF_LIMIT_ADJUST = 2.0;
+    private static final double COEFF_LIMIT_ADJUST = 0.75;
     private final int defArrayLength, facetSize;
     private final double[] defLimits;
     private boolean hasNext;
@@ -63,7 +63,7 @@ public class OpenCLSplitter extends TaskSplitter {
 
         int taskSize = rest;
         while (taskSize > 1 && !isMemOk(deformations, taskSize, facetSize, defArrayLength)) {
-            taskSize /= 2;
+            taskSize *= COEFF_LIMIT_ADJUST;
         }
 
         double[] checkedDeformations = null;
