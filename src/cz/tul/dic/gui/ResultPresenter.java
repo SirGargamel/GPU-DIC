@@ -28,6 +28,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -52,6 +53,9 @@ public class ResultPresenter implements Initializable {
     private static final int PREF_SIZE_W_BASE = 30;
     private static final int PREF_SIZE_W_M = 5;
     private static final int PREF_SIZE_H = 30;
+    private static final int EXTRA_WIDTH = 30;
+    private static final int EXTRA_HEIGHT = 70;
+    private static final int MIN_WIDTH = 380;
     private static final String EXT_SEQUENCE = ".avi";
     private static final String EXT_IMAGE = ".bmp";
     private static final String EXT_CSV = ".avi";
@@ -108,15 +112,24 @@ public class ResultPresenter implements Initializable {
     }
 
     private void displayImage() {
+        init();
         try {
             final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
             if (i != null) {
+                final Scene s = image.getParent().getScene();
+                if (s != null) {
+                    double width = Math.max(MIN_WIDTH, image.getParent().getBoundsInLocal().getWidth() + EXTRA_WIDTH);
+                    s.getWindow().setWidth(width);
+                    s.getWindow().setHeight(image.getParent().getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
+                }
+
+                final Bounds b = image.getParent().getParent().getBoundsInParent();
                 final Image img = SwingFXUtils.toFXImage(i, null);
                 image.setImage(img);
             } else {
                 image.setImage(null);
             }
-                  
+
         } catch (ComputationException ex) {
             Logger.warn(ex);
         }
@@ -229,11 +242,11 @@ public class ResultPresenter implements Initializable {
         }
         return result;
     }
-    
+
     private int determineType() {
         final String c1 = Lang.getString("TypeAvi");
         final String c2 = Lang.getString("TypeImage");
-        final String c3 = Lang.getString("TypeCsv");        
+        final String c3 = Lang.getString("TypeCsv");
         final Action a = Dialogs.create()
                 .title(Lang.getString("Save"))
                 .message(Lang.getString("ChooseSequenceType"))
@@ -266,9 +279,7 @@ public class ResultPresenter implements Initializable {
 
         choiceDir.getSelectionModel().selectFirst();
 
-        image.setPreserveRatio(true);
-        image.setFitHeight(0);
-        image.setFitWidth(0);
+        image.setPreserveRatio(true);        
 
         image.setOnMouseClicked((MouseEvent t) -> {
             try {
@@ -276,8 +287,8 @@ public class ResultPresenter implements Initializable {
                 lastY = (int) Math.round(t.getY());
                 final double[] line = Context.getInstance().getLineResult(lastX, lastY, choiceDir.getValue());
                 if (line != null) {
-                    final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());                    
-                    final Stage stage = new Stage();                    
+                    final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
+                    final Stage stage = new Stage();
 
                     @SuppressWarnings("unchecked")
                     final LineChart<Number, Number> chart = (LineChart<Number, Number>) root.getChildrenUnmodifiable().get(0);
@@ -296,16 +307,6 @@ public class ResultPresenter implements Initializable {
                     stage.setIconified(false);
                     stage.show();
 
-                    if (!inited) {
-                        final Stage mainStage = (Stage) buttonNext.getScene().getWindow();
-                        mainStage.setOnCloseRequest((WindowEvent event) -> {
-                            for (Stage s : charts.keySet()) {
-                                s.close();
-                            }
-                            charts.clear();
-                        });
-                        inited = true;
-                    }
                 }
             } catch (IOException e) {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
@@ -341,6 +342,25 @@ public class ResultPresenter implements Initializable {
         imgV.setFitHeight(20);
         imgV.setPreserveRatio(true);
         buttonNext.setGraphic(imgV);
+    }
+
+    private void init() {
+        if (!inited) {
+            final Scene scene = image.getParent().getScene();
+            if (scene != null) {
+                final Stage mainStage = (Stage) scene.getWindow();
+                mainStage.setResizable(false);
+                mainStage.setOnCloseRequest((WindowEvent event) -> {
+                    charts.keySet().stream().forEach((s) -> {
+                        s.close();
+                    });
+                    charts.clear();
+                });
+
+                inited = true;
+            }
+        }
+
     }
 
     private void actualizeCharts(final Direction dir) {
