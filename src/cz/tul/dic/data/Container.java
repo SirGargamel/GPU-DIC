@@ -29,7 +29,7 @@ public final class Container<T> implements Serializable {
         T result;
         if (position >= data.size()) {
             if (!data.isEmpty()) {
-                result = data.get(data.size() - 1);
+                result = getItem(data.size() - 1);
             } else {
                 result = null;
             }
