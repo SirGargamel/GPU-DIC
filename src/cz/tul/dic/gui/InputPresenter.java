@@ -23,9 +23,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -35,7 +35,7 @@ import javafx.scene.shape.Shape;
  *
  * @author Petr Jecmen
  */
-public class InputPresenter extends ScrollPane implements Initializable, ChangeListener<String>, Observer {
+public class InputPresenter extends Pane implements Initializable, ChangeListener<String>, Observer {
 
     protected int imageIndex;
     protected Set<Shape> rois;
@@ -76,8 +76,8 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
             image.setFitWidth(img.getWidth());
             image.setFitHeight(img.getHeight());
 
-            setContent(null);
-            setContent(image);
+            getChildren().clear();
+            getChildren().add(image);
 
             loadRois();
         });
@@ -124,13 +124,15 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
         rois = new HashSet<>();
         imageIndex = 0;
 
-        setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
-        setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
-
         image = new ImageView();
-//        image.setPreserveRatio(true);
+        image.setPreserveRatio(true);
 
-        setContent(image);
+        getChildren().clear();
+        getChildren().add(image);
+    }
+
+    public Image getImage() {
+        return image.getImage();
     }
 
     public void assignImageIndexTextField(final StringProperty imageIndexProperty) {

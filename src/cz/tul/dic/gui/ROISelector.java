@@ -1,6 +1,7 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.data.roi.RoiType;
+import cz.tul.dic.data.task.TaskContainer;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -20,8 +21,8 @@ import javafx.stage.WindowEvent;
 
 public class ROISelector implements Initializable {
 
-    private static final int EXTRA_WIDTH = 115;
-    private static final int EXTRA_HEIGHT = 66;    
+    private static final int EXTRA_WIDTH = 125;
+    private static final int EXTRA_HEIGHT = 75;
     @FXML
     private EditableInputPresenter imagePane;
     @FXML
@@ -35,14 +36,12 @@ public class ROISelector implements Initializable {
     @FXML
     private void handleButtonActionNext(ActionEvent event) {
         imagePane.nextImage();
-        resize();
         event.consume();
     }
 
     @FXML
     private void handleButtonActionPrev(ActionEvent event) {
         imagePane.previousImage();
-        resize();
         event.consume();
     }
 
@@ -54,9 +53,10 @@ public class ROISelector implements Initializable {
 
     private void resize() {
         final Scene s = imagePane.getParent().getScene();
-        if (s != null) {            
-            s.getWindow().setWidth(imagePane.getBoundsInLocal().getWidth() + EXTRA_WIDTH);
-            s.getWindow().setHeight(imagePane.getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
+        if (s != null) {
+            final TaskContainer tc = Context.getInstance().getTc();
+            imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + EXTRA_WIDTH);
+            imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + EXTRA_HEIGHT);
         }
     }
 
@@ -66,7 +66,8 @@ public class ROISelector implements Initializable {
             Stage s = (Stage) imagePane.getScene().getWindow();
             s.setResizable(false);
             imagePane.displayImage();
-            displayed = true;            
+            displayed = true;
+            resize();
         }
         Context.getInstance().getTc().addObserver(imagePane);
         imagePane.getScene().getWindow().setOnCloseRequest(new EventHandler<WindowEvent>() {
