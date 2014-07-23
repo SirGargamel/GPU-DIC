@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -28,14 +27,12 @@ public class EditableInputPresenter extends InputPresenter {
 
     @Override
     public boolean nextImage() {
-        saveRois();
         actualShape = null;
         return super.nextImage();
     }
 
     @Override
     public boolean previousImage() {
-        saveRois();
         actualShape = null;
         return super.previousImage();
     }
@@ -130,13 +127,14 @@ public class EditableInputPresenter extends InputPresenter {
                 s.setFill(new Color(1, 1, 1, 0.5));
                 actualShape = s;
                 lastX = t.getSceneX();
-                lastY = t.getSceneY();
+                lastY = t.getSceneY();                
                 t.consume();
             } else if (t.isSecondaryButtonDown()) {
                 rois.remove(s);
                 EditableInputPresenter.this.getChildren().remove(s);
                 actualShape = null;
-                t.consume();
+                saveRois();
+                t.consume();                
             }
         });
         s.setOnMouseDragged((MouseEvent t) -> {
@@ -148,22 +146,23 @@ public class EditableInputPresenter extends InputPresenter {
 
             lastX = t.getSceneX();
             lastY = t.getSceneY();
-
+            
             t.consume();
         });
         s.setOnMouseReleased((MouseEvent t) -> {
             if (!t.isDragDetect()) {
                 s.setFill(new Color(1, 1, 1, 0));
                 actualShape = null;
+                saveRois();
             }
             t.consume();
         });
     }
-    
+
     private void onMouseDrag(MouseEvent event) {
         handleShapeSize(event);
     }
-    
+
     private void handleShapeSize(MouseEvent event) {
         if (actualShape instanceof Circle) {
             Circle circle = (Circle) actualShape;
