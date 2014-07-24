@@ -50,11 +50,13 @@ import org.pmw.tinylog.Logger;
  */
 public class MainWindow implements Initializable {
 
-    private static final boolean TEST_CASE = true;
+    private static final boolean TEST_CASE = false;
     private static final String LAST_DIR = "lastDir";
 
     @FXML
     private TextField textFs;
+    @FXML
+    private TextField textIndex;
     @FXML
     private Button buttonRun;
     @FXML
@@ -153,6 +155,7 @@ public class MainWindow implements Initializable {
                             if (imagePane != null && imagePane.getScene() != null) {
                                 adjustConfigButtons(false);
                                 adjustImageButtons(false);
+                                textIndex.textProperty().setValue("0");
                                 imagePane.displayImage();
 
                                 imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 143);
@@ -435,6 +438,7 @@ public class MainWindow implements Initializable {
         textFs.setText("7");
 
         imagePane.initialize(url, rb);
+        imagePane.assignImageIndexTextField(textIndex.textProperty());        
 
         Image img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/play_24x32.png"));
         ImageView image = new ImageView(img);
@@ -469,7 +473,7 @@ public class MainWindow implements Initializable {
         adjustResultButtons(true);
 
         if (TEST_CASE) {
-            performComputationTest();    
+            performComputationTest();
 
 //            try {
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(new File("D:\\temp\\7202845m.avi.test.task")));
@@ -507,13 +511,13 @@ public class MainWindow implements Initializable {
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                    Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
 
-                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
-                    TaskContainer tc = Context.getInstance().getTc();
-                    InputLoader.loadInput(tc);
-                    tc.setParameter(TaskParameter.FACET_SIZE, size);                    
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
+                TaskContainer tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
 ////                    Computation.commenceComputationDynamic(tc);
-                    Computation.commenceComputationDynamicStrainParamSweep(tc, 5, 30);
-                    
+                Computation.commenceComputationDynamicStrainParamSweep(tc, 5, 30);
+
 //                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
 //                    tc = Context.getInstance().getTc();
 //                    InputLoader.loadInput(tc);

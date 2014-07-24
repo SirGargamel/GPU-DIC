@@ -15,7 +15,7 @@
                 <HBox maxHeight="30.0" prefHeight="30.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
                     <children>
                         <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" text="%prev" />
-                        <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" text="%next" />
+                        <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" text="%next" /><TextField fx:id="textIndex" editable="false" prefHeight="25.0" prefWidth="25.0" />
                     </children>
                     <padding>
                         <Insets bottom="5.0" left="5.0" top="5.0" />

@@ -27,8 +27,7 @@
                         <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#handleButtonActionPlay" />
                         <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#handleButtonActionStop" GridPane.columnIndex="1" />
                         <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="%Index" GridPane.rowIndex="2" />
-                        <TextField fx:id="textIndex" maxWidth="50.0" onAction="#handleTextActionIndex" onKeyTyped="#handleTextKeyTyped" prefWidth="40.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <TextField fx:id="textIndex" editable="false" maxWidth="50.0" onAction="#handleTextActionIndex" onKeyTyped="#handleTextKeyTyped" prefWidth="40.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <ComboBox fx:id="choiceDir" onAction="#handleChoiceChange" prefHeight="25.0" prefWidth="75.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
                             <GridPane.margin>
                                 <Insets left="5.0" right="5.0" />

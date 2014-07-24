@@ -13,6 +13,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -31,6 +32,8 @@ public class ROISelector implements Initializable {
     private Button buttonPrev;
     @FXML
     private Button buttonNext;
+    @FXML
+    private TextField textIndex;
     boolean displayed;
 
     @FXML
@@ -90,6 +93,8 @@ public class ROISelector implements Initializable {
 
         imagePane.initialize(url, rb);
         imagePane.setRoiTypeProperty(choiceRoi.valueProperty());
+        imagePane.assignImageIndexTextField(textIndex.textProperty());
+        textIndex.textProperty().setValue("0");
 
         displayed = false;
 

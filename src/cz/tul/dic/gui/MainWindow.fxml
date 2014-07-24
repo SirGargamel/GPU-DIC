@@ -26,7 +26,7 @@
 <Insets />
 </HBox.margin></Button>
                                 <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#handleButtonActionStop" />
-                                <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" />
+                                <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" /><TextField fx:id="textIndex" editable="false" prefHeight="25.0" prefWidth="25.0" />
                             </children>
 <BorderPane.margin>
 <Insets bottom="2.0" left="2.0" top="2.0" />

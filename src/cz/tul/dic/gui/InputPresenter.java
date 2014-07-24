@@ -143,8 +143,12 @@ public class InputPresenter extends Pane implements Initializable, ChangeListene
     @Override
     public void changed(ObservableValue<? extends String> ov, String t, String t1) {
         try {
-            imageIndex = Integer.valueOf(t1);
-            displayImage();
+            if (t1 != null) {
+                imageIndex = Integer.valueOf(t1);
+                displayImage();
+            } else {
+                imageIndexProperty.setValue(t);
+            }
         } catch (NumberFormatException ex) {
             imageIndexProperty.setValue(t);
         }
