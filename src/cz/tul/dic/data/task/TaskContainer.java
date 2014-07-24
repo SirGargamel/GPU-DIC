@@ -55,16 +55,20 @@ public class TaskContainer extends Observable implements Serializable {
     }
 
     public void setParameter(final TaskParameter key, final Object value) {
-        if (value != null && key != null) {
-            final Class<?> cK = key.getType();
-            final Class<?> cV = value.getClass();
-            if (cK.isAssignableFrom(cV)) {
-                params.put(key, value);
+        if (key != null) {
+            if (value != null) {
+                final Class<?> cK = key.getType();
+                final Class<?> cV = value.getClass();
+                if (cK.isAssignableFrom(cV)) {
+                    params.put(key, value);
+                } else {
+                    throw new IllegalArgumentException("Illegal value datatype - " + value.getClass().getSimpleName() + ", required " + key.getType().getSimpleName());
+                }
             } else {
-                throw new IllegalArgumentException("Illegal value datatype - " + value.getClass().getSimpleName() + ", required " + key.getType().getSimpleName());
+                params.remove(key);
             }
         } else {
-            throw new IllegalArgumentException("Null values not supported.");
+            throw new IllegalArgumentException("Null key not supported.");
         }
     }
 
@@ -126,14 +130,14 @@ public class TaskContainer extends Observable implements Serializable {
             rois.setItem(r, round);
         }
         r.add(roi);
-        
+
         setChanged();
         notifyObservers();
     }
 
     public void setROIs(final int round, final Set<ROI> rois) {
         this.rois.setItem(rois, round);
-        
+
         setChanged();
         notifyObservers();
     }
@@ -223,7 +227,7 @@ public class TaskContainer extends Observable implements Serializable {
         }
 
         displacement.set(round, result);
-        
+
         setChanged();
         notifyObservers();
     }
@@ -234,7 +238,7 @@ public class TaskContainer extends Observable implements Serializable {
 
     public void setStrain(final int round, final double[][][] result) {
         strain.set(round, result);
-        
+
         setChanged();
         notifyObservers();
     }
