@@ -146,7 +146,9 @@ public class TaskContainerUtils {
                     sb.append(Integer.toString(tc.getFacetSize(round, roi)));
                     sb.append(CONFIG_SEPARATOR_FULL);
                 }
-                sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
+                if (sb.length() > CONFIG_SEPARATOR_FULL.length()) {
+                    sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
+                }
 
                 config.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
                 prevRoi = rois;
