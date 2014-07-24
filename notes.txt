@@ -1,3 +1,5 @@
+--- Coverity
+https://scan.coverity.com/download?tab=java
 cov-build --dir cov-int ant -f build.xml
 
 malé facetSize nemají cenu (klidně 20 a více, závisí na kvalitě videa)
