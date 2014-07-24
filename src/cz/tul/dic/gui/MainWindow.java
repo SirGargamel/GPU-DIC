@@ -469,7 +469,7 @@ public class MainWindow implements Initializable {
         adjustResultButtons(true);
 
         if (TEST_CASE) {
-//            performComputationTest();    
+            performComputationTest();    
 
 //            try {
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(new File("D:\\temp\\7202845m.avi.test.task")));
@@ -489,31 +489,31 @@ public class MainWindow implements Initializable {
 
     private void performComputationTest() {
         try {
-            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-            TaskContainer tc = Context.getInstance().getTc();
-            InputLoader.loadInput(tc);
-            tc.setParameter(TaskParameter.FACET_SIZE, 20);
-            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-            Computation.commenceComputationDynamic(tc);
-
-            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
+//            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
+//            TaskContainer tc = Context.getInstance().getTc();
+//            InputLoader.loadInput(tc);
+//            tc.setParameter(TaskParameter.FACET_SIZE, 20);
+//            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
+//            Computation.commenceComputationDynamic(tc);
+//
+//            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 
             // 7202845m
             // 9905121m
             // 9820088m
-            final int val1 = 10;
-            final int val2 = 30;
+            final int val1 = 20;
+            final int val2 = 35;
             for (int size = val1; size <= val2; size++) {
-                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
+//                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                    Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
 
-//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-//                    TaskContainer tc = Context.getInstance().getTc();
-//                    InputLoader.loadInput(tc);
-//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                    tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
+                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
+                    TaskContainer tc = Context.getInstance().getTc();
+                    InputLoader.loadInput(tc);
+                    tc.setParameter(TaskParameter.FACET_SIZE, size);                    
 ////                    Computation.commenceComputationDynamic(tc);
-//                    Computation.commenceComputationDynamicStrainParamSweep(tc, 10, 30);
+                    Computation.commenceComputationDynamicStrainParamSweep(tc, 5, 30);
+                    
 //                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
 //                    tc = Context.getInstance().getTc();
 //                    InputLoader.loadInput(tc);
@@ -525,7 +525,7 @@ public class MainWindow implements Initializable {
 //                    InputLoader.loadInput(tc);
 //                    tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                    Computation.commenceComputationDynamic(tc);
-                }
+//                }
             }
         } catch (IOException | ComputationException ex) {
             System.err.println(ex);

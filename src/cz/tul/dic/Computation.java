@@ -1,33 +1,18 @@
 package cz.tul.dic;
 
 import cz.tul.dic.complextask.ComplexTaskSolver;
-import cz.tul.dic.data.roi.CircularROI;
-import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.data.task.splitter.TaskSplit;
-import cz.tul.dic.engine.EngineUtils;
-import cz.tul.dic.engine.ResultCompilation;
-import cz.tul.dic.engine.opencl.KernelType;
-import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimator;
-import cz.tul.dic.generators.facet.FacetGeneratorMode;
-import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportTarget;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
-import org.pmw.tinylog.LoggingLevel;
-import org.pmw.tinylog.writers.ConsoleWriter;
 
 /**
  *
@@ -35,252 +20,66 @@ import org.pmw.tinylog.writers.ConsoleWriter;
  */
 public class Computation {
 
-    private static final LoggingLevel LOGGING_LEVEL = LoggingLevel.TRACE;
-//    private static final File IN_VIDEO_REAL = new File("d:\\temp\\7202845m.avi");
-//    private static final File IN_VIDEO_ART = new File("d:\\temp\\image.avi");
-//    private static final List<File> IN_IMAGES;
     private static final File OUT_DIR = new File("D:\\temp\\results");
-    private static final int SIZE_MIN = 3;
-    private static final int SIZE_MAX = 50;
-    private static final int SIZE_STEP = 1;
 
-    static {
-        Configurator.defaultConfig().writer(new ConsoleWriter()).level(LOGGING_LEVEL).activate();
-
-//        IN_IMAGES = new LinkedList<>();
-////        IN_IMAGES.add(new File("d:\\temp\\image000.bmp"));
-////        IN_IMAGES.add(new File("d:\\temp\\image001.bmp"));
-////        IN_IMAGES.add(new File("d:\\temp\\image002.bmp"));
-////        IN_IMAGES.add(new File("d:\\temp\\image003.bmp"));
-////        IN_IMAGES.add(new File("d:\\temp\\image004.bmp"));
-//
-//        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00000.bmp"));
-//        IN_IMAGES.add(new File("d:\\temp\\7202845m.avi00004.bmp"));        
-    }
-
-    public static void commenceComputationStatic(final Object in) throws IOException, ComputationException {        
-        long time;
-        TaskContainer tc, loadedTc;
-        for (int size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_STEP) {
-            tc = generateTask(in, size, KernelType.CL_1D_I_V_LL_MC_D);
-
-            InputLoader.loadInput(tc);
-
-            // generate exports
-            generateExports(tc);
-            final File input = (File) tc.getParameter(TaskParameter.IN);
-            final File target = new File(input.getAbsolutePath().concat(TaskContainerUtils.EXT_CONFIG));
-
-            TaskContainerUtils.serializeTaskToConfig(tc, target);
-            loadedTc = TaskContainerUtils.deserializeTaskFromConfig(target);
-//            System.out.println(loadedTc);
-
-            TaskContainerChecker.checkTaskValidity(tc);
-
-            time = System.nanoTime();
-            EngineUtils.getInstance().computeTask(tc);
-            time = System.nanoTime() - time;
-            Exporter.export(tc);
-            Logger.info("Finished task " + size + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-        }
-        Logger.info("All done !!!");
-    }
-
-    private static TaskContainer generateTask(final Object in, final int facetSize, final KernelType kernelType) throws IOException {
-        final TaskContainer tc = new TaskContainer(in);
-
-        // select ROI 
-        final ROI r1 = new RectangleROI(135, 19, 179, 200);
-        tc.addRoi(0, r1);
-        final ROI r2 = new CircularROI(108, 101, 26);
-        tc.addRoi(0, r2);
-        final ROI r3 = new CircularROI(203, 101, 26);
-        tc.addRoi(0, r3);
-
-        // select facet size
-        TaskContainerUtils.setUniformFacetSize(tc, 0, facetSize);
-
-        // facets
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
-//        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
-
-        // deformations
-        tc.setDeformationLimits(0, r1, new double[]{-1, 1, 0.5, -5, 5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5});
-        tc.setDeformationLimits(0, r2, new double[]{-1, 1, 0.5, -10, 1, 0.5});
-        tc.setDeformationLimits(0, r3, new double[]{-1, 1, 0.5, -10, 1, 0.5});
-
-        // task
-        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
-        tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);
-
-        // opencl
-        tc.setParameter(TaskParameter.KERNEL, kernelType);
-
-        return tc;
-    }
-
-    private static void generateExports(final TaskContainer tc) {
-        // prepare ROIS
-        final List<ROI> circular = new ArrayList<>(2);
-        final List<ROI> rect = new ArrayList<>(1);
-        for (ROI roi : tc.getRois(0)) {
-            if (roi instanceof CircularROI) {
-                circular.add(roi);
-            } else {
-                rect.add(roi);
-            }
-        }
-
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat(tc.getParameter(TaskParameter.KERNEL).toString()).concat("-");
-        final String ext = String.format("%02d", tc.getFacetSize(0, rect.get(0))).concat(".bmp");
-        for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-X-").concat(ext)), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-Y-").concat(ext)), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-ABS-").concat(ext)), round));
-
-//            tc.addExport(ExportTask.generateMapExport(Direction.DX, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DX-").concat(ext)), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.DY, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DY-").concat(ext)), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.DABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DABS-").concat(ext)), round));            
-//            tc.addExport(ExportTask.generateMapExport(Direction.DABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DABS-RC-").concat(ext)),round, circular.toArray(new ROI[0])));
-            
-//            tc.addExport(ExportTask.generateMapExport(Direction.DABS, ExportTarget.FILE, new File(target.concat(String.format("%02d", round)).concat("-DABS-RR-").concat(ext)), round, rect.toArray(new ROI[0])));
-        }
-    }
-
-    public static void commenceComputationDynamic(final Object in, final int facetSize) throws IOException, ComputationException {
-        TaskContainer tc = new TaskContainer(in);
-        InputLoader.loadInput(tc);
-
-        final int roiRadius = 26;
-        tc.addRoi(0, new CircularROI(108, 12, roiRadius));
-        tc.addRoi(0, new CircularROI(201, 7, roiRadius));
-        tc.addRoi(0, new CircularROI(108, 86, roiRadius));
-        tc.addRoi(0, new CircularROI(202, 84, roiRadius));
-
-        tc.setParameter(TaskParameter.FACET_SIZE, facetSize);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.TIGHT);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
-        tc.setParameter(TaskParameter.INTERPOLATION, Interpolation.BILINEAR);
-        tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
-        tc.setParameter(TaskParameter.KERNEL, KernelType.CL_1D_I_V_LL_MC_D);
-//        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, TaskSplit.STATIC);
-//        tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, 1000);        
-
-        TaskContainerChecker.checkTaskValidity(tc);
-
-//        TaskContainerUtils.serializeTaskToConfig(tc);
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File) tc.getParameter(TaskParameter.IN)).getName()).concat("-");
-        final String ext = String.format("%02d", facetSize);
-        for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat("-Dx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat("-Dy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("-Dabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-        }
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("Dabs-").concat(ext).concat(".avi")), ExportTask.EXPORT_SEQUENCE_AVI));
-
-        computeDynamicTask(tc);
-
-//        TaskContainerUtils.serializeTaskToBinary(tc);
-//        TaskContainerUtils.exportTask(tc);
-//        System.out.println(tc);
-//        System.out.println(loadedTc);
-    }
-
-    public static void commenceComputationDynamic(final TaskContainer tc) throws IOException, ComputationException {
-        TaskContainerChecker.checkTaskValidity(tc);
-
-        final String target = OUT_DIR.getAbsolutePath().concat(File.separator).concat("dyn").concat(File.separator).concat(((File) tc.getParameter(TaskParameter.IN)).getName());
-        final String ext = String.format("%02d", tc.getParameter(TaskParameter.FACET_SIZE));
-        for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(target.concat("-Dx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(target.concat("-Dy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("-Dabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, new File(target.concat("-Exx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(target.concat("-Eyy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(target.concat("-Exy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-            tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(target.concat("-Eabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".bmp")), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.CSV, new File(target.concat("-Exx-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.CSV, new File(target.concat("-Eyy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.CSV, new File(target.concat("-Exy-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
-//            tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.CSV, new File(target.concat("-Eabs-").concat(String.format("%02d", round)).concat("-").concat(ext).concat(".csv")), round));
-        }
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, new File(target.concat("-Dabs-").concat(ext).concat(".avi")), ExportTask.EXPORT_SEQUENCE_AVI));
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, new File(target.concat("-Eabs-").concat(ext).concat(".avi")), ExportTask.EXPORT_SEQUENCE_AVI));
-
-        computeDynamicTask(tc);
-    }
-
-    public static void computeDynamicTask(TaskContainer tc) throws IOException {
-        try {
-            long time = System.nanoTime();
-            ComplexTaskSolver cts = new ComplexTaskSolver();
-            cts.solveComplexTask(tc);
-            time = System.nanoTime() - time;
-            Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-
-            Exporter.export(tc);
-        } catch (ComputationException ex) {
-            Logger.error(ex);
-        }
-    }
-
-    public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax) throws ComputationException, IOException {
-        TaskContainerChecker.checkTaskValidity(tc);
-
+    public static void computeDynamicTask(TaskContainer tc) throws IOException, ComputationException {
         final File in = (File) tc.getParameter(TaskParameter.IN);
-        final Object facetSize = tc.getParameter(TaskParameter.FACET_SIZE);
-        final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
+        final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
 
-        computeDynamicTask(tc);
+        long time = System.nanoTime();
+        TaskContainerChecker.checkTaskValidity(tc);
+        ComplexTaskSolver cts = new ComplexTaskSolver();
+        cts.solveComplexTask(tc);
+        time = System.nanoTime() - time;
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, in.getName(), facetSize, facetGenMode, Direction.Dx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, in.getName(), facetSize, facetGenMode, Direction.Dy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, in.getName(), facetSize, facetGenMode, Direction.Dabs), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), Direction.Dx), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), Direction.Dy), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), Direction.Dabs), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
         Exporter.export(tc);
 
+    }
+
+    public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax) throws ComputationException, IOException {
+        computeDynamicTask(tc);
+
         // strain sweep and export
+        final File in = (File) tc.getParameter(TaskParameter.IN);
+        final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
         for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_PARAMETER, strainParam);
             StrainEstimator.computeStrain(tc);
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-                tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(r, in.getName(), facetSize, facetGenMode, Direction.Exx, strainParam), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(r, in.getName(), facetSize, facetGenMode, Direction.Eyy, strainParam), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(r, in.getName(), facetSize, facetGenMode, Direction.Exy, strainParam), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(r, in.getName(), facetSize, facetGenMode, Direction.Eabs, strainParam), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), Direction.Exx), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), Direction.Eyy), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), Direction.Exy), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), Direction.Eabs), r));
             }
 //            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
-
             Exporter.export(tc);
         }
     }
 
-    private static File generateTargetFile(final Integer round, final Object... params) {
+    private static File generateTargetFile(final Integer round, final Integer facetSize, final Object... params) {
         final StringBuilder sb = new StringBuilder();
         sb.append(OUT_DIR.getAbsolutePath());
         sb.append(File.separator);
-
-//        for (int i = 0; i < params.length - 1; i++) {
-//            sb.append(String.valueOf(params[i]));
-//            sb.append("-");
-//        }
-//        sb.setLength(sb.length() - 1);
-//        sb.append(File.separator);
 
         for (Object o : params) {
             if (o instanceof Direction) {
                 sb.setLength(sb.length() - 1);
                 sb.append(File.separator);
             }
-            
+
             sb.append(String.valueOf(o));
-            sb.append("-");            
+            sb.append(File.separator);
         }
 
         sb.setLength(sb.length() - 1);
@@ -288,6 +87,42 @@ public class Computation {
 
         if (round != null) {
             sb.append(String.format("%02d", round));
+            sb.append("_");
+            sb.append(String.format("%02d", facetSize));
+            sb.append(".bmp");
+        } else {
+            sb.append("video.avi");
+        }
+
+        final File result = new File(sb.toString());
+        Utils.ensureDirectoryExistence(result.getParentFile());
+        return result;
+    }
+    
+    private static File generateTargetFile(final Integer round, final Integer facetSize, final Integer strainParam, final Object... params) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(OUT_DIR.getAbsolutePath());
+        sb.append(File.separator);
+
+        for (Object o : params) {
+            if (o instanceof Direction) {
+                sb.setLength(sb.length() - 1);
+                sb.append(File.separator);
+            }
+
+            sb.append(String.valueOf(o));
+            sb.append(File.separator);
+        }
+
+        sb.setLength(sb.length() - 1);
+        sb.append(File.separator);
+
+        if (round != null) {
+            sb.append(String.format("%02d", round));
+            sb.append("_");
+            sb.append(String.format("%02d", facetSize));
+            sb.append("_");
+            sb.append(String.format("%02d", strainParam));
             sb.append(".bmp");
         } else {
             sb.append("video.avi");
