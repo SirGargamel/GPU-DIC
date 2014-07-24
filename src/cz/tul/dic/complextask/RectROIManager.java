@@ -56,6 +56,18 @@ public class RectROIManager extends ROIManager {
                     xRight,
                     yBottom);
         }
+        
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Main ROI - [");
+        sb.append(rect.getX1());
+        sb.append("; ");
+        sb.append(rect.getY1());
+        sb.append("], [");
+        sb.append(rect.getX2());
+        sb.append("; ");
+        sb.append(rect.getY2());
+        sb.append("]");
+        Logger.trace(sb);
 
         final HashSet<ROI> rois = new HashSet<>(1);
         rois.add(rect);

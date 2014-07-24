@@ -69,6 +69,17 @@ public class CircleROIManager extends ROIManager {
         topRight = cRois.get(1);
         bottomLeft = cRois.get(2);
         bottomRight = cRois.get(3);
+        
+        final StringBuilder sb  = new StringBuilder();
+        sb.append("Top Left - ");
+        sb.append(topLeft);
+        sb.append("; Top Right - ");
+        sb.append(topRight);
+        sb.append("; Bottom Left - ");
+        sb.append(bottomLeft);
+        sb.append("; Bottom Right - ");
+        sb.append(bottomRight);
+        Logger.trace(sb);
 
         defLimits = DefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO;
         setROIs(initialRound);
