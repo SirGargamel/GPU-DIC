@@ -26,6 +26,7 @@ import javafx.stage.Stage;
  */
 public class ExpertSettings implements Initializable {
 
+    private static final String ROUND_SPLITTER = ",";
     @FXML
     private ComboBox<FacetGeneratorMode> comboFGMode;
     @FXML
@@ -38,6 +39,8 @@ public class ExpertSettings implements Initializable {
     private TextField textFGSpacing;
     @FXML
     private TextField textTSValue;
+    @FXML
+    private TextField textRoundLimits;
 
     @FXML
     private void handleButtonActionOk(ActionEvent event) {
@@ -49,6 +52,20 @@ public class ExpertSettings implements Initializable {
             tc.setParameter(TaskParameter.INTERPOLATION, comboInterpolation.getValue());
             tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, Integer.valueOf(textFGSpacing.getText()));
             tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, Integer.valueOf(textTSValue.getText()));
+
+            final String limits = textRoundLimits.getText();
+            final int[] newLimits;
+            if (limits != null && !limits.isEmpty()) {
+                final String[] split = limits.split(ROUND_SPLITTER);
+                if (split.length == 2) {
+                    newLimits = new int[]{Integer.valueOf(split[0]), Integer.valueOf(split[1])};
+                } else {
+                    newLimits = null;
+                }
+            } else {
+                newLimits = null;
+            }
+            tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
         }
         closeWindow();
     }
@@ -97,6 +114,7 @@ public class ExpertSettings implements Initializable {
         comboInterpolation.getSelectionModel().select(DefaultValues.DEFAULT_INTERPOLATION);
         textFGSpacing.setText(String.valueOf(DefaultValues.DEFAULT_FACET_SPACING));
         textTSValue.setText(String.valueOf(DefaultValues.DEFAULT_TASK_SPLIT_VALUE));
+        textRoundLimits.setText("");
 
         final TaskContainer tc = Context.getInstance().getTc();
         if (tc != null) {
@@ -104,30 +122,36 @@ public class ExpertSettings implements Initializable {
             if (o != null) {
                 comboFGMode.getSelectionModel().select((FacetGeneratorMode) o);
             }
+            o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
+            if (o != null) {
+                textFGSpacing.setText(o.toString());
+            }
 
             o = tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
             if (o != null) {
                 comboTSVariant.getSelectionModel().select((TaskSplit) o);
+            }
+            o = tc.getParameter(TaskParameter.TASK_SPLIT_VALUE);
+            if (o != null) {
+                textTSValue.setText(o.toString());
             }
 
             o = tc.getParameter(TaskParameter.KERNEL);
             if (o != null) {
                 comboKernel.getSelectionModel().select((KernelType) o);
             }
-            
+
             o = tc.getParameter(TaskParameter.INTERPOLATION);
             if (o != null) {
                 comboInterpolation.getSelectionModel().select((Interpolation) o);
             }
 
-            o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
+            o = tc.getParameter(TaskParameter.ROUND_LIMITS);
             if (o != null) {
-                textFGSpacing.setText(o.toString());
+                final int[] limits = (int[]) o;
+                textFGSpacing.setText(Integer.toString(limits[0]) + ", " + Integer.toString(limits[1]));
             }
-            o = tc.getParameter(TaskParameter.TASK_SPLIT_VALUE);
-            if (o != null) {
-                textTSValue.setText(o.toString());
-            }            
+
         }
     }
 
