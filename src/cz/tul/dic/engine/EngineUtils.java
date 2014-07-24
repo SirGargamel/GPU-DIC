@@ -36,9 +36,9 @@ import org.pmw.tinylog.Logger;
  * @author Petr Ječmen
  */
 public class EngineUtils extends Observable {
-    
+
     private static final EngineUtils instance;
-    
+
     static {
         instance = new EngineUtils();
     }
@@ -78,10 +78,10 @@ public class EngineUtils extends Observable {
     }
 
     public void computeRound(final TaskContainer tc, final int index1, final int index2) throws ComputationException {
-        Logger.trace("Computing round {0}.", index1 + 1);                
+        Logger.trace("Computing round {0}.", index1);
 
         TaskContainerChecker.checkTaskValidity(tc);
-        
+
         final Engine engine = new Engine();
         // prepare parameters
         engine.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
@@ -124,7 +124,7 @@ public class EngineUtils extends Observable {
         DisplacementCalculator.computeDisplacement(tc, index1, facets);
 
         StrainEstimator.computeStrain(tc, index1);
-                       
+
         Logger.debug("Computed round {0}.", index1);
     }
 
