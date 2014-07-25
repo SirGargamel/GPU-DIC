@@ -25,14 +25,6 @@ public class Computation {
     public static void computeDynamicTask(TaskContainer tc) throws IOException, ComputationException {
         final File in = (File) tc.getParameter(TaskParameter.IN);
         final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
-
-        long time = System.nanoTime();
-        TaskContainerChecker.checkTaskValidity(tc);
-        ComplexTaskSolver cts = new ComplexTaskSolver();
-        cts.solveComplexTask(tc);
-        time = System.nanoTime() - time;
-        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
@@ -41,8 +33,15 @@ public class Computation {
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), Direction.Dabs), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
-        Exporter.export(tc);
 
+        long time = System.nanoTime();
+        TaskContainerChecker.checkTaskValidity(tc);
+        ComplexTaskSolver cts = new ComplexTaskSolver();
+        cts.solveComplexTask(tc);
+        time = System.nanoTime() - time;
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+
+        Exporter.export(tc);
     }
 
     public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax) throws ComputationException, IOException {
@@ -98,7 +97,7 @@ public class Computation {
         Utils.ensureDirectoryExistence(result.getParentFile());
         return result;
     }
-    
+
     private static File generateTargetFile(final Integer round, final Integer facetSize, final Integer strainParam, final Object... params) {
         final StringBuilder sb = new StringBuilder();
         sb.append(OUT_DIR.getAbsolutePath());
