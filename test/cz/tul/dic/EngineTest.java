@@ -216,7 +216,12 @@ public class EngineTest {
             sb.append("; ");
             sb.append(tc.getParameter(TaskParameter.INTERPOLATION));
             sb.append("; ");
-            sb.append(Arrays.toString(tc.getDeformationLimits(0).values().iterator().next()));
+            final Map<ROI, double[]> limits = tc.getDeformationLimits(0);
+            if (limits != null && limits.values().iterator().hasNext()) {
+                sb.append(Arrays.toString(limits.values().iterator().next()));
+            } else {
+                sb.append("No limits !!!");
+            }
             return sb.toString();
         } else {
             return null;
