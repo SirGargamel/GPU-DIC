@@ -276,4 +276,9 @@ public class TaskContainer extends Observable implements Serializable {
 
         return result;
     }
+
+    @Override
+    public String toString() {
+        return params.toString();
+    }
 }

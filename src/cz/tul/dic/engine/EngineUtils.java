@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.tul.dic.engine;
 
 import cz.tul.dic.ComputationException;
@@ -78,7 +73,7 @@ public class EngineUtils extends Observable {
     }
 
     public void computeRound(final TaskContainer tc, final int index1, final int index2) throws ComputationException {
-        Logger.trace("Computing round {0}.", index1);
+        Logger.trace("Computing round {0} - {1}.", index1, tc);
 
         TaskContainerChecker.checkTaskValidity(tc);
 

@@ -73,11 +73,11 @@ public class CircleROIManager extends ROIManager {
         final StringBuilder sb  = new StringBuilder();
         sb.append("Top Left - ");
         sb.append(topLeft);
-        sb.append("; Top Right - ");
+        sb.append(" ; Top Right - ");
         sb.append(topRight);
-        sb.append("; Bottom Left - ");
+        sb.append(" ; Bottom Left - ");
         sb.append(bottomLeft);
-        sb.append("; Bottom Right - ");
+        sb.append(" ; Bottom Right - ");
         sb.append(bottomRight);
         Logger.trace(sb);
 
@@ -158,7 +158,7 @@ public class CircleROIManager extends ROIManager {
         }
 
         defLimits = result;
-        Logger.debug("New circle limits - " + Arrays.toString(defLimits));
+        Logger.debug("Detected shift " + shift + ", new circle limits - " + Arrays.toString(defLimits));
     }
 
     private static double adjustValue(final double value, final double limit) {

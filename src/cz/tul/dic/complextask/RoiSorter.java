@@ -23,16 +23,8 @@ public class RoiSorter implements Comparator<ROI> {
             result = Integer.compare(o1.getX1(), o2.getX1());
         } else {
             result = Integer.compare(y11, y21);
-        }     
-        
-        final StringBuilder sb = new StringBuilder();
-        sb.append(o1);
-        sb.append(" vs ");
-        sb.append(o2);
-        sb.append(" - ");
-        sb.append(result);
-        Logger.trace(sb);
-        
+        }
+
         return result;
     }
 
