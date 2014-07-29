@@ -204,5 +204,9 @@ public class CircleROIManager extends ROIManager {
     public double getShiftBottom() {
         return shiftBottom;
     }
+    
+    public boolean hasMoved() {
+        return haveMoved(shiftBottom, shiftBottom);
+    }
 
 }

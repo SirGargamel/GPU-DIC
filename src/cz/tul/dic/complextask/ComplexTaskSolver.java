@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Observable;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -40,7 +41,11 @@ public class ComplexTaskSolver extends Observable {
             nextR = e.getValue();
 
             computeRound(r, nextR, crm);
-            computeRound(r, nextR, rrm);
+            if (crm.hasMoved()) {
+                computeRound(r, nextR, rrm);
+            } else {
+                Logger.info("Skipping round " + r + ", no shift detected.");
+            }
             currentRound++;
             setChanged();
             notifyObservers(new int[]{currentRound, roundCount});

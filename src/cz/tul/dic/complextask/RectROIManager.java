@@ -116,7 +116,7 @@ public class RectROIManager extends ROIManager {
         if (haveMoved(shiftTop, shiftBottom)) {
             estimateNewRectangleDeformationLimits(shiftTop, shiftBottom);
         }
-        rect = new RectangleROI(rect.getX1(), rect.getY1() + crm.getShiftTop(), rect.getX2(), rect.getY2() + crm.getShiftBottom());
+        rect = new RectangleROI(rect.getX1(), rect.getY1() + shiftTop, rect.getX2(), rect.getY2() + shiftBottom);
 
         setRois(nextRound);
     }
