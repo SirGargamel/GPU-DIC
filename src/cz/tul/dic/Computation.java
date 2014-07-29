@@ -23,19 +23,20 @@ public class Computation {
     private static final File OUT_DIR = new File("D:\\temp\\results");
 
     public static void computeDynamicTask(TaskContainer tc) throws IOException, ComputationException {
+        TaskContainerChecker.checkTaskValidity(tc);
+        
         final File in = (File) tc.getParameter(TaskParameter.IN);
         final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), Direction.Dx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), Direction.Dy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), Direction.Dabs), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dx), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dy), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dabs), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
 
-        long time = System.nanoTime();
-        TaskContainerChecker.checkTaskValidity(tc);
+        long time = System.nanoTime();        
         ComplexTaskSolver cts = new ComplexTaskSolver();
         cts.solveComplexTask(tc);
         time = System.nanoTime() - time;
@@ -56,10 +57,10 @@ public class Computation {
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-                tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), Direction.Exx), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), Direction.Eyy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), Direction.Exy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), Direction.Eabs), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Exx), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Eyy), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Exy), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(r, facetSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Eabs), r));
             }
 //            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
             Exporter.export(tc);
