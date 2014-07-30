@@ -104,10 +104,8 @@ public class Utils {
         @Override
         public String toString() {
             List<Map.Entry> a = new ArrayList<>(counter.entrySet());
-            Collections.sort(a, (Object o1, Object o2) -> {
-                Map.Entry e1 = (Map.Entry) o1;
-                Map.Entry e2 = (Map.Entry) o2;
-                return ((Comparable) e1.getValue()).compareTo(e2.getValue());
+            Collections.sort(a, (Map.Entry o1, Map.Entry o2) -> {
+                return ((Comparable) o1.getValue()).compareTo(o2.getValue());
             });
 
             final StringBuilder sb = new StringBuilder();
