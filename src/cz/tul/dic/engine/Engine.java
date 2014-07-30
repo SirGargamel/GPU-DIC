@@ -5,6 +5,7 @@ import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLException;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
@@ -31,12 +32,17 @@ import org.pmw.tinylog.Logger;
 public final class Engine extends Observable {
 
     private static final int BEST_RESULT_COUNT_MAX = 50;
+    private static final Utils.ResultCounter COUNTER;
     private final CLContext context;
     private final CLDevice device;
     // dynamic
     private KernelType kernelType;
     private Interpolation interpolation;
     private TaskSplit taskSplitVariant;
+
+    static {
+        COUNTER = new Utils.ResultCounter();
+    }
 
     public Engine() {
         device = DeviceManager.getDevice();
@@ -149,8 +155,10 @@ public final class Engine extends Observable {
                 }
 
                 bestResults.set(globalFacetIndex, bestResult);
+                COUNTER.inc(bestResult[0]);
             }
         }
+        dumpCounterStats();
     }
 
     private double[] extractDeformation(final int index, final double[] deformations, int defArrayLength) throws ComputationException {
@@ -174,6 +182,11 @@ public final class Engine extends Observable {
 
     public void setTaskSplitVariant(TaskSplit taskSplitVariant) {
         this.taskSplitVariant = taskSplitVariant;
+    }
+
+    public static void dumpCounterStats() {
+        Logger.info(COUNTER);
+        COUNTER.reset();
     }
 
 }

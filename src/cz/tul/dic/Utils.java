@@ -3,7 +3,9 @@ package cz.tul.dic;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +63,7 @@ public class Utils {
         }
     }
 
-    public static void ensureDirectoryExistence(final File file) {        
+    public static void ensureDirectoryExistence(final File file) {
         if (!file.exists()) {
             file.mkdirs();
         }
@@ -80,6 +82,47 @@ public class Utils {
             }
         }
         return indexCurrentLevel < indexTestedLevel;
+    }
+
+    public static class ResultCounter {
+
+        private final Map<String, Integer> counter;
+
+        public ResultCounter() {
+            counter = new HashMap<>();
+        }
+
+        public void inc(final double[] val) {
+            final String key = Arrays.toString(val);
+            if (counter.containsKey(key)) {
+                counter.put(key, counter.get(key) + 1);
+            } else {
+                counter.put(key, 1);
+            }
+        }
+
+        @Override
+        public String toString() {
+            List<Map.Entry> a = new ArrayList<>(counter.entrySet());
+            Collections.sort(a, (Object o1, Object o2) -> {
+                Map.Entry e1 = (Map.Entry) o1;
+                Map.Entry e2 = (Map.Entry) o2;
+                return ((Comparable) e1.getValue()).compareTo(e2.getValue());
+            });
+
+            final StringBuilder sb = new StringBuilder();
+            a.stream().forEach((e) -> {
+                sb.append("\n")
+                        .append(e.getKey())
+                        .append(" ")
+                        .append(e.getValue());
+            });
+            return sb.toString();
+        }
+
+        public void reset() {
+            counter.clear();
+        }
     }
 
 }
