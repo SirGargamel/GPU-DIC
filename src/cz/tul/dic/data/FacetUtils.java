@@ -2,6 +2,7 @@ package cz.tul.dic.data;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.deformation.Deformation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,14 +67,16 @@ public class FacetUtils {
         result[Coordinates.X] = x;
         result[Coordinates.Y] = y;
         switch (degree) {
-            case FIRST:
-                result[Coordinates.X] += deformation[2] * dx + deformation[4] * dy;
-                result[Coordinates.Y] += deformation[3] * dx + deformation[5] * dy;
-            case ZERO:
-                result[Coordinates.X] += deformation[0];
-                result[Coordinates.Y] += deformation[1];
-                break;
             case SECOND:
+                result[Coordinates.X] += 0.5 * deformation[Deformation.UXX] * dx * dx + 0.5 * deformation[Deformation.UYY] * dy * dy + deformation[Deformation.UXY] * dx * dy;
+                result[Coordinates.Y] += 0.5 * deformation[Deformation.VXX] * dx * dx + 0.5 * deformation[Deformation.VYY] * dy * dy + deformation[Deformation.VXY] * dx * dy;
+            case FIRST:
+                result[Coordinates.X] += deformation[Deformation.UX] * dx + deformation[Deformation.UY] * dy;
+                result[Coordinates.Y] += deformation[Deformation.VX] * dx + deformation[Deformation.VY] * dy;
+            case ZERO:
+                result[Coordinates.X] += deformation[Deformation.U];
+                result[Coordinates.Y] += deformation[Deformation.V];
+                break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation.");
 
@@ -85,7 +88,7 @@ public class FacetUtils {
 
         final int[] pointData = f.getData();
         for (int i = 0; i < pointData.length / 2; i++) {
-            if (x == pointData[i*2] && y == pointData[i*2 + 1]) {
+            if (x == pointData[i * 2] && y == pointData[i * 2 + 1]) {
                 result = true;
                 break;
             }

@@ -50,7 +50,7 @@ import org.pmw.tinylog.Logger;
  */
 public class MainWindow implements Initializable {
 
-    private static final boolean TEST_CASE = false;
+    private static final boolean TEST_CASE = true;
     private static final String LAST_DIR = "lastDir";
 
     @FXML
@@ -438,7 +438,7 @@ public class MainWindow implements Initializable {
         textFs.setText("7");
 
         imagePane.initialize(url, rb);
-        imagePane.assignImageIndexTextField(textIndex.textProperty());        
+        imagePane.assignImageIndexTextField(textIndex.textProperty());
 
         Image img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/play_24x32.png"));
         ImageView image = new ImageView(img);
@@ -505,26 +505,41 @@ public class MainWindow implements Initializable {
             // 7202845m
             // 9905121m
             // 9820088m
-            final int val1 = 20;
-            final int val2 = 35;
-            for (int size = val1; size <= val2; size++) {
+            final int fs1 = 10;
+            final int fs2 = 35;
+            final int ps1 = 10;
+            final int ps2 = 35;
+            for (int size = fs1; size <= fs2; size++) {
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                    Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
 
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
                 TaskContainer tc = Context.getInstance().getTc();
                 InputLoader.loadInput(tc);
                 tc.setParameter(TaskParameter.FACET_SIZE, size);
-////                    Computation.commenceComputationDynamic(tc);
-                Computation.commenceComputationDynamicStrainParamSweep(tc, 5, 30);
+                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
+                
+                Engine.dumpCounterStats();
 
-//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
-//                    tc = Context.getInstance().getTc();
-//                    InputLoader.loadInput(tc);
-//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                    Computation.commenceComputationDynamic(tc);
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-classic.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
+
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
+//                
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi-classic.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
 //
-//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
+//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
 //                    tc = Context.getInstance().getTc();
 //                    InputLoader.loadInput(tc);
 //                    tc.setParameter(TaskParameter.FACET_SIZE, size);

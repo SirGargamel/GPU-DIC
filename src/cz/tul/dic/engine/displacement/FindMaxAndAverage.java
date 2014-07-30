@@ -43,7 +43,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
             facets = facetMap.get(roi);
             results = tc.getResult(round, roi);
 
-            degree = DeformationUtils.getDegree(results.get(0)[0]);
+            degree = DeformationUtils.getDegreeFromValue(results.get(0)[0]);
 
             for (int i = 0; i < facets.size(); i++) {
                 f = facets.get(i);

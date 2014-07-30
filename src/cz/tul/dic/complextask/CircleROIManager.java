@@ -3,6 +3,7 @@ package cz.tul.dic.complextask;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
+import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -150,11 +151,11 @@ public class CircleROIManager extends ROIManager {
         System.arraycopy(defLimits, 0, result, 0, defLimits.length);
 
         if (shift < 0) {
-            result[3] = adjustValue(shift, defLimits[3]);
-            result[4] = -result[3] / 2.0;
+            result[DeformationLimit.VMIN] = adjustValue(shift, defLimits[3]);
+            result[DeformationLimit.VMAX] = -result[3] / 2.0;
         } else {
-            result[4] = adjustValue(shift, defLimits[4]);
-            result[3] = -result[4] / 2.0;
+            result[DeformationLimit.VMAX] = adjustValue(shift, defLimits[4]);
+            result[DeformationLimit.VMIN] = -result[4] / 2.0;
         }
 
         defLimits = result;

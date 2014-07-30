@@ -2,7 +2,9 @@ package cz.tul.dic.generators;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.deformation.Deformation;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
@@ -48,7 +50,7 @@ public class DeformationGenerator {
 
     private static double[] generateZeroDegree(final double[] limits) throws ComputationException {
         if (limits.length < 6) {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal number of deformation parameters - received " + limits.length + ", required 6.");
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal number of deformation parameters - received " + limits.length + ", required at least 6.");
         }
 
         final int coeffCount = 2;
@@ -60,18 +62,18 @@ public class DeformationGenerator {
 
         int index;
         int i = 0;
-        for (double u = limits[0]; u <= limits[1]; u += limits[2]) {
-            for (double v = limits[3]; v <= limits[4]; v += limits[5]) {
+        for (double u = limits[DeformationLimit.UMIN]; u <= limits[DeformationLimit.UMAX]; u += limits[DeformationLimit.USTEP]) {
+            for (double v = limits[DeformationLimit.VMIN]; v <= limits[DeformationLimit.VMAX]; v += limits[DeformationLimit.VSTEP]) {
                 index = i * coeffCount;
-                result[index] = u;
-                result[index + 1] = v;
+                result[index + Deformation.U] = u;
+                result[index + Deformation.V] = v;
                 i++;
 
-                if (limits[5] == 0) {
+                if (limits[DeformationLimit.VSTEP] == 0) {
                     break;
                 }
             }
-            if (limits[2] == 0) {
+            if (limits[DeformationLimit.USTEP] == 0) {
                 break;
             }
         }
@@ -107,42 +109,42 @@ public class DeformationGenerator {
 
         int index;
         int i = 0;
-        for (double u = limits[0]; u <= limits[1]; u += limits[2]) {
-            for (double v = limits[3]; v <= limits[4]; v += limits[5]) {
-                for (double ux = limits[6]; ux <= limits[7]; ux += limits[8]) {
-                    for (double uy = limits[9]; uy <= limits[10]; uy += limits[11]) {
-                        for (double vx = limits[12]; vx <= limits[13]; vx += limits[14]) {
-                            for (double vy = limits[15]; vy <= limits[16]; vy += limits[17]) {
+        for (double u = limits[DeformationLimit.UMIN]; u <= limits[DeformationLimit.UMAX]; u += limits[DeformationLimit.USTEP]) {
+            for (double v = limits[DeformationLimit.VMIN]; v <= limits[DeformationLimit.VMAX]; v += limits[DeformationLimit.VSTEP]) {
+                for (double ux = limits[DeformationLimit.UXMIN]; ux <= limits[DeformationLimit.UXMAX]; ux += limits[DeformationLimit.UXSTEP]) {
+                    for (double uy = limits[DeformationLimit.UYMIN]; uy <= limits[DeformationLimit.UYMAX]; uy += limits[DeformationLimit.UYSTEP]) {
+                        for (double vx = limits[DeformationLimit.VXMIN]; vx <= limits[DeformationLimit.VXMAX]; vx += limits[DeformationLimit.VXSTEP]) {
+                            for (double vy = limits[DeformationLimit.VYMIN]; vy <= limits[DeformationLimit.VYMAX]; vy += limits[DeformationLimit.VYSTEP]) {
                                 index = i * coeffCount;
-                                result[index] = u;
-                                result[index + 1] = v;
-                                result[index + 2] = ux;
-                                result[index + 3] = uy;
-                                result[index + 4] = vx;
-                                result[index + 5] = vy;
+                                result[index + Deformation.U] = u;
+                                result[index + Deformation.V] = v;
+                                result[index + Deformation.UX] = ux;
+                                result[index + Deformation.UY] = uy;
+                                result[index + Deformation.VX] = vx;
+                                result[index + Deformation.VY] = vy;
                                 i++;
 
-                                if (limits[17] == 0) {
+                                if (limits[DeformationLimit.VYSTEP] == 0) {
                                     break;
                                 }
                             }
-                            if (limits[14] == 0) {
+                            if (limits[DeformationLimit.VXSTEP] == 0) {
                                 break;
                             }
                         }
-                        if (limits[11] == 0) {
+                        if (limits[DeformationLimit.UYSTEP] == 0) {
                             break;
                         }
                     }
-                    if (limits[8] == 0) {
+                    if (limits[DeformationLimit.UXSTEP] == 0) {
                         break;
                     }
                 }
-                if (limits[5] == 0) {
+                if (limits[DeformationLimit.VSTEP] == 0) {
                     break;
                 }
             }
-            if (limits[2] == 0) {
+            if (limits[DeformationLimit.USTEP] == 0) {
                 break;
             }
         }
@@ -174,78 +176,78 @@ public class DeformationGenerator {
 
         int index;
         int i = 0;
-        for (double u = limits[0]; u <= limits[1]; u += limits[2]) {
-            for (double v = limits[3]; v <= limits[4]; v += limits[5]) {
-                for (double ux = limits[6]; ux <= limits[7]; ux += limits[8]) {
-                    for (double uy = limits[9]; uy <= limits[10]; uy += limits[11]) {
-                        for (double vx = limits[12]; vx <= limits[13]; vx += limits[14]) {
-                            for (double vy = limits[15]; vy <= limits[16]; vy += limits[17]) {
-                                for (double uxx = limits[18]; uxx <= limits[19]; uxx += limits[20]) {
-                                    for (double uxy = limits[21]; uxy <= limits[22]; uxy += limits[23]) {
-                                        for (double uyy = limits[24]; uyy <= limits[25]; uyy += limits[26]) {
-                                            for (double vxx = limits[27]; vxx <= limits[28]; vxx += limits[29]) {
-                                                for (double vxy = limits[30]; vxy <= limits[31]; vxy += limits[32]) {
-                                                    for (double vyy = limits[33]; vyy <= limits[34]; vyy += limits[35]) {
+        for (double u = limits[DeformationLimit.UMIN]; u <= limits[DeformationLimit.UMAX]; u += limits[DeformationLimit.USTEP]) {
+            for (double v = limits[DeformationLimit.VMIN]; v <= limits[DeformationLimit.VMAX]; v += limits[DeformationLimit.VSTEP]) {
+                for (double ux = limits[DeformationLimit.UXMIN]; ux <= limits[DeformationLimit.UXMAX]; ux += limits[DeformationLimit.UXSTEP]) {
+                    for (double uy = limits[DeformationLimit.UYMIN]; uy <= limits[DeformationLimit.UYMAX]; uy += limits[DeformationLimit.UYSTEP]) {
+                        for (double vx = limits[DeformationLimit.VXMIN]; vx <= limits[DeformationLimit.VXMAX]; vx += limits[DeformationLimit.VXSTEP]) {
+                            for (double vy = limits[DeformationLimit.VYMIN]; vy <= limits[DeformationLimit.VYMAX]; vy += limits[DeformationLimit.VYSTEP]) {
+                                for (double uxx = limits[DeformationLimit.UXXMIN]; uxx <= limits[DeformationLimit.UXXMAX]; uxx += limits[DeformationLimit.UXXSTEP]) {
+                                    for (double uyy = limits[DeformationLimit.UYYMIN]; uyy <= limits[DeformationLimit.UYYMAX]; uyy += limits[DeformationLimit.UYYSTEP]) {
+                                        for (double uxy = limits[DeformationLimit.UXYMIN]; uxy <= limits[DeformationLimit.UXYMAX]; uxy += limits[DeformationLimit.UXYSTEP]) {
+                                            for (double vxx = limits[DeformationLimit.VXXMIN]; vxx <= limits[DeformationLimit.VXXMAX]; vxx += limits[DeformationLimit.VXXSTEP]) {
+                                                for (double vyy = limits[DeformationLimit.VYYMIN]; vyy <= limits[DeformationLimit.VYYMAX]; vyy += limits[DeformationLimit.VYYSTEP]) {
+                                                    for (double vxy = limits[DeformationLimit.VXYMIN]; vxy <= limits[DeformationLimit.VXYMAX]; vxy += limits[DeformationLimit.VXYSTEP]) {
                                                         index = i * coeffCount;
-                                                        result[index] = u;
-                                                        result[index + 1] = v;
-                                                        result[index + 2] = ux;
-                                                        result[index + 3] = uy;
-                                                        result[index + 4] = vx;
-                                                        result[index + 5] = vy;
-                                                        result[index + 6] = uxx;
-                                                        result[index + 7] = uxy;
-                                                        result[index + 8] = uyy;
-                                                        result[index + 9] = vxx;
-                                                        result[index + 10] = vxy;
-                                                        result[index + 11] = vyy;
+                                                        result[index + Deformation.U] = u;
+                                                        result[index + Deformation.V] = v;
+                                                        result[index + Deformation.UX] = ux;
+                                                        result[index + Deformation.UY] = uy;
+                                                        result[index + Deformation.VX] = vx;
+                                                        result[index + Deformation.VY] = vy;
+                                                        result[index + Deformation.UXX] = uxx;
+                                                        result[index + Deformation.UYY] = uyy;
+                                                        result[index + Deformation.UXY] = uxy;
+                                                        result[index + Deformation.VXX] = vxx;
+                                                        result[index + Deformation.VYY] = vyy;
+                                                        result[index + Deformation.VXY] = vxy;
                                                         i++;
 
-                                                        if (limits[35] == 0) {
+                                                        if (limits[DeformationLimit.VXYSTEP] == 0) {
                                                             break;
                                                         }
                                                     }
-                                                    if (limits[32] == 0) {
+                                                    if (limits[DeformationLimit.VYYSTEP] == 0) {
                                                         break;
                                                     }
                                                 }
-                                                if (limits[29] == 0) {
+                                                if (limits[DeformationLimit.VXXSTEP] == 0) {
                                                     break;
                                                 }
                                             }
-                                            if (limits[26] == 0) {
+                                            if (limits[DeformationLimit.UXYSTEP] == 0) {
                                                 break;
                                             }
                                         }
-                                        if (limits[23] == 0) {
+                                        if (limits[DeformationLimit.UYYSTEP] == 0) {
                                             break;
                                         }
                                     }
-                                    if (limits[20] == 0) {
+                                    if (limits[DeformationLimit.UXXSTEP] == 0) {
                                         break;
                                     }
                                 }
-                                if (limits[17] == 0) {
+                                if (limits[DeformationLimit.VYSTEP] == 0) {
                                     break;
                                 }
                             }
-                            if (limits[14] == 0) {
+                            if (limits[DeformationLimit.VXSTEP] == 0) {
                                 break;
                             }
                         }
-                        if (limits[11] == 0) {
+                        if (limits[DeformationLimit.UYSTEP] == 0) {
                             break;
                         }
                     }
-                    if (limits[8] == 0) {
+                    if (limits[DeformationLimit.UXSTEP] == 0) {
                         break;
                     }
                 }
-                if (limits[5] == 0) {
+                if (limits[DeformationLimit.VSTEP] == 0) {
                     break;
                 }
             }
-            if (limits[2] == 0) {
+            if (limits[DeformationLimit.USTEP] == 0) {
                 break;
             }
         }

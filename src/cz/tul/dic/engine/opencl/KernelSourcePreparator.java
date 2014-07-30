@@ -2,6 +2,7 @@ package cz.tul.dic.engine.opencl;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.deformation.Deformation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import java.io.BufferedReader;
@@ -74,49 +75,147 @@ public class KernelSourcePreparator {
             case ZERO:
                 sb.append(x);
                 sb.append(PLUS);
-                sb.append("deformations[baseIndexDeformation]");
-//                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, "coords.x + deformations[baseIndexDeformation]");
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.U)
+                        .append("]");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
 
                 sb.setLength(0);
                 sb.append(y);
                 sb.append(PLUS);
-                sb.append("deformations[baseIndexDeformation + 1]");
-//                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, "coords.y + deformations[baseIndexDeformation + 1]");
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.V)
+                        .append("]");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
                 break;
             case FIRST:
                 sb.append(x);
                 sb.append(PLUS);
-                sb.append("deformations[baseIndexDeformation]");
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.U)
+                        .append("]");
                 sb.append(PLUS);
-                sb.append("deformations[baseIndexDeformation + 2]");
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.UX)
+                        .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
-                sb.append("deformations[baseIndexDeformation + 4]");
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.UY)
+                        .append("]");
                 sb.append(MUL);
                 sb.append(dy);
-//                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, "coords.x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * def.x + deformations[baseIndexDeformation + 4] * def.y");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
 
                 sb.setLength(0);
                 sb.append(y);
                 sb.append(PLUS);
-                sb.append("deformations[baseIndexDeformation + 1]");
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.V)
+                        .append("]");
                 sb.append(PLUS);
-                sb.append("deformations[baseIndexDeformation + 3]");
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.VX)
+                        .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
-                sb.append("deformations[baseIndexDeformation + 5]");
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.VY)
+                        .append("]");
                 sb.append(MUL);
                 sb.append(dy);
-//                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, "coords.y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * def.x + deformations[baseIndexDeformation + 5] * def.y");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
                 break;
             case SECOND:
-                throw new UnsupportedOperationException("Second degree not supported yet");
+                sb.append(x);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.U)
+                        .append("]");
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.UX)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dx);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.UY)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dy);                              
+                sb.append(PLUS);
+                sb.append("0.5 * deformations[baseIndexDeformation + ")
+                        .append(Deformation.UXX)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dx);
+                sb.append(MUL);
+                sb.append(dx);                
+                sb.append(PLUS);
+                sb.append("0.5 * deformations[baseIndexDeformation + ")
+                        .append(Deformation.UYY)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dy);
+                sb.append(MUL);
+                sb.append(dy);                
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.UXY)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dx);
+                sb.append(MUL);
+                sb.append(dy);
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
+
+                sb.setLength(0);
+                sb.append(y);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.V)
+                        .append("]");
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.VX)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dx);
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.VY)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dy);                
+                sb.append(PLUS);
+                sb.append("0.5 * deformations[baseIndexDeformation + ")
+                        .append(Deformation.VXX)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dx);
+                sb.append(MUL);
+                sb.append(dx);                
+                sb.append(PLUS);
+                sb.append("0.5 * deformations[baseIndexDeformation + ")
+                        .append(Deformation.VYY)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dy);
+                sb.append(MUL);
+                sb.append(dy);                
+                sb.append(PLUS);
+                sb.append("deformations[baseIndexDeformation + ")
+                        .append(Deformation.VXY)
+                        .append("]");
+                sb.append(MUL);
+                sb.append(dx);
+                sb.append(MUL);
+                sb.append(dy);
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation");
         }

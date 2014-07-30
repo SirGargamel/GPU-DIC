@@ -2,6 +2,7 @@ package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
@@ -129,14 +130,14 @@ public class RectROIManager extends ROIManager {
         final double max = Math.max(shiftTop, shiftBottom);
 
         if (min < 0) {
-            result[3] = adjustValue(min, defLimits[3]);
-            result[12] = adjustElongation(min, defLimits[3], defLimits[12]);
-            result[15] = adjustElongation(min, defLimits[3], defLimits[15]);
+            result[DeformationLimit.VMIN] = adjustValue(min, defLimits[3]);
+            result[DeformationLimit.VXMIN] = adjustElongation(min, defLimits[3], defLimits[12]);
+            result[DeformationLimit.VYMIN] = adjustElongation(min, defLimits[3], defLimits[15]);
         }
         if (max > 0) {
-            result[4] = adjustValue(max, defLimits[4]);
-            result[13] = adjustElongation(max, defLimits[4], defLimits[13]);
-            result[16] = adjustElongation(max, defLimits[4], defLimits[16]);
+            result[DeformationLimit.VMAX] = adjustValue(max, defLimits[4]);
+            result[DeformationLimit.VXMAX] = adjustElongation(max, defLimits[4], defLimits[13]);
+            result[DeformationLimit.VYMAX] = adjustElongation(max, defLimits[4], defLimits[16]);
         }
 
         for (int i = 0; i < result.length; i++) {

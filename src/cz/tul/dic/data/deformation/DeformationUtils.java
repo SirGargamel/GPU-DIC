@@ -44,9 +44,9 @@ public class DeformationUtils {
         return result;
     }
     
-    public static DeformationDegree getDegree(final double[] limits) throws ComputationException {
+    public static DeformationDegree getDegreeFromValue(final double[] deformation) throws ComputationException {
         final DeformationDegree result;
-        switch (limits.length) {
+        switch (deformation.length) {
             case 2:
                 result = DeformationDegree.ZERO;
                 break;
@@ -57,7 +57,7 @@ public class DeformationUtils {
                 result = DeformationDegree.SECOND;
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal count of deformation limits - " + limits.length);
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal count of deformations - " + deformation.length);
         }
         return result;
     }
