@@ -1,6 +1,7 @@
 package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -45,6 +46,8 @@ public class ComplexTaskSolver extends Observable {
                 computeRound(r, nextR, rrm);
             } else {
                 Logger.info("Skipping round " + r + ", no shift detected.");
+                final Image img = rrm.getTc().getImage(r);
+                rrm.getTc().setDisplacement(r, new double[img.getWidth()][img.getHeight()][2]);
             }
             currentRound++;
             setChanged();
