@@ -157,8 +157,7 @@ public final class Engine extends Observable {
                 bestResults.set(globalFacetIndex, bestResult);
                 COUNTER.inc(bestResult[0]);
             }
-        }
-        dumpCounterStats();
+        }        
     }
 
     private double[] extractDeformation(final int index, final double[] deformations, int defArrayLength) throws ComputationException {
