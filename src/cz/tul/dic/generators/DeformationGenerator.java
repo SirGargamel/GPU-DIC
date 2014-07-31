@@ -158,7 +158,7 @@ public class DeformationGenerator {
         }
 
         final int coeffCount = 12;
-        int size = coeffCount;
+        long size = coeffCount;
         size *= computeSize(limits, 0);
         size *= computeSize(limits, 3);
         size *= computeSize(limits, 6);
@@ -172,7 +172,10 @@ public class DeformationGenerator {
         size *= computeSize(limits, 30);
         size *= computeSize(limits, 33);
 
-        final double[] result = new double[size];
+        if (size > Integer.MAX_VALUE) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Too many deformations requested - " + size);
+        }
+        final double[] result = new double[(int) size];
 
         int index;
         int i = 0;

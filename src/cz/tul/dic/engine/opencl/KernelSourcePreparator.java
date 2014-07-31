@@ -215,7 +215,7 @@ public class KernelSourcePreparator {
                 sb.append(MUL);
                 sb.append(dy);
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+                break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation");
         }

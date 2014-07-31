@@ -42,13 +42,32 @@ public class EngineTest {
         -10, 10, 1, -10, 10, 1,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     private static final String[] DEF_FIRST_FILES = new String[]{
-        "out_0_0_1_0_0_0", "out_0_0_0_0_0_1", "out_0_0_1_0_0_1"};
+        "out_0_0_1_0_0_0", "out_0_0_0_1_0_0", "out_0_0_0_0_1_0",
+        "out_0_0_0_0_0_1", "out_0_0_1_0_0_1", "out_0_0_1_1_0_0",
+        "out_0_0_0_0_1_1"};
     private static final double[] DEF_FIRST = new double[]{
         0, 0, 0, 0, 0, 0,
         -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
     private static final double[] DEF_FIRST_F = new double[]{
-        -0, 3, 1, -0, 3, 1,
+        -2, 2, 1, -2, 2, 1,
         -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
+    private static final String[] DEF_SECOND_FILES = new String[]{
+        "out_0_0_0_0_0_0_0_0.5_0_0_0_0", "out_0_0_0_0_0_0_0_0_1_0_0_0",
+        "out_0_0_0_0_0_0_0_0_0_0.5_0_0", "out_0_0_0_0_0_0_0_0_0_0_0_1",
+        "out_0_0_0_0_0_0_0_0_1_0_0_1", "out_0_0_0_0_0_0_0_0.5_0_0.5_0_0"
+    };
+    private static final double[] DEF_SECOND = new double[]{
+        0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        -0.0, 0.0, 0.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -0.0, 0.0, 0.0, -1.0, 1.0, 0.5};
+    private static final double[] DEF_SECOND_F = new double[]{
+        -1, 2, 1, -1, 1, 1,
+        -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
+        -0.0, 0.0, 0.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -0.0, 0.0, 0.0, -1.0, 1.0, 0.5};
+    private static final String[] DEF_ZERO_FIRST_FILES = new String[]{
+        "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};
+    private static final String[] DEF_ZERO_FIRST_SECOND_FILES = new String[]{
+        "out_2_0_1_1_0_0_1_0_0_0_0_1", "out_-1_-1_0_0_1_0_0_0.5_1_0_0_0"};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
@@ -60,16 +79,33 @@ public class EngineTest {
                     for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
                         for (String s : DEF_ZERO_FILES) {
                             tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc));
+                            errors.add(checkResultsBack(tc, s));
                             tc = generateTask(s, DEF_ZERO_F, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc));
+                            errors.add(checkResultsBack(tc, s));
                         }
 
                         for (String s : DEF_FIRST_FILES) {
                             tc = generateTask(s, DEF_FIRST, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc));
+                            errors.add(checkResultsBack(tc, s));
                             tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc));
+                            errors.add(checkResultsBack(tc, s));
+                        }
+
+                        for (String s : DEF_ZERO_FIRST_FILES) {
+                            tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm);
+                            errors.add(checkResultsBack(tc, s));
+                        }
+
+                        for (String s : DEF_SECOND_FILES) {
+                            tc = generateTask(s, DEF_SECOND, kt, i, ts, fgm);
+                            errors.add(checkResultsBack(tc, s));
+                            tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm);
+                            errors.add(checkResultsBack(tc, s));
+                        }
+
+                        for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
+                            tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm);
+                            errors.add(checkResultsBack(tc, s));
                         }
                     }
                 }
@@ -88,10 +124,10 @@ public class EngineTest {
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
 
-        TaskContainer tc = new TaskContainer(input);
+        final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
 
-        ROI roi = new RectangleROI(10, 10, 20, 20);
+        final ROI roi = new RectangleROI(85, 85, 95, 95);
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
@@ -116,15 +152,15 @@ public class EngineTest {
 
         for (String s : DEF_ZERO_FILES) {
             tc = generateTask(s, DEF_ZERO);
-            errors.add(checkResultsBack(tc));
+            errors.add(checkResultsBack(tc, s));
             tc = generateTask(s, DEF_ZERO_F);
-            errors.add(checkResultsBack(tc));
+            errors.add(checkResultsBack(tc, s));
         }
         for (String s : DEF_FIRST_FILES) {
             tc = generateTask(s, DEF_FIRST);
-            errors.add(checkResultsBack(tc));
+            errors.add(checkResultsBack(tc, s));
             tc = generateTask(s, DEF_FIRST_F);
-            errors.add(checkResultsBack(tc));
+            errors.add(checkResultsBack(tc, s));
         }
 
         errors.remove(null);
@@ -136,10 +172,10 @@ public class EngineTest {
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
 
-        TaskContainer tc = new TaskContainer(input);
+        final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
 
-        ROI roi = new RectangleROI(10, 10, 20, 20);
+        final ROI roi = new RectangleROI(85, 85, 95, 95);
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
@@ -151,7 +187,7 @@ public class EngineTest {
         return tc;
     }
 
-    private String checkResultsBack(final TaskContainer tc) {
+    private String checkResultsBack(final TaskContainer tc, final String fileName) {
         final Image img1 = tc.getImage(ROUND);
         final Image img2 = tc.getImage(ROUND + 1);
         double[][][] results = tc.getDisplacement(ROUND);
@@ -212,6 +248,8 @@ public class EngineTest {
         if (errorCount > 0) {
             final StringBuilder sb = new StringBuilder();
             sb.append("\n");
+            sb.append(fileName);
+            sb.append("; ");
             sb.append(tc.getParameter(TaskParameter.KERNEL));
             sb.append("; ");
             sb.append(tc.getParameter(TaskParameter.INTERPOLATION));
@@ -222,6 +260,8 @@ public class EngineTest {
             } else {
                 sb.append("No limits !!!");
             }
+            sb.append(" - ");
+            sb.append(errorCount);
             return sb.toString();
         } else {
             return null;
