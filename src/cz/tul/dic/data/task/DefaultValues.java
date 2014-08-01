@@ -30,4 +30,5 @@ public interface DefaultValues {
     StrainEstimation DEFAULT_STRAIN_ESTIMATION = StrainEstimation.LOCAL_LEAST_SQUARES;
     TaskSplit DEFAULT_TASK_SPLIT = TaskSplit.DYNAMIC;
     int DEFAULT_TASK_SPLIT_VALUE = 1000;
+    int DEFAULT_WINDOW_SIZE = 3;
 }

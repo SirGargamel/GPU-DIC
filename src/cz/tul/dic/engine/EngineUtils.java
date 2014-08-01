@@ -117,6 +117,8 @@ public class EngineUtils extends Observable {
         }
 
         DisplacementCalculator.computeDisplacement(tc, index1, facets);
+        
+        FineLocalSearch.searchForBestPosition(tc, index1, index2);
 
         StrainEstimator.computeStrain(tc, index1);
 

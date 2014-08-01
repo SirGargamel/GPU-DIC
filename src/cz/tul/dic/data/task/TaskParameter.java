@@ -27,7 +27,9 @@ public enum TaskParameter {
     ROUND_LIMITS(int[].class),
     DISPLACEMENT_CALCULATION_TYPE(DisplacementCalculation.class),
     STRAIN_ESTIMATION_METHOD(StrainEstimation.class),
-    STRAIN_PARAMETER(Integer.class);
+    STRAIN_PARAMETER(Integer.class),
+    WINDOW_SIZE(Integer.class),
+    ;
 
     private final Class type;
 

@@ -120,6 +120,12 @@ public class TaskContainerChecker {
             Logger.warn("Adding default displacement calculator.");
             tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION);
         }
+        
+        final Object ws = tc.getParameter(TaskParameter.WINDOW_SIZE);
+        if (ws == null) {
+            Logger.warn("Adding default local search window size.");
+            tc.setParameter(TaskParameter.WINDOW_SIZE, DefaultValues.DEFAULT_WINDOW_SIZE);
+        }
     }
 
 }

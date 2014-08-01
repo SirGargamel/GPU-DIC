@@ -41,6 +41,8 @@ public class ExpertSettings implements Initializable {
     private TextField textTSValue;
     @FXML
     private TextField textRoundLimits;
+    @FXML
+    private TextField textWindowSize;
 
     @FXML
     private void handleButtonActionOk(ActionEvent event) {
@@ -52,6 +54,7 @@ public class ExpertSettings implements Initializable {
             tc.setParameter(TaskParameter.INTERPOLATION, comboInterpolation.getValue());
             tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, Integer.valueOf(textFGSpacing.getText()));
             tc.setParameter(TaskParameter.TASK_SPLIT_VALUE, Integer.valueOf(textTSValue.getText()));
+            tc.setParameter(TaskParameter.WINDOW_SIZE, Integer.valueOf(textWindowSize.getText()));
 
             final String limits = textRoundLimits.getText();
             final int[] newLimits;
@@ -152,6 +155,10 @@ public class ExpertSettings implements Initializable {
                 textFGSpacing.setText(Integer.toString(limits[0]) + ", " + Integer.toString(limits[1]));
             }
 
+            o = tc.getParameter(TaskParameter.WINDOW_SIZE);
+            if (o != null) {                
+                textFGSpacing.setText(o.toString());
+            }
         }
     }
 
