@@ -1,0 +1,140 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[czech, english]{babel}
+\selectlanguage{english}
+\usepackage[FM, EN, bwtitles, noheader]{tul}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{todonotes}
+\presetkeys{todonotes}{inline}{}
+\newcommand{\classname}[1]{\texttt{#1}}
+\TULphone{+420\,485\,353\,030}
+\TULmail{Petr.Jecmen@tul.cz}
+\date{September 13, 2013}
+
+\usepackage{listings}
+\definecolor{gray}{rgb}{0.4,0.4,0.4}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+\lstset{
+	basicstyle=\ttfamily,
+	breaklines=true,
+	keywordstyle=\color{darkblue},
+	commentstyle=\color{gray},
+    frame=trbl,
+    rulecolor=\color{black!30},
+    xrightmargin=7pt,
+	columns=fullflexible,
+	showstringspaces=false,
+	language=Java
+}
+\lstdefinelanguage{XML}
+{
+	morestring=[b]",
+	morestring=[s]{>}{<},
+	morecomment=[s]{<?}{?>},
+	identifierstyle=\color{darkblue},
+	keywordstyle=\color{cyan},
+	morekeywords={xmlns,version,type}
+}
+
+\begin{document}
+\listoftodos
+\newpage
+\logo
+\\\vspace{6pt}
+\begin{center}
+\large{\bfseries Manuál k softwaru DIC-Voucher}
+\\\vspace{1pc}
+\small{
+Ing. Petr Ječmen
+\\\vspace{1pc}
+Fakulta mechatroniky, informatiky a mezioborových studií\\
+Technická Univerzita v~Liberci\\
+Studentská 2\\
+461 17 Liberec}
+\end{center}
+\newpage
+\section{Úvod}
+\todo{úvod k čemu softare je a co umí}
+
+\newpage
+\section{Ovládání aplikace}
+\subsection{Úvodní okno}
+\todo{screenshot okna, čiselný popis prvků}
+\subsection{Výběr vstupu}
+\todo{video / obrázky / config / binary}
+\subsection{Zadávání ROI}
+\todo{jak se ovládá, jak se chová}
+\subsection{Expertní nastavení}
+\todo{odkaz na sekci s konfigurací úlohy}
+\subsection{Spůštění výpočtu}
+\todo{nic extra, pouze poznámka, že nenastavené parametry se nastaví na výchozí (uživatel se nemusí starat)}
+\subsection{Uložení}
+\todo{uložení configu / bin. otisku}
+\subsection{Výsledky}
+\todo{zobrazení výsledků a případné uložení}
+
+\newpage
+\section{Konfigurační soubor úlohy}
+\todo{detailní popis možných položek v konfiguračnícm souboru}
+
+\newpage
+\section{Doporučená nastavení}
+\todo{velikost facetu, parametr výpočtu prodloužení, velikost okna pro lokální dohledávání atd.}
+
+% --- Zdrojove kody
+\newpage
+\todo{spravne zdrojove kody}
+\section{Source code examples}
+\subsection{Instance creation and messaging}\label{appMsg}
+\begin{lstlisting}[title=Constant declaration]
+final UUID ID = UUID.randomUUID();	// define ID for messaging
+\end{lstlisting}
+\begin{lstlisting}[title=Client side code]
+public static void main(String[] args) {
+  Client client = Client.Client.initNewClient();
+  client.getListenerRegistrator().setIdListener(ID, new MessageHandler());
+}
+
+class MessageHandler implements Listener<Identifiable> {
+  @Override
+  public Object receiveData(Identifiable data) {
+    if (data instanceof Message) {
+      Message m = (Message) data;
+      System.out.println(m.getData());	// print content to console
+      return m.getHeader();	// send valid response
+    } else {
+      return "ERROR";	// report error
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Job Management}\label{appJm}
+\begin{lstlisting}[title=Server side code]
+public static void main(String[] args) {
+  double start = -100.0, end = 100.0; // define range of values
+  double step = 0.01;
+  // divide the range in small pieces and create a Set<double[]>, where double[] defines start and end of each sub-range and step size
+  for (double[] d : subranges) {	// submit all jobs
+    s.getJobManager().submitJob(d);
+  }
+  s.getJobManager().waitForAllJobs();	// wait until all jobs are complete
+  // use s.getJobManager().getAllJobs() to get all submitted jobs and find the best result
+}
+
+class DataStore implements DataStorage {
+  @Override
+  public Object requestData(Object o) {
+    switch (o.toString()) {
+      case "data":
+        return dataArray;	// return data
+      default:
+        return "Illegal data request";
+    }
+  }
+}
+\end{lstlisting}
+
+\end{document}
