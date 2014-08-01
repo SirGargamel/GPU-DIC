@@ -5,7 +5,7 @@ import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
-import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.generators.facet.FacetGeneratorMode;
 
 /**
@@ -27,7 +27,7 @@ public interface DefaultValues {
     Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;
     KernelType DEFAULT_KERNEL = KernelType.CL_1D_I_V_LL_MC_D;
     ResultCompilation DEFAULT_RESULT_COMPILATION = ResultCompilation.MAJOR_AVERAGING;
-    StrainEstimation DEFAULT_STRAIN_ESTIMATION = StrainEstimation.LOCAL_LEAST_SQUARES;
+    StrainEstimationMethod DEFAULT_STRAIN_ESTIMATION = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
     TaskSplit DEFAULT_TASK_SPLIT = TaskSplit.DYNAMIC;
     int DEFAULT_TASK_SPLIT_VALUE = 1000;
     int DEFAULT_WINDOW_SIZE = 3;
