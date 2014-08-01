@@ -52,7 +52,7 @@ public class Computation {
         final File in = (File) tc.getParameter(TaskParameter.IN);
         final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
         for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
-            tc.setParameter(TaskParameter.STRAIN_PARAMETER, strainParam);
+            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAMETER, strainParam);
             StrainEstimator.computeStrain(tc);
 
             tc.getExports().clear();

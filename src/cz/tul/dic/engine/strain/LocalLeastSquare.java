@@ -28,7 +28,7 @@ public class LocalLeastSquare extends StrainEstimator {
             final int height = displacement[0].length;
             final double[][][] result = new double[width][height][];
 
-            final Object o = tc.getParameter(TaskParameter.STRAIN_PARAMETER);
+            final Object o = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAMETER);
             final int m = o == null ? DEFAULT_M : (int) o;
 
             double[] coeffs;
@@ -104,7 +104,13 @@ public class LocalLeastSquare extends StrainEstimator {
     }
 
     private double[] computeStrains(final double[] coeffs) {
-        return new double[]{coeffs[INDEX_A1], coeffs[INDEX_B2], 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]), 0.5 * (coeffs[INDEX_B1] - coeffs[INDEX_A2])};
+        final double[] result = new double[3];
+        
+        result[StrainParameter.Exx] = coeffs[INDEX_A1];
+        result[StrainParameter.Eyy] = coeffs[INDEX_B2];
+        result[StrainParameter.Exy] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]);        
+        
+        return result;
     }
 
 }

@@ -4,6 +4,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.engine.strain.StrainParameter;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -81,18 +82,18 @@ public class ExportUtils {
 
         switch (dir) {
             case Exx:
-                result = results[0];
+                result = results[StrainParameter.Exx];
                 break;
             case Eyy:
-                result = results[1];
+                result = results[StrainParameter.Eyy];
                 break;
             case Exy:
-                result = results[2];
+                result = results[StrainParameter.Exy];
                 break;
             case Eabs:
-                final double val1 = results[0];
-                final double val2 = results[1];
-                final double val3 = results[2];
+                final double val1 = results[StrainParameter.Exx];
+                final double val2 = results[StrainParameter.Eyy];
+                final double val3 = results[StrainParameter.Exy];
                 result = Math.sqrt(val1 * val1 + val2 * val2 + val3 * val3);
                 break;
             default:
