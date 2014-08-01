@@ -32,7 +32,7 @@ public class FineLocalSearch {
             for (int y = 0; y < results[x].length; y++) {
                 d = results[x][y];
                 if (d != null) {
-                    best = Integer.MAX_VALUE;                    
+                    best = Integer.MAX_VALUE;
                     candidates.clear();
                     colorIn = in.getRGB(x, y);
 
@@ -58,16 +58,17 @@ public class FineLocalSearch {
 
                     if (candidates.size() > 1) {
                         Collections.sort(candidates, new ResultSorter(d));
-                    }
-                    bestDx = candidates.get(0)[Coordinates.X];
-                    bestDy = candidates.get(0)[Coordinates.Y];
+                    } else if (!candidates.isEmpty()) {
+                        bestDx = candidates.get(0)[Coordinates.X];
+                        bestDy = candidates.get(0)[Coordinates.Y];
 
-                    if (bestDx != d[Coordinates.X] || bestDy != d[Coordinates.Y]) {
-                        Logger.trace("Found better location - {0}; {1} vs. {2}; {3}.", d[Coordinates.X], d[Coordinates.Y], bestDx, bestDy);
-                    }
+                        if (bestDx != d[Coordinates.X] || bestDy != d[Coordinates.Y]) {
+                            Logger.trace("Found better location - {0}; {1} vs. {2}; {3}.", d[Coordinates.X], d[Coordinates.Y], bestDx, bestDy);
+                        }
 
-                    d[Coordinates.X] = bestDx;
-                    d[Coordinates.Y] = bestDy;
+                        d[Coordinates.X] = bestDx;
+                        d[Coordinates.Y] = bestDy;
+                    }
                 }
             }
         }
