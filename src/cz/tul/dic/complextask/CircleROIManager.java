@@ -39,6 +39,7 @@ public class CircleROIManager extends ROIManager {
         tcC.setROIs(initialRound, tc.getRois(initialRound));
         tcC.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
         tcC.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
+        tcC.setParameter(TaskParameter.WINDOW_SIZE, 0);
         tcC.clearResultData();
 
         return new CircleROIManager(tcC, initialRound);
