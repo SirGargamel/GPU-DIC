@@ -1,13 +1,11 @@
 package cz.tul.dic.gui;
 
-import cz.tul.dic.Computation;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
@@ -470,89 +468,6 @@ public class MainWindow implements Initializable {
         adjustImageButtons(true);
         adjustConfigButtons(true);
         adjustResultButtons(true);
-
-        if (TEST_CASE) {
-            performComputationTest();
-
-//            try {
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(new File("D:\\temp\\7202845m.avi.test.task")));
-//
-//                TaskContainer tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.getExports().clear();
-//                tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File("D:\\temp\\results\\export.avi"), ExportTask.EXPORT_SEQUENCE_AVI));
-//                tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File("D:\\temp\\results\\export.avi"), ExportTask.EXPORT_SEQUENCE_BMP));
-//                tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File("D:\\temp\\results\\export.avi"), ExportTask.EXPORT_SEQUENCE_CSV));
-//                Exporter.export(tc);
-//            } catch (IOException | ComputationException | ClassNotFoundException ex) {
-//                java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-        }
-    }
-
-    private void performComputationTest() {
-        try {
-//            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-//            TaskContainer tc = Context.getInstance().getTc();
-//            InputLoader.loadInput(tc);
-//            tc.setParameter(TaskParameter.FACET_SIZE, 20);
-//            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-//            Computation.commenceComputationDynamic(tc);
-//
-//            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
-
-            // 7202845m
-            // 9905121m
-            // 9820088m
-            final int fs1 = 15;
-            final int fs2 = 15;
-            final int ps1 = 20;
-            final int ps2 = 20;
-            for (int size = fs1; size <= fs2; size++) {
-//                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
-//                    Computation.commenceComputationDynamic(new File("D:\\temp\\7202845m.avi"), size);
-                
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-tight.config")));
-                TaskContainer tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
-
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-//                TaskContainer tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);                
-//                Engine.dumpCounterStats();
-
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-classic.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
-
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
-//                
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi-classic.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
-//
-//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
-//                    tc = Context.getInstance().getTc();
-//                    InputLoader.loadInput(tc);
-//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                    Computation.commenceComputationDynamic(tc);
-//                }
-            }
-        } catch (IOException | ComputationException ex) {
-            System.err.println(ex);
-        }
     }
 
     private void adjustImageButtons(final boolean disabled) {
