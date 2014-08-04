@@ -135,7 +135,7 @@ public class Computation {
 
     public static void commenceComputationDynamicWindowSizeSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax, final int windowSize) throws ComputationException, IOException {
         tc.setParameter(TaskParameter.WINDOW_SIZE, windowSize);
-        
+
         TaskContainerChecker.checkTaskValidity(tc);
 
         final File in = (File) tc.getParameter(TaskParameter.IN);
@@ -169,11 +169,21 @@ public class Computation {
                 tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Eabs), r));
             }
             Exporter.export(tc);
+
+            final StringBuilder sb = new StringBuilder();
+            sb.append(OUT_DIR.getAbsolutePath());
+            sb.append(File.separator);            
+            sb.append(String.format("%02d", facetSize));
+            sb.append("_");
+            sb.append(String.format("%02d", windowSize));
+            sb.append("_");
+            sb.append(String.format("%02d", strainParam));
+            sb.append(".task");
+            TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
         }
-        
-        
+
     }
-    
+
     private static File generateTargetFile(final Integer round, final Integer facetSize, final Integer windowSize, final Integer strainParam, final Object... params) {
         final StringBuilder sb = new StringBuilder();
         sb.append(OUT_DIR.getAbsolutePath());
