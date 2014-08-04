@@ -42,6 +42,15 @@ public class Computation {
         time = System.nanoTime() - time;
         Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
+        final StringBuilder sb = new StringBuilder();
+        sb.append(OUT_DIR.getAbsolutePath());
+        sb.append(File.separator);
+        sb.append(in.getName());
+        sb.append(File.separator);
+        sb.append(String.format("%02d", facetSize));
+        sb.append(".task");
+        TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
+
         Exporter.export(tc);
     }
 
@@ -64,6 +73,17 @@ public class Computation {
             }
 //            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
             Exporter.export(tc);
+
+            final StringBuilder sb = new StringBuilder();
+            sb.append(OUT_DIR.getAbsolutePath());
+            sb.append(File.separator);
+            sb.append(in.getName());
+            sb.append(File.separator);
+            sb.append(String.format("%02d", facetSize));
+            sb.append("_");
+            sb.append(String.format("%02d", strainParam));
+            sb.append(".task");
+            TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
         }
     }
 
@@ -172,7 +192,9 @@ public class Computation {
 
             final StringBuilder sb = new StringBuilder();
             sb.append(OUT_DIR.getAbsolutePath());
-            sb.append(File.separator);            
+            sb.append(File.separator);
+            sb.append(in.getName());
+            sb.append(File.separator);
             sb.append(String.format("%02d", facetSize));
             sb.append("_");
             sb.append(String.format("%02d", windowSize));
@@ -207,9 +229,9 @@ public class Computation {
             sb.append("_");
             sb.append(String.format("%02d", facetSize));
             sb.append("_");
-            sb.append(String.format("%02d", windowSize));
-            sb.append("_");
             sb.append(String.format("%02d", strainParam));
+            sb.append("_");
+            sb.append(String.format("%02d", windowSize));
             sb.append(".bmp");
         } else {
             sb.append("video.avi");
