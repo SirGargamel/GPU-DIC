@@ -56,9 +56,11 @@ public class FineLocalSearch {
                         }
                     }
 
-                    if (candidates.size() > 1) {
-                        Collections.sort(candidates, new ResultSorter(d));
-                    } else if (!candidates.isEmpty()) {
+                    if (!candidates.isEmpty()) {
+                        if (candidates.size() > 1) {
+                            Collections.sort(candidates, new ResultSorter(d));
+                        }
+
                         bestDx = candidates.get(0)[Coordinates.X];
                         bestDy = candidates.get(0)[Coordinates.Y];
 
