@@ -24,6 +24,7 @@ public class RectROIManager extends ROIManager {
     
     private static final double ADJUST_COEFF_UP = 2.0;
     private static final double ADJUST_COEFF_DOWN = 0.75;
+    private static final int GAP = 5;
     private final CircleROIManager crm;
     private RectangleROI rect;
 
@@ -52,9 +53,9 @@ public class RectROIManager extends ROIManager {
             int yBottom = Math.min(cRois.get(2).getY2(), cRois.get(3).getY2());
 
             rect = new RectangleROI(
-                    xLeft,
+                    xLeft + GAP,
                     yTop,
-                    xRight,
+                    xRight - GAP,
                     yBottom);
         }
         
