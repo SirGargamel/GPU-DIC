@@ -1,4 +1,4 @@
-package cz.tul.dic.output;
+package cz.tul.dic.output.target;
 
 /**
  *

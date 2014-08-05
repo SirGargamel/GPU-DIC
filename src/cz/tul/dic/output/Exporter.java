@@ -1,16 +1,18 @@
 package cz.tul.dic.output;
 
+import cz.tul.dic.output.data.ExportMode;
+import cz.tul.dic.output.target.ExportTarget;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.output.data.DataExportLine;
-import cz.tul.dic.output.data.DataExportMap;
-import cz.tul.dic.output.data.DataExportSequence;
-import cz.tul.dic.output.data.IDataExport;
-import cz.tul.dic.output.target.ITargetExport;
-import cz.tul.dic.output.target.TargetExportCsv;
-import cz.tul.dic.output.target.TargetExportFile;
-import cz.tul.dic.output.target.TargetExportGUI;
+import cz.tul.dic.output.data.ExportModeLine;
+import cz.tul.dic.output.data.ExportModeMap;
+import cz.tul.dic.output.data.ExportModeSequence;
+import cz.tul.dic.output.data.IExportMode;
+import cz.tul.dic.output.target.IExportTarget;
+import cz.tul.dic.output.target.ExportTargetCsv;
+import cz.tul.dic.output.target.ExportTargetFile;
+import cz.tul.dic.output.target.ExportTargetGUI;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,23 +24,23 @@ import org.pmw.tinylog.Logger;
  */
 public class Exporter {
 
-    private static final Map<ExportMode, IDataExport> dataExporters;
-    private static final Map<ExportTarget, ITargetExport> targetExporters;
+    private static final Map<ExportMode, IExportMode> dataExporters;
+    private static final Map<ExportTarget, IExportTarget> targetExporters;
 
     static {
         dataExporters = new HashMap<>();
-        dataExporters.put(ExportMode.MAP, new DataExportMap());
-        dataExporters.put(ExportMode.LINE, new DataExportLine());
-        dataExporters.put(ExportMode.SEQUENCE, new DataExportSequence());
+        dataExporters.put(ExportMode.MAP, new ExportModeMap());
+        dataExporters.put(ExportMode.LINE, new ExportModeLine());
+        dataExporters.put(ExportMode.SEQUENCE, new ExportModeSequence());
 
         targetExporters = new HashMap<>();
-        targetExporters.put(ExportTarget.FILE, new TargetExportFile());
-        targetExporters.put(ExportTarget.CSV, new TargetExportCsv());
-        targetExporters.put(ExportTarget.GUI, new TargetExportGUI());
+        targetExporters.put(ExportTarget.FILE, new ExportTargetFile());
+        targetExporters.put(ExportTarget.CSV, new ExportTargetCsv());
+        targetExporters.put(ExportTarget.GUI, new ExportTargetGUI());
     }
 
     public static void export(final TaskContainer tc, final ExportTask et) throws IOException, ComputationException {
-        IDataExport dataExporter;
+        IExportMode dataExporter;
         ExportMode mode;
         final Object data;                
 
@@ -65,7 +67,7 @@ public class Exporter {
 
     public static void exportData(final ExportTask et, final TaskContainer tc, final Object data) throws ComputationException, IOException {
         final ExportTarget target = et.getTarget();
-        ITargetExport targetExporter;
+        IExportTarget targetExporter;
         if (targetExporters.containsKey(target)) {
             targetExporter = targetExporters.get(target);
         } else {

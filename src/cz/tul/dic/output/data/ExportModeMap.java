@@ -7,7 +7,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
 
-public class DataExportMap implements IDataExport<double[][]> {
+public class ExportModeMap implements IExportMode<double[][]> {
 
     @Override
     public double[][] exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {

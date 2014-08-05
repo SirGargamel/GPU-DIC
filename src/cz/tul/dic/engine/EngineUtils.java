@@ -15,7 +15,7 @@ import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
-import cz.tul.dic.output.ExportMode;
+import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.io.IOException;

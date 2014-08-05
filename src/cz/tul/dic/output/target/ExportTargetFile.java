@@ -10,8 +10,7 @@ import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportMode;
-import cz.tul.dic.output.ExportTarget;
+import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.Exporter;
@@ -31,7 +30,7 @@ import javax.imageio.ImageIO;
  *
  * @author Petr Jecmen
  */
-public class TargetExportFile implements ITargetExport {
+public class ExportTargetFile implements IExportTarget {
 
     private static final String EXTENSION_IMAGE = ".bmp";
     private static final String EXTENSION_CSV = ".csv";
@@ -181,7 +180,7 @@ public class TargetExportFile implements ITargetExport {
     }
 
     private String loadScript() throws IOException {
-        InputStream in = TargetExportFile.class.getResourceAsStream(SCRIPT_NAME);
+        InputStream in = ExportTargetFile.class.getResourceAsStream(SCRIPT_NAME);
         BufferedReader bin = new BufferedReader(new InputStreamReader(in));
         StringBuilder sb = new StringBuilder();
         while (bin.ready()) {

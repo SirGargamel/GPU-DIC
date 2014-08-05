@@ -6,7 +6,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.EngineUtils;
-import cz.tul.dic.output.ExportMode;
+import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.io.IOException;

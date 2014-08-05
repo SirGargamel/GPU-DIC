@@ -5,6 +5,8 @@
  */
 package cz.tul.dic.output;
 
+import cz.tul.dic.output.data.ExportMode;
+import cz.tul.dic.output.target.ExportTarget;
 import java.io.File;
 import java.io.Serializable;
 

@@ -6,7 +6,7 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportTarget;
+import cz.tul.dic.output.target.ExportTarget;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.awt.image.BufferedImage;

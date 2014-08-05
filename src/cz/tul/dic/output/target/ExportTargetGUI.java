@@ -4,12 +4,12 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportMode;
+import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportUtils;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class TargetExportGUI implements ITargetExport {
+public class ExportTargetGUI implements IExportTarget {
 
     @Override
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException, ComputationException {

@@ -8,12 +8,12 @@ import cz.tul.dic.output.Direction;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataExportSequence implements IDataExport<List<double[][]>> {        
+public class ExportModeSequence implements IExportMode<List<double[][]>> {        
 
     @Override
     public List<double[][]> exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {
         final List<double[][]> result = new ArrayList<>();
-        final DataExportMap mapExporter = new DataExportMap();
+        final ExportModeMap mapExporter = new ExportModeMap();
 
         for (int r = 0; r < TaskContainerUtils.getMaxRoundCount(tc); r++) {
             result.add(mapExporter.exportData(tc, direction, new int[]{r}));
