@@ -9,6 +9,7 @@ import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.target.ExportTarget;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
+import cz.tul.dic.output.NameGenerator;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class ResultPresenter implements Initializable {
     private static final int MIN_WIDTH = 380;
     private static final String EXT_SEQUENCE = ".avi";
     private static final String EXT_IMAGE = ".bmp";
-    private static final String EXT_CSV = ".avi";
+    private static final String EXT_CSV = ".csv";
     private static final String DELIMITER = "-";
 
     @FXML
@@ -208,19 +209,18 @@ public class ResultPresenter implements Initializable {
         final String baseName = tc.getParameter(TaskParameter.IN).toString();
         if (val.equals(c1)) {
             final ExportTarget et = determineTarget();
-            if (et != null) {
-                final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(DELIMITER).concat(Integer.toString(index)).concat(EXT_IMAGE);
-                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName), index));
+            switch (et) {
+                case FILE:
+                    Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateMap(baseName, index, choiceDir.getValue())), index));
+                    break;
+                case CSV:
+                    Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(baseName, index, choiceDir.getValue())), index));
+                    break;
             }
         } else if (val.equals(c2)) {
-            final ExportTarget et = determineTarget();
-            if (et != null) {
-                final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(DELIMITER).concat(Integer.toString(index)).concat(EXT_CSV);
-                Exporter.export(tc, ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(fileName), lastX, lastY));
-            }
-        } else if (val.equals(c3)) {
-            final String fileName = baseName.concat(DELIMITER).concat(choiceDir.getValue().toString()).concat(EXT_SEQUENCE);
-            Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(fileName), determineType()));
+            Exporter.export(tc, ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(baseName, lastX, lastY)), lastX, lastY));
+        } else if (val.equals(c3)) {            
+            Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(baseName, choiceDir.getValue())), determineType()));
         }
     }
 
@@ -279,7 +279,7 @@ public class ResultPresenter implements Initializable {
 
         choiceDir.getSelectionModel().selectFirst();
 
-        image.setPreserveRatio(true);        
+        image.setPreserveRatio(true);
 
         image.setOnMouseClicked((MouseEvent t) -> {
             try {

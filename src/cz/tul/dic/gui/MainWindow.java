@@ -9,6 +9,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -229,23 +230,23 @@ public class MainWindow implements Initializable {
             fc.setInitialDirectory(in.getParentFile());
             fc.getExtensionFilters().clear();
             if (val.equals(c1)) {
-                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*".concat(TaskContainerUtils.EXT_CONFIG).concat(")"), "*".concat(TaskContainerUtils.EXT_CONFIG)));
-                fc.setInitialFileName(in.getName().concat(TaskContainerUtils.EXT_CONFIG));
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*".concat(NameGenerator.EXT_CONFIG).concat(")"), "*".concat(NameGenerator.EXT_CONFIG)));
+                fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_CONFIG));
             } else if (val.equals(c2)) {
-                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*".concat(TaskContainerUtils.EXT_BINARY).concat(")"), "*".concat(TaskContainerUtils.EXT_BINARY)));
-                fc.setInitialFileName(in.getName().concat(TaskContainerUtils.EXT_BINARY));
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*".concat(NameGenerator.EXT_BINARY).concat(")"), "*".concat(NameGenerator.EXT_BINARY)));
+                fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_BINARY));
             }
 
             File target = fc.showSaveDialog(null);
             if (target != null) {
                 if (val.equals(c1)) {
-                    if (!target.getName().endsWith(TaskContainerUtils.EXT_CONFIG)) {
-                        target = new File(target.getAbsolutePath().concat(TaskContainerUtils.EXT_CONFIG));
+                    if (!target.getName().endsWith(NameGenerator.EXT_CONFIG)) {
+                        target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_CONFIG));
                     }
                     TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc(), target);
                 } else if (val.equals(c2)) {
-                    if (!target.getName().endsWith(TaskContainerUtils.EXT_BINARY)) {
-                        target = new File(target.getAbsolutePath().concat(TaskContainerUtils.EXT_BINARY));
+                    if (!target.getName().endsWith(NameGenerator.EXT_BINARY)) {
+                        target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_BINARY));
                     }
                     TaskContainerUtils.serializeTaskToBinary(Context.getInstance().getTc(), target);
                 }

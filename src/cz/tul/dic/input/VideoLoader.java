@@ -7,6 +7,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.output.NameGenerator;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,7 +42,7 @@ public class VideoLoader implements IInputLoader {
 
         final File input = (File) in;
         final File temp = Utils.getTempDir(input);
-        final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(TaskContainerUtils.EXT_CONFIG));
+        final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(NameGenerator.EXT_CONFIG));
         tc.setParameter(TaskParameter.IN, input);
         // check cache
         final List<File> files;
@@ -71,7 +72,7 @@ public class VideoLoader implements IInputLoader {
 
                 @Override
                 public boolean accept(File dir, String name) {
-                    return name.startsWith(input.getName()) && !name.endsWith(TaskContainerUtils.EXT_CONFIG);
+                    return name.startsWith(input.getName()) && !name.endsWith(NameGenerator.EXT_CONFIG);
                 }
             }));
 

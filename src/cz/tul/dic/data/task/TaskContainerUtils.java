@@ -32,9 +32,7 @@ import java.util.TreeMap;
  * @author Petr Jecmen
  */
 public class TaskContainerUtils {
-
-    public static final String EXT_BINARY = ".task";
-    public static final String EXT_CONFIG = ".config";
+    
     private static final String CONFIG_EMPTY = "NONE";
     private static final String CONFIG_EXPORTS = "EXPORT_";
     private static final String CONFIG_INPUT = "INPUT";
