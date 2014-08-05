@@ -18,6 +18,8 @@ import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
+import cz.tul.dic.output.NameGenerator;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,6 +60,8 @@ public class EngineUtils extends Observable {
             notifyObservers(new int[]{currentRound, roundCount});
             exportRound(tc, r);
         }
+        
+        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc.getParameter(TaskParameter.IN).toString())));
     }
 
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
