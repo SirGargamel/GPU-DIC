@@ -46,7 +46,7 @@ public class ExportTask implements Serializable {
     }
 
     public static ExportTask generateLineExport(final Direction dir, final ExportTarget target, final Object targetArg, final int x, final int y) {
-        return new ExportTask(dir, ExportMode.LINE, target, targetArg, new int[]{x, y});
+        return new ExportTask(dir, ExportMode.POINT, target, targetArg, new int[]{x, y});
     }
 
     public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final int mode) {

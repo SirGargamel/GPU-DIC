@@ -202,7 +202,7 @@ public class ExportTargetFile implements IExportTarget {
 
     @Override
     public boolean supportsMode(ExportMode mode) {
-        return !ExportMode.LINE.equals(mode);
+        return !ExportMode.POINT.equals(mode);
     }
 
 }

@@ -9,7 +9,7 @@ import cz.tul.dic.output.ExportUtils;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class ExportModeLine implements IExportMode<Map<Direction, double[]>> {
+public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
 
     @Override
     public Map<Direction, double[]> exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {
