@@ -9,6 +9,8 @@ import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
+import cz.tul.dic.output.NameGenerator;
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -58,6 +60,8 @@ public class ComplexTaskSolver extends Observable {
             tc.setDisplacement(r, tcR.getDisplacement(r));
             tc.setStrain(r, tcR.getStrain(r));
         }
+        
+        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc.getParameter(TaskParameter.IN).toString())));
     }
 
     private void computeRound(final int r, final int nextR, final ROIManager rm) throws ComputationException {
