@@ -6,6 +6,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.EngineUtils;
+import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -13,6 +14,8 @@ import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Observable;
 import org.pmw.tinylog.Logger;
@@ -37,6 +40,8 @@ public class ComplexTaskSolver extends Observable {
         final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
         final TaskContainer tcR = rrm.getTc();
+        
+        final List<Double> shifts = new LinkedList<>();
 
         int r, nextR;
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
@@ -59,9 +64,17 @@ public class ComplexTaskSolver extends Observable {
             tc.setResults(r, tcR.getResults(r));
             tc.setDisplacement(r, tcR.getDisplacement(r));
             tc.setStrain(r, tcR.getStrain(r));
+            
+            shifts.add(crm.getShiftBottom());
         }
         
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc.getParameter(TaskParameter.IN).toString())));
+        
+        final String[][] shiftsS = new String[1][shifts.size()];
+        for (int i = 0; i < shifts.size(); i++) {
+            shiftsS[0][i] = Double.toString(shifts.get(i));
+        }
+        CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc.getParameter(TaskParameter.IN).toString())), shiftsS);
     }
 
     private void computeRound(final int r, final int nextR, final ROIManager rm) throws ComputationException {

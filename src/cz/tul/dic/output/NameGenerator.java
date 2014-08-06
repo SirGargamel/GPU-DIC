@@ -20,6 +20,10 @@ public class NameGenerator {
     public static String generateConfig(final String name) {
         return name.concat(EXT_CONFIG);
     }
+    
+    public static String generateCsvShifts(final String name) {
+        return name.concat(EXT_CSV);
+    }
 
     public static String generateMap(final String name, final int round, final Direction dir) {
         return name.concat(DELIMITER).concat(Integer.toString(round)).concat(DELIMITER).concat(dir.toString()).concat(EXT_MAP);
