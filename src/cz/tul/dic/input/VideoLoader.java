@@ -5,7 +5,6 @@ import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.BufferedReader;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import org.pmw.tinylog.Logger;
 
-public class VideoLoader implements IInputLoader {
+public class VideoLoader extends AbstractInputLoader {
 
     private static final String PREFIX_SIZE = "SIZE_";
     private static final String PREFIX_MOD = "MOD_";
@@ -93,6 +92,8 @@ public class VideoLoader implements IInputLoader {
         final List<Image> result = il.loadData(files, tc);
 
         tc.setParameter(TaskParameter.IN, input);
+        
+        loadUdaFile(input.getAbsolutePath(), tc);
 
         return result;
     }

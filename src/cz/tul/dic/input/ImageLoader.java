@@ -1,6 +1,5 @@
 package cz.tul.dic.input;
 
-import cz.tul.dic.Utils;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -8,15 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.pmw.tinylog.Logger;
-import org.pmw.tinylog.LoggingLevel;
 
-public class ImageLoader implements IInputLoader {
+public class ImageLoader extends AbstractInputLoader {
 
     private static final Class<?> TYPE = List.class;
 
     @Override
-    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {        
+    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {
         final Class<?> c = in.getClass();
         if (!TYPE.isAssignableFrom(c)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
@@ -37,6 +34,11 @@ public class ImageLoader implements IInputLoader {
         for (int i = 0; i < data.size(); i++) {
             img = Image.loadImageFromDisk(data.get(i));
             result.add(img);
+        }
+
+        final StackTraceElement[] st = Thread.currentThread().getStackTrace();
+        if (!st[2].getClassName().equals(VideoLoader.class.getName())) {
+            loadUdaFile(data.get(0).getAbsolutePath(), tc);
         }
 
         return result;

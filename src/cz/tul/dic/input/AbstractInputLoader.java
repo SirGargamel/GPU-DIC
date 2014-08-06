@@ -1,0 +1,53 @@
+package cz.tul.dic.input;
+
+import cz.tul.dic.data.Image;
+import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import org.pmw.tinylog.Logger;
+
+/**
+ *
+ * @author Petr Jecmen
+ */
+public abstract class AbstractInputLoader {
+
+    private static final String EXT_UDA = ".uda";
+    private static final int DEFAULT_FPS = 5000;
+    private static final String TEXT_SPEED = "Speed";
+    private static final String TEXT_FPS = "fps";
+    private static final String TEXT_EXTRA = "[=]";
+
+    public abstract List<Image> loadData(final Object in, final TaskContainer tc) throws IOException;
+
+    public abstract Class getSupporteType();
+
+    void loadUdaFile(final String inputName, final TaskContainer tc) throws IOException {
+        final String udaFilename = inputName.substring(0, inputName.lastIndexOf('.')).concat(EXT_UDA);
+        final File uda = new File(udaFilename);
+
+        int fps = DEFAULT_FPS;
+        if (!uda.exists() || !uda.canRead()) {
+            Logger.warn("Missing UDA file, using default FPS - {0}", DEFAULT_FPS);
+        } else {
+            final List<String> lines = Files.readAllLines(Paths.get(udaFilename));
+            for (String s : lines) {
+                if (s.contains(TEXT_SPEED)) {
+                    String val = s.replace(TEXT_SPEED, "").replace(TEXT_FPS, "").replaceAll(TEXT_EXTRA, "").trim();
+                    try {
+                        fps = Integer.valueOf(val);
+                    } catch (NumberFormatException ex) {
+                        Logger.warn("Failed to parse FPS value \"{0}\", using default FPS - ", val, DEFAULT_FPS);
+                    }
+                    break;
+                }
+            }
+        }
+        tc.setParameter(TaskParameter.FPS, fps);
+    }
+
+}

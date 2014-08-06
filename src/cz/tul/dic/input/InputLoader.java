@@ -16,12 +16,12 @@ import org.pmw.tinylog.LoggingLevel;
  */
 public class InputLoader {
 
-    private static final Map<Class, IInputLoader> loaders;
+    private static final Map<Class, AbstractInputLoader> loaders;
 
     static {
         loaders = new HashMap<>();
 
-        IInputLoader il = new VideoLoader();
+        AbstractInputLoader il = new VideoLoader();
         loaders.put(il.getSupporteType(), il);
 
         il = new ImageLoader();
@@ -31,7 +31,7 @@ public class InputLoader {
     public static void loadInput(final TaskContainer tc) throws IOException {
         final Object in = tc.getInput();
         final Class<?> cls = in.getClass();
-        IInputLoader loader = null;
+        AbstractInputLoader loader = null;
 
         if (loaders.containsKey(cls)) {
             loader = loaders.get(cls);
