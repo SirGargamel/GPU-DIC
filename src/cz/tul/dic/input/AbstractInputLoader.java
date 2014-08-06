@@ -1,6 +1,7 @@
 package cz.tul.dic.input;
 
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.task.DefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import java.io.File;
@@ -16,8 +17,7 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class AbstractInputLoader {
 
-    private static final String EXT_UDA = ".uda";
-    private static final int DEFAULT_FPS = 5000;
+    private static final String EXT_UDA = ".uda";    
     private static final String TEXT_SPEED = "Speed";
     private static final String TEXT_FPS = "fps";
     private static final String TEXT_EXTRA = "[=]";
@@ -30,9 +30,9 @@ public abstract class AbstractInputLoader {
         final String udaFilename = inputName.substring(0, inputName.lastIndexOf('.')).concat(EXT_UDA);
         final File uda = new File(udaFilename);
 
-        int fps = DEFAULT_FPS;
+        int fps = DefaultValues.DEFAULT_FPS;
         if (!uda.exists() || !uda.canRead()) {
-            Logger.warn("Missing UDA file, using default FPS - {0}", DEFAULT_FPS);
+            Logger.warn("Missing UDA file, using default FPS - {0}", fps);
         } else {
             final List<String> lines = Files.readAllLines(Paths.get(udaFilename));
             for (String s : lines) {
@@ -41,7 +41,7 @@ public abstract class AbstractInputLoader {
                     try {
                         fps = Integer.valueOf(val);
                     } catch (NumberFormatException ex) {
-                        Logger.warn("Failed to parse FPS value \"{0}\", using default FPS - ", val, DEFAULT_FPS);
+                        Logger.warn("Failed to parse FPS value \"{0}\", using default FPS - ", val, fps);
                     }
                     break;
                 }
