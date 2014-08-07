@@ -205,22 +205,21 @@ public class ResultPresenter implements Initializable {
                 .message(Lang.getString("ChooseDataType"))
                 .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2), new Dialogs.CommandLink(c3, t3));
         final String val = a.textProperty().get();
-        final TaskContainer tc = Context.getInstance().getTc();
-        final String baseName = tc.getParameter(TaskParameter.IN).toString();
+        final TaskContainer tc = Context.getInstance().getTc();        
         if (val.equals(c1)) {
             final ExportTarget et = determineTarget();
             switch (et) {
                 case FILE:
-                    Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateMap(baseName, index, choiceDir.getValue())), index));
+                    Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateMap(tc, index, choiceDir.getValue())), index));
                     break;
                 case CSV:
-                    Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(baseName, index, choiceDir.getValue())), index));
+                    Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index));
                     break;
             }
         } else if (val.equals(c2)) {
-            Exporter.export(tc, ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(baseName, lastX, lastY)), lastX, lastY));
+            Exporter.export(tc, ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, lastX, lastY)), lastX, lastY));
         } else if (val.equals(c3)) {            
-            Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(baseName, choiceDir.getValue())), determineType()));
+            Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), determineType()));
         }
     }
 

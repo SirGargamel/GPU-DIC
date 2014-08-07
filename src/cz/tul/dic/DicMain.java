@@ -81,25 +81,25 @@ public class DicMain extends Application {
             // 7202845m
             // 9905121m
             // 9820088m
-            final int fs1 = 25;
-            final int fs2 = 25;
+            final int fs1 = 20;
+            final int fs2 = 30;
             final int ps1 = 20;
             final int ps2 = 40;
             for (int size = fs1; size <= fs2; size++) {
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
-                for (int windowSize = 0; windowSize < 2; windowSize++) {
+//                for (int windowSize = 0; windowSize < 1; windowSize++) {
                     Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
                     TaskContainer tc = Context.getInstance().getTc();
                     InputLoader.loadInput(tc);
                     tc.setParameter(TaskParameter.FACET_SIZE, size);
-                    Computation.commenceComputationDynamicWindowSizeSweep(tc, ps1, ps2, windowSize);
-                }
+                    Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
+//                }
 
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-tight.config")));
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
 //                TaskContainer tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
+                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
 //                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
 //                TaskContainer tc = Context.getInstance().getTc();

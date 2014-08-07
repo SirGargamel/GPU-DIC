@@ -68,13 +68,13 @@ public class ComplexTaskSolver extends Observable {
             shifts.add(crm.getShiftBottom());
         }
         
-        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc.getParameter(TaskParameter.IN).toString())));
+        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         
         final String[][] shiftsS = new String[1][shifts.size()];
         for (int i = 0; i < shifts.size(); i++) {
             shiftsS[0][i] = Double.toString(shifts.get(i));
         }
-        CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc.getParameter(TaskParameter.IN).toString())), shiftsS);
+        CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), shiftsS);
     }
 
     private void computeRound(final int r, final int nextR, final ROIManager rm) throws ComputationException {

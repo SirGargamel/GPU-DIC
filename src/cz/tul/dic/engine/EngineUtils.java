@@ -61,7 +61,7 @@ public class EngineUtils extends Observable {
             exportRound(tc, r);
         }
         
-        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc.getParameter(TaskParameter.IN).toString())));
+        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
     }
 
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
