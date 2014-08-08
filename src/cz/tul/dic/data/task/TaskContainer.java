@@ -36,6 +36,7 @@ public class TaskContainer extends Observable implements Serializable {
     // results
     private final List<Map<ROI, List<double[][]>>> results;
     private final List<double[][][]> displacement, strain;
+    private final List<double[][][]> cumulativeDisplacement, cumulativeStrain;
 
     public TaskContainer(final Object input) {
         params = new HashMap<>();
@@ -46,6 +47,8 @@ public class TaskContainer extends Observable implements Serializable {
         results = Collections.synchronizedList(new LinkedList<>());
         displacement = Collections.synchronizedList(new LinkedList<>());
         strain = Collections.synchronizedList(new LinkedList<>());
+        cumulativeDisplacement = Collections.synchronizedList(new LinkedList<>());
+        cumulativeStrain = Collections.synchronizedList(new LinkedList<>());
 
         this.input = input;
     }
@@ -220,6 +223,10 @@ public class TaskContainer extends Observable implements Serializable {
     public double[][][] getDisplacement(final int round) {
         return displacement.get(round);
     }
+    
+    public List<double[][][]> getDisplacements() {
+        return Collections.unmodifiableList(displacement);
+    }
 
     public void setDisplacement(final int round, final double[][][] result) {
         while (displacement.size() <= round) {
@@ -235,9 +242,41 @@ public class TaskContainer extends Observable implements Serializable {
     public double[][][] getStrain(final int round) {
         return strain.get(round);
     }
+    
+    public List<double[][][]> getStrains() {
+        return Collections.unmodifiableList(strain);
+    }
 
     public void setStrain(final int round, final double[][][] result) {
+        while (strain.size() <= round) {
+            strain.add(null);
+        }
+
         strain.set(round, result);
+
+        setChanged();
+        notifyObservers();
+    }
+
+    public double[][][] getCumulativeDisplacement(final int round) {
+        return cumulativeDisplacement.get(round);
+    }
+
+    public void setCumulativeDisplacements(final List<double[][][]> data) {
+        cumulativeDisplacement.clear();
+        cumulativeDisplacement.addAll(data);
+
+        setChanged();
+        notifyObservers();
+    }
+
+    public double[][][] getCumulativeStrain(final int round) {
+        return cumulativeStrain.get(round);
+    }
+
+    public void setCumulativeStrain(final List<double[][][]> data) {
+        cumulativeStrain.clear();
+        cumulativeStrain.addAll(data);
 
         setChanged();
         notifyObservers();

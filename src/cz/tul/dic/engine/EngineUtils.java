@@ -58,7 +58,10 @@ public class EngineUtils extends Observable {
             notifyObservers(new int[]{currentRound, roundCount});
             exportRound(tc, r);
         }
-        
+
+        tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
+        tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
+
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
     }
 
@@ -90,7 +93,7 @@ public class EngineUtils extends Observable {
 
         // prepare data
         final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, index1);
-        Logger.trace("Facets generated.");        
+        Logger.trace("Facets generated.");
 
         // compute round        
         for (ROI roi : tc.getRois(index1)) {
@@ -113,7 +116,7 @@ public class EngineUtils extends Observable {
         }
 
         DisplacementCalculator.computeDisplacement(tc, index1, facets);
-        
+
         FineLocalSearch.searchForBestPosition(tc, index1, index2);
 
         StrainEstimator.computeStrain(tc, index1);

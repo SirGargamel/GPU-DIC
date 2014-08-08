@@ -5,6 +5,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.data.ExportMode;
@@ -67,6 +68,9 @@ public class ComplexTaskSolver extends Observable {
             
             shifts.add(crm.getShiftBottom());
         }
+        
+        tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
+        tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
         
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         

@@ -28,6 +28,17 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case Eabs:
                 results = tc.getStrain(round);
                 break;
+            case cDx:
+            case cDy:
+            case cDabs:
+                results = tc.getCumulativeDisplacement(round);
+                break;
+            case cExx:
+            case cEyy:
+            case cExy:
+            case cEabs:
+                results = tc.getCumulativeStrain(round);
+                break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
         }
@@ -50,12 +61,19 @@ public class ExportModeMap implements IExportMode<double[][]> {
                     case Dx:
                     case Dy:
                     case Dabs:
+                    case cDx:
+                    case cDy:
+                    case cDabs:
                         result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
+                    case cExx:
+                    case cEyy:
+                    case cExy:
+                    case cEabs:
                         result[x][y] = ExportUtils.calculateStrain(results[x][y], direction);
                         break;
                     default:
