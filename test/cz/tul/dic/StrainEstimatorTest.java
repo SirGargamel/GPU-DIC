@@ -38,7 +38,7 @@ public class StrainEstimatorTest {
         final TaskContainer tc = new TaskContainer(input);
 
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
-        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAMETER, 5);
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, 5);
 
         final Image img = tc.getImage(ROUND);
         final double[][][] displacement = new double[img.getWidth()][img.getHeight()][2];

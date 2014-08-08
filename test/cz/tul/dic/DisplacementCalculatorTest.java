@@ -8,7 +8,7 @@ import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.generators.facet.FacetGenerator;
-import cz.tul.dic.generators.facet.FacetGeneratorMode;
+import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -52,9 +52,9 @@ public class DisplacementCalculatorTest {
         tc.setDeformationLimits(ROUND, roi, deformations);
 
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
-        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE, DisplacementCalculation.FIND_MAX_AND_AVERAGE);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 0);
+        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION, DisplacementCalculation.FIND_MAX_AND_AVERAGE);
         tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
 
         final List<double[][]> results = new ArrayList<>(1);

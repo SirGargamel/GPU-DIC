@@ -16,7 +16,7 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
 
     @Override
     public Map<ROI, List<Facet>> generateFacets(TaskContainer tc, int round) throws ComputationException {
-        final Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_SPACING);
+        final Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No facet generator spacing.");
         }
@@ -65,8 +65,8 @@ public class TightFacetGenerator extends AbstractFacetGenerator {
     }
 
     @Override
-    public FacetGeneratorMode getMode() {
-        return FacetGeneratorMode.TIGHT;
+    public FacetGeneratorMethod getMode() {
+        return FacetGeneratorMethod.TIGHT;
     }
 
 }

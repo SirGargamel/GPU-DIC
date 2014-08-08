@@ -78,10 +78,11 @@ public class TaskContainerChecker {
             }
         }
 
-        final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
+        final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         if (ts == null) {
             Logger.warn("Adding default TaskSplit.");
-            tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, DefaultValues.DEFAULT_TASK_SPLIT);
+            tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, DefaultValues.DEFAULT_TASK_SPLIT_METHOD);
+            tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, DefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
         }
 
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
@@ -90,11 +91,11 @@ public class TaskContainerChecker {
             tc.setParameter(TaskParameter.KERNEL, DefaultValues.DEFAULT_KERNEL);
         }
 
-        final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
+        final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
         if (facetGenMode == null) {
             Logger.warn("Adding default facet generator.");
-            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, DefaultValues.DEFAULT_FACET_GENERATOR);
-            tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, DefaultValues.DEFAULT_FACET_SPACING);
+            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, DefaultValues.DEFAULT_FACET_GENERATOR);
+            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, DefaultValues.DEFAULT_FACET_SPACING);
         }
 
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
@@ -112,13 +113,14 @@ public class TaskContainerChecker {
         final Object strainEstimation = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (strainEstimation == null) {
             Logger.warn("Adding default strain estimator.");
-            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, DefaultValues.DEFAULT_STRAIN_ESTIMATION);
+            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, DefaultValues.DEFAULT_STRAIN_ESTIMATION_METHOD);
+            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, DefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER);
         }
 
-        final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE);
+        final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION);
         if (displacementCalculator == null) {
             Logger.warn("Adding default displacement calculator.");
-            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_TYPE, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION);
+            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION);
         }
         
         final Object ws = tc.getParameter(TaskParameter.WINDOW_SIZE);

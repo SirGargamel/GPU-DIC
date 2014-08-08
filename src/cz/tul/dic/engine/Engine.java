@@ -11,7 +11,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.splitter.TaskSplit;
+import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.Kernel;
@@ -39,7 +39,7 @@ public final class Engine extends Observable {
     // dynamic
     private KernelType kernelType;
     private Interpolation interpolation;
-    private TaskSplit taskSplitVariant;
+    private TaskSplitMethod taskSplitVariant;
 
     static {
         COUNTER = new Utils.ResultCounter();
@@ -272,7 +272,7 @@ public final class Engine extends Observable {
         this.interpolation = interpolation;
     }
 
-    public void setTaskSplitVariant(TaskSplit taskSplitVariant) {
+    public void setTaskSplitVariant(TaskSplitMethod taskSplitVariant) {
         this.taskSplitVariant = taskSplitVariant;
     }
 

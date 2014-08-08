@@ -82,24 +82,24 @@ public class DicMain extends Application {
             // 9905121m
             // 9820088m
             final int fs1 = 20;
-            final int fs2 = 30;
+            final int fs2 = 20;
             final int ps1 = 20;
-            final int ps2 = 40;
+            final int ps2 = 20;
             for (int size = fs1; size <= fs2; size++) {
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                for (int windowSize = 0; windowSize < 1; windowSize++) {
-                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-                    TaskContainer tc = Context.getInstance().getTc();
-                    InputLoader.loadInput(tc);
-                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-                    Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
+                TaskContainer tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputation(tc);
 //                }
 
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
 //                TaskContainer tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
+//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
 //                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
 //                TaskContainer tc = Context.getInstance().getTc();

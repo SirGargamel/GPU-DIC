@@ -8,7 +8,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.data.task.splitter.TaskSplit;
+import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -86,10 +86,10 @@ public class EngineUtils extends Observable {
         // prepare parameters
         engine.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         engine.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
-        final TaskSplit taskSplit = (TaskSplit) tc.getParameter(TaskParameter.TASK_SPLIT_VARIANT);
+        final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         engine.setTaskSplitVariant(taskSplit);
 
-        Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_VALUE);
+        Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
 
         // prepare data
         final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, index1);
@@ -98,7 +98,7 @@ public class EngineUtils extends Observable {
         // compute round        
         for (ROI roi : tc.getRois(index1)) {
             // OpenCL splitter needs dynamic data
-            if (taskSplit.equals(TaskSplit.DYNAMIC)) {
+            if (taskSplit.equals(TaskSplitMethod.DYNAMIC)) {
                 taskSplitValue = new Object[]{
                     TaskContainerUtils.getDeformationArrayLength(tc, index1, roi),
                     tc.getFacetSize(index1, roi),

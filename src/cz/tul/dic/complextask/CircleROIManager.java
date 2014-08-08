@@ -11,7 +11,7 @@ import cz.tul.dic.data.task.DefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.cluster.Analyzer1D;
-import cz.tul.dic.generators.facet.FacetGeneratorMode;
+import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,8 +37,8 @@ public class CircleROIManager extends ROIManager {
         final TaskContainer tcC = tc.cloneInputTask();
 
         tcC.setROIs(initialRound, tc.getRois(initialRound));
-        tcC.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tcC.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 0);
+        tcC.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
+        tcC.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 0);
         tcC.setParameter(TaskParameter.WINDOW_SIZE, 0);
         tcC.clearResultData();
 

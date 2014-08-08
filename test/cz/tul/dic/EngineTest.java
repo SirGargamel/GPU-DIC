@@ -6,12 +6,12 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.data.task.splitter.TaskSplit;
+import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
-import cz.tul.dic.generators.facet.FacetGeneratorMode;
+import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -93,8 +93,8 @@ public class EngineTest {
         Set<String> errors = new HashSet<>();
         for (KernelType kt : KernelType.values()) {
             for (Interpolation i : Interpolation.values()) {
-                for (TaskSplit ts : TaskSplit.values()) {
-                    for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
+                for (TaskSplitMethod ts : TaskSplitMethod.values()) {
+                    for (FacetGeneratorMethod fgm : FacetGeneratorMethod.values()) {
                         for (String s : DEF_ZERO_FILES) {
                             tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm);
                             errors.add(checkResultsBack(tc, s));
@@ -137,7 +137,7 @@ public class EngineTest {
     private TaskContainer generateTask(
             final String outFilename, final double[] deformations,
             final KernelType kernel, final Interpolation interpolation,
-            final TaskSplit taskSplit, final FacetGeneratorMode fgm) throws IOException, URISyntaxException, ComputationException {
+            final TaskSplitMethod taskSplit, final FacetGeneratorMethod fgm) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
@@ -151,12 +151,12 @@ public class EngineTest {
         tc.setDeformationLimits(ROUND, roi, deformations);
 
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_SPACING, 1);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
         tc.setParameter(TaskParameter.KERNEL, kernel);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
-        tc.setParameter(TaskParameter.TASK_SPLIT_VARIANT, taskSplit);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, fgm);
+        tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, taskSplit);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, fgm);
 
         EngineUtils.getInstance().computeTask(tc);
 

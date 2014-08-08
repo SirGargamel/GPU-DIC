@@ -1,5 +1,6 @@
 package cz.tul.dic.engine.strain;
 
+import cz.tul.dic.data.task.DefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import java.util.Arrays;
@@ -10,8 +11,7 @@ import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.pmw.tinylog.Logger;
 
 public class LocalLeastSquare extends StrainEstimator {
-
-    private static final int DEFAULT_M = 15;
+    
     private static final int INDEX_A0 = 0;
     private static final int INDEX_A1 = 1;
     private static final int INDEX_A2 = 2;
@@ -28,8 +28,8 @@ public class LocalLeastSquare extends StrainEstimator {
             final int height = displacement[0].length;
             final double[][][] result = new double[width][height][];
 
-            final Object o = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAMETER);
-            final int m = o == null ? DEFAULT_M : (int) o;
+            final Object o = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
+            final int m = o == null ? DefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER : (int) o;
 
             double[] coeffs;
             for (int x = 0; x < width; x++) {

@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class FacetGenerator {
 
-    private static final Map<FacetGeneratorMode, AbstractFacetGenerator> generators;
+    private static final Map<FacetGeneratorMethod, AbstractFacetGenerator> generators;
 
     static {
         generators = new HashMap<>();
@@ -28,7 +28,7 @@ public class FacetGenerator {
     }
 
     public static Map<ROI, List<Facet>> generateFacets(final TaskContainer tc, final int round) throws ComputationException {
-        final FacetGeneratorMode mode = (FacetGeneratorMode) tc.getParameter(TaskParameter.FACET_GENERATOR_MODE);
+        final FacetGeneratorMethod mode = (FacetGeneratorMethod) tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
         if (generators.containsKey(mode)) {            
             return generators.get(mode).generateFacets(tc, round);
         } else {

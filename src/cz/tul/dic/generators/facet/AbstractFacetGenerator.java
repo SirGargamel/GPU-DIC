@@ -15,7 +15,7 @@ public abstract class AbstractFacetGenerator {
 
     public abstract Map<ROI, List<Facet>> generateFacets(final TaskContainer tc, final int round) throws ComputationException;
     
-    public abstract FacetGeneratorMode getMode();
+    public abstract FacetGeneratorMethod getMode();
     
     protected boolean checkAreaValidity(final double x1, final double y1, final double x2, final double y2, final int width, final int height) {
         boolean result = true;

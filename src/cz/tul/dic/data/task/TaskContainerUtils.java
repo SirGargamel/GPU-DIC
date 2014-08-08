@@ -6,11 +6,11 @@ import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.data.task.splitter.TaskSplit;
+import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
-import cz.tul.dic.generators.facet.FacetGeneratorMode;
+import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.FileInputStream;
@@ -255,10 +255,10 @@ public class TaskContainerUtils {
                     case IN:
                         result.setParameter(tp, new File(e.getValue()));
                         break;
-                    case FACET_GENERATOR_MODE:
-                        result.setParameter(tp, FacetGeneratorMode.valueOf(e.getValue()));
+                    case FACET_GENERATOR_METHOD:
+                        result.setParameter(tp, FacetGeneratorMethod.valueOf(e.getValue()));
                         break;
-                    case FACET_GENERATOR_SPACING:
+                    case FACET_GENERATOR_PARAM:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
                     case FACET_SIZE:
@@ -276,10 +276,10 @@ public class TaskContainerUtils {
                     case RESULT_COMPILATION:
                         result.setParameter(tp, ResultCompilation.valueOf(e.getValue()));
                         break;
-                    case TASK_SPLIT_VARIANT:
-                        result.setParameter(tp, TaskSplit.valueOf(e.getValue()));
+                    case TASK_SPLIT_METHOD:
+                        result.setParameter(tp, TaskSplitMethod.valueOf(e.getValue()));
                         break;
-                    case TASK_SPLIT_VALUE:
+                    case TASK_SPLIT_PARAM:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
                     case ROUND_LIMITS:
