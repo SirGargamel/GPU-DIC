@@ -5,6 +5,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.Direction;
@@ -32,9 +33,9 @@ public class Computation {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDy)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDabs)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
 
@@ -52,6 +53,11 @@ public class Computation {
         sb.append(".task");
         TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
 
+        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDabs)), r));
+        }
         Exporter.export(tc);
     }
 
@@ -66,9 +72,6 @@ public class Computation {
             tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDy)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDabs)), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
 
@@ -87,6 +90,11 @@ public class Computation {
         sb.append(".task");
         TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
 
+        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDabs)), r));
+        }
         Exporter.export(tc);
     }
 
@@ -99,6 +107,7 @@ public class Computation {
         for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAMETER, strainParam);
             StrainEstimator.computeStrain(tc);
+            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
@@ -136,10 +145,7 @@ public class Computation {
         final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
         // displacement export
         tc.getExports().clear();
-        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDabs), r));
+        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {            
             tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dx), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dy), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dabs), r));
@@ -151,12 +157,18 @@ public class Computation {
         time = System.nanoTime() - time;
         Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.WINDOW_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
+        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDx), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDy), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDabs), r));            
+        }
         Exporter.export(tc);
 
         // strain sweep and export        
         for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAMETER, strainParam);
             StrainEstimator.computeStrain(tc);
+            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
