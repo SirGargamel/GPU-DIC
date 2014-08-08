@@ -5,6 +5,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.target.ExportTarget;
@@ -22,7 +23,38 @@ public class Computation {
 
     private static final File OUT_DIR = new File("D:\\temp\\results");
 
-    public static void computeDynamicTask(TaskContainer tc) throws IOException, ComputationException {
+    public static void commenceComputation(TaskContainer tc) throws IOException, ComputationException {
+        TaskContainerChecker.checkTaskValidity(tc);
+
+        final File in = (File) tc.getParameter(TaskParameter.IN);
+        final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
+        // displacement export
+        tc.getExports().clear();
+        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dx), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dy), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dabs), r));
+        }
+//        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
+
+        long time = System.nanoTime();
+        EngineUtils.getInstance().computeTask(tc);
+        time = System.nanoTime() - time;
+        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append(OUT_DIR.getAbsolutePath());
+        sb.append(File.separator);
+        sb.append(in.getName());
+        sb.append(File.separator);
+        sb.append(String.format("%02d", facetSize));
+        sb.append(".task");
+        TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
+
+        Exporter.export(tc);
+    }
+    
+    public static void commenceComputationDynamic(TaskContainer tc) throws IOException, ComputationException {
         TaskContainerChecker.checkTaskValidity(tc);
 
         final File in = (File) tc.getParameter(TaskParameter.IN);
@@ -55,7 +87,7 @@ public class Computation {
     }
 
     public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax) throws ComputationException, IOException {
-        computeDynamicTask(tc);
+        commenceComputationDynamic(tc);
 
         // strain sweep and export
         final File in = (File) tc.getParameter(TaskParameter.IN);
