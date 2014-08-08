@@ -32,16 +32,16 @@ public class Computation {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Dx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Dy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Dabs), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDabs)), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
 
         long time = System.nanoTime();
         EngineUtils.getInstance().computeTask(tc);
         time = System.nanoTime() - time;
-        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.WINDOW_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
         final StringBuilder sb = new StringBuilder();
         sb.append(OUT_DIR.getAbsolutePath());
@@ -63,9 +63,12 @@ public class Computation {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Dx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Dy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Dabs), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDabs)), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
 
@@ -73,7 +76,7 @@ public class Computation {
         ComplexTaskSolver cts = new ComplexTaskSolver();
         cts.solveComplexTask(tc);
         time = System.nanoTime() - time;
-        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.WINDOW_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
         final StringBuilder sb = new StringBuilder();
         sb.append(OUT_DIR.getAbsolutePath());
@@ -99,10 +102,14 @@ public class Computation {
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-                tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Exx), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Eyy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Exy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, NameGenerator.generateMap(tc, r, Direction.Eabs), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.cExx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cExx)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.cEyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cEyy)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.cExy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cExy)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.cEabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cEabs)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exx)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eyy)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exy)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eabs)), r));
             }
 //            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
             Exporter.export(tc);
@@ -130,6 +137,9 @@ public class Computation {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDx), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDy), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cDabs), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dx), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dy), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Dabs), r));
@@ -139,7 +149,7 @@ public class Computation {
         ComplexTaskSolver cts = new ComplexTaskSolver();
         cts.solveComplexTask(tc);
         time = System.nanoTime() - time;
-        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.WINDOW_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
         Exporter.export(tc);
 
@@ -150,6 +160,10 @@ public class Computation {
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+                tc.addExport(ExportTask.generateMapExport(Direction.cExx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cExx), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.cEyy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cEyy), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.cExy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cExy), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.cEabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.cEabs), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Exx), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Eyy), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_MODE), Direction.Exy), r));
