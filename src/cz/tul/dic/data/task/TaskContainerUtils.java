@@ -32,7 +32,7 @@ import java.util.TreeMap;
  * @author Petr Jecmen
  */
 public class TaskContainerUtils {
-    
+
     private static final String CONFIG_EMPTY = "NONE";
     private static final String CONFIG_EXPORTS = "EXPORT_";
     private static final String CONFIG_INPUT = "INPUT";
@@ -262,6 +262,9 @@ public class TaskContainerUtils {
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
                     case FACET_SIZE:
+                        result.setParameter(tp, Integer.valueOf(e.getValue()));
+                        break;
+                    case FPS:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
                     case INTERPOLATION:
