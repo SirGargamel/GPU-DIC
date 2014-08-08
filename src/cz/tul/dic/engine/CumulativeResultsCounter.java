@@ -11,8 +11,8 @@ import java.util.List;
  *
  * @author Petr Ječmen
  */
-public class CumulativeResultsCounter {    
-    
+public class CumulativeResultsCounter {
+
     public static List<double[][][]> calculate(final TaskContainer tc, final List<double[][][]> data) {
         final int roundCount = TaskContainerUtils.getMaxRoundCount(tc);
         final int srcPos = TaskContainerUtils.getRounds(tc).keySet().iterator().next();
@@ -47,8 +47,10 @@ public class CumulativeResultsCounter {
 
             for (int x = 0; x < result.length; x++) {
                 for (int y = 0; y < result[x].length; y++) {
-                    result[x][y][Coordinates.X] += roundData[x][y][Coordinates.X];
-                    result[x][y][Coordinates.Y] += roundData[x][y][Coordinates.Y];
+                    if (roundData[x][y] != null) {
+                        result[x][y][Coordinates.X] += roundData[x][y][Coordinates.X];
+                        result[x][y][Coordinates.Y] += roundData[x][y][Coordinates.Y];
+                    }
                 }
             }
         }
