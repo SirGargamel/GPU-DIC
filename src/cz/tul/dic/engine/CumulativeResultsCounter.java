@@ -16,8 +16,8 @@ public class CumulativeResultsCounter {
     public static List<double[][][]> calculate(final TaskContainer tc, final List<double[][][]> data) {
         final int roundCount = TaskContainerUtils.getMaxRoundCount(tc);
         final int srcPos = TaskContainerUtils.getRounds(tc).keySet().iterator().next();
-        int destPos = srcPos + 1;
-        for (Integer i : TaskContainerUtils.getRounds(tc).values()) {
+        int destPos = srcPos;
+        for (Integer i : TaskContainerUtils.getRounds(tc).keySet()) {
             if (i > destPos) {
                 destPos = i;
             }
@@ -31,7 +31,7 @@ public class CumulativeResultsCounter {
             result.add(null);
         }
 
-        for (int i = srcPos + 1; i < destPos; i++) {
+        for (int i = srcPos; i <= destPos; i++) {
             result.set(i, calculateCumulativeResult(data, srcPos, i));
         }
 

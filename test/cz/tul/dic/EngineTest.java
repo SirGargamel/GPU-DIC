@@ -4,8 +4,10 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplit;
+import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.EngineUtils;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -72,6 +74,18 @@ public class EngineTest {
         -2, 2, 1, -2, 2, 1,
         -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
         -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
+    private static final double[][][] CUMULATIVE_ZERO = new double[][][]{
+        {{0, 0}, {0, 0}, {0, 0}},
+        {{0, 0}, {0, 0}, {0, 0}},
+        {{0, 0}, {0, 0}, {0, 0}}};
+    private static final double[][][] CUMULATIVE_ONE = new double[][][]{
+        {{1, 1}, {1, 1}, {1, 1}},
+        {{1, 1}, {1, 1}, {1, 1}},
+        {{1, 1}, {1, 1}, {1, 1}}};
+    private static final double[][][] CUMULATIVE_TWO = new double[][][]{
+        {{2, 2}, {2, 2}, {2, 2}},
+        {{2, 2}, {2, 2}, {2, 2}},
+        {{2, 2}, {2, 2}, {2, 2}}};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
@@ -284,5 +298,52 @@ public class EngineTest {
         } else {
             return null;
         }
+    }
+
+    @Test
+    public void testCumulativeResultCounter() throws IOException, URISyntaxException, ComputationException {
+        final List<File> input = new ArrayList<>(4);
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        final TaskContainer tc = new TaskContainer(input);
+        InputLoader.loadInput(tc);
+        TaskContainerChecker.checkTaskValidity(tc);
+
+        tc.setDisplacement(0, CUMULATIVE_ZERO);
+        tc.setDisplacement(1, CUMULATIVE_ZERO);
+        tc.setDisplacement(2, CUMULATIVE_ONE);
+        tc.setDisplacement(3, CUMULATIVE_ONE);
+
+        tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
+
+        assert equals(tc.getCumulativeDisplacement(0), CUMULATIVE_ZERO);
+        assert equals(tc.getCumulativeDisplacement(1), CUMULATIVE_ZERO);
+        assert equals(tc.getCumulativeDisplacement(2), CUMULATIVE_ONE);
+        assert equals(tc.getCumulativeDisplacement(3), CUMULATIVE_TWO);
+    }
+
+    private boolean equals(final double[][][] A, final double[][][] B) {
+        boolean result = true;
+
+        if (A != null && B != null) {
+            loop:
+            for (int x = 0; x < A.length; x++) {
+                for (int y = 0; y < A[x].length; y++) {
+                    for (int z = 0; z < A[x][y].length; z++) {
+                        if (A[x][y][z] != B[x][y][z]) {
+                            result = false;
+                            break loop;
+                        }
+                    }
+                }
+            }
+        } else {
+            result = false;
+        }
+
+        return result;
     }
 }
