@@ -57,9 +57,7 @@ public class NameGenerator {
         public Generator name() {
             sb.append(tc.getParameter(TaskParameter.IN).toString());
             sb.append(DELIMITER);
-            sb.append(tc.getParameter(TaskParameter.FACET_SIZE).toString());
-            sb.append(DELIMITER);
-            sb.append(tc.getParameter(TaskParameter.WINDOW_SIZE).toString());
+            sb.append(tc.getParameter(TaskParameter.FACET_SIZE).toString());            
             return this;
         }
         
