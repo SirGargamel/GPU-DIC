@@ -6,10 +6,6 @@ import cz.tul.dic.data.deformation.Deformation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.data.task.TaskContainer;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -17,29 +13,28 @@ import java.util.Map;
  */
 public class DeformationGenerator {
 
-    public static Map<ROI, double[]> generateDeformations(final TaskContainer tc, final int round) throws ComputationException {
-        final Map<ROI, double[]> result = new HashMap<>();
-
-        for (ROI roi : tc.getRois(round)) {
-            result.put(roi, generateDeformations(tc.getDeformationLimits(round, roi)));
-        }
-
-        return result;
-    }
-
-    public static double[] generateDeformations(final double[] limits) throws ComputationException {
+    public static double[] generateDeformations(final double[] limits, final long... fromTo) throws ComputationException {
         final DeformationDegree degree = DeformationUtils.getDegreeFromLimits(limits);
         final double[] deformations;
 
+        final long from, to;
+        if (fromTo.length > 1) {
+            from = fromTo[0];
+            to = fromTo[1];
+        } else {
+            from = 0;
+            to = (int) Math.min(Integer.MAX_VALUE, calculateDeformationArraySize(limits));
+        }
+
         switch (degree) {
             case ZERO:
-                deformations = generateZeroDegree(limits);
+                deformations = generateZeroDegree(limits, from, to);
                 break;
             case FIRST:
-                deformations = generateFirstDegree(limits);
+                deformations = generateFirstDegree(limits, from, to);
                 break;
             case SECOND:
-                deformations = generateSecondDegree(limits);
+                deformations = generateSecondDegree(limits, from, to);
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation - " + degree + ".");
@@ -48,26 +43,35 @@ public class DeformationGenerator {
         return deformations;
     }
 
-    private static double[] generateZeroDegree(final double[] limits) throws ComputationException {
+    private static double[] generateZeroDegree(final double[] limits, final long from, final long to) throws ComputationException {
         if (limits.length < 6) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal number of deformation parameters - received " + limits.length + ", required at least 6.");
         }
 
         final int coeffCount = 2;
-        int size = coeffCount;
-        size *= computeSize(limits, 0);
-        size *= computeSize(limits, 3);
-
-        final double[] result = new double[size];
+        final long size = Math.min(calculateDeformationArraySize(limits), to - from);
+        if (size > Integer.MAX_VALUE) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Too many deformations requested - " + size);
+        }
+        final double[] result = new double[(int) size];
 
         int index;
         int i = 0;
+        long counter = 0;
+        loop:
         for (double u = limits[DeformationLimit.UMIN]; u <= limits[DeformationLimit.UMAX]; u += limits[DeformationLimit.USTEP]) {
             for (double v = limits[DeformationLimit.VMIN]; v <= limits[DeformationLimit.VMAX]; v += limits[DeformationLimit.VSTEP]) {
                 index = i * coeffCount;
+                if (index >= result.length) {
+                    break loop;
+                }
+
                 result[index + Deformation.U] = u;
                 result[index + Deformation.V] = v;
-                i++;
+                counter += coeffCount;
+                if (counter >= from) {
+                    i++;
+                }
 
                 if (limits[DeformationLimit.VSTEP] == 0) {
                     break;
@@ -91,24 +95,22 @@ public class DeformationGenerator {
         return result;
     }
 
-    private static double[] generateFirstDegree(final double[] limits) throws ComputationException {
+    private static double[] generateFirstDegree(final double[] limits, final long from, final long to) throws ComputationException {
         if (limits.length < 18) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal number of deformation parameters - received " + limits.length + ", required 18.");
         }
 
         final int coeffCount = 6;
-        int size = coeffCount;
-        size *= computeSize(limits, 0);
-        size *= computeSize(limits, 3);
-        size *= computeSize(limits, 6);
-        size *= computeSize(limits, 9);
-        size *= computeSize(limits, 12);
-        size *= computeSize(limits, 15);
-
-        final double[] result = new double[size];
+        final long size = Math.min(calculateDeformationArraySize(limits), to - from);
+        if (size > Integer.MAX_VALUE) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Too many deformations requested - " + size);
+        }
+        final double[] result = new double[(int) size];
 
         int index;
         int i = 0;
+        long counter = 0;
+        loop:
         for (double u = limits[DeformationLimit.UMIN]; u <= limits[DeformationLimit.UMAX]; u += limits[DeformationLimit.USTEP]) {
             for (double v = limits[DeformationLimit.VMIN]; v <= limits[DeformationLimit.VMAX]; v += limits[DeformationLimit.VSTEP]) {
                 for (double ux = limits[DeformationLimit.UXMIN]; ux <= limits[DeformationLimit.UXMAX]; ux += limits[DeformationLimit.UXSTEP]) {
@@ -116,14 +118,20 @@ public class DeformationGenerator {
                         for (double vx = limits[DeformationLimit.VXMIN]; vx <= limits[DeformationLimit.VXMAX]; vx += limits[DeformationLimit.VXSTEP]) {
                             for (double vy = limits[DeformationLimit.VYMIN]; vy <= limits[DeformationLimit.VYMAX]; vy += limits[DeformationLimit.VYSTEP]) {
                                 index = i * coeffCount;
+                                if (index >= result.length) {
+                                    break loop;
+                                }
+
                                 result[index + Deformation.U] = u;
                                 result[index + Deformation.V] = v;
                                 result[index + Deformation.UX] = ux;
                                 result[index + Deformation.UY] = uy;
                                 result[index + Deformation.VX] = vx;
                                 result[index + Deformation.VY] = vy;
-                                i++;
-
+                                counter += coeffCount;
+                                if (counter >= from) {
+                                    i++;
+                                }
                                 if (limits[DeformationLimit.VYSTEP] == 0) {
                                     break;
                                 }
@@ -152,33 +160,22 @@ public class DeformationGenerator {
         return result;
     }
 
-    private static double[] generateSecondDegree(final double[] limits) throws ComputationException {
+    private static double[] generateSecondDegree(final double[] limits, final long from, final long to) throws ComputationException {
         if (limits.length < 36) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal number of deformation parameters - received " + limits.length + ", required 36.");
         }
 
         final int coeffCount = 12;
-        long size = coeffCount;
-        size *= computeSize(limits, 0);
-        size *= computeSize(limits, 3);
-        size *= computeSize(limits, 6);
-        size *= computeSize(limits, 9);
-        size *= computeSize(limits, 12);
-        size *= computeSize(limits, 15);
-        size *= computeSize(limits, 18);
-        size *= computeSize(limits, 21);
-        size *= computeSize(limits, 24);
-        size *= computeSize(limits, 27);
-        size *= computeSize(limits, 30);
-        size *= computeSize(limits, 33);
-
+        final long size = Math.min(calculateDeformationArraySize(limits), to - from);
         if (size > Integer.MAX_VALUE) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Too many deformations requested - " + size);
         }
-        final double[] result = new double[(int) size];
+        final double[] result = new double[(int) size];        
 
         int index;
         int i = 0;
+        long counter = 0;
+        loop:
         for (double u = limits[DeformationLimit.UMIN]; u <= limits[DeformationLimit.UMAX]; u += limits[DeformationLimit.USTEP]) {
             for (double v = limits[DeformationLimit.VMIN]; v <= limits[DeformationLimit.VMAX]; v += limits[DeformationLimit.VSTEP]) {
                 for (double ux = limits[DeformationLimit.UXMIN]; ux <= limits[DeformationLimit.UXMAX]; ux += limits[DeformationLimit.UXSTEP]) {
@@ -192,6 +189,10 @@ public class DeformationGenerator {
                                                 for (double vyy = limits[DeformationLimit.VYYMIN]; vyy <= limits[DeformationLimit.VYYMAX]; vyy += limits[DeformationLimit.VYYSTEP]) {
                                                     for (double vxy = limits[DeformationLimit.VXYMIN]; vxy <= limits[DeformationLimit.VXYMAX]; vxy += limits[DeformationLimit.VXYSTEP]) {
                                                         index = i * coeffCount;
+                                                        if (index >= result.length) {
+                                                            break loop;
+                                                        }
+
                                                         result[index + Deformation.U] = u;
                                                         result[index + Deformation.V] = v;
                                                         result[index + Deformation.UX] = ux;
@@ -204,7 +205,10 @@ public class DeformationGenerator {
                                                         result[index + Deformation.VXX] = vxx;
                                                         result[index + Deformation.VYY] = vyy;
                                                         result[index + Deformation.VXY] = vxy;
-                                                        i++;
+                                                        counter += coeffCount;
+                                                        if (counter >= from) {
+                                                            i++;
+                                                        }
 
                                                         if (limits[DeformationLimit.VXYSTEP] == 0) {
                                                             break;
@@ -256,6 +260,28 @@ public class DeformationGenerator {
         }
 
         return result;
+    }
+
+    public static long calculateDeformationArraySize(final double[] limits) {
+        final int coeffCount = limits.length / 3;
+        long size = coeffCount;
+        size *= computeSize(limits, 0);
+        size *= computeSize(limits, 3);
+        if (coeffCount > 2) {
+            size *= computeSize(limits, 6);
+            size *= computeSize(limits, 9);
+            size *= computeSize(limits, 12);
+            size *= computeSize(limits, 15);
+            if (coeffCount > 6) {
+                size *= computeSize(limits, 18);
+                size *= computeSize(limits, 21);
+                size *= computeSize(limits, 24);
+                size *= computeSize(limits, 27);
+                size *= computeSize(limits, 30);
+                size *= computeSize(limits, 33);
+            }
+        }
+        return size;
     }
 
 }

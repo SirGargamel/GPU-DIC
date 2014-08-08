@@ -13,13 +13,15 @@ public class ComputationTask {
     private final Image imageA, imageB;
     private final List<Facet> facets;
     private final double[] deformations;
+    private final boolean subtask;
     private float[] results;
 
-    public ComputationTask(Image imageA, Image imageB, List<Facet> facets, double[] deformations) {
+    public ComputationTask(Image imageA, Image imageB, List<Facet> facets, double[] deformations, boolean subtask) {
         this.imageA = imageA;
         this.imageB = imageB;
         this.facets = facets;
         this.deformations = deformations;
+        this.subtask = subtask;
     }
 
     public Image getImageA() {
@@ -44,6 +46,10 @@ public class ComputationTask {
 
     public void setResults(float[] results) {
         this.results = results;
+    }
+
+    public boolean isSubtask() {
+        return subtask;
     }
 
 }

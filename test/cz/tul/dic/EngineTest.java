@@ -68,6 +68,10 @@ public class EngineTest {
         "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};
     private static final String[] DEF_ZERO_FIRST_SECOND_FILES = new String[]{
         "out_2_0_1_1_0_0_1_0_0_0_0_1", "out_-1_-1_0_0_1_0_0_0.5_1_0_0_0"};
+    private static final double[] DEF_LARGE = new double[]{
+        -2, 2, 1, -2, 2, 1,
+        -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
+        -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
@@ -160,6 +164,20 @@ public class EngineTest {
             tc = generateTask(s, DEF_FIRST);
             errors.add(checkResultsBack(tc, s));
             tc = generateTask(s, DEF_FIRST_F);
+            errors.add(checkResultsBack(tc, s));
+        }
+
+        errors.remove(null);
+        Assert.assertEquals(errors.toString(), 0, errors.size());
+    }
+
+    @Test
+    public void testEngineLarge() throws IOException, URISyntaxException, ComputationException {
+        TaskContainer tc;
+        Set<String> errors = new HashSet<>();
+
+        for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
+            tc = generateTask(s, DEF_LARGE);
             errors.add(checkResultsBack(tc, s));
         }
 

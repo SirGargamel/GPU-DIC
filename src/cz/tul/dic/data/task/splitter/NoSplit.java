@@ -5,19 +5,22 @@
  */
 package cz.tul.dic.data.task.splitter;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.generators.DeformationGenerator;
 import java.util.List;
 
 public class NoSplit extends TaskSplitter {
 
+    private final double[] deformations;
     private boolean hasNext;
 
-    public NoSplit(Image image1, Image image2, final List<Facet> facets, final double[] deformations, final ROI roi) {
-        super(image1, image2, facets, deformations, roi);
-
+    public NoSplit(Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits, final ROI roi) throws ComputationException {
+        super(image1, image2, facets, deformationLimits, roi);
+        deformations = DeformationGenerator.generateDeformations(deformationLimits);
         hasNext = true;
     }
 
@@ -29,7 +32,7 @@ public class NoSplit extends TaskSplitter {
     @Override
     public ComputationTask next() {
         hasNext = false;
-        return new ComputationTask(image1, image2, facets, deformations);
+        return new ComputationTask(image1, image2, facets, deformations, false);
     }
 
     @Override

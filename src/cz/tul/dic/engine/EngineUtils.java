@@ -13,7 +13,6 @@ import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimator;
-import cz.tul.dic.generators.DeformationGenerator;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
@@ -21,7 +20,6 @@ import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -92,13 +90,7 @@ public class EngineUtils extends Observable {
 
         // prepare data
         final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, index1);
-        Logger.trace("Facets generated.");
-
-        final Map<ROI, double[]> deformations = new HashMap<>();
-        for (ROI roi : tc.getRois(index1)) {
-            deformations.put(roi, DeformationGenerator.generateDeformations(tc.getDeformationLimits(index1, roi)));
-        }
-        Logger.trace("Deformations generated.");
+        Logger.trace("Facets generated.");        
 
         // compute round        
         for (ROI roi : tc.getRois(index1)) {
@@ -114,7 +106,7 @@ public class EngineUtils extends Observable {
             tc.setResult(index1, roi, engine.computeCorrelations(
                     tc.getImage(index1), tc.getImage(index2),
                     roi, facets.get(roi),
-                    deformations.get(roi),
+                    tc.getDeformationLimits(index1, roi),
                     DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(index1, roi)),
                     TaskContainerUtils.getDeformationArrayLength(tc, index1, roi),
                     tc.getFacetSize(index1, roi), taskSplitValue));
