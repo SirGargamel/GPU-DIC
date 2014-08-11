@@ -11,7 +11,7 @@
 <center>
         <LineChart fx:id="chart" layoutX="0.0" layoutY="0.0" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
             <xAxis>
-                <NumberAxis autoRanging="false" forceZeroInRange="false" label="%Round" minorTickVisible="false" side="BOTTOM" />
+                <NumberAxis autoRanging="false" forceZeroInRange="false" label="%Time" minorTickVisible="false" side="BOTTOM" tickUnit="8.0E-4" upperBound="0.003" />
             </xAxis>
             <yAxis>
                 <NumberAxis forceZeroInRange="false" label="%Value" side="LEFT" tickUnit="1.0" />

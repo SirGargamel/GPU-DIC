@@ -3,6 +3,7 @@ package cz.tul.dic.gui;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.target.ExportTarget;
@@ -55,7 +56,7 @@ public class ResultPresenter implements Initializable {
     private static final int PREF_SIZE_H = 30;
     private static final int EXTRA_WIDTH = 30;
     private static final int EXTRA_HEIGHT = 70;
-    private static final int MIN_WIDTH = 380;    
+    private static final int MIN_WIDTH = 380;
 
     @FXML
     private ComboBox<Direction> choiceDir;
@@ -118,7 +119,7 @@ public class ResultPresenter implements Initializable {
                     s.getWindow().setWidth(width);
                     s.getWindow().setHeight(image.getParent().getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
                 }
-                
+
                 final Image img = SwingFXUtils.toFXImage(i, null);
                 image.setImage(img);
             } else {
@@ -289,7 +290,7 @@ public class ResultPresenter implements Initializable {
                     @SuppressWarnings("unchecked")
                     final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
 
-                    final ChartHandler ch = new ChartHandler(lastX, lastY, chart);
+                    final ChartHandler ch = new ChartHandler(lastX, lastY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
                     charts.put(stage, ch);
                     ch.displayData(choiceDir.getValue());
 
@@ -384,18 +385,27 @@ public class ResultPresenter implements Initializable {
 
     private static class ChartHandler {
 
-        private final int x, y;
+        private final int x, y, fps;
         private final LineChart<Number, Number> chart;
 
-        public ChartHandler(int x, int y, LineChart<Number, Number> chart) {
+        public ChartHandler(int x, int y, LineChart<Number, Number> chart, int fps) {
             this.x = x;
             this.y = y;
             this.chart = chart;
+            this.fps = fps;
 
             chart.setLegendVisible(false);
         }
 
         public void displayData(final Direction dir) throws ComputationException {
+            double tickUnit = 1 / (double) fps;
+            final String unit;
+            if (fps > 999) {
+                tickUnit *= 1000;
+                unit = "us";
+            } else {
+                unit = "ms"; 
+            }
             final double[] line = Context.getInstance().getLineResult(x, y).get(dir);
 
             final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
@@ -406,7 +416,7 @@ public class ResultPresenter implements Initializable {
             final XYChart.Series<Number, Number> series = new XYChart.Series<>();
             double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
             for (int i = 0; i < line.length; i++) {
-                series.getData().add(new XYChart.Data<>(i + 1, line[i]));
+                series.getData().add(new XYChart.Data<>((i + 1) * tickUnit, line[i]));
 
                 if (line[i] < min) {
                     min = line[i];
@@ -419,9 +429,10 @@ public class ResultPresenter implements Initializable {
             chart.getData().add(series);
 
             NumberAxis axis = (NumberAxis) chart.getXAxis();
-            axis.setTickUnit(1);
+            axis.setTickUnit(tickUnit);
             axis.setLowerBound(0);
-            axis.setUpperBound(line.length + 1);
+            axis.setUpperBound(line.length * tickUnit);
+            axis.setLabel(Lang.getString("Time").concat(" [".concat(unit).concat("]")));
 
             axis = (NumberAxis) chart.getYAxis();
             axis.setLabel(dir.getDescription());
@@ -429,7 +440,7 @@ public class ResultPresenter implements Initializable {
                 axis.setAutoRanging(false);
                 axis.setTickUnit(1);
                 axis.setLowerBound(min - 1);
-                axis.setUpperBound(min + 1);
+                axis.setUpperBound(max + 1);
             } else {
                 axis.setAutoRanging(true);
             }
