@@ -20,9 +20,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
+import org.pmw.tinylog.labellers.TimestampLabeller;
+import org.pmw.tinylog.policies.DailyPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.FileWriter;
+import org.pmw.tinylog.writers.RollingFileWriter;
 
 /**
  *
@@ -64,17 +68,20 @@ public class DicMain extends Application {
             c.writer(new ConsoleWriter())
                     .level(LoggingLevel.TRACE);
         } else {
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd__HH-mm-ss");
-            
+            final DateFormat df = new SimpleDateFormat("");
+
             final StringBuilder sb = new StringBuilder();
             sb.append("log__");
             sb.append(df.format(Calendar.getInstance().getTime()));
             sb.append(".txt");
-            c.writer(new FileWriter(sb.toString()))
+//            c.writer(new FileWriter(sb.toString()))
+//                    .level(LoggingLevel.INFO);
+            c.writer(new RollingFileWriter("log.txt", 10, new TimestampLabeller("yyyy-MM-dd"), new DailyPolicy()))
                     .level(LoggingLevel.INFO);
         }
-
         c.activate();
+        
+        Logger.info("----- Starting APP -----");
     }
 
     private void performComputationTest() {
@@ -98,11 +105,11 @@ public class DicMain extends Application {
             for (int size = fs1; size <= fs2; size++) {
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                for (int windowSize = 0; windowSize < 1; windowSize++) {
-                  Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
-                  TaskContainer tc = Context.getInstance().getTc();
-                  InputLoader.loadInput(tc);
-                  tc.setParameter(TaskParameter.FACET_SIZE, size);
-                  Computation.commenceComputation(tc);
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
+                TaskContainer tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputation(tc);
 //                }
 
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
