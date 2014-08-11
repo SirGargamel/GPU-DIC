@@ -40,7 +40,7 @@ public class CumulativeResultsCounter {
 
     private static double[][][] calculateCumulativeResult(final List<double[][][]> data, final int srcPos, final int destPos) {
         double[][][] roundData = data.get(srcPos);        
-        final double[][][] result = new double[roundData.length][roundData[0].length][0];
+        final double[][][] result = new double[roundData.length][roundData[0].length][];
 
         int l;
         for (int i = srcPos; i <= destPos; i++) {
