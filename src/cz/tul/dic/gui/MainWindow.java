@@ -200,6 +200,7 @@ public class MainWindow implements Initializable {
         Dialogs.create()
                 .title(Lang.getString("Wait"))
                 .message(Lang.getString("LoadingData"))
+                .masthead(null)
                 .showWorkerProgress(worker);
 
         Thread th = new Thread(worker);
@@ -207,25 +208,27 @@ public class MainWindow implements Initializable {
         th.start();
 
         th = new Thread(() -> {
-            Platform.runLater(() -> {
-                try {
-                    final String err = worker.get();
-                    if (err != null) {
+            try {
+                final String err = worker.get();
+                if (err != null) {
+                    Platform.runLater(() -> {
                         Dialogs.create()
                                 .title(Lang.getString("error"))
                                 .masthead(null)
                                 .message(err)
                                 .showWarning();
+                    });
 
-                    }
-                } catch (InterruptedException | ExecutionException ex) {
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                Platform.runLater(() -> {
                     Dialogs.create()
                             .title(Lang.getString("error"))
                             .masthead(null)
                             .message(ex.getLocalizedMessage())
                             .showException(ex);
-                }
-            });
+                });
+            }
         });
         th.setDaemon(true);
         th.start();
