@@ -1,7 +1,9 @@
 package cz.tul.dic.output.target;
 
+import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
@@ -11,14 +13,11 @@ import java.util.Map;
 
 public class ExportTargetCsv implements IExportTarget {
 
-    private static final String SEPARATOR_VALUE = ",";
-    private static final String SEPARATOR_LINE = "\n";
-
     @Override
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
         if (data instanceof Map<?, ?>) {
             // export image
-            exportLine((Map<Direction, double[]>) data, targetParam);
+            exportLine((Map<Direction, double[]>) data, targetParam, (int) tc.getParameter(TaskParameter.FPS));
         } else if (data instanceof double[][]) {
             // export map
             exportMap((double[][]) data, targetParam);
@@ -50,12 +49,14 @@ public class ExportTargetCsv implements IExportTarget {
 
     }
 
-    private void exportLine(final Map<Direction, double[]> data, final Object targetParam) throws IOException {
+    private void exportLine(final Map<Direction, double[]> data, final Object targetParam, final int fps) throws IOException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
 
         final File target = (File) targetParam;
+        final FpsManager fpsM = new FpsManager(fps);
+        final double tickLength = fpsM.getTickLength();
 
         if (data != null) {
             int l = 0;
@@ -66,18 +67,20 @@ public class ExportTargetCsv implements IExportTarget {
                     l = vals.length;
                 }
             }
-            final String[][] out = new String[l + 1][Direction.values().length];
+            final String[][] out = new String[l + 1][Direction.values().length + 1];
             // header
+            out[0][0] = fpsM.buildTimeDescription();
             for (Direction d : Direction.values()) {
-                out[0][d.ordinal()] = d.toString();
+                out[0][d.ordinal() + 1] = d.toString();
             }
             // data
-            
+
             for (int i = 0; i < l; i++) {
+                out[i + 1][0] = Double.toString((i + 1) * tickLength);
                 for (Direction d : Direction.values()) {
                     vals = data.get(d);
                     if (i < vals.length) {
-                        out[i + 1][d.ordinal()] = Double.toString(vals[i]);
+                        out[i + 1][d.ordinal() + 1] = Double.toString(vals[i]);
                     }
                 }
             }

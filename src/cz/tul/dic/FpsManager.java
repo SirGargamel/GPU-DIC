@@ -1,5 +1,7 @@
 package cz.tul.dic;
 
+import cz.tul.dic.gui.lang.Lang;
+
 /**
  *
  * @author Petr Ječmen
@@ -27,6 +29,10 @@ public class FpsManager {
 
     public String getTickUnit() {
         return tickUnit;
+    }
+
+    public String buildTimeDescription() {
+        return Lang.getString("Time").concat(" [".concat(getTickUnit()).concat("]"));
     }
 
 }

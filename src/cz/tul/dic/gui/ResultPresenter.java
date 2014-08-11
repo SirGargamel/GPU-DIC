@@ -427,7 +427,7 @@ public class ResultPresenter implements Initializable {
             axis.setTickUnit(tickUnit);
             axis.setLowerBound(0);
             axis.setUpperBound(line.length * tickUnit);
-            axis.setLabel(Lang.getString("Time").concat(" [".concat(fpsM.getTickUnit()).concat("]")));
+            axis.setLabel(fpsM.buildTimeDescription());
 
             axis = (NumberAxis) chart.getYAxis();
             axis.setLabel(dir.getDescription());
