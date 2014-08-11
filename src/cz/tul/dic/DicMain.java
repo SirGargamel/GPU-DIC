@@ -8,6 +8,10 @@ import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Application;
@@ -60,7 +64,13 @@ public class DicMain extends Application {
             c.writer(new ConsoleWriter())
                     .level(LoggingLevel.TRACE);
         } else {
-            c.writer(new FileWriter("log.txt"))
+            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd__HH-mm-ss");
+            
+            final StringBuilder sb = new StringBuilder();
+            sb.append("log__");
+            sb.append(df.format(Calendar.getInstance().getTime()));
+            sb.append(".txt");
+            c.writer(new FileWriter(sb.toString()))
                     .level(LoggingLevel.INFO);
         }
 
@@ -88,11 +98,11 @@ public class DicMain extends Application {
             for (int size = fs1; size <= fs2; size++) {
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                for (int windowSize = 0; windowSize < 1; windowSize++) {
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
-                TaskContainer tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputation(tc);
+                  Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
+                  TaskContainer tc = Context.getInstance().getTc();
+                  InputLoader.loadInput(tc);
+                  tc.setParameter(TaskParameter.FACET_SIZE, size);
+                  Computation.commenceComputation(tc);
 //                }
 
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
