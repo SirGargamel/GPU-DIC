@@ -2,6 +2,7 @@
 /nbproject/
 /dist/
 *.log
+log*.txt
 /build.xml
 /manifest.mf
 /cov-int/
