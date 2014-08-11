@@ -11,14 +11,14 @@ import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.pmw.tinylog.Logger;
 
 public class LocalLeastSquare extends StrainEstimator {
-    
+
     private static final int INDEX_A0 = 0;
     private static final int INDEX_A1 = 1;
     private static final int INDEX_A2 = 2;
     private static final int INDEX_B0 = 3;
     private static final int INDEX_B1 = 4;
     private static final int INDEX_B2 = 5;
-    
+    private static final double COEFF_ADJUST = 100;
 
     @Override
     void estimateStrain(TaskContainer tc, int round) {
@@ -69,7 +69,7 @@ public class LocalLeastSquare extends StrainEstimator {
         final double[] result;
         if (Xu.size() > 3) {
             result = new double[6];
-            try {                
+            try {
                 final OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
                 regression.setNoIntercept(true);
 
@@ -91,13 +91,13 @@ public class LocalLeastSquare extends StrainEstimator {
 
                 regression.newSampleData(dataY, dataX);
                 beta = regression.estimateRegressionParameters();
-                System.arraycopy(beta, 0, result, 3, 3);                
+                System.arraycopy(beta, 0, result, 3, 3);
             } catch (MathIllegalArgumentException ex) {
                 Logger.trace(ex.getLocalizedMessage());
                 // singular matrix, let solution be zeroes
             }
         } else {
-            result = null;            
+            result = null;
         }
 
         return result;
@@ -105,11 +105,11 @@ public class LocalLeastSquare extends StrainEstimator {
 
     private double[] computeStrains(final double[] coeffs) {
         final double[] result = new double[3];
-        
-        result[StrainParameter.Exx] = coeffs[INDEX_A1];
-        result[StrainParameter.Eyy] = coeffs[INDEX_B2];
-        result[StrainParameter.Exy] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]);        
-        
+
+        result[StrainParameter.Exx] = coeffs[INDEX_A1] * COEFF_ADJUST;
+        result[StrainParameter.Eyy] = coeffs[INDEX_B2] * COEFF_ADJUST;
+        result[StrainParameter.Exy] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]) * COEFF_ADJUST;
+
         return result;
     }
 
