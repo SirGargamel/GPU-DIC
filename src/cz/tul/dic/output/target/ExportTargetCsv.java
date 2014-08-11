@@ -9,10 +9,14 @@ import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Map;
 
 public class ExportTargetCsv implements IExportTarget {
 
+    private static final NumberFormat nf = new DecimalFormat("#0.###");
+    
     @Override
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
         if (data instanceof Map<?, ?>) {
@@ -76,7 +80,7 @@ public class ExportTargetCsv implements IExportTarget {
             // data
 
             for (int i = 0; i < l; i++) {
-                out[i + 1][0] = Double.toString((i + 1) * tickLength);
+                out[i + 1][0] = nf.format((i + 1) * tickLength);
                 for (Direction d : Direction.values()) {
                     vals = data.get(d);
                     if (i < vals.length) {
