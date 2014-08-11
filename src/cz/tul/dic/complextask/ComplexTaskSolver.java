@@ -70,7 +70,7 @@ public class ComplexTaskSolver extends Observable {
         }
         
         tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
-        tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
+        tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
         
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         
