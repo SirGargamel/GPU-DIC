@@ -28,7 +28,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -56,11 +55,7 @@ public class ResultPresenter implements Initializable {
     private static final int PREF_SIZE_H = 30;
     private static final int EXTRA_WIDTH = 30;
     private static final int EXTRA_HEIGHT = 70;
-    private static final int MIN_WIDTH = 380;
-    private static final String EXT_SEQUENCE = ".avi";
-    private static final String EXT_IMAGE = ".bmp";
-    private static final String EXT_CSV = ".csv";
-    private static final String DELIMITER = "-";
+    private static final int MIN_WIDTH = 380;    
 
     @FXML
     private ComboBox<Direction> choiceDir;
@@ -429,6 +424,7 @@ public class ResultPresenter implements Initializable {
             axis.setUpperBound(line.length + 1);
 
             axis = (NumberAxis) chart.getYAxis();
+            axis.setLabel(dir.getDescription());
             if (Double.compare(min, max) == 0) {
                 axis.setAutoRanging(false);
                 axis.setTickUnit(1);

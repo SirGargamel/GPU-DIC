@@ -6,19 +6,29 @@ package cz.tul.dic.output;
  */
 public enum Direction {
 
-    cDx,
-    cDy,
-    cDabs,
-    cExx,
-    cEyy,
-    cExy,
-    cEabs,
-    Dx,
-    Dy,
-    Dabs,
-    Exx,
-    Eyy,
-    Exy,
-    Eabs;
+    cDx("mm"),
+    cDy("mm"),
+    cDabs("mm"),
+    cExx("%"),
+    cEyy("%"),
+    cExy("%"),
+    cEabs("%"),
+    Dx("mm"),
+    Dy("mm"),
+    Dabs("mm"),
+    Exx("%"),
+    Eyy("%"),
+    Exy("%"),
+    Eabs("%");
+
+    private final String unit;
+
+    private Direction(String unit) {
+        this.unit = unit;
+    }
+
+    public String getDescription() {
+        return toString().concat(" [").concat(unit).concat("]");
+    }
 
 }
