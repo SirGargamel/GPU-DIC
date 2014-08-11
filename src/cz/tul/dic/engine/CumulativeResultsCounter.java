@@ -39,17 +39,21 @@ public class CumulativeResultsCounter {
     }
 
     private static double[][][] calculateCumulativeResult(final List<double[][][]> data, final int srcPos, final int destPos) {
-        double[][][] roundData = data.get(srcPos);
-        final double[][][] result = new double[roundData.length][roundData[0].length][Coordinates.DIMENSION];
+        double[][][] roundData = data.get(srcPos);        
+        final double[][][] result = new double[roundData.length][roundData[0].length][0];
 
+        int l;
         for (int i = srcPos; i <= destPos; i++) {
             roundData = data.get(i);
 
             for (int x = 0; x < result.length; x++) {
                 for (int y = 0; y < result[x].length; y++) {
                     if (roundData[x][y] != null) {
-                        result[x][y][Coordinates.X] += roundData[x][y][Coordinates.X];
-                        result[x][y][Coordinates.Y] += roundData[x][y][Coordinates.Y];
+                        l = roundData[x][y].length;
+                        result[x][y] = new double[l];
+                        for (int j = 0; j < l; j++) {
+                            result[x][y][j] += roundData[x][y][j];
+                        }
                     }
                 }
             }
