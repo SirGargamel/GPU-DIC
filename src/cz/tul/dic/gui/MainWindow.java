@@ -13,17 +13,22 @@ import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -38,6 +43,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javax.sound.midi.Patch;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
 import org.pmw.tinylog.Logger;
@@ -48,7 +54,6 @@ import org.pmw.tinylog.Logger;
  */
 public class MainWindow implements Initializable {
 
-    private static final boolean TEST_CASE = true;
     private static final String LAST_DIR = "lastDir";
 
     @FXML
@@ -80,7 +85,7 @@ public class MainWindow implements Initializable {
     private Timeline timeLine;
 
     @FXML
-    private void handleButtonActionInput(ActionEvent event) throws IOException, InterruptedException, ExecutionException {
+    private void handleButtonActionInput(ActionEvent event) throws IOException, InterruptedException, ExecutionException, ComputationException {
         final FileChooser fc = new FileChooser();
         final String lastDir = Preferences.userRoot().get(LAST_DIR, null);
         if (lastDir != null) {
@@ -95,14 +100,31 @@ public class MainWindow implements Initializable {
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files (*.bmp, *.jpg)", "*.bmp", "*.jpg"));
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*.config)", "*.config"));
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Batch job (*.scr)", "*.scr"));
         List<File> fileList = fc.showOpenMultipleDialog(null);
         if (fileList != null && !fileList.isEmpty()) {
-            loadInput(fileList);
+            if (fc.getSelectedExtensionFilter().getExtensions().contains("*.scr")) {
+                // load batch batch file
+                List<String> fileNames;
+                List<File> input = new ArrayList<>(1);
+                for (File f : fileList) {
+                    fileNames = Files.readAllLines(f.toPath());
+                    for (String s : fileNames) {
+                        // load each config and run it
+                        input.clear();
+                        input.add(new File(s.trim()));
+                        loadInput(input).get();
+                        handleButtonActionRun(null);
+                    }
+                }
+            } else {
+                loadInput(fileList);
+            }
             Preferences.userRoot().put(LAST_DIR, fileList.get(0).getAbsolutePath());
         }
     }
 
-    private void loadInput(List<File> fileList) {
+    private Task loadInput(List<File> fileList) {
         Task<String> worker = new Task<String>() {
             @Override
             protected String call() throws Exception {
@@ -207,6 +229,8 @@ public class MainWindow implements Initializable {
         });
         th.setDaemon(true);
         th.start();
+
+        return worker;
     }
 
     @FXML

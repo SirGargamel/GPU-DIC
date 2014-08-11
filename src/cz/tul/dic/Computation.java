@@ -27,9 +27,7 @@ public class Computation {
 
     public static void commenceComputation(TaskContainer tc) throws IOException, ComputationException {
         TaskContainerChecker.checkTaskValidity(tc);
-
-        final File in = (File) tc.getParameter(TaskParameter.IN);
-        final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
+        
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
@@ -43,15 +41,8 @@ public class Computation {
         EngineUtils.getInstance().computeTask(tc);
         time = System.nanoTime() - time;
         Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.WINDOW_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-
-        final StringBuilder sb = new StringBuilder();
-        sb.append(OUT_DIR.getAbsolutePath());
-        sb.append(File.separator);
-        sb.append(in.getName());
-        sb.append(File.separator);
-        sb.append(String.format("%02d", facetSize));
-        sb.append(".task");
-        TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
+        
+        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
@@ -101,9 +92,7 @@ public class Computation {
     public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax) throws ComputationException, IOException {
         commenceComputationDynamic(tc);
 
-        // strain sweep and export
-        final File in = (File) tc.getParameter(TaskParameter.IN);
-        final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
+        // strain sweep and export        
         for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
             StrainEstimator.computeStrain(tc);
@@ -123,16 +112,7 @@ public class Computation {
 //            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
             Exporter.export(tc);
 
-            final StringBuilder sb = new StringBuilder();
-            sb.append(OUT_DIR.getAbsolutePath());
-            sb.append(File.separator);
-            sb.append(in.getName());
-            sb.append(File.separator);
-            sb.append(String.format("%02d", facetSize));
-            sb.append("_");
-            sb.append(String.format("%02d", strainParam));
-            sb.append(".task");
-            TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
+            TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         }
     }
 
