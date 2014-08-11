@@ -1,6 +1,7 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.FpsManager;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -398,14 +399,8 @@ public class ResultPresenter implements Initializable {
         }
 
         public void displayData(final Direction dir) throws ComputationException {
-            double tickUnit = 1 / (double) fps;
-            final String unit;
-            if (fps > 999) {
-                tickUnit *= 1000;
-                unit = "us";
-            } else {
-                unit = "ms"; 
-            }
+            final FpsManager fpsM = new FpsManager(fps);
+            final double tickUnit = fpsM.getTickLength();
             final double[] line = Context.getInstance().getLineResult(x, y).get(dir);
 
             final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
@@ -432,7 +427,7 @@ public class ResultPresenter implements Initializable {
             axis.setTickUnit(tickUnit);
             axis.setLowerBound(0);
             axis.setUpperBound(line.length * tickUnit);
-            axis.setLabel(Lang.getString("Time").concat(" [".concat(unit).concat("]")));
+            axis.setLabel(Lang.getString("Time").concat(" [".concat(fpsM.getTickUnit()).concat("]")));
 
             axis = (NumberAxis) chart.getYAxis();
             axis.setLabel(dir.getDescription());
