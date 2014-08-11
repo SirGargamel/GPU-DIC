@@ -1,16 +1,23 @@
 package cz.tul.dic.gui;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.DefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
+import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
+import cz.tul.dic.gui.lang.Lang;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,6 +25,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import org.controlsfx.dialog.Dialogs;
 
 /**
  * FXML Controller class
@@ -45,7 +53,7 @@ public class ExpertSettings implements Initializable {
     private TextField textWindowSize;
 
     @FXML
-    private void handleButtonActionOk(ActionEvent event) {
+    private void handleButtonActionOk(ActionEvent event) throws InterruptedException, ExecutionException {
         final TaskContainer tc = Context.getInstance().getTc();
         if (tc != null) {
             tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, comboFGMode.getValue());
@@ -54,14 +62,13 @@ public class ExpertSettings implements Initializable {
             tc.setParameter(TaskParameter.INTERPOLATION, comboInterpolation.getValue());
             tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, Integer.valueOf(textFGSpacing.getText()));
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, Integer.valueOf(textTSValue.getText()));
-            tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, Integer.valueOf(textWindowSize.getText()));
 
             final String limits = textRoundLimits.getText();
             final int[] newLimits;
             if (limits != null && !limits.isEmpty()) {
-                final String[] split = limits.split(ROUND_SPLITTER);
+                final String[] split = limits.trim().split(ROUND_SPLITTER);
                 if (split.length == 2) {
-                    newLimits = new int[]{Integer.valueOf(split[0]), Integer.valueOf(split[1])};
+                    newLimits = new int[]{Integer.valueOf(split[0].trim()), Integer.valueOf(split[1].trim())};
                 } else {
                     newLimits = null;
                 }
@@ -69,9 +76,66 @@ public class ExpertSettings implements Initializable {
                 newLimits = null;
             }
             tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
-        }
-        
-        
+
+            final int newWs = Integer.valueOf(textWindowSize.getText());
+            final int oldWs = (int) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
+
+            if (newWs != oldWs) {
+                // recompute
+                Task<String> worker = new Task<String>() {
+
+                    @Override
+                    protected String call() throws Exception {
+                        String result = null;
+                        updateProgress(0, 2);
+                        try {
+                            StrainEstimator.computeStrain(tc);
+                            updateProgress(1, 2);
+                            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
+                        } catch (ComputationException ex) {
+                            result = ex.getLocalizedMessage();
+                        }
+                        updateProgress(2, 2);
+                        return result;
+                    }
+                };
+                Dialogs.create()
+                        .title(Lang.getString("Wait"))
+                        .message(Lang.getString("Computing"))
+                        .showWorkerProgress(worker);
+
+                Thread th = new Thread(worker);
+                th.setDaemon(true);
+                th.start();
+
+                th = new Thread(() -> {
+                    Platform.runLater(() -> {
+                        try {
+                            final String err = worker.get();
+                            if (err != null) {
+                                Dialogs.create()
+                                        .title(Lang.getString("error"))
+                                        .masthead(null)
+                                        .message(err)
+                                        .showWarning();
+
+                            }
+                        } catch (InterruptedException | ExecutionException ex) {
+                            Dialogs.create()
+                                    .title(Lang.getString("error"))
+                                    .masthead(null)
+                                    .message(ex.getLocalizedMessage())
+                                    .showException(ex);
+                        }
+                    });
+                });
+                th.setDaemon(true);
+                th.start();                                
+                
+                tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, newWs);
+            }                   
+        }                
+
         closeWindow();
     }
 
@@ -119,6 +183,7 @@ public class ExpertSettings implements Initializable {
         comboInterpolation.getSelectionModel().select(DefaultValues.DEFAULT_INTERPOLATION);
         textFGSpacing.setText(String.valueOf(DefaultValues.DEFAULT_FACET_SPACING));
         textTSValue.setText(String.valueOf(DefaultValues.DEFAULT_TASK_SPLIT_PARAMETER));
+        textWindowSize.setText(String.valueOf(DefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER));
         textRoundLimits.setText("");
 
         final TaskContainer tc = Context.getInstance().getTc();
@@ -154,12 +219,12 @@ public class ExpertSettings implements Initializable {
             o = tc.getParameter(TaskParameter.ROUND_LIMITS);
             if (o != null) {
                 final int[] limits = (int[]) o;
-                textFGSpacing.setText(Integer.toString(limits[0]) + ", " + Integer.toString(limits[1]));
+                textRoundLimits.setText(Integer.toString(limits[0]) + ", " + Integer.toString(limits[1]));
             }
 
-            o = tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM);
-            if (o != null) {                
-                textFGSpacing.setText(o.toString());
+            o = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
+            if (o != null) {
+                textWindowSize.setText(o.toString());
             }
         }
     }
