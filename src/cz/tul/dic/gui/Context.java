@@ -9,6 +9,7 @@ import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.pmw.tinylog.Logger;
@@ -68,24 +69,18 @@ public class Context {
         return result;
     }
 
-    public double[] getLineResult(final int x, final int y, final Direction dir) throws ComputationException {
+    public Map<Direction, double[]> getLineResult(final int x, final int y) throws ComputationException {
         Map<Integer, Map<Direction, double[]>> m = exportCacheLines.get(x);
         if (m == null) {
             m = new HashMap<>();
-            exportCacheLines.put(x, m);                        
+            exportCacheLines.put(x, m);
         }
 
-        Map<Direction, double[]> m2 = m.get(y);
-        if (m2 == null) {
-            m2 = new HashMap<>();
-            m.put(y, m2);
-        }
-
-        double[] result = m2.get(dir);
+        Map<Direction, double[]> result = m.get(y);
         if (result == null) {
             try {
-                Exporter.export(tc, ExportTask.generateLineExport(dir, ExportTarget.GUI, this, x, y));
-                result = m2.get(dir);
+                Exporter.export(tc, ExportTask.generateLineExport(ExportTarget.GUI, this, x, y));
+                result = m.get(y);
             } catch (IOException ex) {
                 Logger.error(ex, "Unexpected IO error.");
             }
@@ -108,8 +103,8 @@ public class Context {
         m.put(dir, (BufferedImage) data);
     }
 
-    public void storeLineExport(final Object data, final int x, final int y, final ExportMode mode, final Direction dir) {
-        if (!(data instanceof double[])) {
+    public void storeLineExport(final Map<Direction, double[]> data, final int x, final int y, final ExportMode mode) {
+        if (!(data instanceof EnumMap)) {
             throw new IllegalArgumentException("Illegal type of data - " + data.getClass());
         }
 
@@ -119,13 +114,6 @@ public class Context {
             exportCacheLines.put(x, m);
         }
 
-        Map<Direction, double[]> m2 = m.get(y);
-        if (m2 == null) {
-            m2 = new HashMap<>();
-            m.put(y, m2);
-        }
-
-        m2.put(dir, (double[]) data);
-
+        m.put(y, data);
     }
 }

@@ -8,6 +8,7 @@ import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportUtils;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Map;
 
 public class ExportTargetGUI implements IExportTarget {
 
@@ -18,8 +19,8 @@ public class ExportTargetGUI implements IExportTarget {
         }
         if (data instanceof double[][]) {
             exportImage((double[][]) data, direction, targetParam, dataParams, tc);
-        } else if (data instanceof double[]) {
-            exportLine((double[]) data, direction, targetParam, dataParams, tc);
+        } else if (data instanceof Map) {
+            exportLine((Map<Direction, double[]>) data, targetParam, dataParams, tc);
         } else if (data != null) {
             throw new IllegalArgumentException("Illegal type of data - " + targetParam.getClass());
         }
@@ -43,12 +44,12 @@ public class ExportTargetGUI implements IExportTarget {
         context.storeMapExport(overlay, position, ExportMode.MAP, direction);
     }
 
-    private void exportLine(final double[] data, Direction direction, final Object targetParam, int[] dataParams, final TaskContainer tc) {
+    private void exportLine(final Map<Direction, double[]> data, final Object targetParam, int[] dataParams, final TaskContainer tc) {
         if (dataParams.length < 2) {
             throw new IllegalArgumentException("Not enough data parameters.");
         }
         final Context context = (Context) targetParam;
-        context.storeLineExport(data, dataParams[0], dataParams[1], ExportMode.POINT, direction);
+        context.storeLineExport(data, dataParams[0], dataParams[1], ExportMode.POINT);
     }
 
     @Override

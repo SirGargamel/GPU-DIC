@@ -66,13 +66,13 @@ public class ExportTargetCsv implements IExportTarget {
                     l = vals.length;
                 }
             }
-            final String[][] out = new String[Direction.values().length][l + 1];
+            final String[][] out = new String[l + 1][Direction.values().length];
             // header
             for (Direction d : Direction.values()) {
                 out[0][d.ordinal()] = d.toString();
             }
             // data
-
+            
             for (int i = 0; i < l; i++) {
                 for (Direction d : Direction.values()) {
                     vals = data.get(d);

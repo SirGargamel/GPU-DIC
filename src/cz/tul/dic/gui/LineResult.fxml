@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane id="AnchorPane" prefHeight="200.0" prefWidth="350.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.LineResult">
-    <children>
-        <LineChart fx:id="chart" layoutX="0.0" layoutY="0.0" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <children><BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<center>
+        <LineChart fx:id="chart" layoutX="0.0" layoutY="0.0" legendVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
             <xAxis>
                 <NumberAxis autoRanging="false" forceZeroInRange="false" label="%Round" minorTickVisible="false" side="BOTTOM" />
             </xAxis>
@@ -14,5 +17,14 @@
                 <NumberAxis forceZeroInRange="false" label="%Value" side="LEFT" tickUnit="1.0" />
             </yAxis>
         </LineChart>
+</center>
+<bottom><Button fx:id="buttonSave" mnemonicParsing="false" onAction="#handleButtonActionSave" text="%Save" BorderPane.alignment="CENTER" />
+</bottom>
+<opaqueInsets>
+<Insets />
+</opaqueInsets></BorderPane>
     </children>
+<opaqueInsets>
+<Insets />
+</opaqueInsets>
 </AnchorPane>

@@ -53,8 +53,9 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     case cExy:
                     case cEabs:
                         results = tc.getCumulativeStrain(r);
+                        break;
                     default:
-                        throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                        throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
                 }
 
                 if (results == null || results.length < x || results[0].length < y || results[x][y] == null) {

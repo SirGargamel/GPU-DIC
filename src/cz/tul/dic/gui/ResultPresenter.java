@@ -3,7 +3,6 @@ package cz.tul.dic.gui;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.target.ExportTarget;
@@ -42,6 +41,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
@@ -123,8 +123,7 @@ public class ResultPresenter implements Initializable {
                     s.getWindow().setWidth(width);
                     s.getWindow().setHeight(image.getParent().getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
                 }
-
-                final Bounds b = image.getParent().getParent().getBoundsInParent();
+                
                 final Image img = SwingFXUtils.toFXImage(i, null);
                 image.setImage(img);
             } else {
@@ -205,7 +204,7 @@ public class ResultPresenter implements Initializable {
                 .message(Lang.getString("ChooseDataType"))
                 .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2), new Dialogs.CommandLink(c3, t3));
         final String val = a.textProperty().get();
-        final TaskContainer tc = Context.getInstance().getTc();        
+        final TaskContainer tc = Context.getInstance().getTc();
         if (val.equals(c1)) {
             final ExportTarget et = determineTarget();
             switch (et) {
@@ -217,8 +216,8 @@ public class ResultPresenter implements Initializable {
                     break;
             }
         } else if (val.equals(c2)) {
-            Exporter.export(tc, ExportTask.generateLineExport(choiceDir.getValue(), ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, lastX, lastY)), lastX, lastY));
-        } else if (val.equals(c3)) {            
+            Exporter.export(tc, ExportTask.generateLineExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, lastX, lastY)), lastX, lastY));
+        } else if (val.equals(c3)) {
             Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), determineType()));
         }
     }
@@ -284,13 +283,16 @@ public class ResultPresenter implements Initializable {
             try {
                 lastX = (int) Math.round(t.getX());
                 lastY = (int) Math.round(t.getY());
-                final double[] line = Context.getInstance().getLineResult(lastX, lastY, choiceDir.getValue());
+                final Map<Direction, double[]> data = Context.getInstance().getLineResult(lastX, lastY);
+                final double[] line = data.get(choiceDir.getValue());
                 if (line != null) {
                     final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
                     final Stage stage = new Stage();
 
                     @SuppressWarnings("unchecked")
-                    final LineChart<Number, Number> chart = (LineChart<Number, Number>) root.getChildrenUnmodifiable().get(0);
+                    final BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
+                    @SuppressWarnings("unchecked")
+                    final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
 
                     final ChartHandler ch = new ChartHandler(lastX, lastY, chart);
                     charts.put(stage, ch);
@@ -300,6 +302,7 @@ public class ResultPresenter implements Initializable {
                         stage.setX(stage.getX() + lastX + 35);
                         stage.setY(stage.getY() + lastY + 10);
                     });
+                    chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, lastY});
 
                     stage.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(lastX).concat(";").concat(Integer.toString(lastY))));
                     stage.setScene(new Scene(root));
@@ -398,7 +401,7 @@ public class ResultPresenter implements Initializable {
         }
 
         public void displayData(final Direction dir) throws ComputationException {
-            final double[] line = Context.getInstance().getLineResult(x, y, dir);
+            final double[] line = Context.getInstance().getLineResult(x, y).get(dir);
 
             final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
             chart.setPrefSize(width, PREF_SIZE_H);

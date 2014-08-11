@@ -61,12 +61,15 @@ public class ExportUtils {
     public static double calculateDisplacement(final double[] def, final Direction dir) throws ComputationException {
         double result;
         switch (dir) {
+            case cDx:
             case Dx:
                 result = def[0];
                 break;
+            case cDy:
             case Dy:
                 result = def[1];
                 break;
+            case cDabs:
             case Dabs:
                 result = Math.sqrt(def[0] * def[0] + def[1] * def[1]);
                 break;
@@ -81,15 +84,19 @@ public class ExportUtils {
         double result;
 
         switch (dir) {
+            case cExx:
             case Exx:
                 result = results[StrainParameter.Exx];
                 break;
+            case cEyy:
             case Eyy:
                 result = results[StrainParameter.Eyy];
                 break;
+            case cExy:
             case Exy:
                 result = results[StrainParameter.Exy];
                 break;
+            case cEabs:
             case Eabs:
                 final double val1 = results[StrainParameter.Exx];
                 final double val2 = results[StrainParameter.Eyy];
@@ -163,15 +170,22 @@ public class ExportUtils {
         switch (dir) {
             case Dabs:
             case Eabs:
+            case cDabs:
+            case cEabs:
                 drawVerticalBar(out, max);
                 break;
             case Dy:
             case Eyy:
             case Exy:
+            case cDy:
+            case cEyy:
+            case cExy:
                 drawVerticalBar(out, max, min);
                 break;
             case Dx:
             case Exx:
+            case cDx:
+            case cExx:
                 drawHorizontalBar(out, max, min);
                 break;
             default:
