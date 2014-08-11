@@ -10,7 +10,6 @@ import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.generators.DeformationGenerator;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -134,10 +133,10 @@ public class OpenCLSplitter extends TaskSplitter {
         return new ComputationTask(image1, image2, sublist, checkedDeformations, subDivision);
     }
 
-    private boolean isMemOk(final long deformationCount, final int facetCount, final int facetSize, final int deformationArraySize) {
+    private boolean isMemOk(final long deformationCount, final long facetCount, final long facetSize, final long deformationArraySize) {
         final long imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
         final long deformationsSize = deformationCount * SIZE_FLOAT;
-        final int reserve = 32 * SIZE_INT;
+        final long reserve = 32 * SIZE_INT;
         final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
         final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;
         final long resultSize = facetCount * (deformationCount / deformationArraySize) * SIZE_FLOAT;
