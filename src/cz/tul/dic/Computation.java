@@ -40,7 +40,7 @@ public class Computation {
         long time = System.nanoTime();
         EngineUtils.getInstance().computeTask(tc);
         time = System.nanoTime() - time;
-        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.WINDOW_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
         
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
@@ -70,7 +70,7 @@ public class Computation {
         ComplexTaskSolver cts = new ComplexTaskSolver();
         cts.solveComplexTask(tc);
         time = System.nanoTime() - time;
-        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.WINDOW_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
         final StringBuilder sb = new StringBuilder();
         sb.append(OUT_DIR.getAbsolutePath());
@@ -117,7 +117,7 @@ public class Computation {
     }
 
     public static void commenceComputationDynamicWindowSizeSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax, final int windowSize) throws ComputationException, IOException {
-        tc.setParameter(TaskParameter.WINDOW_SIZE, windowSize);
+        tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, windowSize);
 
         TaskContainerChecker.checkTaskValidity(tc);
 
@@ -135,7 +135,7 @@ public class Computation {
         ComplexTaskSolver cts = new ComplexTaskSolver();
         cts.solveComplexTask(tc);
         time = System.nanoTime() - time;
-        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.WINDOW_SIZE) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.cDx), r));

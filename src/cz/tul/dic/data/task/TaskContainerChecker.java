@@ -123,10 +123,10 @@ public class TaskContainerChecker {
             tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION);
         }
         
-        final Object ws = tc.getParameter(TaskParameter.WINDOW_SIZE);
+        final Object ws = tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM);
         if (ws == null) {
             Logger.warn("Adding default local search window size.");
-            tc.setParameter(TaskParameter.WINDOW_SIZE, DefaultValues.DEFAULT_WINDOW_SIZE);
+            tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, DefaultValues.DEFAULT_WINDOW_SIZE);
         }
     }
 

@@ -29,7 +29,7 @@ public enum TaskParameter {
     DISPLACEMENT_CALCULATION(DisplacementCalculation.class),
     STRAIN_ESTIMATION_METHOD(StrainEstimationMethod.class),
     STRAIN_ESTIMATION_PARAM(Integer.class),
-    WINDOW_SIZE(Integer.class),
+    LOCAL_SEARCH_PARAM(Integer.class),
     ;
 
     private final Class type;

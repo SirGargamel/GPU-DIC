@@ -22,7 +22,7 @@ public class FineLocalSearch {
         final int width = in.getWidth();
         final int height = in.getHeight();
         final Image out = tc.getImage(nextR);
-        final int windowSize = (int) tc.getParameter(TaskParameter.WINDOW_SIZE);
+        final int windowSize = (int) tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM);
 
         double[] d;
         int colorIn, colorOut, dif, best, newX, newY;

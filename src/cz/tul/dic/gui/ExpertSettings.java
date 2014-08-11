@@ -54,7 +54,7 @@ public class ExpertSettings implements Initializable {
             tc.setParameter(TaskParameter.INTERPOLATION, comboInterpolation.getValue());
             tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, Integer.valueOf(textFGSpacing.getText()));
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, Integer.valueOf(textTSValue.getText()));
-            tc.setParameter(TaskParameter.WINDOW_SIZE, Integer.valueOf(textWindowSize.getText()));
+            tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, Integer.valueOf(textWindowSize.getText()));
 
             final String limits = textRoundLimits.getText();
             final int[] newLimits;
@@ -70,6 +70,8 @@ public class ExpertSettings implements Initializable {
             }
             tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
         }
+        
+        
         closeWindow();
     }
 
@@ -155,7 +157,7 @@ public class ExpertSettings implements Initializable {
                 textFGSpacing.setText(Integer.toString(limits[0]) + ", " + Integer.toString(limits[1]));
             }
 
-            o = tc.getParameter(TaskParameter.WINDOW_SIZE);
+            o = tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM);
             if (o != null) {                
                 textFGSpacing.setText(o.toString());
             }
