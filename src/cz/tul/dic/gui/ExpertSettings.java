@@ -8,7 +8,7 @@ import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
-import cz.tul.dic.engine.strain.StrainEstimator;
+import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.gui.lang.Lang;
 import java.net.URL;
@@ -78,64 +78,66 @@ public class ExpertSettings implements Initializable {
             tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
 
             final int newWs = Integer.valueOf(textWindowSize.getText());
-            final int oldWs = (int) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
+            final Object old = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
+            if (old != null) {
+                final int oldWs = (int) old;
+                if (newWs != oldWs) {
+                    // recompute
+                    Task<String> worker = new Task<String>() {
 
-            if (newWs != oldWs) {
-                // recompute
-                Task<String> worker = new Task<String>() {
-
-                    @Override
-                    protected String call() throws Exception {
-                        String result = null;
-                        updateProgress(0, 2);
-                        try {
-                            StrainEstimator.computeStrain(tc);
-                            updateProgress(1, 2);
-                            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
-                        } catch (ComputationException ex) {
-                            result = ex.getLocalizedMessage();
+                        @Override
+                        protected String call() throws Exception {
+                            String result = null;
+                            updateProgress(0, 2);
+                            try {
+                                new StrainEstimation().computeStrain(tc);
+                                updateProgress(1, 2);
+                                tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
+                            } catch (ComputationException ex) {
+                                result = ex.getLocalizedMessage();
+                            }
+                            updateProgress(2, 2);
+                            return result;
                         }
-                        updateProgress(2, 2);
-                        return result;
-                    }
-                };
-                Dialogs.create()
-                        .title(Lang.getString("Wait"))
-                        .message(Lang.getString("Computing"))
-                        .masthead(null)
-                        .showWorkerProgress(worker);
+                    };
+                    Dialogs.create()
+                            .title(Lang.getString("Wait"))
+                            .message(Lang.getString("Computing"))
+                            .masthead(null)
+                            .showWorkerProgress(worker);
 
-                Thread th = new Thread(worker);
-                th.setDaemon(true);
-                th.start();
+                    Thread th = new Thread(worker);
+                    th.setDaemon(true);
+                    th.start();
 
-                th = new Thread(() -> {
-                    try {
-                        final String err = worker.get();
-                        if (err != null) {
+                    th = new Thread(() -> {
+                        try {
+                            final String err = worker.get();
+                            if (err != null) {
+                                Platform.runLater(() -> {
+                                    Dialogs.create()
+                                            .title(Lang.getString("error"))
+                                            .masthead(null)
+                                            .message(err)
+                                            .showWarning();
+                                });
+
+                            }
+                        } catch (InterruptedException | ExecutionException ex) {
                             Platform.runLater(() -> {
                                 Dialogs.create()
                                         .title(Lang.getString("error"))
                                         .masthead(null)
-                                        .message(err)
-                                        .showWarning();
+                                        .message(ex.getLocalizedMessage())
+                                        .showException(ex);
                             });
-
                         }
-                    } catch (InterruptedException | ExecutionException ex) {
-                        Platform.runLater(() -> {
-                            Dialogs.create()
-                                    .title(Lang.getString("error"))
-                                    .masthead(null)
-                                    .message(ex.getLocalizedMessage())
-                                    .showException(ex);
-                        });
-                    }
-                });
-                th.setDaemon(true);
-                th.start();
+                    });
+                    th.setDaemon(true);
+                    th.start();
 
-                tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, newWs);
+                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, newWs);
+                }
             }
         }
 
