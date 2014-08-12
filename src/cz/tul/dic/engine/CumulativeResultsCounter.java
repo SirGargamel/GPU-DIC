@@ -36,7 +36,9 @@ public class CumulativeResultsCounter {
                     for (int y = 0; y < result[x].length; y++) {
                         if (roundData[x][y] != null) {
                             l = roundData[x][y].length;
-                            result[x][y] = new double[l];
+                            if (result[x][y] == null) {
+                                result[x][y] = new double[l];
+                            }
                             for (int j = 0; j < l; j++) {
                                 result[x][y][j] += roundData[x][y][j];
                             }
