@@ -6,7 +6,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.CumulativeResultsCounter;
-import cz.tul.dic.engine.EngineUtils;
+import cz.tul.dic.engine.Engine;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
@@ -28,7 +28,6 @@ import org.pmw.tinylog.Logger;
 public class ComplexTaskSolver extends Observable {
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
-        final int roundCount = TaskContainerUtils.getRounds(tc).size();
         tc.clearResultData();
 
         final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
@@ -36,12 +35,12 @@ public class ComplexTaskSolver extends Observable {
         final int baseRound = rounds[0];
 
         setChanged();
-        notifyObservers(new int[]{currentRound, roundCount});
+        notifyObservers(currentRound);
 
         final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
         final TaskContainer tcR = rrm.getTc();
-        
+
         final List<Double> shifts = new LinkedList<>();
 
         int r, nextR;
@@ -49,7 +48,12 @@ public class ComplexTaskSolver extends Observable {
             r = e.getKey();
             nextR = e.getValue();
 
+            setChanged();
+            notifyObservers(new Object[]{currentRound, CircleROIManager.class});
             computeRound(r, nextR, crm);
+
+            setChanged();
+            notifyObservers(new Object[]{currentRound, RectROIManager.class});
             if (crm.hasMoved()) {
                 computeRound(r, nextR, rrm);
             } else {
@@ -57,23 +61,26 @@ public class ComplexTaskSolver extends Observable {
                 final Image img = rrm.getTc().getImage(r);
                 rrm.getTc().setDisplacement(r, new double[img.getWidth()][img.getHeight()][2]);
             }
-            currentRound++;
-            setChanged();
-            notifyObservers(new int[]{currentRound, roundCount});
-            exportRound(tcR, r);
 
             tc.setResults(r, tcR.getResults(r));
             tc.setDisplacement(r, tcR.getDisplacement(r));
             tc.setStrain(r, tcR.getStrain(r));
-            
+
+            exportRound(tcR, r);
             shifts.add(crm.getShiftBottom());
+
+            currentRound++;
+            setChanged();
+            notifyObservers(currentRound);
         }
-        
+
+        setChanged();
+        notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
         tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
         tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
-        
+
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
-        
+
         final String[][] shiftsS = new String[1][shifts.size()];
         for (int i = 0; i < shifts.size(); i++) {
             shiftsS[0][i] = Double.toString(shifts.get(i));
@@ -82,7 +89,7 @@ public class ComplexTaskSolver extends Observable {
     }
 
     private void computeRound(final int r, final int nextR, final ROIManager rm) throws ComputationException {
-        EngineUtils.getInstance().computeRound(rm.getTc(), r, nextR);
+        Engine.getInstance().computeRound(rm.getTc(), r, nextR);
         rm.generateNextRound(r, nextR);
     }
 

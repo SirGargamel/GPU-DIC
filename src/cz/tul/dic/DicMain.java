@@ -99,7 +99,7 @@ public class DicMain extends Application {
             // 9905121m
             // 9820088m
             final int fs1 = 20;
-            final int fs2 = 20;
+            final int fs2 = 40;
             final int ps1 = 20;
             final int ps2 = 20;
             for (int size = fs1; size <= fs2; size++) {

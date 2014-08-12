@@ -3,7 +3,7 @@ package cz.tul.dic.engine.strain;
 import cz.tul.dic.data.task.DefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import java.util.Arrays;
+import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;

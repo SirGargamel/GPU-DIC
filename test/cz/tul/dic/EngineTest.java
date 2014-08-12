@@ -8,7 +8,7 @@ import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CumulativeResultsCounter;
-import cz.tul.dic.engine.EngineUtils;
+import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
@@ -158,7 +158,7 @@ public class EngineTest {
         tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, taskSplit);
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, fgm);
 
-        EngineUtils.getInstance().computeTask(tc);
+        Engine.getInstance().computeTask(tc);
 
         return tc;
     }
@@ -214,7 +214,7 @@ public class EngineTest {
 
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
 
-        EngineUtils.getInstance().computeTask(tc);
+        Engine.getInstance().computeTask(tc);
 
         return tc;
     }

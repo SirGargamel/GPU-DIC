@@ -8,8 +8,8 @@ package cz.tul.dic;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainParameter;
 import java.io.File;
 import java.net.URISyntaxException;
@@ -44,7 +44,7 @@ public class StrainEstimatorTest {
         final double[][][] displacement = new double[img.getWidth()][img.getHeight()][2];
         tc.setDisplacement(ROUND, displacement);
 
-        StrainEstimator.computeStrain(tc, ROUND);
+        new StrainEstimation().computeStrain(tc, ROUND);
 
         final double[][][] strains = tc.getStrain(ROUND);
 

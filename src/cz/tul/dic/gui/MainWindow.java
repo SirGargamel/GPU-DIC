@@ -6,7 +6,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.EngineUtils;
+import cz.tul.dic.engine.Engine;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.NameGenerator;
@@ -20,15 +20,12 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -43,7 +40,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javax.sound.midi.Patch;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
 import org.pmw.tinylog.Logger;
@@ -523,10 +519,12 @@ public class MainWindow implements Initializable {
 
         private final ComplexTaskSolver cts;
         private final TaskContainer tc;
+        private final int roundCount;
 
         public ComputationObserver(ComplexTaskSolver cts, final TaskContainer tc) {
             this.cts = cts;
             this.tc = tc;
+            roundCount = TaskContainerUtils.getRounds(tc).keySet().size();
         }
 
         @Override
@@ -537,20 +535,36 @@ public class MainWindow implements Initializable {
                     cts.addObserver(this);
                     cts.solveComplexTask(tc);
                 } else {
-                    EngineUtils.getInstance().addObserver(this);
-                    EngineUtils.getInstance().computeTask(tc);
+                    Engine.getInstance().addObserver(this);
+                    Engine.getInstance().computeTask(tc);
                 }
             } catch (ComputationException ex) {
                 result = ex;
             }
+            Engine.getInstance().deleteObserver(this);
+            cts.deleteObserver(this);
+
             return result;
         }
 
         @Override
-        public void update(Observable o, Object arg) {
-            if (arg instanceof int[]) {
-                final int[] data = (int[]) arg;
-                updateProgress(data[0], data[1]);
+        public void update(Observable o, Object arg) {            
+            if (arg instanceof Integer) {
+                updateProgress((int) arg, roundCount);
+            } else if (arg instanceof Object[]) {
+                final Object[] data = (Object[]) arg;
+                final int round = (int) data[0];
+                updateProgress(round, roundCount);
+                
+                final Class cls = (Class) data[1];
+                final StringBuilder sb = new StringBuilder();
+                sb.append("[");
+                sb.append(Lang.getString("Round"));
+                sb.append(" ");
+                sb.append(round);
+                sb.append("] ");
+                sb.append(Lang.getString(cls.getSimpleName()));
+                updateMessage(sb.toString());
             }
         }
     }

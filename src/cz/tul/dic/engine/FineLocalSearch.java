@@ -3,20 +3,37 @@ package cz.tul.dic.engine;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Observable;
+import java.util.Set;
 import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Ječmen
  */
-public class FineLocalSearch {
+public class FineLocalSearch extends Observable {
 
-    public static void searchForBestPosition(final TaskContainer tc, final int r, final int nextR) {
+    public void searchForBestPosition(final TaskContainer tc) {
+        final Set<Entry<Integer, Integer>> rounds = TaskContainerUtils.getRounds(tc).entrySet();
+        
+        int counter = 0;
+        for (Entry<Integer, Integer> e : rounds) {
+            searchForBestPosition(tc, e.getKey(), e.getValue());
+            
+            counter++;
+            setChanged();
+            notifyObservers(counter);
+        }
+    }
+    
+    public void searchForBestPosition(final TaskContainer tc, final int r, final int nextR) {
         final double[][][] results = tc.getDisplacement(r);
         final Image in = tc.getImage(r);
         final int width = in.getWidth();

@@ -6,8 +6,9 @@ import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.CumulativeResultsCounter;
-import cz.tul.dic.engine.EngineUtils;
-import cz.tul.dic.engine.strain.StrainEstimator;
+import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.target.ExportTarget;
 import cz.tul.dic.output.ExportTask;
@@ -38,7 +39,7 @@ public class Computation {
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
 
         long time = System.nanoTime();
-        EngineUtils.getInstance().computeTask(tc);
+        Engine.getInstance().computeTask(tc);
         time = System.nanoTime() - time;
         Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
         
@@ -92,10 +93,11 @@ public class Computation {
     public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax) throws ComputationException, IOException {
         commenceComputationDynamic(tc);
 
-        // strain sweep and export        
+        // strain sweep and export       
+        final StrainEstimation strain = new StrainEstimation();
         for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
-            StrainEstimator.computeStrain(tc);
+            strain.computeStrain(tc);
             tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 
             tc.getExports().clear();
@@ -144,10 +146,11 @@ public class Computation {
         }
         Exporter.export(tc);
 
-        // strain sweep and export        
+        // strain sweep and export   
+        final StrainEstimation strain = new StrainEstimation();
         for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
-            StrainEstimator.computeStrain(tc);
+            strain.computeStrain(tc);
             tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 
             tc.getExports().clear();
