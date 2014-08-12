@@ -58,6 +58,7 @@ public class DicMain extends Application {
 
         stage.setScene(scene);
         stage.setTitle(rb.getString("Title"));
+        stage.setResizable(false);
         stage.show();
     }
 

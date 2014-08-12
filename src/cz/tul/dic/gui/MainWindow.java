@@ -388,6 +388,7 @@ public class MainWindow implements Initializable {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
+            stage.setResizable(false);
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading Results dialog from JAR.\n{0}", e);

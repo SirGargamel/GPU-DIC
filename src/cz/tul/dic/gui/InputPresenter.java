@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.tul.dic.gui;
 
 import cz.tul.dic.data.roi.CircularROI;
@@ -23,9 +18,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -35,7 +31,7 @@ import javafx.scene.shape.Shape;
  *
  * @author Petr Jecmen
  */
-public class InputPresenter extends Pane implements Initializable, ChangeListener<String>, Observer {
+public class InputPresenter extends ScrollPane implements Initializable, ChangeListener<String>, Observer {
 
     protected int imageIndex;
     protected Set<Shape> rois;
@@ -73,8 +69,6 @@ public class InputPresenter extends Pane implements Initializable, ChangeListene
 
         Platform.runLater(() -> {
             image.setImage(img);
-            image.setFitWidth(img.getWidth());
-            image.setFitHeight(img.getHeight());
 
             getChildren().clear();
             getChildren().add(image);
@@ -126,9 +120,6 @@ public class InputPresenter extends Pane implements Initializable, ChangeListene
 
         image = new ImageView();
         image.setPreserveRatio(true);
-
-        getChildren().clear();
-        getChildren().add(image);
     }
 
     public Image getImage() {

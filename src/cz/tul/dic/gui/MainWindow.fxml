@@ -11,26 +11,24 @@
             <center>
                 <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                     <center>      
-                        <AnchorPane opacity="0.9" BorderPane.alignment="CENTER">
-                            <children>                                          
-                                <cz.tul.dic.gui.InputPresenter fx:id="imagePane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />                        
-                            </children>
-                        </AnchorPane>
+                        <cz.tul.dic.gui.InputPresenter fx:id="imagePane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />                        
                     </center>
                     <bottom>
                         <HBox maxHeight="30.0" prefHeight="100.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="BOTTOM_CENTER">
                             <children>
                                 <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" />
                                 <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#handleButtonActionPlay">
-<HBox.margin>
-<Insets />
-</HBox.margin></Button>
+                                    <HBox.margin>
+                                        <Insets />
+                                    </HBox.margin>
+                                </Button>
                                 <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#handleButtonActionStop" />
-                                <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" /><TextField fx:id="textIndex" editable="false" prefHeight="25.0" prefWidth="25.0" />
+                                <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" />
+                                <TextField fx:id="textIndex" editable="false" prefHeight="25.0" prefWidth="25.0" />
                             </children>
-<BorderPane.margin>
-<Insets bottom="2.0" left="2.0" top="2.0" />
-</BorderPane.margin>
+                            <BorderPane.margin>
+                                <Insets bottom="2.0" left="2.0" top="2.0" />
+                            </BorderPane.margin>
                         </HBox>
                     </bottom>
                 </BorderPane>
@@ -39,28 +37,31 @@
                 <HBox maxHeight="30.0" prefHeight="100.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
                     <children>
                         <Button fx:id="buttonRun" layoutX="10.0" layoutY="100.0" onAction="#handleButtonActionRun" text="%Run" />
-                        <Button fx:id="buttonResults" layoutX="10.0" layoutY="135.0" onAction="#handleButtonActionResults" text="%Results" /><Button fx:id="buttonSave" mnemonicParsing="false" onAction="#handleButtonActionSave" text="%Save">
-<HBox.margin>
-<Insets />
-</HBox.margin></Button>
+                        <Button fx:id="buttonResults" layoutX="10.0" layoutY="135.0" onAction="#handleButtonActionResults" text="%Results" />
+                        <Button fx:id="buttonSave" mnemonicParsing="false" onAction="#handleButtonActionSave" text="%Save">
+                            <HBox.margin>
+                                <Insets />
+                            </HBox.margin>
+                        </Button>
                     </children>
-<BorderPane.margin>
-<Insets left="2.0" />
-</BorderPane.margin>
+                    <BorderPane.margin>
+                        <Insets left="2.0" />
+                    </BorderPane.margin>
                 </HBox>
             </bottom>
             <right>
                 <VBox spacing="5.0" BorderPane.alignment="CENTER">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#handleButtonActionInput" text="%Input" /><Button fx:id="buttonExport" mnemonicParsing="false" onAction="#handleButtonActionExport" text="%Export" />
+                        <Button mnemonicParsing="false" onAction="#handleButtonActionInput" text="%Input" />
+                        <Button fx:id="buttonExport" mnemonicParsing="false" onAction="#handleButtonActionExport" text="%Export" />
                         <Button fx:id="buttonROI" layoutX="10.0" layoutY="70.0" onAction="#handleButtonActionROI" text="%ROI" />
                         <Label fx:id="labelFs" layoutX="10.0" layoutY="40.0" text="%fs" />
                         <TextField fx:id="textFs" layoutX="130.0" layoutY="40.0" onKeyTyped="#handleTextKeyTyped" prefWidth="55.0" BorderPane.alignment="CENTER" />
                         <Button fx:id="buttonExpert" layoutX="130.0" layoutY="70.0" onAction="#handleButtonActionExpert" text="%Expert" />
                     </children>
-<BorderPane.margin>
-<Insets left="2.0" />
-</BorderPane.margin>
+                    <BorderPane.margin>
+                        <Insets left="2.0" />
+                    </BorderPane.margin>
                 </VBox>
             </right>
             
