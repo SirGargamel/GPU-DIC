@@ -10,7 +10,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.engine.strain.StrainParameter;
+import cz.tul.dic.engine.strain.StrainResult;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -51,9 +51,9 @@ public class StrainEstimatorTest {
         for (int x = 0; x < img.getWidth(); x++) {
             for (int y = 0; y < img.getHeight(); y++) {
                 Assert.assertNotNull(strains[x][y]);
-                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainParameter.Exx]));
-                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainParameter.Eyy]));
-                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainParameter.Exy]));
+                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainResult.Exx]));
+                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainResult.Eyy]));
+                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainResult.Exy]));
             }
         }
     }

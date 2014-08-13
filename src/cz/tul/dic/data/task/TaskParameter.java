@@ -24,6 +24,7 @@ public enum TaskParameter {
     TASK_SPLIT_METHOD(TaskSplitMethod.class),
     TASK_SPLIT_PARAM(Integer.class),
     INTERPOLATION(Interpolation.class),
+    MM_TO_PX_RATIO(Double.class),
     RESULT_COMPILATION(ResultCompilation.class),
     ROUND_LIMITS(int[].class),
     DISPLACEMENT_CALCULATION(DisplacementCalculation.class),

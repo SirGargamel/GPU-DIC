@@ -27,6 +27,7 @@ public interface DefaultValues {
     int DEFAULT_FACET_SIZE = 7;
     Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;
     KernelType DEFAULT_KERNEL = KernelType.CL_1D_I_V_LL_MC_D;
+    double DEFAULT_PX_TO_MM_RATIO = 1;
     ResultCompilation DEFAULT_RESULT_COMPILATION = ResultCompilation.MAJOR_AVERAGING;
     StrainEstimationMethod DEFAULT_STRAIN_ESTIMATION_METHOD = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
     int DEFAULT_STRAIN_ESTIMATION_PARAMETER = 20;

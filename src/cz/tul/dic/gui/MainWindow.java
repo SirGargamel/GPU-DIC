@@ -7,9 +7,13 @@ import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
+import static cz.tul.dic.gui.PxToMmMapperController.EXTRA_HEIGHT;
+import static cz.tul.dic.gui.PxToMmMapperController.EXTRA_WIDTH;
+import static cz.tul.dic.gui.PxToMmMapperController.MIN_WIDTH;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.NameGenerator;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -72,6 +76,8 @@ public class MainWindow implements Initializable {
     private Button buttonPause;
     @FXML
     private Button buttonNext;
+    @FXML
+    private Button buttonRealSize;
     @FXML
     private Button buttonResults;
     @FXML
@@ -388,10 +394,33 @@ public class MainWindow implements Initializable {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
-            stage.setResizable(false);
+            stage.setResizable(false);            
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading Results dialog from JAR.\n{0}", e);
+        }
+    }
+    
+    @FXML
+    private void handleButtonActionRealSize(ActionEvent event) {
+        try {
+            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/PxToMmMapper.fxml"), Lang.getBundle());
+            final Stage stage = new Stage();
+            stage.setTitle(Lang.getString("RealSizeW"));
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(imagePane.getScene().getWindow());
+            stage.setResizable(false);
+            final Scene s = stage.getScene();
+            if (s != null) {
+                final BufferedImage image = Context.getInstance().getTc().getImage(0);
+                double width = Math.max(PxToMmMapperController.MIN_WIDTH, image.getWidth() + PxToMmMapperController.EXTRA_WIDTH);
+                s.getWindow().setWidth(width);
+                s.getWindow().setHeight(image.getHeight() + PxToMmMapperController.EXTRA_HEIGHT);
+            }
+            stage.showAndWait();
+        } catch (IOException e) {
+            Logger.error("Error loading PxToMmMapper dialog from JAR.\n{0}", e);
         }
     }
 
@@ -505,6 +534,7 @@ public class MainWindow implements Initializable {
     private void adjustConfigButtons(final boolean disabled) {
         buttonExpert.setDisable(disabled);
         buttonExport.setDisable(disabled);
+        buttonRealSize.setDisable(disabled);
         buttonROI.setDisable(disabled);
         buttonRun.setDisable(disabled);
         textFs.setDisable(disabled);
