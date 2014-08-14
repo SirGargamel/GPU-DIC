@@ -4,7 +4,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerChecker;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CumulativeResultsCounter;
@@ -310,7 +310,7 @@ public class EngineTest {
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
-        TaskContainerChecker.checkTaskValidity(tc);
+        TaskContainerUtils.checkTaskValidity(tc);
 
         tc.setDisplacement(0, CUMULATIVE_ZERO);
         tc.setDisplacement(1, CUMULATIVE_ZERO);

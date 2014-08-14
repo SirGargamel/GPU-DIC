@@ -5,7 +5,6 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -56,7 +55,7 @@ public class Engine extends Observable {
         notifyObservers(0);
 
         tc.clearResultData();
-        TaskContainerChecker.checkTaskValidity(tc);
+        TaskContainerUtils.checkTaskValidity(tc);
 
         int r, nextR, currentRound = 0;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
@@ -95,8 +94,8 @@ public class Engine extends Observable {
         Logger.trace("Computing round {0} - {1}.", index1, tc);
 
         setChanged();
-        notifyObservers(new Object[]{index1, TaskContainerChecker.class});
-        TaskContainerChecker.checkTaskValidity(tc);
+        notifyObservers(new Object[]{index1, TaskContainerUtils.class});
+        TaskContainerUtils.checkTaskValidity(tc);
 
         // prepare parameters
         correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));

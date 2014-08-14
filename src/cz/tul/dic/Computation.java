@@ -27,7 +27,7 @@ public class Computation {
     private static final File OUT_DIR = new File("D:\\temp\\results");
 
     public static void commenceComputation(TaskContainer tc) throws IOException, ComputationException {
-        TaskContainerChecker.checkTaskValidity(tc);
+        TaskContainerUtils.checkTaskValidity(tc);
         
         // displacement export
         tc.getExports().clear();
@@ -54,7 +54,7 @@ public class Computation {
     }
 
     public static void commenceComputationDynamic(TaskContainer tc) throws IOException, ComputationException {
-        TaskContainerChecker.checkTaskValidity(tc);
+        TaskContainerUtils.checkTaskValidity(tc);
 
         final File in = (File) tc.getParameter(TaskParameter.IN);
         final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
@@ -121,7 +121,7 @@ public class Computation {
     public static void commenceComputationDynamicWindowSizeSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax, final int windowSize) throws ComputationException, IOException {
         tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, windowSize);
 
-        TaskContainerChecker.checkTaskValidity(tc);
+        TaskContainerUtils.checkTaskValidity(tc);
 
         final File in = (File) tc.getParameter(TaskParameter.IN);
         final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);

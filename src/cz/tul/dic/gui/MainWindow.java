@@ -3,7 +3,6 @@ package cz.tul.dic.gui;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
@@ -289,7 +288,7 @@ public class MainWindow implements Initializable {
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
                 saveFacetSize();
-                TaskContainerChecker.checkTaskValidity(tc);
+                TaskContainerUtils.checkTaskValidity(tc);
                 ComplexTaskSolver cts = new ComplexTaskSolver();
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
                 Dialogs.create()
