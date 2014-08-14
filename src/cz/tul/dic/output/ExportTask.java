@@ -38,7 +38,7 @@ public class ExportTask implements Serializable {
         }
 
         final Direction dir;
-        if (split[2] == null) {
+        if (split[2].equals("null")) {
             dir = Direction.Dy;
         } else {
             dir = Direction.valueOf(split[2]);
@@ -102,9 +102,9 @@ public class ExportTask implements Serializable {
         if (dataParams != null) {
             for (int i : dataParams) {
                 sb.append(Integer.toString(i));
+                sb.append(SEPARATOR);
             }
-        }
-        sb.append(SEPARATOR);
+        }        
         sb.setLength(sb.length() - SEPARATOR.length());
 
         return sb.toString();
