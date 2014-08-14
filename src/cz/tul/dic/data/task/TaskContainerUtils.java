@@ -171,8 +171,7 @@ public class TaskContainerUtils {
             config.put(CONFIG_EXPORTS.concat(Integer.toString(i)), et.toString());
             i++;
         }
-
-        final File in = (File) tc.getParameter(TaskParameter.IN);
+        
         Config.saveConfig(config, ConfigType.TASK, out);
 
     }
