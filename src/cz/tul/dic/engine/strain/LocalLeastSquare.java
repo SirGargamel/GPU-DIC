@@ -30,7 +30,7 @@ public class LocalLeastSquare extends StrainEstimator {
             
             final double mm = (double) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
             final double mmToPx = (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
-            final int windowSize = (int) Math.round(mm * mmToPx);
+            final int windowSize = (int) Math.ceil(mm * mmToPx / 2.0);
 
             double[] coeffs;
             for (int x = 0; x < width; x++) {
