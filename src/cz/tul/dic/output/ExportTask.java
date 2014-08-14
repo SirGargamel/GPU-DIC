@@ -24,7 +24,7 @@ public class ExportTask implements Serializable {
     private final ExportTarget target;
     private final Direction direction;
     private final Object targetParam;
-    private final int[] dataParams;    
+    private final int[] dataParams;
 
     public static ExportTask generateExportTask(final String data) {
         final String[] split = data.split(SEPARATOR);
@@ -37,7 +37,13 @@ public class ExportTask implements Serializable {
             dataParams[i - 4] = Integer.valueOf(split[i]);
         }
 
-        final ExportTask result = new ExportTask(Direction.valueOf(split[2]), ExportMode.valueOf(split[0]), ExportTarget.valueOf(split[1]), new File(split[3]), dataParams);
+        final Direction dir;
+        if (split[2] == null) {
+            dir = Direction.Dy;
+        } else {
+            dir = Direction.valueOf(split[2]);
+        }
+        final ExportTask result = new ExportTask(dir, ExportMode.valueOf(split[0]), ExportTarget.valueOf(split[1]), new File(split[3]), dataParams);
         return result;
     }
 
@@ -46,7 +52,7 @@ public class ExportTask implements Serializable {
     }
 
     public static ExportTask generateLineExport(final ExportTarget target, final Object targetArg, final int x, final int y) {
-        return new ExportTask(null, ExportMode.POINT, target, targetArg, new int[]{x, y});
+        return new ExportTask(Direction.Dy, ExportMode.POINT, target, targetArg, new int[]{x, y});
     }
 
     public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final int mode) {
@@ -75,7 +81,7 @@ public class ExportTask implements Serializable {
 
     public int[] getDataParams() {
         return dataParams;
-    }  
+    }
 
     public Object getTargetParam() {
         return targetParam;
