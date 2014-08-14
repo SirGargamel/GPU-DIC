@@ -79,6 +79,7 @@ public class ComplexTaskSolver extends Observable {
         tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
         tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 
+        Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
         final String[][] shiftsS = new String[1][shifts.size()];
@@ -100,7 +101,6 @@ public class ComplexTaskSolver extends Observable {
             et = it.next();
             if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round) {
                 Exporter.export(tc, et);
-                it.remove();
             }
         }
     }
