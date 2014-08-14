@@ -7,9 +7,6 @@ import cz.tul.dic.data.task.TaskContainerChecker;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
-import static cz.tul.dic.gui.PxToMmMapperController.EXTRA_HEIGHT;
-import static cz.tul.dic.gui.PxToMmMapperController.EXTRA_WIDTH;
-import static cz.tul.dic.gui.PxToMmMapperController.MIN_WIDTH;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.NameGenerator;
@@ -30,9 +27,11 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -43,6 +42,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
@@ -358,12 +358,25 @@ public class MainWindow implements Initializable {
     @FXML
     private void handleButtonActionExport(ActionEvent event) {
         try {
-            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExportEditor.fxml"), Lang.getBundle());
+            saveFacetSize();
+            final FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExportEditor.fxml"));
+            loader.setResources(Lang.getBundle());
+            loader.setBuilderFactory(new JavaFXBuilderFactory());
+            final Parent root = loader.load( );
+            final ExportEditor controller = loader.getController();
             final Stage stage = new Stage();
-            stage.setTitle(Lang.getString("Export"));
+            stage.setTitle(Lang.getString("Exports"));
             stage.setScene(new Scene(root));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
+            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
+
+                @Override
+                public void handle(WindowEvent event) {
+                    controller.actualizeExports();
+                }
+            });
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading Export dialog from JAR.\n{0}", e);
@@ -394,13 +407,13 @@ public class MainWindow implements Initializable {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
-            stage.setResizable(false);            
+            stage.setResizable(false);
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading Results dialog from JAR.\n{0}", e);
         }
     }
-    
+
     @FXML
     private void handleButtonActionRealSize(ActionEvent event) {
         try {
@@ -579,14 +592,14 @@ public class MainWindow implements Initializable {
         }
 
         @Override
-        public void update(Observable o, Object arg) {            
+        public void update(Observable o, Object arg) {
             if (arg instanceof Integer) {
                 updateProgress((int) arg, roundCount);
             } else if (arg instanceof Object[]) {
                 final Object[] data = (Object[]) arg;
                 final int round = (int) data[0];
                 updateProgress(round, roundCount);
-                
+
                 final Class cls = (Class) data[1];
                 final StringBuilder sb = new StringBuilder();
                 sb.append("[");
