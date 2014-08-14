@@ -194,7 +194,7 @@ public class TaskContainerUtils {
         final StringBuilder sb = new StringBuilder();
 
         if (data != null) {
-            for (double d : data) {
+            for (int d : data) {
                 sb.append(d);
                 sb.append(CONFIG_SEPARATOR_DATA);
             }
