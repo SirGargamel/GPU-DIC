@@ -460,6 +460,11 @@ public class TaskContainerUtils {
             Logger.warn("Adding default local search window size.");
             tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, DefaultValues.DEFAULT_WINDOW_SIZE);
         }
+        final Object ratio = tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
+        if (ratio == null) {
+            Logger.warn("Adding default local search window size.");
+            tc.setParameter(TaskParameter.MM_TO_PX_RATIO, DefaultValues.DEFAULT_MM_TO_PX_RATIO);
+        }
     }
 
 }
