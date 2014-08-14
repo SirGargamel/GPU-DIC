@@ -30,7 +30,7 @@ public interface DefaultValues {
     double DEFAULT_PX_TO_MM_RATIO = 1;
     ResultCompilation DEFAULT_RESULT_COMPILATION = ResultCompilation.MAJOR_AVERAGING;
     StrainEstimationMethod DEFAULT_STRAIN_ESTIMATION_METHOD = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
-    int DEFAULT_STRAIN_ESTIMATION_PARAMETER = 20;
+    double DEFAULT_STRAIN_ESTIMATION_PARAMETER = 20;
     TaskSplitMethod DEFAULT_TASK_SPLIT_METHOD = TaskSplitMethod.DYNAMIC;
     int DEFAULT_TASK_SPLIT_PARAMETER = 1000;
     int DEFAULT_WINDOW_SIZE = 0;
