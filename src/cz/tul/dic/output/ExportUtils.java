@@ -217,15 +217,22 @@ public class ExportUtils {
         switch (dir) {
             case Dabs:
             case Eabs:
-            case Exy:
+            case cDabs:
+            case cEabs:
                 drawVerticalBar(out, max);
                 break;
             case Dy:
             case Eyy:
+            case Exy:
+            case cDy:
+            case cEyy:
+            case cExy:
                 drawVerticalBar(out, max, min);
                 break;
             case Dx:
             case Exx:
+            case cDx:
+            case cExx:
                 drawHorizontalBar(out, max, min);
                 break;
             default:
