@@ -63,6 +63,12 @@ public class Engine extends Observable {
             nextR = e.getValue();
 
             computeRound(tc, r, nextR);
+
+            setChanged();
+            notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
+            tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
+            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
+
             exportRound(tc, r);
 
             currentRound++;
@@ -70,11 +76,6 @@ public class Engine extends Observable {
             notifyObservers(currentRound);
         }
 
-        setChanged();
-        notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
-        tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
-        tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
-        
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
     }
@@ -85,7 +86,7 @@ public class Engine extends Observable {
         while (it.hasNext()) {
             et = it.next();
             if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round) {
-                Exporter.export(tc, et);                
+                Exporter.export(tc, et);
             }
         }
     }

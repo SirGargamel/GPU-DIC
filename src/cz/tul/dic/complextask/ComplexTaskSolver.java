@@ -62,6 +62,11 @@ public class ComplexTaskSolver extends Observable {
                 rrm.getTc().setDisplacement(r, new double[img.getWidth()][img.getHeight()][2]);
             }
 
+            setChanged();
+            notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
+            tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
+            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
+
             tc.setResults(r, tcR.getResults(r));
             tc.setDisplacement(r, tcR.getDisplacement(r));
             tc.setStrain(r, tcR.getStrain(r));
@@ -73,11 +78,6 @@ public class ComplexTaskSolver extends Observable {
             setChanged();
             notifyObservers(currentRound);
         }
-
-        setChanged();
-        notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
-        tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
-        tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
