@@ -95,7 +95,7 @@ public class Engine extends Observable {
         Logger.trace("Computing round {0} - {1}.", index1, tc);
 
         setChanged();
-        notifyObservers(new Object[]{index1, TaskContainerUtils.class});
+        notifyObservers(TaskContainerUtils.class);
         TaskContainerUtils.checkTaskValidity(tc);
 
         // prepare parameters
@@ -108,7 +108,7 @@ public class Engine extends Observable {
 
         // prepare data
         setChanged();
-        notifyObservers(new Object[]{index1, FacetGenerator.class});
+        notifyObservers(FacetGenerator.class);
         final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, index1);
         Logger.trace("Facets generated.");
 
@@ -124,7 +124,7 @@ public class Engine extends Observable {
 
             // compute and store result
             setChanged();
-            notifyObservers(new Object[]{index1, CorrelationCalculator.class, roi});
+            notifyObservers(CorrelationCalculator.class);
             tc.setResult(index1, roi, correlation.computeCorrelations(
                     tc.getImage(index1), tc.getImage(index2),
                     roi, facets.get(roi),
@@ -136,15 +136,15 @@ public class Engine extends Observable {
         }
 
         setChanged();
-        notifyObservers(new Object[]{index1, DisplacementCalculator.class});
+        notifyObservers(DisplacementCalculator.class);
         DisplacementCalculator.computeDisplacement(tc, index1, facets);
 
         setChanged();
-        notifyObservers(new Object[]{index1, FineLocalSearch.class});
+        notifyObservers(FineLocalSearch.class);
         fls.searchForBestPosition(tc, index1, index2);
 
         setChanged();
-        notifyObservers(new Object[]{index1, StrainEstimation.class});
+        notifyObservers(StrainEstimation.class);
         strain.computeStrain(tc, index1);
 
         Logger.debug("Computed round {0}.", index1);

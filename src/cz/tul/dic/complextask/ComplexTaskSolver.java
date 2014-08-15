@@ -49,11 +49,11 @@ public class ComplexTaskSolver extends Observable {
             nextR = e.getValue();
 
             setChanged();
-            notifyObservers(new Object[]{currentRound, CircleROIManager.class});
+            notifyObservers(CircleROIManager.class);
             computeRound(r, nextR, crm);
 
             setChanged();
-            notifyObservers(new Object[]{currentRound, RectROIManager.class});
+            notifyObservers(RectROIManager.class);
             if (crm.hasMoved()) {
                 computeRound(r, nextR, rrm);
             } else {
@@ -63,7 +63,7 @@ public class ComplexTaskSolver extends Observable {
             }
 
             setChanged();
-            notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
+            notifyObservers(CumulativeResultsCounter.class);
             tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
             tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 

@@ -362,7 +362,7 @@ public class MainWindow implements Initializable {
             loader.setLocation(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExportEditor.fxml"));
             loader.setResources(Lang.getBundle());
             loader.setBuilderFactory(new JavaFXBuilderFactory());
-            final Parent root = loader.load( );
+            final Parent root = loader.load();
             final ExportEditor controller = loader.getController();
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Exports"));
@@ -563,6 +563,7 @@ public class MainWindow implements Initializable {
         private final ComplexTaskSolver cts;
         private final TaskContainer tc;
         private final int roundCount;
+        private int round;
 
         public ComputationObserver(ComplexTaskSolver cts, final TaskContainer tc) {
             this.cts = cts;
@@ -593,13 +594,10 @@ public class MainWindow implements Initializable {
         @Override
         public void update(Observable o, Object arg) {
             if (arg instanceof Integer) {
-                updateProgress((int) arg, roundCount);
-            } else if (arg instanceof Object[]) {
-                final Object[] data = (Object[]) arg;
-                final int round = (int) data[0];
+                round = (int) arg;
                 updateProgress(round, roundCount);
-
-                final Class cls = (Class) data[1];
+            } else if (arg instanceof Class) {
+                final Class cls = (Class) arg;
                 final StringBuilder sb = new StringBuilder();
                 sb.append("[");
                 sb.append(Lang.getString("Round"));
