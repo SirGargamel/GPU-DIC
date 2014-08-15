@@ -191,8 +191,8 @@ public class ResultPresenter implements Initializable {
     private void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
         final String c1 = Lang.getString("TypeMap");
         final String t1 = Lang.getString("TypeMapD");
-        final String c2 = Lang.getString("TypeLine");
-        final String t2 = Lang.getString("TypeLineD");
+        final String c2 = Lang.getString("TypePoint");
+        final String t2 = Lang.getString("TypePointD");
         final String c3 = Lang.getString("TypeSequence");
         final String t3 = Lang.getString("TypeSequenceD");
         final Action a = Dialogs.create()
@@ -213,7 +213,7 @@ public class ResultPresenter implements Initializable {
                     break;
             }
         } else if (val.equals(c2)) {
-            Exporter.export(tc, ExportTask.generateLineExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, lastX, lastY)), lastX, lastY));
+            Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, lastX, lastY)), lastX, lastY));
         } else if (val.equals(c3)) {
             Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), determineType()));
         }
@@ -280,7 +280,7 @@ public class ResultPresenter implements Initializable {
             try {
                 lastX = (int) Math.round(t.getX());
                 lastY = (int) Math.round(t.getY());
-                final Map<Direction, double[]> data = Context.getInstance().getLineResult(lastX, lastY);
+                final Map<Direction, double[]> data = Context.getInstance().getPointResult(lastX, lastY);
                 final double[] line = data.get(choiceDir.getValue());
                 if (line != null) {
                     final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
@@ -401,7 +401,7 @@ public class ResultPresenter implements Initializable {
         public void displayData(final Direction dir) throws ComputationException {
             final FpsManager fpsM = new FpsManager(fps);
             final double tickUnit = fpsM.getTickLength();
-            final double[] line = Context.getInstance().getLineResult(x, y).get(dir);
+            final double[] line = Context.getInstance().getPointResult(x, y).get(dir);
 
             final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
             chart.setPrefSize(width, PREF_SIZE_H);

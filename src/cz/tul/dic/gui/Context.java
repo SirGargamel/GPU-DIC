@@ -31,11 +31,11 @@ public class Context {
     private static final Context instance;
     private TaskContainer tc;
     private final Map<Integer, Map<Direction, BufferedImage>> exportCacheImages;
-    private final Map<Integer, Map<Integer, Map<Direction, double[]>>> exportCacheLines;
+    private final Map<Integer, Map<Integer, Map<Direction, double[]>>> exportCachePoints;
 
     private Context() {
         exportCacheImages = new HashMap<>();
-        exportCacheLines = new HashMap<>();
+        exportCachePoints = new HashMap<>();
     }
 
     public TaskContainer getTc() {
@@ -46,7 +46,7 @@ public class Context {
         this.tc = tc;
 
         exportCacheImages.clear();
-        exportCacheLines.clear();
+        exportCachePoints.clear();
     }
 
     public BufferedImage getMapResult(final int round, final Direction dir) throws ComputationException {
@@ -69,17 +69,17 @@ public class Context {
         return result;
     }
 
-    public Map<Direction, double[]> getLineResult(final int x, final int y) throws ComputationException {
-        Map<Integer, Map<Direction, double[]>> m = exportCacheLines.get(x);
+    public Map<Direction, double[]> getPointResult(final int x, final int y) throws ComputationException {
+        Map<Integer, Map<Direction, double[]>> m = exportCachePoints.get(x);
         if (m == null) {
             m = new HashMap<>();
-            exportCacheLines.put(x, m);
+            exportCachePoints.put(x, m);
         }
 
         Map<Direction, double[]> result = m.get(y);
         if (result == null) {
             try {
-                Exporter.export(tc, ExportTask.generateLineExport(ExportTarget.GUI, this, x, y));
+                Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.GUI, this, x, y));
                 result = m.get(y);
             } catch (IOException ex) {
                 Logger.error(ex, "Unexpected IO error.");
@@ -103,15 +103,15 @@ public class Context {
         m.put(dir, (BufferedImage) data);
     }
 
-    public void storeLineExport(final Map<Direction, double[]> data, final int x, final int y, final ExportMode mode) {
+    public void storePointExport(final Map<Direction, double[]> data, final int x, final int y, final ExportMode mode) {
         if (!(data instanceof EnumMap)) {
             throw new IllegalArgumentException("Illegal type of data - " + data.getClass());
         }
 
-        Map<Integer, Map<Direction, double[]>> m = exportCacheLines.get(x);
+        Map<Integer, Map<Direction, double[]>> m = exportCachePoints.get(x);
         if (m == null) {
             m = new HashMap<>();
-            exportCacheLines.put(x, m);
+            exportCachePoints.put(x, m);
         }
 
         m.put(y, data);

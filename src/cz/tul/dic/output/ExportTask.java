@@ -51,7 +51,7 @@ public class ExportTask implements Serializable {
         return new ExportTask(dir, ExportMode.MAP, target, targetArg, new int[]{round});
     }
 
-    public static ExportTask generateLineExport(final ExportTarget target, final Object targetArg, final int x, final int y) {
+    public static ExportTask generatePointExport(final ExportTarget target, final Object targetArg, final int x, final int y) {
         return new ExportTask(Direction.Dy, ExportMode.POINT, target, targetArg, new int[]{x, y});
     }
 

@@ -48,6 +48,6 @@ public class LineResult implements Initializable {
         final int x = (int) data[1];
         final int y = (int) data[2];
 
-        Exporter.export(tc, ExportTask.generateLineExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, x, y)), x, y));
+        Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, x, y)), x, y));
     }
 }

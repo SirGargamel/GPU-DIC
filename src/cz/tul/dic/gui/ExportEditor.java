@@ -138,8 +138,8 @@ public class ExportEditor implements Initializable {
     private void handleButtonActionAdd(ActionEvent event) {
         final String c1 = Lang.getString("TypeMap");
         final String t1 = Lang.getString("TypeMapD");
-        final String c2 = Lang.getString("TypeLine");
-        final String t2 = Lang.getString("TypeLineD");
+        final String c2 = Lang.getString("TypePoint");
+        final String t2 = Lang.getString("TypePointD");
         final String c3 = Lang.getString("TypeSequence");
         final String t3 = Lang.getString("TypeSequenceD");
         Action a = Dialogs.create()
@@ -177,7 +177,7 @@ public class ExportEditor implements Initializable {
                     final String[] split = coords.get().split(SPLIT);
                     final int x = Integer.valueOf(split[0].trim());
                     final int y = Integer.valueOf(split[1].trim());
-                    tc.addExport(ExportTask.generateLineExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, x, y)), x, y));
+                    tc.addExport(ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, x, y)), x, y));
                 } else if (val.equals(c3)) {
                     final Direction dir = pickDirection();
                     tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, dir)), ExportTask.EXPORT_SEQUENCE_AVI));

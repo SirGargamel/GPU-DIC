@@ -21,7 +21,7 @@ public class ExportTargetCsv implements IExportTarget {
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
         if (data instanceof Map<?, ?>) {
             // export image
-            exportLine((Map<Direction, double[]>) data, targetParam, (int) tc.getParameter(TaskParameter.FPS));
+            exportPoint((Map<Direction, double[]>) data, targetParam, (int) tc.getParameter(TaskParameter.FPS));
         } else if (data instanceof double[][]) {
             // export map
             exportMap((double[][]) data, targetParam);
@@ -53,7 +53,7 @@ public class ExportTargetCsv implements IExportTarget {
 
     }
 
-    private void exportLine(final Map<Direction, double[]> data, final Object targetParam, final int fps) throws IOException {
+    private void exportPoint(final Map<Direction, double[]> data, final Object targetParam, final int fps) throws IOException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
