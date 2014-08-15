@@ -211,6 +211,9 @@ public class ResultPresenter implements Initializable {
                 case CSV:
                     Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index));
                     break;
+                default:
+                    Logger.warn("Illegal target - {0}", et);
+                    break;
             }
         } else if (val.equals(c2)) {
             Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, lastX, lastY)), lastX, lastY));

@@ -110,7 +110,7 @@ public class ComplexTaskSolver extends Observable {
         try {
             final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
             final int baseRound = rounds[0];
-            final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
+            CircleROIManager.prepareManager(tc, baseRound);
         } catch (ComputationException ex) {
             result = false;
         }
