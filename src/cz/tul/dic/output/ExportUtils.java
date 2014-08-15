@@ -168,24 +168,24 @@ public class ExportUtils {
         }
 
         switch (dir) {
-            casedDabss:
-            casedEabss:
-            case cDabs
-            case cEabs
+            case dDabs:
+            case dEabs:
+            case Dabs:
+            case Eabs:
                 drawVerticalBar(out, max);
                 break;
-            casedDyy:
-            casedEyyy:
-            casedExyy:
-            case cDy
-            case cEyy
-            case cExy
+            case dDy:
+            case dEyy:
+            case dExy:
+            case Dy:
+            case Eyy:
+            case Exy:
                 drawVerticalBar(out, max, min);
                 break;
-            casedDxx:
-            casedExxx:
-            case cDx
-            case cExx
+            case dDx:
+            case dExx:
+            case Dx:
+            case Exx:
                 drawHorizontalBar(out, max, min);
                 break;
             default:
@@ -215,18 +215,25 @@ public class ExportUtils {
         }
 
         switch (dir) {
-            casdDabsbs:
-            casdEabsbs:
-            case cDDabs            case cEEabs                drawVerticalBar(out, max);
+            case dDabs:
+            case dEabs:
+            case Dabs:
+            case Eabs:
+                drawVerticalBar(out, max);
                 break;
-            casdDyDy:
-            casdEyyyy:
-            casdExyxy:
-            case cDDy            case cEEyy            case cEExy                drawVerticalBar(out, max, min);
+            case dDy:
+            case dEyy:
+            case dExy:
+            case Dy:
+            case Eyy:
+            case Exy:
+                drawVerticalBar(out, max, min);
                 break;
-            casdDxDx:
-            casdExxxx:
-            case cDDx            case cEExx                drawHorizontalBar(out, max, min);
+            case dDx:
+            case dExx:
+            case Dx:
+            case Exx:
+                drawHorizontalBar(out, max, min);
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
