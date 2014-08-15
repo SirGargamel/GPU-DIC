@@ -1,7 +1,7 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.task.DefaultValues;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -182,13 +182,13 @@ public class ExpertSettings implements Initializable {
         comboBoxData4.addAll(Interpolation.values());
         comboInterpolation.setItems(comboBoxData4);
 
-        comboFGMode.getSelectionModel().select(DefaultValues.DEFAULT_FACET_GENERATOR);
-        comboTSVariant.getSelectionModel().select(DefaultValues.DEFAULT_TASK_SPLIT_METHOD);
-        comboKernel.getSelectionModel().select(DefaultValues.DEFAULT_KERNEL);
-        comboInterpolation.getSelectionModel().select(DefaultValues.DEFAULT_INTERPOLATION);
-        textFGSpacing.setText(String.valueOf(DefaultValues.DEFAULT_FACET_SPACING));
-        textTSValue.setText(String.valueOf(DefaultValues.DEFAULT_TASK_SPLIT_PARAMETER));
-        textWindowSize.setText(String.valueOf(DefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER));
+        comboFGMode.getSelectionModel().select(TaskDefaultValues.DEFAULT_FACET_GENERATOR);
+        comboTSVariant.getSelectionModel().select(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);
+        comboKernel.getSelectionModel().select(TaskDefaultValues.DEFAULT_KERNEL);
+        comboInterpolation.getSelectionModel().select(TaskDefaultValues.DEFAULT_INTERPOLATION);
+        textFGSpacing.setText(String.valueOf(TaskDefaultValues.DEFAULT_FACET_SPACING));
+        textTSValue.setText(String.valueOf(TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER));
+        textWindowSize.setText(String.valueOf(TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER));
         textRoundLimits.setText("");
 
         final TaskContainer tc = Context.getInstance().getTc();

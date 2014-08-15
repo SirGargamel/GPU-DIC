@@ -6,7 +6,7 @@ import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
-import cz.tul.dic.data.task.DefaultValues;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -99,7 +99,7 @@ public class RectROIManager extends ROIManager {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No ReactangleROI specified.");
         }
 
-        defLimits = DefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST;
+        defLimits = TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST;
         
         setRois(initialRound);
     }

@@ -1,6 +1,6 @@
 package cz.tul.dic.engine.strain;
 
-import cz.tul.dic.data.task.DefaultValues;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;

@@ -1,7 +1,7 @@
 package cz.tul.dic.input;
 
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.task.DefaultValues;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import java.io.File;
@@ -30,7 +30,7 @@ public abstract class AbstractInputLoader {
         final String udaFilename = inputName.substring(0, inputName.lastIndexOf('.')).concat(EXT_UDA);
         final File uda = new File(udaFilename);
 
-        int fps = DefaultValues.DEFAULT_FPS;
+        int fps = TaskDefaultValues.DEFAULT_FPS;
         if (!uda.exists() || !uda.canRead()) {
             Logger.warn("Missing UDA file, using default FPS - {0}", fps);
         } else {

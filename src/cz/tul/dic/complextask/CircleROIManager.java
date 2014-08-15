@@ -7,7 +7,7 @@ import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
-import cz.tul.dic.data.task.DefaultValues;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.cluster.Analyzer1D;
@@ -83,7 +83,7 @@ public class CircleROIManager extends ROIManager {
         sb.append(bottomRight);
         Logger.trace(sb);
 
-        defLimits = DefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO;
+        defLimits = TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO;
         setROIs(initialRound);
         if (rect != null) {
             tc.addRoi(initialRound, rect);

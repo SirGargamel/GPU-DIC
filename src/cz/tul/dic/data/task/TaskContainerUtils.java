@@ -382,7 +382,7 @@ public class TaskContainerUtils {
         final int facetSize;
         if (fs == null) {
             Logger.warn("Adding default facetSize.");
-            facetSize = DefaultValues.DEFAULT_FACET_SIZE;
+            facetSize = TaskDefaultValues.DEFAULT_FACET_SIZE;
             tc.setParameter(TaskParameter.FACET_SIZE, facetSize);
         } else {
             facetSize = (int) fs;
@@ -413,58 +413,58 @@ public class TaskContainerUtils {
                 limits = tc.getDeformationLimits(round, roi);
                 if (limits == null) {
                     Logger.warn("Adding default deformation limits for {0} in round {1}.", roi, round);
-                    tc.setDeformationLimits(round, roi, DefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
+                    tc.setDeformationLimits(round, roi, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
                 }
             }
         }
         final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         if (ts == null) {
             Logger.warn("Adding default TaskSplit.");
-            tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, DefaultValues.DEFAULT_TASK_SPLIT_METHOD);
-            tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, DefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
+            tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);
+            tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
         }
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
         if (kernel == null) {
             Logger.warn("Adding default kernel.");
-            tc.setParameter(TaskParameter.KERNEL, DefaultValues.DEFAULT_KERNEL);
+            tc.setParameter(TaskParameter.KERNEL, TaskDefaultValues.DEFAULT_KERNEL);
         }
         final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
         if (facetGenMode == null) {
             Logger.warn("Adding default facet generator.");
-            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, DefaultValues.DEFAULT_FACET_GENERATOR);
-            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, DefaultValues.DEFAULT_FACET_SPACING);
+            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, TaskDefaultValues.DEFAULT_FACET_GENERATOR);
+            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, TaskDefaultValues.DEFAULT_FACET_SPACING);
         }
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
         if (interpolation == null) {
             Logger.warn("Adding default interpolation.");
-            tc.setParameter(TaskParameter.INTERPOLATION, DefaultValues.DEFAULT_INTERPOLATION);
+            tc.setParameter(TaskParameter.INTERPOLATION, TaskDefaultValues.DEFAULT_INTERPOLATION);
         }
         final Object resultCompilation = tc.getParameter(TaskParameter.RESULT_COMPILATION);
         if (resultCompilation == null) {
             Logger.warn("Adding default result compilator.");
-            tc.setParameter(TaskParameter.RESULT_COMPILATION, DefaultValues.DEFAULT_RESULT_COMPILATION);
+            tc.setParameter(TaskParameter.RESULT_COMPILATION, TaskDefaultValues.DEFAULT_RESULT_COMPILATION);
         }
         final Object strainEstimation = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (strainEstimation == null) {
             Logger.warn("Adding default strain estimator.");
-            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, DefaultValues.DEFAULT_STRAIN_ESTIMATION_METHOD);
-            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, DefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER);
+            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_METHOD);
+            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER);
         }
         final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD);
         if (displacementCalculator == null) {
             Logger.warn("Adding default displacement calculator.");
-            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_METHOD);
-            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_PARAM);
+            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, TaskDefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_METHOD);
+            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, TaskDefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_PARAM);
         }
         final Object ws = tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM);
         if (ws == null) {
             Logger.warn("Adding default local search window size.");
-            tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, DefaultValues.DEFAULT_WINDOW_SIZE);
+            tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, TaskDefaultValues.DEFAULT_WINDOW_SIZE);
         }
         final Object ratio = tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
         if (ratio == null) {
             Logger.warn("Adding default local search window size.");
-            tc.setParameter(TaskParameter.MM_TO_PX_RATIO, DefaultValues.DEFAULT_MM_TO_PX_RATIO);
+            tc.setParameter(TaskParameter.MM_TO_PX_RATIO, TaskDefaultValues.DEFAULT_MM_TO_PX_RATIO);
         }
     }
 
