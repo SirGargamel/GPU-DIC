@@ -6,6 +6,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -44,6 +45,7 @@ public class DicMain extends Application {
         if (parameters.contains(DEBUG)) {
             configureTinyLog(true);
             performComputationTest();
+            NameGenerator.enableDebugMode();
         } else {
             configureTinyLog(false);
         }
