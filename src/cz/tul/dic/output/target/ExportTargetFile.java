@@ -181,11 +181,12 @@ public class ExportTargetFile implements IExportTarget {
 
     private String loadScript() throws IOException {
         InputStream in = ExportTargetFile.class.getResourceAsStream(SCRIPT_NAME);
-        BufferedReader bin = new BufferedReader(new InputStreamReader(in));
         StringBuilder sb = new StringBuilder();
-        while (bin.ready()) {
-            sb.append(bin.readLine());
-            sb.append("\n");
+        try (BufferedReader bin = new BufferedReader(new InputStreamReader(in))) {
+            while (bin.ready()) {
+                sb.append(bin.readLine());
+                sb.append("\n");
+            }
         }
         return sb.toString();
     }

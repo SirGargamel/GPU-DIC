@@ -1,13 +1,14 @@
 package cz.tul.dic.engine;
 
 import cz.tul.dic.data.deformation.DeformationUtils;
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class DeformationResultSorter implements Comparator<Integer> {
+public class DeformationResultSorter implements Comparator<Integer>, Serializable {
 
     private final int defArrayLength;    
     private final double[] deformations;

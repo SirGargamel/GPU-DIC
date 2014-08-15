@@ -92,7 +92,7 @@ public class VideoLoader extends AbstractInputLoader {
         final List<Image> result = il.loadData(files, tc);
 
         tc.setParameter(TaskParameter.IN, input);
-        
+
         loadUdaFile(input.getAbsolutePath(), tc);
 
         return result;
@@ -182,11 +182,12 @@ public class VideoLoader extends AbstractInputLoader {
 
     private String loadScript() throws IOException {
         InputStream in = VideoLoader.class.getResourceAsStream(SCRIPT_NAME);
-        BufferedReader bin = new BufferedReader(new InputStreamReader(in));
         StringBuilder sb = new StringBuilder();
-        while (bin.ready()) {
-            sb.append(bin.readLine());
-            sb.append("\n");
+        try (BufferedReader bin = new BufferedReader(new InputStreamReader(in))) {
+            while (bin.ready()) {
+                sb.append(bin.readLine());
+                sb.append("\n");
+            }
         }
         return sb.toString();
     }

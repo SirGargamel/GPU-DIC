@@ -5,6 +5,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -93,7 +94,7 @@ public class FineLocalSearch extends Observable {
         }
     }
 
-    private static class ResultSorter implements Comparator<double[]> {
+    private static class ResultSorter implements Comparator<double[]>, Serializable {
 
         private final double[] orig;
 

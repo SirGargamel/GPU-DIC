@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
  *
  * @author Petr Jecmen
  */
-public class Image extends BufferedImage implements Serializable {
+public class Image extends BufferedImage {
 
     private int[] grayScale;
 

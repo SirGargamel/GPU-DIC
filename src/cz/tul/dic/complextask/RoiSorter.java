@@ -1,14 +1,14 @@
 package cz.tul.dic.complextask;
 
 import cz.tul.dic.data.roi.ROI;
+import java.io.Serializable;
 import java.util.Comparator;
-import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class RoiSorter implements Comparator<ROI> {
+public class RoiSorter implements Comparator<ROI>, Serializable {
 
     @Override
     public int compare(ROI o1, ROI o2) {
