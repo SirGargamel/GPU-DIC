@@ -450,10 +450,11 @@ public class TaskContainerUtils {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, DefaultValues.DEFAULT_STRAIN_ESTIMATION_METHOD);
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, DefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER);
         }
-        final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION);
+        final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD);
         if (displacementCalculator == null) {
             Logger.warn("Adding default displacement calculator.");
-            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION);
+            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_METHOD);
+            tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, DefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_PARAM);
         }
         final Object ws = tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM);
         if (ws == null) {

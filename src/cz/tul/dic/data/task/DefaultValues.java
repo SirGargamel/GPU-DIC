@@ -14,7 +14,8 @@ import cz.tul.dic.generators.facet.FacetGeneratorMethod;
  */
 public interface DefaultValues {
 
-    DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION = DisplacementCalculation.FIND_MAX_AND_AVERAGE;
+    DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION_METHOD = DisplacementCalculation.FIND_MAX_AND_AVERAGE;
+    int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     int DEFAULT_FPS = 5000;
     double DEFAULT_PRECISION_ZERO = 0.5;
     double DEFAULT_PRECISION_FIRST = 0.25;

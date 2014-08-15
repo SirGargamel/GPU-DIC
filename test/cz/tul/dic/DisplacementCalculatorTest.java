@@ -54,7 +54,8 @@ public class DisplacementCalculatorTest {
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 0);
-        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION, DisplacementCalculation.FIND_MAX_AND_AVERAGE);
+        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DisplacementCalculation.FIND_MAX_AND_AVERAGE);
+        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);
         tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
 
         final List<double[][]> results = new ArrayList<>(1);

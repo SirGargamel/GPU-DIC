@@ -6,15 +6,15 @@ import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.cluster.Analyzer2D;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class FindMaxAndAverage extends DisplacementCalculator {
 
@@ -26,28 +26,38 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         final int width = img.getWidth();
         final int height = img.getHeight();
 
+        final int linesPerGroup = (int) tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM) / width;
+        final int groupCount = (int) Math.ceil(height / (double) linesPerGroup);
+
         final double[][][] finalResults = new double[width][height][];
-        final Analyzer2D[][] counters = new Analyzer2D[width][height];
+        final Map<Integer, Map<Integer, Analyzer2D>> counters = new HashMap<>();
         List<Facet> facets;
         List<double[][]> results;
         Facet f;
         double[] d;
-        int x, y;
+        int x, y, lowerBound, upperBound = 0;
         Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
-        DeformationDegree degree;
 //        StringBuilder sb = new StringBuilder();
 //        System.out.println("Round " + round);
 
-        for (ROI roi : tc.getRois(round)) {
-            facets = facetMap.get(roi);
-            results = tc.getResult(round, roi);
+        for (int g = 0; g < groupCount; g++) {
+            lowerBound = upperBound;
+            upperBound += linesPerGroup;
+            upperBound = Math.min(upperBound, height - 1);
+            counters.clear();
 
-            degree = DeformationUtils.getDegreeFromValue(results.get(0)[0]);
+            for (ROI roi : tc.getRois(round)) {
+                facets = facetMap.get(roi);
+                results = tc.getResult(round, roi);
 
-            for (int i = 0; i < facets.size(); i++) {
-                f = facets.get(i);
-                d = results.get(i)[0];
+                for (int i = 0; i < facets.size(); i++) {
+                    f = facets.get(i);
+                    d = results.get(i)[0];
+
+                    if (!FacetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
+                        continue;
+                    }
 
 //                if (roi instanceof RectangleROI) {
 //                    sb.setLength(0);
@@ -58,54 +68,52 @@ public class FindMaxAndAverage extends DisplacementCalculator {
 //                    sb.setLength(sb.length() - 1);
 //                    System.out.println(sb.toString());
 //                }
-                
-                deformedFacet = FacetUtils.deformFacet(f, d, degree);
-                for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
-                    x = e.getKey()[Coordinates.X];
-                    y = e.getKey()[Coordinates.Y];
+                    deformedFacet = FacetUtils.deformFacet(f, d);
+                    for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
+                        x = e.getKey()[Coordinates.X];
+                        y = e.getKey()[Coordinates.Y];
 
-                    counter = counters[x][y];
-                    if (counter == null) {
-                        counter = new Analyzer2D();
-                        counter.setPrecision(PRECISION);
-                        counters[x][y] = counter;
+                        if (y >= lowerBound && y <= upperBound) {
+                            getAnalyzer(counters, x, y).addValue(e.getValue());
+                        }
                     }
-                    counter.addValue(e.getValue());
                 }
             }
-        }
 
-        double[] majorVal, val = new double[2];
-        int count;
-        double maxDist2 = 4 * PRECISION * PRECISION;
-        final ResultCompilation rc = (ResultCompilation) tc.getParameter(TaskParameter.RESULT_COMPILATION);
-        if (rc == null) {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No result compilation method.");
-        }
+            double[] majorVal, val = new double[2];
+            int count;
+            double maxDist2 = 4 * PRECISION * PRECISION;
+            final ResultCompilation rc = (ResultCompilation) tc.getParameter(TaskParameter.RESULT_COMPILATION);
+            if (rc == null) {
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No result compilation method.");
+            }
 
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                counter = counters[i][j];
-                if (counter != null) {
-                    majorVal = counter.findMajorValue();
-                    if (rc.equals(ResultCompilation.MAJOR)) {
-                        finalResults[i][j] = new double[]{majorVal[0], majorVal[1]};
-                    } else if (rc.equals(ResultCompilation.MAJOR_AVERAGING)) {
-                        count = 0;
-                        val[0] = 0;
-                        val[1] = 0;
+            for (Entry<Integer, Map<Integer, Analyzer2D>> eX : counters.entrySet()) {
+                x = eX.getKey();
+                for (Entry<Integer, Analyzer2D> eY : eX.getValue().entrySet()) {
+                    y = eY.getKey();
+                    counter = eY.getValue();
+                    if (counter != null) {
+                        majorVal = counter.findMajorValue();
+                        if (rc.equals(ResultCompilation.MAJOR)) {
+                            finalResults[x][y] = new double[]{majorVal[0], majorVal[1]};
+                        } else if (rc.equals(ResultCompilation.MAJOR_AVERAGING)) {
+                            count = 0;
+                            val[0] = 0;
+                            val[1] = 0;
 
-                        for (double[] vals : counter.listValues()) {
-                            if (dist2(vals, majorVal) <= maxDist2) {
-                                val[0] += vals[0];
-                                val[1] += vals[1];
-                                count++;
+                            for (double[] vals : counter.listValues()) {
+                                if (dist2(vals, majorVal) <= maxDist2) {
+                                    val[0] += vals[0];
+                                    val[1] += vals[1];
+                                    count++;
+                                }
                             }
-                        }
 
-                        finalResults[i][j] = new double[]{val[0] / (double) count, val[1] / (double) count};
-                    } else {
-                        throw new UnsupportedOperationException("Unsupported method of result compilation - " + rc);
+                            finalResults[x][y] = new double[]{val[0] / (double) count, val[1] / (double) count};
+                        } else {
+                            throw new UnsupportedOperationException("Unsupported method of result compilation - " + rc);
+                        }
                     }
                 }
             }
@@ -113,7 +121,23 @@ public class FindMaxAndAverage extends DisplacementCalculator {
 
         tc.setDisplacement(round, finalResults);
     }
-    
+
+    private Analyzer2D getAnalyzer(final Map<Integer, Map<Integer, Analyzer2D>> maps, final int x, final int y) {
+        Map<Integer, Analyzer2D> m = maps.get(x);
+        if (m == null) {
+            m = new HashMap<>(1);
+            maps.put(x, m);
+        }
+
+        Analyzer2D result = m.get(y);
+        if (result == null) {
+            result = new Analyzer2D();
+            m.put(y, result);
+        }
+
+        return result;
+    }
+
     private static double dist2(final double[] val1, final double[] val2) {
         double a = val2[0] - val1[0];
         double b = val2[1] - val1[1];

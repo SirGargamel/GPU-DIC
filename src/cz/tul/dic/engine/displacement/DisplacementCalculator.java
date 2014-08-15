@@ -25,7 +25,7 @@ public abstract class DisplacementCalculator {
     }
 
     public static void computeDisplacement(final TaskContainer tc, final int round, final Map<ROI, List<Facet>> facetMap) throws ComputationException {
-        final Object o = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION);
+        final Object o = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL displacement calculation type.");
         }

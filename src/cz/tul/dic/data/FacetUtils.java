@@ -4,6 +4,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.Deformation;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,10 +21,11 @@ public class FacetUtils {
         CACHE = new HashMap<>();
     }
 
-    public static Map<int[], double[]> deformFacet(final Facet facet, final double[] deformation, final DeformationDegree degree) throws ComputationException {
+    public static Map<int[], double[]> deformFacet(final Facet facet, final double[] deformation) throws ComputationException {
         final int[] data = facet.getData();
         final double[] center = facet.getCenter();
         final int facetArea = data.length / Coordinates.DIMENSION;
+        final DeformationDegree degree = DeformationUtils.getDegreeFromValue(deformation);
 
         if (CACHE.size() != facetArea) {
             if (CACHE.size() > facetArea) {
@@ -89,6 +91,20 @@ public class FacetUtils {
         final int[] pointData = f.getData();
         for (int i = 0; i < pointData.length / 2; i++) {
             if (x == pointData[i * 2] && y == pointData[i * 2 + 1]) {
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+    
+    public static boolean areLinesInsideFacet(final Facet f, final int yStart, final int yEnd) {
+        boolean result = false;
+
+        final int[] pointData = f.getData();
+        for (int i = 0; i < pointData.length / 2; i++) {
+            if (pointData[i * 2 + 1] >= yStart && pointData[i * 2 + 1] <= yEnd) {
                 result = true;
                 break;
             }
