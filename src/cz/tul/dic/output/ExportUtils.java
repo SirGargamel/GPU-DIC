@@ -61,16 +61,16 @@ public class ExportUtils {
     public static double calculateDisplacement(final double[] def, final Direction dir) throws ComputationException {
         double result;
         switch (dir) {
-            case cDx:
             case Dx:
+            case dDx:
                 result = def[0];
                 break;
-            case cDy:
             case Dy:
+            case dDy:
                 result = def[1];
                 break;
-            case cDabs:
             case Dabs:
+            case dDabs:
                 result = Math.sqrt(def[0] * def[0] + def[1] * def[1]);
                 break;
             default:
@@ -84,20 +84,20 @@ public class ExportUtils {
         double result;
 
         switch (dir) {
-            case cExx:
             case Exx:
+            case dExx:
                 result = results[StrainResult.Exx];
                 break;
-            case cEyy:
             case Eyy:
+            case dEyy:
                 result = results[StrainResult.Eyy];
                 break;
-            case cExy:
             case Exy:
+            case dExy:
                 result = results[StrainResult.Exy];
                 break;
-            case cEabs:
             case Eabs:
+            case dEabs:
                 final double val1 = results[StrainResult.Exx];
                 final double val2 = results[StrainResult.Eyy];
                 final double val3 = results[StrainResult.Exy];
@@ -168,24 +168,24 @@ public class ExportUtils {
         }
 
         switch (dir) {
-            case Dabs:
-            case Eabs:
-            case cDabs:
-            case cEabs:
+            casedDabss:
+            casedEabss:
+            case cDabs
+            case cEabs
                 drawVerticalBar(out, max);
                 break;
-            case Dy:
-            case Eyy:
-            case Exy:
-            case cDy:
-            case cEyy:
-            case cExy:
+            casedDyy:
+            casedEyyy:
+            casedExyy:
+            case cDy
+            case cEyy
+            case cExy
                 drawVerticalBar(out, max, min);
                 break;
-            case Dx:
-            case Exx:
-            case cDx:
-            case cExx:
+            casedDxx:
+            casedExxx:
+            case cDx
+            case cExx
                 drawHorizontalBar(out, max, min);
                 break;
             default:
@@ -215,25 +215,18 @@ public class ExportUtils {
         }
 
         switch (dir) {
-            case Dabs:
-            case Eabs:
-            case cDabs:
-            case cEabs:
-                drawVerticalBar(out, max);
+            casdDabsbs:
+            casdEabsbs:
+            case cDDabs            case cEEabs                drawVerticalBar(out, max);
                 break;
-            case Dy:
-            case Eyy:
-            case Exy:
-            case cDy:
-            case cEyy:
-            case cExy:
-                drawVerticalBar(out, max, min);
+            casdDyDy:
+            casdEyyyy:
+            casdExyxy:
+            case cDDy            case cEEyy            case cEExy                drawVerticalBar(out, max, min);
                 break;
-            case Dx:
-            case Exx:
-            case cDx:
-            case cExx:
-                drawHorizontalBar(out, max, min);
+            casdDxDx:
+            casdExxxx:
+            case cDDx            case cEExx                drawHorizontalBar(out, max, min);
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");

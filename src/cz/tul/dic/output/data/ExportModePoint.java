@@ -32,26 +32,26 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
             data = result.get(dir);
             for (int r = 0; r < roundCount; r++) {
                 switch (dir) {
+                    case dDx:
+                    case dDy:
+                    case dDabs:
+                        results = tc.getDisplacement(r);
+                        break;
+                    case dExx:
+                    case dEyy:
+                    case dExy:
+                    case dEabs:
+                        results = tc.getStrain(r);
+                        break;
                     case Dx:
                     case Dy:
                     case Dabs:
-                        results = tc.getDisplacement(r);
+                        results = tc.getCumulativeDisplacement(r);
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        results = tc.getStrain(r);
-                        break;
-                    case cDx:
-                    case cDy:
-                    case cDabs:
-                        results = tc.getCumulativeDisplacement(r);
-                        break;
-                    case cExx:
-                    case cEyy:
-                    case cExy:
-                    case cEabs:
                         results = tc.getCumulativeStrain(r);
                         break;
                     default:
@@ -62,22 +62,22 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     data[r] = 0;
                 } else {
                     switch (dir) {
+                        case dDx:
+                        case dDy:
+                        case dDabs:
                         case Dx:
                         case Dy:
                         case Dabs:
-                        case cDx:
-                        case cDy:
-                        case cDabs:
                             data[r] = ExportUtils.calculateDisplacement(results[x][y], dir);
                             break;
+                        case dExx:
+                        case dEyy:
+                        case dExy:
+                        case dEabs:
                         case Exx:
                         case Eyy:
                         case Exy:
                         case Eabs:
-                        case cExx:
-                        case cEyy:
-                        case cExy:
-                        case cEabs:
                             data[r] = ExportUtils.calculateStrain(results[x][y], dir);
                             break;
                         default:

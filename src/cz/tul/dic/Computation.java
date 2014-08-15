@@ -30,9 +30,9 @@ public class Computation {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
 
@@ -44,9 +44,9 @@ public class Computation {
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDy)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDabs)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
         }
         Exporter.export(tc);
     }
@@ -59,9 +59,9 @@ public class Computation {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
         }
 //        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
 
@@ -81,9 +81,9 @@ public class Computation {
         TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
 
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDy)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cDabs)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
         }
         Exporter.export(tc);
     }
@@ -100,14 +100,14 @@ public class Computation {
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-                tc.addExport(ExportTask.generateMapExport(Direction.cExx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cExx)), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.cEyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cEyy)), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.cExy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cExy)), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.cEabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.cEabs)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exx)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eyy)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exy)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eabs)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.dExx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dExx)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.dEyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dEyy)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.dExy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dExy)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.dEabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dEabs)), r));
             }
 //            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
             Exporter.export(tc);
@@ -126,9 +126,9 @@ public class Computation {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {            
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dabs), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dDx), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dDy), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dDabs), r));
         }
 
         long time = System.nanoTime();
@@ -138,9 +138,9 @@ public class Computation {
         Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
 
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.cDx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.cDx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.cDy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.cDabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.cDabs), r));            
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dx), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dy), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dabs), r));            
         }
         Exporter.export(tc);
 
@@ -153,14 +153,14 @@ public class Computation {
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-                tc.addExport(ExportTask.generateMapExport(Direction.cExx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.cExx), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.cEyy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.cEyy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.cExy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.cExy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.cEabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.cEabs), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Exx), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Eyy), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Exy), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Eabs), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.dExx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dExx), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.dEyy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dEyy), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.dExy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dExy), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.dEabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dEabs), r));
             }
             Exporter.export(tc);
 

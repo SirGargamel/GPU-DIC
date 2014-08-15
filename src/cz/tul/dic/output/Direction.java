@@ -6,20 +6,20 @@ package cz.tul.dic.output;
  */
 public enum Direction {
 
-    cDx("mm"),
-    cDy("mm"),
-    cDabs("mm"),
-    cExx("%"),
-    cEyy("%"),
-    cExy("%"),
-    cEabs("%"),
     Dx("mm"),
     Dy("mm"),
     Dabs("mm"),
     Exx("%"),
     Eyy("%"),
     Exy("%"),
-    Eabs("%");
+    Eabs("%"),
+    dDx("mm"),
+    dDy("mm"),
+    dDabs("mm"),
+    dExx("%"),
+    dEyy("%"),
+    dExy("%"),
+    dEabs("%");
 
     private final String unit;
 

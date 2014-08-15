@@ -39,7 +39,7 @@ public class ExportTask implements Serializable {
 
         final Direction dir;
         if (split[2].equals("null")) {
-            dir = Direction.Dy;
+            dir = Direction.dDy;
         } else {
             dir = Direction.valueOf(split[2]);
         }
@@ -52,7 +52,7 @@ public class ExportTask implements Serializable {
     }
 
     public static ExportTask generatePointExport(final ExportTarget target, final Object targetArg, final int x, final int y) {
-        return new ExportTask(Direction.Dy, ExportMode.POINT, target, targetArg, new int[]{x, y});
+        return new ExportTask(Direction.dDy, ExportMode.POINT, target, targetArg, new int[]{x, y});
     }
 
     public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final int mode) {

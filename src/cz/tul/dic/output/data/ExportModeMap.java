@@ -17,26 +17,26 @@ public class ExportModeMap implements IExportMode<double[][]> {
         final int round = dataParams[0];
         final double[][][] results;
         switch (direction) {
+            case dDx:
+            case dDy:
+            case dDabs:
+                results = tc.getDisplacement(round);
+                break;
+            case dExx:
+            case dEyy:
+            case dExy:
+            case dEabs:
+                results = tc.getStrain(round);
+                break;
             case Dx:
             case Dy:
             case Dabs:
-                results = tc.getDisplacement(round);
+                results = tc.getCumulativeDisplacement(round);
                 break;
             case Exx:
             case Eyy:
             case Exy:
             case Eabs:
-                results = tc.getStrain(round);
-                break;
-            case cDx:
-            case cDy:
-            case cDabs:
-                results = tc.getCumulativeDisplacement(round);
-                break;
-            case cExx:
-            case cEyy:
-            case cExy:
-            case cEabs:
                 results = tc.getCumulativeStrain(round);
                 break;
             default:
@@ -58,22 +58,22 @@ public class ExportModeMap implements IExportMode<double[][]> {
                 }
 
                 switch (direction) {
+                    case dDx:
+                    case dDy:
+                    case dDabs:
                     case Dx:
                     case Dy:
                     case Dabs:
-                    case cDx:
-                    case cDy:
-                    case cDabs:
                         result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
+                    case dExx:
+                    case dEyy:
+                    case dExy:
+                    case dEabs:
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                    case cExx:
-                    case cEyy:
-                    case cExy:
-                    case cEabs:
                         result[x][y] = ExportUtils.calculateStrain(results[x][y], direction);
                         break;
                     default:
