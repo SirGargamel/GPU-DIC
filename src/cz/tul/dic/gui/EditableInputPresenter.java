@@ -54,16 +54,21 @@ public class EditableInputPresenter extends InputPresenter {
     public void saveRois() {
         final TaskContainer tc = Context.getInstance().getTc();
 
-        final Set<ROI> taskRois = new HashSet<>();
-        rois.stream().forEach((s) -> {
-            if (s instanceof Rectangle) {
-                final Rectangle r = (Rectangle) s;
-                taskRois.add(new RectangleROI(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), r.getX() + r.getTranslateX() + r.getWidth(), r.getY() + r.getTranslateY() + r.getHeight()));
-            } else if (s instanceof Circle) {
-                final Circle c = (Circle) s;
-                taskRois.add(new CircularROI(c.getCenterX() + c.getTranslateX(), c.getCenterY() + c.getTranslateY(), c.getRadius()));
-            }
-        });
+        final Set<ROI> taskRois;
+        if (!rois.isEmpty()) {
+            taskRois = new HashSet<>();
+            rois.stream().forEach((s) -> {
+                if (s instanceof Rectangle) {
+                    final Rectangle r = (Rectangle) s;
+                    taskRois.add(new RectangleROI(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), r.getX() + r.getTranslateX() + r.getWidth(), r.getY() + r.getTranslateY() + r.getHeight()));
+                } else if (s instanceof Circle) {
+                    final Circle c = (Circle) s;
+                    taskRois.add(new CircularROI(c.getCenterX() + c.getTranslateX(), c.getCenterY() + c.getTranslateY(), c.getRadius()));
+                }
+            });
+        } else {
+            taskRois = null;
+        }
         tc.setROIs(imageIndex, taskRois);
     }
 
@@ -127,14 +132,14 @@ public class EditableInputPresenter extends InputPresenter {
                 s.setFill(new Color(1, 1, 1, 0.5));
                 actualShape = s;
                 lastX = t.getSceneX();
-                lastY = t.getSceneY();                
+                lastY = t.getSceneY();
                 t.consume();
             } else if (t.isSecondaryButtonDown()) {
                 rois.remove(s);
                 EditableInputPresenter.this.getChildren().remove(s);
                 actualShape = null;
                 saveRois();
-                t.consume();                
+                t.consume();
             }
         });
         s.setOnMouseDragged((MouseEvent t) -> {
@@ -146,7 +151,7 @@ public class EditableInputPresenter extends InputPresenter {
 
             lastX = t.getSceneX();
             lastY = t.getSceneY();
-            
+
             t.consume();
         });
         s.setOnMouseReleased((MouseEvent t) -> {
