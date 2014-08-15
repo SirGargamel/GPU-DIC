@@ -135,7 +135,7 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
     public void changed(ObservableValue<? extends String> ov, String t, String t1) {
         try {
             if (t1 != null) {
-                imageIndex = Integer.valueOf(t1);
+                imageIndex = Integer.parseInt(t1);
                 displayImage();
             } else {
                 imageIndexProperty.setValue(t);

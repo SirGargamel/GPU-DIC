@@ -68,7 +68,7 @@ public class ExpertSettings implements Initializable {
             if (limits != null && !limits.isEmpty()) {
                 final String[] split = limits.trim().split(ROUND_SPLITTER);
                 if (split.length == 2) {
-                    newLimits = new int[]{Integer.valueOf(split[0].trim()), Integer.valueOf(split[1].trim())};
+                    newLimits = new int[]{Integer.parseInt(split[0].trim()), Integer.parseInt(split[1].trim())};
                 } else {
                     newLimits = null;
                 }

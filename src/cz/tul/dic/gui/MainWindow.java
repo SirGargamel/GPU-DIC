@@ -488,7 +488,7 @@ public class MainWindow implements Initializable {
     private void saveFacetSize() {
         final String text = textFs.getText();
         if (!text.isEmpty()) {
-            final int fs = Integer.valueOf(text);
+            final int fs = Integer.parseInt(text);
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
                 tc.setParameter(TaskParameter.FACET_SIZE, fs);

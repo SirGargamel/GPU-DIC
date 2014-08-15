@@ -175,8 +175,8 @@ public class ExportEditor implements Initializable {
                             .message(Lang.getString("ChooseCoords"))
                             .showTextInput("0; 0");
                     final String[] split = coords.get().split(SPLIT);
-                    final int x = Integer.valueOf(split[0].trim());
-                    final int y = Integer.valueOf(split[1].trim());
+                    final int x = Integer.parseInt(split[0].trim());
+                    final int y = Integer.parseInt(split[1].trim());
                     tc.addExport(ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, x, y)), x, y));
                 } else if (val.equals(c3)) {
                     final Direction dir = pickDirection();

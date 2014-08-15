@@ -172,7 +172,7 @@ public class ResultPresenter implements Initializable {
     @FXML
     private void handleTextActionIndex(ActionEvent event) {
         try {
-            int newIndex = Integer.valueOf(textIndex.getText());
+            int newIndex = Integer.parseInt(textIndex.getText());
             changeIndex(newIndex - index);
         } catch (NumberFormatException ex) {
             textIndex.setText(Integer.toString(index));

@@ -34,7 +34,7 @@ public class ExportTask implements Serializable {
 
         final int[] dataParams = new int[split.length - 4];
         for (int i = 4; i < split.length; i++) {
-            dataParams[i - 4] = Integer.valueOf(split[i]);
+            dataParams[i - 4] = Integer.parseInt(split[i]);
         }
 
         final Direction dir;

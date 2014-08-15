@@ -238,7 +238,7 @@ public class TaskContainerUtils {
         for (Entry<String, String> e : config.entrySet()) {
             key = e.getKey();
             if (key.startsWith(CONFIG_ROIS)) {
-                index = Integer.valueOf(key.replaceFirst(CONFIG_ROIS, ""));
+                index = Integer.parseInt(key.replaceFirst(CONFIG_ROIS, ""));
                 final String[] splitPairs = e.getValue().split(CONFIG_SEPARATOR_FULL);
                 for (String s : splitPairs) {
                     split = s.split(CONFIG_SEPARATOR_PAIRS);
@@ -320,7 +320,7 @@ public class TaskContainerUtils {
             final String[] split = data.split(CONFIG_SEPARATOR_DATA);
             result = new int[split.length];
             for (int i = 0; i < split.length; i++) {
-                result[i] = Integer.valueOf(split[i]);
+                result[i] = Integer.parseInt(split[i]);
             }
         }
         return result;

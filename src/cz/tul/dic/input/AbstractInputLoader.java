@@ -39,7 +39,7 @@ public abstract class AbstractInputLoader {
                 if (s.contains(TEXT_SPEED)) {
                     String val = s.replace(TEXT_SPEED, "").replace(TEXT_FPS, "").replaceAll(TEXT_EXTRA, "").trim();
                     try {
-                        fps = Integer.valueOf(val);
+                        fps = Integer.parseInt(val);
                     } catch (NumberFormatException ex) {
                         Logger.warn("Failed to parse FPS value \"{0}\", using default FPS - ", val, fps);
                     }
