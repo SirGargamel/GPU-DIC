@@ -2,7 +2,10 @@ package cz.tul.dic.gui;
 
 import cz.tul.dic.data.roi.RoiType;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.gui.lang.Lang;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,6 +22,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.StringConverter;
 
 public class ROISelector implements Initializable {
 
@@ -90,6 +94,23 @@ public class ROISelector implements Initializable {
         comboBoxData.addAll(RoiType.values());
         choiceRoi.setItems(comboBoxData);
         choiceRoi.getSelectionModel().selectFirst();
+        choiceRoi.setConverter(new StringConverter<RoiType>() {
+            
+            private final Map<String, RoiType> mapping = new HashMap<String, RoiType>();            
+            
+
+            @Override
+            public String toString(RoiType object) {
+                final String result = Lang.getString(object.toString());
+                mapping.put(result, object);
+                return result;
+            }
+
+            @Override
+            public RoiType fromString(String string) {
+                return mapping.get(string);
+            }
+        });
 
         imagePane.initialize(url, rb);
         imagePane.setRoiTypeProperty(choiceRoi.valueProperty());
