@@ -41,7 +41,7 @@ kernel void CL2DImage(
         dx = x - facetCenters[baseIndexFacetCenter];
         dy = y - facetCenters[baseIndexFacetCenter + 1];
         
-//        deformedFacet[i2] = x + deformation[] + deformation[2] * dx + deformation[4] * dy;                    
+//        deformedFacet[i2] = x + deformation[0] + deformation[2] * dx + deformation[4] * dy;                    
 //        deformedFacet[i2 + 1] = y + deformation[1] + deformation[baseIndexDeformation + 3] * dx + deformation[5] * dy; 
         deformedFacet[i2] = %DEF_X%;
         deformedFacet[i2 + 1] = %DEF_Y%;
