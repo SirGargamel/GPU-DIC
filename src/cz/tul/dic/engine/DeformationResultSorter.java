@@ -10,19 +10,19 @@ import java.util.Comparator;
  */
 public class DeformationResultSorter implements Comparator<Integer>, Serializable {
 
-    private final int defArrayLength;    
-    private final double[] deformations;
+    private final double[] deformationLimits;
+    private final int[] deformationCounts;
 
-    public DeformationResultSorter(int defArrayLength, final double[] deformations) {
-        this.defArrayLength = defArrayLength;        
-        this.deformations = deformations;
+    public DeformationResultSorter(final double[] deformationLimits) {
+        this.deformationLimits = deformationLimits;
+        deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
     }
 
     @Override
     public int compare(Integer o1, Integer o2) {
         return Double.compare(
-                DeformationUtils.getAbs(deformations, o1, defArrayLength),
-                DeformationUtils.getAbs(deformations, o2, defArrayLength));
+                DeformationUtils.getAbs(o1, deformationLimits, deformationCounts),
+                DeformationUtils.getAbs(o2, deformationLimits, deformationCounts));
     }
 
 }

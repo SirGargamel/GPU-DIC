@@ -9,6 +9,7 @@ import cz.tul.dic.Utils;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import org.pmw.tinylog.Logger;
@@ -87,7 +87,7 @@ public final class CorrelationCalculator extends Observable {
             List<double[]> bestSubResults = new ArrayList<>();
             while (it.hasNext()) {
                 ct = it.next();
-                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformations(), defArrayLength));
+                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), defArrayLength));
                 kernel.finishRound();
                 // pick best results for this computation task and discard ct data 
                 if (ct.isSubtask()) {
@@ -146,57 +146,59 @@ public final class CorrelationCalculator extends Observable {
     }
 
     private List<double[]> findBestSubResult(final ComputationTask task, int defArrayLength) throws ComputationException {
-        final double[] deformations = task.getDeformations();
-        final int deformationCount = deformations.length / defArrayLength;
-        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(defArrayLength, deformations);
-        final float[] taskResults = task.getResults();
+        throw new UnsupportedOperationException();
 
-        float val, best = -Float.MAX_VALUE;
-        final List<Integer> candidates = new LinkedList<>();
-        for (int def = 0; def < deformationCount; def++) {
-            val = taskResults[def];
-            if (val > best) {
-                best = val;
-
-                candidates.clear();
-                candidates.add(def);
-            } else if (val == best) {
-                candidates.add(def);
-            }
-        }
-
-        final List<double[]> result;
-        if (candidates.isEmpty()) {
-            Logger.warn("No best value found for sub task {0}", task);
-            result = new ArrayList<>(1);
-            result.add(new double[]{0, 0, 0});
-        } else {
-            if (candidates.size() > 1) {
-                Collections.sort(candidates, candidatesComparator);
-            }
-
-            final int l = Math.min(candidates.size(), BEST_RESULT_COUNT_MAX);
-            result = new ArrayList<>(l);
-            double[] res, tmp;
-            for (int i = 0; i < l; i++) {
-                tmp = extractDeformation(candidates.get(i), deformations, defArrayLength);
-                res = new double[defArrayLength + 1];
-                res[0] = best;
-                System.arraycopy(tmp, 0, res, 1, defArrayLength);
-                result.add(res);
-            }
-        }
-
-        return result;
+//        final double[] deformationLimits = task.getDeformationLimits();
+//        final int deformationCount = deformationLimits.length / defArrayLength;
+//        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(defArrayLength, deformationLimits);
+//        final float[] taskResults = task.getResults();
+//
+//        float val, best = -Float.MAX_VALUE;
+//        final List<Integer> candidates = new LinkedList<>();
+//        for (int def = 0; def < deformationCount; def++) {
+//            val = taskResults[def];
+//            if (val > best) {
+//                best = val;
+//
+//                candidates.clear();
+//                candidates.add(def);
+//            } else if (val == best) {
+//                candidates.add(def);
+//            }
+//        }
+//
+//        final List<double[]> result;
+//        if (candidates.isEmpty()) {
+//            Logger.warn("No best value found for sub task {0}", task);
+//            result = new ArrayList<>(1);
+//            result.add(new double[]{0, 0, 0});
+//        } else {
+//            if (candidates.size() > 1) {
+//                Collections.sort(candidates, candidatesComparator);
+//            }
+//
+//            final int l = Math.min(candidates.size(), BEST_RESULT_COUNT_MAX);
+//            result = new ArrayList<>(l);
+//            double[] res, tmp;
+//            for (int i = 0; i < l; i++) {
+//                tmp = extractDeformation(candidates.get(i), deformationLimits, defArrayLength);
+//                res = new double[defArrayLength + 1];
+//                res[0] = best;
+//                System.arraycopy(tmp, 0, res, 1, defArrayLength);
+//                result.add(res);
+//            }
+//        }
+//        return result;
     }
 
     private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final List<Facet> globalFacets, int defArrayLength) throws ComputationException {
-        final double[] deformations = task.getDeformations();
-        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(defArrayLength, deformations);
+        final double[] deformationLimits = task.getDeformationLimits();
+        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(deformationLimits);
 
         final List<Facet> localFacets = task.getFacets();
         final int facetCount = localFacets.size();
-        final int deformationCount = deformations.length / defArrayLength;
+        final int deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits);
+        final int[] deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
 
         float val, best;
         final List<Integer> candidates = new ArrayList<>();
@@ -244,24 +246,13 @@ public final class CorrelationCalculator extends Observable {
                 l = Math.min(candidates.size(), BEST_RESULT_COUNT_MAX);
                 bestResult = new double[l][];
                 for (int i = 0; i < l; i++) {
-                    bestResult[i] = extractDeformation(candidates.get(i), deformations, defArrayLength);
+                    bestResult[i] = DeformationUtils.extractDeformation(candidates.get(i), deformationLimits, deformationCounts);
                 }
 
                 bestResults.set(globalFacetIndex, bestResult);
                 COUNTER.inc(bestResult[0]);
             }
         }
-    }
-
-    private double[] extractDeformation(final int index, final double[] deformations, int defArrayLength) throws ComputationException {
-        if (index < 0) {
-            throw new IllegalArgumentException("Negative index not allowed.");
-        }
-
-        final double[] result = new double[defArrayLength];
-        System.arraycopy(deformations, defArrayLength * index, result, 0, defArrayLength);
-
-        return result;
     }
 
     public void setKernel(KernelType kernel) {

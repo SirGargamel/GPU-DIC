@@ -2,6 +2,7 @@ package cz.tul.dic.data.deformation;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import java.util.Arrays;
 
 /**
  *
@@ -17,13 +18,8 @@ public class DeformationUtils {
         return Math.sqrt(result);
     }
 
-    public static double getAbs(final double[] deformations, final int deformationIndex, final int deformationLength) {
-        double result = 0;
-        final int base = deformationIndex * deformationLength;
-        for (int i = 0; i < deformationLength; i++) {
-            result += deformations[base + i] * deformations[base + i];
-        }
-        return Math.sqrt(result);
+    public static double getAbs(final int deformationIndex, final double[] deformationLimits, final int[] deformationCounts) {
+        return getAbs(extractDeformation(deformationIndex, deformationLimits, deformationCounts));
     }
 
     public static DeformationDegree getDegreeFromLimits(final double[] limits) throws ComputationException {
@@ -92,6 +88,40 @@ public class DeformationUtils {
             result = 1;
         }
         return result;
+    }
+
+    public static double[] extractDeformation(final int index, final double[] deformationLimits, final int[] deformationCounts) {
+        if (index < 0) {
+            throw new IllegalArgumentException("Negative index not allowed.");
+        }
+
+        final int l = deformationLimits.length / 3;
+        final double[] result = new double[l];
+        int counter = index;
+        for (int i = 0; i < l; i++) {
+            result[i] = counter / deformationCounts[i];
+            counter %= deformationCounts[i];
+        }
+        for (int i = 0; i < l; i++) {
+            result[i] = deformationLimits[i * 3] + result[i] * deformationLimits[i * 3 + 2];
+        }
+
+        return result;
+    }
+
+    public static int[] generateDeformationCounts(final double[] deformationLimits) {
+        final int l = deformationLimits.length / 3;
+        final int[] counts = new int[l];
+        Arrays.fill(counts, 1);
+
+        int count;
+        for (int i = l - 2; i >= 0; i--) {
+            count = (int) Math.round((deformationLimits[i * 3 + 1] - deformationLimits[i * 3]) / deformationLimits[i * 3 + 2]) + 1;
+            for (int j = 0; j <= i; j++) {
+                counts[j] *= count;
+            }
+        }
+        return counts;
     }
 
 }

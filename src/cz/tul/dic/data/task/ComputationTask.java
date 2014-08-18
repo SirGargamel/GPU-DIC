@@ -12,15 +12,15 @@ public class ComputationTask {
 
     private final Image imageA, imageB;
     private final List<Facet> facets;
-    private final double[] deformations;
+    private final double[] deformationLimits;
     private final boolean subtask;
     private float[] results;
 
-    public ComputationTask(Image imageA, Image imageB, List<Facet> facets, double[] deformations, boolean subtask) {
+    public ComputationTask(Image imageA, Image imageB, List<Facet> facets, double[] deformationLimits, boolean subtask) {
         this.imageA = imageA;
         this.imageB = imageB;
         this.facets = facets;
-        this.deformations = deformations;
+        this.deformationLimits = deformationLimits;
         this.subtask = subtask;
     }
 
@@ -36,8 +36,8 @@ public class ComputationTask {
         return facets;
     }
 
-    public double[] getDeformations() {
-        return deformations;
+    public double[] getDeformationLimits() {
+        return deformationLimits;
     }
 
     public float[] getResults() {

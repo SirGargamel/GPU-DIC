@@ -77,7 +77,7 @@ public class KernelSourcePreparator {
                 // deformation generation
                 sb.setLength(0);
                 sb.append("int counter = deformationId;\n");
-                sb.append("deformation[0] = counter / (float) deformationCounts[0];\n");
+                sb.append("deformation[0] = counter / deformationCounts[0];\n");
                 sb.append("counter -=  deformation[0] * deformationCounts[0];\n");
                 sb.append("deformation[1] = counter;\n");
                 sb.append("deformation[0] = deformationLimits[0] + deformation[0] * deformationLimits[2];\n");
@@ -109,10 +109,10 @@ public class KernelSourcePreparator {
                 for (int i = 0; i < 6; i++) {
                     sb.append("deformation[");
                     sb.append(i);
-                    sb.append("] = counter / (float) deformationCounts[");
+                    sb.append("] = counter / deformationCounts[");
                     sb.append(i);
                     sb.append("];\n");
-                    sb.append("counter = counter % deformationCounts[");
+                    sb.append("counter %= deformationCounts[");
                     sb.append(i);
                     sb.append("];\n");
                 }                
@@ -176,10 +176,10 @@ public class KernelSourcePreparator {
                 for (int i = 0; i < 12; i++) {
                     sb.append("deformation[");
                     sb.append(i);
-                    sb.append("] = counter / (float) deformationCounts[");
+                    sb.append("] = counter / deformationCounts[");
                     sb.append(i);
                     sb.append("];\n");
-                    sb.append("counter = counter % deformationCounts[");
+                    sb.append("counter %= deformationCounts[");
                     sb.append(i);
                     sb.append("];\n");
                 }                

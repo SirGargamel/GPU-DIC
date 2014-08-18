@@ -22,7 +22,6 @@ import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -109,7 +108,7 @@ public abstract class Kernel {
         queue.putWriteBuffer(clFacetCenters, false);
 
         clDeformationLimits = generateDeformationLimits(deformationLimits);
-        queue.putWriteBuffer(clDeformationLimits, true);
+        queue.putWriteBuffer(clDeformationLimits, false);
         clDefStepCount = generateDeformationStepCounts(deformationLimits);
         queue.putWriteBuffer(clDefStepCount, true);
         final int deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits);
@@ -251,19 +250,9 @@ public abstract class Kernel {
     }
 
     private CLBuffer<IntBuffer> generateDeformationStepCounts(final double[] deformationLimits) {
-        final int l = deformationLimits.length / 3;
-        final int[] counts = new int[l];
-        Arrays.fill(counts, 1);
+        final int[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
 
-        int count;
-        for (int i = l - 2; i >= 0; i--) {
-            count = (int) Math.round((deformationLimits[i * 3 + 1] - deformationLimits[i * 3]) / deformationLimits[i * 3 + 2]) + 1;
-            for (int j = 0; j <= i; j++) {
-                counts[j] *= count;
-            }
-        }
-
-        final CLBuffer<IntBuffer> result = context.createIntBuffer(l, CLMemory.Mem.READ_ONLY);
+        final CLBuffer<IntBuffer> result = context.createIntBuffer(counts.length, CLMemory.Mem.READ_ONLY);
         final IntBuffer buffer = result.getBuffer();
         for (int i : counts) {
             buffer.put((int) i);
