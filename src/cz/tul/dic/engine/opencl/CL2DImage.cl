@@ -5,7 +5,7 @@ constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_
 kernel void CL2DImage(
     read_only image2d_t imageA, read_only image2d_t imageB, 
     global read_only int * facets, global read_only float * facetCenters,
-    global read_only float * deformations,
+    global read_only float * deformationLimits, global read_only int * deformationCounts,
     global write_only float * result,    
     const int imageWidth, const int deformationCount,
     const int facetSize, const int facetCount) 
@@ -23,8 +23,10 @@ kernel void CL2DImage(
     const int facetSize2 = facetSize * facetSize;
     const int facetCoordCount = facetSize2 * 2;    
     const int baseIndexFacet = facetId * facetCoordCount; 
-    const int baseIndexFacetCenter = facetId * 2;
-    const int baseIndexDeformation = deformationId * %DEF_D%;
+    const int baseIndexFacetCenter = facetId * 2;    
+    
+    float deformation[%DEF_D%];
+    %DEF_C%
     // deform facet
     float deformedFacet[-1*-1*2];
     int index, i2, x, y;
@@ -39,8 +41,8 @@ kernel void CL2DImage(
         dx = x - facetCenters[baseIndexFacetCenter];
         dy = y - facetCenters[baseIndexFacetCenter + 1];
         
-//        deformedFacet[i2] = x + deformations[baseIndexDeformation] + deformations[baseIndexDeformation + 2] * dx + deformations[baseIndexDeformation + 4] * dy;                    
-//        deformedFacet[i2 + 1] = y + deformations[baseIndexDeformation + 1] + deformations[baseIndexDeformation + 3] * dx + deformations[baseIndexDeformation + 5] * dy; 
+//        deformedFacet[i2] = x + deformation[] + deformation[2] * dx + deformation[4] * dy;                    
+//        deformedFacet[i2 + 1] = y + deformation[1] + deformation[baseIndexDeformation + 3] * dx + deformation[5] * dy; 
         deformedFacet[i2] = %DEF_X%;
         deformedFacet[i2 + 1] = %DEF_Y%;
     }

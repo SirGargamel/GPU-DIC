@@ -43,7 +43,7 @@ public class DeformationUtils {
         }
         return result;
     }
-    
+
     public static DeformationDegree getDegreeFromValue(final double[] deformation) throws ComputationException {
         final DeformationDegree result;
         switch (deformation.length) {
@@ -58,6 +58,38 @@ public class DeformationUtils {
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal count of deformations - " + deformation.length);
+        }
+        return result;
+    }
+
+    public static long calculateDeformationCount(final double[] limits) {
+        final int coeffCount = limits.length / 3;
+        long size = 1;
+        size *= computeSize(limits, 0);
+        size *= computeSize(limits, 3);
+        if (coeffCount > 2) {
+            size *= computeSize(limits, 6);
+            size *= computeSize(limits, 9);
+            size *= computeSize(limits, 12);
+            size *= computeSize(limits, 15);
+            if (coeffCount > 6) {
+                size *= computeSize(limits, 18);
+                size *= computeSize(limits, 21);
+                size *= computeSize(limits, 24);
+                size *= computeSize(limits, 27);
+                size *= computeSize(limits, 30);
+                size *= computeSize(limits, 33);
+            }
+        }
+        return size;
+    }
+
+    private static int computeSize(final double[] limits, final int base) {
+        final int result;
+        if (limits[base + 2] != 0 && limits[base] != limits[base + 1]) {
+            result = (int) ((limits[base + 1] - limits[base]) / limits[base + 2] + 1);
+        } else {
+            result = 1;
         }
         return result;
     }

@@ -5,7 +5,7 @@ constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | C
 kernel void CL1D_I_V_LL_MC(
     read_only image2d_t imageA, read_only image2d_t imageB, 
     global read_only int2 * facets, global read_only float2 * facetCenters,
-    global read_only float * deformations,
+    global read_only float * deformationLimits, global read_only int * deformationCounts,
     global write_only float * result,        
     const int imageWidth, const int deformationCount,
     const int facetSize, const int facetCount,
@@ -50,7 +50,8 @@ kernel void CL1D_I_V_LL_MC(
     if (deformationId >= deformationCount) {
         return;
     }
-    const int baseIndexDeformation = deformationId * %DEF_D%;
+    float deformation[%DEF_D%];
+    %DEF_C%
     // deform facet
     float2 deformedFacet[-1*-1];
     float2 coords, def; 

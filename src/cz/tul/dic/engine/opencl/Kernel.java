@@ -17,10 +17,12 @@ import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,7 +67,7 @@ public abstract class Kernel {
         try {
             this.context = context;
             this.device = device;
-            
+
             program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization(), interpolation)).build();
             clGlobalMem.add(program);
             kernel = program.createCLKernel(kernelName);
@@ -81,11 +83,11 @@ public abstract class Kernel {
         }
     }
 
-    public float[] compute(Image imageA, Image imageB, List<Facet> facets, double[] deformations, int deformationLength) {
+    public float[] compute(Image imageA, Image imageB, List<Facet> facets, double[] deformationLimits, int deformationLength) {
         final CLImage2d<IntBuffer> clImageA, clImageB;
-        final CLBuffer<IntBuffer> clFacetData;
+        final CLBuffer<IntBuffer> clFacetData, clDefStepCount;
         final CLBuffer<FloatBuffer> clFacetCenters;
-        final CLBuffer<FloatBuffer> clDeformations, clResults;
+        final CLBuffer<FloatBuffer> clDeformationLimits, clResults;
         // prepare data                
         clImageA = generateImage(imageA);
         queue.putWriteImage(clImageA, false);
@@ -97,7 +99,7 @@ public abstract class Kernel {
             Logger.warn("Empty facets for computation.");
             return new float[0];
         }
-        
+
         final int facetSize = facets.get(0).getSize();
 
         clFacetData = generateFacetData(facets, facetSize, usesMemoryCoalescing());
@@ -106,18 +108,20 @@ public abstract class Kernel {
         clFacetCenters = generateFacetCenters(facets);
         queue.putWriteBuffer(clFacetCenters, false);
 
-        clDeformations = generateDeformations(deformations);
-        queue.putWriteBuffer(clDeformations, true);
-        final int deformationCount = deformations.length / deformationLength;
-        
+        clDeformationLimits = generateDeformationLimits(deformationLimits);
+        queue.putWriteBuffer(clDeformationLimits, true);
+        clDefStepCount = generateDeformationStepCounts(deformationLimits);
+        queue.putWriteBuffer(clDefStepCount, true);
+        final int deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits);
+
         Logger.trace("Computing task " + facetCount + " facets, " + deformationCount + " deformations.");
         clResults = context.createFloatBuffer(facetCount * deformationCount, CLMemory.Mem.WRITE_ONLY);
-        
+
         clRoundMem.add(clResults);
 
         runKernel(clImageA, clImageB,
                 clFacetData, clFacetCenters,
-                clDeformations, clResults,
+                clDeformationLimits, clDefStepCount, clResults,
                 deformationCount, imageA.getWidth(), facetSize, facetCount);
 
         // read result
@@ -129,7 +133,8 @@ public abstract class Kernel {
     abstract void runKernel(final CLImage2d<IntBuffer> imgA, final CLImage2d<IntBuffer> imgB,
             final CLBuffer<IntBuffer> facetData,
             final CLBuffer<FloatBuffer> facetCenters,
-            final CLBuffer<FloatBuffer> deformations, final CLBuffer<FloatBuffer> results,
+            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
+            final CLBuffer<FloatBuffer> results,
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount);
 
@@ -218,7 +223,7 @@ public abstract class Kernel {
             centerData = f.getCenter();
             for (int i = 0; i < dataSize; i++) {
                 data[pointer + i] = (float) centerData[i];
-            }            
+            }
             pointer += dataSize;
         }
 
@@ -233,14 +238,37 @@ public abstract class Kernel {
         return result;
     }
 
-    private CLBuffer<FloatBuffer> generateDeformations(final double[] deformations) {
-        final CLBuffer<FloatBuffer> result = context.createFloatBuffer(deformations.length, CLMemory.Mem.READ_ONLY);
+    private CLBuffer<FloatBuffer> generateDeformationLimits(final double[] deformationLimits) {
+        final CLBuffer<FloatBuffer> result = context.createFloatBuffer(deformationLimits.length, CLMemory.Mem.READ_ONLY);
         final FloatBuffer buffer = result.getBuffer();
-        for (double d : deformations) {
+        for (double d : deformationLimits) {
             buffer.put((float) d);
         }
         buffer.rewind();
 
+        clRoundMem.add(result);
+        return result;
+    }
+
+    private CLBuffer<IntBuffer> generateDeformationStepCounts(final double[] deformationLimits) {
+        final int l = deformationLimits.length / 3;
+        final int[] counts = new int[l];
+        Arrays.fill(counts, 1);
+
+        int count;
+        for (int i = l - 2; i >= 0; i--) {
+            count = (int) Math.round((deformationLimits[i * 3 + 1] - deformationLimits[i * 3]) / deformationLimits[i * 3 + 2]) + 1;
+            for (int j = 0; j <= i; j++) {
+                counts[j] *= count;
+            }
+        }
+
+        final CLBuffer<IntBuffer> result = context.createIntBuffer(l, CLMemory.Mem.READ_ONLY);
+        final IntBuffer buffer = result.getBuffer();
+        for (int i : counts) {
+            buffer.put((int) i);
+        }
+        buffer.rewind();
         clRoundMem.add(result);
         return result;
     }

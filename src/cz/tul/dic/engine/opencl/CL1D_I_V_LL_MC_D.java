@@ -28,7 +28,8 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     void runKernel(final CLImage2d<IntBuffer> imgA, final CLImage2d<IntBuffer> imgB,
             final CLBuffer<IntBuffer> facetData,
             final CLBuffer<FloatBuffer> facetCenters,
-            final CLBuffer<FloatBuffer> deformations, final CLBuffer<FloatBuffer> results,
+            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts, 
+            final CLBuffer<FloatBuffer> results,
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount) {
         final int facetArea = facetSize * facetSize;
@@ -36,7 +37,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         lws0 = Math.min(lws0, device.getMaxWorkItemSizes()[0]);
 
         kernel.rewind();
-        kernel.putArgs(imgA, imgB, facetData, facetCenters, deformations, results)
+        kernel.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)
                 .putArg(imageWidth)
                 .putArg(deformationCount)
                 .putArg(facetSize)

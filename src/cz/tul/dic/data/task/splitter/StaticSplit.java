@@ -5,23 +5,20 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.generators.DeformationGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StaticSplit extends TaskSplitter {
 
     private static final int SPLIT_DEFAULT = 50;
-    private final int split;
-    private final double[] deformations;
+    private final int split;    
     private boolean hasNext;
     private int index;
 
     public StaticSplit(Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits, final ROI roi, final Object taskSplitValue) throws ComputationException {
         super(image1, image2, facets, deformationLimits, roi);
         
-        split = taskSplitValue == null ? SPLIT_DEFAULT : (int) taskSplitValue;
-        deformations = DeformationGenerator.generateDeformations(deformationLimits);
+        split = taskSplitValue == null ? SPLIT_DEFAULT : (int) taskSplitValue;        
 
         checkIfHasNext();
     }
@@ -50,6 +47,6 @@ public class StaticSplit extends TaskSplitter {
 
         checkIfHasNext();
 
-        return new ComputationTask(image1, image2, sublist, deformations, false);
+        return new ComputationTask(image1, image2, sublist, deformationLimits, false);
     }    
 }

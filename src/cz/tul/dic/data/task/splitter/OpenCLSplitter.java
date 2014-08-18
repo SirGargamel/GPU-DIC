@@ -4,10 +4,10 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
-import cz.tul.dic.generators.DeformationGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import org.pmw.tinylog.Logger;
@@ -59,63 +59,59 @@ public class OpenCLSplitter extends TaskSplitter {
         final List<Facet> sublist;
         double[] checkedDeformations = null;
         if (subDivision) {
-            divPosition++;
+            throw new UnsupportedOperationException("Not supported yet.");
 
-            sublist = new ArrayList<>(1);
-            sublist.add(facets.get(facetIndex));
-
-            final int l = (int) (defCount * defArrayLength);
-            try {
-                checkedDeformations = DeformationGenerator.generateDeformations(deformationLimits, divPosition * l, (divPosition + 1) * l);
-            } catch (ComputationException ex) {
-                Logger.error(ex);
-                Logger.error("Failed to generate deformations, should not happen here - something is very wrong.");
-            }
-
-            if (divPosition == divCount - 1) {
-                subDivision = false;
-                facetIndex++;
-            }
+//            sublist = new ArrayList<>(1);
+//            sublist.add(facets.get(facetIndex));
+//
+//            final int l = (int) (defCount * defArrayLength);
+//            try {
+//                checkedDeformations = DeformationGenerator.generateDeformations(deformationLimits, divPosition * l, (divPosition + 1) * l);
+//            } catch (ComputationException ex) {
+//                Logger.error(ex);
+//                Logger.error("Failed to generate deformations, should not happen here - something is very wrong.");
+//            }
+//
+//            if (divPosition == divCount - 1) {
+//                subDivision = false;
+//                facetIndex++;
+//            }
         } else {
             final int rest = facets.size() - facetIndex;
 
             int taskSize = rest;
-            final long l = DeformationGenerator.calculateDeformationArraySize(deformationLimits);
-            while (taskSize > 1 && !isMemOk(l, taskSize, facetSize, defArrayLength)) {
+            final long l = DeformationUtils.calculateDeformationCount(deformationLimits);
+            while (taskSize > 1 && !isMemOk(l, taskSize, facetSize, deformationLimits.length)) {
                 taskSize *= COEFF_LIMIT_ADJUST;
             }
 
-            checkedDeformations = null;
-            long newL;
+            checkedDeformations = null;            
             if (taskSize == 1 && !isMemOk(l, taskSize, facetSize, defArrayLength)) {
                 Logger.warn("Too many deformations to try, spliting facet task .");
-                subDivision = true;
-                divPosition = 0;
-                defCount = l / defArrayLength;
+                throw new UnsupportedOperationException("Not supported yet.");
 
-                do {
-                    defCount /= 2;
-                    newL = defCount * defArrayLength;
-                } while (newL > MAX_SIZE_DEFORMATION_A && !isMemOk(newL, rest, facetSize, defArrayLength));
-
-                divCount = (l / defArrayLength) / defCount;
-                try {
-                    checkedDeformations = DeformationGenerator.generateDeformations(deformationLimits, divPosition * newL, (divPosition + 1) * newL);
-                } catch (ComputationException ex) {
-                    Logger.error(ex);
-                    Logger.error("Failed to generate deformations, should not happen here - something is very wrong.");
-                }
-
-                sublist = new ArrayList<>(1);
-                sublist.add(facets.get(facetIndex));
+//                long newL;
+//                subDivision = true;
+//                divPosition = 0;
+//                defCount = l / defArrayLength;
+//
+//                do {
+//                    defCount /= 2;
+//                    newL = defCount * defArrayLength;
+//                } while (newL > MAX_SIZE_DEFORMATION_A && !isMemOk(newL, rest, facetSize, defArrayLength));
+//
+//                divCount = (l / defArrayLength) / defCount;
+//                try {
+//                    checkedDeformations = DeformationGenerator.generateDeformations(deformationLimits, divPosition * newL, (divPosition + 1) * newL);
+//                } catch (ComputationException ex) {
+//                    Logger.error(ex);
+//                    Logger.error("Failed to generate deformations, should not happen here - something is very wrong.");
+//                }
+//
+//                sublist = new ArrayList<>(1);
+//                sublist.add(facets.get(facetIndex));
             } else {
-                try {
-                    checkedDeformations = DeformationGenerator.generateDeformations(deformationLimits);
-                } catch (ComputationException ex) {
-                    Logger.error(ex);
-                    Logger.error("Failed to generate deformations, should not happen here - something is very wrong.");
-                }
-
+                checkedDeformations = deformationLimits;
                 sublist = new ArrayList<>(taskSize);
                 final int facetCount = facets.size();
 
@@ -136,17 +132,17 @@ public class OpenCLSplitter extends TaskSplitter {
 
     private boolean isMemOk(final long deformationCount, final long facetCount, final long facetSize, final long deformationArraySize) {
         final long imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
-        final long deformationsSize = deformationCount * SIZE_FLOAT;
+        final long deformationsSize = deformationArraySize * SIZE_FLOAT;
         final long reserve = 32 * SIZE_INT;
         final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
         final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;
-        final long resultSize = facetCount * (deformationCount / deformationArraySize) * SIZE_FLOAT;
+        final long resultSize = facetCount * deformationCount * SIZE_FLOAT;
         final long fullSize = imageSize + deformationsSize + reserve + facetDataSize + facetCentersSize + resultSize;
 
         final long maxAllocMem = Math.min(DeviceManager.getDevice().getMaxMemAllocSize() * 3 / 4, MAX_ALLOCATION_SIZE);
         final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
         boolean result = fullSize > 0 && fullSize < maxMem;
-        result &= (deformationCount / deformationArraySize) < (MAX_ALLOCATION_SIZE / (facetCount * SIZE_FLOAT));    // int overflow check
+        result &= deformationCount < (MAX_ALLOCATION_SIZE / (facetCount * SIZE_FLOAT));    // int overflow check
         result &= resultSize > 0 && resultSize < maxAllocMem;
         result &= imageSize > 0 && imageSize < maxAllocMem;
         result &= deformationsSize > 0 && deformationsSize < maxAllocMem;
