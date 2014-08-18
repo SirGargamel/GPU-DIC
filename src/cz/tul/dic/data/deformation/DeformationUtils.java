@@ -99,8 +99,8 @@ public class DeformationUtils {
         final double[] result = new double[l];
         int counter = index;
         for (int i = 0; i < l; i++) {
-            result[i] = counter / deformationCounts[i];
-            counter %= deformationCounts[i];
+            result[i] = counter % deformationCounts[i];
+            counter /= deformationCounts[i];
         }
         for (int i = 0; i < l; i++) {
             result[i] = deformationLimits[i * 3] + result[i] * deformationLimits[i * 3 + 2];
@@ -112,14 +112,9 @@ public class DeformationUtils {
     public static int[] generateDeformationCounts(final double[] deformationLimits) {
         final int l = deformationLimits.length / 3;
         final int[] counts = new int[l];
-        Arrays.fill(counts, 1);
 
-        int count;
-        for (int i = l - 2; i >= 0; i--) {
-            count = (int) Math.round((deformationLimits[i * 3 + 1] - deformationLimits[i * 3]) / deformationLimits[i * 3 + 2]) + 1;
-            for (int j = 0; j <= i; j++) {
-                counts[j] *= count;
-            }
+        for (int i = 0; i < l; i++) {
+            counts[i] = (int) Math.round((deformationLimits[i * 3 + 1] - deformationLimits[i * 3]) / deformationLimits[i * 3 + 2]) + 1;
         }
         return counts;
     }
