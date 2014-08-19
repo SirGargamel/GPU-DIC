@@ -173,7 +173,7 @@ public class KernelSourcePreparator {
                 // deformation generation
                 sb.setLength(0);
                 sb.append("int counter = deformationId;\n");
-                for (int i = 0; i < 6; i++) {
+                for (int i = 0; i < 12; i++) {
                     sb.append("deformation[");
                     sb.append(i);
                     sb.append("] = counter % deformationCounts[");
