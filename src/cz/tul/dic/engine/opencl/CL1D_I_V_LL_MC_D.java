@@ -11,11 +11,11 @@ import java.nio.IntBuffer;
 
 public class CL1D_I_V_LL_MC_D extends Kernel {
 
-    private static final int ARGUMENT_INDEX_G_COUNT = 10;
-    private static final int ARGUMENT_INDEX_F_COUNT = 11;
-    private static final int ARGUMENT_INDEX_F_BASE = 12;
-    private static final int ARGUMENT_INDEX_D_COUNT = 13;
-    private static final int ARGUMENT_INDEX_D_BASE = 14;
+    private static final int ARGUMENT_INDEX_G_COUNT = 11;
+    private static final int ARGUMENT_INDEX_F_COUNT = 12;
+    private static final int ARGUMENT_INDEX_F_BASE = 13;
+    private static final int ARGUMENT_INDEX_D_COUNT = 14;
+    private static final int ARGUMENT_INDEX_D_BASE = 15;
     private static final int LWS0_BASE = 32;
     private final WorkSizeManager wsm;
 
