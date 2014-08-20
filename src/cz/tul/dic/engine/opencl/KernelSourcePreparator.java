@@ -16,7 +16,7 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelSourcePreparator {
 
-    private static final String KERNEL_EXTENSION = ".cl";
+    public static final String KERNEL_EXTENSION = ".cl";
     private static final String REPLACE_FACET_SIZE = "-1";
     private static final String REPLACE_DEFORMATION_X = "%DEF_X%";
     private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";

@@ -71,7 +71,7 @@ public class EngineTest {
     private static final String[] DEF_ZERO_FIRST_SECOND_FILES = new String[]{
         "out_2_0_1_1_0_0_1_0_0_0_0_1", "out_-1_-1_0_0_1_0_0_0.5_1_0_0_0"};
     private static final double[] DEF_LARGE = new double[]{
-        -2, 2, 1, -2, 2, 1,
+        -3, 3, 0.25, -3, 3, 0.25,
         -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
         -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
     private static final double[][][] CUMULATIVE_ZERO = new double[][][]{

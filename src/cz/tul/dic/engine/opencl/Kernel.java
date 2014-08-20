@@ -11,6 +11,7 @@ import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.CLResource;
+import com.sun.prism.impl.BufferUtil;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
@@ -18,10 +19,15 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,12 +54,24 @@ public abstract class Kernel {
     }
 
     private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
+    private static final String KERNEL_REDUCE = "reduce";
+    private static final String KERNEL_FIND_POS = "findPos";
+
+    public static int roundUp(int groupSize, int globalSize) {
+        int r = globalSize % groupSize;
+        int result;
+        if (r == 0) {
+            result = globalSize;
+        } else {
+            result = globalSize + groupSize - r;
+        }
+        return result;
+    }
     private final String kernelName;
     protected CLContext context;
-    protected CLKernel kernel;
+    protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
     protected CLDevice device;
     protected CLCommandQueue queue;
-    private CLProgram program;
     private final Set<CLResource> clGlobalMem, clRoundMem;
 
     public Kernel(String kernelName) {
@@ -67,22 +85,47 @@ public abstract class Kernel {
             this.context = context;
             this.device = device;
 
-            program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization(), interpolation)).build();
+            CLProgram program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization(), interpolation)).build();
             clGlobalMem.add(program);
-            kernel = program.createCLKernel(kernelName);
-            clGlobalMem.add(kernel);
+            kernelDIC = program.createCLKernel(kernelName);
+            clGlobalMem.add(kernelDIC);
             if (isDriven()) {
                 queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
             } else {
                 queue = device.createCommandQueue();
             }
             clGlobalMem.add(queue);
+
+            try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(KERNEL_REDUCE.concat(KernelSourcePreparator.KERNEL_EXTENSION))))) {
+                final StringBuilder sb = new StringBuilder();
+                while (bin.ready()) {
+                    sb.append(bin.readLine());
+                    sb.append("\n");
+                }
+                program = context.createProgram(sb.toString()).build();
+                clGlobalMem.add(program);
+                kernelReduce = program.createCLKernel(KERNEL_REDUCE);
+                clGlobalMem.add(kernelReduce);
+            }
+
+            try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(KERNEL_FIND_POS.concat(KernelSourcePreparator.KERNEL_EXTENSION))))) {
+                final StringBuilder sb = new StringBuilder();
+                while (bin.ready()) {
+                    sb.append(bin.readLine());
+                    sb.append("\n");
+                }
+                program = context.createProgram(sb.toString()).build();
+                clGlobalMem.add(program);
+                kernelFindPos = program.createCLKernel(KERNEL_FIND_POS);
+                clGlobalMem.add(kernelFindPos);
+            }
+
         } catch (IOException ex) {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
         }
     }
 
-    public float[] compute(Image imageA, Image imageB, List<Facet> facets, double[] deformationLimits, int deformationLength) {
+    public List<CorrelationResult> compute(Image imageA, Image imageB, List<Facet> facets, double[] deformationLimits, int deformationLength) throws ComputationException {
         final CLImage2d<IntBuffer> clImageA, clImageB;
         final CLBuffer<IntBuffer> clFacetData, clDefStepCount;
         final CLBuffer<FloatBuffer> clFacetCenters;
@@ -96,7 +139,7 @@ public abstract class Kernel {
         final int facetCount = facets.size();
         if (facets.isEmpty()) {
             Logger.warn("Empty facets for computation.");
-            return new float[0];
+            return new ArrayList<>(0);
         }
 
         final int facetSize = facets.get(0).getSize();
@@ -111,22 +154,25 @@ public abstract class Kernel {
         queue.putWriteBuffer(clDeformationLimits, false);
         clDefStepCount = generateDeformationStepCounts(deformationLimits);
         queue.putWriteBuffer(clDefStepCount, true);
-        final int deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits);
+        final long deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits);
 
         Logger.trace("Computing task " + facetCount + " facets, " + deformationCount + " deformations.");
-        clResults = context.createFloatBuffer(facetCount * deformationCount, CLMemory.Mem.WRITE_ONLY);
+        final long size = facetCount * deformationCount;
+        if (size <= 0 || size >= Integer.MAX_VALUE) {
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
+        }
+        clResults = context.createFloatBuffer((int) size, CLMemory.Mem.WRITE_ONLY);
 
         clRoundMem.add(clResults);
 
         runKernel(clImageA, clImageB,
                 clFacetData, clFacetCenters,
-                clDeformationLimits, clDefStepCount, clResults,
-                deformationCount, imageA.getWidth(), facetSize, facetCount);
+                clDeformationLimits, clDefStepCount, clResults, (int) deformationCount, imageA.getWidth(), facetSize, facetCount);
+        
+        final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) deformationCount);
+        final int[] positions = findPos(clResults, facetCount, (int) deformationCount, maxValuesCl);
 
-        // read result
-        // copy data back            
-        queue.putReadBuffer(clResults, true);
-        return readBuffer(clResults.getBuffer());
+        return createResults(readBuffer(maxValuesCl.getBuffer()), positions, deformationLimits);
     }
 
     abstract void runKernel(final CLImage2d<IntBuffer> imgA, final CLImage2d<IntBuffer> imgB,
@@ -136,6 +182,64 @@ public abstract class Kernel {
             final CLBuffer<FloatBuffer> results,
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount);
+
+    private CLBuffer<FloatBuffer> findMax(final CLBuffer<FloatBuffer> results, final int facetCount, final int deformationCount) {
+        final int lws0 = device.getMaxWorkItemSizes()[0];
+        final CLBuffer<FloatBuffer> maxVal = context.createFloatBuffer(facetCount, CLMemory.Mem.WRITE_ONLY);
+        clRoundMem.add(maxVal);
+
+        kernelReduce.rewind();
+        kernelReduce.setArg(0, results);
+        device.getContext().getCL().clSetKernelArg(kernelReduce.ID, 1, lws0 * BufferUtil.SIZEOF_FLOAT, null);
+        kernelReduce.setArg(2, maxVal);
+        kernelReduce.setArg(3, deformationCount);
+        kernelReduce.setArg(4, 0);
+        kernelReduce.rewind();
+
+        for (int i = 0; i < facetCount; i++) {
+            kernelReduce.setArg(4, i);
+            queue.put1DRangeKernel(kernelReduce, 0, lws0, lws0);
+        }
+
+        queue.putReadBuffer(maxVal, true);
+        return maxVal;
+    }
+
+    private int[] findPos(final CLBuffer<FloatBuffer> results, final int facetCount, final int deformationCount, final CLBuffer<FloatBuffer> vals) {
+        final int lws0 = device.getMaxWorkItemSizes()[0];
+        final CLBuffer<IntBuffer> maxVal = context.createIntBuffer(facetCount, CLMemory.Mem.WRITE_ONLY);
+        clRoundMem.add(maxVal);
+
+        kernelFindPos.rewind();
+        kernelFindPos.setArg(0, results);
+        kernelFindPos.setArg(1, vals);
+        kernelFindPos.setArg(2, maxVal);
+        kernelFindPos.setArg(3, deformationCount);
+        kernelFindPos.setArg(4, 0);
+        kernelFindPos.rewind();
+
+        for (int i = 0; i < facetCount; i++) {
+            kernelFindPos.setArg(4, i);
+            queue.put1DRangeKernel(kernelFindPos, 0, Kernel.roundUp(lws0, deformationCount), lws0);
+        }
+        queue.putReadBuffer(maxVal, true);
+        final int[] result = readBuffer(maxVal.getBuffer());
+        return result;
+    }
+
+    private List<CorrelationResult> createResults(final float[] values, final int[] positions, final double[] deformationLimits) {
+        if (values.length != positions.length) {
+            throw new IllegalArgumentException("Array lengths mismatch.");
+        }
+
+        final int[] deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
+        final List<CorrelationResult> result = new ArrayList<>(values.length);
+        for (int i = 0; i < values.length; i++) {
+            result.add(new CorrelationResult(values[i], DeformationUtils.extractDeformation(positions[i], deformationLimits, deformationCounts)));
+        }
+
+        return result;
+    }
 
     boolean usesMemoryCoalescing() {
         return false;
@@ -264,10 +368,21 @@ public abstract class Kernel {
 
     private float[] readBuffer(final FloatBuffer buffer) {
         buffer.rewind();
-        float[] result = new float[buffer.remaining()];
+        final float[] result = new float[buffer.remaining()];
         for (int i = 0; i < result.length; i++) {
             result[i] = buffer.get(i);
         }
+        buffer.rewind();
+        return result;
+    }
+
+    private int[] readBuffer(final IntBuffer buffer) {
+        buffer.rewind();
+        final int[] result = new int[buffer.remaining()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = buffer.get(i);
+        }
+        buffer.rewind();
         return result;
     }
 

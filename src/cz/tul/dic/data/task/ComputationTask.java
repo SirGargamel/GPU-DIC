@@ -2,6 +2,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.engine.CorrelationResult;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ public class ComputationTask {
     private final List<Facet> facets;
     private final double[] deformationLimits;
     private final boolean subtask;
-    private float[] results;
+    private List<CorrelationResult> results;
 
     public ComputationTask(Image imageA, Image imageB, List<Facet> facets, double[] deformationLimits, boolean subtask) {
         this.imageA = imageA;
@@ -40,11 +41,11 @@ public class ComputationTask {
         return deformationLimits;
     }
 
-    public float[] getResults() {
+    public List<CorrelationResult> getResults() {
         return results;
     }
 
-    public void setResults(float[] results) {
+    public void setResults(List<CorrelationResult> results) {
         this.results = results;
     }
 

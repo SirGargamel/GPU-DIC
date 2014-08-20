@@ -9,7 +9,6 @@ import cz.tul.dic.Utils;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -20,7 +19,6 @@ import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
@@ -84,30 +82,24 @@ public final class CorrelationCalculator extends Observable {
 
             final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
             ComputationTask ct;
-            List<double[]> bestSubResults = new ArrayList<>();
+            List<CorrelationResult> bestSubResults = new ArrayList<>();
             while (it.hasNext()) {
                 ct = it.next();
                 ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), defArrayLength));
                 kernel.finishRound();
                 // pick best results for this computation task and discard ct data 
                 if (ct.isSubtask()) {
-                    bestSubResults.addAll(findBestSubResult(ct, defArrayLength));
+                    bestSubResults.addAll(ct.getResults());
                 } else if (!bestSubResults.isEmpty()) {
                     // find best sub result, store it and find best global result
-                    bestSubResults.addAll(findBestSubResult(ct, defArrayLength));
+                    bestSubResults.addAll(ct.getResults());
                     // sort result according to correlation
-                    Collections.sort(bestSubResults, new Comparator<double[]>() {
-
-                        @Override
-                        public int compare(double[] o1, double[] o2) {
-                            return Double.compare(o1[0], o2[0]);
-                        }
-                    });
+                    Collections.sort(bestSubResults, (CorrelationResult o1, CorrelationResult o2) -> Float.compare(o1.getValue(), o2.getValue()));
                     Collections.reverse(bestSubResults);
                     // count results with same correlation
                     int count = 1;
                     for (int i = 1; i < bestSubResults.size(); i++) {
-                        if (bestSubResults.get(i - 1)[0] == bestSubResults.get(i)[1]) {
+                        if (bestSubResults.get(i - 1).getValue() == bestSubResults.get(i).getValue()) {
                             count++;
                         } else {
                             break;
@@ -116,25 +108,19 @@ public final class CorrelationCalculator extends Observable {
                     count = Math.min(count, BEST_RESULT_COUNT_MAX);
                     // keep only the best results
                     bestSubResults = bestSubResults.subList(0, count);
-                    // remove correlation value
-                    double[] val, newVal;
-                    for (int i = 0; i < count; i++) {
-                        val = bestSubResults.get(i);
-                        newVal = new double[val.length - 1];
-                        System.arraycopy(val, 1, newVal, 0, newVal.length);
-                        bestSubResults.set(i, newVal);
-                    }
-                    // sort results according to absolute deformation
-                    Collections.sort(bestSubResults, new DeformationSorter());
-                    // sotre result
+                    // store result
                     final int globalFacetIndex = facets.indexOf(ct.getFacets().get(0));
                     if (globalFacetIndex < 0) {
                         throw new IllegalArgumentException("Local facet not found in global registry.");
                     }
-                    result.set(globalFacetIndex, bestSubResults.toArray(new double[][]{}));
+                    final double[][] bestResult = new double[bestSubResults.size()][];
+                    for (int i = 0; i < bestSubResults.size(); i++) {
+                        bestResult[i] = bestSubResults.get(i).getDeformation();
+                    }
+                    result.set(globalFacetIndex, bestResult);
                     bestSubResults.clear();
                 } else {
-                    pickBestResultsForTask(ct, result, facets, defArrayLength);
+                    pickBestResultsForTask(ct, result, facets);
                 }
             }
         } catch (CLException ex) {
@@ -145,110 +131,24 @@ public final class CorrelationCalculator extends Observable {
         return result;
     }
 
-    private List<double[]> findBestSubResult(final ComputationTask task, int defArrayLength) throws ComputationException {
-        throw new UnsupportedOperationException();
-
-//        final double[] deformationLimits = task.getDeformationLimits();
-//        final int deformationCount = deformationLimits.length / defArrayLength;
-//        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(defArrayLength, deformationLimits);
-//        final float[] taskResults = task.getResults();
-//
-//        float val, best = -Float.MAX_VALUE;
-//        final List<Integer> candidates = new LinkedList<>();
-//        for (int def = 0; def < deformationCount; def++) {
-//            val = taskResults[def];
-//            if (val > best) {
-//                best = val;
-//
-//                candidates.clear();
-//                candidates.add(def);
-//            } else if (val == best) {
-//                candidates.add(def);
-//            }
-//        }
-//
-//        final List<double[]> result;
-//        if (candidates.isEmpty()) {
-//            Logger.warn("No best value found for sub task {0}", task);
-//            result = new ArrayList<>(1);
-//            result.add(new double[]{0, 0, 0});
-//        } else {
-//            if (candidates.size() > 1) {
-//                Collections.sort(candidates, candidatesComparator);
-//            }
-//
-//            final int l = Math.min(candidates.size(), BEST_RESULT_COUNT_MAX);
-//            result = new ArrayList<>(l);
-//            double[] res, tmp;
-//            for (int i = 0; i < l; i++) {
-//                tmp = extractDeformation(candidates.get(i), deformationLimits, defArrayLength);
-//                res = new double[defArrayLength + 1];
-//                res[0] = best;
-//                System.arraycopy(tmp, 0, res, 1, defArrayLength);
-//                result.add(res);
-//            }
-//        }
-//        return result;
-    }
-
-    private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final List<Facet> globalFacets, int defArrayLength) throws ComputationException {
-        final double[] deformationLimits = task.getDeformationLimits();
-        final Comparator<Integer> candidatesComparator = new DeformationResultSorter(deformationLimits);
-
+    private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final List<Facet> globalFacets) throws ComputationException {
         final List<Facet> localFacets = task.getFacets();
         final int facetCount = localFacets.size();
-        final int deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits);
-        final int[] deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
 
-        float val, best;
-        final List<Integer> candidates = new ArrayList<>();
-        int baseIndex, globalFacetIndex, l;
-        float[] taskResults;
+        int globalFacetIndex;
+        final List<CorrelationResult> taskResults = task.getResults();
         double[][] bestResult;
         for (int localFacetIndex = 0; localFacetIndex < facetCount; localFacetIndex++) {
-            best = -Float.MAX_VALUE;
-
-            taskResults = task.getResults();
-
-            // DEBUG
-//            System.out.println(Arrays.toString(taskResults));
-//            final float[] sort = new float[taskResults.length];
-//            System.arraycopy(taskResults, 0, sort, 0, taskResults.length);
-//            Arrays.sort(sort);
-//            System.out.println(Arrays.toString(sort));
-            baseIndex = localFacetIndex * deformationCount;
-
-            for (int def = 0; def < deformationCount; def++) {
-                val = taskResults[baseIndex + def];
-                if (val > best) {
-                    best = val;
-
-                    candidates.clear();
-                    candidates.add(def);
-                } else if (val == best) {
-                    candidates.add(def);
-                }
-            }
-
             globalFacetIndex = globalFacets.indexOf(localFacets.get(localFacetIndex));
             if (globalFacetIndex < 0) {
                 throw new IllegalArgumentException("Local facet not found in global registry.");
             }
 
-            if (candidates.isEmpty()) {
+            if (localFacetIndex >= taskResults.size()) {
                 Logger.warn("No best value found for facet nr." + globalFacetIndex);
                 bestResults.set(globalFacetIndex, new double[][]{{0, 0}});
             } else {
-                if (candidates.size() > 1) {
-                    Collections.sort(candidates, candidatesComparator);
-                }
-
-                l = Math.min(candidates.size(), BEST_RESULT_COUNT_MAX);
-                bestResult = new double[l][];
-                for (int i = 0; i < l; i++) {
-                    bestResult[i] = DeformationUtils.extractDeformation(candidates.get(i), deformationLimits, deformationCounts);
-                }
-
+                bestResult = new double[][]{taskResults.get(localFacetIndex).getDeformation()};
                 bestResults.set(globalFacetIndex, bestResult);
                 COUNTER.inc(bestResult[0]);
             }

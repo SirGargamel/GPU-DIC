@@ -3,9 +3,7 @@ package cz.tul.dic.engine.opencl;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
-import com.jogamp.opencl.CLException;
 import com.jogamp.opencl.CLImage2d;
-import cz.tul.dic.engine.EngineMath;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -33,11 +31,11 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount) {
         final int facetArea = facetSize * facetSize;
-        int lws0 = EngineMath.roundUp(calculateLws0base(), facetArea);
+        int lws0 = Kernel.roundUp(calculateLws0base(), facetArea);
         lws0 = Math.min(lws0, device.getMaxWorkItemSizes()[0]);
 
-        kernel.rewind();
-        kernel.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)
+        kernelDIC.rewind();
+        kernelDIC.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)
                 .putArg(imageWidth)
                 .putArg(deformationCount)
                 .putArg(facetSize)
@@ -47,7 +45,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 .putArg(0)
                 .putArg(0)
                 .putArg(0);
-        kernel.rewind();
+        kernelDIC.rewind();
         // copy data and execute kernel
         wsm.setMaxFacetCount(facetCount);
         wsm.setMaxDeformationCount(deformationCount);
@@ -70,19 +68,19 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 facetSubCount = Math.min(wsm.getFacetCount(), facetCount - currentBaseFacet);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
-                facetGlobalWorkSize = EngineMath.roundUp(lws0, deformationSubCount) * facetSubCount;
+                facetGlobalWorkSize = Kernel.roundUp(lws0, deformationSubCount) * facetSubCount;
 
                 groupCountPerFacet = deformationSubCount / lws0;
                 if (deformationCount % lws0 > 0) {
                     groupCountPerFacet++;
                 }
 
-                kernel.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerFacet);
-                kernel.setArg(ARGUMENT_INDEX_F_COUNT, facetSubCount);
-                kernel.setArg(ARGUMENT_INDEX_F_BASE, currentBaseFacet);
-                kernel.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
-                kernel.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
-                queue.put1DRangeKernel(kernel, 0, facetGlobalWorkSize, lws0, eventList);
+                kernelDIC.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerFacet);
+                kernelDIC.setArg(ARGUMENT_INDEX_F_COUNT, facetSubCount);
+                kernelDIC.setArg(ARGUMENT_INDEX_F_BASE, currentBaseFacet);
+                kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
+                kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
+                queue.put1DRangeKernel(kernelDIC, 0, facetGlobalWorkSize, lws0, eventList);
 
                 queue.putWaitForEvent(eventList, counter, true);
                 event = eventList.getEvent(counter);
