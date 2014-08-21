@@ -79,6 +79,10 @@ public class EngineTest {
         -3, 3, 0.25, -3, 3, 0.25,
         -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
         -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
+    private static final double[] DEF_LARGE_EXTRA = new double[]{
+        -5, 5, 0.125, -3, 3, 0.125,
+        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5,
+        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
     private static final double[][][] CUMULATIVE_ZERO = new double[][][]{
         {{0, 0}, {0, 0}, {0, 0}},
         {{0, 0}, {0, 0}, {0, 0}},
@@ -202,6 +206,12 @@ public class EngineTest {
 
         errors.remove(null);
         Assert.assertEquals(errors.toString(), 0, errors.size());
+    }
+
+    @Test
+    public void testEngineExtra() throws IOException, URISyntaxException, ComputationException {
+        final String s = DEF_ZERO_FIRST_SECOND_FILES[0];
+        Assert.assertNull(checkResultsBack(generateTask(s, DEF_LARGE_EXTRA), s));
     }
 
     private TaskContainer generateTask(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
@@ -378,7 +388,7 @@ public class EngineTest {
         final Object taskSplitValue = new Object[]{
             TaskContainerUtils.getDeformationArrayLength(tc, ROUND, roi),
             tc.getFacetSize(ROUND, roi)};
-        
+
         Map<ROI, List<Facet>> facets = new HashMap<>(1);
         final List<Facet> roiFacets = new ArrayList<>(4);
         roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
@@ -397,7 +407,7 @@ public class EngineTest {
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         TaskContainerUtils.getDeformationArrayLength(tc, ROUND, roi),
                         tc.getFacetSize(ROUND, roi), taskSplitValue));
-        
+
         DisplacementCalculator.computeDisplacement(tc, ROUND, facets);
 
         Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
