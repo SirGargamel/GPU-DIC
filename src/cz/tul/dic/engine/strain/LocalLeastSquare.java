@@ -1,11 +1,17 @@
 package cz.tul.dic.engine.strain;
 
-import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.pmw.tinylog.Logger;
@@ -27,28 +33,39 @@ public class LocalLeastSquare extends StrainEstimator {
             final int width = displacement.length;
             final int height = displacement[0].length;
             final double[][][] result = new double[width][height][];
-            
+
             final double mm = (double) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
             final double mmToPx = (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
             final int windowSize = (int) Math.ceil(mm * mmToPx / 2.0);
 
-            double[] coeffs;
+            final List<ExecutionUnit> l = new ArrayList<>(width * height);
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     if (displacement[x][y] != null) {
-                        coeffs = computeCoeffs(displacement, x, y, windowSize / 2);
-                        if (coeffs != null) {
-                            result[x][y] = computeStrains(coeffs);
-                        }
+                        l.add(new ExecutionUnit(x, y, result, windowSize));
                     }
                 }
+            }
+
+            try {
+                final int threadCount = Runtime.getRuntime().availableProcessors();
+                final ExecutorService es = Executors.newWorkStealingPool(threadCount);
+                final List<Future<ExecutionUnit>> results = es.invokeAll(l);
+
+                ExecutionUnit eu;
+                for (Future<ExecutionUnit> f : results) {
+                    eu = f.get();
+                    result[eu.getX()][eu.getY()] = eu.getResult();
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                Logger.error(ex);
             }
 
             tc.setStrain(round, result);
         }
     }
 
-    private double[] computeCoeffs(final double[][][] data, final int x, final int y, final int ws) {
+    private static double[] computeCoeffs(final double[][][] data, final int x, final int y, final int ws) {
         final List<double[]> Xu = new LinkedList<>();
         final List<Double> Yu = new LinkedList<>();
         final List<double[]> Xv = new LinkedList<>();
@@ -104,7 +121,7 @@ public class LocalLeastSquare extends StrainEstimator {
         return result;
     }
 
-    private double[] computeStrains(final double[] coeffs) {
+    private static double[] computeStrains(final double[] coeffs) {
         final double[] result = new double[3];
 
         result[StrainResult.Exx] = coeffs[INDEX_A1] * COEFF_ADJUST;
@@ -112,6 +129,41 @@ public class LocalLeastSquare extends StrainEstimator {
         result[StrainResult.Exy] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]) * COEFF_ADJUST;
 
         return result;
+    }
+
+    private static class ExecutionUnit implements Callable<ExecutionUnit> {
+
+        private final int x, y, ws;
+        private final double[][][] data;
+        private double[] result;
+
+        public ExecutionUnit(int x, int y, double[][][] data, final int ws) {
+            this.x = x;
+            this.y = y;
+            this.ws = ws;
+            this.data = data;
+        }
+
+        @Override
+        public ExecutionUnit call() throws Exception {
+            final double[] coeffs = computeCoeffs(data, x, y, ws / 2);
+            if (coeffs != null) {
+                result = computeStrains(coeffs);
+            }
+            return this;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public double[] getResult() {
+            return result;
+        }
     }
 
 }
