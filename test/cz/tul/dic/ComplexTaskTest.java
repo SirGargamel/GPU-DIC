@@ -47,10 +47,10 @@ public class ComplexTaskTest {
         final ComplexTaskSolver cts = new ComplexTaskSolver();
         assert (!cts.isValidComplexTask(tc));
 
-        final CircularROI cRoi1 = new CircularROI(9, 9, 1);
-        final CircularROI cRoi2 = new CircularROI(21, 9, 1);
-        final CircularROI cRoi3 = new CircularROI(9, 21, 1);
-        final CircularROI cRoi4 = new CircularROI(21, 21, 1);
+        final CircularROI cRoi1 = new CircularROI(8, 8, 1);
+        final CircularROI cRoi2 = new CircularROI(22, 8, 1);
+        final CircularROI cRoi3 = new CircularROI(8, 22, 1);
+        final CircularROI cRoi4 = new CircularROI(22, 22, 1);
         tc.addRoi(BASE_ROUND, cRoi1);
         tc.addRoi(BASE_ROUND, cRoi2);
         tc.addRoi(BASE_ROUND, cRoi3);
@@ -68,8 +68,8 @@ public class ComplexTaskTest {
         }
         
         final double[][][] result = tc.getDisplacement(BASE_ROUND);
-        for (int x = 10; x <= 20; x++) {
-            for (int y = 8; y <= 22; y++) {
+        for (int x = 14; x <= 16; x++) {
+            for (int y = 7; y <= 23; y++) {
                 Assert.assertNotNull("NULL result at [" + x + "; " + y + "]", result[x][y]);
             }
         }
