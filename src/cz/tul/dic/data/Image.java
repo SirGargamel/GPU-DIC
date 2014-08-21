@@ -19,12 +19,14 @@ public class Image extends BufferedImage {
             throw new IllegalArgumentException("Illegal input file.");
         }
 
-        final BufferedImage img = ImageIO.read(in);
+        return createImage(ImageIO.read(in));
+    }
+
+    public static Image createImage(final BufferedImage img) {
         final Image result = new Image(img.getWidth(), img.getHeight(), img.getType());
         result.getGraphics().drawImage(img, 0, 0, null);
 
         return result;
-
     }
 
     private Image(int width, int height, int imageType) {

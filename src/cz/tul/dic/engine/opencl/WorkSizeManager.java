@@ -8,6 +8,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CorrelationCalculator;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -57,7 +58,7 @@ public final class WorkSizeManager {
         cc.setTaskSplitVariant(TaskSplitMethod.DYNAMIC);
 
         try {
-            final Image img = Image.loadImageFromDisk(Paths.get(WorkSizeManager.class.getResource("/resources/in.bmp").toURI()).toFile());
+            final Image img = Image.createImage(new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY));
             final double[] deformationLimits = new double[]{-49, 50, 0.1, -49, 50, 0.1};
             final int fs = 11;
             final List<Facet> facets = new ArrayList<>(1);
@@ -67,7 +68,7 @@ public final class WorkSizeManager {
                     new RectangleROI(0, 0, 100, 100), facets,
                     deformationLimits, DeformationDegree.FIRST,
                     6, fs, new Object[]{6, fs});
-        } catch (IOException | URISyntaxException | ComputationException ex) {
+        } catch (ComputationException ex) {
             Logger.warn("Failed to initialize work sizes.");
             Logger.debug(ex);
         }
