@@ -31,22 +31,22 @@ public class LocalLeastSquare extends StrainEstimator {
         final double[][][] displacement = tc.getDisplacement(round);
         if (displacement != null) {
             final int width = displacement.length;
-            final int height = displacement[0].length;
-            final double[][][] result = new double[width][height][];
+            final int height = displacement[0].length;            
 
             final double mm = (double) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
             final double mmToPx = (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
-            final int windowSize = (int) Math.ceil(mm * mmToPx / 2.0);
+            final int windowSize = (int) Math.ceil(mm * mmToPx);
 
             final List<ExecutionUnit> l = new ArrayList<>(width * height);
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     if (displacement[x][y] != null) {
-                        l.add(new ExecutionUnit(x, y, result, windowSize));
+                        l.add(new ExecutionUnit(x, y, displacement, windowSize));
                     }
                 }
             }
 
+            final double[][][] result = new double[width][height][];
             try {
                 final int threadCount = Runtime.getRuntime().availableProcessors();
                 final ExecutorService es = Executors.newWorkStealingPool(threadCount);
@@ -65,7 +65,7 @@ public class LocalLeastSquare extends StrainEstimator {
         }
     }
 
-    private static double[] computeCoeffs(final double[][][] data, final int x, final int y, final int ws) {
+    private static double[] computeCoeffs(final double[][][] data, final int x, final int y, final int radius) {
         final List<double[]> Xu = new LinkedList<>();
         final List<Double> Yu = new LinkedList<>();
         final List<double[]> Xv = new LinkedList<>();
@@ -73,8 +73,8 @@ public class LocalLeastSquare extends StrainEstimator {
 
         final int width = data.length;
         final int height = data[x].length;
-        for (int i = x - ws; i <= x + ws; i++) {
-            for (int j = y - ws; j <= y + ws; j++) {
+        for (int i = x - radius; i <= x + radius; i++) {
+            for (int j = y - radius; j <= y + radius; j++) {
                 if (i >= 0 && j >= 0 && i < width && j < height && data[i][j] != null) {
                     Xu.add(new double[]{1, i - x, j - x});
                     Yu.add(data[i][j][0]);
@@ -146,7 +146,7 @@ public class LocalLeastSquare extends StrainEstimator {
 
         @Override
         public ExecutionUnit call() throws Exception {
-            final double[] coeffs = computeCoeffs(data, x, y, ws / 2);
+            final double[] coeffs = computeCoeffs(data, x, y, (int) Math.ceil(ws / 2.0));
             if (coeffs != null) {
                 result = computeStrains(coeffs);
             }
