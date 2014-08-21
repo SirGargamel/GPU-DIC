@@ -118,8 +118,7 @@ public class Engine extends Observable {
             if (taskSplit.equals(TaskSplitMethod.DYNAMIC)) {
                 taskSplitValue = new Object[]{
                     TaskContainerUtils.getDeformationArrayLength(tc, index1, roi),
-                    tc.getFacetSize(index1, roi),
-                    tc.getDeformationLimits(index1, roi)};
+                    tc.getFacetSize(index1, roi)};
             }
 
             // compute and store result
