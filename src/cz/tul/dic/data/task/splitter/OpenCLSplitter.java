@@ -18,7 +18,6 @@ import org.pmw.tinylog.Logger;
  */
 public class OpenCLSplitter extends TaskSplitter {
 
-    private static final long MAX_ALLOCATION_SIZE = Integer.MAX_VALUE;
     private static final long SIZE_INT = 4;
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
@@ -153,15 +152,16 @@ public class OpenCLSplitter extends TaskSplitter {
         final long reserve = 32 * SIZE_INT;
         final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
         final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;
-        final long resultSize = facetCount * deformationCount * SIZE_FLOAT;
+        final long resultCount = facetCount * deformationCount;
+        final long resultSize = resultCount * SIZE_FLOAT;
         final long fullSize = imageSize + deformationsSize + reserve + facetDataSize + facetCentersSize + resultSize;
 
-        final long maxAllocMem = Math.min(DeviceManager.getDevice().getMaxMemAllocSize(), MAX_ALLOCATION_SIZE);
+        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
         final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
         boolean result = fullSize >= 0 && fullSize <= maxMem;
-        result &= facetCount <= (maxAllocMem / deformationCount);
+        result &= resultCount <= Integer.MAX_VALUE;
+        result &= facetCount <= Integer.MAX_VALUE;
         result &= deformationCount <= Integer.MAX_VALUE;
-        result &= deformationCount <= (maxAllocMem / facetCount);
         result &= resultSize >= 0 && resultSize <= maxAllocMem;
         result &= imageSize >= 0 && imageSize <= maxAllocMem;
         result &= deformationsSize >= 0 && deformationsSize <= maxAllocMem;
