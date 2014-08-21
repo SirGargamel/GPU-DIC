@@ -4,7 +4,6 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CorrelationCalculator;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -31,13 +29,12 @@ public final class WorkSizeManager {
     private static final long MAX_TIME_LIN = 5;
     private static final long MAX_TIME_BASE = 1_000_000_000; // 1s
     private static final long MAX_TIME;
-    private static final double LIMIT_RATIO = 0.75;
     private static final int INITIAL_WORK_SIZE_F = 1;
     private static int INITIAL_WORK_SIZE_D;
     private static final double GROWTH_LIMIT_A = 0.5;
     private static final double GROWTH_LIMIT_B = 0.75;
-    private static final double GROWTH_FACTOR_A = 2;
-    private static final double GROWTH_FACTOR_B = 1.5;
+    private static final double GROWTH_FACTOR_A = 0.75;
+    private static final double GROWTH_FACTOR_B = 1.25;
     private static boolean init;
     private final Map<Integer, Map<Integer, Long>> timeData;
     private int workSizeF, workSizeD, maxF, maxD;
@@ -53,7 +50,7 @@ public final class WorkSizeManager {
         Logger.debug("Initializing work sizes for dynamic task management.");
         INITIAL_WORK_SIZE_D = 1000;
         init = true;
-
+        
         final CorrelationCalculator cc = new CorrelationCalculator();
         cc.setKernel(KernelType.CL_1D_I_V_LL_MC_D);
         cc.setInterpolation(Interpolation.BICUBIC);
@@ -74,7 +71,7 @@ public final class WorkSizeManager {
             Logger.warn("Failed to initialize work sizes.");
             Logger.debug(ex);
         }
-        
+
         init = false;
     }
 
@@ -122,7 +119,7 @@ public final class WorkSizeManager {
             final int[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
             workSizeF = newMax[0];
             workSizeD = newMax[1];
-            
+
             if (init) {
                 INITIAL_WORK_SIZE_D = workSizeD;
             }
@@ -169,7 +166,7 @@ public final class WorkSizeManager {
 
         final int result;
         if (ratio < GROWTH_LIMIT_A) {
-            result = (int) Math.floor(value * GROWTH_FACTOR_A);
+            result = (int) Math.floor(value / ratio * GROWTH_FACTOR_A);
         } else if (ratio < GROWTH_LIMIT_B) {
             result = (int) Math.floor(value * GROWTH_FACTOR_B);
         } else {
