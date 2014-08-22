@@ -7,7 +7,6 @@ import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
-import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.cluster.Analyzer1D;
@@ -26,6 +25,7 @@ import org.pmw.tinylog.Logger;
  */
 public class CircleROIManager extends ROIManager {
 
+    private static final double[] DEFAULT_DEFORMATION_LIMITS = new double[]{-3, 3, 0.5, -20, 20, 0.5};
     private static final int MAX_SHIFT_DIFFERENCE = 3;
     private static final int ROI_CIRCLE_FS_DENOM = 3;
     private static final double ADJUST_COEFF_UP = 2.0;
@@ -83,7 +83,7 @@ public class CircleROIManager extends ROIManager {
         sb.append(bottomRight);
         Logger.trace(sb);
 
-        defLimits = TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO;
+        defLimits = DEFAULT_DEFORMATION_LIMITS;
         setROIs(initialRound);
         if (rect != null) {
             tc.addRoi(initialRound, rect);
