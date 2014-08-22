@@ -422,8 +422,8 @@ public class TaskContainerUtils {
             Logger.warn("Adding default TaskSplit.");
             tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);            
         }
-        final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
-        if (ts == null) {
+        final Object tsp = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
+        if (tsp == null) {
             Logger.warn("Adding default TaskSplit param.");            
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
         }
