@@ -80,7 +80,7 @@ public class EngineTest {
         -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
         -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
     private static final double[] DEF_LARGE_EXTRA = new double[]{
-        -5, 5, 0.125, -3, 3, 0.125,
+        -3, 3, 0.25, -1, 2, 0.25,
         -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5,
         -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
     private static final double[][][] CUMULATIVE_ZERO = new double[][][]{
@@ -209,7 +209,7 @@ public class EngineTest {
     }
 
     @Test
-    public void testEngineExtra() throws IOException, URISyntaxException, ComputationException {
+    public void testEngineExtraLarge() throws IOException, URISyntaxException, ComputationException {
         final String s = DEF_ZERO_FIRST_SECOND_FILES[0];
         Assert.assertNull(checkResultsBack(generateTask(s, DEF_LARGE_EXTRA), s));
     }
