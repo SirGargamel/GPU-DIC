@@ -420,7 +420,11 @@ public class TaskContainerUtils {
         final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         if (ts == null) {
             Logger.warn("Adding default TaskSplit.");
-            tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);
+            tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);            
+        }
+        final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
+        if (ts == null) {
+            Logger.warn("Adding default TaskSplit param.");            
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
         }
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
