@@ -9,6 +9,7 @@ import cz.tul.dic.Utils;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -82,43 +83,25 @@ public final class CorrelationCalculator extends Observable {
 
             final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
             ComputationTask ct;
-            List<CorrelationResult> bestSubResults = new ArrayList<>();
+            CorrelationResult bestSubResult = null;
             while (it.hasNext()) {
                 ct = it.next();
                 ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), defArrayLength));
                 kernel.finishRound();
                 // pick best results for this computation task and discard ct data 
                 if (ct.isSubtask()) {
-                    bestSubResults.addAll(ct.getResults());
-                } else if (!bestSubResults.isEmpty()) {
-                    // find best sub result, store it and find best global result
-                    bestSubResults.addAll(ct.getResults());
-                    // sort result according to correlation
-                    Collections.sort(bestSubResults, (CorrelationResult o1, CorrelationResult o2) -> Float.compare(o1.getValue(), o2.getValue()));
-                    Collections.reverse(bestSubResults);
-                    // count results with same correlation
-                    int count = 1;
-                    for (int i = 1; i < bestSubResults.size(); i++) {
-                        if (bestSubResults.get(i - 1).getValue() == bestSubResults.get(i).getValue()) {
-                            count++;
-                        } else {
-                            break;
-                        }
-                    }
-                    count = Math.min(count, BEST_RESULT_COUNT_MAX);
-                    // keep only the best results
-                    bestSubResults = bestSubResults.subList(0, count);
+                    bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
+                } else if (bestSubResult != null) {
+                    bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
                     // store result
                     final int globalFacetIndex = facets.indexOf(ct.getFacets().get(0));
                     if (globalFacetIndex < 0) {
                         throw new IllegalArgumentException("Local facet not found in global registry.");
                     }
-                    final double[][] bestResult = new double[bestSubResults.size()][];
-                    for (int i = 0; i < bestSubResults.size(); i++) {
-                        bestResult[i] = bestSubResults.get(i).getDeformation();
-                    }
+                    final double[][] bestResult = new double[1][];
+                    bestResult[0] = bestSubResult.getDeformation();
                     result.set(globalFacetIndex, bestResult);
-                    bestSubResults.clear();
+                    bestSubResult = null;
                 } else {
                     pickBestResultsForTask(ct, result, facets);
                 }
@@ -128,6 +111,18 @@ public final class CorrelationCalculator extends Observable {
         }
 
         Logger.trace("Correlations computed.");
+        return result;
+    }
+
+    private CorrelationResult pickBetterResult(final CorrelationResult r1, final CorrelationResult r2) {
+        final CorrelationResult result;
+        if (r1 == null) {
+            result = r2;
+        } else if (r1.getValue() == r2.getValue()) {
+            result = DeformationUtils.getAbs(r1.getDeformation()) < DeformationUtils.getAbs(r2.getDeformation()) ? r1 : r2;
+        } else {
+            result = r1.getValue() > r2.getValue() ? r1 : r2;
+        }
         return result;
     }
 
