@@ -120,15 +120,15 @@ public class OpenCLSplitter extends TaskSplitter {
                         checkedDeformations = new double[deformationLimitsArraySize];
                         System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);
                         checkedDeformations[minIndex * 3 + 1] = midPoint;
-                        System.out.println(Arrays.toString(deformationLimits));
-                        System.out.println(Arrays.toString(checkedDeformations));
+                        Logger.trace(Arrays.toString(deformationLimits));
+                        Logger.trace(Arrays.toString(checkedDeformations));
                         subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations));
                         checkedDeformations = new double[deformationLimitsArraySize];
                         System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);
                         checkedDeformations[minIndex * 3] = midPoint + deformationLimits[minIndex * 3 + 2];
-                        System.out.println(Arrays.toString(checkedDeformations));
+                        Logger.trace(Arrays.toString(checkedDeformations));
                         subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations));
-                        System.out.println("--- " + ID + " splits into " + subSplitters.get(0).ID + "; " + subSplitters.get(1).ID);
+                        Logger.trace("--- " + ID + " splits into " + subSplitters.get(0).ID + "; " + subSplitters.get(1).ID);
 
                         ct = subSplitters.get(0).next();
                         break;
