@@ -159,7 +159,7 @@ public class OpenCLSplitter extends TaskSplitter {
 
         if (ct == null) {
             ct = new ComputationTask(image1, image2, sublist, checkedDeformations, subDivision);
-            System.out.println(ID + " computing " + Arrays.toString(ct.getDeformationLimits()));
+            Logger.trace(ID + " computing " + Arrays.toString(ct.getDeformationLimits()));
         }
         return ct;
     }
