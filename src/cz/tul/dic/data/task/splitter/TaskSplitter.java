@@ -18,24 +18,22 @@ public abstract class TaskSplitter implements Iterator<ComputationTask> {
     protected final Image image1, image2;
     protected final List<Facet> facets;
     protected final double[] deformationLimits;
-    protected final ROI roi;
 
-    public TaskSplitter(final Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits, final ROI roi) {
+    public TaskSplitter(final Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits) {
         this.image1 = image1;
         this.image2 = image2;
         this.facets = facets;
-        this.deformationLimits = deformationLimits;
-        this.roi = roi;
+        this.deformationLimits = deformationLimits;        
     }
 
     public static Iterator<ComputationTask> prepareSplitter(Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits, final ROI roi, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
         switch (ts) {
             case NONE:
-                return new NoSplit(image1, image2, facets, deformationLimits, roi);
+                return new NoSplit(image1, image2, facets, deformationLimits);
             case STATIC:
-                return new StaticSplit(image1, image2, facets, deformationLimits, roi, taskSplitValue);
+                return new StaticSplit(image1, image2, facets, deformationLimits, taskSplitValue);
             case DYNAMIC:
-                return new OpenCLSplitter(image1, image2, facets, deformationLimits, roi, taskSplitValue);
+                return new OpenCLSplitter(image1, image2, facets, deformationLimits);
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of task splitting - " + ts);
         }

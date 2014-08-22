@@ -114,13 +114,6 @@ public class Engine extends Observable {
 
         // compute round        
         for (ROI roi : tc.getRois(index1)) {
-            // OpenCL splitter needs dynamic data
-            if (taskSplit.equals(TaskSplitMethod.DYNAMIC)) {
-                taskSplitValue = new Object[]{
-                    TaskContainerUtils.getDeformationArrayLength(tc, index1, roi),
-                    tc.getFacetSize(index1, roi)};
-            }
-
             // compute and store result
             setChanged();
             notifyObservers(CorrelationCalculator.class);

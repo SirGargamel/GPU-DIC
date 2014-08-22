@@ -1,10 +1,8 @@
 package cz.tul.dic.data.task.splitter;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import java.util.ArrayList;
@@ -31,8 +29,8 @@ public class OpenCLSplitter extends TaskSplitter {
 
     private boolean subDivision;
 
-    public OpenCLSplitter(Image image1, Image image2, List<Facet> facets, double[] deformationLimits, ROI roi, final Object taskSplitValue) {
-        super(image1, image2, facets, deformationLimits, roi);
+    public OpenCLSplitter(Image image1, Image image2, List<Facet> facets, double[] deformationLimits) {
+        super(image1, image2, facets, deformationLimits);
 
         subSplitters = new LinkedList<>();
         facetSize = facets.get(0).getSize();
@@ -124,12 +122,12 @@ public class OpenCLSplitter extends TaskSplitter {
                         checkedDeformations[minIndex * 3 + 1] = midPoint;
                         System.out.println(Arrays.toString(deformationLimits));
                         System.out.println(Arrays.toString(checkedDeformations));
-                        subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, roi, null));
+                        subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations));
                         checkedDeformations = new double[deformationLimitsArraySize];
                         System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);
                         checkedDeformations[minIndex * 3] = midPoint + deformationLimits[minIndex * 3 + 2];
                         System.out.println(Arrays.toString(checkedDeformations));
-                        subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, roi, null));
+                        subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations));
                         System.out.println("--- " + ID + " splits into " + subSplitters.get(0).ID + "; " + subSplitters.get(1).ID);
 
                         ct = subSplitters.get(0).next();
