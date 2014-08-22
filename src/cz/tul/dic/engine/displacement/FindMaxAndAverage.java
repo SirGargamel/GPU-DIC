@@ -32,7 +32,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         final double[][][] finalResults = new double[width][height][];
         final Map<Integer, Map<Integer, Analyzer2D>> counters = new HashMap<>();
         List<Facet> facets;
-        List<double[][]> results;
+        List<double[]> results;
         Facet f;
         double[] d;
         int x, y, lowerBound, upperBound = 0;
@@ -53,7 +53,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
 
                 for (int i = 0; i < facets.size(); i++) {
                     f = facets.get(i);
-                    d = results.get(i)[0];
+                    d = results.get(i);
 
                     if (!FacetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
                         continue;

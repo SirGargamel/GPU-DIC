@@ -19,7 +19,6 @@ import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
@@ -52,7 +51,7 @@ public final class CorrelationCalculator extends Observable {
         interpolation = Interpolation.BILINEAR;
     }
 
-    public List<double[][]> computeCorrelations(
+    public List<double[]> computeCorrelations(
             Image image1, Image image2,
             ROI roi, List<Facet> facets,
             double[] deformationLimits, DeformationDegree defDegree, int defArrayLength,
@@ -60,7 +59,7 @@ public final class CorrelationCalculator extends Observable {
         final Kernel kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared.");
 
-        final List<double[][]> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defArrayLength, defDegree, facetSize, taskSplitValue);
+        final List<double[]> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defArrayLength, defDegree, facetSize, taskSplitValue);
 
         kernel.finishComputation();
 
@@ -68,12 +67,12 @@ public final class CorrelationCalculator extends Observable {
 
     }
 
-    private List<double[][]> computeCorrelations(
+    private List<double[]> computeCorrelations(
             Image image1, Image image2,
             ROI roi, final Kernel kernel, List<Facet> facets,
             double[] deformationLimits, int defArrayLength, DeformationDegree defDegree,
             int facetSize, Object taskSplitValue) throws ComputationException {
-        final List<double[][]> result = new ArrayList<>(facets.size());
+        final List<double[]> result = new ArrayList<>(facets.size());
         for (int i = 0; i < facets.size(); i++) {
             result.add(null);
         }
@@ -98,9 +97,7 @@ public final class CorrelationCalculator extends Observable {
                     if (globalFacetIndex < 0) {
                         throw new IllegalArgumentException("Local facet not found in global registry.");
                     }
-                    final double[][] bestResult = new double[1][];
-                    bestResult[0] = bestSubResult.getDeformation();
-                    result.set(globalFacetIndex, bestResult);
+                    result.set(globalFacetIndex, bestSubResult.getDeformation());
                     bestSubResult = null;
                 } else {
                     pickBestResultsForTask(ct, result, facets);
@@ -126,13 +123,12 @@ public final class CorrelationCalculator extends Observable {
         return result;
     }
 
-    private void pickBestResultsForTask(final ComputationTask task, final List<double[][]> bestResults, final List<Facet> globalFacets) throws ComputationException {
+    private void pickBestResultsForTask(final ComputationTask task, final List<double[]> bestResults, final List<Facet> globalFacets) throws ComputationException {
         final List<Facet> localFacets = task.getFacets();
         final int facetCount = localFacets.size();
 
         int globalFacetIndex;
         final List<CorrelationResult> taskResults = task.getResults();
-        double[][] bestResult;
         for (int localFacetIndex = 0; localFacetIndex < facetCount; localFacetIndex++) {
             globalFacetIndex = globalFacets.indexOf(localFacets.get(localFacetIndex));
             if (globalFacetIndex < 0) {
@@ -141,11 +137,10 @@ public final class CorrelationCalculator extends Observable {
 
             if (localFacetIndex >= taskResults.size()) {
                 Logger.warn("No best value found for facet nr." + globalFacetIndex);
-                bestResults.set(globalFacetIndex, new double[][]{{0, 0}});
+                bestResults.set(globalFacetIndex, new double[]{0, 0});
             } else {
-                bestResult = new double[][]{taskResults.get(localFacetIndex).getDeformation()};
-                bestResults.set(globalFacetIndex, bestResult);
-                COUNTER.inc(bestResult[0]);
+                bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex).getDeformation());
+                COUNTER.inc(bestResults.get(globalFacetIndex));
             }
         }
     }

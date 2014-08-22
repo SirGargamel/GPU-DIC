@@ -58,10 +58,8 @@ public class DisplacementCalculatorTest {
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);
         tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
 
-        final List<double[][]> results = new ArrayList<>(1);
-        final double[][] result = new double[1][];
-        result[0] = deformations;
-        results.add(result);
+        final List<double[]> results = new ArrayList<>(1);
+        results.add(deformations);
         tc.setResult(ROUND, roi, results);
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, FacetGenerator.generateFacets(tc, ROUND));
