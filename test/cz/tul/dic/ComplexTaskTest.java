@@ -13,7 +13,6 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
-import static java.lang.System.in;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
