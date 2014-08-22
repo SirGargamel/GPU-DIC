@@ -32,6 +32,7 @@ public enum TaskParameter {
     STRAIN_ESTIMATION_METHOD(StrainEstimationMethod.class),
     STRAIN_ESTIMATION_PARAM(Double.class),
     LOCAL_SEARCH_PARAM(Integer.class),
+    DEFORMATION_LIMITS(double[].class),
     ;
 
     private final Class type;

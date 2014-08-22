@@ -171,7 +171,7 @@ public class TaskContainerUtils {
             config.put(CONFIG_EXPORTS.concat(Integer.toString(i)), et.toString());
             i++;
         }
-        
+
         Config.saveConfig(config, ConfigType.TASK, out);
 
     }
@@ -262,6 +262,9 @@ public class TaskContainerUtils {
                         break;
                     case FACET_GENERATOR_PARAM:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
+                        break;
+                    case DEFORMATION_LIMITS:
+                        result.setParameter(tp, doubleArrayFromString(e.getValue()));
                         break;
                     case FACET_SIZE:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
@@ -379,18 +382,17 @@ public class TaskContainerUtils {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No rounds for computation.");
         }
         final Object fs = tc.getParameter(TaskParameter.FACET_SIZE);
-        final int facetSize;
         if (fs == null) {
             Logger.warn("Adding default facetSize.");
-            facetSize = TaskDefaultValues.DEFAULT_FACET_SIZE;
-            tc.setParameter(TaskParameter.FACET_SIZE, facetSize);
-        } else {
-            facetSize = (int) fs;
+            tc.setParameter(TaskParameter.FACET_SIZE, TaskDefaultValues.DEFAULT_FACET_SIZE);
+        }
+        final Object dl = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
+        if (dl == null) {
+            Logger.warn("Adding default deformation limits.");
+            tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
         }
         Image img;
         Set<ROI> rois;
-        int fsz;
-        double[] limits;
         for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
             img = tc.getImage(round);
             if (img == null) {
@@ -401,30 +403,15 @@ public class TaskContainerUtils {
                 Logger.warn("Adding default ROI.");
                 tc.addRoi(round, new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1));
             }
-            for (ROI roi : tc.getRois(round)) {
-                try {
-                    fsz = tc.getFacetSize(round, roi);
-                    if (fsz == -1) {
-                        tc.addFacetSize(round, roi, facetSize);
-                    }
-                } catch (NullPointerException ex) {
-                    tc.addFacetSize(round, roi, facetSize);
-                }
-                limits = tc.getDeformationLimits(round, roi);
-                if (limits == null) {
-                    Logger.warn("Adding default deformation limits for {0} in round {1}.", roi, round);
-                    tc.setDeformationLimits(round, roi, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
-                }
-            }
         }
         final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         if (ts == null) {
             Logger.warn("Adding default TaskSplit.");
-            tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);            
+            tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);
         }
         final Object tsp = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
         if (tsp == null) {
-            Logger.warn("Adding default TaskSplit param.");            
+            Logger.warn("Adding default TaskSplit param.");
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
         }
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);

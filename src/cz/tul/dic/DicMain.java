@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Application;
@@ -26,7 +25,6 @@ import org.pmw.tinylog.LoggingLevel;
 import org.pmw.tinylog.labellers.TimestampLabeller;
 import org.pmw.tinylog.policies.DailyPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
-import org.pmw.tinylog.writers.FileWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
 
 /**
@@ -101,7 +99,7 @@ public class DicMain extends Application {
             // 7202845m
             // 9905121m
             // 9820088m
-            final int fs1 = 20;
+            final int fs1 = 21;
             final int fs2 = 40;
             final int ps1 = 20;
             final int ps2 = 20;
