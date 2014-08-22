@@ -6,6 +6,7 @@ import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -67,13 +68,6 @@ public class TaskContainerUtils {
         return tc.getImages().size() - 1;
     }
 
-    public static int getDeformationCount(final TaskContainer tc, final int round, final ROI roi, final double[] deformations) throws ComputationException {
-        final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
-        final int result = deformations.length / deformationArrayLength;
-
-        return result;
-    }
-
     public static int getDeformationArrayLength(final TaskContainer tc, final int round, final ROI roi) throws ComputationException {
         int result;
 
@@ -93,7 +87,7 @@ public class TaskContainerUtils {
         }
 
         return result;
-    }
+    }    
 
     public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi, final double[] deformations) throws ComputationException {
         if (index < 0) {

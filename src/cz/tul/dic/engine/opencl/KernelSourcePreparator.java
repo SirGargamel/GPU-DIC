@@ -5,6 +5,7 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.Deformation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,12 +29,12 @@ public class KernelSourcePreparator {
     private final String kernelName;
     private String kernel;
 
-    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization, final Interpolation interpolation) throws IOException, ComputationException {
+    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final boolean usesVectorization, final Interpolation interpolation) throws IOException, ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         kp.loadKernel();
         kp.prepareFacetSize(facetSize);
-        kp.prepareDeformations(deg, deformationArrayLength, usesVectorization);
+        kp.prepareDeformations(deg, usesVectorization);
         kp.prepareInterpolation(interpolation);
 
         return kp.kernel;
@@ -58,7 +59,7 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(REPLACE_FACET_SIZE, Integer.toString(facetSize));
     }
 
-    private void prepareDeformations(final DeformationDegree deg, final int deformationArrayLength, final boolean usesVectorization) throws ComputationException {
+    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization) throws ComputationException {
         final String x, y, dx, dy;
         if (usesVectorization) {
             x = "coords.x";
@@ -287,7 +288,7 @@ public class KernelSourcePreparator {
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation");
         }
-        kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(deformationArrayLength));
+        kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(DeformationUtils.getDeformationArrayLength(deg)));
     }
 
     private void prepareInterpolation(final Interpolation interpolation) throws ComputationException {

@@ -9,9 +9,6 @@ import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CorrelationCalculator;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +48,7 @@ public final class WorkSizeManager {
         Logger.debug("Initializing work sizes for dynamic task management.");
         INITIAL_WORK_SIZE_D = 1000;
         init = true;
-        
+
         final CorrelationCalculator cc = new CorrelationCalculator();
         cc.setKernel(KernelType.CL_1D_I_V_LL_MC_D);
         cc.setInterpolation(Interpolation.BICUBIC);
@@ -67,7 +64,7 @@ public final class WorkSizeManager {
                     img, img,
                     new RectangleROI(0, 0, 100, 100), facets,
                     deformationLimits, DeformationDegree.FIRST,
-                    6, fs, new Object[]{6, fs});
+                    fs, new Object[]{6, fs});
         } catch (ComputationException ex) {
             Logger.warn("Failed to initialize work sizes.");
             Logger.debug(ex);

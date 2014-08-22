@@ -54,12 +54,12 @@ public final class CorrelationCalculator extends Observable {
     public List<double[]> computeCorrelations(
             Image image1, Image image2,
             ROI roi, List<Facet> facets,
-            double[] deformationLimits, DeformationDegree defDegree, int defArrayLength,
+            double[] deformationLimits, DeformationDegree defDegree,
             int facetSize, Object taskSplitValue) throws ComputationException {
         final Kernel kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared.");
 
-        final List<double[]> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defArrayLength, defDegree, facetSize, taskSplitValue);
+        final List<double[]> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, taskSplitValue);
 
         kernel.finishComputation();
 
@@ -70,7 +70,7 @@ public final class CorrelationCalculator extends Observable {
     private List<double[]> computeCorrelations(
             Image image1, Image image2,
             ROI roi, final Kernel kernel, List<Facet> facets,
-            double[] deformationLimits, int defArrayLength, DeformationDegree defDegree,
+            double[] deformationLimits, DeformationDegree defDegree,
             int facetSize, Object taskSplitValue) throws ComputationException {
         final List<double[]> result = new ArrayList<>(facets.size());
         for (int i = 0; i < facets.size(); i++) {
@@ -78,14 +78,14 @@ public final class CorrelationCalculator extends Observable {
         }
 
         try {
-            kernel.prepareKernel(context, device, facetSize, defDegree, defArrayLength, interpolation);
+            kernel.prepareKernel(context, device, facetSize, defDegree, interpolation);
 
             final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
             ComputationTask ct;
             CorrelationResult bestSubResult = null;
             while (it.hasNext()) {
                 ct = it.next();
-                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), defArrayLength));
+                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));
                 kernel.finishRound();
                 // pick best results for this computation task and discard ct data 
                 if (ct.isSubtask()) {

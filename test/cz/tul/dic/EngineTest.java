@@ -15,7 +15,6 @@ import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
-import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
@@ -385,9 +384,6 @@ public class EngineTest {
         correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         correlation.setTaskSplitVariant(taskSplit);
-        final Object taskSplitValue = new Object[]{
-            TaskContainerUtils.getDeformationArrayLength(tc, ROUND, roi),
-            tc.getFacetSize(ROUND, roi)};
 
         Map<ROI, List<Facet>> facets = new HashMap<>(1);
         final List<Facet> roiFacets = new ArrayList<>(4);
@@ -405,8 +401,7 @@ public class EngineTest {
                         roi, roiFacets,
                         tc.getDeformationLimits(ROUND, roi),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
-                        TaskContainerUtils.getDeformationArrayLength(tc, ROUND, roi),
-                        tc.getFacetSize(ROUND, roi), taskSplitValue));
+                        tc.getFacetSize(ROUND, roi), null));
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, facets);
 

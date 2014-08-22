@@ -122,9 +122,7 @@ public class Engine extends Observable {
                     roi, facets.get(roi),
                     tc.getDeformationLimits(index1, roi),
                     DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(index1, roi)),
-                    TaskContainerUtils.getDeformationArrayLength(tc, index1, roi),
                     tc.getFacetSize(index1, roi), taskSplitValue));
-
         }
 
         setChanged();

@@ -80,12 +80,12 @@ public abstract class Kernel {
         clRoundMem = new HashSet<>();
     }
 
-    public void prepareKernel(final CLContext context, final CLDevice device, final int facetSize, final DeformationDegree deg, final int defArrayLength, final Interpolation interpolation) throws ComputationException {
+    public void prepareKernel(final CLContext context, final CLDevice device, final int facetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
         try {
             this.context = context;
             this.device = device;
 
-            CLProgram program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, defArrayLength, usesVectorization(), interpolation)).build();
+            CLProgram program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, usesVectorization(), interpolation)).build();
             clGlobalMem.add(program);
             kernelDIC = program.createCLKernel(kernelName);
             clGlobalMem.add(kernelDIC);

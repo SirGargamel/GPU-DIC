@@ -118,5 +118,23 @@ public class DeformationUtils {
         }
         return counts;
     }
+    
+    public static int getDeformationArrayLength(final DeformationDegree deg) {
+        final int result;
+        switch (deg) {
+            case ZERO:
+                result = 2;
+                break;
+            case FIRST:
+                result = 6;
+                break;
+            case SECOND:
+                result = 12;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported degree of deformation.");
+        }
+        return result;
+    }
 
 }
