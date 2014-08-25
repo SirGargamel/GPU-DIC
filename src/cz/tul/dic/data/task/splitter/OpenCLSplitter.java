@@ -33,9 +33,14 @@ public class OpenCLSplitter extends TaskSplitter {
         super(image1, image2, facets, deformationLimits);
 
         subSplitters = new LinkedList<>();
-        facetSize = facets.get(0).getSize();
+        if (facets.isEmpty()) {
+            facetSize = facets.get(0).getSize();
+            checkIfHasNext();
+        } else {
+            facetSize = -1;
+            hasNext = false;
+        }
 
-        checkIfHasNext();
         ID = (int) (Integer.MAX_VALUE * Math.random());
     }
 
