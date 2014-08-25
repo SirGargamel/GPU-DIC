@@ -88,12 +88,12 @@ public class Computation {
         Exporter.export(tc);
     }
 
-    public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax) throws ComputationException, IOException {
+    public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final double strainParamMin, final double strainParamMax) throws ComputationException, IOException {
         commenceComputationDynamic(tc);
 
         // strain sweep and export       
         final StrainEstimation strain = new StrainEstimation();
-        for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
+        for (double strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
             strain.computeStrain(tc);
             tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
@@ -116,7 +116,7 @@ public class Computation {
         }
     }
 
-    public static void commenceComputationDynamicWindowSizeSweep(final TaskContainer tc, final int strainParamMin, final int strainParamMax, final int windowSize) throws ComputationException, IOException {
+    public static void commenceComputationDynamicWindowSizeSweep(final TaskContainer tc, final double strainParamMin, final double strainParamMax, final int windowSize) throws ComputationException, IOException {
         tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, windowSize);
 
         TaskContainerUtils.checkTaskValidity(tc);
@@ -146,7 +146,7 @@ public class Computation {
 
         // strain sweep and export   
         final StrainEstimation strain = new StrainEstimation();
-        for (int strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
+        for (double strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
             strain.computeStrain(tc);
             tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
