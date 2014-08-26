@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.pmw.tinylog.Logger;
 
 public class FindMaxAndAverage extends DisplacementCalculator {
 
@@ -55,6 +56,10 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     f = facets.get(i);
                     d = results.get(i);
 
+                    if (f == null || d == null) {
+                        Logger.warn("No facet or deformation - {0} - {1}", f, d);
+                        continue;
+                    }
                     if (!FacetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
                         continue;
                     }
