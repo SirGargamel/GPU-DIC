@@ -299,11 +299,15 @@ public class TaskContainer extends Observable implements Serializable {
         results.clear();
         displacement.clear();
         strain.clear();
+        cumulativeDisplacement.clear();
+        cumulativeStrain.clear();
 
         for (int i = 0; i < TaskContainerUtils.getMaxRoundCount(this); i++) {
             results.add(null);
             displacement.add(null);
             strain.add(null);
+            cumulativeDisplacement.add(null);
+            cumulativeStrain.add(null);
         }
     }
 
