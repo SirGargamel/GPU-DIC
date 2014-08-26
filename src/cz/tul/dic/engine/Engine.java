@@ -31,6 +31,7 @@ import org.pmw.tinylog.Logger;
  */
 public class Engine extends Observable {
 
+    private static final float LIMIT_QUALITY = 0.5f;
     private static final Engine instance;
     private final CorrelationCalculator correlation;
     private final StrainEstimation strain;
@@ -113,16 +114,29 @@ public class Engine extends Observable {
         Logger.trace("Facets generated.");
 
         // compute round        
+        List<CorrelationResult> result;
+        int counter;
         for (ROI roi : tc.getRois(index1)) {
             // compute and store result
             setChanged();
             notifyObservers(CorrelationCalculator.class);
-            tc.setResult(index1, roi, correlation.computeCorrelations(
+            result = correlation.computeCorrelations(
                     tc.getImage(index1), tc.getImage(index2),
                     roi, facets.get(roi),
                     tc.getDeformationLimits(index1, roi),
                     DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(index1, roi)),
-                    tc.getFacetSize(index1, roi), taskSplitValue));
+                    tc.getFacetSize(index1, roi), taskSplitValue);
+            tc.setResult(index1, roi, result);
+            
+            counter = 0;
+            for (CorrelationResult cr : result) {
+                if (cr.getValue() < LIMIT_QUALITY) {
+                    counter++;
+                }
+            }
+            if (counter > 0) {
+                Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", counter, LIMIT_QUALITY, roi);
+            }
         }
 
         setChanged();
