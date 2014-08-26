@@ -65,18 +65,18 @@ public class ComplexTaskSolver extends Observable {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
                 rrm.getTc().setDisplacement(r, new double[img.getWidth()][img.getHeight()][2]);
-            }
+            }            
 
+            tc.setResults(r, tcR.getResults(r));
+            tc.setDisplacement(r, tcR.getDisplacement(r));
+            tc.setStrain(r, tcR.getStrain(r));
+            
             setChanged();
             notifyObservers(CumulativeResultsCounter.class);
             tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
             tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 
-            tc.setResults(r, tcR.getResults(r));
-            tc.setDisplacement(r, tcR.getDisplacement(r));
-            tc.setStrain(r, tcR.getStrain(r));
-
-            exportRound(tcR, r);
+            exportRound(tc, r);
             bottomShifts.add(crm.getShiftBottom());
 
             currentRound++;
