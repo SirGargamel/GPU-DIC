@@ -1,10 +1,12 @@
 package cz.tul.dic.engine;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Petr Ječmen
  */
-public class CorrelationResult {
+public class CorrelationResult implements Serializable {
 
     private final float value;
     private final double[] deformation;
@@ -22,6 +24,4 @@ public class CorrelationResult {
         this.deformation = deformation;
     }
 
-    
-    
 }

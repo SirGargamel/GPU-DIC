@@ -9,6 +9,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.cluster.Analyzer2D;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         final double[][][] finalResults = new double[width][height][];
         final Map<Integer, Map<Integer, Analyzer2D>> counters = new HashMap<>();
         List<Facet> facets;
-        List<double[]> results;
+        List<CorrelationResult> results;
         Facet f;
         double[] d;
         int x, y, lowerBound, upperBound = 0;
@@ -54,7 +55,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
 
                 for (int i = 0; i < facets.size(); i++) {
                     f = facets.get(i);
-                    d = results.get(i);
+                    d = results.get(i).getDeformation();
 
                     if (f == null || d == null) {
                         Logger.warn("No facet or deformation - {0} - {1}", f, d);

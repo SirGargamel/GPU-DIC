@@ -3,6 +3,7 @@ package cz.tul.dic.data.task;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportTask;
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class TaskContainer extends Observable implements Serializable {
     // generated data
     private transient List<Image> images;
     // results
-    private final List<Map<ROI, List<double[]>>> results;
+    private final List<Map<ROI, List<CorrelationResult>>> results;
     private final List<double[][][]> displacement, strain;
     private final List<double[][][]> cumulativeDisplacement, cumulativeStrain;
 
@@ -197,8 +198,8 @@ public class TaskContainer extends Observable implements Serializable {
         return result;
     }
 
-    public void setResult(final int round, final ROI roi, final List<double[]> result) {
-        Map<ROI, List<double[]>> m = results.get(round);
+    public void setResult(final int round, final ROI roi, final List<CorrelationResult> result) {
+        Map<ROI, List<CorrelationResult>> m = results.get(round);
         if (m == null) {
             m = new HashMap<>();
             results.add(round, m);
@@ -207,7 +208,7 @@ public class TaskContainer extends Observable implements Serializable {
         m.put(roi, result);
     }
 
-    public void setResults(final int round, final Map<ROI, List<double[]>> result) {
+    public void setResults(final int round, final Map<ROI, List<CorrelationResult>> result) {
         while (results.size() <= round) {
             results.add(null);
         }
@@ -215,13 +216,13 @@ public class TaskContainer extends Observable implements Serializable {
         results.set(round, result);
     }
 
-    public List<double[]> getResult(final int round, final ROI roi) {
-        final Map<ROI, List<double[]>> m = results.get(round);
-        final List<double[]> result = m == null ? null : m.get(roi);
+    public List<CorrelationResult> getResult(final int round, final ROI roi) {
+        final Map<ROI, List<CorrelationResult>> m = results.get(round);
+        final List<CorrelationResult> result = m == null ? null : m.get(roi);
         return result;
     }
 
-    public Map<ROI, List<double[]>> getResults(final int round) {
+    public Map<ROI, List<CorrelationResult>> getResults(final int round) {
         return results.get(round);
     }
 

@@ -3,6 +3,7 @@ package cz.tul.dic;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.CorrelationCalculator;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
@@ -81,12 +82,17 @@ public class DicMain extends Application {
                     .level(LoggingLevel.INFO);
         }
         c.activate();
-        
+
         Logger.info("----- Starting APP -----");
     }
 
     private void performComputationTest() {
-        try {
+        final int fs1 = 15;
+        final int fs2 = 45;
+        final double ps1 = 10;
+        final double ps2 = 50;
+        for (int size = fs1; size <= fs2; size++) {
+            try {
 //            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
 //            TaskContainer tc = Context.getInstance().getTc();
 //            InputLoader.loadInput(tc);
@@ -97,61 +103,53 @@ public class DicMain extends Application {
 //            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 
             // 7202845m
-            // 9905121m
-            // 9820088m
-            final int fs1 = 21;
-            final int fs2 = 40;
-            final int ps1 = 20;
-            final int ps2 = 20;
-            for (int size = fs1; size <= fs2; size++) {
+                // 9905121m
+                // 9820088m
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                for (int windowSize = 0; windowSize < 1; windowSize++) {
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
-                TaskContainer tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputation(tc);
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
+//                TaskContainer tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputation(tc);
 //                }
-
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
 //                TaskContainer tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
 //                
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-//                TaskContainer tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);                
-//                Engine.dumpCounterStats();
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m\\7202845m.avi.config")));
+                TaskContainer tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputationDynamic(tc);
+                CorrelationCalculator.dumpCounterStats();
 //                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-classic.config")));
 //                tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
+//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
 //                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi-classic.config")));
 //                tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, val1, val2);
-//
-//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m.avi.config")));
-//                    tc = Context.getInstance().getTc();
-//                    InputLoader.loadInput(tc);
-//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                    Computation.commenceComputationDynamic(tc);
+//                Computation.commenceComputationDynamic(tc);
+//                CorrelationCalculator.dumpCounterStats();
+
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m\\9905121m.avi.config")));
+                tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputationDynamic(tc);
+                CorrelationCalculator.dumpCounterStats();
 //                }
+
+            } catch (IOException | ComputationException ex) {
+                System.err.println(ex);
             }
-        } catch (IOException | ComputationException ex) {
-            System.err.println(ex);
         }
     }
 

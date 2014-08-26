@@ -30,7 +30,6 @@ import org.pmw.tinylog.Logger;
  */
 public final class CorrelationCalculator extends Observable {
 
-    private static final int BEST_RESULT_COUNT_MAX = 50;
     private static final Utils.ResultCounter COUNTER;
     private final CLContext context;
     private final CLDevice device;
@@ -51,7 +50,7 @@ public final class CorrelationCalculator extends Observable {
         interpolation = Interpolation.BILINEAR;
     }
 
-    public List<double[]> computeCorrelations(
+    public List<CorrelationResult> computeCorrelations(
             Image image1, Image image2,
             ROI roi, List<Facet> facets,
             double[] deformationLimits, DeformationDegree defDegree,
@@ -59,7 +58,7 @@ public final class CorrelationCalculator extends Observable {
         final Kernel kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared.");
 
-        final List<double[]> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, taskSplitValue);
+        final List<CorrelationResult> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, taskSplitValue);
 
         kernel.finishComputation();
 
@@ -67,12 +66,12 @@ public final class CorrelationCalculator extends Observable {
 
     }
 
-    private List<double[]> computeCorrelations(
+    private List<CorrelationResult> computeCorrelations(
             Image image1, Image image2,
             ROI roi, final Kernel kernel, List<Facet> facets,
             double[] deformationLimits, DeformationDegree defDegree,
             int facetSize, Object taskSplitValue) throws ComputationException {
-        final List<double[]> result = new ArrayList<>(facets.size());
+        final List<CorrelationResult> result = new ArrayList<>(facets.size());
         for (int i = 0; i < facets.size(); i++) {
             result.add(null);
         }
@@ -97,7 +96,7 @@ public final class CorrelationCalculator extends Observable {
                     if (globalFacetIndex < 0) {
                         throw new IllegalArgumentException("Local facet not found in global registry.");
                     }
-                    result.set(globalFacetIndex, bestSubResult.getDeformation());
+                    result.set(globalFacetIndex, bestSubResult);
                     bestSubResult = null;
                 } else {
                     pickBestResultsForTask(ct, result, facets);
@@ -123,7 +122,7 @@ public final class CorrelationCalculator extends Observable {
         return result;
     }
 
-    private void pickBestResultsForTask(final ComputationTask task, final List<double[]> bestResults, final List<Facet> globalFacets) throws ComputationException {
+    private void pickBestResultsForTask(final ComputationTask task, final List<CorrelationResult> bestResults, final List<Facet> globalFacets) throws ComputationException {
         final List<Facet> localFacets = task.getFacets();
         final int facetCount = localFacets.size();
 
@@ -137,10 +136,10 @@ public final class CorrelationCalculator extends Observable {
 
             if (localFacetIndex >= taskResults.size()) {
                 Logger.warn("No best value found for facet nr." + globalFacetIndex);
-                bestResults.set(globalFacetIndex, new double[]{0, 0});
+                bestResults.set(globalFacetIndex, new CorrelationResult(-1, null));
             } else {
-                bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex).getDeformation());
-                COUNTER.inc(bestResults.get(globalFacetIndex));
+                bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex));
+                COUNTER.inc(bestResults.get(globalFacetIndex).getDeformation());
             }
         }
     }

@@ -4,6 +4,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
@@ -28,17 +29,17 @@ public class DisplacementCalculatorTest {
 
     @Test
     public void testDisplacementCalculator() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeDisplacement(new double[]{2, 0, 0, 0, 0, 0});
+        TaskContainer tc = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{2, 0, 0, 0, 0, 0}));
         checkResults(tc, 2, 0);
 
-        tc = prepareAndComputeDisplacement(new double[]{0, 2, 0, 0, 0, 0});
+        tc = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{0, 2, 0, 0, 0, 0}));
         checkResults(tc, 0, 2);
 
-        tc = prepareAndComputeDisplacement(new double[]{2, -2, 0, 0, 0, 0});
+        tc = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{2, -2, 0, 0, 0, 0}));
         checkResults(tc, 2, -2);
     }
 
-    private TaskContainer prepareAndComputeDisplacement(final double[] deformations) throws IOException, URISyntaxException, ComputationException {
+    private TaskContainer prepareAndComputeDisplacement(final CorrelationResult deformation) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
@@ -49,7 +50,7 @@ public class DisplacementCalculatorTest {
         ROI roi = new RectangleROI(10, 10, 20, 20);
 
         tc.addRoi(ROUND, roi);
-        tc.setDeformationLimits(ROUND, roi, deformations);
+        tc.setDeformationLimits(ROUND, roi, deformation.getDeformation());
 
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
@@ -58,8 +59,8 @@ public class DisplacementCalculatorTest {
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);
         tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
 
-        final List<double[]> results = new ArrayList<>(1);
-        results.add(deformations);
+        final List<CorrelationResult> results = new ArrayList<>(1);
+        results.add(deformation);
         tc.setResult(ROUND, roi, results);
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, FacetGenerator.generateFacets(tc, ROUND));
