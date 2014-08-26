@@ -9,7 +9,7 @@ import cz.tul.dic.data.task.TaskContainer;
  */
 public abstract class ROIManager {
     
-    protected static final double PRECISION = 1.0;
+    protected static final double PRECISION = 0.5;
     protected final TaskContainer tc;
     protected double[] defLimits;
 

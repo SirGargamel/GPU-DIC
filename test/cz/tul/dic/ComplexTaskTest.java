@@ -34,9 +34,9 @@ public class ComplexTaskTest {
     @Test
     public void testComplexTask() throws URISyntaxException, ComputationException, IOException {
         Assert.assertEquals(0.0, computeTask("ComplexIn.bmp"), 0.01);
-        Assert.assertEquals(2.0, computeTask("ComplexOut-2.0.bmp"), 0.01);
-        Assert.assertEquals(4.0, computeTask("ComplexOut-4.0.bmp"), 0.01);
-        Assert.assertEquals(30.0, computeTask("ComplexOut-30.0.bmp"), 0.01);
+        Assert.assertEquals(1.0, computeTask("ComplexOut-2.0.bmp"), 0.01);
+        Assert.assertEquals(4.0, computeTask("ComplexOut-4.0.bmp"), 0.5);
+        Assert.assertEquals(30.0, computeTask("ComplexOut-30.0.bmp"), 0.5);
     }
     
     private double computeTask(final String fileOut) throws IOException, URISyntaxException, ComputationException {
