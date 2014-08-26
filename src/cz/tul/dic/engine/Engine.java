@@ -4,6 +4,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -23,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Set;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -58,6 +60,7 @@ public class Engine extends Observable {
         tc.clearResultData();
         TaskContainerUtils.checkTaskValidity(tc);
 
+        final Set<Hint> hints = tc.getHints();
         int r, nextR, currentRound = 0;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             r = e.getKey();
@@ -65,10 +68,12 @@ public class Engine extends Observable {
 
             computeRound(tc, r, nextR);
 
-            setChanged();
-            notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
-            tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
-            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
+            if (!hints.contains(Hint.NO_CUMULATIVE)) {
+                setChanged();
+                notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
+                tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
+                tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
+            }
 
             exportRound(tc, r);
 
@@ -94,6 +99,7 @@ public class Engine extends Observable {
 
     public void computeRound(final TaskContainer tc, final int index1, final int index2) throws ComputationException {
         Logger.trace("Computing round {0} - {1}.", index1, tc);
+        final Set<Hint> hints = tc.getHints();
 
         setChanged();
         notifyObservers(TaskContainerUtils.class);
@@ -103,9 +109,8 @@ public class Engine extends Observable {
         correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
+        final Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
         correlation.setTaskSplitVariant(taskSplit);
-
-        Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
 
         // prepare data
         setChanged();
@@ -127,7 +132,7 @@ public class Engine extends Observable {
                     DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(index1, roi)),
                     tc.getFacetSize(index1, roi), taskSplitValue);
             tc.setResult(index1, roi, result);
-            
+
             counter = 0;
             for (CorrelationResult cr : result) {
                 if (cr.getValue() < LIMIT_QUALITY) {
@@ -147,9 +152,11 @@ public class Engine extends Observable {
         notifyObservers(FineLocalSearch.class);
         fls.searchForBestPosition(tc, index1, index2);
 
-        setChanged();
-        notifyObservers(StrainEstimation.class);
-        strain.computeStrain(tc, index1);
+        if (!hints.contains(Hint.NO_STRAIN)) {
+            setChanged();
+            notifyObservers(StrainEstimation.class);
+            strain.computeStrain(tc, index1);
+        }
 
         Logger.debug("Computed round {0}.", index1);
     }

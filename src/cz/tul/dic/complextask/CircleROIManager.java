@@ -7,6 +7,7 @@ import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
+import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.cluster.Analyzer1D;
@@ -37,10 +38,6 @@ public class CircleROIManager extends ROIManager {
         final TaskContainer tcC = tc.cloneInputTask();
 
         tcC.setROIs(initialRound, tc.getRois(initialRound));
-        tcC.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
-        tcC.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 0);
-        tcC.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, 0);
-        tcC.clearResultData();
 
         return new CircleROIManager(tcC, initialRound);
     }
@@ -48,7 +45,14 @@ public class CircleROIManager extends ROIManager {
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
-        final List<CircularROI> cRois = new ArrayList<>(4);        
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 0);
+        tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, 0);
+        tc.addHint(Hint.NO_STRAIN);
+        tc.addHint(Hint.NO_CUMULATIVE);
+        tc.clearResultData();
+
+        final List<CircularROI> cRois = new ArrayList<>(4);
         if (tc.getRois(initialRound) != null) {
             for (ROI r : tc.getRois(initialRound)) {
                 if (r instanceof CircularROI) {

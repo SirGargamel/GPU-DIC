@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -32,6 +33,7 @@ public class TaskContainer extends Observable implements Serializable {
     private final Container<Map<ROI, Integer>> facetSizes;
     private final Container<Map<ROI, double[]>> deformationLimits;
     private final Set<ExportTask> exports;
+    private final Set<Hint> hints;
     // generated data
     private transient List<Image> images;
     // results
@@ -50,6 +52,7 @@ public class TaskContainer extends Observable implements Serializable {
         strain = Collections.synchronizedList(new LinkedList<>());
         cumulativeDisplacement = Collections.synchronizedList(new LinkedList<>());
         cumulativeStrain = Collections.synchronizedList(new LinkedList<>());
+        hints = EnumSet.noneOf(Hint.class);
 
         this.input = input;
     }
@@ -78,6 +81,14 @@ public class TaskContainer extends Observable implements Serializable {
 
     public Object getParameter(final TaskParameter key) {
         return params.get(key);
+    }
+
+    public void addHint(final Hint hint) {
+        hints.add(hint);
+    }
+
+    public Set<Hint> getHints() {
+        return hints;
     }
 
     private void prepareImages() {
@@ -229,7 +240,7 @@ public class TaskContainer extends Observable implements Serializable {
     public double[][][] getDisplacement(final int round) {
         return displacement.get(round);
     }
-    
+
     public List<double[][][]> getDisplacements() {
         return Collections.unmodifiableList(displacement);
     }
@@ -248,7 +259,7 @@ public class TaskContainer extends Observable implements Serializable {
     public double[][][] getStrain(final int round) {
         return strain.get(round);
     }
-    
+
     public List<double[][][]> getStrains() {
         return Collections.unmodifiableList(strain);
     }
