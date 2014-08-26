@@ -27,8 +27,15 @@ import org.pmw.tinylog.Logger;
  */
 public class ComplexTaskSolver extends Observable {
 
+    private final List<Double> bottomShifts;
+
+    public ComplexTaskSolver() {
+        bottomShifts = new LinkedList<>();
+    }
+
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
         tc.clearResultData();
+        bottomShifts.clear();
 
         final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
         int currentRound = 0;
@@ -39,9 +46,7 @@ public class ComplexTaskSolver extends Observable {
 
         final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
-        final TaskContainer tcR = rrm.getTc();
-
-        final List<Double> shifts = new LinkedList<>();
+        final TaskContainer tcR = rrm.getTc();        
 
         int r, nextR;
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
@@ -72,7 +77,7 @@ public class ComplexTaskSolver extends Observable {
             tc.setStrain(r, tcR.getStrain(r));
 
             exportRound(tcR, r);
-            shifts.add(crm.getShiftBottom());
+            bottomShifts.add(crm.getShiftBottom());
 
             currentRound++;
             setChanged();
@@ -82,9 +87,9 @@ public class ComplexTaskSolver extends Observable {
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
-        final String[][] shiftsS = new String[1][shifts.size()];
-        for (int i = 0; i < shifts.size(); i++) {
-            shiftsS[0][i] = Double.toString(shifts.get(i));
+        final String[][] shiftsS = new String[1][bottomShifts.size()];
+        for (int i = 0; i < bottomShifts.size(); i++) {
+            shiftsS[0][i] = Double.toString(bottomShifts.get(i));
         }
         CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), shiftsS);
     }
@@ -115,6 +120,10 @@ public class ComplexTaskSolver extends Observable {
             result = false;
         }
         return result;
+    }
+
+    public List<Double> getBottomShifts() {
+        return bottomShifts;
     }
 
 }

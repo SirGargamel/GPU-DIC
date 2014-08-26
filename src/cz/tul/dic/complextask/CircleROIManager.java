@@ -28,9 +28,8 @@ public class CircleROIManager extends ROIManager {
 
     private static final double[] DEFAULT_DEFORMATION_LIMITS = new double[]{-3, 3, 0.5, -20, 20, 0.5};
     private static final int MAX_SHIFT_DIFFERENCE = 3;
-    private static final int ROI_CIRCLE_FS_DENOM = 3;
-    private static final double ADJUST_COEFF_UP = 2.0;
-    private static final double ADJUST_COEFF_DOWN = 0.75;
+    private static final int ROI_CIRCLE_FS_DENOM = 2;
+    private static final double ADJUST_COEFF_UP = 2.0;    
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private double shiftTop, shiftBottom;
 
@@ -170,9 +169,7 @@ public class CircleROIManager extends ROIManager {
         final double lim = Math.abs(limit);
 
         final double result;
-        if (val < (lim / 3.0)) {
-            result = lim * ADJUST_COEFF_DOWN;
-        } else if (val < (lim * 2 / 3.0)) {
+        if (val < (lim * 2 / 3.0)) {
             result = lim;
         } else {
             result = lim * ADJUST_COEFF_UP;
