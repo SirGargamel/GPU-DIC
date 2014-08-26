@@ -48,16 +48,13 @@ public class CircleROIManager extends ROIManager {
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
-        final List<CircularROI> cRois = new ArrayList<>(4);
-        ROI rect = null;
+        final List<CircularROI> cRois = new ArrayList<>(4);        
         if (tc.getRois(initialRound) != null) {
             for (ROI r : tc.getRois(initialRound)) {
                 if (r instanceof CircularROI) {
                     cRois.add((CircularROI) r);
                 } else if (!(r instanceof RectangleROI)) {
                     throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of ROI - " + r.getClass());
-                } else {
-                    rect = r;
                 }
             }
         }
@@ -71,8 +68,8 @@ public class CircleROIManager extends ROIManager {
         topRight = cRois.get(1);
         bottomLeft = cRois.get(2);
         bottomRight = cRois.get(3);
-        
-        final StringBuilder sb  = new StringBuilder();
+
+        final StringBuilder sb = new StringBuilder();
         sb.append("Top Left - ");
         sb.append(topLeft);
         sb.append(" ; Top Right - ");
@@ -85,9 +82,6 @@ public class CircleROIManager extends ROIManager {
 
         defLimits = DEFAULT_DEFORMATION_LIMITS;
         setROIs(initialRound);
-        if (rect != null) {
-            tc.addRoi(initialRound, rect);
-        }
     }
 
     @Override
@@ -206,7 +200,7 @@ public class CircleROIManager extends ROIManager {
     public double getShiftBottom() {
         return shiftBottom;
     }
-    
+
     public boolean hasMoved() {
         return haveMoved(shiftBottom, shiftBottom);
     }
