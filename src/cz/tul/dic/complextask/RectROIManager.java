@@ -21,9 +21,7 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public class RectROIManager extends ROIManager {
-    
-    private static final double ADJUST_COEFF_UP = 2.0;
-    private static final double ADJUST_COEFF_DOWN = 0.75;
+
     private static final int GAP = 5;
     private final CircleROIManager crm;
     private RectangleROI rect;
@@ -58,7 +56,7 @@ public class RectROIManager extends ROIManager {
                     xRight - GAP,
                     yBottom);
         }
-        
+
         final StringBuilder sb = new StringBuilder();
         sb.append("Main ROI - [");
         sb.append(rect.getX1());
@@ -74,7 +72,7 @@ public class RectROIManager extends ROIManager {
         final HashSet<ROI> rois = new HashSet<>(1);
         rois.add(rect);
         tcR.setROIs(initialRound, rois);
-        
+
         tc.getRois(initialRound).remove(rect);
         tcR.clearResultData();
 
@@ -100,7 +98,7 @@ public class RectROIManager extends ROIManager {
         }
 
         defLimits = TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST;
-        
+
         setRois(initialRound);
     }
 
@@ -115,63 +113,9 @@ public class RectROIManager extends ROIManager {
     public void generateNextRound(int round, int nextRound) {
         final double shiftTop = crm.getShiftTop();
         final double shiftBottom = crm.getShiftBottom();
-        if (haveMoved(shiftTop, shiftBottom)) {
-            estimateNewRectangleDeformationLimits(shiftTop, shiftBottom);
-        }
         rect = new RectangleROI(rect.getX1(), rect.getY1() + shiftTop, rect.getX2(), rect.getY2() + shiftBottom);
 
         setRois(nextRound);
-    }
-
-    private void estimateNewRectangleDeformationLimits(final double shiftTop, final double shiftBottom) {
-        final double[] result = new double[defLimits.length];
-        System.arraycopy(defLimits, 0, result, 0, defLimits.length);
-
-        final double min = Math.min(shiftTop, shiftBottom);
-        final double max = Math.max(shiftTop, shiftBottom);
-
-        if (min < 0) {
-            result[DeformationLimit.VMIN] = adjustValue(min, defLimits[3]);
-            result[DeformationLimit.VXMIN] = adjustElongation(min, defLimits[3], defLimits[12]);
-            result[DeformationLimit.VYMIN] = adjustElongation(min, defLimits[3], defLimits[15]);
-        }
-        if (max > 0) {
-            result[DeformationLimit.VMAX] = adjustValue(max, defLimits[4]);
-            result[DeformationLimit.VXMAX] = adjustElongation(max, defLimits[4], defLimits[13]);
-            result[DeformationLimit.VYMAX] = adjustElongation(max, defLimits[4], defLimits[16]);
-        }
-
-        for (int i = 0; i < result.length; i++) {
-            if (result[i] != defLimits[i]) {
-                Logger.debug("New rect limits - " + Arrays.toString(result));
-                break;
-            }
-        }
-
-        defLimits = result;
-    }
-
-    private static double adjustElongation(final double value, final double limit, final double elong) {
-        if (value != 0 && Math.signum(limit) != Math.signum(value)) {
-            Logger.trace("Signum mismatch - {0} vs {1}", new Object[]{value, limit});
-            return value;
-        }
-        final double val = Math.abs(value);
-        final double lim = Math.abs(limit);
-
-        final double result;
-        if (val <= (lim / 3.0)) {
-            result = elong * ADJUST_COEFF_DOWN;
-        } else if (val <= (lim * 2 / 3.0)) {
-            result = elong;
-        } else {
-            result = elong * ADJUST_COEFF_UP;
-        }
-        return result;
-    }
-
-    private static double adjustValue(final double value, final double limit) {
-        return adjustElongation(value, limit, limit);
     }
 
 }
