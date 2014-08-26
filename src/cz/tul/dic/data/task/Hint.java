@@ -6,6 +6,7 @@ package cz.tul.dic.data.task;
  */
 public enum Hint {
 
+    NO_FINE_SEARCH,
     NO_STRAIN,
     NO_CUMULATIVE,;
 

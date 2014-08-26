@@ -148,9 +148,11 @@ public class Engine extends Observable {
         notifyObservers(DisplacementCalculator.class);
         DisplacementCalculator.computeDisplacement(tc, index1, facets);
 
-        setChanged();
-        notifyObservers(FineLocalSearch.class);
-        fls.searchForBestPosition(tc, index1, index2);
+        if (!hints.contains(Hint.NO_FINE_SEARCH)) {
+            setChanged();
+            notifyObservers(FineLocalSearch.class);
+            fls.searchForBestPosition(tc, index1, index2);
+        }
 
         if (!hints.contains(Hint.NO_STRAIN)) {
             setChanged();
