@@ -2,9 +2,11 @@ package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.output.CsvWriter;
@@ -27,6 +29,8 @@ import org.pmw.tinylog.Logger;
  */
 public class ComplexTaskSolver extends Observable {
 
+    private final double LIMIT_COUNT_RATIO = 0.5;
+    private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
 
     public ComplexTaskSolver() {
@@ -46,31 +50,44 @@ public class ComplexTaskSolver extends Observable {
 
         final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
-        final TaskContainer tcR = rrm.getTc();        
+        final TaskContainer tcR = rrm.getTc();
 
-        int r, nextR;
+        int r, nextR, repeat;
+        boolean good;
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             r = e.getKey();
             nextR = e.getValue();
 
             setChanged();
             notifyObservers(CircleROIManager.class);
-            computeRound(r, nextR, crm);
+
+            repeat = 0;
+            good = true;
+            do {
+                if (!good) {
+                    crm.increaseLimits(r);
+                }
+                Engine.getInstance().computeRound(crm.getTc(), r, nextR);        
+                good = checkResultsQuality(crm, r);
+                repeat++;
+            } while (!good && repeat < LIMIT_REPETITION);
+            crm.generateNextRound(r, nextR);
 
             setChanged();
             notifyObservers(RectROIManager.class);
             if (crm.hasMoved()) {
-                computeRound(r, nextR, rrm);
+                Engine.getInstance().computeRound(rrm.getTc(), r, nextR);
+                rrm.generateNextRound(r, nextR);
             } else {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
                 rrm.getTc().setDisplacement(r, new double[img.getWidth()][img.getHeight()][2]);
-            }            
+            }
 
             tc.setResults(r, tcR.getResults(r));
             tc.setDisplacement(r, tcR.getDisplacement(r));
             tc.setStrain(r, tcR.getStrain(r));
-            
+
             setChanged();
             notifyObservers(CumulativeResultsCounter.class);
             tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
@@ -94,9 +111,18 @@ public class ComplexTaskSolver extends Observable {
         CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), shiftsS);
     }
 
-    private void computeRound(final int r, final int nextR, final ROIManager rm) throws ComputationException {
-        Engine.getInstance().computeRound(rm.getTc(), r, nextR);
-        rm.generateNextRound(r, nextR);
+    private boolean checkResultsQuality(final CircleROIManager crm, int round) {
+        int countNotGood = 0, count = 0;
+        for (ROI roi : crm.getBottomRois()) {
+            for (CorrelationResult cr : crm.getTc().getResult(round, roi)) {
+                if (cr.getValue() < CircleROIManager.LIMIT_RESULT_QUALITY) {
+                    countNotGood++;
+                }
+                count++;
+            }
+        }
+        final double ratio = countNotGood / (double) count;
+        return ratio < LIMIT_COUNT_RATIO;
     }
 
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {

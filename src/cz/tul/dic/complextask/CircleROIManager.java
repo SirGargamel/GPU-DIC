@@ -3,17 +3,17 @@ package cz.tul.dic.complextask;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
-import cz.tul.dic.data.deformation.DeformationLimit;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -26,10 +26,10 @@ import org.pmw.tinylog.Logger;
  */
 public class CircleROIManager extends ROIManager {
 
+    public static final float LIMIT_RESULT_QUALITY = 0.75f;
     private static final double[] DEFAULT_DEFORMATION_LIMITS = new double[]{-3, 3, 0.5, -20, 20, 0.5};
     private static final int MAX_SHIFT_DIFFERENCE = 3;
     private static final int ROI_CIRCLE_FS_DENOM = 2;
-    private static final double ADJUST_COEFF_UP = 2.0;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private double shiftTop, shiftBottom;
 
@@ -120,61 +120,20 @@ public class CircleROIManager extends ROIManager {
             shiftBottom = Math.max(shift2, shift3);
         }
 
-        if (haveMoved(shift2, shift3)) {
-            estimateNewCircleDeformationLimits(shiftBottom);
-        }
-
         setROIs(nextRound);
     }
 
-    private double determineROIShift(final int round, final ROI roi) {
-        final double[][][] results = tc.getDisplacement(round);
+    private double determineROIShift(final int round, final ROI roi) {        
         final Analyzer1D analyzer = new Analyzer1D();
         analyzer.setPrecision(PRECISION);
 
-        for (int x = roi.getX1(); x <= roi.getX2(); x++) {
-            for (int y = roi.getY1(); y <= roi.getY2(); y++) {
-                if (x > 0 && y > 0 && roi.isPointInside(x, y) && results[x][y] != null) {
-                    analyzer.addValue(results[x][y][Coordinates.Y]);
-                }
+        for (CorrelationResult cr : tc.getResult(round, roi)) {
+            if (cr.getValue() >= LIMIT_RESULT_QUALITY) {
+                analyzer.addValue(cr.getDeformation()[Coordinates.Y]);
             }
         }
 
         return analyzer.findMajorValue();
-    }
-
-    private void estimateNewCircleDeformationLimits(final double shift) {
-        final double[] result;
-        result = new double[defLimits.length];
-        System.arraycopy(defLimits, 0, result, 0, defLimits.length);
-
-        if (shift < 0) {
-            result[DeformationLimit.VMIN] = adjustValue(shift, defLimits[3]);
-            result[DeformationLimit.VMAX] = -result[3] / 2.0;
-        } else {
-            result[DeformationLimit.VMAX] = adjustValue(shift, defLimits[4]);
-            result[DeformationLimit.VMIN] = -result[4] / 2.0;
-        }
-
-        defLimits = result;
-        Logger.debug("Detected shift " + shift + ", new circle limits - " + Arrays.toString(defLimits));
-    }
-
-    private static double adjustValue(final double value, final double limit) {
-        if (value != 0 && Math.signum(limit) != Math.signum(value)) {
-            Logger.warn("Signum mismatch - {0} vs {1}", new Object[]{value, limit});
-            return value;
-        }
-        final double val = Math.abs(value);
-        final double lim = Math.abs(limit);
-
-        final double result;
-        if (val < (lim * 2 / 3.0)) {
-            result = lim;
-        } else {
-            result = lim * ADJUST_COEFF_UP;
-        }
-        return result;
     }
 
     private void setROIs(final int round) {
@@ -202,8 +161,31 @@ public class CircleROIManager extends ROIManager {
         return shiftBottom;
     }
 
+    public Set<ROI> getBottomRois() {
+        final Set<ROI> result = new HashSet<>(2);
+        result.add(bottomLeft);
+        result.add(bottomRight);
+        return result;
+    }
+
     public boolean hasMoved() {
         return haveMoved(shiftBottom, shiftBottom);
+    }
+
+    public void increaseLimits(final int round) {
+        final double[] oldLimits = defLimits;
+        defLimits = new double[oldLimits.length];
+        System.arraycopy(oldLimits, 0, defLimits, 0, oldLimits.length);
+
+        final int[] stepCounts = DeformationUtils.generateDeformationCounts(defLimits);
+        double mod = stepCounts[0] / 4 * defLimits[2];
+        defLimits[0] -= mod;
+        defLimits[1] += mod;
+        mod = stepCounts[1] / 4 * defLimits[5];
+        defLimits[3] -= mod;
+        defLimits[4] += mod;
+        
+        setROIs(round);
     }
 
 }
