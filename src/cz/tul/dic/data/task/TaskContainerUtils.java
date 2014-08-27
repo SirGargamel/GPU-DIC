@@ -87,7 +87,7 @@ public class TaskContainerUtils {
         }
 
         return result;
-    }    
+    }
 
     public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi, final double[] deformations) throws ComputationException {
         if (index < 0) {
@@ -384,6 +384,22 @@ public class TaskContainerUtils {
         if (dl == null) {
             Logger.warn("Adding default deformation limits.");
             tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
+        } else {
+            final double[] limits = (double[]) dl;
+            final double[] newLimits;
+            if (limits.length < 2) {
+                newLimits = new double[2];
+            } else if (limits.length > 2 && limits.length < 6) {
+                newLimits = new double[62];
+            } else if (limits.length > 6 && limits.length < 12) {
+                newLimits = new double[12];
+            } else if (limits.length > 12) {
+                newLimits = new double[12];
+            } else {
+                newLimits = new double[limits.length];
+            }
+            System.arraycopy(limits, 0, newLimits, 0, limits.length);
+            tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimits);
         }
         Image img;
         Set<ROI> rois;
