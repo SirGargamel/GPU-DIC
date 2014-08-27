@@ -128,7 +128,7 @@ public class CircleROIManager extends ROIManager {
         analyzer.setPrecision(PRECISION);
 
         for (CorrelationResult cr : tc.getResult(round, roi)) {
-            if (cr.getValue() >= LIMIT_RESULT_QUALITY) {
+            if (cr != null && cr.getValue() >= LIMIT_RESULT_QUALITY) {
                 analyzer.addValue(cr.getDeformation()[Coordinates.Y]);
             }
         }

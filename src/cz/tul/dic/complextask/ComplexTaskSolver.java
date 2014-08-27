@@ -115,7 +115,7 @@ public class ComplexTaskSolver extends Observable {
         int countNotGood = 0, count = 0;
         for (ROI roi : crm.getBottomRois()) {
             for (CorrelationResult cr : crm.getTc().getResult(round, roi)) {
-                if (cr.getValue() < CircleROIManager.LIMIT_RESULT_QUALITY) {
+                if (cr == null || cr.getValue() < CircleROIManager.LIMIT_RESULT_QUALITY) {
                     countNotGood++;
                 }
                 count++;

@@ -20,7 +20,7 @@ import org.pmw.tinylog.Logger;
 
 public class FindMaxAndAverage extends DisplacementCalculator {
 
-    private static final double PRECISION = 1.0;
+    private static final double PRECISION = 0.5;
 
     @Override
     public void buildFinalResults(TaskContainer tc, int round, Map<ROI, List<Facet>> facetMap) throws ComputationException {
@@ -54,16 +54,19 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                 results = tc.getResult(round, roi);
 
                 for (int i = 0; i < facets.size(); i++) {
-                    f = facets.get(i);
+                    if (results.get(i) == null) {
+                        continue;
+                    }
                     d = results.get(i).getDeformation();
-
-                    if (f == null || d == null) {
-                        Logger.warn("No facet or deformation - {0} - {1}", f, d);
+                    
+                    f = facets.get(i);
+                    if (f == null) {
+                        Logger.warn("No facet - {0}", f);
                         continue;
                     }
                     if (!FacetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
                         continue;
-                    }
+                    }                    
 
 //                if (roi instanceof RectangleROI) {
 //                    sb.setLength(0);

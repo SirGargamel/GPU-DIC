@@ -31,6 +31,7 @@ import org.pmw.tinylog.Logger;
 public final class CorrelationCalculator extends Observable {
 
     private static final Utils.ResultCounter COUNTER;
+    private static final float LIMIT_RESULT_QUALITY = 0.5f;
     private final CLContext context;
     private final CLDevice device;
     // dynamic
@@ -104,6 +105,12 @@ public final class CorrelationCalculator extends Observable {
             }
         } catch (CLException ex) {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
+        }
+        
+        for (int i = 0; i < facets.size(); i++) {
+            if (result.get(i).getValue() < LIMIT_RESULT_QUALITY) {
+                result.set(i, null);
+            }
         }
 
         Logger.trace("Correlations computed.");

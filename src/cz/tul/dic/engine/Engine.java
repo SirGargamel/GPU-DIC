@@ -135,7 +135,7 @@ public class Engine extends Observable {
 
             counter = 0;
             for (CorrelationResult cr : result) {
-                if (cr.getValue() < LIMIT_QUALITY) {
+                if (cr == null || cr.getValue() < LIMIT_QUALITY) {
                     counter++;
                 }
             }
