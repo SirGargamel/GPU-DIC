@@ -200,10 +200,11 @@ public class TaskContainer extends Observable implements Serializable {
 
     public double[] getDeformationLimits(final int round, final ROI roi) {
         final Map<ROI, double[]> m = deformationLimits.getItem(round);
-        final double[] result;
+        double[] result = null;
         if (m != null && m.containsKey(roi)) {
             result = m.get(roi);
-        } else {
+        } 
+        if (result == null) {
             result = (double[]) getParameter(TaskParameter.DEFORMATION_LIMITS);
         }
         return result;
