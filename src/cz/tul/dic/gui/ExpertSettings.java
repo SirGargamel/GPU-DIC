@@ -67,29 +67,37 @@ public class ExpertSettings implements Initializable {
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, Integer.valueOf(textTSValue.getText()));
 
             String limits = textRoundLimits.getText();
-            final int[] newLimits;
-            if (limits != null && !limits.isEmpty()) {
-                final String[] split = limits.trim().split(ROUND_SPLITTER);
-                if (split.length == 2) {
-                    newLimits = new int[]{Integer.parseInt(split[0].trim()), Integer.parseInt(split[1].trim())};
-                } else {
+            int[] newLimits = null;
+            if (!limits.isEmpty()) {
+                try {
+                    final String[] split = limits.trim().split(ROUND_SPLITTER);
+                    if (split.length == 2) {
+                        newLimits = new int[]{Integer.parseInt(split[0].trim()), Integer.parseInt(split[1].trim())};
+                    }
+                } catch (NumberFormatException | NullPointerException ex) {
                     newLimits = null;
                 }
-            } else {
-                newLimits = null;
+                if (newLimits == null) {
+                    Dialogs.create()
+                            .title(Lang.getString("Warning"))
+                            .message(Lang.getString("IllegalLimitsR"))
+                            .masthead(null)
+                            .showInformation();
+                }
             }
             tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
 
             limits = textDefLimits.getText();
-            final double[] newLimitsD;
-            if (limits != null && !limits.isEmpty()) {
-                final String[] split = limits.trim().split(ROUND_SPLITTER);
-                newLimitsD = new double[split.length];
-                for (int i = 0; i < split.length; i++) {
-                    newLimitsD[i] = Double.valueOf(split[i]);
-                }                
-            } else {
-                newLimitsD = null;
+            double[] newLimitsD = null;
+            if (!limits.isEmpty()) {
+                newLimitsD = doubleArrayFromString(limits);
+                if (newLimitsD == null) {
+                    Dialogs.create()
+                            .title(Lang.getString("Warning"))
+                            .message(Lang.getString("IllegalLimitsD"))
+                            .masthead(null)
+                            .showInformation();
+                }
             }
             tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimitsD);
 
@@ -269,10 +277,15 @@ public class ExpertSettings implements Initializable {
     }
 
     private static double[] doubleArrayFromString(final String data) {
-        final String[] split = data.split(LIMITS_SPLITTER);
-        final double[] result = new double[split.length];
-        for (int i = 0; i < split.length; i++) {
-            result[i] = Double.valueOf(split[i]);
+        double[] result;
+        try {
+            final String[] split = data.split(LIMITS_SPLITTER);
+            result = new double[split.length];
+            for (int i = 0; i < split.length; i++) {
+                result[i] = Double.valueOf(split[i].trim());
+            }
+        } catch (NumberFormatException | NullPointerException ex) {
+            result = null;
         }
 
         return result;
