@@ -25,7 +25,7 @@
                         <Label text="%FGVal" BorderPane.alignment="CENTER" HBox.hgrow="SOMETIMES" />
                     </left>
                     <right>
-                        <TextField fx:id="textFGSpacing" onKeyTyped="#handleTextKeyTyped" prefHeight="25.0" prefWidth="50.0" text="1" BorderPane.alignment="CENTER" />
+                        <TextField fx:id="textFGSpacing" onKeyTyped="#handleTextKeyTypedNumbers" prefHeight="25.0" prefWidth="50.0" text="1" BorderPane.alignment="CENTER" />
                     </right>
                     <VBox.margin>
                         <Insets left="5.0" right="5.0" />
@@ -47,7 +47,7 @@
                         <Label text="%TSVal" BorderPane.alignment="CENTER" HBox.hgrow="SOMETIMES" />
                     </left>
                     <right>
-                        <TextField fx:id="textTSValue" onKeyTyped="#handleTextKeyTyped" prefHeight="25.0" prefWidth="50.0" text="100" BorderPane.alignment="CENTER" />
+                        <TextField fx:id="textTSValue" onKeyTyped="#handleTextKeyTypedNumbers" prefHeight="25.0" prefWidth="50.0" text="100" BorderPane.alignment="CENTER" />
                     </right>
                     <VBox.margin>
                         <Insets left="5.0" right="5.0" />
@@ -77,7 +77,7 @@
                 </BorderPane><BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
 <left><Label text="%RoundLimits" BorderPane.alignment="CENTER" />
 </left>
-<right><TextField fx:id="textRoundLimits" BorderPane.alignment="CENTER" />
+<right><TextField fx:id="textRoundLimits" onKeyTyped="#handleTextKeyTypedRounds" BorderPane.alignment="CENTER" />
 </right>
 <VBox.margin>
 <Insets left="5.0" right="5.0" />
@@ -86,7 +86,7 @@
 <Label text="%WindowSize" BorderPane.alignment="CENTER" />
 </left>
 <right>
-<TextField fx:id="textWindowSize" BorderPane.alignment="CENTER" />
+<TextField fx:id="textWindowSize" onKeyTyped="#handleTextKeyTypedNumbers" BorderPane.alignment="CENTER" />
 </right>
 <VBox.margin>
 <Insets left="5.0" right="5.0" />
@@ -94,7 +94,7 @@
 </BorderPane><BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
 <left><Label text="%DefLimits" BorderPane.alignment="CENTER" />
 </left>
-<right><TextField fx:id="textDefLimits" BorderPane.alignment="CENTER" />
+<right><TextField fx:id="textDefLimits" onKeyTyped="#handleTextKeyTypedDeformations" BorderPane.alignment="CENTER" />
 </right>
 <VBox.margin>
 <Insets left="5.0" right="5.0" />

@@ -179,8 +179,22 @@ public class ExpertSettings implements Initializable {
     }
 
     @FXML
-    private void handleTextKeyTyped(KeyEvent keyEvent) {
+    private void handleTextKeyTypedNumbers(KeyEvent keyEvent) {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
+            keyEvent.consume();
+        }
+    }
+    
+    @FXML
+    private void handleTextKeyTypedRounds(KeyEvent keyEvent) {
+        if (!"0123456789,".contains(keyEvent.getCharacter())) {
+            keyEvent.consume();
+        }
+    }
+    
+    @FXML
+    private void handleTextKeyTypedDeformations(KeyEvent keyEvent) {
+        if (!"0123456789;-+".contains(keyEvent.getCharacter())) {
             keyEvent.consume();
         }
     }
