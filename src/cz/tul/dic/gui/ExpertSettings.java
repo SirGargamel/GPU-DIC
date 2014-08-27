@@ -35,6 +35,7 @@ import org.controlsfx.dialog.Dialogs;
 public class ExpertSettings implements Initializable {
 
     private static final String ROUND_SPLITTER = ",";
+    private static final String LIMITS_SPLITTER = ";";
     @FXML
     private ComboBox<FacetGeneratorMethod> comboFGMode;
     @FXML
@@ -51,6 +52,8 @@ public class ExpertSettings implements Initializable {
     private TextField textRoundLimits;
     @FXML
     private TextField textWindowSize;
+    @FXML
+    private TextField textDefLimits;
 
     @FXML
     private void handleButtonActionOk(ActionEvent event) throws InterruptedException, ExecutionException {
@@ -63,7 +66,7 @@ public class ExpertSettings implements Initializable {
             tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, Integer.valueOf(textFGSpacing.getText()));
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, Integer.valueOf(textTSValue.getText()));
 
-            final String limits = textRoundLimits.getText();
+            String limits = textRoundLimits.getText();
             final int[] newLimits;
             if (limits != null && !limits.isEmpty()) {
                 final String[] split = limits.trim().split(ROUND_SPLITTER);
@@ -76,6 +79,19 @@ public class ExpertSettings implements Initializable {
                 newLimits = null;
             }
             tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
+
+            limits = textDefLimits.getText();
+            final double[] newLimitsD;
+            if (limits != null && !limits.isEmpty()) {
+                final String[] split = limits.trim().split(ROUND_SPLITTER);
+                newLimitsD = new double[split.length];
+                for (int i = 0; i < split.length; i++) {
+                    newLimitsD[i] = Double.valueOf(split[i]);
+                }                
+            } else {
+                newLimitsD = null;
+            }
+            tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimitsD);
 
             final double newWs = Double.valueOf(textWindowSize.getText());
             final Object old = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
@@ -190,6 +206,7 @@ public class ExpertSettings implements Initializable {
         textTSValue.setText(String.valueOf(TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER));
         textWindowSize.setText(String.valueOf(TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER));
         textRoundLimits.setText("");
+        textDefLimits.setText(toString(TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST));
 
         final TaskContainer tc = Context.getInstance().getTc();
         if (tc != null) {
@@ -231,7 +248,34 @@ public class ExpertSettings implements Initializable {
             if (o != null) {
                 textWindowSize.setText(o.toString());
             }
+
+            o = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
+            if (o != null) {
+                textDefLimits.setText(toString((double[]) o));
+            }
         }
+    }
+
+    private static String toString(final double[] data) {
+        final StringBuilder sb = new StringBuilder();
+
+        for (double d : data) {
+            sb.append(d);
+            sb.append(LIMITS_SPLITTER);
+        }
+        sb.setLength(sb.length() - LIMITS_SPLITTER.length());
+
+        return sb.toString();
+    }
+
+    private static double[] doubleArrayFromString(final String data) {
+        final String[] split = data.split(LIMITS_SPLITTER);
+        final double[] result = new double[split.length];
+        for (int i = 0; i < split.length; i++) {
+            result[i] = Double.valueOf(split[i]);
+        }
+
+        return result;
     }
 
 }
