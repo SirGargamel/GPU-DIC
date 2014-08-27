@@ -1,7 +1,6 @@
 package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.Utils;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
@@ -33,12 +32,9 @@ public class ComplexTaskSolver extends Observable {
     private final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
-    private final Utils.ResultCounter counterGood, counterNotGood;
 
     public ComplexTaskSolver() {
         bottomShifts = new LinkedList<>();
-        counterGood = new Utils.ResultCounter();
-        counterNotGood = new Utils.ResultCounter();
     }
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
@@ -75,8 +71,7 @@ public class ComplexTaskSolver extends Observable {
                 good = checkResultsQuality(crm, r);
                 repeat++;
             } while (!good && repeat < LIMIT_REPETITION);
-            crm.generateNextRound(r, nextR);
-            dumpCounterStats();
+            crm.generateNextRound(r, nextR);            
 
             setChanged();
             notifyObservers(RectROIManager.class);
@@ -122,13 +117,6 @@ public class ComplexTaskSolver extends Observable {
             for (CorrelationResult cr : crm.getTc().getResult(round, roi)) {
                 if (cr == null || cr.getValue() < CircleROIManager.LIMIT_RESULT_QUALITY) {
                     countNotGood++;
-                    if (cr != null) {
-                        counterNotGood.inc(cr.getDeformation());
-                    } else {
-                        counterNotGood.inc();
-                    }
-                } else {
-                    counterGood.inc(cr.getDeformation());
                 }
                 count++;
             }
@@ -162,18 +150,6 @@ public class ComplexTaskSolver extends Observable {
 
     public List<Double> getBottomShifts() {
         return bottomShifts;
-    }
-
-    public void dumpCounterStats() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("--- Jaws shifts statistics\n");
-        sb.append("-- GOOD --");
-        sb.append(counterGood.toString());
-        sb.append("\n-- NOT GOOD --");
-        sb.append(counterNotGood.toString());
-        Logger.trace(sb.toString());
-        counterGood.reset();
-        counterNotGood.reset();
     }
 
 }

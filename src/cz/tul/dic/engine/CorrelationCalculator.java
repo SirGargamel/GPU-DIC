@@ -31,7 +31,7 @@ import org.pmw.tinylog.Logger;
 public final class CorrelationCalculator extends Observable {
 
     private static final float LIMIT_RESULT_QUALITY = 0.5f;
-    private final Utils.ResultCounter counter;
+    private final Utils.ResultCounter counterGood, counterNotGood;
     private final CLContext context;
     private final CLDevice device;
     // dynamic
@@ -40,7 +40,8 @@ public final class CorrelationCalculator extends Observable {
     private TaskSplitMethod taskSplitVariant;
 
     public CorrelationCalculator() {
-        counter = new Utils.ResultCounter();
+        counterGood = new Utils.ResultCounter();
+        counterNotGood = new Utils.ResultCounter();
 
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
@@ -111,12 +112,12 @@ public final class CorrelationCalculator extends Observable {
             if (cr != null) {
                 if (cr.getValue() < LIMIT_RESULT_QUALITY) {
                     result.set(i, null);
-                    counter.inc();
+                    counterNotGood.inc(cr.getDeformation());
                 } else {
-                    counter.inc(cr.getDeformation());
+                    counterGood.inc(cr.getDeformation());
                 }
             } else {
-                counter.inc();
+                counterNotGood.inc();
             }
 
         }
@@ -154,7 +155,7 @@ public final class CorrelationCalculator extends Observable {
                 bestResults.set(globalFacetIndex, new CorrelationResult(-1, null));
             } else {
                 bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex));
-                counter.inc(bestResults.get(globalFacetIndex).getDeformation());
+                counterGood.inc(bestResults.get(globalFacetIndex).getDeformation());
             }
         }
     }
@@ -172,8 +173,15 @@ public final class CorrelationCalculator extends Observable {
     }
 
     public void dumpCounterStats() {
-        Logger.trace(" --- Resulting deformations statistics" + counter.toString());
-        counter.reset();
+        final StringBuilder sb = new StringBuilder();
+        sb.append("--- esulting deformations statistics\n");
+        sb.append("-- GOOD --");
+        sb.append(counterGood.toString());
+        sb.append("\n-- NOT GOOD --");
+        sb.append(counterNotGood.toString());
+        Logger.trace(sb.toString());
+        counterGood.reset();
+        counterNotGood.reset();
     }
 
 }
