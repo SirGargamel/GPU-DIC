@@ -22,70 +22,47 @@ import org.pmw.tinylog.Logger;
  */
 public class Computation {
 
-    private static final File OUT_DIR = new File("D:\\temp\\results");
-
     public static void commenceComputation(TaskContainer tc) throws IOException, ComputationException {
         TaskContainerUtils.checkTaskValidity(tc);
-        
+
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
-        }
-//        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
-
-        long time = System.nanoTime();
-        Engine.getInstance().computeTask(tc);
-        time = System.nanoTime() - time;
-        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-        
-        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
-
-        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
         }
+
+        long time = System.nanoTime();
+        Engine.getInstance().computeTask(tc);
         Exporter.export(tc);
+        time = System.nanoTime() - time;
+        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
     }
 
     public static void commenceComputationDynamic(TaskContainer tc) throws IOException, ComputationException {
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final File in = (File) tc.getParameter(TaskParameter.IN);
-        final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
-        }
-//        result.addExport(ExportTask.generateSequenceExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, facetGenMode, Direction.Dabs)));
-
-        long time = System.nanoTime();
-        ComplexTaskSolver cts = new ComplexTaskSolver();
-        cts.solveComplexTask(tc);
-        time = System.nanoTime() - time;
-        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-
-        final StringBuilder sb = new StringBuilder();
-        sb.append(OUT_DIR.getAbsolutePath());
-        sb.append(File.separator);
-        sb.append(in.getName());
-        sb.append(File.separator);
-        sb.append(String.format("%02d", facetSize));
-        sb.append(".task");
-        TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
-
-        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
             tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
         }
+
+        long time = System.nanoTime();
+        ComplexTaskSolver cts = new ComplexTaskSolver();
+        cts.solveComplexTask(tc);
         Exporter.export(tc);
+        time = System.nanoTime() - time;
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
     }
 
     public static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final double strainParamMin, final double strainParamMax) throws ComputationException, IOException {
@@ -109,144 +86,8 @@ public class Computation {
                 tc.addExport(ExportTask.generateMapExport(Direction.dExy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dExy)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.dEabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dEabs)), r));
             }
-//            result.addExport(ExportTask.generateSequenceExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(true, null, in.getName(), facetSize, strainParam, facetGenMode, Direction.Eabs)));
             Exporter.export(tc);
-
             TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         }
     }
-
-    public static void commenceComputationDynamicWindowSizeSweep(final TaskContainer tc, final double strainParamMin, final double strainParamMax, final int windowSize) throws ComputationException, IOException {
-        tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, windowSize);
-
-        TaskContainerUtils.checkTaskValidity(tc);
-
-        final File in = (File) tc.getParameter(TaskParameter.IN);
-        final int facetSize = (int) tc.getParameter(TaskParameter.FACET_SIZE);
-        // displacement export
-        tc.getExports().clear();
-        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {            
-            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dDx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dDy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dDabs), r));
-        }
-
-        long time = System.nanoTime();
-        ComplexTaskSolver cts = new ComplexTaskSolver();
-        cts.solveComplexTask(tc);
-        time = System.nanoTime() - time;
-        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
-
-        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dx), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dy), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Dabs), r));            
-        }
-        Exporter.export(tc);
-
-        // strain sweep and export   
-        final StrainEstimation strain = new StrainEstimation();
-        for (double strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
-            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
-            strain.computeStrain(tc);
-            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
-
-            tc.getExports().clear();
-            for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
-                tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Exx), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Eyy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Exy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.Eabs), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.dExx, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dExx), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.dEyy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dEyy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.dExy, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dExy), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.dEabs, ExportTarget.FILE, generateTargetFile(r, facetSize, windowSize, strainParam, in.getName(), tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD), Direction.dEabs), r));
-            }
-            Exporter.export(tc);
-
-            final StringBuilder sb = new StringBuilder();
-            sb.append(OUT_DIR.getAbsolutePath());
-            sb.append(File.separator);
-            sb.append(in.getName());
-            sb.append(File.separator);
-            sb.append(String.format("%02d", facetSize));
-            sb.append("_");
-            sb.append(String.format("%02d", windowSize));
-            sb.append("_");
-            sb.append(String.format("%02d", strainParam));
-            sb.append(".task");
-            TaskContainerUtils.serializeTaskToBinary(tc, new File(sb.toString()));
-        }
-    }
-
-    private static File generateTargetFile(final Integer round, final Integer facetSize, final Integer strainParam, final Object... params) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(OUT_DIR.getAbsolutePath());
-        sb.append(File.separator);
-
-        for (Object o : params) {
-            if (o instanceof Direction) {
-                sb.setLength(sb.length() - 1);
-                sb.append(File.separator);
-            }
-
-            sb.append(String.valueOf(o));
-            sb.append(File.separator);
-        }
-
-        sb.setLength(sb.length() - 1);
-        sb.append(File.separator);
-
-        if (round != null) {
-            sb.append(String.format("%02d", round));
-            sb.append("_");
-            sb.append(String.format("%02d", facetSize));
-            sb.append("_");
-            sb.append(String.format("%02d", strainParam));
-            sb.append(".bmp");
-        } else {
-            sb.append("video.avi");
-        }
-
-        final File result = new File(sb.toString());
-        Utils.ensureDirectoryExistence(result.getParentFile());
-        return result;
-    }
-
-    private static File generateTargetFile(final Integer round, final Integer facetSize, final Integer windowSize, final Integer strainParam, final Object... params) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(OUT_DIR.getAbsolutePath());
-        sb.append(File.separator);
-
-        for (Object o : params) {
-            if (o instanceof Direction) {
-                sb.setLength(sb.length() - 1);
-                sb.append(File.separator);
-            }
-
-            sb.append(String.valueOf(o));
-            sb.append(File.separator);
-        }
-
-        sb.setLength(sb.length() - 1);
-        sb.append(File.separator);
-
-        if (round != null) {
-            sb.append(String.format("%02d", round));
-            sb.append("_");
-            sb.append(String.format("%02d", facetSize));
-            sb.append("_");
-            sb.append(String.format("%02d", strainParam));
-            sb.append("_");
-            sb.append(String.format("%02d", windowSize));
-            sb.append(".bmp");
-        } else {
-            sb.append("video.avi");
-        }
-
-        final File result = new File(sb.toString());
-        Utils.ensureDirectoryExistence(result.getParentFile());
-        return result;
-    }
-
 }
