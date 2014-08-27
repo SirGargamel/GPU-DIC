@@ -54,6 +54,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 if (results[x][y] == null) {
+                    result[x][y] = Double.NaN;
                     continue;
                 }
 

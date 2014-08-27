@@ -1,6 +1,7 @@
 package cz.tul.dic.engine;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
@@ -35,6 +36,7 @@ public class Engine extends Observable {
 
     private static final float LIMIT_QUALITY = 0.5f;
     private static final Engine instance;
+    private final Utils.ResultCounter counter;
     private final CorrelationCalculator correlation;
     private final StrainEstimation strain;
     private final FineLocalSearch fls;
@@ -51,6 +53,7 @@ public class Engine extends Observable {
         correlation = new CorrelationCalculator();
         fls = new FineLocalSearch();
         strain = new StrainEstimation();
+        counter = new Utils.ResultCounter();
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
@@ -120,7 +123,7 @@ public class Engine extends Observable {
 
         // compute round        
         List<CorrelationResult> result;
-        int counter;
+        int count, val;        
         for (ROI roi : tc.getRois(index1)) {
             // compute and store result
             setChanged();
@@ -133,16 +136,24 @@ public class Engine extends Observable {
                     tc.getFacetSize(index1, roi), taskSplitValue);
             tc.setResult(index1, roi, result);
 
-            counter = 0;
+            count = 0;
             for (CorrelationResult cr : result) {
                 if (cr == null || cr.getValue() < LIMIT_QUALITY) {
-                    counter++;
+                    count++;
+                }
+                if (cr != null) {
+                    val = (int) (cr.getValue() * 10);
+                    counter.inc(val / (double)10);
+                } else {
+                    counter.inc();
                 }
             }
-            if (counter > 0) {
-                Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", counter, LIMIT_QUALITY, roi);
+            if (count > 0) {
+                Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", count, LIMIT_QUALITY, roi);
             }
         }
+        correlation.dumpCounterStats();
+        dumpCounterStats();
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
@@ -161,6 +172,11 @@ public class Engine extends Observable {
         }
 
         Logger.debug("Computed round {0}.", index1);
+    }
+
+    public void dumpCounterStats() {
+        Logger.trace(" --- Result quality statistics" + counter.toString());
+        counter.reset();
     }
 
 }

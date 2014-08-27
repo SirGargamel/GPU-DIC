@@ -35,6 +35,16 @@ public class ExportUtils {
     private static final double COLOR_RANGE_NEG = 75 / 360.0;
     private static final int LIMIT_WIDTH = 180;
     private static final int LIMIT_HEIGHT = 180;
+    private static final int COLOR_NaN = Color.MAGENTA.getRGB();
+    private static boolean debugMode;
+
+    static {
+        debugMode = false;
+    }
+
+    public static void enableDebugMode() {
+        debugMode = true;
+    }
 
     public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
         boolean result = false;
@@ -137,24 +147,16 @@ public class ExportUtils {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 val = mapData[x][y];
-                if (val > max) {
-                    max = val;
-                }
-                if (val < min) {
-                    min = val;
+                if (!Double.isNaN(val)) {
+                    if (val > max) {
+                        max = val;
+                    }
+                    if (val < min) {
+                        min = val;
+                    }
                 }
             }
         }
-//        for (double[] da : mapData) {
-//            for (double d : da) {
-//                if (d > max) {
-//                    max = d;
-//                }
-//                if (d < min) {
-//                    min = d;
-//                }
-//            }
-//        }
 
         final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
         Graphics2D g = out.createGraphics();
@@ -243,19 +245,29 @@ public class ExportUtils {
     }
 
     private static int deformationToRGB(final double val, final double max, final double min) {
-        float h, s = 1, b = 1;
-        double fract;
-        if (val == 0) {
-            h = 0.0f;
-            b = 0.0f;
-        } else if (val < 0) {
-            fract = val / min;
-            h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
+        final int result;
+        if (Double.isNaN(val)) {
+            if (debugMode) {
+                result = COLOR_NaN;
+            } else {
+                result = Color.HSBtoRGB(0, 1, 0);
+            }
         } else {
-            fract = val / max;
-            h = (float) (fract * COLOR_RANGE_POS + COLOR_CENTER + COLOR_GAP);
+            float h, s = 1, b = 1;
+            double fract;
+            if (val == 0) {
+                h = 0.0f;
+                b = 0.0f;
+            } else if (val < 0) {
+                fract = val / min;
+                h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
+            } else {
+                fract = val / max;
+                h = (float) (fract * COLOR_RANGE_POS + COLOR_CENTER + COLOR_GAP);
+            }
+            result = Color.HSBtoRGB(h, s, b);
         }
-        return Color.HSBtoRGB(h, s, b);
+        return result;
     }
 
     private static void drawVerticalBar(final BufferedImage image, final double max) {

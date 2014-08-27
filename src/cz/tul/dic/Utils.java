@@ -21,9 +21,15 @@ public class Utils {
 
     private static final String TEMP_DIR_NAME = "temp";
     private static final Map<TaskContainer, List<File>> tempFiles;
+    private static boolean debugMode;
 
     static {
         tempFiles = new HashMap<>();
+        debugMode = false;
+    }
+
+    public static void enableDebugMode() {
+        debugMode = true;
     }
 
     public static File getTempDir(final File in) {
@@ -87,13 +93,38 @@ public class Utils {
     public static class ResultCounter {
 
         private final Map<String, Integer> counter;
+        private boolean enabled;
 
         public ResultCounter() {
             counter = new HashMap<>();
+            enabled = debugMode;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
         }
 
         public void inc(final double[] val) {
-            final String key = Arrays.toString(val);
+            if (enabled) {
+                inc(Arrays.toString(val));
+            }
+        }
+        
+        public void inc(final double val) {
+            inc(Double.toString(val));
+        }
+        
+        public void inc(final float val) {
+            inc(Float.toString(val));
+        }
+
+        public void inc() {
+            if (enabled) {
+                inc("NULL");
+            }
+        }
+
+        private void inc(final String key) {
             if (counter.containsKey(key)) {
                 counter.put(key, counter.get(key) + 1);
             } else {
@@ -104,7 +135,7 @@ public class Utils {
         @Override
         public String toString() {
             List<Map.Entry> a = new ArrayList<>(counter.entrySet());
-            Collections.sort(a, (Map.Entry o1, Map.Entry o2) -> {               
+            Collections.sort(a, (Map.Entry o1, Map.Entry o2) -> {
                 return ((Comparable) o1.getValue()).compareTo(o2.getValue());
             });
 
@@ -112,7 +143,7 @@ public class Utils {
             a.stream().forEach((e) -> {
                 sb.append("\n")
                         .append(e.getKey())
-                        .append(" ")
+                        .append(" -- ")
                         .append(e.getValue());
             });
             return sb.toString();
@@ -122,5 +153,4 @@ public class Utils {
             counter.clear();
         }
     }
-
 }

@@ -7,6 +7,7 @@ import cz.tul.dic.engine.CorrelationCalculator;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
@@ -43,8 +44,12 @@ public class DicMain extends Application {
 
         if (parameters.contains(DEBUG)) {
             configureTinyLog(true);
-            performComputationTest();
+
             NameGenerator.enableDebugMode();
+            Utils.enableDebugMode();
+            ExportUtils.enableDebugMode();
+
+            performComputationTest();
         } else {
             configureTinyLog(false);
         }
@@ -88,9 +93,10 @@ public class DicMain extends Application {
 
     private void performComputationTest() {
         final int fs1 = 15;
-        final int fs2 = 45;
+        final int fs2 = 15;
         final double ps1 = 10;
         final double ps2 = 50;
+        TaskContainer tc;
         for (int size = fs1; size <= fs2; size++) {
             try {
 //            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
@@ -102,29 +108,28 @@ public class DicMain extends Application {
 //
 //            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 
-            // 7202845m
+                // 7202845m
                 // 9905121m
                 // 9820088m
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                for (int windowSize = 0; windowSize < 1; windowSize++) {
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
-//                TaskContainer tc = Context.getInstance().getTc();
+//                tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputation(tc);
 //                }
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-oneRound-classic.config")));
-//                TaskContainer tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
-//                
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m\\7202845m.avi.config")));
-                TaskContainer tc = Context.getInstance().getTc();
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\7202845m\\7202845m.avi-oneRound-classic.config")));
+                tc = Context.getInstance().getTc();
                 InputLoader.loadInput(tc);
                 tc.setParameter(TaskParameter.FACET_SIZE, size);
                 Computation.commenceComputationDynamic(tc);
-                CorrelationCalculator.dumpCounterStats();
+//                
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m\\7202845m.avi.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamic(tc);
 //                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-classic.config")));
 //                tc = Context.getInstance().getTc();
@@ -139,16 +144,15 @@ public class DicMain extends Application {
 //                Computation.commenceComputationDynamic(tc);
 //                CorrelationCalculator.dumpCounterStats();
 
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m\\9905121m.avi.config")));
-                tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamic(tc);
-                CorrelationCalculator.dumpCounterStats();
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m\\9905121m.avi.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamic(tc);
 //                }
 
             } catch (IOException | ComputationException ex) {
-                System.err.println(ex);
+                Logger.error(ex);
             }
         }
     }

@@ -30,8 +30,8 @@ import org.pmw.tinylog.Logger;
  */
 public final class CorrelationCalculator extends Observable {
 
-    private static final Utils.ResultCounter COUNTER;
     private static final float LIMIT_RESULT_QUALITY = 0.5f;
+    private final Utils.ResultCounter counter;
     private final CLContext context;
     private final CLDevice device;
     // dynamic
@@ -39,11 +39,9 @@ public final class CorrelationCalculator extends Observable {
     private Interpolation interpolation;
     private TaskSplitMethod taskSplitVariant;
 
-    static {
-        COUNTER = new Utils.ResultCounter();
-    }
-
     public CorrelationCalculator() {
+        counter = new Utils.ResultCounter();
+
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
 
@@ -106,11 +104,21 @@ public final class CorrelationCalculator extends Observable {
         } catch (CLException ex) {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
         }
-        
+
+        CorrelationResult cr;
         for (int i = 0; i < facets.size(); i++) {
-            if (result.get(i).getValue() < LIMIT_RESULT_QUALITY) {
-                result.set(i, null);
+            cr = result.get(i);
+            if (cr != null) {
+                if (cr.getValue() < LIMIT_RESULT_QUALITY) {
+                    result.set(i, null);
+                    counter.inc();
+                } else {
+                    counter.inc(cr.getDeformation());
+                }
+            } else {
+                counter.inc();
             }
+
         }
 
         Logger.trace("Correlations computed.");
@@ -146,7 +154,7 @@ public final class CorrelationCalculator extends Observable {
                 bestResults.set(globalFacetIndex, new CorrelationResult(-1, null));
             } else {
                 bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex));
-                COUNTER.inc(bestResults.get(globalFacetIndex).getDeformation());
+                counter.inc(bestResults.get(globalFacetIndex).getDeformation());
             }
         }
     }
@@ -163,9 +171,9 @@ public final class CorrelationCalculator extends Observable {
         this.taskSplitVariant = taskSplitVariant;
     }
 
-    public static void dumpCounterStats() {
-        Logger.info(COUNTER);
-        COUNTER.reset();
+    public void dumpCounterStats() {
+        Logger.trace(" --- Resulting deformations statistics" + counter.toString());
+        counter.reset();
     }
 
 }

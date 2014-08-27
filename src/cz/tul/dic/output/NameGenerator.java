@@ -65,14 +65,6 @@ public class NameGenerator {
 
         public Generator name() {
             sb.append(tc.getParameter(TaskParameter.IN).toString());
-            sb.append(DELIMITER);
-            sb.append(tc.getParameter(TaskParameter.FACET_SIZE).toString());
-            if (debugMode) {
-                sb.append(DELIMITER);
-                sb.append(tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM).toString());
-                sb.append(DELIMITER);
-                sb.append(tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM).toString());
-            }
             return this;
         }
 
@@ -89,6 +81,14 @@ public class NameGenerator {
         }
 
         public String finalize(String extension) {
+            sb.append(DELIMITER);
+            sb.append(tc.getParameter(TaskParameter.FACET_SIZE).toString());
+            if (debugMode) {
+                sb.append(DELIMITER);
+                sb.append(tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM).toString());
+                sb.append(DELIMITER);
+                sb.append(tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM).toString());
+            }
             sb.append(extension);
             return sb.toString();
         }
