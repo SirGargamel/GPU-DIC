@@ -47,6 +47,7 @@ public class ComplexTaskTest {
 
         InputLoader.loadInput(tc);
 
+        tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         tc.setParameter(TaskParameter.FACET_SIZE, 40);
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);

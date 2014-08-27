@@ -158,6 +158,7 @@ public class EngineTest {
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
 
+        tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
@@ -226,6 +227,7 @@ public class EngineTest {
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
 
+        tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
 
         Engine.getInstance().computeTask(tc);
@@ -324,6 +326,7 @@ public class EngineTest {
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
+        tc.setParameter(TaskParameter.IN, input.get(0));
         TaskContainerUtils.checkTaskValidity(tc);
 
         tc.setDisplacement(0, CUMULATIVE_ZERO);
@@ -375,6 +378,7 @@ public class EngineTest {
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, DEF_SECOND_F);
+        tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, fs);
 
         TaskContainerUtils.checkTaskValidity(tc);
