@@ -387,14 +387,12 @@ public class TaskContainerUtils {
         } else {
             final double[] limits = (double[]) dl;
             final double[] newLimits;
-            if (limits.length < 2) {
-                newLimits = new double[2];
-            } else if (limits.length > 2 && limits.length < 6) {
-                newLimits = new double[62];
-            } else if (limits.length > 6 && limits.length < 12) {
-                newLimits = new double[12];
-            } else if (limits.length > 12) {
-                newLimits = new double[12];
+            if (limits.length < 6) {
+                newLimits = new double[6];
+            } else if (limits.length > 6 && limits.length < 18) {
+                newLimits = new double[18];
+            } else if (limits.length > 18) {
+                newLimits = new double[36];
             } else {
                 newLimits = new double[limits.length];
             }
