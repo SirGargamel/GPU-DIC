@@ -113,7 +113,7 @@ public class ExportTargetFile implements IExportTarget {
 
         final String name = fullName.substring(0, fullName.lastIndexOf("."));
 
-        final File temp = Utils.getTempDir((File) tc.getParameter(TaskParameter.IN));
+        final File temp = Utils.getTempDir(tc);
 
         double globalMaxPos = -Double.MAX_VALUE, globalMaxNeg = Double.MAX_VALUE;
         for (double[][] daa : data) {

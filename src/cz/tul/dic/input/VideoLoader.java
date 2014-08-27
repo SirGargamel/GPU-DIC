@@ -40,9 +40,8 @@ public class VideoLoader extends AbstractInputLoader {
         }
 
         final File input = (File) in;
-        final File temp = Utils.getTempDir(input);
+        final File temp = Utils.getTempDir(tc);
         final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(NameGenerator.EXT_CONFIG));
-        tc.setParameter(TaskParameter.IN, input);
         // check cache
         final List<File> files;
         Config config = Config.loadConfig(sequenceConfigFile);
@@ -89,9 +88,7 @@ public class VideoLoader extends AbstractInputLoader {
         }
         // list of all bmp files inside temp dir with roght name        
         final ImageLoader il = new ImageLoader();
-        final List<Image> result = il.loadData(files, tc);
-
-        tc.setParameter(TaskParameter.IN, input);
+        final List<Image> result = il.loadData(files, tc);        
 
         loadUdaFile(input.getAbsolutePath(), tc);
 

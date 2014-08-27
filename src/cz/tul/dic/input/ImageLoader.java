@@ -23,9 +23,6 @@ public class ImageLoader extends AbstractInputLoader {
         final List<File> data = (List<File>) in;
         if (data.isEmpty()) {
             throw new IllegalArgumentException("No images.");
-        } else {
-            final File first = data.get(0);
-            tc.setParameter(TaskParameter.IN, first);
         }
 
         final List<Image> result = new ArrayList<>(data.size());

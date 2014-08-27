@@ -64,7 +64,8 @@ public class NameGenerator {
         }
 
         public Generator name() {
-            sb.append(tc.getParameter(TaskParameter.IN).toString());
+            final String inName = tc.getParameter(TaskParameter.IN).toString();
+            sb.append(inName.substring(0, inName.lastIndexOf('.')));
             return this;
         }
 

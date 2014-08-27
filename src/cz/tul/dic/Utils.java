@@ -32,7 +32,8 @@ public class Utils {
         debugMode = true;
     }
 
-    public static File getTempDir(final File in) {
+    public static File getTempDir(final TaskContainer tc) {
+        final File in = (File) (tc.getParameter(TaskParameter.IN));
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         ensureDirectoryExistence(temp);
