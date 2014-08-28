@@ -35,7 +35,7 @@ public class FineLocalSearch extends Observable {
     }
     
     public void searchForBestPosition(final TaskContainer tc, final int r, final int nextR) {
-        final double[][][] results = tc.getDisplacement(r);
+        final double[][][] results = tc.getDisplacement(r, nextR);
         final Image in = tc.getImage(r);
         final int width = in.getWidth();
         final int height = in.getHeight();

@@ -23,7 +23,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
     private static final double PRECISION = 0.5;
 
     @Override
-    public void buildFinalResults(TaskContainer tc, int round, Map<ROI, List<Facet>> facetMap) throws ComputationException {
+    public void buildFinalResults(TaskContainer tc, int round, int nextRound, Map<ROI, List<Facet>> facetMap) throws ComputationException {
         final Image img = tc.getImage(round);
         final int width = img.getWidth();
         final int height = img.getHeight();
@@ -128,7 +128,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
             }
         }
 
-        tc.setDisplacement(round, finalResults);
+        tc.setDisplacement(round, nextRound, finalResults);
     }
 
     private Analyzer2D getAnalyzer(final Map<Integer, Map<Integer, Analyzer2D>> maps, final int x, final int y) {

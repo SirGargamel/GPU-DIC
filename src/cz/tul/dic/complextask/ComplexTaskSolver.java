@@ -1,6 +1,7 @@
 package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
@@ -9,7 +10,9 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.output.CsvWriter;
+import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -38,6 +41,7 @@ public class ComplexTaskSolver extends Observable {
     }
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
+        TaskContainerUtils.checkTaskValidity(tc);
         tc.clearResultData();
         bottomShifts.clear();
 
@@ -71,7 +75,7 @@ public class ComplexTaskSolver extends Observable {
                 good = checkResultsQuality(crm, r);
                 repeat++;
             } while (!good && repeat < LIMIT_REPETITION);
-            crm.generateNextRound(r, nextR);            
+            crm.generateNextRound(r, nextR);
 
             setChanged();
             notifyObservers(RectROIManager.class);
@@ -81,17 +85,14 @@ public class ComplexTaskSolver extends Observable {
             } else {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
-                rrm.getTc().setDisplacement(r, new double[img.getWidth()][img.getHeight()][2]);
+                rrm.getTc().setDisplacement(r, nextR, new double[img.getWidth()][img.getHeight()][Coordinates.DIMENSION]);
             }
 
             tc.setResults(r, tcR.getResults(r));
-            tc.setDisplacement(r, tcR.getDisplacement(r));
-            tc.setStrain(r, tcR.getStrain(r));
+            tc.setDisplacement(r, nextR, tcR.getDisplacement(r, nextR));            
 
             setChanged();
             notifyObservers(CumulativeResultsCounter.class);
-            tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
-            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
 
             exportRound(tc, r);
             bottomShifts.add(crm.getShiftBottom());
@@ -101,6 +102,8 @@ public class ComplexTaskSolver extends Observable {
             notifyObservers(currentRound);
         }
 
+        StrainEstimation strain = new StrainEstimation();
+        strain.computeStrain(tc);
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
@@ -130,10 +133,15 @@ public class ComplexTaskSolver extends Observable {
         ExportTask et;
         while (it.hasNext()) {
             et = it.next();
-            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round) {
+            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round && !isStrainExport(et)) {
                 Exporter.export(tc, et);
             }
         }
+    }
+    
+    private boolean isStrainExport(ExportTask et) {
+        final Direction dir = et.getDirection();
+        return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
     }
 
     public boolean isValidComplexTask(final TaskContainer tc) {

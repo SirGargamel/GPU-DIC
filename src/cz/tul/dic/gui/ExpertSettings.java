@@ -115,8 +115,7 @@ public class ExpertSettings implements Initializable {
                             updateProgress(0, 2);
                             try {
                                 new StrainEstimation().computeStrain(tc);
-                                updateProgress(1, 2);
-                                tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
+                                updateProgress(1, 2);                                
                             } catch (ComputationException ex) {
                                 result = ex.getLocalizedMessage();
                             }

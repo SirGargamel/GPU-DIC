@@ -3,7 +3,6 @@ package cz.tul.dic;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.CorrelationCalculator;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
@@ -93,7 +92,7 @@ public class DicMain extends Application {
 
     private void performComputationTest() {
         final int fs1 = 15;
-        final int fs2 = 15;
+        final int fs2 = 45;
         final double ps1 = 10;
         final double ps2 = 50;
         TaskContainer tc;
@@ -119,17 +118,18 @@ public class DicMain extends Application {
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputation(tc);
 //                }
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\7202845m\\7202845m.avi-oneRound-classic.config")));
-                tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamic(tc);
-//                
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m\\7202845m.avi.config")));
+                
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\7202845m\\7202845m.avi-oneRound-classic.config")));
 //                tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputationDynamic(tc);
+//                
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m\\7202845m.avi.config")));
+                tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputationDynamic(tc);
 //                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-classic.config")));
 //                tc = Context.getInstance().getTc();

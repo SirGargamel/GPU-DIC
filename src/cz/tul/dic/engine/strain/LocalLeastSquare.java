@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.pmw.tinylog.Logger;
@@ -27,8 +26,8 @@ public class LocalLeastSquare extends StrainEstimator {
     private static final double COEFF_ADJUST = 100;
 
     @Override
-    void estimateStrain(TaskContainer tc, int round) {
-        final double[][][] displacement = tc.getDisplacement(round);
+    void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) {
+        final double[][][] displacement = tc.getDisplacement(roundFrom, roundTo);
         if (displacement != null) {
             final int width = displacement.length;
             final int height = displacement[0].length;            
@@ -61,7 +60,7 @@ public class LocalLeastSquare extends StrainEstimator {
                 Logger.error(ex);
             }
 
-            tc.setStrain(round, result);
+            tc.setStrain(roundFrom, roundTo, result);
         }
     }
 

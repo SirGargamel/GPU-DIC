@@ -4,9 +4,9 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
+import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -64,6 +64,10 @@ public class TaskContainerUtils {
         return result;
     }
 
+    public static int getFirstRound(final TaskContainer tc) {
+        return getRounds(tc).keySet().iterator().next();
+    }
+
     public static int getMaxRoundCount(final TaskContainer tc) {
         return tc.getImages().size() - 1;
     }
@@ -97,6 +101,63 @@ public class TaskContainerUtils {
         final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
         final double[] result = new double[deformationArrayLength];
         System.arraycopy(deformations, deformationArrayLength * index, result, 0, deformationArrayLength);
+
+        return result;
+    }
+
+    public static double[][][] getDisplacement(final TaskContainer tc, final int startImageIndex, final int endImageIndex) throws ComputationException {
+        double[][][] result = tc.getDisplacement(startImageIndex, endImageIndex);
+
+        if (result == null) {
+            final Image img = tc.getImage(startImageIndex);
+            final int width = img.getWidth();
+            final int height = img.getHeight();
+            result = new double[width][height][Coordinates.DIMENSION];
+
+            double posX, posY;
+            int iX, iY;
+            double[][][] data;
+            int indexFrom, indexTo;
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    indexFrom = startImageIndex;
+                    indexTo = endImageIndex;
+                    posX = x;
+                    posY = y;
+                    iX = x;
+                    iY = y;
+
+                    while (indexFrom != endImageIndex) {
+                        do {                            
+                            data = tc.getDisplacement(indexFrom, indexTo);
+                            if (data == null) {
+                                indexTo--;
+                            }
+                        } while (data == null && indexTo >= 0);
+                        if (data == null) {
+                            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No displacement results found.");
+                        }
+
+                        posX += data[iX][iY][Coordinates.X];
+                        posY += data[iX][iY][Coordinates.Y];
+                        
+                        indexFrom = indexTo;
+                        indexTo = endImageIndex;
+                        
+                        iX = (int) Math.round(posX);
+                        iY = (int) Math.round(posY);
+                        if (posX < 0 || posY < 0 || iX >= data.length || iY >= data[x].length) {
+                            break;
+                        }
+                    }
+                    
+                    result[x][y][Coordinates.X] = posX - x;
+                    result[x][y][Coordinates.Y] = posY - y;
+                }
+            }
+
+            tc.setDisplacement(startImageIndex, endImageIndex, result);
+        }
 
         return result;
     }

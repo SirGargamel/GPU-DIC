@@ -35,24 +35,18 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     case dDx:
                     case dDy:
                     case dDabs:
-                        results = tc.getDisplacement(r);
-                        break;
-                    case dExx:
-                    case dEyy:
-                    case dExy:
-                    case dEabs:
-                        results = tc.getStrain(r);
+                        results = tc.getDisplacement(r, r + 1);
                         break;
                     case Dx:
                     case Dy:
                     case Dabs:
-                        results = tc.getCumulativeDisplacement(r);
+                        results = TaskContainerUtils.getDisplacement(tc, 0, r);
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        results = tc.getCumulativeStrain(r);
+                        results = tc.getStrain(0, r);
                         break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
@@ -70,10 +64,6 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         case Dabs:
                             data[r] = ExportUtils.calculateDisplacement(results[x][y], dir);
                             break;
-                        case dExx:
-                        case dEyy:
-                        case dExy:
-                        case dEabs:
                         case Exx:
                         case Eyy:
                         case Exy:

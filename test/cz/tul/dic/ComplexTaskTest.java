@@ -43,9 +43,8 @@ public class ComplexTaskTest {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/ComplexIn.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + fileOut).toURI()).toFile());
-        final TaskContainer tc = new TaskContainer(input);
-
-        InputLoader.loadInput(tc);
+        final TaskContainer tc = new TaskContainer(input);        
+        InputLoader.loadInput(tc);        
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});

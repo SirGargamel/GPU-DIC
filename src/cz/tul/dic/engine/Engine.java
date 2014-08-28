@@ -15,6 +15,7 @@ import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.generators.facet.FacetGenerator;
+import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -70,19 +71,17 @@ public class Engine extends Observable {
             nextR = e.getValue();
 
             computeRound(tc, r, nextR);
-
-            if (!hints.contains(Hint.NO_CUMULATIVE)) {
-                setChanged();
-                notifyObservers(new Object[]{currentRound, CumulativeResultsCounter.class});
-                tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
-                tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
-            }
-
             exportRound(tc, r);
 
             currentRound++;
             setChanged();
             notifyObservers(currentRound);
+        }
+
+        if (!hints.contains(Hint.NO_STRAIN)) {
+            setChanged();
+            notifyObservers(StrainEstimation.class);
+            strain.computeStrain(tc);
         }
 
         Exporter.export(tc);
@@ -94,14 +93,19 @@ public class Engine extends Observable {
         ExportTask et;
         while (it.hasNext()) {
             et = it.next();
-            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round) {
+            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round && !isStrainExport(et)) {
                 Exporter.export(tc, et);
             }
         }
     }
+    
+    private boolean isStrainExport(ExportTask et) {
+        final Direction dir = et.getDirection();
+        return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
+    }
 
-    public void computeRound(final TaskContainer tc, final int index1, final int index2) throws ComputationException {
-        Logger.trace("Computing round {0} - {1}.", index1, tc);
+    public void computeRound(final TaskContainer tc, final int roundFrom, final int roundTo) throws ComputationException {
+        Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, tc);
         final Set<Hint> hints = tc.getHints();
 
         setChanged();
@@ -118,23 +122,23 @@ public class Engine extends Observable {
         // prepare data
         setChanged();
         notifyObservers(FacetGenerator.class);
-        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, index1);
+        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);
         Logger.trace("Facets generated.");
 
         // compute round        
         List<CorrelationResult> result;
-        int count, val;        
-        for (ROI roi : tc.getRois(index1)) {
+        int count, val;
+        for (ROI roi : tc.getRois(roundFrom)) {
             // compute and store result
             setChanged();
             notifyObservers(CorrelationCalculator.class);
             result = correlation.computeCorrelations(
-                    tc.getImage(index1), tc.getImage(index2),
+                    tc.getImage(roundFrom), tc.getImage(roundTo),
                     roi, facets.get(roi),
-                    tc.getDeformationLimits(index1, roi),
-                    DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(index1, roi)),
-                    tc.getFacetSize(index1, roi), taskSplitValue);
-            tc.setResult(index1, roi, result);
+                    tc.getDeformationLimits(roundFrom, roi),
+                    DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
+                    tc.getFacetSize(roundFrom, roi), taskSplitValue);
+            tc.setResult(roundFrom, roi, result);
 
             count = 0;
             for (CorrelationResult cr : result) {
@@ -143,7 +147,7 @@ public class Engine extends Observable {
                 }
                 if (cr != null) {
                     val = (int) (cr.getValue() * 10);
-                    counter.inc(val / (double)10);
+                    counter.inc(val / (double) 10);
                 } else {
                     counter.inc();
                 }
@@ -157,21 +161,15 @@ public class Engine extends Observable {
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
-        DisplacementCalculator.computeDisplacement(tc, index1, facets);
+        DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);
 
         if (!hints.contains(Hint.NO_FINE_SEARCH)) {
             setChanged();
             notifyObservers(FineLocalSearch.class);
-            fls.searchForBestPosition(tc, index1, index2);
+            fls.searchForBestPosition(tc, roundFrom, roundTo);
         }
 
-        if (!hints.contains(Hint.NO_STRAIN)) {
-            setChanged();
-            notifyObservers(StrainEstimation.class);
-            strain.computeStrain(tc, index1);
-        }
-
-        Logger.debug("Computed round {0}.", index1);
+        Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
     }
 
     public void dumpCounterStats() {

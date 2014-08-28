@@ -95,19 +95,15 @@ public class ExportUtils {
 
         switch (dir) {
             case Exx:
-            case dExx:
                 result = results[StrainResult.Exx];
                 break;
             case Eyy:
-            case dEyy:
                 result = results[StrainResult.Eyy];
                 break;
             case Exy:
-            case dExy:
                 result = results[StrainResult.Exy];
                 break;
             case Eabs:
-            case dEabs:
                 final double val1 = results[StrainResult.Exx];
                 final double val2 = results[StrainResult.Eyy];
                 final double val3 = results[StrainResult.Exy];
@@ -171,21 +167,17 @@ public class ExportUtils {
 
         switch (dir) {
             case dDabs:
-            case dEabs:
             case Dabs:
             case Eabs:
                 drawVerticalBar(out, max);
                 break;
             case dDy:
-            case dEyy:
-            case dExy:
             case Dy:
             case Eyy:
             case Exy:
                 drawVerticalBar(out, max, min);
                 break;
             case dDx:
-            case dExx:
             case Dx:
             case Exx:
                 drawHorizontalBar(out, max, min);
@@ -218,21 +210,17 @@ public class ExportUtils {
 
         switch (dir) {
             case dDabs:
-            case dEabs:
             case Dabs:
             case Eabs:
                 drawVerticalBar(out, max);
                 break;
             case dDy:
-            case dEyy:
-            case dExy:
             case Dy:
             case Eyy:
             case Exy:
                 drawVerticalBar(out, max, min);
                 break;
             case dDx:
-            case dExx:
             case Dx:
             case Exx:
                 drawHorizontalBar(out, max, min);

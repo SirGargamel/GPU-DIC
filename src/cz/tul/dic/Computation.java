@@ -72,19 +72,14 @@ public class Computation {
         final StrainEstimation strain = new StrainEstimation();
         for (double strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
-            strain.computeStrain(tc);
-            tc.setCumulativeStrain(CumulativeResultsCounter.calculate(tc, tc.getStrains()));
+            strain.computeStrain(tc);            
 
             tc.getExports().clear();
             for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
                 tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exx)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eyy)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exy)), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eabs)), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.dExx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dExx)), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.dEyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dEyy)), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.dExy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dExy)), r));
-                tc.addExport(ExportTask.generateMapExport(Direction.dEabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dEabs)), r));
+                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eabs)), r));                
             }
             Exporter.export(tc);
             TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));

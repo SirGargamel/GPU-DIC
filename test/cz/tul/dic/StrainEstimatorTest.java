@@ -35,11 +35,11 @@ public class StrainEstimatorTest {
 
         final Image img = tc.getImage(ROUND);
         final double[][][] displacement = new double[img.getWidth()][img.getHeight()][2];
-        tc.setDisplacement(ROUND, displacement);
+        tc.setDisplacement(ROUND, ROUND + 1, displacement);
 
-        new StrainEstimation().computeStrain(tc, ROUND);
+        new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
 
-        final double[][][] strains = tc.getStrain(ROUND);
+        final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
 
         for (int x = 0; x < img.getWidth(); x++) {
             for (int y = 0; y < img.getHeight(); y++) {

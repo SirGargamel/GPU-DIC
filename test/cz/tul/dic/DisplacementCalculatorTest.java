@@ -63,13 +63,13 @@ public class DisplacementCalculatorTest {
         results.add(deformation);
         tc.setResult(ROUND, roi, results);
 
-        DisplacementCalculator.computeDisplacement(tc, ROUND, FacetGenerator.generateFacets(tc, ROUND));
+        DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, FacetGenerator.generateFacets(tc, ROUND));
 
         return tc;
     }
 
     private void checkResults(final TaskContainer tc, final double dx, final double dy) {
-        double[][][] results = tc.getDisplacement(ROUND);
+        double[][][] results = tc.getDisplacement(ROUND, ROUND + 1);
         for (double[][] dAA : results) {
             for (double[] dA : dAA) {
                 if (dA != null) {

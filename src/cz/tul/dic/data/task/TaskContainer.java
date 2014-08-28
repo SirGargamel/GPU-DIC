@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -38,8 +39,7 @@ public class TaskContainer extends Observable implements Serializable {
     private transient List<Image> images;
     // results
     private final List<Map<ROI, List<CorrelationResult>>> results;
-    private final List<double[][][]> displacement, strain;
-    private final List<double[][][]> cumulativeDisplacement, cumulativeStrain;
+    private final Map<Integer, Map<Integer, double[][][]>> displacement, strain;
 
     public TaskContainer(final Object input) {
         params = new HashMap<>();
@@ -48,10 +48,8 @@ public class TaskContainer extends Observable implements Serializable {
         deformationLimits = new Container<>();
         exports = new HashSet<>();
         results = Collections.synchronizedList(new LinkedList<>());
-        displacement = Collections.synchronizedList(new LinkedList<>());
-        strain = Collections.synchronizedList(new LinkedList<>());
-        cumulativeDisplacement = Collections.synchronizedList(new LinkedList<>());
-        cumulativeStrain = Collections.synchronizedList(new LinkedList<>());
+        displacement = new ConcurrentHashMap<>();
+        strain = new ConcurrentHashMap<>();
         hints = EnumSet.noneOf(Hint.class);
 
         this.input = input;
@@ -108,8 +106,6 @@ public class TaskContainer extends Observable implements Serializable {
 
         images.add(image);
         results.add(null);
-        displacement.add(null);
-        strain.add(null);
     }
 
     public Image getImage(final int round) {
@@ -203,7 +199,7 @@ public class TaskContainer extends Observable implements Serializable {
         double[] result = null;
         if (m != null && m.containsKey(roi)) {
             result = m.get(roi);
-        } 
+        }
         if (result == null) {
             result = (double[]) getParameter(TaskParameter.DEFORMATION_LIMITS);
         }
@@ -238,63 +234,45 @@ public class TaskContainer extends Observable implements Serializable {
         return results.get(round);
     }
 
-    public double[][][] getDisplacement(final int round) {
-        return displacement.get(round);
-    }
-
-    public List<double[][][]> getDisplacements() {
-        return Collections.unmodifiableList(displacement);
-    }
-
-    public void setDisplacement(final int round, final double[][][] result) {
-        while (displacement.size() <= round) {
-            displacement.add(null);
+    public double[][][] getDisplacement(final int roundFrom, final int roundTo) {
+        double[][][] result = null;
+        if (displacement.containsKey(roundFrom)) {
+            result = displacement.get(roundFrom).get(roundTo);
         }
-
-        displacement.set(round, result);
-
-        setChanged();
-        notifyObservers();
+        return result;
     }
 
-    public double[][][] getStrain(final int round) {
-        return strain.get(round);
+    public Map<Integer, Map<Integer, double[][][]>> getDisplacements() {
+        return displacement;
     }
 
-    public List<double[][][]> getStrains() {
-        return Collections.unmodifiableList(strain);
-    }
-
-    public void setStrain(final int round, final double[][][] result) {
-        while (strain.size() <= round) {
-            strain.add(null);
+    public void setDisplacement(final int roundFrom, final int roundTo, final double[][][] result) {
+        Map<Integer, double[][][]> m = displacement.get(roundFrom);
+        if (m == null) {
+            m = new ConcurrentHashMap<>();
+            displacement.put(roundFrom, m);
         }
-
-        strain.set(round, result);
-
-        setChanged();
-        notifyObservers();
-    }
-
-    public double[][][] getCumulativeDisplacement(final int round) {
-        return cumulativeDisplacement.get(round);
-    }
-
-    public void setCumulativeDisplacements(final List<double[][][]> data) {
-        cumulativeDisplacement.clear();
-        cumulativeDisplacement.addAll(data);
+        m.put(roundTo, result);
 
         setChanged();
         notifyObservers();
     }
 
-    public double[][][] getCumulativeStrain(final int round) {
-        return cumulativeStrain.get(round);
+    public double[][][] getStrain(final int roundFrom, final int roundTo) {
+        double[][][] result = null;
+        if (strain.containsKey(roundFrom)) {
+            result = strain.get(roundFrom).get(roundTo);
+        }
+        return result;
     }
 
-    public void setCumulativeStrain(final List<double[][][]> data) {
-        cumulativeStrain.clear();
-        cumulativeStrain.addAll(data);
+    public void setStrain(final int roundFrom, final int roundTo, final double[][][] result) {
+        Map<Integer, double[][][]> m = strain.get(roundFrom);
+        if (m == null) {
+            m = new ConcurrentHashMap<>();
+            strain.put(roundFrom, m);
+        }
+        m.put(roundTo, result);
 
         setChanged();
         notifyObservers();
@@ -312,15 +290,9 @@ public class TaskContainer extends Observable implements Serializable {
         results.clear();
         displacement.clear();
         strain.clear();
-        cumulativeDisplacement.clear();
-        cumulativeStrain.clear();
 
         for (int i = 0; i < TaskContainerUtils.getMaxRoundCount(this); i++) {
             results.add(null);
-            displacement.add(null);
-            strain.add(null);
-            cumulativeDisplacement.add(null);
-            cumulativeStrain.add(null);
         }
     }
 

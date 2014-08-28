@@ -1,5 +1,6 @@
 package cz.tul.dic;
 
+import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -10,7 +11,6 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CorrelationCalculator;
-import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.KernelType;
@@ -82,18 +82,6 @@ public class EngineTest {
         -3, 3, 0.25, -1, 2, 0.25,
         -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5,
         -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
-    private static final double[][][] CUMULATIVE_ZERO = new double[][][]{
-        {{0, 0}, {0, 0}, {0, 0}},
-        {{0, 0}, {0, 0}, {0, 0}},
-        {{0, 0}, {0, 0}, {0, 0}}};
-    private static final double[][][] CUMULATIVE_ONE = new double[][][]{
-        {{1, 1}, {1, 1}, {1, 1}},
-        {{1, 1}, {1, 1}, {1, 1}},
-        {{1, 1}, {1, 1}, {1, 1}}};
-    private static final double[][][] CUMULATIVE_TWO = new double[][][]{
-        {{2, 2}, {2, 2}, {2, 2}},
-        {{2, 2}, {2, 2}, {2, 2}},
-        {{2, 2}, {2, 2}, {2, 2}}};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
@@ -238,7 +226,7 @@ public class EngineTest {
     private String checkResultsBack(final TaskContainer tc, final String fileName) {
         final Image img1 = tc.getImage(ROUND);
         final Image img2 = tc.getImage(ROUND + 1);
-        double[][][] results = tc.getDisplacement(ROUND);
+        double[][][] results = tc.getDisplacement(ROUND, ROUND + 1);
 
         // displacement map
         final Map<Integer, Map<Integer, List<Integer>>> defMap = new HashMap<>();
@@ -329,26 +317,36 @@ public class EngineTest {
         tc.setParameter(TaskParameter.IN, input.get(0));
         TaskContainerUtils.checkTaskValidity(tc);
 
-        tc.setDisplacement(0, CUMULATIVE_ZERO);
-        tc.setDisplacement(1, CUMULATIVE_ZERO);
-        tc.setDisplacement(2, CUMULATIVE_ONE);
-        tc.setDisplacement(3, CUMULATIVE_ONE);
+        final int width = tc.getImage(ROUND).getWidth();
+        final int height = tc.getImage(ROUND).getHeight();
+        tc.setDisplacement(0, 1, prepareArray(width, height, 0));
+        tc.setDisplacement(1, 2, prepareArray(width, height, 0));
+        tc.setDisplacement(2, 3, prepareArray(width, height, 1));
+        tc.setDisplacement(3, 4, prepareArray(width, height, 1));
 
-        tc.setCumulativeDisplacements(CumulativeResultsCounter.calculate(tc, tc.getDisplacements()));
-
-        assert equals(tc.getCumulativeDisplacement(0), CUMULATIVE_ZERO);
-        assert equals(tc.getCumulativeDisplacement(1), CUMULATIVE_ZERO);
-        assert equals(tc.getCumulativeDisplacement(2), CUMULATIVE_ONE);
-        assert equals(tc.getCumulativeDisplacement(3), CUMULATIVE_TWO);
+        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 1), prepareArray(width, height, 0), 0);
+        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 2), prepareArray(width, height, 0), 0);
+        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 3), prepareArray(width, height, 1), 0);
+        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 4), prepareArray(width, height, 2), 1);
     }
 
-    private boolean equals(final double[][][] A, final double[][][] B) {
+    private double[][][] prepareArray(final int width, final int height, final double val) {
+        final double[][][] result = new double[width][height][Coordinates.DIMENSION];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                Arrays.fill(result[x][y], val);
+            }
+        }
+        return result;
+    }
+
+    private boolean equals(final double[][][] A, final double[][][] B, final int gap) {
         boolean result = true;
 
         if (A != null && B != null) {
             loop:
-            for (int x = 0; x < A.length; x++) {
-                for (int y = 0; y < A[x].length; y++) {
+            for (int x = 0; x < A.length - gap; x++) {
+                for (int y = 0; y < A[x].length - gap; y++) {
                     for (int z = 0; z < A[x][y].length; z++) {
                         if (A[x][y][z] != B[x][y][z]) {
                             result = false;
@@ -407,7 +405,7 @@ public class EngineTest {
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi), null));
 
-        DisplacementCalculator.computeDisplacement(tc, ROUND, facets);
+        DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
         Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
     }

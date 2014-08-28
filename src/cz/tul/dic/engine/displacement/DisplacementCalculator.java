@@ -24,7 +24,7 @@ public abstract class DisplacementCalculator {
         data.put(DisplacementCalculation.FIND_MAX_AND_AVERAGE, new FindMaxAndAverage());
     }
 
-    public static void computeDisplacement(final TaskContainer tc, final int round, final Map<ROI, List<Facet>> facetMap) throws ComputationException {
+    public static void computeDisplacement(final TaskContainer tc, final int round, int nextRound, final Map<ROI, List<Facet>> facetMap) throws ComputationException {
         final Object o = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL displacement calculation type.");
@@ -32,13 +32,13 @@ public abstract class DisplacementCalculator {
         final DisplacementCalculation type = (DisplacementCalculation) o;
 
         if (data.containsKey(type)) {
-            data.get(type).buildFinalResults(tc, round, facetMap);
+            data.get(type).buildFinalResults(tc, round, nextRound, facetMap);
         } else {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported strain estimation - " + type.toString());
         }
         Logger.trace("Displacement calculated for round {0} using {1}.", round, type);
     }
 
-    abstract void buildFinalResults(final TaskContainer tc, final int round, final Map<ROI, List<Facet>> facetMap) throws ComputationException;
+    abstract void buildFinalResults(final TaskContainer tc, final int round, int nextRound, final Map<ROI, List<Facet>> facetMap) throws ComputationException;
 
 }
