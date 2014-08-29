@@ -8,7 +8,6 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.CorrelationResult;
-import cz.tul.dic.engine.CumulativeResultsCounter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.output.CsvWriter;
@@ -89,10 +88,7 @@ public class ComplexTaskSolver extends Observable {
             }
 
             tc.setResults(r, tcR.getResults(r));
-            tc.setDisplacement(r, nextR, tcR.getDisplacement(r, nextR));            
-
-            setChanged();
-            notifyObservers(CumulativeResultsCounter.class);
+            tc.setDisplacement(r, nextR, tcR.getDisplacement(r, nextR));
 
             exportRound(tc, r);
             bottomShifts.add(crm.getShiftBottom());
@@ -138,7 +134,7 @@ public class ComplexTaskSolver extends Observable {
             }
         }
     }
-    
+
     private boolean isStrainExport(ExportTask et) {
         final Direction dir = et.getDirection();
         return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;

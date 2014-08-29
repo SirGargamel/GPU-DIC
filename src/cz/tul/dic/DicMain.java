@@ -129,7 +129,7 @@ public class DicMain extends Application {
                 tc = Context.getInstance().getTc();
                 InputLoader.loadInput(tc);
                 tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamic(tc);
+                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
 //                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-classic.config")));
 //                tc = Context.getInstance().getTc();
