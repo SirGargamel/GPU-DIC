@@ -1,6 +1,8 @@
 package cz.tul.dic.engine.strain;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;
 import java.util.ArrayList;
@@ -26,8 +28,8 @@ public class LocalLeastSquare extends StrainEstimator {
     private static final double COEFF_ADJUST = 100;
 
     @Override
-    void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) {
-        final double[][][] displacement = tc.getDisplacement(roundFrom, roundTo);
+    void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) throws ComputationException {
+        final double[][][] displacement = TaskContainerUtils.getDisplacement(tc, roundFrom, roundTo);
         if (displacement != null) {
             final int width = displacement.length;
             final int height = displacement[0].length;            

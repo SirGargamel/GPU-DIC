@@ -117,6 +117,7 @@ public class TaskContainerUtils {
             double posX, posY;
             int iX, iY;
             double[][][] data;
+            double[] val;
             int indexFrom, indexTo;
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
@@ -128,7 +129,7 @@ public class TaskContainerUtils {
                     iY = y;
 
                     while (indexFrom != endImageIndex) {
-                        do {                            
+                        do {
                             data = tc.getDisplacement(indexFrom, indexTo);
                             if (data == null) {
                                 indexTo--;
@@ -138,19 +139,22 @@ public class TaskContainerUtils {
                             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No displacement results found.");
                         }
 
-                        posX += data[iX][iY][Coordinates.X];
-                        posY += data[iX][iY][Coordinates.Y];
-                        
+                        val = data[iX][iY];
+                        if (val != null) {
+                            posX += val[Coordinates.X];
+                            posY += val[Coordinates.Y];
+                        }
+
                         indexFrom = indexTo;
                         indexTo = endImageIndex;
-                        
+
                         iX = (int) Math.round(posX);
                         iY = (int) Math.round(posY);
                         if (posX < 0 || posY < 0 || iX >= data.length || iY >= data[x].length) {
                             break;
                         }
                     }
-                    
+
                     result[x][y][Coordinates.X] = posX - x;
                     result[x][y][Coordinates.Y] = posY - y;
                 }

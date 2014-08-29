@@ -55,7 +55,7 @@ public class StrainEstimation extends Observable {
 
     public static abstract class StrainEstimator {
 
-        abstract void estimateStrain(final TaskContainer tc, final int roundFrom, int roundTo);
+        abstract void estimateStrain(final TaskContainer tc, final int roundFrom, int roundTo) throws ComputationException;
 
     }
 
