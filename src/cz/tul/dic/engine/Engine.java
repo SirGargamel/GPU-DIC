@@ -35,9 +35,7 @@ import org.pmw.tinylog.Logger;
  */
 public class Engine extends Observable {
 
-    private static final float LIMIT_QUALITY = 0.5f;
     private static final Engine instance;
-    private final Utils.ResultCounter counter;
     private final CorrelationCalculator correlation;
     private final StrainEstimation strain;
     private final FineLocalSearch fls;
@@ -54,7 +52,6 @@ public class Engine extends Observable {
         correlation = new CorrelationCalculator();
         fls = new FineLocalSearch();
         strain = new StrainEstimation();
-        counter = new Utils.ResultCounter();
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
@@ -98,7 +95,7 @@ public class Engine extends Observable {
             }
         }
     }
-    
+
     private boolean isStrainExport(ExportTask et) {
         final Direction dir = et.getDirection();
         return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
@@ -125,39 +122,21 @@ public class Engine extends Observable {
         final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);
         Logger.trace("Facets generated.");
 
-        // compute round        
-        List<CorrelationResult> result;
-        int count, val;
+        // compute round                
         for (ROI roi : tc.getRois(roundFrom)) {
             // compute and store result
             setChanged();
             notifyObservers(CorrelationCalculator.class);
-            result = correlation.computeCorrelations(
-                    tc.getImage(roundFrom), tc.getImage(roundTo),
-                    roi, facets.get(roi),
-                    tc.getDeformationLimits(roundFrom, roi),
-                    DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
-                    tc.getFacetSize(roundFrom, roi), taskSplitValue);
-            tc.setResult(roundFrom, roi, result);
-
-            count = 0;
-            for (CorrelationResult cr : result) {
-                if (cr == null || cr.getValue() < LIMIT_QUALITY) {
-                    count++;
-                }
-                if (cr != null) {
-                    val = (int) (cr.getValue() * 10);
-                    counter.inc(val / (double) 10);
-                } else {
-                    counter.inc();
-                }
-            }
-            if (count > 0) {
-                Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", count, LIMIT_QUALITY, roi);
-            }
+            tc.setResult(
+                    roundFrom, roi,
+                    correlation.computeCorrelations(
+                            tc.getImage(roundFrom), tc.getImage(roundTo),
+                            roi, facets.get(roi),
+                            tc.getDeformationLimits(roundFrom, roi),
+                            DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
+                            tc.getFacetSize(roundFrom, roi), taskSplitValue));
         }
         correlation.dumpCounterStats();
-        dumpCounterStats();
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
@@ -170,11 +149,6 @@ public class Engine extends Observable {
         }
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
-    }
-
-    public void dumpCounterStats() {
-        Logger.trace(" --- Result quality statistics" + counter.toString());
-        counter.reset();
     }
 
 }

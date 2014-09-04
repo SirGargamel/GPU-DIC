@@ -31,7 +31,7 @@ import org.pmw.tinylog.Logger;
 public final class CorrelationCalculator extends Observable {
 
     private static final float LIMIT_RESULT_QUALITY = 0.5f;
-    private final Utils.ResultCounter counterGood, counterNotGood;
+    private final Utils.ResultCounter counterGood, counterNotGood, quality;
     private final CLContext context;
     private final CLDevice device;
     // dynamic
@@ -42,6 +42,7 @@ public final class CorrelationCalculator extends Observable {
     public CorrelationCalculator() {
         counterGood = new Utils.ResultCounter();
         counterNotGood = new Utils.ResultCounter();
+        quality = new Utils.ResultCounter();
 
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
@@ -107,19 +108,27 @@ public final class CorrelationCalculator extends Observable {
         }
 
         CorrelationResult cr;
+        int val, count = 0;
         for (int i = 0; i < facets.size(); i++) {
             cr = result.get(i);
             if (cr != null) {
+                val = (int) (cr.getValue() * 10);
+                quality.inc(val / (double) 10);
                 if (cr.getValue() < LIMIT_RESULT_QUALITY) {
                     result.set(i, null);
                     counterNotGood.inc(cr.getDeformation());
+                    count++;
                 } else {
                     counterGood.inc(cr.getDeformation());
                 }
             } else {
                 counterNotGood.inc();
+                quality.inc();
             }
 
+        }
+        if (count > 0) {
+            Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", count, LIMIT_RESULT_QUALITY, roi);
         }
 
         Logger.trace("Correlations computed.");
@@ -179,6 +188,8 @@ public final class CorrelationCalculator extends Observable {
         sb.append(counterGood.toString());
         sb.append("\n-- NOT GOOD --");
         sb.append(counterNotGood.toString());
+        sb.append("\n-- QUALITY STATS --");
+        sb.append(quality.toString());
         Logger.trace(sb.toString());
         counterGood.reset();
         counterNotGood.reset();
