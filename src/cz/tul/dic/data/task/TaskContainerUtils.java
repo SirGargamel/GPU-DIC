@@ -112,15 +112,17 @@ public class TaskContainerUtils {
             final Image img = tc.getImage(startImageIndex);
             final int width = img.getWidth();
             final int height = img.getHeight();
-            result = new double[width][height][Coordinates.DIMENSION];
+            result = new double[width][height][];
 
             double posX, posY;
             int iX, iY;
             double[][][] data;
             double[] val;
             int indexFrom, indexTo;
+            boolean notNull;
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
+                    notNull = false;
                     indexFrom = startImageIndex;
                     indexTo = endImageIndex;
                     posX = x;
@@ -141,6 +143,7 @@ public class TaskContainerUtils {
 
                         val = data[iX][iY];
                         if (val != null) {
+                            notNull = true;
                             posX += val[Coordinates.X];
                             posY += val[Coordinates.Y];
                         }
@@ -155,8 +158,9 @@ public class TaskContainerUtils {
                         }
                     }
 
-                    result[x][y][Coordinates.X] = posX - x;
-                    result[x][y][Coordinates.Y] = posY - y;
+                    if (notNull) {
+                        result[x][y] = new double[]{posX - x, posY - y};
+                    }
                 }
             }
 
@@ -419,7 +423,7 @@ public class TaskContainerUtils {
     public static TaskContainer deserializeTaskFromBinary(final File source) throws IOException, ClassNotFoundException {
         TaskContainer result;
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(source))) {
-            result = (TaskContainer) in.readObject();            
+            result = (TaskContainer) in.readObject();
             in.reset();
         }
         return result;
