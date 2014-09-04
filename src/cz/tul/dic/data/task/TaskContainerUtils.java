@@ -411,13 +411,16 @@ public class TaskContainerUtils {
     public static void serializeTaskToBinary(final TaskContainer tc, final File target) throws IOException {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
             out.writeObject(tc);
+            out.flush();
+            out.reset();
         }
     }
 
-    public static TaskContainer deserializeTaskFromBinary(final File in) throws IOException, ClassNotFoundException {
+    public static TaskContainer deserializeTaskFromBinary(final File source) throws IOException, ClassNotFoundException {
         TaskContainer result;
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(in))) {
-            result = (TaskContainer) ois.readObject();
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(ois))) {
+            result = (TaskContainer) in.readObject();            
+            in.reset();
         }
         return result;
     }
