@@ -29,6 +29,7 @@ public enum TaskParameter {
     ROUND_LIMITS(int[].class),
     DISPLACEMENT_CALCULATION_METHOD(DisplacementCalculation.class),
     DISPLACEMENT_CALCULATION_PARAM(Integer.class),
+    RESULT_QUALITY(Double.class),
     STRAIN_ESTIMATION_METHOD(StrainEstimationMethod.class),
     STRAIN_ESTIMATION_PARAM(Double.class),
     LOCAL_SEARCH_PARAM(Integer.class),

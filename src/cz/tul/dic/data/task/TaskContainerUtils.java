@@ -533,6 +533,11 @@ public class TaskContainerUtils {
             Logger.warn("Adding default local search window size.");
             tc.setParameter(TaskParameter.MM_TO_PX_RATIO, TaskDefaultValues.DEFAULT_MM_TO_PX_RATIO);
         }
+        final Object quality = tc.getParameter(TaskParameter.RESULT_QUALITY);
+        if (quality == null) {
+            Logger.warn("Adding default local search window size.");
+            tc.setParameter(TaskParameter.RESULT_QUALITY, TaskDefaultValues.DEFAULT_RESULT_QUALITY);
+        }
     }
 
 }

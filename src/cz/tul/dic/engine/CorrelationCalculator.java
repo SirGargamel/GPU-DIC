@@ -30,7 +30,6 @@ import org.pmw.tinylog.Logger;
  */
 public final class CorrelationCalculator extends Observable {
 
-    private static final float LIMIT_RESULT_QUALITY = 0.5f;
     private final Utils.ResultCounter counterGood, counterNotGood, quality;
     private final CLContext context;
     private final CLDevice device;
@@ -55,11 +54,11 @@ public final class CorrelationCalculator extends Observable {
             Image image1, Image image2,
             ROI roi, List<Facet> facets,
             double[] deformationLimits, DeformationDegree defDegree,
-            int facetSize, Object taskSplitValue) throws ComputationException {
+            int facetSize, double resultQuality, Object taskSplitValue) throws ComputationException {
         final Kernel kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared.");
 
-        final List<CorrelationResult> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, taskSplitValue);
+        final List<CorrelationResult> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, resultQuality, taskSplitValue);
 
         kernel.finishComputation();
 
@@ -71,7 +70,7 @@ public final class CorrelationCalculator extends Observable {
             Image image1, Image image2,
             ROI roi, final Kernel kernel, List<Facet> facets,
             double[] deformationLimits, DeformationDegree defDegree,
-            int facetSize, Object taskSplitValue) throws ComputationException {
+            int facetSize, double resultQuality, Object taskSplitValue) throws ComputationException {
         final List<CorrelationResult> result = new ArrayList<>(facets.size());
         for (int i = 0; i < facets.size(); i++) {
             result.add(null);
@@ -114,7 +113,7 @@ public final class CorrelationCalculator extends Observable {
             if (cr != null) {
                 val = (int) (cr.getValue() * 10);
                 quality.inc(val / (double) 10);
-                if (cr.getValue() < LIMIT_RESULT_QUALITY) {
+                if (cr.getValue() < resultQuality) {
                     result.set(i, null);
                     counterNotGood.inc(cr.getDeformation());
                     count++;
@@ -128,7 +127,7 @@ public final class CorrelationCalculator extends Observable {
 
         }
         if (count > 0) {
-            Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", count, LIMIT_RESULT_QUALITY, roi);
+            Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", count, resultQuality, roi);
         }
 
         Logger.trace("Correlations computed.");

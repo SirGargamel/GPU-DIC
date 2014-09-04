@@ -122,6 +122,8 @@ public class Engine extends Observable {
         final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);
         Logger.trace("Facets generated.");
 
+        final double resultQuality = (double) tc.getParameter(TaskParameter.RESULT_QUALITY);
+
         // compute round                
         for (ROI roi : tc.getRois(roundFrom)) {
             // compute and store result
@@ -134,7 +136,7 @@ public class Engine extends Observable {
                             roi, facets.get(roi),
                             tc.getDeformationLimits(roundFrom, roi),
                             DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
-                            tc.getFacetSize(roundFrom, roi), taskSplitValue));
+                            tc.getFacetSize(roundFrom, roi), resultQuality, taskSplitValue));
         }
         correlation.dumpCounterStats();
 

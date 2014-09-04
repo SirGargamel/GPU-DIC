@@ -91,10 +91,10 @@ public class DicMain extends Application {
     }
 
     private void performComputationTest() {
-        final int fs1 = 15;
+        final int fs1 = 20;
         final int fs2 = 45;
-        final double ps1 = 10;
-        final double ps2 = 50;
+        final double ps1 = 20;
+        final double ps2 = 20;
         TaskContainer tc;
         for (int size = fs1; size <= fs2; size++) {
             try {
@@ -144,15 +144,18 @@ public class DicMain extends Application {
 //                Computation.commenceComputationDynamic(tc);
 //                CorrelationCalculator.dumpCounterStats();
 
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m\\9905121m.avi.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamic(tc);
+                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m\\9905121m.avi.config")));
+                tc = Context.getInstance().getTc();
+                InputLoader.loadInput(tc);
+                tc.setParameter(TaskParameter.FACET_SIZE, size);
+                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
 //                }
 
             } catch (IOException | ComputationException ex) {
                 Logger.error(ex);
+            } catch (Error t) {                
+                Logger.error(t);                
+                System.out.println(Context.getInstance().getTc());
             }
         }
     }

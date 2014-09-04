@@ -30,6 +30,7 @@ public interface TaskDefaultValues {
     KernelType DEFAULT_KERNEL = KernelType.CL_1D_I_V_LL_MC_D;
     double DEFAULT_MM_TO_PX_RATIO = 1;
     ResultCompilation DEFAULT_RESULT_COMPILATION = ResultCompilation.MAJOR_AVERAGING;
+    double DEFAULT_RESULT_QUALITY = 0.5;
     StrainEstimationMethod DEFAULT_STRAIN_ESTIMATION_METHOD = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
     double DEFAULT_STRAIN_ESTIMATION_PARAMETER = 20;
     TaskSplitMethod DEFAULT_TASK_SPLIT_METHOD = TaskSplitMethod.DYNAMIC;

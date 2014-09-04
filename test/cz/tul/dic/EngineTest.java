@@ -8,6 +8,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CorrelationCalculator;
@@ -403,7 +404,7 @@ public class EngineTest {
                         roi, roiFacets,
                         tc.getDeformationLimits(ROUND, roi),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
-                        tc.getFacetSize(ROUND, roi), null));
+                        tc.getFacetSize(ROUND, roi), TaskDefaultValues.DEFAULT_RESULT_QUALITY, null));
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 

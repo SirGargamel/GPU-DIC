@@ -64,7 +64,7 @@ public final class WorkSizeManager {
                     img, img,
                     new RectangleROI(0, 0, 100, 100), facets,
                     deformationLimits, DeformationDegree.FIRST,
-                    fs, new Object[]{6, fs});
+                    fs, 50, new Object[]{6, fs});
         } catch (ComputationException ex) {
             Logger.warn("Failed to initialize work sizes.");
             Logger.debug(ex);
