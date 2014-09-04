@@ -418,7 +418,7 @@ public class TaskContainerUtils {
 
     public static TaskContainer deserializeTaskFromBinary(final File source) throws IOException, ClassNotFoundException {
         TaskContainer result;
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(ois))) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(source))) {
             result = (TaskContainer) in.readObject();            
             in.reset();
         }
