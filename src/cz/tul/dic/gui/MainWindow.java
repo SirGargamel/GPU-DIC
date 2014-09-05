@@ -97,14 +97,10 @@ public class MainWindow implements Initializable {
             fc.setInitialDirectory(last);
         }
         fc.getExtensionFilters().clear();
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("AVI files (*.avi)", "*.avi"));
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files (*.bmp, *.jpg)", "*.bmp", "*.jpg"));
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*.config)", "*.config"));
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*.task)", "*.task"));
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Batch job (*.scr)", "*.scr"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project files", "*.avi", "*.bmp", "*.jpg", "*.config", "*.task", "*.scr"));
         List<File> fileList = fc.showOpenMultipleDialog(null);
         if (fileList != null && !fileList.isEmpty()) {
-            if (fc.getSelectedExtensionFilter().getExtensions().contains("*.scr")) {
+            if (fileList.get(0).getName().endsWith(".scr")) {
                 // load batch batch file
                 List<String> fileNames;
                 List<File> input = new ArrayList<>(1);
