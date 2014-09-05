@@ -95,15 +95,19 @@ public class ExportUtils {
 
         switch (dir) {
             case Exx:
+            case dExx:
                 result = results[StrainResult.Exx];
                 break;
             case Eyy:
+            case dEyy:
                 result = results[StrainResult.Eyy];
                 break;
             case Exy:
+            case dExy:
                 result = results[StrainResult.Exy];
                 break;
             case Eabs:
+            case dEabs:
                 final double val1 = results[StrainResult.Exx];
                 final double val2 = results[StrainResult.Eyy];
                 final double val3 = results[StrainResult.Exy];
@@ -152,41 +156,9 @@ public class ExportUtils {
                     }
                 }
             }
-        }
+        }        
 
-        final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
-        Graphics2D g = out.createGraphics();
-        g.setColor(COLORBACKGROUND);
-        g.drawRect(0, 0, width, height);
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                out.setRGB(x, y, deformationToRGB(mapData[x][y], max, min));
-            }
-        }
-
-        switch (dir) {
-            case dDabs:
-            case Dabs:
-            case Eabs:
-                drawVerticalBar(out, max);
-                break;
-            case dDy:
-            case Dy:
-            case Eyy:
-            case Exy:
-                drawVerticalBar(out, max, min);
-                break;
-            case dDx:
-            case Dx:
-            case Exx:
-                drawHorizontalBar(out, max, min);
-                break;
-            default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
-        }
-
-        return out;
+        return createImageFromMap(mapData, dir, max, min);
     }
 
     public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double max, final double min) throws ComputationException {
@@ -211,17 +183,21 @@ public class ExportUtils {
         switch (dir) {
             case dDabs:
             case Dabs:
+            case dEabs:
             case Eabs:
                 drawVerticalBar(out, max);
                 break;
             case dDy:
             case Dy:
+            case dEyy:
+            case dExy:
             case Eyy:
             case Exy:
                 drawVerticalBar(out, max, min);
                 break;
             case dDx:
             case Dx:
+            case dExx:
             case Exx:
                 drawHorizontalBar(out, max, min);
                 break;

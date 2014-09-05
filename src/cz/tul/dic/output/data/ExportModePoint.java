@@ -18,6 +18,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
         }
 
         final int roundCount = TaskContainerUtils.getMaxRoundCount(tc);
+        final int roundZero = TaskContainerUtils.getFirstRound(tc);
         final Map<Direction, double[]> result = new EnumMap<>(Direction.class);
         for (Direction d : Direction.values()) {
             result.put(d, new double[roundCount]);
@@ -35,18 +36,24 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     case dDx:
                     case dDy:
                     case dDabs:
-                        results = tc.getDisplacement(r, r + 1);
+                        results = tc.getDisplacement(r - 1, r);
                         break;
                     case Dx:
                     case Dy:
                     case Dabs:
-                        results = TaskContainerUtils.getDisplacement(tc, 0, r);
+                        results = TaskContainerUtils.getDisplacement(tc, roundZero, r);
+                        break;
+                    case dExx:
+                    case dEyy:
+                    case dExy:
+                    case dEabs:
+                        results = tc.getStrain(r - 1, r);
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        results = tc.getStrain(0, r);
+                        results = tc.getStrain(roundZero, r);
                         break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
@@ -64,6 +71,10 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         case Dabs:
                             data[r] = ExportUtils.calculateDisplacement(results[x][y], dir);
                             break;
+                        case dExx:
+                        case dEyy:
+                        case dExy:
+                        case dEabs:
                         case Exx:
                         case Eyy:
                         case Exy:

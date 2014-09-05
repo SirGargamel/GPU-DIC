@@ -28,6 +28,12 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case Dabs:
                 results = TaskContainerUtils.getDisplacement(tc, roundZero, round);
                 break;
+            case dExx:
+            case dEyy:
+            case dExy:
+            case dEabs:
+                results = tc.getStrain(round - 1, round);
+                break;
             case Exx:
             case Eyy:
             case Exy:
@@ -62,6 +68,10 @@ public class ExportModeMap implements IExportMode<double[][]> {
                     case Dabs:
                         result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
+                    case dExx:
+                    case dEyy:
+                    case dExy:
+                    case dEabs:
                     case Exx:
                     case Eyy:
                     case Exy:
