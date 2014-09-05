@@ -87,7 +87,13 @@ public class DicMain extends Application {
         }
         c.activate();
 
-        Logger.info("----- Starting APP -----");
+        
+        if (debug) {
+            Logger.info("----- Starting APP ----- DEBUG -----");
+        } else {
+            Logger.info("----- Starting APP -----");
+        }
+              
     }
 
     private void performComputationTest() {
