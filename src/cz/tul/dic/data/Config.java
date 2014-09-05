@@ -40,7 +40,7 @@ public class Config {
                 }
             }
         } else {
-            throw new FileNotFoundException(in.getAbsolutePath());
+            result = null;
         }
         return result;
     }
