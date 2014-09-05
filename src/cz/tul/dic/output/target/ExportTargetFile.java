@@ -42,7 +42,7 @@ public class ExportTargetFile implements IExportTarget {
     @Override
     @SuppressWarnings("unchecked")
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException, ComputationException {
-        if (data instanceof double[][]) {
+        if (data instanceof double[][] || data == null) {
             // export image
             exportImage((double[][]) data, direction, targetParam, dataParams, tc);
         } else if (data instanceof List) {
@@ -74,7 +74,7 @@ public class ExportTargetFile implements IExportTarget {
                     }
                 }
             }
-        } else if (data != null) {
+        } else {
             throw new IllegalArgumentException("Unsupported data for file export - " + data.getClass());
         }
     }

@@ -17,11 +17,11 @@ public class ExportTargetGUI implements IExportTarget {
         if (!(targetParam instanceof Context)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
-        if (data instanceof double[][]) {
+        if (data instanceof double[][] || data == null) {
             exportImage((double[][]) data, direction, targetParam, dataParams, tc);
         } else if (data instanceof Map) {
             exportPoint((Map<Direction, double[]>) data, targetParam, dataParams, tc);
-        } else if (data != null) {
+        } else {
             throw new IllegalArgumentException("Illegal type of data - " + targetParam.getClass());
         }
 
