@@ -138,7 +138,7 @@ public class TaskContainerUtils {
                             }
                         } while (data == null && indexTo >= 0);
                         if (data == null) {
-                            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No displacement results found.");
+                            break;
                         }
 
                         val = data[iX][iY];

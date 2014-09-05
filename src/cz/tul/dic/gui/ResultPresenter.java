@@ -96,11 +96,11 @@ public class ResultPresenter implements Initializable {
         boolean result = false;
         index += change;
 
-        final int roundCount = TaskContainerUtils.getMaxRoundCount(Context.getInstance().getTc());
+        final int maxCount = Context.getInstance().getTc().getImages().size();
         if (index < 0) {
-            index = roundCount - 1;
+            index = maxCount - 1;
             result = true;
-        } else if (index >= roundCount) {
+        } else if (index >= maxCount) {
             index = 0;
             result = true;
         }

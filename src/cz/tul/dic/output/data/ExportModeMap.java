@@ -21,7 +21,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case dDx:
             case dDy:
             case dDabs:
-                results = tc.getDisplacement(round, round + 1);
+                results = tc.getDisplacement(round - 1, round);
                 break;
             case Dx:
             case Dy:
