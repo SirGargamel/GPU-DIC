@@ -1,7 +1,6 @@
 package cz.tul.dic.engine;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.Utils;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
@@ -74,6 +73,8 @@ public class Engine extends Observable {
             setChanged();
             notifyObservers(currentRound);
         }
+        
+        correlation.dumpTaskCounterStats();
 
         if (!hints.contains(Hint.NO_STRAIN)) {
             setChanged();
@@ -138,7 +139,7 @@ public class Engine extends Observable {
                             DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
                             tc.getFacetSize(roundFrom, roi), resultQuality, taskSplitValue));
         }
-        correlation.dumpCounterStats();
+        correlation.dumpRoundCounterStats();
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
@@ -151,6 +152,10 @@ public class Engine extends Observable {
         }
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
+    }
+    
+    public void dumpTaskCounterStats() {
+        correlation.dumpTaskCounterStats();
     }
 
 }

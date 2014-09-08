@@ -30,6 +30,7 @@ import org.pmw.tinylog.Logger;
  */
 public final class CorrelationCalculator extends Observable {
 
+    private final Utils.ResultCounter roundCounterGood, roundCounterNotGood, roundQuality;
     private final Utils.ResultCounter counterGood, counterNotGood, quality;
     private final CLContext context;
     private final CLDevice device;
@@ -39,6 +40,9 @@ public final class CorrelationCalculator extends Observable {
     private TaskSplitMethod taskSplitVariant;
 
     public CorrelationCalculator() {
+        roundCounterGood = new Utils.ResultCounter();
+        roundCounterNotGood = new Utils.ResultCounter();
+        roundQuality = new Utils.ResultCounter();
         counterGood = new Utils.ResultCounter();
         counterNotGood = new Utils.ResultCounter();
         quality = new Utils.ResultCounter();
@@ -112,15 +116,20 @@ public final class CorrelationCalculator extends Observable {
             cr = result.get(i);
             if (cr != null) {
                 val = (int) (cr.getValue() * 10);
+                roundQuality.inc(val / (double) 10);
                 quality.inc(val / (double) 10);
                 if (cr.getValue() < resultQuality) {
                     result.set(i, null);
+                    roundCounterNotGood.inc(cr.getDeformation());
                     counterNotGood.inc(cr.getDeformation());
                     count++;
                 } else {
+                    roundCounterGood.inc(cr.getDeformation());
                     counterGood.inc(cr.getDeformation());
                 }
             } else {
+                roundCounterNotGood.inc();
+                roundQuality.inc();
                 counterNotGood.inc();
                 quality.inc();
             }
@@ -163,7 +172,7 @@ public final class CorrelationCalculator extends Observable {
                 bestResults.set(globalFacetIndex, new CorrelationResult(-1, null));
             } else {
                 bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex));
-                counterGood.inc(bestResults.get(globalFacetIndex).getDeformation());
+                roundCounterGood.inc(bestResults.get(globalFacetIndex).getDeformation());
             }
         }
     }
@@ -180,9 +189,24 @@ public final class CorrelationCalculator extends Observable {
         this.taskSplitVariant = taskSplitVariant;
     }
 
-    public void dumpCounterStats() {
+    public void dumpRoundCounterStats() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("--- esulting deformations statistics\n");
+        sb.append("--- Resulting deformations statistics --- ROUND\n");
+        sb.append("-- GOOD --");
+        sb.append(roundCounterGood.toString());
+        sb.append("\n-- NOT GOOD --");
+        sb.append(roundCounterNotGood.toString());
+        sb.append("\n-- QUALITY STATS --");
+        sb.append(roundQuality.toString());
+        Logger.trace(sb.toString());
+        roundCounterGood.reset();
+        roundCounterNotGood.reset();
+        roundQuality.reset();
+    }
+    
+    public void dumpTaskCounterStats() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("--- Resulting deformations statistics --- TASK\n");
         sb.append("-- GOOD --");
         sb.append(counterGood.toString());
         sb.append("\n-- NOT GOOD --");
@@ -192,6 +216,7 @@ public final class CorrelationCalculator extends Observable {
         Logger.trace(sb.toString());
         counterGood.reset();
         counterNotGood.reset();
+        quality.reset();
     }
 
 }

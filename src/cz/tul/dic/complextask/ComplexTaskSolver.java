@@ -97,6 +97,8 @@ public class ComplexTaskSolver extends Observable {
             setChanged();
             notifyObservers(currentRound);
         }
+        
+        Engine.getInstance().dumpTaskCounterStats();
 
         StrainEstimation strain = new StrainEstimation();
         strain.computeStrain(tc);
