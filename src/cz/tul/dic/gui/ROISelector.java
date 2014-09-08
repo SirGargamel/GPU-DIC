@@ -93,7 +93,7 @@ public class ROISelector implements Initializable {
         ObservableList<RoiType> comboBoxData = FXCollections.observableArrayList();
         comboBoxData.addAll(RoiType.values());
         choiceRoi.setItems(comboBoxData);
-        choiceRoi.getSelectionModel().selectFirst();
+        choiceRoi.getSelectionModel().select(RoiType.CIRCLE);
         choiceRoi.setConverter(new StringConverter<RoiType>() {
             
             private final Map<String, RoiType> mapping = new HashMap<String, RoiType>();            
