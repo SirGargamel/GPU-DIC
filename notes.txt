@@ -6,3 +6,20 @@ cov-build --dir cov-int ant -f build.xml
 --- Parameter notes
 - malé facetSize nemají cenu (klidně 20 a více, závisí na kvalitě videa)
 - sweep parametr vypadá nejlépe kolem 20, opět vetší hodnoty dávají lepší výsledky
+
+
+--- Limity deformací
+- 0.order	- posuny po 0.5
+			- hodnoty Y dle posunu čelistí
+			- hodnoty X TODO (okoukat z videí)
+- 1. order	- UX - roztažení v X, hodnoty 0-1 s krokem 0.1 (dvojnásobné natažení)
+			- UY - zkosení v X, hodnoty -0.5 - 0.5 s krokem 0.1
+			- VX - zkosení v Y, hodnoty -0.5 - 0.5 s krokem 0.1
+			- VY - roztažení v Y, hodnoty 0-1 s krokem 0.1 (dvojnásobné natažení)
+- 2. order	- UXX - jednostranné natažení v X, není potřeba
+			- UYY - ohnutí v X, není potřeba
+			- UXY - zploštění do trojúhelníku ve směru Y, hodnoty -0.05 - 0.05 po 0.01
+			- VXX - ohnutí v Y, hodnoty -0.1 - 0.1 po 0.025
+			- VYY - jednostranné natažení v Y, hodnoty 0-0.5 po 0.1
+			- VXY - zploštění do trojúhelníku ve směru X, není potřeba
+			
