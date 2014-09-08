@@ -4,6 +4,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.gui.lang.Lang;
@@ -495,7 +496,7 @@ public class MainWindow implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        textFs.setText("7");
+        textFs.setText(Integer.toString(TaskDefaultValues.DEFAULT_FACET_SIZE));
 
         imagePane.initialize(url, rb);
         imagePane.assignImageIndexTextField(textIndex.textProperty());
