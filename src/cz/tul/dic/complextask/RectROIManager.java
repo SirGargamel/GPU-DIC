@@ -112,9 +112,11 @@ public class RectROIManager extends ROIManager {
     @Override
     public void generateNextRound(int round, int nextRound) {
         final double shiftTop = crm.getShiftTop();
-        final double shiftBottom = crm.getShiftBottom();
+        final double shiftBottom = crm.getShiftBottom();        
+        defLimits[DeformationLimit.VMAX] = shiftBottom;
+        setRois(round);
+        
         rect = new RectangleROI(rect.getX1(), rect.getY1() + shiftTop, rect.getX2(), rect.getY2() + shiftBottom);
-
         setRois(nextRound);
     }
 

@@ -79,8 +79,8 @@ public class ComplexTaskSolver extends Observable {
             setChanged();
             notifyObservers(RectROIManager.class);
             if (crm.hasMoved()) {
-                Engine.getInstance().computeRound(rrm.getTc(), r, nextR);
                 rrm.generateNextRound(r, nextR);
+                Engine.getInstance().computeRound(rrm.getTc(), r, nextR);                
             } else {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
