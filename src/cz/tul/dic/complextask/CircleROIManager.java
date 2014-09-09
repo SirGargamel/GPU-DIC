@@ -27,7 +27,7 @@ import org.pmw.tinylog.Logger;
 public class CircleROIManager extends ROIManager {
 
     public static final float LIMIT_RESULT_QUALITY = 0.5f;
-    private static final double[] DEFAULT_DEFORMATION_LIMITS = new double[]{-3, 3, 0.5, -20, 20, 0.5};
+    private static final double[] DEFAULT_DEFORMATION_LIMITS = new double[]{-1, 1, 0.5, -20, 20, 0.5};
     private static final int MAX_SHIFT_DIFFERENCE = 3;
     private static final int ROI_CIRCLE_FS_DENOM = 2;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
