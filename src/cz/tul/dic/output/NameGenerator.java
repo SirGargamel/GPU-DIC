@@ -1,5 +1,6 @@
 package cz.tul.dic.output;
 
+import cz.tul.dic.FpsManager;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 
@@ -38,7 +39,7 @@ public class NameGenerator {
     }
 
     public static String generateMap(final TaskContainer tc, final int round, final Direction dir) {
-        return new Generator(tc).name().intVal(round).direction(dir).finalize(EXT_MAP);
+        return new Generator(tc).name().time(round).direction(dir).finalize(EXT_MAP);
     }
 
     public static String generateSequence(final TaskContainer tc, final Direction dir) {
@@ -57,10 +58,12 @@ public class NameGenerator {
 
         private final TaskContainer tc;
         private final StringBuilder sb;
+        private final FpsManager fpsM;
 
         public Generator(TaskContainer tc) {
             this.tc = tc;
             sb = new StringBuilder();
+            fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
         }
 
         public Generator name() {
@@ -72,6 +75,13 @@ public class NameGenerator {
         public Generator intVal(int round) {
             sb.append(DELIMITER);
             sb.append(round);
+            return this;
+        }
+        
+        public Generator time(int imageNr) {
+            sb.append(DELIMITER);
+            sb.append(fpsM.getTime(imageNr));
+            sb.append(fpsM.getTickUnit());
             return this;
         }
 

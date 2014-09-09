@@ -59,8 +59,7 @@ public class ExportTargetCsv implements IExportTarget {
         }
 
         final File target = (File) targetParam;
-        final FpsManager fpsM = new FpsManager(fps);
-        final double tickLength = fpsM.getTickLength();
+        final FpsManager fpsM = new FpsManager(fps);        
 
         if (data != null) {
             int l = 0;
@@ -80,7 +79,7 @@ public class ExportTargetCsv implements IExportTarget {
             // data
 
             for (int i = 0; i < l; i++) {
-                out[i + 1][0] = nf.format((i + 1) * tickLength);
+                out[i + 1][0] = nf.format(fpsM.getTime(i + 1));
                 for (Direction d : Direction.values()) {
                     vals = data.get(d);
                     if (i < vals.length) {

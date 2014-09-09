@@ -3,7 +3,6 @@ package cz.tul.dic.gui;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.Direction;
@@ -15,6 +14,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -37,6 +38,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -52,17 +54,20 @@ import org.pmw.tinylog.Logger;
 
 public class ResultPresenter implements Initializable {
 
+    private static final NumberFormat nf = new DecimalFormat("#0.###");
     private static final int PREF_SIZE_W_BASE = 30;
     private static final int PREF_SIZE_W_M = 5;
     private static final int PREF_SIZE_H = 30;
     private static final int EXTRA_WIDTH = 30;
-    private static final int EXTRA_HEIGHT = 70;
+    private static final int EXTRA_HEIGHT = 100;
     private static final int MIN_WIDTH = 380;
 
     @FXML
     private ComboBox<Direction> choiceDir;
     @FXML
     private TextField textIndex;
+    @FXML
+    private Label labelTime;
     @FXML
     private ImageView image;
     @FXML
@@ -96,7 +101,8 @@ public class ResultPresenter implements Initializable {
         boolean result = false;
         index += change;
 
-        final int maxCount = Context.getInstance().getTc().getImages().size();
+        final TaskContainer tc = Context.getInstance().getTc();
+        final int maxCount = tc.getImages().size();
         if (index < 0) {
             index = maxCount - 1;
             result = true;
@@ -106,6 +112,10 @@ public class ResultPresenter implements Initializable {
         }
 
         textIndex.setText(Integer.toString(index));
+        
+        final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
+        labelTime.setText(nf.format(fpsM.getTime(index)).concat(fpsM.getTickUnit()));
+        
         return result;
     }
 

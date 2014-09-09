@@ -10,35 +10,68 @@
     <children>
         <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <center>
-                <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                <ScrollPane BorderPane.alignment="CENTER">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="240.0" prefWidth="320.0">
                             <children>
-                                <ImageView fx:id="image" fitHeight="240.0" fitWidth="320.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                <ImageView fx:id="image" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                             </children>
                         </AnchorPane>
                     </content>
                 </ScrollPane>
             </center>
-            <bottom>
-                <HBox maxHeight="30.0" prefHeight="0.0" prefWidth="522.0" spacing="5.0" BorderPane.alignment="CENTER">
+<bottom><VBox prefHeight="40.0" BorderPane.alignment="CENTER">
+<children><BorderPane prefHeight="25.0">
+<right><HBox alignment="CENTER" BorderPane.alignment="CENTER">
+<children><Label alignment="CENTER" contentDisplay="CENTER" text="%ImageNr" textAlignment="CENTER">
+<padding>
+<Insets right="5.0" />
+</padding></Label>
+                        <TextField fx:id="textIndex" editable="false" onAction="#handleTextActionIndex" onKeyTyped="#handleTextKeyTyped" prefWidth="40.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" /><Label text="%Time">
+<padding>
+<Insets left="5.0" />
+</padding></Label><Label fx:id="labelTime" text="0us" textAlignment="CENTER">
+<HBox.margin>
+<Insets />
+</HBox.margin>
+<padding>
+<Insets left="2.0" />
+</padding></Label>
+</children></HBox>
+</right>
+<left>
+                <HBox maxHeight="30.0" spacing="5.0" BorderPane.alignment="CENTER">
                     <children>
                         <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" GridPane.rowIndex="1" />
                         <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#handleButtonActionPlay" />
                         <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#handleButtonActionStop" GridPane.columnIndex="1" />
-                        <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" GridPane.columnIndex="1" GridPane.rowIndex="1" /><Label alignment="CENTER" contentDisplay="CENTER" text="%ImageNr" textAlignment="CENTER" />
-                        <TextField fx:id="textIndex" editable="false" maxWidth="50.0" onAction="#handleTextActionIndex" onKeyTyped="#handleTextKeyTyped" prefWidth="40.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <ComboBox fx:id="choiceDir" onAction="#handleChoiceChange" prefHeight="25.0" prefWidth="75.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
+                        <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    </children>
+                </HBox>
+</left>
+<opaqueInsets>
+<Insets />
+</opaqueInsets>
+<padding>
+<Insets left="5.0" right="5.0" top="5.0" />
+</padding></BorderPane><BorderPane prefHeight="25.0">
+<right><Button mnemonicParsing="false" onAction="#handleButtonActionSave" text="%Save" BorderPane.alignment="CENTER" />
+</right>
+<left>
+                        <ComboBox fx:id="choiceDir" onAction="#handleChoiceChange" prefHeight="25.0" prefWidth="100.0" BorderPane.alignment="CENTER" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
                             <GridPane.margin>
                                 <Insets left="5.0" right="5.0" />
                             </GridPane.margin>
-                        </ComboBox><Button mnemonicParsing="false" onAction="#handleButtonActionSave" text="%Save" />
-                    </children>
-                    <padding>
-                        <Insets top="2.0" />
-                    </padding>
-                </HBox>
-            </bottom>
+                        </ComboBox>
+</left>
+<opaqueInsets>
+<Insets />
+</opaqueInsets>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding></BorderPane>
+</children></VBox>
+</bottom>
         </BorderPane>
     </children>
 </AnchorPane>

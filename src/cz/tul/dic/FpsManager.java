@@ -1,6 +1,8 @@
 package cz.tul.dic;
 
 import cz.tul.dic.gui.lang.Lang;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  *
@@ -8,6 +10,7 @@ import cz.tul.dic.gui.lang.Lang;
  */
 public class FpsManager {
 
+    private static final NumberFormat nf = new DecimalFormat("#0.###");
     private final double tickLength;
     private final String tickUnit;
 
@@ -25,6 +28,10 @@ public class FpsManager {
 
     public double getTickLength() {
         return tickLength;
+    }
+
+    public double getTime(final int imageNr) {
+        return tickLength * imageNr;
     }
 
     public String getTickUnit() {
