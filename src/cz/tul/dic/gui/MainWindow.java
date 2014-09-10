@@ -344,7 +344,7 @@ public class MainWindow implements Initializable {
         try {
             final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ROISelector.fxml"), Lang.getBundle());
             final Stage stage = new Stage();
-            stage.setTitle("Select ROIs");
+            stage.setTitle(Lang.getString("selectROIs"));
             stage.setScene(new Scene(root));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
