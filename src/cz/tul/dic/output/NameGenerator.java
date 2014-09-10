@@ -3,6 +3,8 @@ package cz.tul.dic.output;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  *
@@ -11,6 +13,7 @@ import cz.tul.dic.data.task.TaskParameter;
 public class NameGenerator {
 
     private static final String DELIMITER = "_";
+    private static final NumberFormat nf = new DecimalFormat("#0.###");
     public static final String EXT_CONFIG = ".config";
     public static final String EXT_CSV = ".csv";
     public static final String EXT_MAP = ".bmp";
@@ -80,7 +83,7 @@ public class NameGenerator {
         
         public Generator time(int imageNr) {
             sb.append(DELIMITER);
-            sb.append(fpsM.getTime(imageNr));
+            sb.append(nf.format(fpsM.getTime(imageNr)));
             sb.append(fpsM.getTickUnit());
             return this;
         }
