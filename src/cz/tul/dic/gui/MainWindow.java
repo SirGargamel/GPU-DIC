@@ -130,8 +130,8 @@ public class MainWindow implements Initializable {
                 boolean error = false;
 
                 updateProgress(0, 5);
-                final File in = fileList.get(0);                
-                if (fileList.size() == 1) {                    
+                final File in = fileList.get(0);
+                if (fileList.size() == 1) {
                     final String name = in.getName();
                     final String ext = name.substring(name.lastIndexOf(".") + 1);
                     updateProgress(1, 5);
@@ -168,9 +168,11 @@ public class MainWindow implements Initializable {
                         final TaskContainer tc = Context.getInstance().getTc();
                         tc.setParameter(TaskParameter.IN, in);
                         tc.addObserver(imagePane);
-                        InputLoader.loadInput(tc);                        
+                        InputLoader.loadInput(tc);
                         updateProgress(4, 5);
                         Platform.runLater(() -> {
+                            final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
+                            stage.setTitle("DIC - " + in.getName());
                             if (imagePane != null && imagePane.getScene() != null) {
                                 adjustConfigButtons(false);
                                 adjustImageButtons(false);
