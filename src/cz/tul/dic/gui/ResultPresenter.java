@@ -198,16 +198,14 @@ public class ResultPresenter implements Initializable {
     @FXML
     private void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
         final String c1 = Lang.getString("TypeMap");
-        final String t1 = Lang.getString("TypeMapD");
-        final String c2 = Lang.getString("TypePoint");
-        final String t2 = Lang.getString("TypePointD");
-        final String c3 = Lang.getString("TypeSequence");
-        final String t3 = Lang.getString("TypeSequenceD");
+        final String t1 = Lang.getString("TypeMapD");        
+        final String c2 = Lang.getString("TypeSequence");
+        final String t2 = Lang.getString("TypeSequenceD");
         final Action a = Dialogs.create()
                 .masthead(null)
                 .title(Lang.getString("Save"))
                 .message(Lang.getString("ChooseDataType"))
-                .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2), new Dialogs.CommandLink(c3, t3));
+                .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2));
         final String val = a.textProperty().get();
         final TaskContainer tc = Context.getInstance().getTc();
         if (val.equals(c1)) {
@@ -222,10 +220,8 @@ public class ResultPresenter implements Initializable {
                 default:
                     Logger.warn("Illegal target - {0}", et);
                     break;
-            }
+            }        
         } else if (val.equals(c2)) {
-            Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, lastX, lastY)), lastX, lastY));
-        } else if (val.equals(c3)) {
             Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), determineType()));
         }
     }
