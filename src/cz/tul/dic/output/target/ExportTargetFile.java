@@ -8,7 +8,6 @@ package cz.tul.dic.output.target;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
@@ -64,7 +63,6 @@ public class ExportTargetFile implements IExportTarget {
                 }
                 final NumberFormat nf = new DecimalFormat(sb.toString());
                 for (int i = 0; i < dataList.size(); i++) {
-
                     if (image) {
                         if (dataList.get(i) != null) {
                             exportImage(dataList.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION_IMAGE), new int[]{i}, tc);

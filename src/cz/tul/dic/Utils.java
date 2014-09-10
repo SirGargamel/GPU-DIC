@@ -3,12 +3,16 @@ package cz.tul.dic;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import java.io.File;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
@@ -22,10 +26,15 @@ public class Utils {
     private static final String TEMP_DIR_NAME = "temp";
     private static final Map<TaskContainer, List<File>> tempFiles;
     private static boolean debugMode;
+    private static final NumberFormat nf;
 
     static {
         tempFiles = new HashMap<>();
         debugMode = false;
+
+        final DecimalFormatSymbols decimalSymbol = new DecimalFormatSymbols(Locale.getDefault());
+        decimalSymbol.setDecimalSeparator('.');
+        nf = new DecimalFormat("#0.###", decimalSymbol);
     }
 
     public static void enableDebugMode() {
@@ -90,6 +99,10 @@ public class Utils {
         }
         return indexCurrentLevel < indexTestedLevel;
     }
+    
+    public static String format(final double val) {
+        return nf.format(val);
+    }
 
     public static class ResultCounter {
 
@@ -110,11 +123,11 @@ public class Utils {
                 inc(Arrays.toString(val));
             }
         }
-        
+
         public void inc(final double val) {
             inc(Double.toString(val));
         }
-        
+
         public void inc(final float val) {
             inc(Float.toString(val));
         }

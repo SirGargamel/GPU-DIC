@@ -1,16 +1,13 @@
 package cz.tul.dic;
 
 import cz.tul.dic.gui.lang.Lang;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 /**
  *
  * @author Petr Ječmen
  */
 public class FpsManager {
-
-    private static final NumberFormat nf = new DecimalFormat("#0.###");
+    
     private final double tickLength;
     private final String tickUnit;
 

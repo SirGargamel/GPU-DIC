@@ -9,13 +9,9 @@ import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Map;
 
-public class ExportTargetCsv implements IExportTarget {
-
-    private static final NumberFormat nf = new DecimalFormat("#0.###");
+public class ExportTargetCsv implements IExportTarget {    
     
     @Override
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
@@ -58,6 +54,7 @@ public class ExportTargetCsv implements IExportTarget {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
 
+        
         final File target = (File) targetParam;
         final FpsManager fpsM = new FpsManager(fps);        
 
@@ -79,11 +76,11 @@ public class ExportTargetCsv implements IExportTarget {
             // data
 
             for (int i = 0; i < l; i++) {
-                out[i + 1][0] = nf.format(fpsM.getTime(i + 1));
+                out[i + 1][0] = Utils.format(fpsM.getTime(i + 1));
                 for (Direction d : Direction.values()) {
                     vals = data.get(d);
                     if (i < vals.length) {
-                        out[i + 1][d.ordinal() + 1] = Double.toString(vals[i]);
+                        out[i + 1][d.ordinal() + 1] = Utils.format(vals[i]);
                     }
                 }
             }

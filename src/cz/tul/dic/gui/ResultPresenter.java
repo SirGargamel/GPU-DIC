@@ -2,6 +2,7 @@ package cz.tul.dic.gui;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.FpsManager;
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
@@ -14,8 +15,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -53,8 +52,7 @@ import org.controlsfx.dialog.Dialogs;
 import org.pmw.tinylog.Logger;
 
 public class ResultPresenter implements Initializable {
-
-    private static final NumberFormat nf = new DecimalFormat("#0.###");
+    
     private static final int PREF_SIZE_W_BASE = 30;
     private static final int PREF_SIZE_W_M = 5;
     private static final int PREF_SIZE_H = 30;
@@ -114,7 +112,7 @@ public class ResultPresenter implements Initializable {
         textIndex.setText(Integer.toString(index));
         
         final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
-        labelTime.setText(nf.format(fpsM.getTime(index)).concat(fpsM.getTickUnit()));
+        labelTime.setText(Utils.format(fpsM.getTime(index)).concat(fpsM.getTickUnit()));
         
         return result;
     }

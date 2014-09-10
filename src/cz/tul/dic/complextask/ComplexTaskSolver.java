@@ -2,6 +2,7 @@ package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.FpsManager;
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
@@ -19,8 +20,6 @@ import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,8 +32,7 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public class ComplexTaskSolver extends Observable {
-
-    private static final NumberFormat nf = new DecimalFormat("#0.###");
+    
     private final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
@@ -114,8 +112,8 @@ public class ComplexTaskSolver extends Observable {
         out[0][0] = fpsM.buildTimeDescription();
         out[0][1] = "dY";
         for (int i = 0; i < bottomShifts.size(); i++) {
-            out[i + 1][0] = nf.format(fpsM.getTime(i + 1));
-            out[i + 1][i] = Double.toString(bottomShifts.get(i));
+            out[i + 1][0] = Utils.format(fpsM.getTime(i + 1));
+            out[i + 1][1] = Utils.format(bottomShifts.get(i));
         }
         CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), out);
     }
