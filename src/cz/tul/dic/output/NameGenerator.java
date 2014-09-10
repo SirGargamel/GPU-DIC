@@ -67,9 +67,8 @@ public class NameGenerator {
             fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
         }
 
-        public Generator name() {
-            final String inName = tc.getParameter(TaskParameter.IN).toString();
-            sb.append(inName.substring(0, inName.lastIndexOf('.')));
+        public Generator name() {            
+            sb.append(tc.getParameter(TaskParameter.IN).toString());
             return this;
         }
 
