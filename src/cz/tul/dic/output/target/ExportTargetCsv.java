@@ -37,11 +37,11 @@ public class ExportTargetCsv implements IExportTarget {
         if (data != null) {
             final int width = data.length;
             final int height = data[0].length;
-            final String[][] out = new String[width][height];
+            final String[][] out = new String[height][width];
 
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    out[x][y] = Double.toString(data[x][y]);
+                    out[y][x] = Double.toString(data[x][y]);
                 }
             }
             CsvWriter.writeDataToCsv(target, out);
