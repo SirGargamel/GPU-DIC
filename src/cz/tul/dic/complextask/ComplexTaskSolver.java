@@ -1,6 +1,7 @@
 package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.FpsManager;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
@@ -18,6 +19,8 @@ import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +34,7 @@ import org.pmw.tinylog.Logger;
  */
 public class ComplexTaskSolver extends Observable {
 
+    private static final NumberFormat nf = new DecimalFormat("#0.###");
     private final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
@@ -80,7 +84,7 @@ public class ComplexTaskSolver extends Observable {
             notifyObservers(RectROIManager.class);
             if (crm.hasMoved()) {
                 rrm.generateNextRound(r, nextR);
-                Engine.getInstance().computeRound(rrm.getTc(), r, nextR);                
+                Engine.getInstance().computeRound(rrm.getTc(), r, nextR);
             } else {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
@@ -97,7 +101,7 @@ public class ComplexTaskSolver extends Observable {
             setChanged();
             notifyObservers(currentRound);
         }
-        
+
         Engine.getInstance().dumpTaskCounterStats();
 
         StrainEstimation strain = new StrainEstimation();
@@ -105,11 +109,15 @@ public class ComplexTaskSolver extends Observable {
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
-        final String[][] shiftsS = new String[1][bottomShifts.size()];
+        final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
+        final String[][] out = new String[bottomShifts.size() + 1][2];
+        out[0][0] = fpsM.buildTimeDescription();
+        out[0][1] = "dY";
         for (int i = 0; i < bottomShifts.size(); i++) {
-            shiftsS[0][i] = Double.toString(bottomShifts.get(i));
+            out[i + 1][0] = nf.format(fpsM.getTime(i + 1));
+            out[i + 1][i] = Double.toString(bottomShifts.get(i));
         }
-        CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), shiftsS);
+        CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), out);
     }
 
     private boolean checkResultsQuality(final CircleROIManager crm, int round) {
