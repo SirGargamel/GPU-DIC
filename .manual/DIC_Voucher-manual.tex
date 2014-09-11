@@ -86,9 +86,28 @@ V některých speciálních případech může být žádoucí změnit i další
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{hlavniOkno.png}\\Hlavní okno programu}
 \end{figure}
-\todo{screenshot okna, číselný popis prvků}
+\begin{description}
+\item[Vstupní soubor] načte vstupní souboru(y), podporovány jsou videa (*.avi), obrázky (*.bmp, *.jpg), konfigurace úlohy (*.config), soubor projektu (*.task) a skript pro více úloh (*.scr)
+\item[Reálná velikost] otevře okno pro vyznačení známého rozměru v obraze
+\item[Zadat ROI] otevře okno pro vyznačení ROI
+\item[Exporty] otevře okno pro specifikaci exportů provedených po dokončení výpočtu
+\item[Velikost facetu] slouží pro zadání velikost facetu použitou během výpočtu
+\item[Expertní nastavení] slouží pro nastavení specifických parametrů enginu
+\item[Šipky] slouží pro prohlížení obrázků
+\item[Spustit výpočet] spustí výpočet
+\item[Výsledky] otevře okno pro prezentaci výsledků (dostupné po dokončení výpočtu)
+\item[Uložit] otevře dialog pro uložení skriptu úlohy dle konkrétního nastavení a pro uložení celého projektu (včetně výsledků)        
+\end{description}
+\newpage
 \subsection{Výběr vstupu}
-\todo{video / obrázky / config / binary}
+\begin{description}
+\item[Video] soubor musí mít koncovku avi, video se rozseká na obrázky za pomoci programu VirtualDub 
+\item[Obrázky] se řadí dle přirozeného třídění (tj. většinou dle abecedy)
+\item[Config] soubor je textový soubor obsahující konfiguraci výpočtu, typicky po načtení mlže být rovnou spuštěn výpočet
+\item[Task] soubor obsahuje kromě konfigurace úlohy také vypočtené výsledky, které lze okamžitě po načtení souboru prohlížet
+\item[Scr] soubor by měl obsahovat seznam konfigurací, které se mají spočítat, cesty ke konfiguracím musí být v absolutním tvaru (např. C:\textbackslash temp\textbackslash prvni.config)
+\end{description}
+\newpage
 \subsection{Zadávání ROI}
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{ROI.png}\\Okno pro vyznačení ROI}
