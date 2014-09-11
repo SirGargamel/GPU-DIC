@@ -58,7 +58,7 @@ Studentská 2\\
 \newpage
 \section{Úvod}
 Algoritmus digitální obrazové korelace (dále jen DIC) se historicky ukázal jako algoritmus vhodný pro analýzu záznamu mechanických dějů pro potřeby analýzy chování materiálu s co největší přesností. Nevýhodou algoritmu je citlivost na vstupní parametry a dlouhá výpočetní doba. Cílem aplikace GPU-DIC je  hlavně zkrátit dobu výpočtu a alespoň částečný odhad vhodných vstupních parametrů.
-Popis jak funguje algoritmus DIC lze nalézt v "Two-dimensional digital image correlation for in-plane displacement and strain measurement:a review, Bing Pan et al 2009 Meas. Sci. Technol. 20, http://iopscience.iop.org/0957-0233/20/6/062001." V tomto textu budou zmíněny pouze vybrané části, které byly vylepšeny nebo jejichž pochopením se uživateli ulehčí volba vstupních parametrů. V následující kapitole budou zmíněny pouze teoretické předpoklady pro úspěšnou volbu parametrů na základě teorie, detailnější doporučení týkající se volby parametrů budou pak uvedeny v kapitole \ref{sec:settings}
+Popis jak funguje algoritmus DIC lze nalézt v "Two-dimensional digital image correlation for in-plane displacement and strain measurement:a review, Bing Pan et al; 2009 Meas. Sci. Technol. 2;, http://iopscience.iop.org/0957-0233/20/6/062001." V tomto textu budou zmíněny pouze vybrané části, které byly vylepšeny nebo jejichž pochopením se uživateli ulehčí volba vstupních parametrů. V následující kapitole budou zmíněny pouze teoretické předpoklady pro úspěšnou volbu parametrů na základě teorie, detailnější doporučení týkající se volby parametrů budou pak uvedeny v kapitole \ref{sec:settings}.
 \newpage
 \section{Vybrané části algoritmu DIC}
 V této části textu bude odkazováno na text uvedený v minulé kapitole, je tedy velmi doporučeno výše zmíněný text z webu stáhnout. Odkazy budou ve formě "(DIC-5)", kde číslovka označuje číslo strany.
@@ -70,9 +70,18 @@ Výpočet pole posunů tkví v odhadu, jak se facet deformoval. Facet se deformu
 Výstupem algoritmu DIC je pole posunutí jednotlivých bodů (typicky bod = pixel). Pro potřeby mechaniky by bylo dobré kromě samotným posunů znát i pole přetvoření (hodnoty epsilon). Hodnota přetvoření je dána poměrem koncové délky ku počáteční, v diskrétní oblasti lze tedy definovat jako rozdíl hodnot posunů v daném směru (prostá diferenciace hodnot). Bohužel vlivem šumu nelze provést výpočet takto jednoduše. Existují dva přístupy, které dokáží potlačit vliv šumu na výsledné pole. Prvním přístupem je vyhlazení pole posunutí před vlastní diferenciací. Problém tohoto přístupu je volba vhodného vyhlazovacího algoritmu, který by nepotlačil užitečná data. Druhým přístupem a zároveň přístupem, který je implementován v aplikaci, je využití metody nejmenších čtverců. Podrobný popis lze nalézt v "Digital image correlation using iterative least squares and pointwise least squares for displacement field and strain field measurements. Bing Pan, Anand Asundi, Huimin Xie, Jianxin Gao. 2008." Principem metody je aproximace pole posunutí za pomoci lineární plochy (její předpis lze nalézt ve zmíněném článku) a hledání jejích koeficientů. Vzhledem k přímé závislosti koeficientů rovnice a hodnot posunutí a přetvoření, je možno koeficienty hledat za pomoci lineární algebry. Problém této metody je opět nutná volba parametru. Tím je velikost okolí, ve kterém se bude pole deformací aproximovat plochou. Pokud předpokládáme homogenní deformace, je možno volit velikost okna větší, protože se lépe potlačí vliv šumu ne přesnost výsledku. V případě velkých variací v poli posunutí je nutné volit menší okno, aby byly zachyceny detaily, a tím pádem může docházet ke zkreslení výsledků vlivem šumu. Typicky se velikost okna volí v rozsahu 11 - 21 pixelů.
 \newpage
 \section{Kroky výpočtu}
-\todo{vyznačit ROI, nastavit reálnou velikost, velikost facetu, volitelně expert}
+V této kapitole budou zmíněny kroky, které by měl uživatel vykonat před spuštěním vlastního výpočtu. Nastavení lze provést buď za pomoci grafického rozhraní (viz kapitola \ref{sec:gui}) nebo lze parametry také nastavit za pomoci skriptu úlohy (viz kapitola \ref{sec:config}).
+\subsection{Vyznačení oblasti zájmu (ROI)}
+Vzhledem k zaměření této aplikace na analýzu trhací zkoušky je i výpočet tomu uzpůsoben. Typicky záznam obsahuje region, kde je zkoušený předmět uchycen do čelistí a zbytek obrazu je pro analýzu nezajímavý. Proto uživatel může buď vyznačit obdélníkovou oblast(-i), na jejichž ploše bude probíhat výpočet, nebo využije možnosti dynamické tvorby ROI na základě polohy čelistí. V případě dynamické tvorby je nutno vyznačit úvodní polohu čelistí za pomoci kružnic, program poté sleduje polohu čelistí a upravuje oblast zájmu tak, aby byla mezi nimi.
+\subsection{Vyznačení reálné velikosti}
+Tento krok je volitelný a slouží k možné unifikaci velikosti plochy pro odhad plochy přetvoření. Aplikaci používá poměr px / mm, který lze opět zadat dvěma způsoby. Buď ve formě čísla do skriptu úlohy nebo za pomoci GUI, kde se vyznačí známý rozměr a jeho reálná velikost a poměr se automaticky dopočítá.
+\subsection{Velikost facetu}
+Velikost facetu je hlavním parametrem algoritmu a kvalita výsledky je na něm dost závislá. Doporučené hodnoty lze nalézt v kapitole \ref{sec:settings}. Číslo musí být celé a opět ho lze zadat přes GUI či skript.
+\subsection{Expertní nastavení}
+V některých speciálních případech může být žádoucí změnit i další parametry výpočetního enginu (jako limity deformací, limity kol výpočtu apod.). Co lze a nelze nastavit lze nalézt opět v kapitole \ref{sec:settings}, některá nastavení lze měnit v GUI, jiná se musí specifikovat za pomoci skriptu úlohy.
 \newpage
 \section{Ovládání aplikace}
+\label{sec:gui}
 \subsection{Úvodní okno}
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{hlavniOkno.png}\\Hlavní okno programu}
@@ -113,7 +122,8 @@ Výstupem algoritmu DIC je pole posunutí jednotlivých bodů (typicky bod = pix
 
 \newpage
 \section{Konfigurační soubor úlohy}
-\todo{detailní popis možných položek v konfiguračnícm souboru}
+\label{sec:config}
+\todo{detailní popis možných položek v konfiguračním souboru}
 
 \newpage
 \section{Doporučená nastavení}
