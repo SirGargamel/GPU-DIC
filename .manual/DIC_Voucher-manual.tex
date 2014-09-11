@@ -112,7 +112,8 @@ V některých speciálních případech může být žádoucí změnit i další
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{ROI.png}\\Okno pro vyznačení ROI}
 \end{figure}
-\todo{jak se ovládá, jak se chová}
+Zadáním ROI může uživatel enginu říci, které oblasti má počítat a tím pádem dost urychlit výpočet. Na výběr jsou dvě možnosti. První je statické umístění ROI (v téměř libovolném počtu), Tyto ROI se budou dodržovat po celou dobu výpočtu, případně je možno specifikovat na různá kola různá ROI s tím, že pokud nejsou uvedena jiná ROI, použijí se ROI z předchozího kola. Dostupné tvary ROI jsou obdélník a kruh.\\
+Druhou možností je vyznačení polohy čelistí za pomoci 4 kruhových ROI (odtud pochází omezení na ne zcela libovolný počet statických ROI). V tomto případě se engine pokusí automaticky sledovat čelisti a podle toho upravuje sledovanou oblast. Sledovaná oblast může být v tomto případě definována dvěma způsoby - buď ji uživatel vyznačí sám za pomoci obdélníkové oblasti nebo vyznačení nechá na enginu. Engine vytvoří oblast dle jednoduchých pravidel - oblast je mezi čelistmi, začíná nad horními čelistmi a končí pod spodními čelistmi s tím, že se nechává mezera pro alespoň částečně potlačení nepřesnosti vyznačení čelistí a tím pádem ovlivnění výpočtu.
 \subsection{Vyznačení reálné velikosti}
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{realSize.png}\\Okno pro vyznačení reálné velikosti}
