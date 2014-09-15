@@ -59,7 +59,14 @@ public class Config {
 
     public static ConfigType determineType(final Config configFile) {
         final String configType = configFile.get(CLASS_ID);
-        return ConfigType.valueOf(configType);
+        ConfigType result;
+        try {
+            result = ConfigType.valueOf(configType);
+        } catch (IllegalArgumentException ex) {
+            result = ConfigType.TASK;
+            configFile.put(CLASS_ID, ConfigType.TASK.toString());
+        }
+        return result;
     }
 
     public Config() {
