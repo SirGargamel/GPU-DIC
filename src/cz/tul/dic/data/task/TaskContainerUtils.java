@@ -41,6 +41,7 @@ public class TaskContainerUtils {
     private static final String CONFIG_EXPORTS = "EXPORT_";
     private static final String CONFIG_INPUT = "INPUT";    
     private static final String CONFIG_SEPARATOR = ";;";
+    private static final String CONFIG_SEPARATOR_ARRAY = ",,";
     private static final String CONFIG_SEPARATOR_ROI = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
@@ -223,6 +224,8 @@ public class TaskContainerUtils {
             val = tc.getParameter(tp);
             if (val instanceof int[]) {
                 config.put(CONFIG_PARAMETERS.concat(tp.name()), toString((int[]) val));
+            } else if (val instanceof double[]) {
+                config.put(CONFIG_PARAMETERS.concat(tp.name()), toString((double[]) val));
             } else if (val != null) {
                 config.put(CONFIG_PARAMETERS.concat(tp.name()), val.toString());
             }
@@ -243,10 +246,11 @@ public class TaskContainerUtils {
 
         if (data != null) {
             for (double d : data) {
+                sb.append(" ");
                 sb.append(d);
-                sb.append(CONFIG_SEPARATOR);
+                sb.append(CONFIG_SEPARATOR_ARRAY);
             }
-            sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
+            sb.setLength(sb.length() - CONFIG_SEPARATOR_ARRAY.length());
         } else {
             sb.append(CONFIG_EMPTY);
         }
@@ -259,10 +263,11 @@ public class TaskContainerUtils {
 
         if (data != null) {
             for (int d : data) {
+                sb.append(" ");
                 sb.append(d);
-                sb.append(CONFIG_SEPARATOR);
+                sb.append(CONFIG_SEPARATOR_ARRAY);
             }
-            sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
+            sb.setLength(sb.length() - CONFIG_SEPARATOR_ARRAY.length());
         } else {
             sb.append(CONFIG_EMPTY);
         }
@@ -372,10 +377,10 @@ public class TaskContainerUtils {
         if (data.equals(CONFIG_EMPTY)) {
             result = null;
         } else {
-            final String[] split = data.split(CONFIG_SEPARATOR);
+            final String[] split = data.split(CONFIG_SEPARATOR_ARRAY);
             result = new double[split.length];
             for (int i = 0; i < split.length; i++) {
-                result[i] = Double.valueOf(split[i]);
+                result[i] = Double.valueOf(split[i].trim());
             }
         }
         return result;
@@ -386,10 +391,10 @@ public class TaskContainerUtils {
         if (data.equals(CONFIG_EMPTY)) {
             result = null;
         } else {
-            final String[] split = data.split(CONFIG_SEPARATOR);
+            final String[] split = data.split(CONFIG_SEPARATOR_ARRAY);
             result = new int[split.length];
             for (int i = 0; i < split.length; i++) {
-                result[i] = Integer.parseInt(split[i]);
+                result[i] = Integer.parseInt(split[i].trim());
             }
         }
         return result;
