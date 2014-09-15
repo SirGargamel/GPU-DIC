@@ -21,12 +21,18 @@ import org.junit.Test;
 public class StrainEstimatorTest {
 
     private static final int ROUND = 0;
+    private static final double DELTA = 0.001;
 
     @Test
     public void testEstimator() throws URISyntaxException, ComputationException {
+        testStatic("out_0_0.bmp", 0, 0);
+        testStatic("out_5_0.bmp", 5, 0);
+    }
+
+    private void testStatic(final String fileOut, final double dX, final double dY) throws ComputationException, URISyntaxException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/" + fileOut).toURI()).toFile());
         final TaskContainer tc = new TaskContainer(input);
 
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
@@ -35,6 +41,12 @@ public class StrainEstimatorTest {
 
         final Image img = tc.getImage(ROUND);
         final double[][][] displacement = new double[img.getWidth()][img.getHeight()][2];
+        for (double[][] dAA : displacement) {
+            for (double[] dA : dAA) {
+                dA[0] = dX;
+                dA[1] = dY;
+            }
+        }
         tc.setDisplacement(ROUND, ROUND + 1, displacement);
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
@@ -44,9 +56,9 @@ public class StrainEstimatorTest {
         for (int x = 0; x < img.getWidth(); x++) {
             for (int y = 0; y < img.getHeight(); y++) {
                 Assert.assertNotNull(strains[x][y]);
-                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainResult.Exx]));
-                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainResult.Eyy]));
-                Assert.assertEquals(0.0, Math.abs(strains[x][y][StrainResult.Exy]));
+                Assert.assertEquals("Exx", 0.0, strains[x][y][StrainResult.Exx], DELTA);
+                Assert.assertEquals("Eyy", 0.0, strains[x][y][StrainResult.Eyy], DELTA);
+                Assert.assertEquals("Exy", 0.0, strains[x][y][StrainResult.Exy], DELTA);
             }
         }
     }
