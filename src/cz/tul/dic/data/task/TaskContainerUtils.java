@@ -39,10 +39,9 @@ public class TaskContainerUtils {
 
     private static final String CONFIG_EMPTY = "NONE";
     private static final String CONFIG_EXPORTS = "EXPORT_";
-    private static final String CONFIG_INPUT = "INPUT";
-    private static final String CONFIG_SEPARATOR_DATA = ",,";
-    private static final String CONFIG_SEPARATOR_FULL = ";;";
-    private static final String CONFIG_SEPARATOR_PAIRS = "--";
+    private static final String CONFIG_INPUT = "INPUT";    
+    private static final String CONFIG_SEPARATOR = ";;";
+    private static final String CONFIG_SEPARATOR_ROI = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
 
@@ -184,9 +183,9 @@ public class TaskContainerUtils {
             final StringBuilder sb = new StringBuilder();
             for (File f : l) {
                 sb.append(f.getAbsolutePath());
-                sb.append(CONFIG_SEPARATOR_FULL);
+                sb.append(CONFIG_SEPARATOR);
             }
-            sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
+            sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
             config.put(CONFIG_INPUT, sb.toString());
         } else {
             throw new IllegalArgumentException("Unsupported type of input.");
@@ -204,14 +203,14 @@ public class TaskContainerUtils {
                 sb.setLength(0);
                 for (ROI roi : rois) {
                     sb.append(roi.toString());
-                    sb.append(CONFIG_SEPARATOR_PAIRS);
+                    sb.append(CONFIG_SEPARATOR_ROI);
                     sb.append(toString(tc.getDeformationLimits(round, roi)));
-                    sb.append(CONFIG_SEPARATOR_PAIRS);
+                    sb.append(CONFIG_SEPARATOR_ROI);
                     sb.append(Integer.toString(tc.getFacetSize(round, roi)));
-                    sb.append(CONFIG_SEPARATOR_FULL);
+                    sb.append(CONFIG_SEPARATOR);
                 }
-                if (sb.length() > CONFIG_SEPARATOR_FULL.length()) {
-                    sb.setLength(sb.length() - CONFIG_SEPARATOR_FULL.length());
+                if (sb.length() > CONFIG_SEPARATOR.length()) {
+                    sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
                 }
 
                 config.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
@@ -245,9 +244,9 @@ public class TaskContainerUtils {
         if (data != null) {
             for (double d : data) {
                 sb.append(d);
-                sb.append(CONFIG_SEPARATOR_DATA);
+                sb.append(CONFIG_SEPARATOR);
             }
-            sb.setLength(sb.length() - CONFIG_SEPARATOR_DATA.length());
+            sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
         } else {
             sb.append(CONFIG_EMPTY);
         }
@@ -261,9 +260,9 @@ public class TaskContainerUtils {
         if (data != null) {
             for (int d : data) {
                 sb.append(d);
-                sb.append(CONFIG_SEPARATOR_DATA);
+                sb.append(CONFIG_SEPARATOR);
             }
-            sb.setLength(sb.length() - CONFIG_SEPARATOR_DATA.length());
+            sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
         } else {
             sb.append(CONFIG_EMPTY);
         }
@@ -280,9 +279,9 @@ public class TaskContainerUtils {
         final TaskContainer result;
         // input
         final String input = config.get(CONFIG_INPUT);
-        if (input.contains(CONFIG_SEPARATOR_FULL)) {
+        if (input.contains(CONFIG_SEPARATOR)) {
             // list of images
-            final String[] split = input.split(CONFIG_SEPARATOR_FULL);
+            final String[] split = input.split(CONFIG_SEPARATOR);
             final List<File> l = new ArrayList<>(split.length);
             for (String s : split) {
                 l.add(new File(s));
@@ -302,14 +301,18 @@ public class TaskContainerUtils {
             key = e.getKey();
             if (key.startsWith(CONFIG_ROIS)) {
                 index = Integer.parseInt(key.replaceFirst(CONFIG_ROIS, ""));
-                final String[] splitPairs = e.getValue().split(CONFIG_SEPARATOR_FULL);
+                final String[] splitPairs = e.getValue().split(CONFIG_SEPARATOR);
                 for (String s : splitPairs) {
-                    split = s.split(CONFIG_SEPARATOR_PAIRS);
+                    split = s.split(CONFIG_SEPARATOR_ROI);
                     if (split.length == 3) {
                         roi = ROI.generateROI(split[0]);
                         result.addRoi(index, roi);
-                        result.setDeformationLimits(index, roi, doubleArrayFromString(split[1]));
-                        result.addFacetSize(index, roi, Integer.decode(split[2]));
+                        if (!split[1].trim().equals(CONFIG_EMPTY)) {
+                            result.setDeformationLimits(index, roi, doubleArrayFromString(split[1]));
+                        }
+                        if (!split[2].trim().equals(CONFIG_EMPTY)) {
+                            result.addFacetSize(index, roi, Integer.decode(split[2]));
+                        }
                     } else {
                         throw new IllegalArgumentException("Illegal roi-limits pair - " + Arrays.toString(split));
                     }
@@ -369,7 +372,7 @@ public class TaskContainerUtils {
         if (data.equals(CONFIG_EMPTY)) {
             result = null;
         } else {
-            final String[] split = data.split(CONFIG_SEPARATOR_DATA);
+            final String[] split = data.split(CONFIG_SEPARATOR);
             result = new double[split.length];
             for (int i = 0; i < split.length; i++) {
                 result[i] = Double.valueOf(split[i]);
@@ -383,7 +386,7 @@ public class TaskContainerUtils {
         if (data.equals(CONFIG_EMPTY)) {
             result = null;
         } else {
-            final String[] split = data.split(CONFIG_SEPARATOR_DATA);
+            final String[] split = data.split(CONFIG_SEPARATOR);
             result = new int[split.length];
             for (int i = 0; i < split.length; i++) {
                 result[i] = Integer.parseInt(split[i]);
@@ -423,7 +426,7 @@ public class TaskContainerUtils {
     public static TaskContainer deserializeTaskFromBinary(final File source) throws IOException, ClassNotFoundException {
         TaskContainer result;
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(source))) {
-            result = (TaskContainer) in.readObject();            
+            result = (TaskContainer) in.readObject();
         }
         return result;
     }
