@@ -58,7 +58,7 @@ Studentská 2\\
 \newpage
 \section{Úvod}
 Algoritmus digitální obrazové korelace (dále jen DIC) se historicky ukázal jako algoritmus vhodný pro analýzu záznamu mechanických dějů pro potřeby analýzy chování materiálu s co největší přesností. Nevýhodou algoritmu je citlivost na vstupní parametry a dlouhá výpočetní doba. Cílem aplikace GPU-DIC je  hlavně zkrátit dobu výpočtu a alespoň částečný odhad vhodných vstupních parametrů.
-Popis jak funguje algoritmus DIC lze nalézt v "Two-dimensional digital image correlation for in-plane displacement and strain measurement:a review, Bing Pan et al; 2009 Meas. Sci. Technol. 2;, http://iopscience.iop.org/0957-0233/20/6/062001." V tomto textu budou zmíněny pouze vybrané části, které byly vylepšeny nebo jejichž pochopením se uživateli ulehčí volba vstupních parametrů. V následující kapitole budou zmíněny pouze teoretické předpoklady pro úspěšnou volbu parametrů na základě teorie, detailnější doporučení týkající se volby parametrů budou pak uvedeny v kapitole \ref{sec:settings}.
+Popis jak funguje algoritmus DIC lze nalézt v "Two-dimensional digital image correlation for in-plane displacement and strain measurement:a review, Bing Pan et al; 2009 Meas. Sci. Technol. 2;, http://iopscience.iop.org/0957-0233/20/6/062001." V tomto textu budou zmíněny pouze vybrané části, které byly vylepšeny nebo jejichž pochopením se uživateli ulehčí volba vstupních parametrů. V následující kapitole budou zmíněny pouze teoretické předpoklady pro úspěšnou volbu parametrů na základě teorie, detailnější doporučení týkající se volby parametrů budou pak uvedeny v kapitole \ref{sec:goodSettings}.
 \newpage
 \section{Vybrané části algoritmu DIC}
 V této části textu bude odkazováno na text uvedený v minulé kapitole, je tedy velmi doporučeno výše zmíněný text z webu stáhnout. Odkazy budou ve formě "(DIC-5)", kde číslovka označuje číslo strany.
@@ -76,9 +76,9 @@ Vzhledem k zaměření této aplikace na analýzu trhací zkoušky je i výpoče
 \subsection{Vyznačení reálné velikosti}
 Tento krok je volitelný a slouží k možné unifikaci velikosti plochy pro odhad plochy přetvoření. Aplikaci používá poměr px / mm, který lze opět zadat dvěma způsoby. Buď ve formě čísla do skriptu úlohy nebo za pomoci GUI, kde se vyznačí známý rozměr a jeho reálná velikost a poměr se automaticky dopočítá.
 \subsection{Velikost facetu}
-Velikost facetu je hlavním parametrem algoritmu a kvalita výsledky je na něm dost závislá. Doporučené hodnoty lze nalézt v kapitole \ref{sec:settings}. Číslo musí být celé a opět ho lze zadat přes GUI či skript.
+Velikost facetu je hlavním parametrem algoritmu a kvalita výsledky je na něm dost závislá. Doporučené hodnoty lze nalézt v kapitole \ref{sec:goodSettings}. Číslo musí být celé a opět ho lze zadat přes GUI či skript.
 \subsection{Expertní nastavení}
-V některých speciálních případech může být žádoucí změnit i další parametry výpočetního enginu (jako limity deformací, limity kol výpočtu apod.). Co lze a nelze nastavit lze nalézt opět v kapitole \ref{sec:settings}, některá nastavení lze měnit v GUI, jiná se musí specifikovat za pomoci skriptu úlohy.
+V některých speciálních případech může být žádoucí změnit i další parametry výpočetního enginu (jako limity deformací, limity kol výpočtu apod.). Co lze a nelze nastavit lze nalézt opět v kapitole \ref{sec:parameters}, některá nastavení lze měnit v GUI, jiná se musí specifikovat za pomoci skriptu úlohy.
 \newpage
 \section{Ovládání aplikace}
 \label{sec:gui}
@@ -118,90 +118,110 @@ Druhou možností je vyznačení polohy čelistí za pomoci 4 kruhových ROI (od
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{realSize.png}\\Okno pro vyznačení reálné velikosti}
 \end{figure}
-\todo{jak se ovládá, jak se chová}
+Konfigurace úlohy z hlediska fyzikálního uspořádání se může měnit, pro porovnávání výsledků by bylo dobré mít možnost zadávat parametry pro engine v reálných jednotkách, nikoliv v pixelech, protože rozměr pixelu se může vlivem změny vzdálenosti kamery a vzorku lišit. Proto je k dispozici okno pro vyznačení známého rozměru v obraze spolu se zadáním jeho reálné délky, což umožní spočítat převodní koeficient px / mm, který se využívá pro stanovení velikosti okna při výpočtu pole přetvoření. Tím lze zajistit stejné vlastnosti algoritmu (odolnost proti šumu a vyhlazení detailů) pro různá uspořádání.\\
+Proces vyznačení je prostý, uživatel vyznačí známý horizontální rozměr za pomoci kliknutí levého tlačítka myši a tažením a vyplní jeho délku v milimetrech. Program ulehčuje práci tím, že umožňuje vyznačit pouze horizontální čáru, takže uživatel nemusí řešit, jestli je čára skutečně rovná. Pokud uživatel chce nakreslit čáru znovu, stačí pouze znovu vyznačit za pomoci levého tlačítka, stará linie se automaticky smaže.
 \subsection{Expertní nastavení}
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{expert.png}\\Expertní nastavení}
 \end{figure}
-\todo{odkaz na sekci s konfigurací úlohy}
+V tomto okně lze nastavit detailní parametry enginu, většinu z nich není v běžném případě nutné nastavovat. V této sekci nebudou jednotlivé volby popisovány, pouze bude uveden jejich systémový název, který lze dohledat v kapitole \ref{sec:parameters}, kde je uveden i jejich podrobný popis.
+\begin{description}
+\item[Varianta generátoru] FACET\textunderscore GENERATOR\textunderscore METHOD
+\item[Parametr generování] FACET\textunderscore GENERATOR\textunderscore PARAM
+\item[Varianta rozdělení] TASK\textunderscore SPLIT\textunderscore METHOD
+\item[Parametr rozdělení] TASK\textunderscore SPLIT\textunderscore PARAM
+\item[Kernel] KERNEL
+\item[Interpolace] INTERPOLATION
+\item[Limity kol] ROUND\textunderscore LIMITS
+\item[Velikost okna] STRAIN\textunderscore ESTIMATION\textunderscore PARAM
+\item[Limity deformací] DEFORMATION\textunderscore LIMITS 
+\end{description}
 \subsection{Spuštění výpočtu}
-\todo{nic extra, pouze poznámka, že nenastavené parametry se nastaví na výchozí (uživatel se nemusí starat)}
+Spuštění výpočtu neobnáší nic zvláštního, stačí pouze kliknout na tlačítko. Nenastavené parametry enginu (prakticky pouze hodnoty z expertního nastavení) se nastaví na výchozí hodnoty, které by měly být vhodné pro drtivou většinu záznamů trhacích zkoušek (konkrétní hodnoty lze nalézt v kapitole \ref{sec:parameters}).
 \subsection{Uložení}
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{saveCfgBin.png}\\Uložení projektu}
 \end{figure}
-\todo{uložení configu / bin. otisku}
+Úlohu lze uložit dvěma způsoby - jako textovou konfiguraci či jako binární otisk. Textová konfigurace se hodí v případě, že chcete opakovat výpočet či spustit více výpočtů po sobě za pomoci skriptu. Uložený soubor obsahuje všechny nastavené parametry výpočtu, takže po jeho načtení se může rovnou spouštět výpočet. Binární otisk úlohy také uloží nastavení úlohy, uloží také vypočtené výsledky, takže je možno je prohlížet i později (binární otisk se automaticky ukládá vždy po dokončení výpočtu).
 \subsection{Výsledky}
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{results.png}\\Okno s výsledky}
 \end{figure}
-\todo{zobrazení výsledků a případné uložení}
+Okno výsledků prezentuje mapy s vypočtenými výsledky. Jsou dostupné jak kumulativní výsledky tak diferenciální (ty mají před názvem písmeno "d"). Kromě prohlížení výsledků je také možno výsledky exportovat. K dispozici je buď export zobrazené mapy nebo sekvence map. mapy je možno exportovat buď jako obrázek jako jako seznam hodnot do souboru CSV. Kromě exportu po jednotlivých mapách lze také vytvořit animaci, která vytvoří video soubor prezentující zvolené výsledky jako video.
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{resultsPoint.png}\\Výsledky pro bod}
 \end{figure}
-
+Kliknutím do obrázku je možno zobrazit vývoj vybrané hodnoty v daném bodě. Vývoj hodnoty je reprezentován grafem. Typ zobrazené hodnoty se automaticky aktualizuje vzhledem k vybrané hodnotě v hlavním okně s výsledky. Tlačítkem uložit je možné uložit zobrazené hodnoty do CSV souboru (jméno souboru se generuje automaticky ze souřadnic bodu, typu dat a nastavení úlohy). Je možno mít otevřeno několik oken s různými body najednou.
+\newpage
+\section{Doporučená nastavení}
+\label{sec:goodSettings}
+\begin{description}
+\item[Velikost facetu] Vzhledem k šumu ve videu je vhodné volit velikost facetu minimálně 20, příliš vysoké hodnoty ale mohou způsobit ignorování detailů, takže není vhodné překročit hodnotu cca 40.
+\item[Velikost okna] Tento parametr by měl nejlépe korespondovat se zvolenou velikostí facetu, případně může být větší. Hodnota menší než velikost facetu nemá příliš smysl, protože detaily jsou ignorovány díky zvolené velikosti facetu. Je nutné ale dát pozor na to, že tato velikost se zadává v milimetrech, zatímco velikost facetu je v pixelech.
+\item[ROI] Nevhodnější je použít variantu dynamického výpočtu, tj. vyznačit pozice čelistí. Algoritmus pak na základě polohy čelistí vytvoří oblast materiálu a také se postará o posouvání oblastí dle detekovaného pohybu čelistí.
+\item[Limity kol] Algoritmus vynechá výpočet deformací v případě, že detekuje nulový pohyb čelistí. Není tedy nezbytně nutné limity kol definovat, mohou se hodit v případě, že nás zajímá pouze konkrétní část videa, ne celý děj.
+\end{description}
+\newpage
+\section{Parametry enginu}
+\label{sec:parameters}
+V této kapitole budou uvedeny parametry enginu, které lze měnit (ať už za pomoci GUI či konfiguračního souboru) spolu s popisem, jaké hodnoty lze použít. Za názvem parametru bude v hranaté závorce uvedena stručná charakteristika povolené hodnoty (int - celé číslo, double - reálné číslo, výčet povolených hodnot pro některé parametry, výchozí hodnota pak bude \textbf{tučně}).
+\begin{description}
+\item[FACET\textunderscore GENERATOR\textunderscore METHOD] [CLASSIC | \textbf{TIGHT}]\\
+Způsob generování facetu. CLASSIC používá klasický režim generování, kde facety pokládají vedle sebe s malým přesahem. Tento režim je vhodný pro deformace typu posunutí, v případě složitějších deformací nemusí být výsledné pole posunů homogenní. TIGHT klade facety přes sebe s malou mezerou, co vylepší homogenitu výsledného pole, lépe také odolává šumu ve videu, daní je ale mnohem vyšší počet facetů a tím pádem i mnohem delší výpočet. Ve výchozím stavu se používá TIGHT režim.
+\item[FACET\textunderscore GENERATOR\textunderscore PARAM] [int]\\
+Parametr generování úzce souvisí se způsobem generování. Pro \emph{CLASSIC} režim tento parametr určuje kolik pixelů z facetů se bude překrývat. V \emph{TIGHT} režimu parametr určuje o kolik se posune okraj následujícího facetu oproti předchozímu. Výchozí hodnotou je 1. Je nutné dát pozor na jistá omezení hodnot, které vycházejí z principu generování facetů. V \emph{CLASSIC} režimu má parametr smysl pro hodnoty maximálně do velikosti facetu, poté už se nové facety umisťují špatně nebo výsledný počet facetu je nekonečný. V případě \emph{TIGHT} režimu musí být hodnota kladné číslo, nulová hodnota by způsobila nekonečně mnoho facetů, záporné hodnoty by způsobily generování facetů na špatné pozici.
+\item[FACET\textunderscore SIZE] [int]\\
+Tento parametr je velikost facetu, která se musí nastavit. Doporučené hodnoty lze nalézt v kapitole \ref{sec:goodSettings}.
+\item[KERNEL] [CL\textunderscore 2D\textunderscore I | CL\textunderscore 1D\textunderscore I\textunderscore V\textunderscore LL\textunderscore MC | \textbf{CL\textunderscore 1D\textunderscore I\textunderscore V\textunderscore LL\textunderscore MC\textunderscore D}]\\
+Typ OpenCL kernelu, který bude použit pro výpočet na GPU. Výchozí a doporučená hodnota je CL\textunderscore 1D\textunderscore I\textunderscore V\textunderscore LL\textunderscore MC\textunderscore D, ostatní jsou vhodné pouze pro testování a není garantována stabilita programu.
+\item[TASK\textunderscore SPLIT\textunderscore METHOD] [NONE | STATIC | \textbf{DYNAMIC}]\\
+Vzhledem k omezenů množství paměti na GPU ne někdy nutné rozdělit úlohu na menší části. Varianta NONE zakáže rozdělování úlohy. To lze úspěšně použít pouze pro malé úlohy, v ostatních případech výpočet spadne. STATIC umožní definovat, po kolika facetech se má úloha rozdělit. Tato varianta se může hodit v případě, kdy nechcete plně vytěžovat paměť GPU. Poslední varianta DYNAMIC se pokusí co možná nejvíce zaplnit paměť GPU daty, což je z hlediska délky výpočtu nejefektivnější, protože se minimalizují přenosy dat z / do GPU a je to také výchozí hodnota.
+\item[TASK\textunderscore SPLIT\textunderscore PARAM] [int]\\
+NONE a DYNAMIC rozdělování úlohy parametr nevyžadují, u varianty STATIC je nutné stanovit počet facetů tvořících jednu pod-úlohu. Výchozí hodnota je 1000, celková velikost úlohy ale také dost závisí na počtu testovaných deformací, takže nelze stanovit nějaké univerzální pravidlo, vesměs je nutno postupovat způsobem pokus-omyl, dokud nedosáhneme požadované paměťové náročnosti.
+\item[INTERPOLATION] [BILINEAR | \textbf{BICUBIC}]\\
+Po deformaci facetu jsou souřadnice bodů facetu obecně reálná čísla, je tedy nutné je nějakým způsobem zasadit zpět do rastru obrazu. K tomu se používá proces interpolace barvy. Volba BILINEAR používá lineární interpolaci v ploše, zatímco BICUBIC používá kubickou funkci pro dopočet výsledné barvy. BICUBIC varianta by měla produkovat kvalitnější výsledky, je ale také náročnější na výpočet.
+\item[ROUND\textunderscore LIMITS] [int ;; int]\\
+Limity kol je možné stanovit k urychlení výpočtu (např. pro vynechání části záznamu, kde již došlo k přetržení vzorku). Hodnoty se zadávají ve formě indexů prvního a posledního snímku (číslováno od 0). V případě GUI se čísla oddělují čárkou, v případě konfiguračního souboru se pak používá dvojitý středník.
+\item[RESULT\textunderscore QUALITY] [double]\\
+Deformace se odhaduje na základě míry korelace barev pixelů původního a deformovaného facetu. Čím vyšší je tato hodnota, tím pravděpodobněji se jedná o správný odhad, maximální hodnotu je pak 1.0, což znamená, že se vstup a výstup se naprosto shodují. Vlivem šumu a diskretizací prostoru možných deformací se ale maximální hodnoty prakticky nikdy nedosáhne, pouze se jí můžeme přiblížit. Často máme pro jeden pixel několik možných výsledků, čímž se dá částečně eliminovat vliv šumu na výsledek. Tento parametr říká, jak moc kvalitní musí být výsledek, aby byl přijat do skupiny výsledných. Výchozí hodnota je 0.5, což zaručuje vynechání nekvalitních výsledků při zachování dostatečného počtu výsledků pro úspěšný výsledek. 
+\item[STRAIN\textunderscore ESTIMATION\textunderscore PARAM] [double]\\
+Tento parametr určuje velikost okna při výpočtu pole přetvoření. Tento parametr se zadává v mm, engine si pak velikost v pixelech dopočítá sám za pomoci parametru MM\textunderscore TO\textunderscore PX\textunderscore RATIO.
+\item[MM\textunderscore TO\textunderscore PX\textunderscore RATIO] [double]\\
+Koeficient pro přepočet rozměru okna přetvoření z milimetrů na pixely. Jedná se o hodnotu, která říká, kolik pixelů v obraze je jeden milimetr v reálném světě.
+\item[DEFORMATION\textunderscore LIMITS] [double ;; double ;; double...]\\
+Limity deformací určují, jaké deformace se v obraze předpokládají a tím pádem jaké deformace se budou testovat. Hodnoty se pro každý koeficient zadávají ve tvaru MIN, MAX, KROK, koeficienty mohou být dva (testovat se budou pouze posuny), 6 (kromě posunutí také prodloužení a smyk) nebo 12 (přidají se nelineární deformace). Tím pádem se musí zadat 6, 18 nebo 36 hodnot oddělených čárkami (GUI) nebo dvojitým středníkem (konfigurace úlohy). Matematické využití koeficientů lze nalézt v přiložené literatuře. Jako výchozí hodnota se používají deformace prvního řádu s následujícím zadáním : -1, 1, 0.5, -2, 5, 0.5, -0.0, 1.0, 0.1, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, -0.0, 1.0, 0.1. V překladu jde o to, že posuny se testují po 0.5 pixelech, v ose X se testují pouze malé posuny. Deformace prvního řádu pak testují prodloužení od žádného (0) do prodloužení na dvojnásobek (1) jak v ose X, tak Y, a smyk pak záporný i kladný v obou osách (-0.5 až 0.5). Vliv koeficientů na deformaci lze vyzkoušet v přiloženém nástroji \emph{DIC\textunderscore DeformationGenerator}.
+\end{description}
 \newpage
 \section{Konfigurační soubor úlohy}
 \label{sec:config}
-\todo{detailní popis možných položek v konfiguračním souboru}
-
+Konfigurační soubor v běžném případě není nutné psát ručně, lze ho vygenerovat v aplikaci po nastavení všeho potřebného, ukázkový soubor lze nalézt v kapitole \ref{sec:config}. Soubor je textový, každý parametr je uveden na samostatném řádku. Parametr se skládá z identifikátoru (název velkými písmeny), oddělovače (ten je tvořen dvojnásobnou dvojtečkou - "::") a hodnotou parametru.\\
+Povinným parametrem je vstupní soubor. Tím může být buď cesta k video-souboru (cesta musí být absolutní) nebo seznam obrázků ke zpracování, názvy pak musí být odděleny dvojitým středníkem (";;"). Název parametru pro vstupní soubor je pak "INPUT."\\
+Dále je možno stanovit ROI pro jednotlivá kola. Identifikátor je "ROI\textunderscore " a číslo obrázku (např. ROI\textunderscore 0 pro první obrázek). Hodnotou je pak výčet ROI pro dané kolo oddělených dvojitými středníky. ROI se definuje jako posloupnost hodnot (souřadnice ROI -- limity deformací -- velikost facetu) oddělených dvojitou pomlčkou ("--"). Souřadnice ROI mohou být buď souřadnice středu a poloměr (pro kruhový ROI) nebo souřadnice levého horního a pravého spodního bodu (obdélníkový ROI, v pořadí X1;Y1;X2;Y2), jednotlivé hodnoty jsou od sebe odděleny středníkem. Limity deformací se specifikují ve stejném tvaru jako globální limity (viz. kapitola \ref{sec:parameters}), případně lze uvést slovo "NONE", které specifikuje, že se mají použít limity globální. Obdobně se chová velikost facetu, celočíselná hodnota určí velikost, NONE vynutí použití globálního nastavení.\\
+Dále lze v souboru nastavit i parametry enginu. Identifikátor parametru se tvoří jako klíčové slovo "PARAM\textunderscore" následované názvem parametru (např. PARAM\textunderscore FACET\textunderscore SIZE), hodnota se pak musí řídit možnostmi hodnot daného parametru (opět viz. kapitola \ref{sec:parameters}). Všechny neuvedené hodnoty budou nahrazeny výchozí hodnotou - nemusí se tedy nutně specifikovat každý parametr, pouze ten, který chceme změnit.\\
+V ukázkách lze nalézt dva soubory. První je dalo by se říci minimalistický - obsahuje minimální počet parametrů pro úspěšný výpočet. Vstupem je video, ROI jsou čtyři kružnice označující pozici čelistí (což zajistí inteligentní posunovaní jak ROI čelistí, tak automatické vytvoření ROI vzorku) a velikost facetu. Je nutné dát pozor na zápis ROI, který se bohužel nevejde na jeden řádek a je tudíž zalomen. V reálném souboru je ale nutné dodržet, aby ROI pro dané kolo byly všechny napsány na jednom řádku (čili v ukázce se jedná o jeden dlouhý řádek rozdělený na několik).\\
+Druhá ukázka pak představuje plnou konfiguraci, ukazuje i definici ROI pro jednotlivá kola - druhé kolo má obdélníkový ROI používající specifikované limity deformací (pouze posuny) při velikosti facetu 25, zatímco ve třetím kole se použijí výchozí hodnoty jak pro limity, tak pro velikost facetu.
 \newpage
-\section{Doporučená nastavení}
-\label{sec:settings}
-\todo{velikost facetu, parametr výpočtu přetvoření atd.}
-
 % --- Zdrojove kody
 \newpage
-\todo{spravne zdrojove kody}
-\section{Source code examples}
-\subsection{Instance creation and messaging}\label{appMsg}
-\begin{lstlisting}[title=Constant declaration]
-final UUID ID = UUID.randomUUID();	// define ID for messaging
+\section{Ukázky konfiguračních souborů}
+\begin{lstlisting}[title=Jednoduchý konfigurační soubor pro automatický výpočet]
+INPUT :: D:\temp\7202845m\7202845m.avi
+ROI_0 :: 110.0;88.0;24.20--NONE--NONE;; 203.0;9.0;26.24--NONE--NONE;; 203.0;87.0;28.28--NONE--NONE;; 109.0;12.0;26.24--NONE--NONE
+PARAM_FACET_SIZE :: 20
 \end{lstlisting}
-\begin{lstlisting}[title=Client side code]
-public static void main(String[] args) {
-  Client client = Client.Client.initNewClient();
-  client.getListenerRegistrator().setIdListener(ID, new MessageHandler());
-}
-
-class MessageHandler implements Listener<Identifiable> {
-  @Override
-  public Object receiveData(Identifiable data) {
-    if (data instanceof Message) {
-      Message m = (Message) data;
-      System.out.println(m.getData());	// print content to console
-      return m.getHeader();	// send valid response
-    } else {
-      return "ERROR";	// report error
-    }
-  }
-}
+\begin{lstlisting}[title=Plný konfigurační soubor pro automatický výpočet]
+INPUT :: D:\temp\7202845m\7202845m.avi
+ROI_2 ::  100.0;100.0;150.0;150.0---2.0,,2.0,,0.1,,-5.0,,10.0,,0.1--25
+ROI_3 ::  109.0;109.0;159.0;159.0---NONE--NONE
+PARAM_FACET_GENERATOR_METHOD :: TIGHT
+PARAM_FACET_GENERATOR_PARAM :: 1
+PARAM_FACET_SIZE :: 20
+PARAM_KERNEL :: CL_1D_I_V_LL_MC_D
+PARAM_TASK_SPLIT_METHOD :: DYNAMIC
+PARAM_INTERPOLATION :: BICUBIC
+PARAM_ROUND_LIMITS :: 2,,4
+PARAM_DEFORMATION_LIMITS :: -1.0,,1.0,,0.1,,-2.0,,5.0,,0.1
 \end{lstlisting}
 
-\subsection{Job Management}\label{appJm}
-\begin{lstlisting}[title=Server side code]
-public static void main(String[] args) {
-  double start = -100.0, end = 100.0; // define range of values
-  double step = 0.01;
-  // divide the range in small pieces and create a Set<double[]>, where double[] defines start and end of each sub-range and step size
-  for (double[] d : subranges) {	// submit all jobs
-    s.getJobManager().submitJob(d);
-  }
-  s.getJobManager().waitForAllJobs();	// wait until all jobs are complete
-  // use s.getJobManager().getAllJobs() to get all submitted jobs and find the best result
-}
-
-class DataStore implements DataStorage {
-  @Override
-  public Object requestData(Object o) {
-    switch (o.toString()) {
-      case "data":
-        return dataArray;	// return data
-      default:
-        return "Illegal data request";
-    }
-  }
-}
-\end{lstlisting}
 
 \end{document}
