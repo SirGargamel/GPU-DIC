@@ -346,6 +346,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("selectROIs"));
             stage.setScene(new Scene(root));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
@@ -367,6 +368,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Exports"));
             stage.setScene(new Scene(root));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
@@ -389,6 +391,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Expert"));
             stage.setScene(new Scene(root));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
@@ -404,6 +407,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Results"));
             stage.setScene(new Scene(root));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.setResizable(false);
@@ -420,6 +424,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("RealSizeW"));
             stage.setScene(new Scene(root));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.setResizable(false);

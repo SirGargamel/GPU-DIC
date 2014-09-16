@@ -1,9 +1,11 @@
 package cz.tul.dic;
 
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.Context;
+import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportUtils;
@@ -35,6 +37,15 @@ import org.pmw.tinylog.writers.RollingFileWriter;
 public class DicMain extends Application {
 
     private static final String DEBUG = "debug";
+    private static final String[] FILES_TO_DEBUG = new String[]{
+//        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
+//        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
+//        "d:\\temp\\.test FS vs Quality\\6203652m.avi.config",
+//        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
+//        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
+//        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
+        "D:\\temp\\7202845m\\7202845m.avi.config"
+    };
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -62,6 +73,7 @@ public class DicMain extends Application {
         final Scene scene = new Scene(root);
 
         stage.setScene(scene);
+        stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
         stage.setTitle(rb.getString("Title"));
         stage.setResizable(false);
         stage.show();
@@ -87,23 +99,29 @@ public class DicMain extends Application {
         }
         c.activate();
 
-        
         if (debug) {
             Logger.info("----- Starting APP ----- DEBUG -----");
         } else {
             Logger.info("----- Starting APP -----");
         }
-              
+
     }
 
     private void performComputationTest() {
-        final int fs1 = 20;
-        final int fs2 = 45;
-        final double ps1 = 20;
-        final double ps2 = 20;
+        final int fs1 = 25;
+        final int fs2 = 50;
+        final double ps1 = 25;
+        final double ps2 = 25;
         TaskContainer tc;
         for (int size = fs1; size <= fs2; size++) {
-            try {
+            for (String s : FILES_TO_DEBUG) {
+                try {
+                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
+                    tc = Context.getInstance().getTc();
+                    InputLoader.loadInput(tc);
+                    tc.setParameter(TaskParameter.FACET_SIZE, size);
+                    Computation.commenceComputationDynamic(tc);
+
 //            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
 //            TaskContainer tc = Context.getInstance().getTc();
 //            InputLoader.loadInput(tc);
@@ -112,10 +130,6 @@ public class DicMain extends Application {
 //            Computation.commenceComputationDynamic(tc);
 //
 //            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
-
-                // 7202845m
-                // 9905121m
-                // 9820088m
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
 //                for (int windowSize = 0; windowSize < 1; windowSize++) {
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
@@ -124,18 +138,17 @@ public class DicMain extends Application {
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputation(tc);
 //                }
-                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\7202845m\\7202845m.avi-oneRound-classic.config")));
 //                tc = Context.getInstance().getTc();
 //                InputLoader.loadInput(tc);
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputationDynamic(tc);
 //                
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m\\7202845m.avi.config")));
-                tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m\\7202845m.avi.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
 //                
 //                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-classic.config")));
 //                tc = Context.getInstance().getTc();
@@ -149,19 +162,18 @@ public class DicMain extends Application {
 //                tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                Computation.commenceComputationDynamic(tc);
 //                CorrelationCalculator.dumpCounterStats();
-
-                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m\\9905121m.avi.config")));
-                tc = Context.getInstance().getTc();
-                InputLoader.loadInput(tc);
-                tc.setParameter(TaskParameter.FACET_SIZE, size);
-                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
+//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m\\9905121m.avi.config")));
+//                tc = Context.getInstance().getTc();
+//                InputLoader.loadInput(tc);
+//                tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
 //                }
-
-            } catch (IOException | ComputationException ex) {
-                Logger.error(ex);
-            } catch (Error t) {                
-                Logger.error(t);                
-                System.out.println(Context.getInstance().getTc());
+                } catch (IOException | ComputationException ex) {
+                    Logger.error(ex);
+                } catch (Error t) {
+                    Logger.error(t);
+                    System.out.println(Context.getInstance().getTc());
+                }
             }
         }
     }
