@@ -25,7 +25,7 @@ public interface TaskDefaultValues {
         -0.0, 1.0, DEFAULT_PRECISION_FIRST, -0.5, 0.5, DEFAULT_PRECISION_FIRST, -0.5, 0.5, DEFAULT_PRECISION_FIRST, -0.0, 1.0, DEFAULT_PRECISION_FIRST};
     FacetGeneratorMethod DEFAULT_FACET_GENERATOR = FacetGeneratorMethod.TIGHT;
     int DEFAULT_FACET_SPACING = 1;
-    int DEFAULT_FACET_SIZE = 7;
+    int DEFAULT_FACET_SIZE = 20;
     Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;
     KernelType DEFAULT_KERNEL = KernelType.CL_1D_I_V_LL_MC_D;
     double DEFAULT_MM_TO_PX_RATIO = 1;
