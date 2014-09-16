@@ -41,7 +41,7 @@ public class TaskContainerUtils {
     private static final String CONFIG_EXPORTS = "EXPORT_";
     private static final String CONFIG_INPUT = "INPUT";    
     private static final String CONFIG_SEPARATOR = ";;";
-    private static final String CONFIG_SEPARATOR_ARRAY = ",,";
+    private static final String CONFIG_SEPARATOR_ARRAY = ";";
     private static final String CONFIG_SEPARATOR_ROI = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
@@ -184,9 +184,9 @@ public class TaskContainerUtils {
             final StringBuilder sb = new StringBuilder();
             for (File f : l) {
                 sb.append(f.getAbsolutePath());
-                sb.append(CONFIG_SEPARATOR);
+                sb.append(CONFIG_SEPARATOR_ARRAY);
             }
-            sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
+            sb.setLength(sb.length() - CONFIG_SEPARATOR_ARRAY.length());
             config.put(CONFIG_INPUT, sb.toString());
         } else {
             throw new IllegalArgumentException("Unsupported type of input.");
@@ -284,9 +284,9 @@ public class TaskContainerUtils {
         final TaskContainer result;
         // input
         final String input = config.get(CONFIG_INPUT);
-        if (input.contains(CONFIG_SEPARATOR)) {
+        if (input.contains(CONFIG_SEPARATOR_ARRAY)) {
             // list of images
-            final String[] split = input.split(CONFIG_SEPARATOR);
+            final String[] split = input.split(CONFIG_SEPARATOR_ARRAY);
             final List<File> l = new ArrayList<>(split.length);
             for (String s : split) {
                 l.add(new File(s));
