@@ -99,7 +99,7 @@ public class Utils {
         }
         return indexCurrentLevel < indexTestedLevel;
     }
-    
+
     public static String format(final double val) {
         return nf.format(val);
     }
@@ -125,11 +125,15 @@ public class Utils {
         }
 
         public void inc(final double val) {
-            inc(Double.toString(val));
+            if (enabled) {
+                inc(Double.toString(val));
+            }
         }
 
         public void inc(final float val) {
-            inc(Float.toString(val));
+            if (enabled) {
+                inc(Float.toString(val));
+            }
         }
 
         public void inc() {

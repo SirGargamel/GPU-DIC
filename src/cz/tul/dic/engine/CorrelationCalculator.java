@@ -12,6 +12,7 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
 import cz.tul.dic.engine.opencl.DeviceManager;
@@ -38,7 +39,6 @@ public final class CorrelationCalculator extends Observable {
     private KernelType kernelType;
     private Interpolation interpolation;
     private TaskSplitMethod taskSplitVariant;
-    private boolean logStats;
 
     public CorrelationCalculator() {
         roundCounterGood = new Utils.ResultCounter();
@@ -51,9 +51,8 @@ public final class CorrelationCalculator extends Observable {
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
 
-        kernelType = KernelType.CL_1D_I_V_LL_MC_D;
-        interpolation = Interpolation.BILINEAR;
-        logStats = true;
+        kernelType = TaskDefaultValues.DEFAULT_KERNEL;
+        interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
     }
 
     public List<CorrelationResult> computeCorrelations(
@@ -221,10 +220,12 @@ public final class CorrelationCalculator extends Observable {
     }
 
     public void enableStatLogging(boolean enable) {
-        roundCounterNotGood.setEnabled(enable);
-        roundQuality.setEnabled(enable);
+        counterGood.setEnabled(enable);
+        roundCounterGood.setEnabled(enable);
         counterNotGood.setEnabled(enable);
+        roundCounterNotGood.setEnabled(enable);                
         quality.setEnabled(enable);
+        roundQuality.setEnabled(enable);
     }
 
 }
