@@ -38,6 +38,7 @@ public final class CorrelationCalculator extends Observable {
     private KernelType kernelType;
     private Interpolation interpolation;
     private TaskSplitMethod taskSplitVariant;
+    private boolean logStats;
 
     public CorrelationCalculator() {
         roundCounterGood = new Utils.ResultCounter();
@@ -52,6 +53,7 @@ public final class CorrelationCalculator extends Observable {
 
         kernelType = KernelType.CL_1D_I_V_LL_MC_D;
         interpolation = Interpolation.BILINEAR;
+        logStats = true;
     }
 
     public List<CorrelationResult> computeCorrelations(
@@ -133,7 +135,6 @@ public final class CorrelationCalculator extends Observable {
                 counterNotGood.inc();
                 quality.inc();
             }
-
         }
         if (count > 0) {
             Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", count, resultQuality, roi);
@@ -203,7 +204,7 @@ public final class CorrelationCalculator extends Observable {
         roundCounterNotGood.reset();
         roundQuality.reset();
     }
-    
+
     public void dumpTaskCounterStats() {
         final StringBuilder sb = new StringBuilder();
         sb.append("--- Resulting deformations statistics --- TASK\n");
@@ -217,6 +218,13 @@ public final class CorrelationCalculator extends Observable {
         counterGood.reset();
         counterNotGood.reset();
         quality.reset();
+    }
+
+    public void enableStatLogging(boolean enable) {
+        roundCounterNotGood.setEnabled(enable);
+        roundQuality.setEnabled(enable);
+        counterNotGood.setEnabled(enable);
+        quality.setEnabled(enable);
     }
 
 }

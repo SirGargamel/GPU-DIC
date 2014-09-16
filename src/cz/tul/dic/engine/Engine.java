@@ -116,6 +116,7 @@ public class Engine extends Observable {
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
         correlation.setTaskSplitVariant(taskSplit);
+        correlation.enableStatLogging(!tc.getHints().contains(Hint.NO_STATS));
 
         // prepare data
         setChanged();

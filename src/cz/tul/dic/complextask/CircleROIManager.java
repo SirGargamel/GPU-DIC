@@ -49,6 +49,7 @@ public class CircleROIManager extends ROIManager {
         tc.addHint(Hint.NO_STRAIN);
         tc.addHint(Hint.NO_CUMULATIVE);
         tc.addHint(Hint.NO_FINE_SEARCH);
+        tc.addHint(Hint.NO_STATS);
         tc.clearResultData();
 
         final List<CircularROI> cRois = new ArrayList<>(4);
