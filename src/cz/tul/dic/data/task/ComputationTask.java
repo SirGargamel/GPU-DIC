@@ -14,7 +14,7 @@ public class ComputationTask {
     private final Image imageA, imageB;
     private final List<Facet> facets;
     private final double[] deformationLimits;
-    private final boolean subtask;
+    private boolean subtask;
     private List<CorrelationResult> results;
 
     public ComputationTask(Image imageA, Image imageB, List<Facet> facets, double[] deformationLimits, boolean subtask) {
@@ -48,6 +48,10 @@ public class ComputationTask {
     public void setResults(List<CorrelationResult> results) {
         this.results = results;
     }
+
+    public void setSubtask(boolean subtask) {
+        this.subtask = subtask;
+    }        
 
     public boolean isSubtask() {
         return subtask;

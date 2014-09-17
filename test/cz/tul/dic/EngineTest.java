@@ -76,13 +76,9 @@ public class EngineTest {
     private static final String[] DEF_ZERO_FIRST_SECOND_FILES = new String[]{
         "out_2_0_1_1_0_0_1_0_0_0_0_1", "out_-1_-1_0_0_1_0_0_0.5_1_0_0_0"};
     private static final double[] DEF_LARGE = new double[]{
-        -3, 3, 0.25, -3, 3, 0.25,
+        -4, 4, 0.25, -4, 4, 0.25,
         -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
         -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
-    private static final double[] DEF_LARGE_EXTRA = new double[]{
-        -2, 2, 1.0, -2, 2, 1.0,
-        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5,
-        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
@@ -195,12 +191,6 @@ public class EngineTest {
 
         errors.remove(null);
         Assert.assertEquals(errors.toString(), 0, errors.size());
-    }
-
-    @Test
-    public void testEngineExtraLarge() throws IOException, URISyntaxException, ComputationException {
-        final String s = DEF_ZERO_FIRST_SECOND_FILES[0];
-        Assert.assertNull(checkResultsBack(generateTask(s, DEF_LARGE_EXTRA), s));
     }
 
     private TaskContainer generateTask(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
@@ -364,7 +354,7 @@ public class EngineTest {
     }
 
     @Test
-    public void testMultiFacet() throws IOException, URISyntaxException, ComputationException {
+    public void testEngineMultiFacet() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_SECOND_FILES[0] + ".bmp").toURI()).toFile());
@@ -413,7 +403,7 @@ public class EngineTest {
     }
 
     @Test
-    public void testMultiFacetExtraLarge() throws IOException, URISyntaxException, ComputationException {
+    public void testEngineMultiFacetLarge() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_SECOND_FILES[0] + ".bmp").toURI()).toFile());
@@ -425,7 +415,7 @@ public class EngineTest {
         final int fs = 11;
 
         tc.addRoi(ROUND, roi);
-        tc.setDeformationLimits(ROUND, roi, DEF_LARGE_EXTRA);
+        tc.setDeformationLimits(ROUND, roi, DEF_LARGE);
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, fs);
 
