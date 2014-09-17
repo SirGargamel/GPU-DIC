@@ -9,6 +9,8 @@ import cz.tul.dic.data.task.TaskParameter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -30,7 +32,16 @@ public class FacetGenerator {
     public static Map<ROI, List<Facet>> generateFacets(final TaskContainer tc, final int round) throws ComputationException {
         final FacetGeneratorMethod mode = (FacetGeneratorMethod) tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
         if (generators.containsKey(mode)) {            
-            return generators.get(mode).generateFacets(tc, round);
+            final Map<ROI, List<Facet>> result = generators.get(mode).generateFacets(tc, round);
+            final StringBuilder sb = new StringBuilder();
+            for (Entry<ROI, List<Facet>> e : result.entrySet()) {
+                sb.append(e.getKey().toString());
+                sb.append(" -- ");
+                sb.append(e.getValue().size());
+                sb.append("; ");
+            }
+            Logger.trace(sb.toString());
+            return result;
         } else {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported mode of facet generator - " + mode.toString());
         }

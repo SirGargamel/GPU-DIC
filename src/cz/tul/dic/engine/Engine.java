@@ -121,8 +121,7 @@ public class Engine extends Observable {
         // prepare data
         setChanged();
         notifyObservers(FacetGenerator.class);
-        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);
-        Logger.trace("Facets generated.");
+        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);                
 
         final double resultQuality = (double) tc.getParameter(TaskParameter.RESULT_QUALITY);
 

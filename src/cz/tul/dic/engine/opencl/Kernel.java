@@ -27,7 +27,6 @@ import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,7 +73,7 @@ public abstract class Kernel {
     protected CLCommandQueue queue;
     private final Set<CLResource> clGlobalMem, clRoundMem;
 
-    public Kernel(String kernelName) {
+    protected Kernel(String kernelName) {
         this.kernelName = kernelName;
         clGlobalMem = new HashSet<>();
         clRoundMem = new HashSet<>();
@@ -168,7 +167,7 @@ public abstract class Kernel {
         runKernel(clImageA, clImageB,
                 clFacetData, clFacetCenters,
                 clDeformationLimits, clDefStepCount, clResults, (int) deformationCount, imageA.getWidth(), facetSize, facetCount);
-        
+
         final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) deformationCount);
         final int[] positions = findPos(clResults, facetCount, (int) deformationCount, maxValuesCl);
 
@@ -384,6 +383,11 @@ public abstract class Kernel {
         }
         buffer.rewind();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return kernelName;
     }
 
 }

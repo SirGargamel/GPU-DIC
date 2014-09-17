@@ -96,7 +96,7 @@ public class CircleROIManager extends ROIManager {
         final double shift1 = determineROIShift(round, topRight);
         final double shift2 = determineROIShift(round, bottomLeft);
         final double shift3 = determineROIShift(round, bottomRight);
-        Logger.trace(shift2 + ", " + shift3);
+        Logger.trace("Detected jaw shifts - TOP : {0}; {1}; BOTTOM : {2}, {3}", shift0, shift1, shift2, shift3);
         //// check if left equals right
         if (Math.abs(shift2 - shift3) > MAX_SHIFT_DIFFERENCE) {
             Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat("-LOWER- ").concat(Double.toString(shift2)).concat(" vs ".concat(Double.toString(shift3))));
@@ -124,7 +124,7 @@ public class CircleROIManager extends ROIManager {
         setROIs(nextRound);
     }
 
-    private double determineROIShift(final int round, final ROI roi) {        
+    private double determineROIShift(final int round, final ROI roi) {
         final Analyzer1D analyzer = new Analyzer1D();
         analyzer.setPrecision(PRECISION);
 
@@ -185,7 +185,7 @@ public class CircleROIManager extends ROIManager {
         mod = stepCounts[1] / 4 * defLimits[5];
         defLimits[3] -= mod;
         defLimits[4] += mod;
-        
+
         setROIs(round);
     }
 

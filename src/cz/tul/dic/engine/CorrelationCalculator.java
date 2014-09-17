@@ -61,7 +61,7 @@ public final class CorrelationCalculator extends Observable {
             double[] deformationLimits, DeformationDegree defDegree,
             int facetSize, double resultQuality, Object taskSplitValue) throws ComputationException {
         final Kernel kernel = Kernel.createKernel(kernelType);
-        Logger.trace("Kernel prepared.");
+        Logger.trace("Kernel prepared - {0}", kernel);
 
         final List<CorrelationResult> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, resultQuality, taskSplitValue);
 
@@ -80,7 +80,7 @@ public final class CorrelationCalculator extends Observable {
         for (int i = 0; i < facets.size(); i++) {
             result.add(null);
         }
-
+        
         try {
             kernel.prepareKernel(context, device, facetSize, defDegree, interpolation);
 
@@ -139,7 +139,7 @@ public final class CorrelationCalculator extends Observable {
             Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", count, resultQuality, roi);
         }
 
-        Logger.trace("Correlations computed.");
+        Logger.trace("{0} correlations computed.", result.size());
         return result;
     }
 
