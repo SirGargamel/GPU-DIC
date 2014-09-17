@@ -80,7 +80,7 @@ public class EngineTest {
         -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
         -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
     private static final double[] DEF_LARGE_EXTRA = new double[]{
-        -3, 3, 0.25, -1, 2, 0.25,
+        -2, 2, 1.0, -2, 2, 1.0,
         -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5,
         -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
 
@@ -408,6 +408,56 @@ public class EngineTest {
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
+        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
+        Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
+    }
+
+    @Test
+    public void testMultiFacetExtraLarge() throws IOException, URISyntaxException, ComputationException {
+        final List<File> input = new ArrayList<>(2);
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_SECOND_FILES[0] + ".bmp").toURI()).toFile());
+
+        final TaskContainer tc = new TaskContainer(input);
+        InputLoader.loadInput(tc);
+
+        final ROI roi = new RectangleROI(85, 85, 95, 95);
+        final int fs = 11;
+
+        tc.addRoi(ROUND, roi);
+        tc.setDeformationLimits(ROUND, roi, DEF_LARGE_EXTRA);
+        tc.setParameter(TaskParameter.IN, input.get(0));
+        tc.setParameter(TaskParameter.FACET_SIZE, fs);
+
+        TaskContainerUtils.checkTaskValidity(tc);
+
+        final CorrelationCalculator correlation = new CorrelationCalculator();
+        correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
+        correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
+        final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
+        correlation.setTaskSplitVariant(taskSplit);
+
+        Map<ROI, List<Facet>> facets = new HashMap<>(1);
+        final List<Facet> roiFacets = new ArrayList<>(4);
+        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
+        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
+        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
+        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
+        facets.put(roi, roiFacets);
+
+        tc.setResult(
+                ROUND,
+                roi,
+                correlation.computeCorrelations(
+                        tc.getImage(ROUND), tc.getImage(ROUND + 1),
+                        roi, roiFacets,
+                        tc.getDeformationLimits(ROUND, roi),
+                        DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
+                        tc.getFacetSize(ROUND, roi), TaskDefaultValues.DEFAULT_RESULT_QUALITY, null));
+
+        DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
+
+        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
         Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
     }
 }
