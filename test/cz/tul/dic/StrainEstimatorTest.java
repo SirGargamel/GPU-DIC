@@ -24,7 +24,7 @@ public class StrainEstimatorTest {
     private static final double DELTA = 0.001;
 
     @Test
-    public void testEstimator() throws URISyntaxException, ComputationException {
+    public void testEstimatorZeroStrain() throws URISyntaxException, ComputationException {
         testStatic("out_0_0.bmp", 0, 0);
         testStatic("out_5_0.bmp", 5, 0);
     }
@@ -59,6 +59,70 @@ public class StrainEstimatorTest {
                 Assert.assertEquals("Exx", 0.0, strains[x][y][StrainResult.Exx], DELTA);
                 Assert.assertEquals("Eyy", 0.0, strains[x][y][StrainResult.Eyy], DELTA);
                 Assert.assertEquals("Exy", 0.0, strains[x][y][StrainResult.Exy], DELTA);
+            }
+        }
+    }
+
+    @Test
+    public void testEstimatorNonZeroXxYy() throws URISyntaxException, ComputationException {
+        final List<File> input = new ArrayList<>(2);
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        final TaskContainer tc = new TaskContainer(input);
+
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, 3.0);
+        tc.setParameter(TaskParameter.MM_TO_PX_RATIO, 1.0);
+        
+        // indexing is [x][y], but init is [y][x]
+        final double[][][] displacement = new double[][][]{
+            {{1, 1}, {1, 0.5}, {1, 0.0}},
+            {{2, 1}, {2, 0.5}, {2, 0.0}},
+            {{3, 1}, {3, 0.5}, {3, 0.0}}
+        };
+        tc.setDisplacement(ROUND, ROUND + 1, displacement);
+
+        new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
+        final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
+        
+        for (double[][] strain : strains) {
+            for (double[] strain1 : strain) {
+                Assert.assertNotNull(strain1);
+                Assert.assertEquals("Exx", 100.0, strain1[StrainResult.Exx], DELTA);
+                Assert.assertEquals("Eyy", -50.0, strain1[StrainResult.Eyy], DELTA);
+                Assert.assertEquals("Exy", 0.0, strain1[StrainResult.Exy], DELTA);
+            }
+        }
+    }
+    
+    @Test
+    public void testEstimatorNonZeroXy() throws URISyntaxException, ComputationException {
+        final List<File> input = new ArrayList<>(2);
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        final TaskContainer tc = new TaskContainer(input);
+
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, 3.0);
+        tc.setParameter(TaskParameter.MM_TO_PX_RATIO, 1.0);
+        
+        // indexing is [x][y], but init is [y][x]
+        final double[][][] displacement = new double[][][]{
+            {{1, 1}, {0, 1}, {-1, 1}},
+            {{1, 0.5}, {0, 0.5}, {-1, 0.5}},
+            {{1, 0.0}, {0, 0.0}, {-1, 0.0}}
+        };
+        tc.setDisplacement(ROUND, ROUND + 1, displacement);
+
+        new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
+        final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
+        
+        for (double[][] strain : strains) {
+            for (double[] strain1 : strain) {
+                Assert.assertNotNull(strain1);
+                Assert.assertEquals("Exx", 0.0, strain1[StrainResult.Exx], DELTA);
+                Assert.assertEquals("Eyy", 0.0, strain1[StrainResult.Eyy], DELTA);
+                Assert.assertEquals("Exy", -75.0, strain1[StrainResult.Exy], DELTA);
             }
         }
     }

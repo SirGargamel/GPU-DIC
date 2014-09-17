@@ -77,9 +77,9 @@ public class LocalLeastSquare extends StrainEstimator {
         for (int i = x - radius; i <= x + radius; i++) {
             for (int j = y - radius; j <= y + radius; j++) {
                 if (i >= 0 && j >= 0 && i < width && j < height && data[i][j] != null) {
-                    Xu.add(new double[]{1, i - x, j - x});
+                    Xu.add(new double[]{1, i - x, j - y});
                     Yu.add(data[i][j][0]);
-                    Xv.add(new double[]{1, i - x, j - x});
+                    Xv.add(new double[]{1, i - x, j - y});
                     Yv.add(data[i][j][1]);
                 }
             }
