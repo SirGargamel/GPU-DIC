@@ -1,5 +1,5 @@
-/DIC_Voucher-manual.aux
-/DIC_Voucher-manual.out
-/DIC_Voucher-manual.synctex.gz
-/DIC_Voucher-manual.tdo
+*.aux
+*.out
+*.synctex.gz
+*.tdo
 *.toc
