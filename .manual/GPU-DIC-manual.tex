@@ -121,6 +121,25 @@ Aplikace je schopna zobrazovat reálný čas děje, je ale nutné, aby ve složc
 Zadáním ROI může uživatel enginu říci, které oblasti má počítat a tím pádem dost urychlit výpočet. Dostupné tvary ROI jsou obdélník a kruh. Na výběr jsou dvě možnosti vyznačení. První je statické umístění ROI (v téměř libovolném počtu). Tyto ROI se budou dodržovat po celou dobu výpočtu, případně je možno specifikovat na různá kola různá ROI s tím, že pokud nejsou uvedena jiná ROI, použijí se ROI z předchozího kola (takže pokud nás zajímá pouze jedna oblast během celého výpočtu, stačí ji označit pro první kolo).\\
 Druhou možností je vyznačení polohy čelistí za pomoci 4 kruhových ROI (odtud pochází omezení na ne zcela libovolný počet statických ROI). V tomto případě se engine pokusí automaticky sledovat čelisti a podle toho upravuje sledovanou oblast. Sledovaná oblast může být v tomto případě definována dvěma způsoby - buď ji uživatel vyznačí sám za pomoci obdélníkové oblasti nebo vyznačení nechá na enginu. Engine vytvoří oblast dle jednoduchých pravidel - oblast je mezi čelistmi, začíná nad horními čelistmi a končí pod spodními čelistmi s tím, že se nechává mezera mezi čelistí a sledovanou oblastí pro alespoň částečné potlačení nepřesnosti vyznačení čelistí a tím pádem ovlivnění výpočtu.\\
 Vlastní vyznačení se děje za pomoci kliknutí a tažení levým tlačítkem myši. Pokud uživatel není spokojen s umístěním oblasti, je možno ji chycením a tažením přemisťovat. Pravým tlačítkem myši pak lze danou oblast vymazat.
+\subsection{Exporty výsledků}
+\label{sec:exports}
+\begin{figure}[H]
+\center{\includegraphics[width=0.5\textwidth]{initialExport.png}\\Možnosti exportů}
+\end{figure}
+Před výpočtem je možno zadat exporty, které se provedou po dokončení výpočtu. V tomto kroku se nevybírá konkrétní kolo (obrázek), pro který se export bude provádět, daný export se provede vždy pro všechna kola. Vybíráme tedy pouze formát a směr (typ) exportovaných dat. Výstupní formáty jsou k dispozici tři - obrázek (mapa), csv (textový export výsledků) nebo video (animace vývoje hodnot). Směr (či typ) dat určuje jedna, jestli se bude jednat o výsledná posunutí nebo přetvoření, a také směr dané hodnoty (pro posunutí X, Y nebo absolutní hodnota. u přetvoření pak XX, XY, YY a absolutní hodnota). Názvy výstupních souborů jsou pak generovány dle následujícího klíče:
+\begin{description}
+\item[Obrazová mapa hodnot]  [name]\textunderscore [time]\textunderscore [dir].bmp
+\item[Textová mapa hodnot] [name]\textunderscore [pos].csv
+\item[Vývoj hodnot v bodě] [name]\textunderscore [time]\textunderscore [dir].bmp
+\item[Video] [name]\textunderscore [dir].avi
+\end{description}
+\begin{center}\textbf{Legenda:}\end{center}
+\begin{description}
+\item[name] Jméno vstupního souboru (nemusí nutně být název videa, může to být např. název config souboru)
+\item[time] čas, ve kterém dané výsledky platí či ve kterém se udály  
+\item[dir] směr (typ) výsledků 
+\item[pos] pozice výsledku (X a Y)
+\end{description}
 \subsection{Vyznačení reálné velikosti}
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{realSize.png}\\Okno pro vyznačení reálné velikosti}
@@ -154,7 +173,7 @@ Spuštění výpočtu neobnáší nic zvláštního, stačí pouze kliknout na t
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{results.png}\\Okno s výsledky}
 \end{figure}
-Okno výsledků prezentuje mapy s vypočtenými výsledky. Jsou dostupné jak kumulativní výsledky, tak diferenciální (ty mají před názvem písmeno "d"). Kromě prohlížení výsledků je také možno výsledky exportovat. K dispozici je buď export zobrazené mapy nebo sekvence map. Mapy lze exportovat buď jako obrázek (obdoba obrázku v okně) nebo jako seznam hodnot do souboru CSV. Kromě exportu po jednotlivých mapách lze také vytvořit animaci, která vytvoří video soubor prezentující zvolené výsledky jako video.
+Okno výsledků prezentuje mapy s vypočtenými výsledky. Jsou dostupné jak kumulativní výsledky, tak diferenciální (ty mají před názvem písmeno "d"). Kromě prohlížení výsledků je také možno výsledky exportovat. K dispozici je buď export zobrazené mapy nebo sekvence map. Mapy lze exportovat buď jako obrázek (obdoba obrázku v okně) nebo jako seznam hodnot do souboru CSV. Kromě exportu po jednotlivých mapách lze také vytvořit animaci, která vytvoří video soubor prezentující zvolené výsledky jako video. Názvy výsledných souborů se generují automaticky dle klíče, který lze nalézt v kapitole \ref{sec:exports}.
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{resultsPoint.png}\\Výsledky pro bod}
 \end{figure}
