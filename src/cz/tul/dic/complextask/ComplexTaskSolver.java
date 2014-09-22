@@ -86,7 +86,7 @@ public class ComplexTaskSolver extends Observable {
             } else {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
-                rrm.getTc().setDisplacement(r, nextR, new double[img.getWidth()][img.getHeight()][Coordinates.DIMENSION]);
+                rrm.getTc().setDisplacement(r, nextR, new double[img.getWidth()][img.getHeight()][]);
             }
 
             tc.setResults(r, tcR.getResults(r));
