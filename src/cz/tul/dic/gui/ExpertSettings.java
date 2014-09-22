@@ -103,7 +103,7 @@ public class ExpertSettings implements Initializable {
             final double newWs = Double.valueOf(textWindowSize.getText());
             final Object old = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
             if (old != null) {
-                final double oldWs = (int) old;
+                final double oldWs = (double) old;
                 if (newWs != oldWs) {
                     // recompute
                     Task<String> worker = new Task<String>() {
