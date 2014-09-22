@@ -1,6 +1,5 @@
 package cz.tul.dic;
 
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -28,6 +27,7 @@ import org.pmw.tinylog.LoggingLevel;
 import org.pmw.tinylog.labellers.TimestampLabeller;
 import org.pmw.tinylog.policies.DailyPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
+import org.pmw.tinylog.writers.LoggingWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
 
 /**
@@ -36,32 +36,35 @@ import org.pmw.tinylog.writers.RollingFileWriter;
  */
 public class DicMain extends Application {
 
-    private static final String DEBUG = "debug";
+    private static final String DEBUG_SMALL = "-d";
+    private static final String DEBUG_COMPUTE = "-debug";
     private static final String[] FILES_TO_DEBUG = new String[]{
-//        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
-//        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
-//        "d:\\temp\\.test FS vs Quality\\6203652m.avi.config",
-//        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
-//        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
-//        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
-        "D:\\temp\\7202845m\\7202845m.avi.config"
-    };
+        //        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\6203652m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
+        "d:\\temp\\6203652m\\6203652m.avi.config",
+        "d:\\temp\\9905121m\\9905121m.avi.config",};
 
     @Override
     public void start(Stage stage) throws Exception {
         final Parameters params = getParameters();
-        final List<String> parameters = params.getRaw();
+        final List<String> parameters = params.getRaw();   
 
-        if (parameters.contains(DEBUG)) {
+        if (parameters.contains(DEBUG_COMPUTE) || parameters.contains(DEBUG_SMALL)) {
             configureTinyLog(true);
 
             NameGenerator.enableDebugMode();
             Utils.enableDebugMode();
             ExportUtils.enableDebugMode();
-
-            performComputationTest();
         } else {
             configureTinyLog(false);
+        }
+
+        if (parameters.contains(DEBUG_COMPUTE)) {
+            performComputationTest();
         }
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
@@ -82,20 +85,11 @@ public class DicMain extends Application {
     private void configureTinyLog(final boolean debug) throws IOException {
         Configurator c = Configurator.defaultConfig();
         c.writingThread(true);
+        c.writer(new MultiWriter(new ConsoleWriter(), new RollingFileWriter("log.txt", 10, new TimestampLabeller("yyyy-MM-dd"), new DailyPolicy())));
         if (debug) {
-            c.writer(new ConsoleWriter())
-                    .level(LoggingLevel.TRACE);
+            c.level(LoggingLevel.TRACE);
         } else {
-            final DateFormat df = new SimpleDateFormat("");
-
-            final StringBuilder sb = new StringBuilder();
-            sb.append("log__");
-            sb.append(df.format(Calendar.getInstance().getTime()));
-            sb.append(".txt");
-//            c.writer(new FileWriter(sb.toString()))
-//                    .level(LoggingLevel.INFO);
-            c.writer(new RollingFileWriter("log.txt", 10, new TimestampLabeller("yyyy-MM-dd"), new DailyPolicy()))
-                    .level(LoggingLevel.INFO);
+            c.level(LoggingLevel.INFO);
         }
         c.activate();
 
@@ -108,16 +102,20 @@ public class DicMain extends Application {
     }
 
     private void performComputationTest() {
-        final int fs1 = 25;
+        final int fs1 = 15;
         final int fs2 = 50;
         final double ps1 = 25;
         final double ps2 = 25;
         TaskContainer tc;
-        for (int size = fs1; size <= fs2; size++) {
-            for (String s : FILES_TO_DEBUG) {
+        for (String s : FILES_TO_DEBUG) {
+            for (int size = fs1; size <= fs2; size++) {
                 try {
                     Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
                     tc = Context.getInstance().getTc();
+                    if ((int) tc.getParameter(TaskParameter.FACET_SIZE) < size) {
+                        System.out.println(tc.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
+                        break;
+                    }
                     InputLoader.loadInput(tc);
                     tc.setParameter(TaskParameter.FACET_SIZE, size);
                     Computation.commenceComputationDynamic(tc);
