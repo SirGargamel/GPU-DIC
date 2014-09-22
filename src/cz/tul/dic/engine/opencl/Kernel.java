@@ -160,7 +160,7 @@ public abstract class Kernel {
         if (size <= 0 || size >= Integer.MAX_VALUE) {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
         }
-        clResults = context.createFloatBuffer((int) size, CLMemory.Mem.WRITE_ONLY);
+        clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
 
         clRoundMem.add(clResults);
 
