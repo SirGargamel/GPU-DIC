@@ -106,6 +106,7 @@ public class ExpertSettings implements Initializable {
                 final double oldWs = (double) old;
                 if (newWs != oldWs) {
                     // recompute
+                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, newWs);
                     Task<String> worker = new Task<String>() {
 
                         @Override
@@ -156,9 +157,7 @@ public class ExpertSettings implements Initializable {
                         }
                     });
                     th.setDaemon(true);
-                    th.start();
-
-                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, newWs);
+                    th.start();                    
                 }
             }
         }
