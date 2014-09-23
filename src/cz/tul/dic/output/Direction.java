@@ -19,7 +19,10 @@ public enum Direction {
     dExx("%"),
     dEyy("%"),
     dExy("%"),
-    dEabs("%"),    
+    dEabs("%"),
+    rDx("mm/ms"),
+    rDy("mm/ms"),
+    rDabs("mm/ms"),
     ;
 
     private final String unit;

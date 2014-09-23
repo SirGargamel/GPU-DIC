@@ -120,6 +120,25 @@ public class ExportUtils {
         return result;
     }
 
+    public static double calculateSpeed(final double[] def, final Direction dir, final double time) throws ComputationException {
+        double result;
+        switch (dir) {
+            case rDx:
+                result = def[0] / time;
+                break;
+            case rDy:
+                result = def[1] / time;
+                break;
+            case rDabs:
+                result = Math.sqrt(def[0] * def[0] + def[1] * def[1]) / time;
+                break;
+            default:
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
+        }
+
+        return result;
+    }
+
     public static BufferedImage overlayImage(final BufferedImage background, final BufferedImage foreground) {
         final int width = Math.max(background.getWidth(), foreground.getWidth());
         final int height = Math.max(background.getHeight(), foreground.getHeight());
@@ -156,7 +175,7 @@ public class ExportUtils {
                     }
                 }
             }
-        }        
+        }
 
         return createImageFromMap(mapData, dir, max, min);
     }
@@ -185,6 +204,7 @@ public class ExportUtils {
             case Dabs:
             case dEabs:
             case Eabs:
+            case rDabs:
                 drawVerticalBar(out, max);
                 break;
             case dDy:
@@ -193,12 +213,14 @@ public class ExportUtils {
             case dExy:
             case Eyy:
             case Exy:
+            case rDy:
                 drawVerticalBar(out, max, min);
                 break;
             case dDx:
             case Dx:
             case dExx:
             case Exx:
+            case rDx:
                 drawHorizontalBar(out, max, min);
                 break;
             default:

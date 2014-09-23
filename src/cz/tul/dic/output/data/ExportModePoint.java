@@ -2,8 +2,10 @@ package cz.tul.dic.output.data;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.FpsManager;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
 import java.util.EnumMap;
@@ -27,6 +29,9 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
         final int x = dataParams[0];
         final int y = dataParams[1];
 
+        final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
+        final double time = fpsM.getTickLength();
+
         double[][][] results;
         double[] data;
         for (Direction dir : Direction.values()) {
@@ -36,6 +41,9 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     case dDx:
                     case dDy:
                     case dDabs:
+                    case rDx:
+                    case rDy:
+                    case rDabs:
                         results = tc.getDisplacement(r - 1, r);
                         break;
                     case Dx:
@@ -80,6 +88,11 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         case Exy:
                         case Eabs:
                             data[r] = ExportUtils.calculateStrain(results[x][y], dir);
+                            break;
+                        case rDx:
+                        case rDy:
+                        case rDabs:
+                            data[r] = ExportUtils.calculateSpeed(results[x][y], dir, time);
                             break;
                         default:
                             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
