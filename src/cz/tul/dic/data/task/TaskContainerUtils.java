@@ -39,7 +39,7 @@ public class TaskContainerUtils {
 
     private static final String CONFIG_EMPTY = "NONE";
     private static final String CONFIG_EXPORTS = "EXPORT_";
-    private static final String CONFIG_INPUT = "INPUT";    
+    private static final String CONFIG_INPUT = "INPUT";
     private static final String CONFIG_SEPARATOR = ";;";
     private static final String CONFIG_SEPARATOR_ARRAY = ";";
     private static final String CONFIG_SEPARATOR_ROI = "--";
@@ -112,23 +112,24 @@ public class TaskContainerUtils {
             final Image img = tc.getImage(startImageIndex);
             final int width = img.getWidth();
             final int height = img.getHeight();
-            result = new double[width][height][];
+            result = new double[width][height][];            
 
             double posX, posY;
             int iX, iY;
             double[][][] data;
             double[] val;
             int indexFrom, indexTo;
-            boolean notNull;
+            boolean notNull, inited;
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     notNull = false;
+                    inited = false;
                     indexFrom = startImageIndex;
                     indexTo = endImageIndex;
                     posX = x;
                     posY = y;
                     iX = x;
-                    iY = y;
+                    iY = y;                    
 
                     while (indexFrom != endImageIndex) {
                         do {
@@ -146,7 +147,10 @@ public class TaskContainerUtils {
                             notNull = true;
                             posX += val[Coordinates.X];
                             posY += val[Coordinates.Y];
+                        } else if (!inited) {
+                            break;
                         }
+                        inited = true;
 
                         indexFrom = indexTo;
                         indexTo = endImageIndex;
