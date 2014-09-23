@@ -28,14 +28,17 @@ public class Context {
         return instance;
     }
 
+    private static final String SEPARATOR = ";";
     private static final Context instance;
     private TaskContainer tc;
     private final Map<Integer, Map<Direction, BufferedImage>> exportCacheImages;
     private final Map<Integer, Map<Integer, Map<Direction, double[]>>> exportCachePoints;
+    private final Map<String, Map<Direction, double[]>> exportCacheDoublePoints;
 
     private Context() {
         exportCacheImages = new HashMap<>();
         exportCachePoints = new HashMap<>();
+        exportCacheDoublePoints = new HashMap<>();
     }
 
     public TaskContainer getTc() {
@@ -89,6 +92,21 @@ public class Context {
         return result;
     }
 
+    public Map<Direction, double[]> getComparativeStrain(final int x1, final int y1, final int x2, final int y2) throws ComputationException {
+        final String key = generateKey(x1, y1, x2, y2);
+        Map<Direction, double[]> result = exportCacheDoublePoints.get(key);
+        if (result == null) {
+            try {
+                Exporter.export(tc, ExportTask.generateDoublePointExport(ExportTarget.GUI, this, x1, y1, x2, y2));
+                result = exportCacheDoublePoints.get(key);
+            } catch (IOException ex) {
+                Logger.error(ex, "Unexpected IO error.");
+            }
+        }
+
+        return result;
+    }
+
     public void storeMapExport(final Object data, final int round, final ExportMode mode, final Direction dir) {
         if (!(data instanceof BufferedImage)) {
             throw new IllegalArgumentException("Illegal type of data - " + data.getClass());
@@ -103,7 +121,7 @@ public class Context {
         m.put(dir, (BufferedImage) data);
     }
 
-    public void storePointExport(final Map<Direction, double[]> data, final int x, final int y, final ExportMode mode) {
+    public void storePointExport(final Map<Direction, double[]> data, final int x, final int y) {
         if (!(data instanceof EnumMap)) {
             throw new IllegalArgumentException("Illegal type of data - " + data.getClass());
         }
@@ -115,5 +133,25 @@ public class Context {
         }
 
         m.put(y, data);
+    }
+
+    public void storePointExport(final Map<Direction, double[]> data, final int x1, final int y1, final int x2, final int y2) {
+        if (!(data instanceof EnumMap)) {
+            throw new IllegalArgumentException("Illegal type of data - " + data.getClass());
+        }
+
+        final String key = generateKey(x1, y1, x2, y2);
+        exportCacheDoublePoints.put(key, data);
+    }
+
+    private static String generateKey(int... vals) {
+        final StringBuilder sb = new StringBuilder();
+        {
+            for (int i : vals) {
+                sb.append(i);
+                sb.append(SEPARATOR);
+            }
+            return sb.toString();
+        }
     }
 }

@@ -276,6 +276,7 @@ public class ResultPresenter implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         index = 0;
+        lastX = -1;
 
         final ObservableList<Direction> comboBoxData = FXCollections.observableArrayList();
         comboBoxData.addAll(Direction.values());
@@ -287,20 +288,60 @@ public class ResultPresenter implements Initializable {
 
         image.setOnMouseClicked((MouseEvent t) -> {
             try {
-                lastX = (int) Math.round(t.getX());
-                lastY = (int) Math.round(t.getY());
-                final Map<Direction, double[]> data = Context.getInstance().getPointResult(lastX, lastY);
+                final Context context = Context.getInstance();
+                final int newX = (int) Math.round(t.getX());
+                final int newY = (int) Math.round(t.getY());
+
+                if (lastX != -1) {
+                    final Map<Direction, double[]> data = context.getComparativeStrain(lastX, lastY, newX, newY);
+                    if (data != null) {
+                        final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
+                        final Parent root = loader.load();
+                        final Stage stage = new Stage();
+
+                        @SuppressWarnings("unchecked")
+                        final BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
+                        @SuppressWarnings("unchecked")
+                        final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
+                        chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, lastY, newX, newY});
+
+                        final ChartHandler ch = new ComparativePointChartHandler(lastX, lastY, newX, newY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
+                        charts.put(stage, ch);
+                        ch.displayData(choiceDir.getValue());
+
+                        final LineResult controller = loader.getController();
+                        controller.init();
+
+                        stage.setOnShown((WindowEvent t2) -> {
+                            stage.setX(stage.getX() + lastX + 35);
+                            stage.setY(stage.getY() + lastY + 50);
+                        });
+                        stage.setTitle(ch.buildTitle());
+                        stage.setScene(new Scene(root));
+                        stage.setIconified(false);
+                        stage.show();
+                    }
+                }
+
+                lastX = newX;
+                lastY = newY;
+                final Map<Direction, double[]> data = context.getPointResult(lastX, lastY);
                 final double[] line = data.get(choiceDir.getValue());
                 if (line != null) {
-                    final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
+                    final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
+                    final Parent root = loader.load();
                     final Stage stage = new Stage();
 
                     @SuppressWarnings("unchecked")
                     final BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
                     @SuppressWarnings("unchecked")
                     final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
+                    chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, lastY});
 
-                    final ChartHandler ch = new ChartHandler(lastX, lastY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
+                    final LineResult controller = loader.getController();
+                    controller.init();
+
+                    final ChartHandler ch = new SinglePointChartHandler(lastX, lastY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
                     charts.put(stage, ch);
                     ch.displayData(choiceDir.getValue());
 
@@ -308,9 +349,7 @@ public class ResultPresenter implements Initializable {
                         stage.setX(stage.getX() + lastX + 35);
                         stage.setY(stage.getY() + lastY + 10);
                     });
-                    chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, lastY});
-
-                    stage.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(lastX).concat(";").concat(Integer.toString(lastY))));
+                    stage.setTitle(ch.buildTitle());
                     stage.setScene(new Scene(root));
                     stage.setIconified(false);
                     stage.show();
@@ -383,7 +422,7 @@ public class ResultPresenter implements Initializable {
                 try {
                     ch = e.getValue();
                     ch.displayData(dir);
-                    s.setTitle(choiceDir.getValue().toString().concat(" : ").concat(Integer.toString(ch.getX()).concat(";").concat(Integer.toString(ch.getY()))));
+                    s.setTitle(ch.buildTitle());
                 } catch (ComputationException ex) {
                     Logger.warn(ex, "Error obtaining line data for chart");
                 }
@@ -393,12 +432,13 @@ public class ResultPresenter implements Initializable {
         }
     }
 
-    private static class ChartHandler {
+    private static class SinglePointChartHandler implements ChartHandler {
 
         private final int x, y, fps;
         private final LineChart<Number, Number> chart;
+        private Direction dir;
 
-        public ChartHandler(int x, int y, LineChart<Number, Number> chart, int fps) {
+        public SinglePointChartHandler(int x, int y, LineChart<Number, Number> chart, int fps) {
             this.x = x;
             this.y = y;
             this.chart = chart;
@@ -407,10 +447,12 @@ public class ResultPresenter implements Initializable {
             chart.setLegendVisible(false);
         }
 
+        @Override
         public void displayData(final Direction dir) throws ComputationException {
             final FpsManager fpsM = new FpsManager(fps);
             final double tickUnit = fpsM.getTickLength();
             final double[] line = Context.getInstance().getPointResult(x, y).get(dir);
+            this.dir = dir;
 
             final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
             chart.setPrefSize(width, PREF_SIZE_H);
@@ -450,14 +492,118 @@ public class ResultPresenter implements Initializable {
             }
         }
 
-        public int getX() {
-            return x;
+        @Override
+        public String buildTitle() {
+            return dir.toString().concat(" : ")
+                    .concat(Integer.toString(x)).concat(";").concat(Integer.toString(y));
         }
 
-        public int getY() {
-            return y;
+    }
+
+    private static class ComparativePointChartHandler implements ChartHandler {
+
+        private final int x1, y1, x2, y2, fps;
+        private final LineChart<Number, Number> chart;
+        private Direction dir;
+
+        public ComparativePointChartHandler(int x1, int y1, int x2, int y2, LineChart<Number, Number> chart, int fps) {
+            this.x1 = x1;
+            this.y1 = y1;
+            this.x2 = x2;
+            this.y2 = y2;
+            this.chart = chart;
+            this.fps = fps;
+
+            chart.setLegendVisible(false);
         }
 
+        @Override
+        public void displayData(final Direction dir) throws ComputationException {
+            final FpsManager fpsM = new FpsManager(fps);
+            final double tickUnit = fpsM.getTickLength();
+
+            // TODO
+            switch (dir) {
+                case Dabs:
+                case rDabs:
+                    this.dir = Direction.Eabs;
+                    break;
+                case dDabs:
+                    this.dir = Direction.dEabs;
+                    break;
+                case Dx:
+                case rDx:
+                    this.dir = Direction.Exx;
+                    break;
+                case dDx:
+                    this.dir = Direction.dExx;
+                    break;
+                case Dy:
+                case rDy:
+                    this.dir = Direction.Eyy;
+                    break;
+                case dDy:
+                    this.dir = Direction.dEyy;
+                    break;
+                default:
+                    this.dir = dir;
+            }
+
+            final double[] line = Context.getInstance().getComparativeStrain(x1, y1, x2, y2).get(this.dir);
+
+            final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
+            chart.setPrefSize(width, PREF_SIZE_H);
+
+            chart.getData().clear();
+
+            final XYChart.Series<Number, Number> series = new XYChart.Series<>();
+            double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+            for (int i = 0; i < line.length; i++) {
+                series.getData().add(new XYChart.Data<>((i + 1) * tickUnit, line[i]));
+
+                if (line[i] < min) {
+                    min = line[i];
+                }
+                if (line[i] > max) {
+                    max = line[i];
+                }
+
+            }
+            chart.getData().add(series);
+
+            NumberAxis axis = (NumberAxis) chart.getXAxis();
+            axis.setTickUnit(tickUnit);
+            axis.setLowerBound(0);
+            axis.setUpperBound(line.length * tickUnit);
+            axis.setLabel(fpsM.buildTimeDescription());
+
+            axis = (NumberAxis) chart.getYAxis();
+            axis.setLabel(this.dir.getDescription());
+            if (Double.compare(min, max) == 0) {
+                axis.setAutoRanging(false);
+                axis.setTickUnit(1);
+                axis.setLowerBound(min - 1);
+                axis.setUpperBound(max + 1);
+            } else {
+                axis.setAutoRanging(true);
+            }
+        }
+
+        @Override
+        public String buildTitle() {
+            return dir.toString().concat(" : ")
+                    .concat(Integer.toString(x1)).concat(";").concat(Integer.toString(y1))
+                    .concat(" vs. ")
+                    .concat(Integer.toString(x2)).concat(";").concat(Integer.toString(y2));
+        }
+
+    }
+
+    private static interface ChartHandler {
+
+        public void displayData(final Direction dir) throws ComputationException;
+
+        public String buildTitle();
     }
 
 }

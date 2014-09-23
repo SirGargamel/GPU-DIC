@@ -8,6 +8,7 @@ public enum ExportMode {
 
     MAP,
     POINT,
+    DOUBLE_POINT,
     SEQUENCE
     
 }

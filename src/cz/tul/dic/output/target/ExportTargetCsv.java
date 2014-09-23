@@ -90,7 +90,7 @@ public class ExportTargetCsv implements IExportTarget {
 
     @Override
     public boolean supportsMode(ExportMode mode) {
-        return !ExportMode.SEQUENCE.equals(mode);
+        return ExportMode.POINT.equals(mode) || ExportMode.MAP.equals(mode);
     }
 
 }

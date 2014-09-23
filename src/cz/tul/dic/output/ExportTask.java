@@ -54,6 +54,10 @@ public class ExportTask implements Serializable {
     public static ExportTask generatePointExport(final ExportTarget target, final Object targetArg, final int x, final int y) {
         return new ExportTask(Direction.dDy, ExportMode.POINT, target, targetArg, new int[]{x, y});
     }
+    
+    public static ExportTask generateDoublePointExport(final ExportTarget target, final Object targetArg, final int x1, final int y1, final int x2, final int y2) {
+        return new ExportTask(Direction.dDy, ExportMode.DOUBLE_POINT, target, targetArg, new int[]{x1, y1, x2, y2});
+    }
 
     public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final int mode) {
         return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, new int[]{mode});

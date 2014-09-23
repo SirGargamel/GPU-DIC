@@ -49,7 +49,11 @@ public class ExportTargetGUI implements IExportTarget {
             throw new IllegalArgumentException("Not enough data parameters.");
         }
         final Context context = (Context) targetParam;
-        context.storePointExport(data, dataParams[0], dataParams[1], ExportMode.POINT);
+        if (dataParams.length == 2) {
+            context.storePointExport(data, dataParams[0], dataParams[1]);
+        } else {
+            context.storePointExport(data, dataParams[0], dataParams[1], dataParams[2], dataParams[3]);
+        }
     }
 
     @Override

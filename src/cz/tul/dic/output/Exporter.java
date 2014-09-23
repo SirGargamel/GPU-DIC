@@ -5,6 +5,7 @@ import cz.tul.dic.output.target.ExportTarget;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.output.data.ExportModeDoublePoint;
 import cz.tul.dic.output.data.ExportModePoint;
 import cz.tul.dic.output.data.ExportModeMap;
 import cz.tul.dic.output.data.ExportModeSequence;
@@ -31,6 +32,7 @@ public class Exporter {
         dataExporters = new HashMap<>();
         dataExporters.put(ExportMode.MAP, new ExportModeMap());
         dataExporters.put(ExportMode.POINT, new ExportModePoint());
+        dataExporters.put(ExportMode.DOUBLE_POINT, new ExportModeDoublePoint());
         dataExporters.put(ExportMode.SEQUENCE, new ExportModeSequence());
 
         targetExporters = new HashMap<>();
