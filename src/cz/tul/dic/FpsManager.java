@@ -7,17 +7,20 @@ import cz.tul.dic.gui.lang.Lang;
  * @author Petr Ječmen
  */
 public class FpsManager {
-    
+
     private final double tickLength;
     private final String tickUnit;
 
     public FpsManager(int fps) {
         double length = 1 / (double) fps;
-        if (fps > 999) {
+        if (fps > 10) {
             length *= 1000;
+            tickUnit = "ms";
+        } else if (fps > 10000) {
+            length *= 1000000;
             tickUnit = "us";
         } else {
-            tickUnit = "ms";
+            tickUnit = "s";
         }
         tickLength = length;
 
