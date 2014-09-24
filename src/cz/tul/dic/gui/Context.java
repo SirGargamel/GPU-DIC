@@ -33,10 +33,14 @@ public class Context {
     private TaskContainer tc;
     private final Map<Integer, Map<Direction, BufferedImage>> exportCacheImages;
     private final Map<String, Map<Direction, double[]>> exportCachePoints;
+    private double min, max;
 
     private Context() {
         exportCacheImages = new HashMap<>();
         exportCachePoints = new HashMap<>();
+        
+        min = Double.NaN;
+        max = min;
     }
 
     public TaskContainer getTc() {
@@ -126,5 +130,14 @@ public class Context {
             }
             return sb.toString();
         }
+    }
+
+    public void setLimits(final double min, final double max) {
+        this.min = min;
+        this.max = max;
+    }
+    
+    public double[] getLimits() {
+        return new double[]{min, max};
     }
 }

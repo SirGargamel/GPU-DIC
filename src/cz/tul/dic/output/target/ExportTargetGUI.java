@@ -37,7 +37,12 @@ public class ExportTargetGUI implements IExportTarget {
         final Context context = (Context) targetParam;
         final BufferedImage overlay;
         if (data != null) {
-            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction));
+            final double[] limits = context.getLimits();
+            if (!Double.isNaN(limits[0]) && !Double.isNaN(limits[1])) {
+                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction, limits[1], limits[0]));
+            } else {
+                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction));
+            }
         } else {
             overlay = background;
         }

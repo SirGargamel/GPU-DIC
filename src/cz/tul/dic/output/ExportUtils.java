@@ -28,7 +28,6 @@ public class ExportUtils {
     private static final int BAR_SIZE_VERTA = 25;
     private static final int BAR_SIZE_HOR = 15;
     private static final NumberFormat nf = new DecimalFormat("0.0#");
-    private static final double BAR_LIMIT = 0.001;
     private static final double COLOR_CENTER = 75 / 360.0;
     private static final double COLOR_GAP = 5 / 360.0;
     private static final double COLOR_RANGE_POS = 160 / 360.0;
@@ -195,7 +194,7 @@ public class ExportUtils {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                out.setRGB(x, y, deformationToRGB(mapData[x][y], max, min));
+                out.setRGB(x, y, deformationToRGB(mapData[x][y], min, max));
             }
         }
 
@@ -205,7 +204,7 @@ public class ExportUtils {
             case dEabs:
             case Eabs:
             case rDabs:
-                drawVerticalBar(out, max);
+                drawVerticalBarAbsolute(out, max, min);
                 break;
             case dDy:
             case Dy:
@@ -230,7 +229,7 @@ public class ExportUtils {
         return out;
     }
 
-    private static int deformationToRGB(final double val, final double max, final double min) {
+    private static int deformationToRGB(final double val, final double min, final double max) {
         final int result;
         if (Double.isNaN(val)) {
             if (debugMode) {
@@ -241,46 +240,55 @@ public class ExportUtils {
         } else {
             float h, s = 1, b = 1;
             double fract;
-            if (val == 0) {
-                h = 0.0f;
-                b = 0.0f;
-            } else if (val < 0) {
-                fract = val / min;
-                h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
+            final double midlle = (max + min) / 2.0;
+            final double half = max - midlle;
+            if (val >= min && val <= max) {
+                if (val == midlle) {
+                    h = 0.0f;
+                    b = 0.0f;
+                } else if (val < midlle) {
+                    fract = -(val - midlle) / half;
+                    h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
+                } else {
+                    fract = (val - midlle) / half;
+                    h = (float) (fract * COLOR_RANGE_POS + COLOR_CENTER + COLOR_GAP);
+                }
             } else {
-                fract = val / max;
-                h = (float) (fract * COLOR_RANGE_POS + COLOR_CENTER + COLOR_GAP);
+                h = 1;
+                s = 0;
+                b = 0.5f;
             }
+
             result = Color.HSBtoRGB(h, s, b);
         }
         return result;
     }
 
-    private static void drawVerticalBar(final BufferedImage image, final double max) {
+    private static void drawVerticalBarAbsolute(final BufferedImage image, final double max, final double min) {
         final int height = image.getHeight();
 
         final Graphics2D g = image.createGraphics();
         final FontMetrics metrics = g.getFontMetrics(g.getFont());
 
         final int x = image.getWidth() - 1 - BAR_SIZE_VERTA;
+        final double middle = (max + min) / 2.0;
+        final double quarter = (max - middle) / 2.0;
 
         final int width = image.getWidth();
-        // positive part   
-        if (max > BAR_LIMIT) {
-            for (int y = 0; y < height; y++) {
-                g.setColor(new Color(deformationToRGB(height - 1 - y, height - 1, 0)));
-                g.drawRect(x, y, BAR_SIZE_VERTA, 1);
-            }
-
-            g.setColor(COLOR_TEXT);
-
-            if (height > LIMIT_HEIGHT) {
-                g.drawString(nf.format(max / 4.0), width - BAR_SIZE_VERTA, height / 4 * 3);
-                g.drawString(nf.format(max / 4.0 * 3), width - BAR_SIZE_VERTA, height / 4);
-            }
-            g.drawString(nf.format(max / 2.0), width - BAR_SIZE_VERTA, height / 2);
-            g.drawString(nf.format(max), width - BAR_SIZE_VERTA, metrics.getHeight() / 3 * 2);
+        // positive part           
+        for (int y = 0; y < height; y++) {
+            g.setColor(new Color(deformationToRGB(height - 1 - y, 0, height - 1)));
+            g.drawRect(x, y, BAR_SIZE_VERTA, 1);
         }
+
+        g.setColor(COLOR_TEXT);
+
+        if (height > LIMIT_HEIGHT) {
+            g.drawString(nf.format(middle - quarter), width - BAR_SIZE_VERTA, height / 4 * 3);
+            g.drawString(nf.format(middle + quarter), width - BAR_SIZE_VERTA, height / 4);
+        }
+        g.drawString(nf.format(middle), width - BAR_SIZE_VERTA, height / 2);
+        g.drawString(nf.format(max), width - BAR_SIZE_VERTA, metrics.getHeight() / 3 * 2);
 
         // zero
         g.setColor(COLOR_TEXT);
@@ -289,7 +297,7 @@ public class ExportUtils {
         g.dispose();
     }
 
-    private static void drawVerticalBar(final BufferedImage image, final double maxPos, final double maxNeg) {
+    private static void drawVerticalBar(final BufferedImage image, final double max, final double min) {
         final int height = image.getHeight();
         final int halfHeight = height / 2;
 
@@ -301,43 +309,42 @@ public class ExportUtils {
         final int width = image.getWidth();
         final int minusWidth = metrics.stringWidth("-");
 
-        // negative part
-        if (maxNeg < -BAR_LIMIT) {
-            for (int y = 0; y < halfHeight; y++) {
-                g.setColor(new Color(deformationToRGB(-y, 0, -halfHeight + 1)));
-                g.drawRect(x, halfHeight - 1 - y, BAR_SIZE_VERT, 1);
-            }
+        final double middle = (max + min) / 2.0;
+        final double half = max - middle;
+        final double thirdOfHalf = half / 3.0;
 
-            g.setColor(COLOR_TEXT);
-
-            if (height > LIMIT_HEIGHT) {
-                g.drawString(nf.format(maxNeg / 3.0), width - BAR_SIZE_VERT, halfHeight - halfHeight / 3);
-                g.drawString(nf.format(maxNeg / 3.0 * 2), width - BAR_SIZE_VERT, halfHeight - halfHeight / 3 * 2);
-            } else {
-                g.drawString(nf.format(maxNeg / 2.0), width - BAR_SIZE_VERT, metrics.getHeight() - halfHeight / 2);
-            }
-            g.drawString(nf.format(maxNeg), width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
-
-            g.drawString(nf.format(0.0), width - BAR_SIZE_VERT + minusWidth, halfHeight - 1);
+        // negative part        
+        for (int y = 0; y < halfHeight; y++) {
+            g.setColor(new Color(deformationToRGB(-y, -halfHeight + 1, halfHeight - 1)));
+            g.drawRect(x, halfHeight - 1 - y, BAR_SIZE_VERT, 1);
         }
 
-        // positive part        
-        if (maxPos > BAR_LIMIT) {
-            for (int y = 0; y < halfHeight; y++) {
-                g.setColor(new Color(deformationToRGB(y, halfHeight - 1, 0)));
-                g.drawRect(x, halfHeight + y, BAR_SIZE_VERT, 1);
-            }
-
-            g.setColor(COLOR_TEXT);
-            if (height > LIMIT_HEIGHT) {
-                g.drawString(nf.format(maxPos / 3.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 3);
-                g.drawString(nf.format(maxPos / 3.0 * 2), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 3 * 2);
-            } else {
-                g.drawString(nf.format(maxPos / 2.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 2);
-            }
-            g.drawString(nf.format(maxPos), width - BAR_SIZE_VERT + minusWidth, height - 2);
-            g.drawString(nf.format(0.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + (metrics.getHeight() * 2 / 3 + 1));
+        g.setColor(COLOR_TEXT);
+        if (height > LIMIT_HEIGHT) {
+            g.drawString(nf.format(middle - thirdOfHalf), width - BAR_SIZE_VERT, halfHeight - halfHeight / 3);
+            g.drawString(nf.format(middle - thirdOfHalf * 2), width - BAR_SIZE_VERT, halfHeight - halfHeight / 3 * 2);
+        } else {
+            g.drawString(nf.format(middle - half), width - BAR_SIZE_VERT, metrics.getHeight() - halfHeight / 2);
         }
+        g.drawString(nf.format(min), width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
+
+        // positive part                
+        for (int y = 0; y < halfHeight; y++) {
+            g.setColor(new Color(deformationToRGB(y, -halfHeight + 1, halfHeight - 1)));
+            g.drawRect(x, halfHeight + y, BAR_SIZE_VERT, 1);
+        }
+
+        g.setColor(COLOR_TEXT);
+        if (height > LIMIT_HEIGHT) {
+            g.drawString(nf.format(middle + thirdOfHalf), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 3);
+            g.drawString(nf.format(middle + thirdOfHalf * 2), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 3 * 2);
+        } else {
+            g.drawString(nf.format(middle + half), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 2);
+        }
+        g.drawString(nf.format(max), width - BAR_SIZE_VERT + minusWidth, height - 2);
+
+        final String val = nf.format(middle);
+        g.drawString(val, width - BAR_SIZE_VERT + minusWidth, halfHeight + (metrics.getHeight() * 2 / 3 + 1));
 
         g.dispose();
     }
@@ -352,46 +359,43 @@ public class ExportUtils {
         final int y = image.getHeight() - 1 - BAR_SIZE_HOR;
         final int tY = image.getHeight() - 3;
         final int tWidth = metrics.stringWidth(nf.format(max));
-        String val;
 
-        // negative part
-        if (min < -BAR_LIMIT) {
-            for (int x = 0; x < halfWidth; x++) {
-                g.setColor(new Color(deformationToRGB(-x, 0, -halfWidth + 1)));
-                g.drawRect(halfWidth - 1 - x, y, 1, BAR_SIZE_HOR);
-            }
+        final double middle = (max + min) / 2.0;
+        final double half = max - middle;
+        final double thirdOfHalf = half / 3.0;
 
-            g.setColor(COLOR_TEXT);
-            if (width > LIMIT_WIDTH) {
-                g.drawString(nf.format(min / 3.0), halfWidth - halfWidth / 3, tY);
-                g.drawString(nf.format(min / 3.0 * 2), halfWidth - halfWidth / 3 * 2, tY);
-            } else {
-                g.drawString(nf.format(min / 2.0), halfWidth - halfWidth / 2 - tWidth / 2, tY);
-            }
-            g.drawString(nf.format(min), 0, tY);
-        }
-
-        // positive part  
-        if (max > BAR_LIMIT) {
-            for (int x = 0; x < halfWidth; x++) {
-                g.setColor(new Color(deformationToRGB(x, halfWidth - 1, 0)));
-                g.drawRect(x + halfWidth, y, 1, BAR_SIZE_HOR);
-            }
-
-            g.setColor(COLOR_TEXT);
-            if (width > LIMIT_WIDTH) {
-                g.drawString(nf.format(max / 3.0), halfWidth + halfWidth / 3 - tWidth, tY);
-                g.drawString(nf.format(max / 3.0 * 2), halfWidth + halfWidth / 3 * 2 - tWidth, tY);
-            } else {
-                g.drawString(nf.format(max / 2.0), halfWidth + halfWidth / 2 - tWidth / 2, tY);
-            }
-
-            g.drawString(nf.format(max), width - tWidth, tY);
+        // negative part        
+        for (int x = 0; x < halfWidth; x++) {
+            g.setColor(new Color(deformationToRGB(-x, -halfWidth + 1, halfWidth - 1)));
+            g.drawRect(halfWidth - 1 - x, y, 1, BAR_SIZE_HOR);
         }
 
         g.setColor(COLOR_TEXT);
-        val = nf.format(0.0);
-        g.drawString("0.0", halfWidth - metrics.stringWidth(val) / 2, tY);
+        if (width > LIMIT_WIDTH) {
+            g.drawString(nf.format(middle - thirdOfHalf), halfWidth - halfWidth / 3, tY);
+            g.drawString(nf.format(middle - thirdOfHalf * 2), halfWidth - halfWidth / 3 * 2, tY);
+        } else {
+            g.drawString(nf.format(middle - half), halfWidth - halfWidth / 2 - tWidth / 2, tY);
+        }
+        g.drawString(nf.format(min), 0, tY);
+
+        // positive part          
+        for (int x = 0; x < halfWidth; x++) {
+            g.setColor(new Color(deformationToRGB(x, -halfWidth + 1, halfWidth - 1)));
+            g.drawRect(x + halfWidth, y, 1, BAR_SIZE_HOR);
+        }
+
+        g.setColor(COLOR_TEXT);
+        if (width > LIMIT_WIDTH) {
+            g.drawString(nf.format(middle + thirdOfHalf), halfWidth + halfWidth / 3 - tWidth, tY);
+            g.drawString(nf.format(middle + thirdOfHalf * 2), halfWidth + halfWidth / 3 * 2 - tWidth, tY);
+        } else {
+            g.drawString(nf.format(middle + half), halfWidth + halfWidth / 2 - tWidth / 2, tY);
+        }
+        g.drawString(nf.format(max), width - tWidth, tY);
+
+        final String val = nf.format(middle);
+        g.drawString(val, halfWidth - metrics.stringWidth(val) / 2, tY);
 
         g.dispose();
     }

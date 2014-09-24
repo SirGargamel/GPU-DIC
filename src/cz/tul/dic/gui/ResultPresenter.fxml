@@ -69,7 +69,11 @@
 </opaqueInsets>
 <padding>
 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</padding></BorderPane>
+</padding>
+<center><HBox alignment="CENTER" BorderPane.alignment="CENTER">
+<children><Label alignment="CENTER" contentDisplay="CENTER" minWidth="35.0" text="%Limits" textAlignment="CENTER" /><TextField fx:id="textMin" onAction="#handleLimitsAction" promptText="min" /><TextField fx:id="textMax" onAction="#handleLimitsAction" promptText="max" />
+</children></HBox>
+</center></BorderPane>
 </children></VBox>
 </bottom>
         </BorderPane>

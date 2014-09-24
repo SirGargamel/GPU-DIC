@@ -63,7 +63,7 @@ public class ResultPresenter implements Initializable {
     @FXML
     private ComboBox<Direction> choiceDir;
     @FXML
-    private TextField textIndex;
+    private TextField textIndex, textMin, textMax;
     @FXML
     private Label labelTime;
     @FXML
@@ -193,7 +193,7 @@ public class ResultPresenter implements Initializable {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
             keyEvent.consume();
         }
-    }
+    }    
 
     @FXML
     private void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
@@ -226,6 +226,25 @@ public class ResultPresenter implements Initializable {
         } else if (val.equals(c2)) {
             Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), determineType()));
         }
+    }
+
+    @FXML
+    private void handleLimitsAction(ActionEvent event) {
+        final String minS = textMin.getText();
+        final String maxS = textMax.getText();
+        if (minS != null && !minS.isEmpty() && maxS != null && !maxS.isEmpty()) {
+            try {
+                final double min = Double.valueOf(minS);
+                final double max = Double.valueOf(maxS);
+                Context.getInstance().setLimits(min, max);                
+            } catch (NumberFormatException ex) {
+                Context.getInstance().setLimits(Double.NaN, Double.NaN);
+            }
+        } else {
+            Context.getInstance().setLimits(Double.NaN, Double.NaN);
+        }
+
+        displayImage();
     }
 
     private ExportTarget determineTarget() {
