@@ -47,7 +47,7 @@ public class Computation {
 
         // displacement export
         tc.getExports().clear();
-        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+        for (int r : TaskContainerUtils.getRounds(tc).values()) {
             tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
@@ -74,7 +74,7 @@ public class Computation {
             strain.computeStrain(tc);            
 
             tc.getExports().clear();
-            for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+            for (int r : TaskContainerUtils.getRounds(tc).values()) {
                 tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exx)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eyy)), r));
                 tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exy)), r));
