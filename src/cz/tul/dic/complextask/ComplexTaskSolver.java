@@ -3,7 +3,6 @@ package cz.tul.dic.complextask;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
-import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
@@ -86,7 +85,14 @@ public class ComplexTaskSolver extends Observable {
             } else {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
-                rrm.getTc().setDisplacement(r, nextR, new double[img.getWidth()][img.getHeight()][]);
+                final double[][][] data = new double[img.getWidth()][img.getHeight()][];
+                ROI roi = rrm.getTc().getRois(r).iterator().next();
+                for (int x = roi.getX1(); x <= roi.getX2(); x++) {
+                    for (int y = roi.getY1(); y <= roi.getY2(); y++) {
+                        data[x][y] = new double[2];
+                    }
+                }
+                rrm.getTc().setDisplacement(r, nextR, data);
             }
 
             tc.setResults(r, tcR.getResults(r));
