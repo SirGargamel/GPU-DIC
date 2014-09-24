@@ -31,7 +31,7 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public class ComplexTaskSolver extends Observable {
-    
+
     private final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
@@ -86,10 +86,18 @@ public class ComplexTaskSolver extends Observable {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
                 final double[][][] data = new double[img.getWidth()][img.getHeight()][];
-                ROI roi = rrm.getTc().getRois(r).iterator().next();
-                for (int x = roi.getX1(); x <= roi.getX2(); x++) {
-                    for (int y = roi.getY1(); y <= roi.getY2(); y++) {
-                        data[x][y] = new double[2];
+                if (!rrm.getTc().getRois(r).isEmpty()) {
+                    ROI roi = rrm.getTc().getRois(r).iterator().next();
+                    for (int x = roi.getX1(); x <= roi.getX2(); x++) {
+                        if (x < 0 || x >= data.length) {
+                            continue;
+                        }
+                        for (int y = roi.getY1(); y <= roi.getY2(); y++) {
+                            if (y < 0 || y >= data[x].length) {
+                                continue;
+                            }
+                            data[x][y] = new double[2];
+                        }
                     }
                 }
                 rrm.getTc().setDisplacement(r, nextR, data);
