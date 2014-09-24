@@ -102,6 +102,7 @@ public class NameGenerator {
 
         public String finalize(String extension) {
             sb.append(DELIMITER);
+            sb.append(DELIMITER);
             sb.append(tc.getParameter(TaskParameter.FACET_SIZE).toString());
             if (debugMode) {
                 sb.append(DELIMITER);
