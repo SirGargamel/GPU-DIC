@@ -50,6 +50,10 @@ public class NameGenerator {
     public static String generateCsvPoint(final TaskContainer tc, final int x, final int y) {
         return new Generator(tc).name().intVal(x).intVal(y).finalize(EXT_CSV);
     }
+    
+    public static String generateCsvDoublePoint(final TaskContainer tc, final int x1, final int y1, final int x2, final int y2) {
+        return new Generator(tc).name().intVal(x1).intVal(y1).delimiter().intVal(x2).intVal(y2).finalize(EXT_CSV);
+    }
 
     public static String generateCsvMap(final TaskContainer tc, final int round, final Direction dir) {
         return generateMap(tc, round, dir).replace(EXT_MAP, EXT_CSV);
@@ -88,6 +92,11 @@ public class NameGenerator {
         public Generator direction(Direction dir) {
             sb.append(DELIMITER);
             sb.append(dir.toString());
+            return this;
+        }
+        
+        public Generator delimiter() {
+            sb.append(DELIMITER);
             return this;
         }
 

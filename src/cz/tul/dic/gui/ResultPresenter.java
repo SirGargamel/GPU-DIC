@@ -326,14 +326,11 @@ public class ResultPresenter implements Initializable {
 
                         final ChartHandler ch = new ComparativePointChartHandler(lastX, lastY, newX, newY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
                         charts.put(stage, ch);
-                        ch.displayData(choiceDir.getValue());
-
-                        final LineResult controller = loader.getController();
-                        controller.init();
+                        ch.displayData(choiceDir.getValue());                        
 
                         stage.setOnShown((WindowEvent t2) -> {
-                            stage.setX(stage.getX() + lastX + 35);
-                            stage.setY(stage.getY() + lastY + 50);
+                            stage.setX(stage.getX() + newX + 35);
+                            stage.setY(stage.getY() + newY + 50);
                         });
                         stage.setTitle(ch.buildTitle());
                         stage.setScene(new Scene(root));
@@ -356,9 +353,6 @@ public class ResultPresenter implements Initializable {
                     @SuppressWarnings("unchecked")
                     final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
                     chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, lastY});
-
-                    final LineResult controller = loader.getController();
-                    controller.init();
 
                     final ChartHandler ch = new SinglePointChartHandler(lastX, lastY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
                     charts.put(stage, ch);
