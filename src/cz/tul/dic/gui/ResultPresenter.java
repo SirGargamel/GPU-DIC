@@ -83,11 +83,9 @@ public class ResultPresenter implements Initializable {
     private Timeline timeLine;
     private int lastX, lastY;
     private final Map<Stage, ChartHandler> charts;
-    private boolean inited;
 
     public ResultPresenter() {
-        charts = new LinkedHashMap<>();
-        inited = false;
+        charts = new LinkedHashMap<>();        
     }
 
     @FXML
@@ -121,7 +119,6 @@ public class ResultPresenter implements Initializable {
     }
 
     private void displayImage() {
-        init();
         try {
             final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
             if (i != null) {
@@ -322,7 +319,7 @@ public class ResultPresenter implements Initializable {
 
         image.setOnMouseClicked((MouseEvent t) -> {
             try {
-                final Context context = Context.getInstance();                
+                final Context context = Context.getInstance();
 
                 lastX = (int) Math.round(t.getX());
                 lastY = (int) Math.round(t.getY());
@@ -351,7 +348,7 @@ public class ResultPresenter implements Initializable {
                     stage.setScene(new Scene(root));
                     stage.setIconified(false);
                     stage.show();
-                    
+
                     openTwoPointStrainAnalysis(context);
                 }
             } catch (IOException e) {
@@ -439,23 +436,16 @@ public class ResultPresenter implements Initializable {
         }
     }
 
-    private void init() {
-        if (!inited) {
-            final Scene scene = image.getParent().getScene();
-            if (scene != null) {
-                final Stage mainStage = (Stage) scene.getWindow();
-                mainStage.setResizable(false);
-                mainStage.setOnCloseRequest((WindowEvent event) -> {
-                    charts.keySet().stream().forEach((s) -> {
-                        s.close();
-                    });
-                    charts.clear();
-                });
-
-                inited = true;
-            }
-        }
-
+    public void init() {
+        final Scene scene = image.getParent().getScene();
+        final Stage mainStage = (Stage) scene.getWindow();
+        mainStage.setOnCloseRequest((WindowEvent event) -> {
+            charts.keySet().stream().forEach((s) -> {
+                s.close();
+            });
+            charts.clear();
+        });
+        displayImage();
     }
 
     private void actualizeCharts(final Direction dir) {

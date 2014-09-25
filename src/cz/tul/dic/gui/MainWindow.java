@@ -402,8 +402,9 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionResults(ActionEvent event) {
-        try {
-            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ResultPresenter.fxml"), Lang.getBundle());
+        try {            
+            final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("cz/tul/dic/gui/ResultPresenter.fxml"), Lang.getBundle());
+            final Parent root = loader.load();
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Results"));
             stage.setScene(new Scene(root));
@@ -411,6 +412,10 @@ public class MainWindow implements Initializable {
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.setResizable(false);
+            stage.setOnShown((WindowEvent event1) -> {
+                ResultPresenter controller = loader.getController();
+                controller.init();
+            });
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading Results dialog from JAR.\n{0}", e);
