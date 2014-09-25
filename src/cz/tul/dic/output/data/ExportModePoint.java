@@ -32,6 +32,8 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
         final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
         final double time = fpsM.getTickLength();
 
+        final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
+
         double[][][] results;
         double[] data;
         for (Direction dir : Direction.values()) {
@@ -97,6 +99,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         default:
                             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                     }
+                    data[r] *= pxToMm;
                 }
             }
         }
