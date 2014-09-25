@@ -13,15 +13,15 @@ public class FpsManager {
 
     public FpsManager(int fps) {
         double length = 1 / (double) fps;
-        if (fps > 10) {
+//        if (fps > 10) {
             length *= 1000;
             tickUnit = "ms";
-        } else if (fps > 10000) {
-            length *= 1000000;
-            tickUnit = "us";
-        } else {
-            tickUnit = "s";
-        }
+//        } else if (fps > 10000) {
+//            length *= 1000000;
+//            tickUnit = "us";
+//        } else {
+//            tickUnit = "s";
+//        }
         tickLength = length;
 
     }
