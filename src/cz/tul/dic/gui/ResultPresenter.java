@@ -16,7 +16,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -81,11 +80,11 @@ public class ResultPresenter implements Initializable {
     @FXML
     private Button buttonNext;
     private int index;
-    private Timeline timeLine;    
+    private Timeline timeLine;
     private final Map<Stage, ChartHandler> charts;
 
     public ResultPresenter() {
-        charts = new LinkedHashMap<>();        
+        charts = new LinkedHashMap<>();
     }
 
     @FXML
@@ -112,7 +111,7 @@ public class ResultPresenter implements Initializable {
 
         textIndex.setText(Integer.toString(index));
 
-        final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
+        final FpsManager fpsM = new FpsManager(tc);
         labelTime.setText(Utils.format(fpsM.getTime(index)).concat(fpsM.getTickUnit()));
 
         return result;
@@ -294,7 +293,7 @@ public class ResultPresenter implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        index = 0;        
+        index = 0;
 
         final ObservableList<Direction> comboBoxData = FXCollections.observableArrayList();
         comboBoxData.addAll(Direction.values());
@@ -322,7 +321,7 @@ public class ResultPresenter implements Initializable {
 
                 final int lastX = (int) Math.round(t.getX());
                 final int lastY = (int) Math.round(t.getY());
-                
+
                 final int correctedY;
                 if (choiceDir.getValue().isStretch()) {
                     final double stretchFactor = TaskContainerUtils.getStretchFactor(context.getTc(), index);
@@ -330,7 +329,7 @@ public class ResultPresenter implements Initializable {
                 } else {
                     correctedY = lastY;
                 }
-                
+
                 final Map<Direction, double[]> data = context.getPointResult(lastX, correctedY);
                 final double[] line = data.get(choiceDir.getValue());
                 if (line != null) {
@@ -344,7 +343,7 @@ public class ResultPresenter implements Initializable {
                     final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
                     chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, correctedY});
 
-                    final ChartHandler ch = new SinglePointChartHandler(lastX, correctedY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
+                    final ChartHandler ch = new SinglePointChartHandler(lastX, correctedY, chart, new FpsManager(Context.getInstance().getTc()));
                     charts.put(stage, ch);
                     ch.displayData(choiceDir.getValue());
 
@@ -428,7 +427,7 @@ public class ResultPresenter implements Initializable {
                 final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
                 chart.setUserData(new Object[]{Context.getInstance().getTc(), x1, y1, x2, y2});
 
-                final ChartHandler ch = new ComparativePointChartHandler(x1, y1, x2, y2, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
+                final ChartHandler ch = new ComparativePointChartHandler(x1, y1, x2, y2, chart, new FpsManager(Context.getInstance().getTc()));
                 charts.put(stage, ch);
                 ch.displayData(choiceDir.getValue());
 
@@ -480,22 +479,22 @@ public class ResultPresenter implements Initializable {
 
     private static class SinglePointChartHandler implements ChartHandler {
 
-        private final int x, y, fps;
+        private final int x, y;
+        private final FpsManager fpsM;
         private final LineChart<Number, Number> chart;
         private Direction dir;
 
-        public SinglePointChartHandler(int x, int y, LineChart<Number, Number> chart, int fps) {
+        public SinglePointChartHandler(int x, int y, LineChart<Number, Number> chart, FpsManager fpsM) {
             this.x = x;
             this.y = y;
             this.chart = chart;
-            this.fps = fps;
+            this.fpsM = fpsM;
 
             chart.setLegendVisible(false);
         }
 
         @Override
         public void displayData(final Direction dir) throws ComputationException {
-            final FpsManager fpsM = new FpsManager(fps);
             final double tickUnit = fpsM.getTickLength();
             final double[] line = Context.getInstance().getPointResult(x, y).get(dir);
             this.dir = dir;
@@ -548,24 +547,24 @@ public class ResultPresenter implements Initializable {
 
     private static class ComparativePointChartHandler implements ChartHandler {
 
-        private final int x1, y1, x2, y2, fps;
+        private final int x1, y1, x2, y2;
+        private final FpsManager fpsM;
         private final LineChart<Number, Number> chart;
         private Direction dir;
 
-        public ComparativePointChartHandler(int x1, int y1, int x2, int y2, LineChart<Number, Number> chart, int fps) {
+        public ComparativePointChartHandler(int x1, int y1, int x2, int y2, LineChart<Number, Number> chart, FpsManager fpsM) {
             this.x1 = x1;
             this.y1 = y1;
             this.x2 = x2;
             this.y2 = y2;
             this.chart = chart;
-            this.fps = fps;
+            this.fpsM = fpsM;
 
             chart.setLegendVisible(false);
         }
 
         @Override
-        public void displayData(final Direction dir) throws ComputationException {
-            final FpsManager fpsM = new FpsManager(fps);
+        public void displayData(final Direction dir) throws ComputationException {            
             final double tickUnit = fpsM.getTickLength();
 
             // TODO

@@ -3,7 +3,6 @@ package cz.tul.dic.output.target;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
@@ -17,7 +16,7 @@ public class ExportTargetCsv implements IExportTarget {
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
         if (data instanceof Map<?, ?>) {
             // export image
-            exportPoint((Map<Direction, double[]>) data, targetParam, (int) tc.getParameter(TaskParameter.FPS));
+            exportPoint((Map<Direction, double[]>) data, targetParam, new FpsManager(tc));
         } else if (data instanceof double[][]) {
             // export map
             exportMap((double[][]) data, targetParam);
@@ -49,14 +48,13 @@ public class ExportTargetCsv implements IExportTarget {
 
     }
 
-    private void exportPoint(final Map<Direction, double[]> data, final Object targetParam, final int fps) throws IOException {
+    private void exportPoint(final Map<Direction, double[]> data, final Object targetParam, final FpsManager fpsM) throws IOException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
 
         
-        final File target = (File) targetParam;
-        final FpsManager fpsM = new FpsManager(fps);        
+        final File target = (File) targetParam;            
 
         if (data != null) {
             int l = 0;

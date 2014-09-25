@@ -57,7 +57,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
 
         double[][] result = new double[width][height];
 
-        final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
+        final FpsManager fpsM = new FpsManager(tc);
         final double time = fpsM.getTickLength();
 
         final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);

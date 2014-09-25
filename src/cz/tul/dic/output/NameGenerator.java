@@ -68,7 +68,7 @@ public class NameGenerator {
         public Generator(TaskContainer tc) {
             this.tc = tc;
             sb = new StringBuilder();
-            fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
+            fpsM = new FpsManager(tc);
         }
 
         public Generator name() {            

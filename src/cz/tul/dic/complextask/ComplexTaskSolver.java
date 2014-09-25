@@ -121,7 +121,7 @@ public class ComplexTaskSolver extends Observable {
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
-        final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
+        final FpsManager fpsM = new FpsManager(tc);
         final String[][] out = new String[bottomShifts.size() + 1][2];
         out[0][0] = fpsM.buildTimeDescription();
         out[0][1] = "dY";

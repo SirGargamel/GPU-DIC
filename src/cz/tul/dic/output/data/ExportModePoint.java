@@ -29,7 +29,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
         final int x = dataParams[0];
         final int y = dataParams[1];
 
-        final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
+        final FpsManager fpsM = new FpsManager(tc);
         final double time = fpsM.getTickLength();
 
         final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);

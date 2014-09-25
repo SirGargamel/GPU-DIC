@@ -1,5 +1,7 @@
 package cz.tul.dic;
 
+import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 
 /**
@@ -11,7 +13,8 @@ public class FpsManager {
     private final double tickLength;
     private final String tickUnit;
 
-    public FpsManager(int fps) {
+    public FpsManager(final TaskContainer tc) {
+        final int fps = (int) tc.getParameter(TaskParameter.FPS);
         double length = 1 / (double) fps;
 //        if (fps > 10) {
             length *= 1000;
