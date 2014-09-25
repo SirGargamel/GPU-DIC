@@ -99,7 +99,7 @@ public class MainWindow implements Initializable {
         }
         fc.getExtensionFilters().clear();
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project files", "*.avi", "*.bmp", "*.jpg", "*.config", "*.task", "*.scr"));
-        List<File> fileList = fc.showOpenMultipleDialog(null);
+        List<File> fileList = fc.showOpenMultipleDialog(buttonRun.getScene().getWindow());
         if (fileList != null && !fileList.isEmpty()) {
             if (fileList.get(0).getName().endsWith(".scr")) {
                 // load batch batch file
@@ -265,7 +265,7 @@ public class MainWindow implements Initializable {
                 fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_BINARY));
             }
 
-            File target = fc.showSaveDialog(null);
+            File target = fc.showSaveDialog(buttonRun.getScene().getWindow());
             if (target != null) {
                 if (val.equals(c1)) {
                     if (!target.getName().endsWith(NameGenerator.EXT_CONFIG)) {
