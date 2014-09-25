@@ -179,9 +179,10 @@ public class TaskContainerUtils {
         final double result;
         final double[][][] results = tc.getDisplacement(startImageIndex, endImageIndex);
         final double[][][] dResults = tc.getDisplacement(endImageIndex - 1, endImageIndex);
-        final int width = dResults.length;
-        final int height = dResults[0].length;
         if (dResults != null) {
+            final int width = dResults.length;
+            final int height = dResults[0].length;
+
             int y2 = 1;
             outerloop:
             for (int y = height - 1; y >= 0; y--) {

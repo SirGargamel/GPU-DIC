@@ -105,8 +105,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
         if (direction.isStretch()) {
             final double[][][] tempData = tc.getDisplacement(round - 1, round);
             if (tempData != null) {
-                final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);
-                System.out.println("Stretch - " + stretchFactor);
+                final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);                
 
                 final double[][] stretchedResult = new double[width][height];
                 double newY;
