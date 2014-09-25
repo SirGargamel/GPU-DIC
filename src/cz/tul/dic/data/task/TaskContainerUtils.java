@@ -112,7 +112,7 @@ public class TaskContainerUtils {
             final Image img = tc.getImage(startImageIndex);
             final int width = img.getWidth();
             final int height = img.getHeight();
-            result = new double[width][height][];            
+            result = new double[width][height][];
 
             double posX, posY;
             int iX, iY;
@@ -129,7 +129,7 @@ public class TaskContainerUtils {
                     posX = x;
                     posY = y;
                     iX = x;
-                    iY = y;                    
+                    iY = y;
 
                     while (indexFrom != endImageIndex) {
                         do {
@@ -169,6 +169,42 @@ public class TaskContainerUtils {
             }
 
             tc.setDisplacement(startImageIndex, endImageIndex, result);
+        }
+
+        return result;
+    }
+
+    public static double getStretchFactor(final TaskContainer tc, final int endImageIndex) {
+        final int startImageIndex = getFirstRound(tc);
+        final double result;
+        final double[][][] results = tc.getDisplacement(startImageIndex, endImageIndex);
+        final double[][][] dResults = tc.getDisplacement(endImageIndex - 1, endImageIndex);
+        final int width = dResults.length;
+        final int height = dResults[0].length;
+        if (dResults != null) {
+            int y2 = 1;
+            outerloop:
+            for (int y = height - 1; y >= 0; y--) {
+                for (int x = 0; x < width; x++) {
+                    if (dResults[x][y] != null) {
+                        y2 = y;
+                        break outerloop;
+                    }
+                }
+            }
+            int y1 = 1;
+            outerloop:
+            for (int y = height - 1; y >= 0; y--) {
+                for (int x = 0; x < width; x++) {
+                    if (results[x][y] != null) {
+                        y1 = y;
+                        break outerloop;
+                    }
+                }
+            }
+            result = y2 / (double) y1;
+        } else {
+            result = 1;
         }
 
         return result;

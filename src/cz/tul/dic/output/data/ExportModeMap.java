@@ -18,7 +18,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
         }
         final int round = dataParams[0];
         final int roundZero = TaskContainerUtils.getFirstRound(tc);
-        final double[][][] results;
+        final double[][][] results;        
         switch (direction) {
             case dDx:
             case dDy:
@@ -31,7 +31,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case Dx:
             case Dy:
             case Dabs:
-                results = TaskContainerUtils.getDisplacement(tc, roundZero, round);
+                results = TaskContainerUtils.getDisplacement(tc, roundZero, round);                
                 break;
             case dExx:
             case dEyy:
@@ -43,7 +43,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case Eyy:
             case Exy:
             case Eabs:
-                results = tc.getStrain(roundZero, round);
+                results = tc.getStrain(roundZero, round);                
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
@@ -55,11 +55,11 @@ public class ExportModeMap implements IExportMode<double[][]> {
         final int width = results.length;
         final int height = results[0].length;
 
-        final double[][] result = new double[width][height];
-        
+        double[][] result = new double[width][height];
+
         final FpsManager fpsM = new FpsManager((int) tc.getParameter(TaskParameter.FPS));
         final double time = fpsM.getTickLength();
-        
+
         final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
 
         for (int x = 0; x < width; x++) {
@@ -96,12 +96,42 @@ public class ExportModeMap implements IExportMode<double[][]> {
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                 }
-                
+
                 result[x][y] *= pxToMm;
             }
         }
 
+        // stretch result to ending ROI
+        if (direction.isStretch()) {
+            final double[][][] tempData = tc.getDisplacement(round - 1, round);
+            if (tempData != null) {
+                final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);
+                System.out.println("Stretch - " + stretchFactor);
+
+                final double[][] stretchedResult = new double[width][height];
+                double newY;
+                for (int y = 0; y < height; y++) {
+                    newY = y / stretchFactor;
+                    for (int x = 0; x < width; x++) {
+                        stretchedResult[x][y] = interpolate(
+                                result[x][(int) Math.floor(newY)],
+                                result[x][(int) Math.ceil(newY)],
+                                newY % 1);
+                    }
+                }
+                result = stretchedResult;
+            }
+        }
+
         return result;
+    }
+
+    private double interpolate(final double val1, final double val2, final double ratio) {
+        if (Double.isNaN(val1) || Double.isNaN(val2)) {
+            return Double.NaN;
+        } else {
+            return (int) ((val1 * ratio) + (val2 * (1 - ratio)));
+        }
     }
 
 }

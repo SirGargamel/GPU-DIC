@@ -4,6 +4,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.Direction;
@@ -80,8 +81,7 @@ public class ResultPresenter implements Initializable {
     @FXML
     private Button buttonNext;
     private int index;
-    private Timeline timeLine;
-    private int lastX, lastY;
+    private Timeline timeLine;    
     private final Map<Stage, ChartHandler> charts;
 
     public ResultPresenter() {
@@ -294,8 +294,7 @@ public class ResultPresenter implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        index = 0;
-        lastX = -1;
+        index = 0;        
 
         final ObservableList<Direction> comboBoxData = FXCollections.observableArrayList();
         comboBoxData.addAll(Direction.values());
@@ -321,9 +320,18 @@ public class ResultPresenter implements Initializable {
             try {
                 final Context context = Context.getInstance();
 
-                lastX = (int) Math.round(t.getX());
-                lastY = (int) Math.round(t.getY());
-                final Map<Direction, double[]> data = context.getPointResult(lastX, lastY);
+                final int lastX = (int) Math.round(t.getX());
+                final int lastY = (int) Math.round(t.getY());
+                
+                final int correctedY;
+                if (choiceDir.getValue().isStretch()) {
+                    final double stretchFactor = TaskContainerUtils.getStretchFactor(context.getTc(), index);
+                    correctedY = (int) Math.round(lastY / stretchFactor);
+                } else {
+                    correctedY = lastY;
+                }
+                
+                final Map<Direction, double[]> data = context.getPointResult(lastX, correctedY);
                 final double[] line = data.get(choiceDir.getValue());
                 if (line != null) {
                     final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
@@ -334,9 +342,9 @@ public class ResultPresenter implements Initializable {
                     final BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
                     @SuppressWarnings("unchecked")
                     final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
-                    chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, lastY});
+                    chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, correctedY});
 
-                    final ChartHandler ch = new SinglePointChartHandler(lastX, lastY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
+                    final ChartHandler ch = new SinglePointChartHandler(lastX, correctedY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
                     charts.put(stage, ch);
                     ch.displayData(choiceDir.getValue());
 
