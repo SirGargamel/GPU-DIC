@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
@@ -85,7 +86,7 @@ public class ResultPresenter implements Initializable {
     private boolean inited;
 
     public ResultPresenter() {
-        charts = new HashMap<>();
+        charts = new LinkedHashMap<>();
         inited = false;
     }
 
@@ -195,7 +196,7 @@ public class ResultPresenter implements Initializable {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
             keyEvent.consume();
         }
-    }    
+    }
 
     @FXML
     private void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
@@ -238,7 +239,7 @@ public class ResultPresenter implements Initializable {
             try {
                 final double min = Double.valueOf(minS);
                 final double max = Double.valueOf(maxS);
-                Context.getInstance().setLimits(min, max);                
+                Context.getInstance().setLimits(min, max);
             } catch (NumberFormatException ex) {
                 Context.getInstance().setLimits(Double.NaN, Double.NaN);
             }
@@ -321,40 +322,10 @@ public class ResultPresenter implements Initializable {
 
         image.setOnMouseClicked((MouseEvent t) -> {
             try {
-                final Context context = Context.getInstance();
-                final int newX = (int) Math.round(t.getX());
-                final int newY = (int) Math.round(t.getY());
+                final Context context = Context.getInstance();                
 
-                if (lastX != -1) {
-                    final Map<Direction, double[]> data = context.getComparativeStrain(lastX, lastY, newX, newY);
-                    if (data != null) {
-                        final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
-                        final Parent root = loader.load();
-                        final Stage stage = new Stage();
-
-                        @SuppressWarnings("unchecked")
-                        final BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
-                        @SuppressWarnings("unchecked")
-                        final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
-                        chart.setUserData(new Object[]{Context.getInstance().getTc(), lastX, lastY, newX, newY});
-
-                        final ChartHandler ch = new ComparativePointChartHandler(lastX, lastY, newX, newY, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
-                        charts.put(stage, ch);
-                        ch.displayData(choiceDir.getValue());                        
-
-                        stage.setOnShown((WindowEvent t2) -> {
-                            stage.setX(stage.getX() + newX + 35);
-                            stage.setY(stage.getY() + newY + 50);
-                        });
-                        stage.setTitle(ch.buildTitle());
-                        stage.setScene(new Scene(root));
-                        stage.setIconified(false);
-                        stage.show();
-                    }
-                }
-
-                lastX = newX;
-                lastY = newY;
+                lastX = (int) Math.round(t.getX());
+                lastY = (int) Math.round(t.getY());
                 final Map<Direction, double[]> data = context.getPointResult(lastX, lastY);
                 final double[] line = data.get(choiceDir.getValue());
                 if (line != null) {
@@ -380,7 +351,8 @@ public class ResultPresenter implements Initializable {
                     stage.setScene(new Scene(root));
                     stage.setIconified(false);
                     stage.show();
-
+                    
+                    openTwoPointStrainAnalysis(context);
                 }
             } catch (IOException e) {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
@@ -416,6 +388,55 @@ public class ResultPresenter implements Initializable {
         imgV.setFitHeight(20);
         imgV.setPreserveRatio(true);
         buttonNext.setGraphic(imgV);
+    }
+
+    private void openTwoPointStrainAnalysis(final Context context) throws ComputationException, IOException {
+        final Stage[] stages = this.charts.keySet().toArray(new Stage[0]);
+        SinglePointChartHandler chart1 = null, chart2 = null;
+
+        for (int i = stages.length - 1; i >= 0; i--) {
+            if (stages[i].isShowing() && charts.get(stages[i]) instanceof SinglePointChartHandler) {
+                if (chart1 == null) {
+                    chart1 = (SinglePointChartHandler) charts.get(stages[i]);
+                } else {
+                    chart2 = (SinglePointChartHandler) charts.get(stages[i]);
+                    break;
+                }
+            }
+        }
+
+        if (chart1 != null && chart2 != null) {
+            final int x1 = chart1.x;
+            final int y1 = chart1.y;
+            final int x2 = chart2.x;
+            final int y2 = chart2.y;
+
+            final Map<Direction, double[]> data = context.getComparativeStrain(x1, y1, x2, y2);
+            if (data != null) {
+                final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("cz/tul/dic/gui/LineResult.fxml"), Lang.getBundle());
+                final Parent root = loader.load();
+                final Stage stage = new Stage();
+
+                @SuppressWarnings("unchecked")
+                final BorderPane pane = (BorderPane) root.getChildrenUnmodifiable().get(0);
+                @SuppressWarnings("unchecked")
+                final LineChart<Number, Number> chart = (LineChart<Number, Number>) pane.getCenter();
+                chart.setUserData(new Object[]{Context.getInstance().getTc(), x1, y1, x2, y2});
+
+                final ChartHandler ch = new ComparativePointChartHandler(x1, y1, x2, y2, chart, (int) Context.getInstance().getTc().getParameter(TaskParameter.FPS));
+                charts.put(stage, ch);
+                ch.displayData(choiceDir.getValue());
+
+                stage.setOnShown((WindowEvent t2) -> {
+                    stage.setX(stage.getX() + x1 + 35 + stage.getWidth());
+                    stage.setY(stage.getY() + y1 + 10);
+                });
+                stage.setTitle(ch.buildTitle());
+                stage.setScene(new Scene(root));
+                stage.setIconified(false);
+                stage.show();
+            }
+        }
     }
 
     private void init() {
