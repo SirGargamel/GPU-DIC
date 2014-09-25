@@ -47,12 +47,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
 import org.pmw.tinylog.Logger;
 
 public class ResultPresenter implements Initializable {
 
+    private static final String SEPARATOR = " [";
     private static final int PREF_SIZE_W_BASE = 30;
     private static final int PREF_SIZE_W_M = 5;
     private static final int PREF_SIZE_H = 30;
@@ -300,6 +302,18 @@ public class ResultPresenter implements Initializable {
         final ObservableList<Direction> comboBoxData = FXCollections.observableArrayList();
         comboBoxData.addAll(Direction.values());
         choiceDir.setItems(comboBoxData);
+        choiceDir.setConverter(new StringConverter<Direction>() {
+
+            @Override
+            public String toString(Direction object) {
+                return object.getDescription();
+            }
+
+            @Override
+            public Direction fromString(String string) {
+                return Direction.valueOf(string.substring(0, string.indexOf(SEPARATOR)));
+            }
+        });
 
         choiceDir.getSelectionModel().selectFirst();
 
