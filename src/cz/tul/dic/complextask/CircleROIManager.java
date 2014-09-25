@@ -27,9 +27,9 @@ import org.pmw.tinylog.Logger;
 public class CircleROIManager extends ROIManager {
 
     public static final float LIMIT_RESULT_QUALITY = 0.5f;
+    private static final double ROOT_TWO = Math.sqrt(2);
     private static final double[] DEFAULT_DEFORMATION_LIMITS = new double[]{-1, 1, 0.5, -5, 10, 0.5};
     private static final int MAX_SHIFT_DIFFERENCE = 3;
-    private static final int ROI_CIRCLE_FS_DENOM = 2;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private double shiftTop, shiftBottom;
 
@@ -44,8 +44,8 @@ public class CircleROIManager extends ROIManager {
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 0);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.TIGHT);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
         tc.addHint(Hint.NO_STRAIN);
         tc.addHint(Hint.NO_CUMULATIVE);
         tc.addHint(Hint.NO_FINE_SEARCH);
@@ -149,7 +149,7 @@ public class CircleROIManager extends ROIManager {
         CircularROI cr;
         for (ROI roi : rois) {
             cr = (CircularROI) roi;
-            tc.addFacetSize(round, roi, Math.max(1, (int) (cr.getRadius() / ROI_CIRCLE_FS_DENOM)));
+            tc.addFacetSize(round, roi, Math.max(1, (int) Math.floor(cr.getRadius() * ROOT_TWO)));
             tc.setDeformationLimits(round, roi, defLimits);
         }
     }
