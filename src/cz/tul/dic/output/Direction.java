@@ -6,31 +6,32 @@ package cz.tul.dic.output;
  */
 public enum Direction {
 
-    Dx("mm", true),
-    Dy("mm", true),
-    Dabs("mm", true),
-    Exx("%", true),
-    Eyy("%", true),
-    Exy("%", true),
-    Eabs("%", true),
-    dDx("mm", false),
-    dDy("mm", false),
-    dDabs("mm", false),
-    dExx("%", false),
-    dEyy("%", false),
-    dExy("%", false),
-    dEabs("%", false),
-    rDx("mm/ms", false),
-    rDy("mm/ms", false),
-    rDabs("mm/ms", false),
+    Dx("mm", true, true),
+    Dy("mm", true, true),
+    Dabs("mm", true, true),
+    Exx("%", true, false),
+    Eyy("%", true, false),
+    Exy("%", true, false),
+    Eabs("%", true, false),
+    dDx("mm", false, true),
+    dDy("mm", false, true),
+    dDabs("mm", false, true),
+    dExx("%", false, true),
+    dEyy("%", false, true),
+    dExy("%", false, false),
+    dEabs("%", false, false),
+    rDx("mm/ms", false, true),
+    rDy("mm/ms", false, true),
+    rDabs("mm/ms", false, true),
     ;
 
     private final String unit;
-    private final boolean stretch;
+    private final boolean stretch, mm;
 
-    private Direction(String unit, boolean stretch) {
+    private Direction(String unit, boolean stretch, boolean mm) {
         this.unit = unit;
         this.stretch = stretch;
+        this.mm = mm;
     }
 
     public String getDescription() {
@@ -39,6 +40,10 @@ public enum Direction {
 
     public boolean isStretch() {
         return stretch;
+    }
+
+    public boolean isMm() {
+        return mm;
     }
 
 }

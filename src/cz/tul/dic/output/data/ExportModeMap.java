@@ -18,7 +18,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
         }
         final int round = dataParams[0];
         final int roundZero = TaskContainerUtils.getFirstRound(tc);
-        final double[][][] results;        
+        final double[][][] results;
         switch (direction) {
             case dDx:
             case dDy:
@@ -31,7 +31,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case Dx:
             case Dy:
             case Dabs:
-                results = TaskContainerUtils.getDisplacement(tc, roundZero, round);                
+                results = TaskContainerUtils.getDisplacement(tc, roundZero, round);
                 break;
             case dExx:
             case dEyy:
@@ -43,7 +43,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case Eyy:
             case Exy:
             case Eabs:
-                results = tc.getStrain(roundZero, round);                
+                results = tc.getStrain(roundZero, round);
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
@@ -97,7 +97,9 @@ public class ExportModeMap implements IExportMode<double[][]> {
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                 }
 
-                result[x][y] *= pxToMm;
+                if (direction.isMm()) {
+                    result[x][y] *= pxToMm;
+                }
             }
         }
 
@@ -105,7 +107,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
         if (direction.isStretch()) {
             final double[][][] tempData = tc.getDisplacement(round - 1, round);
             if (tempData != null) {
-                final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);                
+                final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);
 
                 final double[][] stretchedResult = new double[width][height];
                 double newY;
