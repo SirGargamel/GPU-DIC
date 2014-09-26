@@ -79,7 +79,7 @@ V této kapitole budou zmíněny kroky, které by měl uživatel vykonat před s
 \subsection{Vyznačení oblasti zájmu (ROI)}
 Vzhledem k zaměření této aplikace na analýzu trhací zkoušky je i výpočet tomu uzpůsoben. Typicky záznam obsahuje region, kde je zkoušený předmět uchycen do čelistí a zbytek obrazu je pro analýzu nezajímavý. Proto uživatel může buď vyznačit obdélníkovou oblast(-i), na jejichž ploše bude probíhat výpočet, nebo využije možnosti dynamické tvorby ROI na základě polohy čelistí. V případě dynamické tvorby je nutno vyznačit úvodní polohu čelistí za pomoci kružnic, program poté sleduje polohu čelistí a upravuje oblast zájmu tak, aby byla mezi nimi.
 \subsection{Vyznačení reálné velikosti}
-Tento krok je volitelný a slouží k možné unifikaci velikosti plochy pro odhad pole přetvoření. Aplikace používá poměr px / mm, který lze opět zadat dvěma způsoby. Buď ve formě čísla do skriptu úlohy nebo za pomoci GUI, kde se vyznačí známý rozměr, zadá se jeho reálná velikost a poměr se automaticky dopočítá.
+Tento krok je volitelný a slouží k možnosti prezentace výsledných hodnot posunutí v reálných rozměrech a k možné unifikaci velikosti plochy pro odhad pole přetvoření. Aplikace používá poměr px / mm, který lze opět zadat dvěma způsoby. Buď ve formě čísla do skriptu úlohy nebo za pomoci GUI, kde se vyznačí známý rozměr, zadá se jeho reálná velikost a poměr se automaticky dopočítá.
 \subsection{Velikost facetu}
 Velikost facetu je hlavním parametrem algoritmu a kvalita výsledky je na něm dost závislá. Doporučené hodnoty lze nalézt v kapitole \ref{sec:goodSettings}. Číslo musí být celé a opět ho lze zadat přes GUI či skript.
 \subsection{Expertní nastavení}
@@ -135,8 +135,9 @@ Před výpočtem je možno zadat exporty, které se provedou po dokončení výp
 \item [Config soubor] [název]\textunderscore [vf].config
 \item [Posuny čelistí] [název]\textunderscore [vf].csv
 \item[Obrazová mapa hodnot]  [název]\textunderscore [čas]\textunderscore [typ]\textunderscore [vf].bmp
-\item[Textová mapa hodnot] [název]\textunderscore [pos]\textunderscore [vf].csv
-\item[Vývoj hodnot v bodě] [název]\textunderscore [čas]\textunderscore [typ]\textunderscore [vf].csv
+\item[Textová mapa hodnot] [název]\textunderscore [čas]\textunderscore [typ]\textunderscore [vf].csv
+\item[Vývoj hodnot v bodě] [název]\textunderscore [poz]\textunderscore [vf].csv
+\item[2-bodová analýza přetvoření] [název]\textunderscore [poz-1]\textunderscore [poz-2\textunderscore [vf].csv
 \item[Video] [název]\textunderscore [typ].avi
 \end{description}
 \begin{center}\textbf{Legenda:}\end{center}
@@ -145,7 +146,7 @@ Před výpočtem je možno zadat exporty, které se provedou po dokončení výp
 \item[vf] velikost facetu
 \item[čas] čas, ve kterém dané výsledky platí či ve kterém se udály  
 \item[typ] směr (typ) výsledků 
-\item[pos] pozice výsledku (X a Y)
+\item[poz] pozice výsledku (X a Y)
 \end{description}
 \newpage
 \subsection{Vyznačení reálné velikosti}
@@ -182,16 +183,20 @@ Spuštění výpočtu neobnáší nic zvláštního, stačí pouze kliknout na t
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{results.png}\\Okno s výsledky}
 \end{figure}
-Okno výsledků prezentuje mapy s vypočtenými výsledky. Jsou dostupné jak kumulativní výsledky, tak diferenciální (ty mají před názvem písmeno "d"). Kromě prohlížení výsledků je také možno výsledky exportovat. K dispozici je export právě zobrazené mapy nebo celé sekvence map. Mapy lze exportovat buď jako obrázek (obdoba obrázku v okně), nebo jako seznam hodnot do souboru CSV. Kromě exportu po jednotlivých mapách lze také vytvořit animaci, která vytvoří video soubor prezentující zvolené výsledky jako video. Názvy výsledných souborů se generují automaticky dle klíče, který lze nalézt v kapitole \ref{sec:names}.
+Okno výsledků prezentuje mapy s vypočtenými výsledky. K dispozici jsou tři typy výsledků - pole posunutí (D), pole přetvoření (E) a rychlost posunutí (rD). U posunutí a přetvoření jsou dostupné jak kumulativní výsledky, tak diferenciální (ty mají před názvem písmeno "d"). Jednotky zobrazené hodnoty jsou vždy uvedeny u názvu typu (směru dat) v levé spodní části okna. Pro potřeby rychlé vizuální analýzy jsou ve spodní části okna k dispozici limity zobrazených hodnot. Hodnoty mimo zadané limity jsou vykresleny šedou barvou (viz horní část obrázku). Kromě prohlížení výsledků je také možno výsledky exportovat. K dispozici je export právě zobrazené mapy nebo celé sekvence map. Mapy lze exportovat buď jako obrázek (obdoba obrázku v okně), nebo jako seznam hodnot do souboru CSV. Kromě exportu po jednotlivých mapách lze také vytvořit animaci, která vytvoří video soubor prezentující zvolené výsledky jako video. Názvy výsledných souborů se generují automaticky dle klíče, který lze nalézt v kapitole \ref{sec:names}.
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{resultsPoint.png}\\Výsledky pro bod}
 \end{figure}
 Kliknutím do obrázku je možno zobrazit vývoj vybrané hodnoty v daném bodě. Vývoj hodnoty je reprezentován grafem, kde na horizontální ose je čas a na vertikální sledovaná veličina. Typ zobrazené hodnoty se automaticky aktualizuje vzhledem k vybrané hodnotě v hlavním okně s výsledky. Tlačítkem "Uložit" je možné uložit zobrazené hodnoty do CSV souboru (jméno souboru se generuje automaticky ze souřadnic bodu, typu dat a nastavení úlohy). Je možno mít otevřeno několik oken s různými body najednou.
+\begin{figure}[H]
+\center{\includegraphics[width=0.5\textwidth]{results2Point.png}\\Přetvoření mezi 2 body}
+\end{figure}
+Při otevření alespoň dvou vývojů hodnoty se otevře také okno s analýzou přetvoření mezi dvěma zadanými body. Analýza se zobrazí vždy pro dva poslední průběhy, které jsou zobrazeny (tzn. pro bod, který uživatel aktuálně označil a předchozí v případě, že nezavřel okno s průběhem nebo aktuální a poslední nezavřený graf).
 \newpage
 \section{Doporučená nastavení}
 \label{sec:goodSettings}
 \begin{description}
-\item[Velikost facetu] Vzhledem k šumu ve videu je vhodné volit velikost facetu minimálně 20, příliš vysoké hodnoty ale mohou způsobit ignorování detailů, není tedy vhodné překročit hodnotu cca 30. Je také nutné dbát na to, aby generovaný facet nebyl větší než sledovaná oblast, v tom případě by skoro určitě docházelo ke zkreslení výsledků vlivem zahrnutí pozadí do sledování.
+\item[Velikost facetu] Vzhledem k šumu ve videu je vhodné volit velikost facetu minimálně 15, příliš vysoké hodnoty ale mohou způsobit ignorování detailů, není tedy vhodné překročit hodnotu cca 30. Je také nutné dbát na to, aby generovaný facet nebyl větší než sledovaná oblast, v tom případě by skoro určitě docházelo ke zkreslení výsledků vlivem zahrnutí pozadí do sledování, případně by se nemuseli vygenerovat žádné facety, protože by se nevešly do vyznačené oblasti zájmu.
 \item[Velikost okna] Tento parametr by měl nejlépe korespondovat se zvolenou velikostí facetu, případně může být větší. Hodnota menší než velikost facetu nemá příliš smysl, protože detaily jsou ignorovány díky zvolené velikosti facetu a promítnou se do pole posunutí, ze kterého se počítá pole přetvoření. Je nutné ale dát pozor na to, že tato velikost se zadává v milimetrech, zatímco velikost facetu je v pixelech.
 \item[ROI] Nevhodnější je použít variantu dynamického výpočtu, tj. vyznačit pozice čelistí. Algoritmus pak na základě polohy čelistí vytvoří oblast materiálu a také se postará o posouvání oblastí dle detekovaného pohybu čelistí. 
 \item[Limity kol] Algoritmus vynechá výpočet deformací v případě, že detekuje nulový pohyb čelistí. Není tedy nezbytně nutné limity kol definovat, mohou se hodit v případě, že nás zajímá pouze konkrétní část videa, ne celý děj.
