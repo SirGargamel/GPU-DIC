@@ -353,7 +353,7 @@ public class ResultPresenter implements Initializable {
                     });
                     stage.setTitle(ch.buildTitle());
                     stage.setScene(new Scene(root));
-                    stage.setIconified(false);
+                    stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
                     stage.show();
 
                     openTwoPointStrainAnalysis(context);
@@ -436,8 +436,8 @@ public class ResultPresenter implements Initializable {
                     stage.setY(stage.getY() + y1 + 10);
                 });
                 stage.setTitle(ch.buildTitle());
-                stage.setScene(new Scene(root));
-                stage.setIconified(false);
+                stage.setScene(new Scene(root));                
+                stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
                 stage.show();
             }
         }
