@@ -171,8 +171,7 @@ public final class CorrelationCalculator extends Observable {
                 Logger.warn("No best value found for facet nr." + globalFacetIndex);
                 bestResults.set(globalFacetIndex, new CorrelationResult(-1, null));
             } else {
-                bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex));
-                roundCounterGood.inc(bestResults.get(globalFacetIndex).getDeformation());
+                bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex));                
             }
         }
     }
