@@ -12,6 +12,7 @@ import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CorrelationCalculator;
+import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.KernelType;
@@ -447,7 +448,9 @@ public class EngineTest {
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
-        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
+        for (CorrelationResult cr : tc.getResult(ROUND, roi)) {
+            Assert.assertNotNull(cr);
+        }        
         Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
     }
 }

@@ -22,7 +22,7 @@ public class OpenCLSplitter extends TaskSplitter {
     private static final long SIZE_PIXEL = 4;
     private static final double COEFF_LIMIT_ADJUST = 0.75;
     private final int facetSize, ID;
-    private final List<OpenCLSplitter> subSplitters;    
+    private final List<OpenCLSplitter> subSplitters;
     private final boolean subSplitter;
     private boolean hasNext;
     private int facetIndex;
@@ -30,7 +30,7 @@ public class OpenCLSplitter extends TaskSplitter {
     public OpenCLSplitter(Image image1, Image image2, List<Facet> facets, double[] deformationLimits) {
         this(image1, image2, facets, deformationLimits, false);
     }
-    
+
     private OpenCLSplitter(Image image1, Image image2, List<Facet> facets, double[] deformationLimits, boolean subSplitter) {
         super(image1, image2, facets, deformationLimits);
 
@@ -53,18 +53,17 @@ public class OpenCLSplitter extends TaskSplitter {
     }
 
     private void checkIfHasNext() {
-        if (subSplitters.isEmpty()) {
-            hasNext = facetIndex < facets.size();
-        } else {
-            hasNext = false;
-            while (!subSplitters.isEmpty() && !hasNext) {
-                if (subSplitters.get(0).hasNext()) {
-                    hasNext = true;
-                } else {
-                    subSplitters.remove(0);
-                }
+        hasNext = false;
+        while (!subSplitters.isEmpty() && !hasNext) {
+            if (subSplitters.get(0).hasNext()) {
+                hasNext = true;
+            } else {
+                subSplitters.remove(0);
             }
+        }
 
+        if (!hasNext) {
+            hasNext = facetIndex < facets.size();
         }
     }
 
@@ -88,7 +87,7 @@ public class OpenCLSplitter extends TaskSplitter {
             if (taskSize == 1 && !isMemOk(l, taskSize, facetSize, deformationLimitsArraySize)) {
                 Logger.warn("Too many deformations, {0} generating subsplitters.", ID);
                 checkedDeformations = new double[deformationLimitsArraySize];
-                System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);                
+                System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);
 
                 sublist = new ArrayList<>(1);
                 sublist.add(facets.get(facetIndex));
@@ -108,7 +107,7 @@ public class OpenCLSplitter extends TaskSplitter {
                 checkedDeformations[minIndex * 3] = midPoint + deformationLimits[minIndex * 3 + 2];
                 Logger.trace(Arrays.toString(checkedDeformations));
                 subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
-                Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, + subSplitters.get(1).ID);                
+                Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, +subSplitters.get(1).ID);
 
                 ct = subSplitters.get(0).next();
             } else {
@@ -125,23 +124,24 @@ public class OpenCLSplitter extends TaskSplitter {
                 }
             }
         }
-
+        
         checkIfHasNext();
 
-        if (ct == null) {            
-            ct = new ComputationTask(image1, image2, sublist, checkedDeformations, subSplitter);            
-            Logger.trace("{0} computing {1}", ID, Arrays.toString(ct.getDeformationLimits()));            
+        if (ct == null) {
+            ct = new ComputationTask(image1, image2, sublist, checkedDeformations, subSplitter);
+            Logger.trace("{0} computing {1}", ID, Arrays.toString(ct.getDeformationLimits()));
         } else {
             if (subSplitters.isEmpty()) {
                 ct.setSubtask(false);
                 facetIndex++;
+                checkIfHasNext();
             } else {
                 ct.setSubtask(true);
             }
-        }
-        
+        }                
+
         return ct;
-    }    
+    }
 
     private int findMinIndexBiggerThanZero(final int[] counts) {
         int min = Integer.MAX_VALUE, minPos = 0;
