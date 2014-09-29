@@ -85,7 +85,11 @@ public class OpenCLSplitter extends TaskSplitter {
             }
 
             if (taskSize == 1 && !isMemOk(l, taskSize, facetSize, deformationLimitsArraySize)) {
-                Logger.warn("Too many deformations, {0} generating subsplitters.", ID);
+                if (subSplitter) {
+                    Logger.warn("Too many deformations in subtask, {0} generating subsplitters.", ID);
+                } else {
+                    Logger.warn("Too many deformations in task, {0} generating subsplitters.", ID);
+                }
                 checkedDeformations = new double[deformationLimitsArraySize];
                 System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);
 
@@ -107,7 +111,7 @@ public class OpenCLSplitter extends TaskSplitter {
                 checkedDeformations[minIndex * 3] = midPoint + deformationLimits[minIndex * 3 + 2];
                 Logger.trace(Arrays.toString(checkedDeformations));
                 subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
-                Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, +subSplitters.get(1).ID);
+                Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
 
                 ct = subSplitters.get(0).next();
             } else {
@@ -124,12 +128,16 @@ public class OpenCLSplitter extends TaskSplitter {
                 }
             }
         }
-        
+
         checkIfHasNext();
 
         if (ct == null) {
             ct = new ComputationTask(image1, image2, sublist, checkedDeformations, subSplitter);
-            Logger.trace("{0} computing {1}", ID, Arrays.toString(ct.getDeformationLimits()));
+            if (subSplitter) {
+                Logger.trace("{0} computing {1}", ID, Arrays.toString(ct.getDeformationLimits()));
+            } else {
+                Logger.trace("{0} computing subtask {1}", ID, Arrays.toString(ct.getDeformationLimits()));
+            }
         } else {
             if (subSplitters.isEmpty()) {
                 ct.setSubtask(false);
@@ -138,7 +146,7 @@ public class OpenCLSplitter extends TaskSplitter {
             } else {
                 ct.setSubtask(true);
             }
-        }                
+        }
 
         return ct;
     }
