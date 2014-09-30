@@ -12,10 +12,10 @@ cov-build --dir cov-int ant -f build.xml
 - 0.order	- posuny po 0.5
 			- hodnoty Y dle posunu čelistí
 			- hodnoty X TODO (okoukat z videí)
-- 1. order	- UX - roztažení v X, hodnoty 0-1 s krokem 0.1 (dvojnásobné natažení)
+- 1. order	- UX - roztažení v X, hodnoty -0.2 - 0 s krokem 0.05
 			- UY - zkosení v X, hodnoty -0.5 - 0.5 s krokem 0.1
 			- VX - zkosení v Y, hodnoty -0.5 - 0.5 s krokem 0.1
-			- VY - roztažení v Y, hodnoty 0-1 s krokem 0.1 (dvojnásobné natažení)
+			- VY - roztažení v Y, hodnoty 0-0.5 s krokem 0.1
 - 2. order	- UXX - jednostranné natažení v X, není potřeba
 			- UYY - ohnutí v X, není potřeba
 			- UXY - zploštění do trojúhelníku ve směru Y, hodnoty -0.05 - 0.05 po 0.01

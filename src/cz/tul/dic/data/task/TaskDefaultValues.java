@@ -16,13 +16,11 @@ public interface TaskDefaultValues {
 
     DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION_METHOD = DisplacementCalculation.FIND_MAX_AND_AVERAGE;
     int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
-    int DEFAULT_FPS = 5000;
-    double DEFAULT_PRECISION_ZERO = 0.5;
-    double DEFAULT_PRECISION_FIRST = 0.1;
-    double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-1.0, 1.0, DEFAULT_PRECISION_ZERO, -5, 5, DEFAULT_PRECISION_ZERO};
+    int DEFAULT_FPS = 5000;    
+    double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-2.0, 2.0, 0.25, -1, 5, 0.25};
     double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
-        -1, 1, DEFAULT_PRECISION_ZERO, -2, 5, DEFAULT_PRECISION_ZERO,
-        -0.0, 1.0, DEFAULT_PRECISION_FIRST, -0.5, 0.5, DEFAULT_PRECISION_FIRST, -0.5, 0.5, DEFAULT_PRECISION_FIRST, -0.0, 1.0, DEFAULT_PRECISION_FIRST};
+        -2, 2, 0.25, -1, 3, 0.25,
+        -0.2, 0.0, 0.05, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, 0.0, 0.5, 0.1};
     FacetGeneratorMethod DEFAULT_FACET_GENERATOR = FacetGeneratorMethod.TIGHT;
     int DEFAULT_FACET_SPACING = 1;
     int DEFAULT_FACET_SIZE = 20;
