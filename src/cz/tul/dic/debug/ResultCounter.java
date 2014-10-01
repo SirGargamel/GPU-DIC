@@ -18,7 +18,14 @@ public class ResultCounter {
     private final Map<String, Integer> counter;
     private boolean enabled;
 
-    public ResultCounter() {
+    public static ResultCounter createCounter() {
+        final ResultCounter rc = new ResultCounter();
+        DebugControl.addCounter(rc);
+        rc.setEnabled(DebugControl.isDebugMode());
+        return rc;
+    }
+    
+    private ResultCounter() {
         counter = new HashMap<>();
         enabled = DebugControl.isDebugMode();
     }

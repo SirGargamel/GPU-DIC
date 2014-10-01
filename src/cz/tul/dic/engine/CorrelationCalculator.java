@@ -41,12 +41,12 @@ public final class CorrelationCalculator extends Observable {
     private TaskSplitMethod taskSplitVariant;
 
     public CorrelationCalculator() {
-        roundCounterGood = new ResultCounter();
-        roundCounterNotGood = new ResultCounter();
-        roundQuality = new ResultCounter();
-        counterGood = new ResultCounter();
-        counterNotGood = new ResultCounter();
-        quality = new ResultCounter();
+        roundCounterGood = ResultCounter.createCounter();
+        roundCounterNotGood = ResultCounter.createCounter();
+        roundQuality = ResultCounter.createCounter();
+        counterGood = ResultCounter.createCounter();
+        counterNotGood = ResultCounter.createCounter();
+        quality = ResultCounter.createCounter();
 
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
@@ -216,15 +216,6 @@ public final class CorrelationCalculator extends Observable {
         counterGood.reset();
         counterNotGood.reset();
         quality.reset();
-    }
-
-    public void enableStatLogging(boolean enable) {
-        counterGood.setEnabled(enable);
-        roundCounterGood.setEnabled(enable);
-        counterNotGood.setEnabled(enable);
-        roundCounterNotGood.setEnabled(enable);
-        quality.setEnabled(enable);
-        roundQuality.setEnabled(enable);
-    }
+    }    
 
 }

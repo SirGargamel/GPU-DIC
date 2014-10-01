@@ -9,6 +9,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
+import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -73,7 +74,7 @@ public class Engine extends Observable {
             setChanged();
             notifyObservers(currentRound);
         }
-        
+
         correlation.dumpTaskCounterStats();
 
         if (!hints.contains(Hint.NO_STRAIN)) {
@@ -105,6 +106,11 @@ public class Engine extends Observable {
     public void computeRound(final TaskContainer tc, final int roundFrom, final int roundTo) throws ComputationException {
         Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, tc);
         final Set<Hint> hints = tc.getHints();
+        if (hints.contains(Hint.NO_STATS)) {
+            DebugControl.pauseDebugMode();
+        } else {
+            DebugControl.resumeDebugMode();
+        }
 
         setChanged();
         notifyObservers(TaskContainerUtils.class);
@@ -116,12 +122,11 @@ public class Engine extends Observable {
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
         correlation.setTaskSplitVariant(taskSplit);
-        correlation.enableStatLogging(!tc.getHints().contains(Hint.NO_STATS));
 
         // prepare data
         setChanged();
         notifyObservers(FacetGenerator.class);
-        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);                
+        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);
 
         final double resultQuality = (double) tc.getParameter(TaskParameter.RESULT_QUALITY);
 
@@ -139,7 +144,9 @@ public class Engine extends Observable {
                             DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
                             tc.getFacetSize(roundFrom, roi), resultQuality, taskSplitValue));
         }
-        correlation.dumpRoundCounterStats();
+        if (DebugControl.isDebugMode()) {
+            correlation.dumpRoundCounterStats();
+        }
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
@@ -153,7 +160,7 @@ public class Engine extends Observable {
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
     }
-    
+
     public void dumpTaskCounterStats() {
         correlation.dumpTaskCounterStats();
     }

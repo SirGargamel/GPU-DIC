@@ -61,7 +61,7 @@ public class DicMain extends Application {
 
         if (parameters.contains(DEBUG_COMPUTE) || parameters.contains(DEBUG_SMALL)) {
             configureTinyLog(true);            
-            DebugControl.enableDebugMode();            
+            DebugControl.startDebugMode();            
         } else {
             configureTinyLog(false);
         }
