@@ -1,5 +1,6 @@
 package cz.tul.dic.debug;
 
+import cz.tul.dic.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import java.util.Map;
  */
 public class ResultCounter {
 
+    private static final String SEPARATOR = ", ";
     private final Map<String, Integer> counter;
     private boolean enabled;
 
@@ -27,19 +29,30 @@ public class ResultCounter {
 
     public void inc(final double[] val) {
         if (enabled) {
-            inc(Arrays.toString(val));
+            inc(toString(val));
         }
+    }
+    
+    private String toString(final double[] val) {
+        final StringBuilder sb = new StringBuilder("[");
+        for (double d : val) {
+            sb.append(Utils.format(d));
+            sb.append(SEPARATOR);
+        }
+        sb.setLength(sb.length() - SEPARATOR.length());
+        sb.append("]");
+        return sb.toString();
     }
 
     public void inc(final double val) {
         if (enabled) {
-            inc(Double.toString(val));
+            inc(Utils.format(val));
         }
     }
 
     public void inc(final float val) {
         if (enabled) {
-            inc(Float.toString(val));
+            inc(Utils.format(val));
         }
     }
 
