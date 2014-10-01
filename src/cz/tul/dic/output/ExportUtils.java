@@ -243,10 +243,7 @@ public class ExportUtils {
             final double midlle = (max + min) / 2.0;
             final double half = max - midlle;
             if (val >= min && val <= max) {
-                if (val == midlle) {
-                    h = 0.0f;
-                    b = 0.0f;
-                } else if (val < midlle) {
+                if (val < midlle) {
                     fract = -(val - midlle) / half;
                     h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
                 } else {
