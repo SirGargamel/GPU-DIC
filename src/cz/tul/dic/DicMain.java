@@ -3,6 +3,7 @@ package cz.tul.dic;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
@@ -45,20 +46,22 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
-        "d:\\temp\\6203652m\\6203652m.avi.config",
-        "d:\\temp\\9905121m\\9905121m.avi.config",};
+//        
+//        "d:\\temp\\6203652m\\6203652m.avi.config",
+//        "d:\\temp\\9905121m\\9905121m.avi.config",
+        "d:\\temp\\7202845m\\7202845m.avi.config",
+        "d:\\temp\\6107544m\\6107544m.avi.config",
+        "d:\\temp\\6113599m\\6113599m.avi.config",        
+        "d:\\temp\\9112502m\\9112502m.avi.config",};
 
     @Override
     public void start(Stage stage) throws Exception {
         final Parameters params = getParameters();
-        final List<String> parameters = params.getRaw();   
+        final List<String> parameters = params.getRaw();
 
         if (parameters.contains(DEBUG_COMPUTE) || parameters.contains(DEBUG_SMALL)) {
-            configureTinyLog(true);
-
-            NameGenerator.enableDebugMode();
-            Utils.enableDebugMode();
-            ExportUtils.enableDebugMode();
+            configureTinyLog(true);            
+            DebugControl.enableDebugMode();            
         } else {
             configureTinyLog(false);
         }
@@ -103,21 +106,22 @@ public class DicMain extends Application {
 
     private void performComputationTest() {
         final int fs1 = 15;
-        final int fs2 = 50;
+        final int fs2 = 25;
         final double ps1 = 25;
         final double ps2 = 25;
         TaskContainer tc;
         for (String s : FILES_TO_DEBUG) {
-            for (int size = fs1; size <= fs2; size++) {
+            for (int size = fs1; size <= fs2; size += 5) {
                 try {
                     Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
                     tc = Context.getInstance().getTc();
                     if ((int) tc.getParameter(TaskParameter.FACET_SIZE) < size) {
-                        System.out.println(tc.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
+                        System.out.println("STOPPING --- " + tc.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
                         break;
                     }
                     InputLoader.loadInput(tc);
                     tc.setParameter(TaskParameter.FACET_SIZE, size);
+                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
                     Computation.commenceComputationDynamic(tc);
 
 //            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));

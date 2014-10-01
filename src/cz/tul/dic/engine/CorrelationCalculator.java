@@ -5,7 +5,6 @@ import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLException;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.Utils;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
@@ -15,6 +14,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
+import cz.tul.dic.debug.ResultCounter;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
@@ -31,8 +31,8 @@ import org.pmw.tinylog.Logger;
  */
 public final class CorrelationCalculator extends Observable {
 
-    private final Utils.ResultCounter roundCounterGood, roundCounterNotGood, roundQuality;
-    private final Utils.ResultCounter counterGood, counterNotGood, quality;
+    private final ResultCounter roundCounterGood, roundCounterNotGood, roundQuality;
+    private final ResultCounter counterGood, counterNotGood, quality;
     private final CLContext context;
     private final CLDevice device;
     // dynamic
@@ -41,12 +41,12 @@ public final class CorrelationCalculator extends Observable {
     private TaskSplitMethod taskSplitVariant;
 
     public CorrelationCalculator() {
-        roundCounterGood = new Utils.ResultCounter();
-        roundCounterNotGood = new Utils.ResultCounter();
-        roundQuality = new Utils.ResultCounter();
-        counterGood = new Utils.ResultCounter();
-        counterNotGood = new Utils.ResultCounter();
-        quality = new Utils.ResultCounter();
+        roundCounterGood = new ResultCounter();
+        roundCounterNotGood = new ResultCounter();
+        roundQuality = new ResultCounter();
+        counterGood = new ResultCounter();
+        counterNotGood = new ResultCounter();
+        quality = new ResultCounter();
 
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
@@ -80,7 +80,7 @@ public final class CorrelationCalculator extends Observable {
         for (int i = 0; i < facets.size(); i++) {
             result.add(null);
         }
-        
+
         try {
             kernel.prepareKernel(context, device, facetSize, defDegree, interpolation);
 
@@ -171,7 +171,7 @@ public final class CorrelationCalculator extends Observable {
                 Logger.warn("No best value found for facet nr." + globalFacetIndex);
                 bestResults.set(globalFacetIndex, new CorrelationResult(-1, null));
             } else {
-                bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex));                
+                bestResults.set(globalFacetIndex, taskResults.get(localFacetIndex));
             }
         }
     }
@@ -222,7 +222,7 @@ public final class CorrelationCalculator extends Observable {
         counterGood.setEnabled(enable);
         roundCounterGood.setEnabled(enable);
         counterNotGood.setEnabled(enable);
-        roundCounterNotGood.setEnabled(enable);                
+        roundCounterNotGood.setEnabled(enable);
         quality.setEnabled(enable);
         roundQuality.setEnabled(enable);
     }
