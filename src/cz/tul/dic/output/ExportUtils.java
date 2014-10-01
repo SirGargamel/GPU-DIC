@@ -341,7 +341,7 @@ public class ExportUtils {
         g.drawString(nf.format(max), width - BAR_SIZE_VERT + minusWidth, height - 2);
 
         final String val = nf.format(middle);
-        g.drawString(val, width - BAR_SIZE_VERT + minusWidth, halfHeight + (metrics.getHeight() * 2 / 3 + 1));
+        g.drawString(val, width - BAR_SIZE_VERT + minusWidth, halfHeight);
 
         g.dispose();
     }
