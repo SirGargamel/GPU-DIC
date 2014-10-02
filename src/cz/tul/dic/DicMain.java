@@ -45,13 +45,19 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
-        "d:\\temp\\6203652m\\6203652m.avi.config",
-        "d:\\temp\\9905121m\\9905121m.avi.config",};
+
+//        "d:\\temp\\6203652m\\6203652m.avi.config",
+//        "d:\\temp\\9905121m\\9905121m.avi.config",
+        "d:\\temp\\6107544m\\6107544m.avi.config",
+        "d:\\temp\\6113599m\\6113599m.avi.config",
+        "d:\\temp\\7202845m\\7202845m.avi.config",
+        "d:\\temp\\9112502m\\9112502m.avi.config",};
 
     @Override
+
     public void start(Stage stage) throws Exception {
         final Parameters params = getParameters();
-        final List<String> parameters = params.getRaw();   
+        final List<String> parameters = params.getRaw();
 
         if (parameters.contains(DEBUG_COMPUTE) || parameters.contains(DEBUG_SMALL)) {
             configureTinyLog(true);
