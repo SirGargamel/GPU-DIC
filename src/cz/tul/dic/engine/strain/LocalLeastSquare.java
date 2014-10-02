@@ -77,9 +77,9 @@ public class LocalLeastSquare extends StrainEstimator {
             
             if (DebugControl.isDebugMode()) {
                 try {
-                    final Image img = tc.getImage(roundFrom);
-                    ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[0], Direction.Exx)), "BMP", new File(NameGenerator.generateRegressionQualityMap(tc, roundFrom, Direction.Exx)));
-                    ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[1], Direction.Eyy)), "BMP", new File(NameGenerator.generateRegressionQualityMap(tc, roundFrom, Direction.Eyy)));
+                    final Image img = tc.getImage(roundTo);
+                    ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[0], Direction.Exx)), "BMP", new File(NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Exx)));
+                    ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[1], Direction.Eyy)), "BMP", new File(NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Eyy)));
                 } catch (IOException ex) {
                     Logger.warn(ex);
                 }

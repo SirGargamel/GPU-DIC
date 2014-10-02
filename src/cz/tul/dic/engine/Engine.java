@@ -149,7 +149,7 @@ public class Engine extends Observable {
         }
         if (DebugControl.isDebugMode()) {
             correlation.dumpRoundCounterStats();
-            dumpResultQualityStatistics(tc, facets, roundFrom);
+            dumpResultQualityStatistics(tc, facets, roundFrom, roundTo);
         }
 
         setChanged();
@@ -165,10 +165,10 @@ public class Engine extends Observable {
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
     }
 
-    private void dumpResultQualityStatistics(final TaskContainer tc, final Map<ROI, List<Facet>> allFacets, final int round) throws IOException, ComputationException {
-        final Map<ROI, List<CorrelationResult>> allResults = tc.getResults(round);
+    private void dumpResultQualityStatistics(final TaskContainer tc, final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
+        final Map<ROI, List<CorrelationResult>> allResults = tc.getResults(roundFrom);
 
-        final Image img = tc.getImage(round);
+        final Image img = tc.getImage(roundTo);
         final double[][] resultData = new double[img.getWidth()][img.getHeight()];
 
         List<CorrelationResult> results;
@@ -186,7 +186,7 @@ public class Engine extends Observable {
             }
         }
 
-        ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.Dabs)), "BMP", new File(NameGenerator.generateQualityMap(tc, round)));
+        ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.Dabs)), "BMP", new File(NameGenerator.generateQualityMap(tc, roundTo)));
     }
 
     public void dumpTaskCounterStats() {

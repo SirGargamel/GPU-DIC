@@ -140,7 +140,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                                 data[i][1] = Utils.format(precision * (int) Math.round(vals.get(i)[1] / precision));
                             }
                             try {
-                                CsvWriter.writeDataToCsv(new File(NameGenerator.generate2DValueHistogram(tc, round, x, y)), data);
+                                CsvWriter.writeDataToCsv(new File(NameGenerator.generate2DValueHistogram(tc, nextRound, x, y)), data);
                             } catch (IOException ex) {
                                 java.util.logging.Logger.getLogger(FindMaxAndAverage.class.getName()).log(Level.SEVERE, null, ex);
                             }
