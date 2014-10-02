@@ -17,6 +17,9 @@ public class NameGenerator {
     public static final String EXT_MAP = ".bmp";
     public static final String EXT_SEQUENCE = ".avi";
     public static final String EXT_BINARY = ".task";
+    private static final String TEXT_QUALITY_FACET = "correlationQuality";
+    private static final String TEXT_QUALITY_REGRESSION = "regressionError";
+    private static final String TEXT_HISTOGRAM = "histogram";
     private static boolean debugMode;
 
     static {
@@ -58,6 +61,18 @@ public class NameGenerator {
     public static String generateCsvMap(final TaskContainer tc, final int round, final Direction dir) {
         return generateMap(tc, round, dir).replace(EXT_MAP, EXT_CSV);
     }
+    
+    public static String generateQualityMap(final TaskContainer tc, final int round) {
+        return new Generator(tc).name().time(round).text(TEXT_QUALITY_FACET).finalize(EXT_MAP);
+    }
+    
+    public static String generateRegressionQualityMap(final TaskContainer tc, final int round, final Direction dir) {
+        return new Generator(tc).name().time(round).text(TEXT_QUALITY_REGRESSION).direction(dir).finalize(EXT_MAP);
+    }
+    
+    public static String generate2DValueHistogram(final TaskContainer tc, final int round, final int x, final int y) {
+        return new Generator(tc).name().time(round).text(TEXT_HISTOGRAM).intVal(x).intVal(y).finalize(EXT_CSV);
+    }
 
     private static class Generator {
 
@@ -97,6 +112,12 @@ public class NameGenerator {
         
         public Generator delimiter() {
             sb.append(DELIMITER);
+            return this;
+        }
+        
+        public Generator text(final String text) {
+            sb.append(DELIMITER);
+            sb.append(text);
             return this;
         }
 

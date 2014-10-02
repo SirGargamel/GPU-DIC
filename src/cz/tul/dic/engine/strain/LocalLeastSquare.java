@@ -1,10 +1,18 @@
 package cz.tul.dic.engine.strain;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.Utils;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;
+import cz.tul.dic.output.Direction;
+import cz.tul.dic.output.ExportUtils;
+import cz.tul.dic.output.NameGenerator;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import javax.imageio.ImageIO;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.pmw.tinylog.Logger;
@@ -25,6 +34,8 @@ public class LocalLeastSquare extends StrainEstimator {
     private static final int INDEX_B0 = 3;
     private static final int INDEX_B1 = 4;
     private static final int INDEX_B2 = 5;
+    private static final int INDEX_ERRA = 6;
+    private static final int INDEX_ERRB = 7;
     private static final double COEFF_ADJUST = 100;
 
     @Override
@@ -48,6 +59,7 @@ public class LocalLeastSquare extends StrainEstimator {
             }
 
             final double[][][] result = new double[width][height][];
+            final double[][][] resultQuality = new double[][][] {Utils.generateNaNarray(width, height), Utils.generateNaNarray(width, height)};
             try {
                 final int threadCount = Runtime.getRuntime().availableProcessors();
                 final ExecutorService es = Executors.newWorkStealingPool(threadCount);
@@ -57,9 +69,21 @@ public class LocalLeastSquare extends StrainEstimator {
                 for (Future<ExecutionUnit> f : results) {
                     eu = f.get();
                     result[eu.getX()][eu.getY()] = eu.getResult();
+                    resultQuality[0][eu.getX()][eu.getY()] = eu.getErrors()[0];
+                    resultQuality[1][eu.getX()][eu.getY()] = eu.getErrors()[1];
                 }
             } catch (InterruptedException | ExecutionException ex) {
                 Logger.error(ex);
+            }
+            
+            if (DebugControl.isDebugMode()) {
+                try {
+                    final Image img = tc.getImage(roundTo);
+                    ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[0], Direction.Exx)), "BMP", new File(NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Exx)));
+                    ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[1], Direction.Eyy)), "BMP", new File(NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Eyy)));
+                } catch (IOException ex) {
+                    Logger.warn(ex);
+                }
             }
 
             tc.setStrain(roundFrom, roundTo, result);
@@ -87,7 +111,7 @@ public class LocalLeastSquare extends StrainEstimator {
 
         final double[] result;
         if (Xu.size() > 3) {
-            result = new double[6];
+            result = new double[8];
             try {
                 final OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
                 regression.setNoIntercept(true);
@@ -101,6 +125,7 @@ public class LocalLeastSquare extends StrainEstimator {
                 regression.newSampleData(dataY, dataX);
                 double[] beta = regression.estimateRegressionParameters();
                 System.arraycopy(beta, 0, result, 0, 3);
+                result[INDEX_ERRA] = regression.estimateRegressionStandardError();
 
                 dataY = new double[Yv.size()];
                 for (int i = 0; i < dataY.length; i++) {
@@ -111,6 +136,7 @@ public class LocalLeastSquare extends StrainEstimator {
                 regression.newSampleData(dataY, dataX);
                 beta = regression.estimateRegressionParameters();
                 System.arraycopy(beta, 0, result, 3, 3);
+                result[INDEX_ERRB] = regression.estimateRegressionStandardError();
             } catch (MathIllegalArgumentException ex) {
                 Logger.trace(ex.getLocalizedMessage());
                 // singular matrix, let solution be zeroes
@@ -136,7 +162,7 @@ public class LocalLeastSquare extends StrainEstimator {
 
         private final int x, y, ws;
         private final double[][][] data;
-        private double[] result;
+        private double[] result, errors;
 
         public ExecutionUnit(int x, int y, double[][][] data, final int ws) {
             this.x = x;
@@ -150,6 +176,7 @@ public class LocalLeastSquare extends StrainEstimator {
             final double[] coeffs = computeCoeffs(data, x, y, (int) Math.ceil(ws / 2.0));
             if (coeffs != null) {
                 result = computeStrains(coeffs);
+                errors = new double[] {coeffs[INDEX_ERRA], coeffs[INDEX_ERRB]};
             }
             return this;
         }
@@ -164,6 +191,10 @@ public class LocalLeastSquare extends StrainEstimator {
 
         public double[] getResult() {
             return result;
+        }
+
+        public double[] getErrors() {
+            return errors;
         }
     }
 

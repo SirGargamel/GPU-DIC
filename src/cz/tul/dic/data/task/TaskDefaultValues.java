@@ -19,8 +19,8 @@ public interface TaskDefaultValues {
     int DEFAULT_FPS = 5000;    
     double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-2.0, 2.0, 0.25, -1, 5, 0.25};
     double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
-        -2, 2, 0.25, -1, 3, 0.25,
-        -0.2, 0.0, 0.05, -0.5, 0.5, 0.1, -0.5, 0.5, 0.1, 0.0, 0.5, 0.1};
+        -1.5, 1.5, 0.5, -1.0, 2.0, 0.5,
+        -0.25, 0.0, 0.025, -0.4, 0.2, 0.05, -0.2, 0.4, 0.05, -0.2, 0.5, 0.1};
     FacetGeneratorMethod DEFAULT_FACET_GENERATOR = FacetGeneratorMethod.TIGHT;
     int DEFAULT_FACET_SPACING = 1;
     int DEFAULT_FACET_SIZE = 20;
