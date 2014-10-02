@@ -17,6 +17,7 @@ public class NameGenerator {
     public static final String EXT_MAP = ".bmp";
     public static final String EXT_SEQUENCE = ".avi";
     public static final String EXT_BINARY = ".task";
+    private static final String TEXT_QUALITY = "quality";
     private static boolean debugMode;
 
     static {
@@ -58,6 +59,10 @@ public class NameGenerator {
     public static String generateCsvMap(final TaskContainer tc, final int round, final Direction dir) {
         return generateMap(tc, round, dir).replace(EXT_MAP, EXT_CSV);
     }
+    
+    public static String generateQualityMap(final TaskContainer tc, final int round) {
+        return new Generator(tc).name().time(round).text(TEXT_QUALITY).finalize(EXT_MAP);
+    }
 
     private static class Generator {
 
@@ -97,6 +102,12 @@ public class NameGenerator {
         
         public Generator delimiter() {
             sb.append(DELIMITER);
+            return this;
+        }
+        
+        public Generator text(final String text) {
+            sb.append(DELIMITER);
+            sb.append(text);
             return this;
         }
 

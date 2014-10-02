@@ -2,6 +2,7 @@ package cz.tul.dic.engine;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.Hint;
@@ -18,6 +19,7 @@ import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
+import javax.imageio.ImageIO;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -103,7 +106,7 @@ public class Engine extends Observable {
         return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
     }
 
-    public void computeRound(final TaskContainer tc, final int roundFrom, final int roundTo) throws ComputationException {
+    public void computeRound(final TaskContainer tc, final int roundFrom, final int roundTo) throws ComputationException, IOException {
         Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, tc);
         final Set<Hint> hints = tc.getHints();
         if (hints.contains(Hint.NO_STATS)) {
@@ -146,6 +149,7 @@ public class Engine extends Observable {
         }
         if (DebugControl.isDebugMode()) {
             correlation.dumpRoundCounterStats();
+            dumpResultQualityStatistics(tc, facets, roundFrom);
         }
 
         setChanged();
@@ -159,6 +163,30 @@ public class Engine extends Observable {
         }
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
+    }
+
+    private void dumpResultQualityStatistics(final TaskContainer tc, final Map<ROI, List<Facet>> allFacets, final int round) throws IOException, ComputationException {
+        final Map<ROI, List<CorrelationResult>> allResults = tc.getResults(round);
+
+        final Image img = tc.getImage(round);
+        final double[][] resultData = new double[img.getWidth()][img.getHeight()];
+
+        List<CorrelationResult> results;
+        List<Facet> facets;
+        double[] center;
+        for (ROI roi : allResults.keySet()) {
+            results = allResults.get(roi);
+            facets = allFacets.get(roi);
+
+            for (int i = 0; i < results.size(); i++) {
+                center = facets.get(i).getCenter();
+                if (results.get(i) != null) {
+                    resultData[(int) Math.round(center[0])][(int) Math.round(center[1])] = results.get(i).getValue();
+                }
+            }
+        }
+
+        ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.Dabs)), "BMP", new File(NameGenerator.generateQualityMap(tc, round)));
     }
 
     public void dumpTaskCounterStats() {
