@@ -6,9 +6,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,5 +95,13 @@ public class Utils {
 
     public static String format(final double val) {
         return nf.format(val);
+    }
+    
+    public static double[][] generateNaNarray(final int width, final int height) {
+        final double[][] result = new double[width][height];
+        for (double[] dA : result) {
+            Arrays.fill(dA, Double.NaN);
+        }
+        return result;
     }
 }

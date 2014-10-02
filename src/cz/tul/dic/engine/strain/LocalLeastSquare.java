@@ -1,6 +1,7 @@
 package cz.tul.dic.engine.strain;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -58,7 +59,7 @@ public class LocalLeastSquare extends StrainEstimator {
             }
 
             final double[][][] result = new double[width][height][];
-            final double[][][] resultQuality = new double[2][width][height];
+            final double[][][] resultQuality = new double[][][] {Utils.generateNaNarray(width, height), Utils.generateNaNarray(width, height)};
             try {
                 final int threadCount = Runtime.getRuntime().availableProcessors();
                 final ExecutorService es = Executors.newWorkStealingPool(threadCount);

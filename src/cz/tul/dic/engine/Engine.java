@@ -1,6 +1,7 @@
 package cz.tul.dic.engine;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -169,7 +170,7 @@ public class Engine extends Observable {
         final Map<ROI, List<CorrelationResult>> allResults = tc.getResults(roundFrom);
 
         final Image img = tc.getImage(roundTo);
-        final double[][] resultData = new double[img.getWidth()][img.getHeight()];
+        final double[][] resultData = Utils.generateNaNarray(img.getWidth(), img.getHeight());
 
         List<CorrelationResult> results;
         List<Facet> facets;
