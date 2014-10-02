@@ -17,7 +17,7 @@ public class NameGenerator {
     public static final String EXT_MAP = ".bmp";
     public static final String EXT_SEQUENCE = ".avi";
     public static final String EXT_BINARY = ".task";
-    private static final String TEXT_QUALITY = "quality";
+    private static final String TEXT_QUALITY_FACET = "correlationQuality";
     private static final String TEXT_QUALITY_REGRESSION = "regressionError";
     private static final String TEXT_HISTOGRAM = "histogram";
     private static boolean debugMode;
@@ -63,7 +63,7 @@ public class NameGenerator {
     }
     
     public static String generateQualityMap(final TaskContainer tc, final int round) {
-        return new Generator(tc).name().time(round).text(TEXT_QUALITY).finalize(EXT_MAP);
+        return new Generator(tc).name().time(round).text(TEXT_QUALITY_FACET).finalize(EXT_MAP);
     }
     
     public static String generateRegressionQualityMap(final TaskContainer tc, final int round, final Direction dir) {
