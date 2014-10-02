@@ -18,6 +18,7 @@ public class NameGenerator {
     public static final String EXT_SEQUENCE = ".avi";
     public static final String EXT_BINARY = ".task";
     private static final String TEXT_QUALITY = "quality";
+    private static final String TEXT_HISTOGRAM = "histogram";
     private static boolean debugMode;
 
     static {
@@ -62,6 +63,10 @@ public class NameGenerator {
     
     public static String generateQualityMap(final TaskContainer tc, final int round) {
         return new Generator(tc).name().time(round).text(TEXT_QUALITY).finalize(EXT_MAP);
+    }
+    
+    public static String generate2DValueHistogram(final TaskContainer tc, final int round, final int x, final int y) {
+        return new Generator(tc).name().time(round).text(TEXT_HISTOGRAM).intVal(x).intVal(y).finalize(EXT_CSV);
     }
 
     private static class Generator {

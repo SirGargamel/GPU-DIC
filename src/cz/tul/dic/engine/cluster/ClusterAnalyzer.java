@@ -20,6 +20,10 @@ public abstract class ClusterAnalyzer<T> {
         this.precision = precision;
     }
 
+    public double getPrecision() {
+        return precision;
+    }
+
     public abstract T findMajorValue();
 
 }
