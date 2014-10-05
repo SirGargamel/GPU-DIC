@@ -34,6 +34,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         final Image img = tc.getImage(round);
         final int width = img.getWidth();
         final int height = img.getHeight();
+        final double resultQuality = (double) tc.getParameter(TaskParameter.RESULT_QUALITY);
 
         final int linesPerGroup = (int) tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM) / width;
         final int groupCount = (int) Math.ceil(height / (double) linesPerGroup);
@@ -47,8 +48,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         int x, y, lowerBound, upperBound = 0;
         Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
-//        StringBuilder sb = new StringBuilder();
-//        System.out.println("Round " + round);
+        CorrelationResult cr;
 
         for (int g = 0; g < groupCount; g++) {
             lowerBound = upperBound;
@@ -64,7 +64,12 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     if (results.get(i) == null) {
                         continue;
                     }
-                    d = results.get(i).getDeformation();
+                    cr = results.get(i);
+                    if (cr.getValue() < resultQuality) {
+                        continue;
+                    }
+                    
+                    d = cr.getDeformation();
                     
                     f = facets.get(i);
                     if (f == null) {
@@ -75,15 +80,6 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                         continue;
                     }                    
 
-//                if (roi instanceof RectangleROI) {
-//                    sb.setLength(0);
-//                    for (double val : d) {
-//                        sb.append(val);
-//                        sb.append(";");
-//                    }
-//                    sb.setLength(sb.length() - 1);
-//                    System.out.println(sb.toString());
-//                }
                     deformedFacet = FacetUtils.deformFacet(f, d);
                     for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
                         x = e.getKey()[Coordinates.X];

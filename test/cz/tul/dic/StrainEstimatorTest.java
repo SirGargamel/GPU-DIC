@@ -32,6 +32,7 @@ public class StrainEstimatorTest {
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, 1.0);
         tc.setParameter(TaskParameter.MM_TO_PX_RATIO, 1.0);
+        tc.setParameter(TaskParameter.RESULT_QUALITY, 0.5);
 
         // indexing is [x][y], but init is [y][x]
         final double[][][] displacement = new double[][][]{

@@ -8,6 +8,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.debug.ResultStats;
 import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.strain.StrainEstimation;
@@ -114,7 +115,7 @@ public class ComplexTaskSolver extends Observable {
             notifyObservers(currentRound);
         }
 
-        Engine.getInstance().dumpTaskCounterStats();
+        ResultStats.dumpResultStatistics(tc);
 
         StrainEstimation strain = new StrainEstimation();
         strain.computeStrain(tc);

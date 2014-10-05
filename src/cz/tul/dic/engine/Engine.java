@@ -12,6 +12,7 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.debug.DebugControl;
+import cz.tul.dic.debug.ResultStats;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -78,8 +79,8 @@ public class Engine extends Observable {
             setChanged();
             notifyObservers(currentRound);
         }
-
-        correlation.dumpTaskCounterStats();
+        
+        ResultStats.dumpResultStatistics(tc);
 
         if (!hints.contains(Hint.NO_STRAIN)) {
             setChanged();
@@ -132,8 +133,6 @@ public class Engine extends Observable {
         notifyObservers(FacetGenerator.class);
         final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);
 
-        final double resultQuality = (double) tc.getParameter(TaskParameter.RESULT_QUALITY);
-
         // compute round                
         for (ROI roi : tc.getRois(roundFrom)) {
             // compute and store result
@@ -146,10 +145,10 @@ public class Engine extends Observable {
                             roi, facets.get(roi),
                             tc.getDeformationLimits(roundFrom, roi),
                             DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
-                            tc.getFacetSize(roundFrom, roi), resultQuality, taskSplitValue));
+                            tc.getFacetSize(roundFrom, roi), taskSplitValue));
         }
         if (DebugControl.isDebugMode()) {
-            correlation.dumpRoundCounterStats();
+            ResultStats.dumpResultStatistics(tc, roundFrom);
             dumpResultQualityStatistics(tc, facets, roundFrom, roundTo);
         }
 
@@ -188,10 +187,6 @@ public class Engine extends Observable {
         }
 
         ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.Dabs)), "BMP", new File(NameGenerator.generateQualityMap(tc, roundTo)));
-    }
-
-    public void dumpTaskCounterStats() {
-        correlation.dumpTaskCounterStats();
     }
 
 }

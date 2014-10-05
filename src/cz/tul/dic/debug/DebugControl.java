@@ -13,7 +13,7 @@ import java.util.Set;
 public class DebugControl {
 
     private static boolean debugMode, debugModeStarted;
-    private static final Set<ResultCounter> counters;
+    private static final Set<ValueCounter> counters;
 
     static {
         debugMode = false;
@@ -32,7 +32,7 @@ public class DebugControl {
         NameGenerator.enableDebugMode();
     }
 
-    public static void addCounter(ResultCounter rc) {
+    public static void addCounter(ValueCounter rc) {
         counters.add(rc);
     }
 
@@ -49,7 +49,7 @@ public class DebugControl {
     }
 
     private static void handleCounters() {
-        for (ResultCounter rc : counters) {
+        for (ValueCounter rc : counters) {
             rc.setEnabled(debugMode);
         }
     }

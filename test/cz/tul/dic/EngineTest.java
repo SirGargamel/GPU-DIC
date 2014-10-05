@@ -395,7 +395,7 @@ public class EngineTest {
                         roi, roiFacets,
                         tc.getDeformationLimits(ROUND, roi),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
-                        tc.getFacetSize(ROUND, roi), TaskDefaultValues.DEFAULT_RESULT_QUALITY, null));
+                        tc.getFacetSize(ROUND, roi), null));
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
@@ -444,7 +444,7 @@ public class EngineTest {
                         roi, roiFacets,
                         tc.getDeformationLimits(ROUND, roi),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
-                        tc.getFacetSize(ROUND, roi), TaskDefaultValues.DEFAULT_RESULT_QUALITY, null));
+                        tc.getFacetSize(ROUND, roi), null));
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 

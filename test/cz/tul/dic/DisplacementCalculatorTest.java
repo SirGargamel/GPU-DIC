@@ -58,6 +58,7 @@ public class DisplacementCalculatorTest {
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DisplacementCalculation.FIND_MAX_AND_AVERAGE);
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);
         tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
+        tc.setParameter(TaskParameter.RESULT_QUALITY, 0.5);
 
         final List<CorrelationResult> results = new ArrayList<>(1);
         results.add(deformation);

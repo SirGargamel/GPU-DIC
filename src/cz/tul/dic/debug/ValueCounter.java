@@ -12,20 +12,20 @@ import java.util.Map;
  *
  * @author Petr Ječmen
  */
-public class ResultCounter {
+public class ValueCounter {
 
     private static final String SEPARATOR = ", ";
     private final Map<String, Integer> counter;
     private boolean enabled;
 
-    public static ResultCounter createCounter() {
-        final ResultCounter rc = new ResultCounter();
+    public static ValueCounter createCounter() {
+        final ValueCounter rc = new ValueCounter();
         DebugControl.addCounter(rc);
         rc.setEnabled(DebugControl.isDebugMode());
         return rc;
     }
     
-    private ResultCounter() {
+    private ValueCounter() {
         counter = new HashMap<>();
         enabled = DebugControl.isDebugMode();
     }

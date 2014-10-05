@@ -14,7 +14,6 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
-import cz.tul.dic.debug.ResultCounter;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
@@ -30,9 +29,7 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public final class CorrelationCalculator extends Observable {
-
-    private final ResultCounter roundCounterGood, roundCounterNotGood, roundQuality;
-    private final ResultCounter counterGood, counterNotGood, quality;
+    
     private final CLContext context;
     private final CLDevice device;
     // dynamic
@@ -41,12 +38,6 @@ public final class CorrelationCalculator extends Observable {
     private TaskSplitMethod taskSplitVariant;
 
     public CorrelationCalculator() {
-        roundCounterGood = ResultCounter.createCounter();
-        roundCounterNotGood = ResultCounter.createCounter();
-        roundQuality = ResultCounter.createCounter();
-        counterGood = ResultCounter.createCounter();
-        counterNotGood = ResultCounter.createCounter();
-        quality = ResultCounter.createCounter();
 
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
@@ -59,11 +50,11 @@ public final class CorrelationCalculator extends Observable {
             Image image1, Image image2,
             ROI roi, List<Facet> facets,
             double[] deformationLimits, DeformationDegree defDegree,
-            int facetSize, double resultQuality, Object taskSplitValue) throws ComputationException {
+            int facetSize, Object taskSplitValue) throws ComputationException {
         final Kernel kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared - {0}", kernel);
 
-        final List<CorrelationResult> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, resultQuality, taskSplitValue);
+        final List<CorrelationResult> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, taskSplitValue);
 
         kernel.finishComputation();
 
@@ -75,7 +66,7 @@ public final class CorrelationCalculator extends Observable {
             Image image1, Image image2,
             ROI roi, final Kernel kernel, List<Facet> facets,
             double[] deformationLimits, DeformationDegree defDegree,
-            int facetSize, double resultQuality, Object taskSplitValue) throws ComputationException {
+            int facetSize, Object taskSplitValue) throws ComputationException {
         final List<CorrelationResult> result = new ArrayList<>(facets.size());
         for (int i = 0; i < facets.size(); i++) {
             result.add(null);
@@ -109,34 +100,6 @@ public final class CorrelationCalculator extends Observable {
             }
         } catch (CLException ex) {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
-        }
-
-        CorrelationResult cr;
-        int val, count = 0;
-        for (int i = 0; i < facets.size(); i++) {
-            cr = result.get(i);
-            if (cr != null) {
-                val = (int) (cr.getValue() * 10);
-                roundQuality.inc(val / (double) 10);
-                quality.inc(val / (double) 10);
-                if (cr.getValue() < resultQuality) {
-                    result.set(i, null);
-                    roundCounterNotGood.inc(cr.getDeformation());
-                    counterNotGood.inc(cr.getDeformation());
-                    count++;
-                } else {
-                    roundCounterGood.inc(cr.getDeformation());
-                    counterGood.inc(cr.getDeformation());
-                }
-            } else {
-                roundCounterNotGood.inc();
-                roundQuality.inc();
-                counterNotGood.inc();
-                quality.inc();
-            }
-        }
-        if (count > 0) {
-            Logger.warn("Found {0} result with quality lower than {1} (for ROI {2}).", count, resultQuality, roi);
         }
 
         Logger.trace("{0} correlations computed.", result.size());
@@ -187,35 +150,5 @@ public final class CorrelationCalculator extends Observable {
     public void setTaskSplitVariant(TaskSplitMethod taskSplitVariant) {
         this.taskSplitVariant = taskSplitVariant;
     }
-
-    public void dumpRoundCounterStats() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("--- Resulting deformations statistics --- ROUND\n");
-        sb.append("-- GOOD --");
-        sb.append(roundCounterGood.toString());
-        sb.append("\n-- NOT GOOD --");
-        sb.append(roundCounterNotGood.toString());
-        sb.append("\n-- QUALITY STATS --");
-        sb.append(roundQuality.toString());
-        Logger.trace(sb.toString());
-        roundCounterGood.reset();
-        roundCounterNotGood.reset();
-        roundQuality.reset();
-    }
-
-    public void dumpTaskCounterStats() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("--- Resulting deformations statistics --- TASK\n");
-        sb.append("-- GOOD --");
-        sb.append(counterGood.toString());
-        sb.append("\n-- NOT GOOD --");
-        sb.append(counterNotGood.toString());
-        sb.append("\n-- QUALITY STATS --");
-        sb.append(quality.toString());
-        Logger.trace(sb.toString());
-        counterGood.reset();
-        counterNotGood.reset();
-        quality.reset();
-    }    
 
 }
