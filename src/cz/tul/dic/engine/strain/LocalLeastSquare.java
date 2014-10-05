@@ -43,7 +43,7 @@ public class LocalLeastSquare extends StrainEstimator {
         final double[][][] displacement = TaskContainerUtils.getDisplacement(tc, roundFrom, roundTo);
         if (displacement != null) {
             final int width = displacement.length;
-            final int height = displacement[0].length;            
+            final int height = displacement[0].length;
 
             final double mm = (double) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
             final double mmToPx = (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
@@ -59,7 +59,7 @@ public class LocalLeastSquare extends StrainEstimator {
             }
 
             final double[][][] result = new double[width][height][];
-            final double[][][] resultQuality = new double[][][] {Utils.generateNaNarray(width, height), Utils.generateNaNarray(width, height)};
+            final double[][][] resultQuality = new double[][][]{Utils.generateNaNarray(width, height), Utils.generateNaNarray(width, height)};
             try {
                 final int threadCount = Runtime.getRuntime().availableProcessors();
                 final ExecutorService es = Executors.newWorkStealingPool(threadCount);
@@ -75,7 +75,7 @@ public class LocalLeastSquare extends StrainEstimator {
             } catch (InterruptedException | ExecutionException ex) {
                 Logger.error(ex);
             }
-            
+
             if (DebugControl.isDebugMode()) {
                 try {
                     final Image img = tc.getImage(roundTo);
@@ -176,7 +176,9 @@ public class LocalLeastSquare extends StrainEstimator {
             final double[] coeffs = computeCoeffs(data, x, y, (int) Math.ceil(ws / 2.0));
             if (coeffs != null) {
                 result = computeStrains(coeffs);
-                errors = new double[] {coeffs[INDEX_ERRA], coeffs[INDEX_ERRB]};
+                errors = new double[]{coeffs[INDEX_ERRA], coeffs[INDEX_ERRB]};
+            } else {
+                errors = new double[]{1, 1};
             }
             return this;
         }
