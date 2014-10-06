@@ -31,8 +31,7 @@ public enum TaskParameter {
     DISPLACEMENT_CALCULATION_PARAM(Integer.class),
     RESULT_QUALITY(Double.class),
     STRAIN_ESTIMATION_METHOD(StrainEstimationMethod.class),
-    STRAIN_ESTIMATION_PARAM(Double.class),
-    LOCAL_SEARCH_PARAM(Integer.class),
+    STRAIN_ESTIMATION_PARAM(Double.class),    
     DEFORMATION_LIMITS(double[].class),
     ;
 

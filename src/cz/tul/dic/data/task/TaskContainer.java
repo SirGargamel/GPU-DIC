@@ -50,9 +50,7 @@ public class TaskContainer extends Observable implements Serializable {
         results = Collections.synchronizedList(new LinkedList<>());
         displacement = new ConcurrentHashMap<>();
         strain = new ConcurrentHashMap<>();
-        hints = EnumSet.noneOf(Hint.class);
-        
-        hints.add(Hint.NO_FINE_SEARCH);
+        hints = EnumSet.noneOf(Hint.class);                
 
         this.input = input;
     }

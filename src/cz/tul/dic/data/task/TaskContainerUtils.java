@@ -575,19 +575,14 @@ public class TaskContainerUtils {
             tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, TaskDefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_METHOD);
             tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, TaskDefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_PARAM);
         }
-        final Object ws = tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM);
-        if (ws == null) {
-            Logger.warn("Adding default local search window size.");
-            tc.setParameter(TaskParameter.LOCAL_SEARCH_PARAM, TaskDefaultValues.DEFAULT_WINDOW_SIZE);
-        }
         final Object ratio = tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
         if (ratio == null) {
-            Logger.warn("Adding default local search window size.");
+            Logger.warn("Adding default mmToPx ratio.");
             tc.setParameter(TaskParameter.MM_TO_PX_RATIO, TaskDefaultValues.DEFAULT_MM_TO_PX_RATIO);
         }
         final Object quality = tc.getParameter(TaskParameter.RESULT_QUALITY);
         if (quality == null) {
-            Logger.warn("Adding default local search window size.");
+            Logger.warn("Adding default result quality.");
             tc.setParameter(TaskParameter.RESULT_QUALITY, TaskDefaultValues.DEFAULT_RESULT_QUALITY);
         }
     }

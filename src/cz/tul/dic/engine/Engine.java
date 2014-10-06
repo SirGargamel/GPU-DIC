@@ -39,7 +39,6 @@ public class Engine extends Observable {
     private static final Engine instance;
     private final CorrelationCalculator correlation;
     private final StrainEstimation strain;
-    private final FineLocalSearch fls;
 
     static {
         instance = new Engine();
@@ -50,8 +49,7 @@ public class Engine extends Observable {
     }
 
     private Engine() {
-        correlation = new CorrelationCalculator();
-        fls = new FineLocalSearch();
+        correlation = new CorrelationCalculator();        
         strain = new StrainEstimation();
     }
 
@@ -150,13 +148,7 @@ public class Engine extends Observable {
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
-        DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);
-
-        if (!hints.contains(Hint.NO_FINE_SEARCH)) {
-            setChanged();
-            notifyObservers(FineLocalSearch.class);
-            fls.searchForBestPosition(tc, roundFrom, roundTo);
-        }
+        DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);        
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
     }

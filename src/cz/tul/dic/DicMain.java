@@ -219,7 +219,7 @@ public class DicMain extends Application {
         Engine.getInstance().computeTask(tc);
         Exporter.export(tc);
         time = System.nanoTime() - time;
-        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
     }
 
     private static void commenceComputationDynamic(TaskContainer tc) throws IOException, ComputationException {
@@ -240,7 +240,7 @@ public class DicMain extends Application {
         cts.solveComplexTask(tc);
 //        Exporter.export(tc);
         time = System.nanoTime() - time;
-        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
     }
 
     private static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final double strainParamMin, final double strainParamMax) throws ComputationException, IOException {

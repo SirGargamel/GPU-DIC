@@ -48,7 +48,6 @@ public class CircleROIManager extends ROIManager {
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
         tc.addHint(Hint.NO_STRAIN);
         tc.addHint(Hint.NO_CUMULATIVE);
-        tc.addHint(Hint.NO_FINE_SEARCH);
         tc.addHint(Hint.NO_STATS);
         tc.clearResultData();
 
