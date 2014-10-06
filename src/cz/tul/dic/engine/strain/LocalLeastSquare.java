@@ -2,17 +2,14 @@ package cz.tul.dic.engine.strain;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
+import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.imageio.ImageIO;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.pmw.tinylog.Logger;
@@ -77,13 +73,10 @@ public class LocalLeastSquare extends StrainEstimator {
             }
 
             if (DebugControl.isDebugMode()) {
-                try {
-                    final Image img = tc.getImage(roundTo);
-                    ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[0], Direction.Exx)), "BMP", new File(NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Exx)));
-                    ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[1], Direction.Eyy)), "BMP", new File(NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Eyy)));
-                } catch (IOException ex) {
-                    Logger.warn(ex);
-                }
+                Stats.drawRegressionQualities(
+                        tc.getImage(roundTo), resultQuality,
+                        NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Exx),
+                        NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Eyy));
             }
 
             tc.setStrain(roundFrom, roundTo, result);

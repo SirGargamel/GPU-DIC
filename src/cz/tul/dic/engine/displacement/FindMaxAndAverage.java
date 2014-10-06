@@ -2,7 +2,6 @@ package cz.tul.dic.engine.displacement;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.Utils;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
@@ -11,18 +10,15 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
+import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.cluster.Analyzer2D;
-import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.NameGenerator;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import org.pmw.tinylog.Logger;
 
 public class FindMaxAndAverage extends DisplacementCalculator {
@@ -68,9 +64,9 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     if (cr.getValue() < resultQuality) {
                         continue;
                     }
-                    
+
                     d = cr.getDeformation();
-                    
+
                     f = facets.get(i);
                     if (f == null) {
                         Logger.warn("No facet - {0}", f);
@@ -78,7 +74,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     }
                     if (!FacetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
                         continue;
-                    }                    
+                    }
 
                     deformedFacet = FacetUtils.deformFacet(f, d);
                     for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
@@ -126,20 +122,9 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                         } else {
                             throw new UnsupportedOperationException("Unsupported method of result compilation - " + rc);
                         }
-                        
-                        if (DebugControl.isDebugMode()) {                            
-                            final List<double[]> vals = counter.listValues();
-                            final String[][] data = new String[vals.size()][2];
-                            final double precision = counter.getPrecision();
-                            for (int i = 0; i < vals.size(); i++) {
-                                data[i][0] = Utils.format(precision * (int) Math.round(vals.get(i)[0] / precision));
-                                data[i][1] = Utils.format(precision * (int) Math.round(vals.get(i)[1] / precision));
-                            }
-                            try {
-                                CsvWriter.writeDataToCsv(new File(NameGenerator.generate2DValueHistogram(tc, nextRound, x, y)), data);
-                            } catch (IOException ex) {
-                                java.util.logging.Logger.getLogger(FindMaxAndAverage.class.getName()).log(Level.SEVERE, null, ex);
-                            }
+
+                        if (DebugControl.isDebugMode()) {
+                            Stats.exportPointResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, nextRound, x, y));
                         }
                     }
                 }

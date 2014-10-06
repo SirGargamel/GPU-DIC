@@ -4,6 +4,7 @@ import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import java.io.File;
 
 /**
  *
@@ -63,15 +64,15 @@ public class NameGenerator {
     }
     
     public static String generateQualityMap(final TaskContainer tc, final int round) {
-        return new Generator(tc).name().time(round).text(TEXT_QUALITY_FACET).finalize(EXT_MAP);
+        return new Generator(tc).name(TEXT_QUALITY_FACET).time(round).text(TEXT_QUALITY_FACET).finalize(EXT_MAP);
     }
     
     public static String generateRegressionQualityMap(final TaskContainer tc, final int round, final Direction dir) {
-        return new Generator(tc).name().time(round).text(TEXT_QUALITY_REGRESSION).direction(dir).finalize(EXT_MAP);
+        return new Generator(tc).name(TEXT_QUALITY_REGRESSION).time(round).text(TEXT_QUALITY_REGRESSION).direction(dir).finalize(EXT_MAP);
     }
     
     public static String generate2DValueHistogram(final TaskContainer tc, final int round, final int x, final int y) {
-        return new Generator(tc).name().time(round).text(TEXT_HISTOGRAM).intVal(x).intVal(y).finalize(EXT_CSV);
+        return new Generator(tc).name(TEXT_HISTOGRAM).time(round).text(TEXT_HISTOGRAM).intVal(x).intVal(y).finalize(EXT_CSV);
     }
 
     private static class Generator {
@@ -88,6 +89,16 @@ public class NameGenerator {
 
         public Generator name() {            
             sb.append(tc.getParameter(TaskParameter.IN).toString());
+            return this;
+        }
+        
+        public Generator name(final String dirName) {
+            final File in = (File) tc.getParameter(TaskParameter.IN);
+            sb.append(in.getParent());
+            sb.append(File.separator);
+            sb.append(dirName);
+            sb.append(File.separator);
+            sb.append(in.getName());
             return this;
         }
 
