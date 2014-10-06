@@ -1,20 +1,23 @@
 package cz.tul.dic;
 
+import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
+import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.input.InputLoader;
-import cz.tul.dic.output.ExportUtils;
+import cz.tul.dic.output.Direction;
+import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.dic.output.target.ExportTarget;
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Application;
@@ -28,7 +31,6 @@ import org.pmw.tinylog.LoggingLevel;
 import org.pmw.tinylog.labellers.TimestampLabeller;
 import org.pmw.tinylog.policies.DailyPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
-import org.pmw.tinylog.writers.LoggingWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
 
 /**
@@ -46,13 +48,19 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
-//        
-//        "d:\\temp\\6203652m\\6203652m.avi.config",
-//        "d:\\temp\\9905121m\\9905121m.avi.config",
-        "d:\\temp\\7202845m\\7202845m.avi.config",
-        "d:\\temp\\6107544m\\6107544m.avi.config",
-        "d:\\temp\\6113599m\\6113599m.avi.config",        
-        "d:\\temp\\9112502m\\9112502m.avi.config",};
+
+        "d:\\temp\\.test spacing\\6107544m.avi.config",
+        "d:\\temp\\.test spacing\\6113599m.avi.config",
+        "d:\\temp\\.test spacing\\6203652m.avi.config",
+        "d:\\temp\\.test spacing\\7202845m.avi.config",
+        "d:\\temp\\.test spacing\\9112502m.avi.config",
+        "d:\\temp\\.test spacing\\9905121m.avi.config", //        "d:\\temp\\6203652m\\6203652m.avi.config",
+    //        "d:\\temp\\9905121m\\9905121m.avi.config",
+    //        "d:\\temp\\7202845m\\7202845m.avi.config",
+    //        "d:\\temp\\6107544m\\6107544m.avi.config",
+    //        "d:\\temp\\6113599m\\6113599m.avi.config",
+    //        "d:\\temp\\9112502m\\9112502m.avi.config",
+    };
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -60,8 +68,8 @@ public class DicMain extends Application {
         final List<String> parameters = params.getRaw();
 
         if (parameters.contains(DEBUG_COMPUTE) || parameters.contains(DEBUG_SMALL)) {
-            configureTinyLog(true);            
-            DebugControl.startDebugMode();            
+            configureTinyLog(true);
+            DebugControl.startDebugMode();
         } else {
             configureTinyLog(false);
         }
@@ -105,10 +113,10 @@ public class DicMain extends Application {
     }
 
     private void performComputationTest() {
-        final int fs1 = 15;
-        final int fs2 = 25;
-        final double ps1 = 25;
-        final double ps2 = 25;
+        final int fs1 = 20;
+        final int fs2 = 20;
+        final double min = 1;
+        final double max = 20;
         TaskContainer tc;
         for (String s : FILES_TO_DEBUG) {
             for (int size = fs1; size <= fs2; size += 5) {
@@ -122,7 +130,8 @@ public class DicMain extends Application {
                     InputLoader.loadInput(tc);
                     tc.setParameter(TaskParameter.FACET_SIZE, size);
                     tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
-                    Computation.commenceComputationDynamic(tc);
+//                    commenceComputationDynamic(tc);
+                    commenceComputationDynamicSpacingSweep(tc, (int)min, (int)max);
 
 //            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
 //            TaskContainer tc = Context.getInstance().getTc();
@@ -190,6 +199,77 @@ public class DicMain extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private static void commenceComputation(TaskContainer tc) throws IOException, ComputationException {
+        TaskContainerUtils.checkTaskValidity(tc);
+
+        // displacement export
+        tc.getExports().clear();
+        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
+        }
+
+        long time = System.nanoTime();
+        Engine.getInstance().computeTask(tc);
+        Exporter.export(tc);
+        time = System.nanoTime() - time;
+        Logger.info("Finished task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+    }
+
+    private static void commenceComputationDynamic(TaskContainer tc) throws IOException, ComputationException {
+        TaskContainerUtils.checkTaskValidity(tc);
+
+        // displacement export
+//        tc.getExports().clear();
+//        for (int r : TaskContainerUtils.getRounds(tc).values()) {
+//            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
+//            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
+//            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
+//        }
+        long time = System.nanoTime();
+        ComplexTaskSolver cts = new ComplexTaskSolver();
+        cts.solveComplexTask(tc);
+//        Exporter.export(tc);
+        time = System.nanoTime() - time;
+        Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.LOCAL_SEARCH_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+    }
+
+    private static void commenceComputationDynamicStrainParamSweep(final TaskContainer tc, final double strainParamMin, final double strainParamMax) throws ComputationException, IOException {
+        commenceComputationDynamic(tc);
+
+        // strain sweep and export       
+        final StrainEstimation strain = new StrainEstimation();
+        for (double strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
+            tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
+            strain.computeStrain(tc);
+
+//            tc.getExports().clear();
+//            for (int r : TaskContainerUtils.getRounds(tc).values()) {
+//                tc.addExport(ExportTask.generateMapExport(Direction.Exx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exx)), r));
+//                tc.addExport(ExportTask.generateMapExport(Direction.Eyy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eyy)), r));
+//                tc.addExport(ExportTask.generateMapExport(Direction.Exy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Exy)), r));
+//                tc.addExport(ExportTask.generateMapExport(Direction.Eabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Eabs)), r));                
+//            }
+//            Exporter.export(tc);
+            TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
+        }
+    }
+
+    private static void commenceComputationDynamicSpacingSweep(final TaskContainer tc, final int spacingMin, final int spacingMax) throws ComputationException, IOException {
+        for (int param = spacingMax; param >= spacingMin; param--) {
+            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, param);
+            commenceComputationDynamic(tc);
+            TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
+        }
     }
 
 }
