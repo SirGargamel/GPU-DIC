@@ -70,7 +70,7 @@ public class DisplacementCalculatorTest {
     }
 
     private void checkResults(final TaskContainer tc, final double dx, final double dy) {
-        double[][][] results = tc.getDisplacement(ROUND, ROUND + 1);
+        double[][][] results = tc.getDisplacement(ROUND, ROUND + 1).getDisplacement();
         for (double[][] dAA : results) {
             for (double[] dA : dAA) {
                 if (dA != null) {

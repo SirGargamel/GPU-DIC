@@ -5,6 +5,7 @@ import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.task.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -101,7 +102,7 @@ public class ComplexTaskSolver extends Observable {
                         }
                     }
                 }
-                rrm.getTc().setDisplacement(r, nextR, data);
+                rrm.getTc().setDisplacement(r, nextR, new DisplacementResult(data, null));
             }
 
             tc.setResults(r, tcR.getResults(r));

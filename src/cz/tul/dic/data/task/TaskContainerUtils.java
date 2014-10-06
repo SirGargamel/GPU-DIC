@@ -105,14 +105,14 @@ public class TaskContainerUtils {
         return result;
     }
 
-    public static double[][][] getDisplacement(final TaskContainer tc, final int startImageIndex, final int endImageIndex) throws ComputationException {
-        double[][][] result = tc.getDisplacement(startImageIndex, endImageIndex);
+    public static DisplacementResult getDisplacement(final TaskContainer tc, final int startImageIndex, final int endImageIndex) throws ComputationException {
+        DisplacementResult result = tc.getDisplacement(startImageIndex, endImageIndex);
 
         if (result == null) {
             final Image img = tc.getImage(startImageIndex);
             final int width = img.getWidth();
             final int height = img.getHeight();
-            result = new double[width][height][];
+            final double[][][] resultData = new double[width][height][];
 
             double posX, posY;
             int iX, iY;
@@ -120,6 +120,7 @@ public class TaskContainerUtils {
             double[] val;
             int indexFrom, indexTo;
             boolean notNull, inited;
+            DisplacementResult dr;
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     notNull = false;
@@ -133,7 +134,12 @@ public class TaskContainerUtils {
 
                     while (indexFrom != endImageIndex) {
                         do {
-                            data = tc.getDisplacement(indexFrom, indexTo);
+                            dr = tc.getDisplacement(indexFrom, indexTo);
+                            if (dr != null) {
+                                data = dr.getDisplacement();
+                            } else {
+                                data = null;
+                            }
                             if (data == null) {
                                 indexTo--;
                             }
@@ -163,11 +169,12 @@ public class TaskContainerUtils {
                     }
 
                     if (notNull) {
-                        result[x][y] = new double[]{posX - x, posY - y};
+                        resultData[x][y] = new double[]{posX - x, posY - y};
                     }
                 }
             }
 
+            result = new DisplacementResult(resultData, null);
             tc.setDisplacement(startImageIndex, endImageIndex, result);
         }
 
@@ -177,8 +184,8 @@ public class TaskContainerUtils {
     public static double getStretchFactor(final TaskContainer tc, final int endImageIndex) {
         final int startImageIndex = getFirstRound(tc);
         final double result;
-        final double[][][] results = tc.getDisplacement(startImageIndex, endImageIndex);
-        final double[][][] dResults = tc.getDisplacement(endImageIndex - 1, endImageIndex);
+        final double[][][] results = tc.getDisplacement(startImageIndex, endImageIndex).getDisplacement();
+        final double[][][] dResults = tc.getDisplacement(endImageIndex - 1, endImageIndex).getDisplacement();
         if (dResults != null) {
             final int width = dResults.length;
             final int height = dResults[0].length;

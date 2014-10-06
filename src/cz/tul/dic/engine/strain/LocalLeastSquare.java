@@ -36,7 +36,7 @@ public class LocalLeastSquare extends StrainEstimator {
 
     @Override
     void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) throws ComputationException {
-        final double[][][] displacement = TaskContainerUtils.getDisplacement(tc, roundFrom, roundTo);
+        final double[][][] displacement = TaskContainerUtils.getDisplacement(tc, roundFrom, roundTo).getDisplacement();
         if (displacement != null) {
             final int width = displacement.length;
             final int height = displacement[0].length;

@@ -6,9 +6,9 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
+import cz.tul.dic.data.task.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.CorrelationCalculator;
@@ -218,7 +218,7 @@ public class EngineTest {
     private String checkResultsBack(final TaskContainer tc, final String fileName) {
         final Image img1 = tc.getImage(ROUND);
         final Image img2 = tc.getImage(ROUND + 1);
-        double[][][] results = tc.getDisplacement(ROUND, ROUND + 1);
+        double[][][] results = tc.getDisplacement(ROUND, ROUND + 1).getDisplacement();
 
         // displacement map
         final Map<Integer, Map<Integer, List<Integer>>> defMap = new HashMap<>();
@@ -311,15 +311,15 @@ public class EngineTest {
 
         final int width = tc.getImage(ROUND).getWidth();
         final int height = tc.getImage(ROUND).getHeight();
-        tc.setDisplacement(0, 1, prepareArray(width, height, 0));
-        tc.setDisplacement(1, 2, prepareArray(width, height, 0));
-        tc.setDisplacement(2, 3, prepareArray(width, height, 1));
-        tc.setDisplacement(3, 4, prepareArray(width, height, 1));
+        tc.setDisplacement(0, 1, new DisplacementResult(prepareArray(width, height, 0), null));
+        tc.setDisplacement(1, 2, new DisplacementResult(prepareArray(width, height, 0), null));
+        tc.setDisplacement(2, 3, new DisplacementResult(prepareArray(width, height, 1), null));
+        tc.setDisplacement(3, 4, new DisplacementResult(prepareArray(width, height, 1), null));
 
-        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 1), prepareArray(width, height, 0), 0);
-        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 2), prepareArray(width, height, 0), 0);
-        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 3), prepareArray(width, height, 1), 0);
-        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 4), prepareArray(width, height, 2), 1);
+        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 1).getDisplacement(), prepareArray(width, height, 0), 0);
+        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 2).getDisplacement(), prepareArray(width, height, 0), 0);
+        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 3).getDisplacement(), prepareArray(width, height, 1), 0);
+        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 4).getDisplacement(), prepareArray(width, height, 2), 1);
     }
 
     private double[][][] prepareArray(final int width, final int height, final double val) {
@@ -450,7 +450,7 @@ public class EngineTest {
 
         for (CorrelationResult cr : tc.getResult(ROUND, roi)) {
             Assert.assertNotNull(cr);
-        }        
+        }
         Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
     }
 }

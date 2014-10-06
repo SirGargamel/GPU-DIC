@@ -39,7 +39,8 @@ public class TaskContainer extends Observable implements Serializable {
     private transient List<Image> images;
     // results
     private final List<Map<ROI, List<CorrelationResult>>> results;
-    private final Map<Integer, Map<Integer, double[][][]>> displacement, strain;
+    private final Map<Integer, Map<Integer, double[][][]>> strain;
+    private final Map<Integer, Map<Integer, DisplacementResult>> displacement;
 
     public TaskContainer(final Object input) {
         params = new HashMap<>();
@@ -234,20 +235,20 @@ public class TaskContainer extends Observable implements Serializable {
         return results.get(round);
     }
 
-    public double[][][] getDisplacement(final int roundFrom, final int roundTo) {
-        double[][][] result = null;
+    public DisplacementResult getDisplacement(final int roundFrom, final int roundTo) {
+        DisplacementResult result = null;
         if (displacement.containsKey(roundFrom)) {
             result = displacement.get(roundFrom).get(roundTo);
         }
         return result;
     }
 
-    public Map<Integer, Map<Integer, double[][][]>> getDisplacements() {
+    public Map<Integer, Map<Integer, DisplacementResult>> getDisplacements() {
         return displacement;
     }
 
-    public void setDisplacement(final int roundFrom, final int roundTo, final double[][][] result) {
-        Map<Integer, double[][][]> m = displacement.get(roundFrom);
+    public void setDisplacement(final int roundFrom, final int roundTo, final DisplacementResult result) {
+        Map<Integer, DisplacementResult> m = displacement.get(roundFrom);
         if (m == null) {
             m = new ConcurrentHashMap<>();
             displacement.put(roundFrom, m);

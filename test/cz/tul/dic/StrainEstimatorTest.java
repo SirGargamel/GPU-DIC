@@ -1,6 +1,7 @@
 package cz.tul.dic;
 
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.task.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.strain.StrainEstimation;
@@ -41,7 +42,7 @@ public class StrainEstimatorTest {
             {{0, 0}, null, {2, 0.5}, {2, 0.0}, null},
             {null, null, {0, 0}, null, null},
             {null, null, null, null, null},};
-        tc.setDisplacement(ROUND, ROUND + 1, displacement);
+        tc.setDisplacement(ROUND, ROUND + 1, new DisplacementResult(displacement, null));
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
         final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
@@ -82,7 +83,7 @@ public class StrainEstimatorTest {
                 dA[1] = dY;
             }
         }
-        tc.setDisplacement(ROUND, ROUND + 1, displacement);
+        tc.setDisplacement(ROUND, ROUND + 1, new DisplacementResult(displacement, null));
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
 
@@ -115,7 +116,7 @@ public class StrainEstimatorTest {
             {{2, 1}, {2, 0.5}, {2, 0.0}},
             {{3, 1}, {3, 0.5}, {3, 0.0}}
         };
-        tc.setDisplacement(ROUND, ROUND + 1, displacement);
+        tc.setDisplacement(ROUND, ROUND + 1, new DisplacementResult(displacement, null));
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
         final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
@@ -147,7 +148,7 @@ public class StrainEstimatorTest {
             {{1, 0.5}, {0, 0.5}, {-1, 0.5}},
             {{1, 0.0}, {0, 0.0}, {-1, 0.0}}
         };
-        tc.setDisplacement(ROUND, ROUND + 1, displacement);
+        tc.setDisplacement(ROUND, ROUND + 1, new DisplacementResult(displacement, null));
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
         final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);

@@ -7,6 +7,7 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.task.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
@@ -35,7 +36,8 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         final int linesPerGroup = (int) tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM) / width;
         final int groupCount = (int) Math.ceil(height / (double) linesPerGroup);
 
-        final double[][][] finalResults = new double[width][height][];
+        final double[][][] finalDisplacement = new double[width][height][];
+        final double[][] finalQuality = new double[width][height];
         final Map<Integer, Map<Integer, Analyzer2D>> counters = new HashMap<>();
         List<Facet> facets;
         List<CorrelationResult> results;
@@ -45,7 +47,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
         CorrelationResult cr;
-
+        double quality;
         for (int g = 0; g < groupCount; g++) {
             lowerBound = upperBound;
             upperBound += linesPerGroup;
@@ -66,7 +68,8 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     }
 
                     d = cr.getDeformation();
-
+                    quality = cr.getValue();
+                    
                     f = facets.get(i);
                     if (f == null) {
                         Logger.warn("No facet - {0}", f);
@@ -82,13 +85,13 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                         y = e.getKey()[Coordinates.Y];
 
                         if (y >= lowerBound && y <= upperBound) {
-                            getAnalyzer(counters, x, y).addValue(e.getValue());
+                            getAnalyzer(counters, x, y).addValue(new double[] {e.getValue()[0], e.getValue()[1], quality});
                         }
                     }
                 }
             }
 
-            double[] majorVal, val = new double[2];
+            double[] majorVal, val = new double[2];            
             int count;
             double maxDist2 = 4 * PRECISION * PRECISION;
             final ResultCompilation rc = (ResultCompilation) tc.getParameter(TaskParameter.RESULT_COMPILATION);
@@ -104,21 +107,24 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     if (counter != null) {
                         majorVal = counter.findMajorValue();
                         if (rc.equals(ResultCompilation.MAJOR)) {
-                            finalResults[x][y] = new double[]{majorVal[0], majorVal[1]};
+                            finalDisplacement[x][y] = new double[]{majorVal[0], majorVal[1]};
                         } else if (rc.equals(ResultCompilation.MAJOR_AVERAGING)) {
                             count = 0;
                             val[0] = 0;
                             val[1] = 0;
+                            quality = 0;
 
                             for (double[] vals : counter.listValues()) {
                                 if (dist2(vals, majorVal) <= maxDist2) {
                                     val[0] += vals[0];
                                     val[1] += vals[1];
+                                    quality += vals[2];
                                     count++;
                                 }
                             }
 
-                            finalResults[x][y] = new double[]{val[0] / (double) count, val[1] / (double) count};
+                            finalDisplacement[x][y] = new double[]{val[0] / (double) count, val[1] / (double) count};
+                            finalQuality[x][y] = quality / (double) count;
                         } else {
                             throw new UnsupportedOperationException("Unsupported method of result compilation - " + rc);
                         }
@@ -131,7 +137,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
             }
         }
 
-        tc.setDisplacement(round, nextRound, finalResults);
+        tc.setDisplacement(round, nextRound, new DisplacementResult(finalDisplacement, finalQuality));
     }
 
     private Analyzer2D getAnalyzer(final Map<Integer, Map<Integer, Analyzer2D>> maps, final int x, final int y) {

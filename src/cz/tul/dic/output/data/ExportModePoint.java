@@ -46,12 +46,12 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     case rDx:
                     case rDy:
                     case rDabs:
-                        results = tc.getDisplacement(r - 1, r);
+                        results = tc.getDisplacement(r - 1, r).getDisplacement();
                         break;
                     case Dx:
                     case Dy:
                     case Dabs:
-                        results = TaskContainerUtils.getDisplacement(tc, roundZero, r);
+                        results = TaskContainerUtils.getDisplacement(tc, roundZero, r).getDisplacement();
                         break;
                     case dExx:
                     case dEyy:

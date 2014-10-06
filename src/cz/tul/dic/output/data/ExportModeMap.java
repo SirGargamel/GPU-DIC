@@ -26,12 +26,12 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case rDx:
             case rDy:
             case rDabs:
-                results = tc.getDisplacement(round - 1, round);
+                results = tc.getDisplacement(round - 1, round).getDisplacement();
                 break;
             case Dx:
             case Dy:
             case Dabs:
-                results = TaskContainerUtils.getDisplacement(tc, roundZero, round);
+                results = TaskContainerUtils.getDisplacement(tc, roundZero, round).getDisplacement();
                 break;
             case dExx:
             case dEyy:
@@ -105,7 +105,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
 
         // stretch result to ending ROI
         if (direction.isStretch()) {
-            final double[][][] tempData = tc.getDisplacement(round - 1, round);
+            final double[][][] tempData = tc.getDisplacement(round - 1, round).getDisplacement();
             if (tempData != null) {
                 final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);
 

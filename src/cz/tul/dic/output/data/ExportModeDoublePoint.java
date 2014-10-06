@@ -4,7 +4,6 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.engine.strain.StrainResult;
 import cz.tul.dic.output.Direction;
 import java.util.EnumMap;
 import java.util.Map;
@@ -50,13 +49,13 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                     case dEyy:
                     case dExy:
                     case dEabs:
-                        results = tc.getDisplacement(r - 1, r);
+                        results = tc.getDisplacement(r - 1, r).getDisplacement();
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        results = TaskContainerUtils.getDisplacement(tc, roundZero, r);
+                        results = TaskContainerUtils.getDisplacement(tc, roundZero, r).getDisplacement();
                         break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
