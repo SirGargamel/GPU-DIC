@@ -130,7 +130,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                         }
 
                         if (DebugControl.isDebugMode()) {
-                            Stats.exportPointResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, nextRound, x, y));
+                            Stats.exportPointSubResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, nextRound, x, y));
                         }
                     }
                 }

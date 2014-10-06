@@ -74,7 +74,7 @@ public class Engine extends Observable {
             notifyObservers(currentRound);
         }
 
-        Stats.dumpResultStatistics(tc);
+        Stats.dumpDeformationsStatistics(tc);
 
         if (!hints.contains(Hint.NO_STRAIN)) {
             setChanged();
@@ -84,23 +84,7 @@ public class Engine extends Observable {
 
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
-    }
-
-    private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
-        Iterator<ExportTask> it = tc.getExports().iterator();
-        ExportTask et;
-        while (it.hasNext()) {
-            et = it.next();
-            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round && !isStrainExport(et)) {
-                Exporter.export(tc, et);
-            }
-        }
-    }
-
-    private boolean isStrainExport(ExportTask et) {
-        final Direction dir = et.getDirection();
-        return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
-    }
+    }        
 
     public void computeRound(final TaskContainer tc, final int roundFrom, final int roundTo) throws ComputationException, IOException {
         Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, tc);
@@ -140,17 +124,35 @@ public class Engine extends Observable {
                             tc.getDeformationLimits(roundFrom, roi),
                             DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
                             tc.getFacetSize(roundFrom, roi), taskSplitValue));
-        }
-        if (DebugControl.isDebugMode()) {
-            Stats.dumpResultStatistics(tc, roundFrom);
-            Stats.drawResultQualityStatistics(tc, facets, roundFrom, roundTo);
-        }
+        }        
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
         DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);        
+        
+        if (DebugControl.isDebugMode()) {
+            Stats.dumpDeformationsStatistics(tc, roundFrom);
+            Stats.drawFacetQualityStatistics(tc, facets, roundFrom, roundTo);
+            Stats.drawPointResultStatistics(tc, roundFrom, roundTo);
+        }
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
+    }
+    
+    private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
+        Iterator<ExportTask> it = tc.getExports().iterator();
+        ExportTask et;
+        while (it.hasNext()) {
+            et = it.next();
+            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round && !isStrainExport(et)) {
+                Exporter.export(tc, et);
+            }
+        }
+    }
+    
+    private boolean isStrainExport(ExportTask et) {
+        final Direction dir = et.getDirection();
+        return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
     }
 
 }

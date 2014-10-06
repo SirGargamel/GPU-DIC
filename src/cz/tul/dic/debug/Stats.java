@@ -30,7 +30,7 @@ import org.pmw.tinylog.Logger;
  */
 public class Stats {
 
-    public static void dumpResultStatistics(final TaskContainer tc, final int round) {
+    public static void dumpDeformationsStatistics(final TaskContainer tc, final int round) {
         final ValueCounter counterGood = ValueCounter.createCounter();
         final ValueCounter counterNotGood = ValueCounter.createCounter();
         final ValueCounter quality = ValueCounter.createCounter();
@@ -66,7 +66,7 @@ public class Stats {
         Logger.trace(sb.toString());
     }
 
-    public static void dumpResultStatistics(final TaskContainer tc) {
+    public static void dumpDeformationsStatistics(final TaskContainer tc) {
         final ValueCounter counterGood = ValueCounter.createCounter();
         final ValueCounter counterNotGood = ValueCounter.createCounter();
         final ValueCounter quality = ValueCounter.createCounter();
@@ -108,10 +108,10 @@ public class Stats {
         Logger.trace(sb.toString());
     }
 
-    public static void drawResultQualityStatistics(final TaskContainer tc, final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
-        final File out = new File(NameGenerator.generateQualityMap(tc, roundTo));
+    public static void drawFacetQualityStatistics(final TaskContainer tc, final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
+        final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
         out.getParentFile().mkdirs();
-        
+
         final Map<ROI, List<CorrelationResult>> allResults = tc.getResults(roundFrom);
         final Image img = tc.getImage(roundTo);
         final double[][] resultData = Utils.generateNaNarray(img.getWidth(), img.getHeight());
@@ -127,14 +127,21 @@ public class Stats {
                     resultData[(int) Math.round(center[0])][(int) Math.round(center[1])] = results.get(i).getValue();
                 }
             }
-        }        
+        }
         ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.Dabs)), "BMP", out);
     }
 
-    public static void exportPointResultsStatistics(final Analyzer2D counter, final String name) {
-        final File out = new File(name);
+    public static void drawPointResultStatistics(final TaskContainer tc, final int roundFrom, final int roundTo) throws IOException, ComputationException {
+        final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
         out.getParentFile().mkdirs();
         
+        ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getDisplacement(roundFrom, roundTo).getQuality(), Direction.Dabs)), "BMP", out);
+    }
+
+    public static void exportPointSubResultsStatistics(final Analyzer2D counter, final String name) {
+        final File out = new File(name);
+        out.getParentFile().mkdirs();
+
         final List<double[]> vals = counter.listValues();
         final String[][] data = new String[vals.size()][2];
         final double precision = counter.getPrecision();
@@ -152,7 +159,7 @@ public class Stats {
     public static void drawRegressionQualities(final Image img, final double[][][] resultQuality, final String nameA, final String nameB) throws ComputationException {
         final File out = new File(nameA);
         out.getParentFile().mkdirs();
-        
+
         try {
             ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[0], Direction.Exx)), "BMP", new File(nameA));
             ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[1], Direction.Eyy)), "BMP", new File(nameB));
