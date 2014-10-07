@@ -558,6 +558,10 @@ public class TaskContainerUtils {
         if (facetGenMode == null) {
             Logger.warn("Adding default facet generator.");
             tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, TaskDefaultValues.DEFAULT_FACET_GENERATOR);
+        }
+        final Object facetGenModeParam = tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM);
+        if (facetGenModeParam == null) {
+            Logger.warn("Adding default facet generator.");
             tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, TaskDefaultValues.DEFAULT_FACET_SPACING);
         }
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
@@ -574,6 +578,10 @@ public class TaskContainerUtils {
         if (strainEstimation == null) {
             Logger.warn("Adding default strain estimator.");
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_METHOD);
+        }
+        final Object strainEstimationParam = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
+        if (strainEstimationParam == null) {
+            Logger.warn("Adding default strain estimator.");
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER);
         }
         final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD);
