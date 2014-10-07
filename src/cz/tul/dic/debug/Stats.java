@@ -177,7 +177,9 @@ public class Stats {
     }
     
     private static void saveDump(final String fileName, final String textDump) throws IOException {
-        try (FileWriter out = new FileWriter(new File(fileName))) {
+        final File outFile = new File(fileName);
+        outFile.getParentFile().mkdirs();
+        try (FileWriter out = new FileWriter(outFile)) {
             out.write(textDump);
         }
     }
