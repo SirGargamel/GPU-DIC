@@ -74,7 +74,8 @@ public class Engine extends Observable {
             notifyObservers(currentRound);
         }
 
-        Stats.dumpDeformationsStatistics(tc);
+        Stats.dumpDeformationsStatisticsUsage(tc);
+        Stats.dumpDeformationsStatisticsPerQuality(tc);
 
         if (!hints.contains(Hint.NO_STRAIN)) {
             setChanged();
@@ -131,7 +132,8 @@ public class Engine extends Observable {
         DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);        
         
         if (DebugControl.isDebugMode()) {
-            Stats.dumpDeformationsStatistics(tc, roundFrom);
+            Stats.dumpDeformationsStatisticsUsage(tc, roundFrom);
+            Stats.dumpDeformationsStatisticsPerQuality(tc, roundFrom);
             Stats.drawFacetQualityStatistics(tc, facets, roundFrom, roundTo);
             Stats.drawPointResultStatistics(tc, roundFrom, roundTo);
         }

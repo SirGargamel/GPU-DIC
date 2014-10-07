@@ -116,7 +116,8 @@ public class ComplexTaskSolver extends Observable {
             notifyObservers(currentRound);
         }
 
-        Stats.dumpDeformationsStatistics(tc);
+        Stats.dumpDeformationsStatisticsUsage(tc);
+        Stats.dumpDeformationsStatisticsPerQuality(tc);
 
         StrainEstimation strain = new StrainEstimation();
         strain.computeStrain(tc);

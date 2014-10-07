@@ -17,6 +17,7 @@ import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +31,7 @@ import org.pmw.tinylog.Logger;
  */
 public class Stats {
 
-    public static void dumpDeformationsStatistics(final TaskContainer tc, final int round) {
+    public static void dumpDeformationsStatisticsUsage(final TaskContainer tc, final int round) {
         final ValueCounter counterGood = ValueCounter.createCounter();
         final ValueCounter counterNotGood = ValueCounter.createCounter();
         final ValueCounter quality = ValueCounter.createCounter();
@@ -66,7 +67,7 @@ public class Stats {
         Logger.trace(sb.toString());
     }
 
-    public static void dumpDeformationsStatistics(final TaskContainer tc) {
+    public static void dumpDeformationsStatisticsUsage(final TaskContainer tc) {
         final ValueCounter counterGood = ValueCounter.createCounter();
         final ValueCounter counterNotGood = ValueCounter.createCounter();
         final ValueCounter quality = ValueCounter.createCounter();
@@ -108,6 +109,72 @@ public class Stats {
         Logger.trace(sb.toString());
     }
 
+    public static void dumpDeformationsStatisticsPerQuality(final TaskContainer tc, final int round) {
+        final Map<Integer, ValueCounter> counters = new HashMap<>();
+        final Map<ROI, List<CorrelationResult>> results = tc.getResults(round);
+
+        for (int i = 0; i < 11; i++) {
+            counters.put(i, ValueCounter.createCounter());
+        }
+
+        int val;
+        ValueCounter counter;
+        for (ROI roi : results.keySet()) {
+            for (CorrelationResult cr : results.get(roi)) {
+                if (cr != null) {
+                    val = (int) (cr.getValue() * 10);
+                    counter = counters.get(val);
+                    counter.inc(cr.getDeformation());
+                }
+            }
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("--- Resulting deformations statistics per quality --- ROUND");
+        for (int i = 0; i < 11; i++) {
+            sb.append("\n-- Quality above ");
+            sb.append(Utils.format(i / 10.0));
+            sb.append(" --");
+            sb.append(counters.get(i).toString());
+        }
+        Logger.trace(sb.toString());
+    }
+
+    public static void dumpDeformationsStatisticsPerQuality(final TaskContainer tc) {
+        final Map<Integer, ValueCounter> counters = new HashMap<>();
+        final Set<Integer> rounds = TaskContainerUtils.getRounds(tc).keySet();
+
+        for (int i = 0; i < 11; i++) {
+            counters.put(i, ValueCounter.createCounter());
+        }
+
+        int val;
+        ValueCounter counter;
+        Map<ROI, List<CorrelationResult>> results;
+        for (Integer round : rounds) {
+            results = tc.getResults(round);
+            for (ROI roi : results.keySet()) {
+                for (CorrelationResult cr : results.get(roi)) {
+                    if (cr != null) {
+                        val = (int) (cr.getValue() * 10);
+                        counter = counters.get(val);
+                        counter.inc(cr.getDeformation());
+                    }
+                }
+            }
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("--- Resulting deformations statistics per quality --- TASK");
+        for (int i = 0; i < 11; i++) {
+            sb.append("\n-- Quality above ");
+            sb.append(Utils.format(i / 10.0));
+            sb.append(" --");
+            sb.append(counters.get(i).toString());
+        }
+        Logger.trace(sb.toString());
+    }
+
     public static void drawFacetQualityStatistics(final TaskContainer tc, final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
         final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
         out.getParentFile().mkdirs();
@@ -134,7 +201,7 @@ public class Stats {
     public static void drawPointResultStatistics(final TaskContainer tc, final int roundFrom, final int roundTo) throws IOException, ComputationException {
         final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
         out.getParentFile().mkdirs();
-        
+
         ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getDisplacement(roundFrom, roundTo).getQuality(), Direction.Dabs)), "BMP", out);
     }
 
