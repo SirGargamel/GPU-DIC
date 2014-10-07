@@ -24,14 +24,15 @@ public class Utils {
     private static final String TEMP_DIR_NAME = "temp";
     private static final Map<TaskContainer, List<File>> tempFiles;
 
-    private static final NumberFormat nf;
+    private static final NumberFormat nfDouble, nfInt;
 
     static {
         tempFiles = new HashMap<>();
 
         final DecimalFormatSymbols decimalSymbol = new DecimalFormatSymbols(Locale.getDefault());
         decimalSymbol.setDecimalSeparator('.');
-        nf = new DecimalFormat("#0.###", decimalSymbol);
+        nfDouble = new DecimalFormat("#0.###", decimalSymbol);
+        nfInt = new DecimalFormat("00", decimalSymbol);
     }
 
     public static File getTempDir(final TaskContainer tc) {
@@ -94,7 +95,11 @@ public class Utils {
     }
 
     public static String format(final double val) {
-        return nf.format(val);
+        return nfDouble.format(val);
+    }
+    
+    public static String format(final int val) {
+        return nfInt.format(val);
     }
     
     public static double[][] generateNaNarray(final int width, final int height) {

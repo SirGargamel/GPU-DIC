@@ -12,7 +12,7 @@ import java.io.File;
  */
 public class NameGenerator {
 
-    private static final String DELIMITER = "_";    
+    private static final String DELIMITER = "_";
     public static final String EXT_CONFIG = ".config";
     public static final String EXT_CSV = ".csv";
     public static final String EXT_MAP = ".bmp";
@@ -55,7 +55,7 @@ public class NameGenerator {
     public static String generateCsvPoint(final TaskContainer tc, final int x, final int y) {
         return new Generator(tc).name().intVal(x).intVal(y).finalize(EXT_CSV);
     }
-    
+
     public static String generateCsvDoublePoint(final TaskContainer tc, final int x1, final int y1, final int x2, final int y2) {
         return new Generator(tc).name().intVal(x1).intVal(y1).delimiter().intVal(x2).intVal(y2).finalize(EXT_CSV);
     }
@@ -63,19 +63,19 @@ public class NameGenerator {
     public static String generateCsvMap(final TaskContainer tc, final int round, final Direction dir) {
         return generateMap(tc, round, dir).replace(EXT_MAP, EXT_CSV);
     }
-    
+
     public static String generateQualityMapFacet(final TaskContainer tc, final int round) {
         return new Generator(tc).name(TEXT_QUALITY_FACET).time(round).text(TEXT_QUALITY_FACET).finalize(EXT_MAP);
     }
-    
+
     public static String generateQualityMapPoint(final TaskContainer tc, final int round) {
         return new Generator(tc).name(TEXT_QUALITY_POINT).time(round).text(TEXT_QUALITY_POINT).finalize(EXT_MAP);
     }
-    
+
     public static String generateRegressionQualityMap(final TaskContainer tc, final int round, final Direction dir) {
         return new Generator(tc).name(TEXT_QUALITY_REGRESSION).time(round).text(TEXT_QUALITY_REGRESSION).direction(dir).finalize(EXT_MAP);
     }
-    
+
     public static String generate2DValueHistogram(final TaskContainer tc, final int round, final int x, final int y) {
         return new Generator(tc).name(TEXT_HISTOGRAM).time(round).text(TEXT_HISTOGRAM).intVal(x).intVal(y).finalize(EXT_CSV);
     }
@@ -92,11 +92,11 @@ public class NameGenerator {
             fpsM = new FpsManager(tc);
         }
 
-        public Generator name() {            
+        public Generator name() {
             sb.append(tc.getParameter(TaskParameter.IN).toString());
             return this;
         }
-        
+
         public Generator name(final String dirName) {
             final File in = (File) tc.getParameter(TaskParameter.IN);
             sb.append(in.getParent());
@@ -109,10 +109,10 @@ public class NameGenerator {
 
         public Generator intVal(int round) {
             sb.append(DELIMITER);
-            sb.append(round);
+            sb.append(Utils.format(round));
             return this;
         }
-        
+
         public Generator time(int imageNr) {
             sb.append(DELIMITER);
             sb.append(Utils.format(fpsM.getTime(imageNr)));
@@ -125,12 +125,12 @@ public class NameGenerator {
             sb.append(dir.toString());
             return this;
         }
-        
+
         public Generator delimiter() {
             sb.append(DELIMITER);
             return this;
         }
-        
+
         public Generator text(final String text) {
             sb.append(DELIMITER);
             sb.append(text);
@@ -140,12 +140,12 @@ public class NameGenerator {
         public String finalize(String extension) {
             sb.append(DELIMITER);
             sb.append(DELIMITER);
-            sb.append(tc.getParameter(TaskParameter.FACET_SIZE).toString());
+            sb.append(Utils.format((int) tc.getParameter(TaskParameter.FACET_SIZE)));
             if (debugMode) {
                 sb.append(DELIMITER);
-                sb.append(tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM).toString());
+                sb.append(Utils.format((int) tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM)));
                 sb.append(DELIMITER);
-                sb.append(tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM).toString());
+                sb.append(Utils.format((double) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM)));
             }
             sb.append(extension);
             return sb.toString();
