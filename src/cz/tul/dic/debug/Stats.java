@@ -16,6 +16,7 @@ import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ import org.pmw.tinylog.Logger;
  */
 public class Stats {
 
-    public static void dumpDeformationsStatisticsUsage(final TaskContainer tc, final int round) {
+    public static void dumpDeformationsStatisticsUsage(final TaskContainer tc, final int round) throws IOException {
         final ValueCounter counterGood = ValueCounter.createCounter();
         final ValueCounter counterNotGood = ValueCounter.createCounter();
         final ValueCounter quality = ValueCounter.createCounter();
@@ -64,10 +65,10 @@ public class Stats {
         sb.append(counterNotGood.toString());
         sb.append("\n-- QUALITY STATS --");
         sb.append(quality.toString());
-        Logger.trace(sb.toString());
+        saveDump(NameGenerator.generateDeformationQualityUsageDump(tc, round), sb.toString());
     }
 
-    public static void dumpDeformationsStatisticsUsage(final TaskContainer tc) {
+    public static void dumpDeformationsStatisticsUsage(final TaskContainer tc) throws IOException {
         final ValueCounter counterGood = ValueCounter.createCounter();
         final ValueCounter counterNotGood = ValueCounter.createCounter();
         final ValueCounter quality = ValueCounter.createCounter();
@@ -106,10 +107,10 @@ public class Stats {
         sb.append(counterNotGood.toString());
         sb.append("\n-- QUALITY STATS --");
         sb.append(quality.toString());
-        Logger.trace(sb.toString());
+        saveDump(NameGenerator.generateDeformationQualityUsageDump(tc, -1), sb.toString());
     }
 
-    public static void dumpDeformationsStatisticsPerQuality(final TaskContainer tc, final int round) {
+    public static void dumpDeformationsStatisticsPerQuality(final TaskContainer tc, final int round) throws IOException {
         final Map<Integer, ValueCounter> counters = new HashMap<>();
         final Map<ROI, List<CorrelationResult>> results = tc.getResults(round);
 
@@ -137,10 +138,10 @@ public class Stats {
             sb.append(" --");
             sb.append(counters.get(i).toString());
         }
-        Logger.trace(sb.toString());
+        saveDump(NameGenerator.generateDeformationQualityDump(tc, round), sb.toString());
     }
 
-    public static void dumpDeformationsStatisticsPerQuality(final TaskContainer tc) {
+    public static void dumpDeformationsStatisticsPerQuality(final TaskContainer tc) throws IOException {
         final Map<Integer, ValueCounter> counters = new HashMap<>();
         final Set<Integer> rounds = TaskContainerUtils.getRounds(tc).keySet();
 
@@ -171,8 +172,14 @@ public class Stats {
             sb.append(Utils.format(i / 10.0));
             sb.append(" --");
             sb.append(counters.get(i).toString());
+        }        
+        saveDump(NameGenerator.generateDeformationQualityDump(tc, -1), sb.toString());        
+    }
+    
+    private static void saveDump(final String fileName, final String textDump) throws IOException {
+        try (FileWriter out = new FileWriter(new File(fileName))) {
+            out.write(textDump);
         }
-        Logger.trace(sb.toString());
     }
 
     public static void drawFacetQualityStatistics(final TaskContainer tc, final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {

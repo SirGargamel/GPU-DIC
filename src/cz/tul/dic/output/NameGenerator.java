@@ -15,9 +15,12 @@ public class NameGenerator {
     private static final String DELIMITER = "_";
     public static final String EXT_CONFIG = ".config";
     public static final String EXT_CSV = ".csv";
+    public static final String EXT_TXT = ".txt";
     public static final String EXT_MAP = ".bmp";
     public static final String EXT_SEQUENCE = ".avi";
     public static final String EXT_BINARY = ".task";
+    private static final String TEXT_QUALITY_DEFORMATION = "deformationQuality";
+    private static final String TEXT_QUALITY_DEFORMATION_BOOL = "deformationQualityBool";
     private static final String TEXT_QUALITY_FACET = "correlationQualityFacet";
     private static final String TEXT_QUALITY_POINT = "correlationQualityPoint";
     private static final String TEXT_QUALITY_REGRESSION = "regressionError";
@@ -70,6 +73,14 @@ public class NameGenerator {
 
     public static String generateQualityMapPoint(final TaskContainer tc, final int round) {
         return new Generator(tc).name(TEXT_QUALITY_POINT).time(round).text(TEXT_QUALITY_POINT).finalize(EXT_MAP);
+    }
+    
+    public static String generateDeformationQualityDump(final TaskContainer tc, final int round) {
+        return new Generator(tc).name(TEXT_QUALITY_DEFORMATION).time(round).text(TEXT_QUALITY_DEFORMATION).finalize(EXT_TXT);
+    }
+    
+    public static String generateDeformationQualityUsageDump(final TaskContainer tc, final int round) {
+        return new Generator(tc).name(TEXT_QUALITY_DEFORMATION).time(round).text(TEXT_QUALITY_DEFORMATION_BOOL).finalize(EXT_TXT);
     }
 
     public static String generateRegressionQualityMap(final TaskContainer tc, final int round, final Direction dir) {
