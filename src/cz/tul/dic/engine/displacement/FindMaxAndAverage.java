@@ -2,6 +2,7 @@ package cz.tul.dic.engine.displacement;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.Utils;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
@@ -37,7 +38,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         final int groupCount = (int) Math.ceil(height / (double) linesPerGroup);
 
         final double[][][] finalDisplacement = new double[width][height][];
-        final double[][] finalQuality = new double[width][height];
+        final double[][] finalQuality = Utils.generateNaNarray(width, height);
         final Map<Integer, Map<Integer, Analyzer2D>> counters = new HashMap<>();
         List<Facet> facets;
         List<CorrelationResult> results;
