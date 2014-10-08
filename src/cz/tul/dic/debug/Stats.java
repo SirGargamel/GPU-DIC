@@ -154,12 +154,14 @@ public class Stats {
         Map<ROI, List<CorrelationResult>> results;
         for (Integer round : rounds) {
             results = tc.getResults(round);
-            for (ROI roi : results.keySet()) {
-                for (CorrelationResult cr : results.get(roi)) {
-                    if (cr != null) {
-                        val = (int) (cr.getValue() * 10);
-                        counter = counters.get(val);
-                        counter.inc(cr.getDeformation());
+            if (results != null) {
+                for (ROI roi : results.keySet()) {
+                    for (CorrelationResult cr : results.get(roi)) {
+                        if (cr != null) {
+                            val = (int) (cr.getValue() * 10);
+                            counter = counters.get(val);
+                            counter.inc(cr.getDeformation());
+                        }
                     }
                 }
             }
@@ -172,10 +174,10 @@ public class Stats {
             sb.append(Utils.format(i / 10.0));
             sb.append(" --");
             sb.append(counters.get(i).toString());
-        }        
-        saveDump(NameGenerator.generateDeformationQualityDump(tc, -1), sb.toString());        
+        }
+        saveDump(NameGenerator.generateDeformationQualityDump(tc, -1), sb.toString());
     }
-    
+
     private static void saveDump(final String fileName, final String textDump) throws IOException {
         final File outFile = new File(fileName);
         outFile.getParentFile().mkdirs();
