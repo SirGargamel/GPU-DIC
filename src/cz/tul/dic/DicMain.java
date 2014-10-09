@@ -184,7 +184,7 @@ public class DicMain extends Application {
 //                }
                 } catch (IOException | ComputationException ex) {
                     Logger.error(ex);
-                } catch (Error t) {
+                } catch (Exception | Error t) {
                     Logger.error(t);
                     System.out.println(Context.getInstance().getTc());
                 }
