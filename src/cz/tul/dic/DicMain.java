@@ -49,12 +49,14 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
 
-        "d:\\temp\\.test spacing\\6107544m.avi.config",
-        "d:\\temp\\.test spacing\\6113599m.avi.config",
-        "d:\\temp\\.test spacing\\6203652m.avi.config",
-        "d:\\temp\\.test spacing\\7202845m.avi.config",
-        "d:\\temp\\.test spacing\\9112502m.avi.config",
-        "d:\\temp\\.test spacing\\9905121m.avi.config", //        "d:\\temp\\6203652m\\6203652m.avi.config",
+        "d:\\temp\\.test spacing\\6107544m\\6107544m.avi.config",
+        "d:\\temp\\.test spacing\\6113599m\\6113599m.avi.config",
+        "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
+        "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
+        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
+        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config", 
+
+    //        "d:\\temp\\6203652m\\6203652m.avi.config",
     //        "d:\\temp\\9905121m\\9905121m.avi.config",
     //        "d:\\temp\\7202845m\\7202845m.avi.config",
     //        "d:\\temp\\6107544m\\6107544m.avi.config",
@@ -113,10 +115,10 @@ public class DicMain extends Application {
     }
 
     private void performComputationTest() {
-        final int fs1 = 20;
-        final int fs2 = 20;
+        final int fs1 = 15;
+        final int fs2 = 15;
         final double min = 1;
-        final double max = 20;
+        final double max = fs2 / 2;
         TaskContainer tc;
         for (String s : FILES_TO_DEBUG) {
             for (int size = fs1; size <= fs2; size += 5) {
@@ -128,10 +130,11 @@ public class DicMain extends Application {
                         break;
                     }
                     InputLoader.loadInput(tc);
+                    tc.setParameter(TaskParameter.IN, new File(s));
                     tc.setParameter(TaskParameter.FACET_SIZE, size);
                     tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
 //                    commenceComputationDynamic(tc);
-                    commenceComputationDynamicSpacingSweep(tc, (int)min, (int)max);
+                    commenceComputationDynamicSpacingSweep(tc, (int) min, (int) max);
 
 //            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
 //            TaskContainer tc = Context.getInstance().getTc();
@@ -206,13 +209,13 @@ public class DicMain extends Application {
 
         // displacement export
         tc.getExports().clear();
-        for (int r : TaskContainerUtils.getRounds(tc).keySet()) {
+        for (int r : TaskContainerUtils.getRounds(tc).values()) {
             tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
             tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+//            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
         }
 
         long time = System.nanoTime();
@@ -226,19 +229,19 @@ public class DicMain extends Application {
         TaskContainerUtils.checkTaskValidity(tc);
 
         // displacement export
-//        tc.getExports().clear();
-//        for (int r : TaskContainerUtils.getRounds(tc).values()) {
-//            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
-//            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
+        tc.getExports().clear();
+        for (int r : TaskContainerUtils.getRounds(tc).values()) {
+            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
 //            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
-//            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
-//            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
 //            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
-//        }
+        }
         long time = System.nanoTime();
         ComplexTaskSolver cts = new ComplexTaskSolver();
         cts.solveComplexTask(tc);
-//        Exporter.export(tc);
+        Exporter.export(tc);
         time = System.nanoTime() - time;
         Logger.info("Finished dynamic task " + tc.getParameter(TaskParameter.FACET_SIZE) + "/" + tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM) + "/" + tc.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
     }
@@ -268,7 +271,6 @@ public class DicMain extends Application {
         for (int param = spacingMax; param >= spacingMin; param--) {
             tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, param);
             commenceComputationDynamic(tc);
-            TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         }
     }
 
