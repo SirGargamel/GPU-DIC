@@ -1,9 +1,20 @@
 package cz.tul.dic.debug;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.engine.displacement.DisplacementCalculator;
+import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -52,6 +63,18 @@ public class DebugControl {
         for (ValueCounter rc : counters) {
             rc.setEnabled(debugMode);
         }
+    }
+
+    public static void performStatisticsDump(final TaskContainer tc) throws IOException, ComputationException {
+        for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
+            Stats.dumpDeformationsStatisticsUsage(tc, e.getKey());
+            Stats.dumpDeformationsStatisticsPerQuality(tc, e.getKey());
+            Stats.drawPointResultStatistics(tc, e.getKey(), e.getValue());
+        }
+
+        Stats.dumpDeformationsStatisticsPerQuality(tc);
+        Stats.dumpDeformationsStatisticsUsage(tc);
+        new StrainEstimation().computeStrain(tc);
     }
 
 }
