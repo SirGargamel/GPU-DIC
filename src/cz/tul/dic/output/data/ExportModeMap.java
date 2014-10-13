@@ -3,6 +3,7 @@ package cz.tul.dic.output.data;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.FpsManager;
+import cz.tul.dic.data.task.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -105,22 +106,25 @@ public class ExportModeMap implements IExportMode<double[][]> {
 
         // stretch result to ending ROI
         if (direction.isStretch()) {
-            final double[][][] tempData = tc.getDisplacement(round - 1, round).getDisplacement();
-            if (tempData != null) {
-                final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);
+            final DisplacementResult dr = tc.getDisplacement(round - 1, round);
+            if (dr != null) {
+                final double[][][] tempData = dr.getDisplacement();
+                if (tempData != null) {
+                    final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);
 
-                final double[][] stretchedResult = new double[width][height];
-                double newY;
-                for (int y = 0; y < height - 1; y++) {
-                    newY = y / stretchFactor;
-                    for (int x = 0; x < width; x++) {
-                        stretchedResult[x][y] = interpolate(
-                                result[x][(int) Math.floor(newY)],
-                                result[x][(int) Math.ceil(newY)],
-                                newY % 1);
+                    final double[][] stretchedResult = new double[width][height];
+                    double newY;
+                    for (int y = 0; y < height - 1; y++) {
+                        newY = y / stretchFactor;
+                        for (int x = 0; x < width; x++) {
+                            stretchedResult[x][y] = interpolate(
+                                    result[x][(int) Math.floor(newY)],
+                                    result[x][(int) Math.ceil(newY)],
+                                    newY % 1);
+                        }
                     }
+                    result = stretchedResult;
                 }
-                result = stretchedResult;
             }
         }
 
