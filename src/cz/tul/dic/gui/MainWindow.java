@@ -95,7 +95,9 @@ public class MainWindow implements Initializable {
             if (!last.isDirectory()) {
                 last = last.getParentFile();
             }
-            fc.setInitialDirectory(last);
+            if (last.exists()) {
+                fc.setInitialDirectory(last);
+            }
         }
         fc.getExtensionFilters().clear();
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project files", "*.avi", "*.bmp", "*.jpg", "*.config", "*.task", "*.scr"));
@@ -402,7 +404,7 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionResults(ActionEvent event) {
-        try {            
+        try {
             final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("cz/tul/dic/gui/ResultPresenter.fxml"), Lang.getBundle());
             final Parent root = loader.load();
             final Stage stage = new Stage();
