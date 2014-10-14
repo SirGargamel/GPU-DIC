@@ -24,6 +24,7 @@ public class EditableInputPresenter extends InputPresenter {
     private Shape actualShape;
     private ReadOnlyProperty<RoiType> roiType;
     private double lastX, lastY;
+    private boolean roisChanged;
 
     @Override
     public boolean nextImage() {
@@ -52,24 +53,27 @@ public class EditableInputPresenter extends InputPresenter {
     }
 
     public void saveRois() {
-        final TaskContainer tc = Context.getInstance().getTc();
+        if (roisChanged) {
+            final TaskContainer tc = Context.getInstance().getTc();
 
-        final Set<ROI> taskRois;
-        if (!rois.isEmpty()) {
-            taskRois = new HashSet<>();
-            rois.stream().forEach((s) -> {
-                if (s instanceof Rectangle) {
-                    final Rectangle r = (Rectangle) s;
-                    taskRois.add(new RectangleROI(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), r.getX() + r.getTranslateX() + r.getWidth(), r.getY() + r.getTranslateY() + r.getHeight()));
-                } else if (s instanceof Circle) {
-                    final Circle c = (Circle) s;
-                    taskRois.add(new CircularROI(c.getCenterX() + c.getTranslateX(), c.getCenterY() + c.getTranslateY(), c.getRadius()));
-                }
-            });
-        } else {
-            taskRois = null;
+            final Set<ROI> taskRois;
+            if (!rois.isEmpty()) {
+                taskRois = new HashSet<>();
+                rois.stream().forEach((s) -> {
+                    if (s instanceof Rectangle) {
+                        final Rectangle r = (Rectangle) s;
+                        taskRois.add(new RectangleROI(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), r.getX() + r.getTranslateX() + r.getWidth(), r.getY() + r.getTranslateY() + r.getHeight()));
+                    } else if (s instanceof Circle) {
+                        final Circle c = (Circle) s;
+                        taskRois.add(new CircularROI(c.getCenterX() + c.getTranslateX(), c.getCenterY() + c.getTranslateY(), c.getRadius()));
+                    }
+                });
+            } else {
+                taskRois = null;
+            }
+            tc.setROIs(imageIndex, taskRois);
+            roisChanged = false;
         }
-        tc.setROIs(imageIndex, taskRois);
     }
 
     @Override
@@ -78,6 +82,7 @@ public class EditableInputPresenter extends InputPresenter {
         rois.stream().forEach((s) -> {
             makeShapeActive(s);
         });
+        roisChanged = false;
     }
 
     public void setRoiTypeProperty(final ReadOnlyProperty<RoiType> roiType) {
@@ -122,6 +127,8 @@ public class EditableInputPresenter extends InputPresenter {
             this.getChildren().add(s);
             rois.add(s);
             actualShape = s;
+
+            roisChanged = true;
             event.consume();
         }
     }
@@ -139,6 +146,8 @@ public class EditableInputPresenter extends InputPresenter {
                 EditableInputPresenter.this.getChildren().remove(s);
                 actualShape = null;
                 saveRois();
+
+                roisChanged = true;
                 t.consume();
             }
         });
@@ -152,6 +161,7 @@ public class EditableInputPresenter extends InputPresenter {
             lastX = t.getSceneX();
             lastY = t.getSceneY();
 
+            roisChanged = true;
             t.consume();
         });
         s.setOnMouseReleased((MouseEvent t) -> {
@@ -160,6 +170,8 @@ public class EditableInputPresenter extends InputPresenter {
                 actualShape = null;
                 saveRois();
             }
+
+            roisChanged = true;
             t.consume();
         });
     }
@@ -175,6 +187,7 @@ public class EditableInputPresenter extends InputPresenter {
             final double dy = lastY - event.getSceneY();
             final double radius = Math.sqrt(dx * dx + dy * dy);
             circle.setRadius(radius);
+            roisChanged = true;
         } else if (actualShape instanceof Rectangle) {
             Rectangle rect = (Rectangle) actualShape;
             final double dx = Math.abs(event.getSceneX() - lastX);
@@ -183,12 +196,13 @@ public class EditableInputPresenter extends InputPresenter {
             rect.setY(Math.min(event.getSceneY(), lastY));
             rect.setWidth(dx);
             rect.setHeight(dy);
+            roisChanged = true;
         }
     }
 
     private void onMouseRelease(MouseEvent event) {
         handleShapeSize(event);
-        actualShape = null;
+        actualShape = null;        
         saveRois();
     }
 

@@ -243,15 +243,15 @@ public class MainWindow implements Initializable {
     private void handleButtonActionSave(ActionEvent event) throws IOException {
         saveFacetSize();
 
-        final String c1 = Lang.getString("TypeConfig");
-        final String t1 = Lang.getString("TypeConfigD");
-        final String c2 = Lang.getString("TypeBinary");
-        final String t2 = Lang.getString("TypeBinaryD");
+        final String config = Lang.getString("TypeConfig");
+        final String configT = Lang.getString("TypeConfigD");
+        final String binary = Lang.getString("TypeBinary");
+        final String binaryT = Lang.getString("TypeBinaryD");
         final Action a = Dialogs.create()
                 .masthead(null)
                 .title(Lang.getString("Save"))
                 .message(Lang.getString("ChooseDataType"))
-                .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2));
+                .showCommandLinks(null, new Dialogs.CommandLink(config, configT), new Dialogs.CommandLink(binary, binaryT));
         final String val = a.textProperty().get();
         if (!val.equals("@@dlg.cancel.button")) {
             // pick target file        
@@ -259,22 +259,22 @@ public class MainWindow implements Initializable {
             final File in = (File) Context.getInstance().getTc().getParameter(TaskParameter.IN);
             fc.setInitialDirectory(in.getParentFile());
             fc.getExtensionFilters().clear();
-            if (val.equals(c1)) {
+            if (val.equals(config)) {
                 fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*".concat(NameGenerator.EXT_CONFIG).concat(")"), "*".concat(NameGenerator.EXT_CONFIG)));
                 fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_CONFIG));
-            } else if (val.equals(c2)) {
+            } else if (val.equals(binary)) {
                 fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*".concat(NameGenerator.EXT_BINARY).concat(")"), "*".concat(NameGenerator.EXT_BINARY)));
                 fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_BINARY));
             }
 
             File target = fc.showSaveDialog(buttonRun.getScene().getWindow());
             if (target != null) {
-                if (val.equals(c1)) {
+                if (val.equals(config)) {
                     if (!target.getName().endsWith(NameGenerator.EXT_CONFIG)) {
                         target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_CONFIG));
                     }
                     TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc(), target);
-                } else if (val.equals(c2)) {
+                } else if (val.equals(binary)) {
                     if (!target.getName().endsWith(NameGenerator.EXT_BINARY)) {
                         target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_BINARY));
                     }
