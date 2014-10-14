@@ -125,12 +125,13 @@ public class ComplexTaskSolver extends Observable {
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 
         final FpsManager fpsM = new FpsManager(tc);
+        final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
         final String[][] out = new String[bottomShifts.size() + 1][2];
         out[0][0] = fpsM.buildTimeDescription();
-        out[0][1] = "dY";
+        out[0][1] = "dY [mm]";
         for (int i = 0; i < bottomShifts.size(); i++) {
             out[i + 1][0] = Utils.format(fpsM.getTime(i + 1));
-            out[i + 1][1] = Utils.format(bottomShifts.get(i));
+            out[i + 1][1] = Utils.format(bottomShifts.get(i) * pxToMm);
         }
         CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), out);
     }
