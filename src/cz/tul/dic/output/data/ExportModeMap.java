@@ -17,6 +17,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
         if (dataParams == null || dataParams.length < 1) {
             throw new IllegalArgumentException("Not wnough input parameters (position required).");
         }
+        DisplacementResult dr;
         final int round = dataParams[0];
         final int roundZero = TaskContainerUtils.getFirstRound(tc);
         final double[][][] results;
@@ -27,12 +28,14 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case rDx:
             case rDy:
             case rDabs:
-                results = tc.getDisplacement(round - 1, round).getDisplacement();
+                dr = tc.getDisplacement(round - 1, round);
+                results = dr != null ? dr.getDisplacement() : null;
                 break;
             case Dx:
             case Dy:
             case Dabs:
-                results = TaskContainerUtils.getDisplacement(tc, roundZero, round).getDisplacement();
+                dr = TaskContainerUtils.getDisplacement(tc, roundZero, round);
+                results = dr != null ? dr.getDisplacement() : null;
                 break;
             case dExx:
             case dEyy:
@@ -106,7 +109,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
 
         // stretch result to ending ROI
         if (direction.isStretch()) {
-            final DisplacementResult dr = tc.getDisplacement(round - 1, round);
+            dr = tc.getDisplacement(round - 1, round);
             if (dr != null) {
                 final double[][][] tempData = dr.getDisplacement();
                 if (tempData != null) {

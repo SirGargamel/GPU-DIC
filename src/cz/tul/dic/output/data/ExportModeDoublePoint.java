@@ -2,6 +2,7 @@ package cz.tul.dic.output.data;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.task.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.output.Direction;
@@ -28,6 +29,7 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
         final int x2 = dataParams[2];
         final int y2 = dataParams[3];
 
+        DisplacementResult dr;
         double[][][] results;
         double[] data;
         for (Direction dir : Direction.values()) {
@@ -49,13 +51,15 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                     case dEyy:
                     case dExy:
                     case dEabs:
-                        results = tc.getDisplacement(r - 1, r).getDisplacement();
+                        dr = tc.getDisplacement(r - 1, r);
+                        results = dr != null ? dr.getDisplacement() : null;
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        results = TaskContainerUtils.getDisplacement(tc, roundZero, r).getDisplacement();
+                        dr = TaskContainerUtils.getDisplacement(tc, roundZero, r);
+                        results = dr != null ? dr.getDisplacement() : null;
                         break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);

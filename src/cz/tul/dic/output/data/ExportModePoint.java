@@ -3,6 +3,7 @@ package cz.tul.dic.output.data;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.FpsManager;
+import cz.tul.dic.data.task.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -34,6 +35,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
 
         final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
 
+        DisplacementResult dr;
         double[][][] results;
         double[] data;
         for (Direction dir : Direction.values()) {
@@ -46,12 +48,14 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     case rDx:
                     case rDy:
                     case rDabs:
-                        results = tc.getDisplacement(r - 1, r).getDisplacement();
+                        dr = tc.getDisplacement(r - 1, r);
+                        results = dr != null ? dr.getDisplacement() : null;
                         break;
                     case Dx:
                     case Dy:
                     case Dabs:
-                        results = TaskContainerUtils.getDisplacement(tc, roundZero, r).getDisplacement();
+                        dr = TaskContainerUtils.getDisplacement(tc, roundZero, r);
+                        results = dr != null ? dr.getDisplacement() : null;
                         break;
                     case dExx:
                     case dEyy:

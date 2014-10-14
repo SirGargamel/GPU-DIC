@@ -183,36 +183,38 @@ public class TaskContainerUtils {
 
     public static double getStretchFactor(final TaskContainer tc, final int endImageIndex) {
         final int startImageIndex = getFirstRound(tc);
-        final double result;
-        final double[][][] results = tc.getDisplacement(startImageIndex, endImageIndex).getDisplacement();
-        final double[][][] dResults = tc.getDisplacement(endImageIndex - 1, endImageIndex).getDisplacement();
-        if (dResults != null) {
-            final int width = dResults.length;
-            final int height = dResults[0].length;
+        double result = 1.0;
+        final DisplacementResult resultsC = tc.getDisplacement(startImageIndex, endImageIndex);
+        final DisplacementResult dResultsC = tc.getDisplacement(endImageIndex - 1, endImageIndex);
+        if (resultsC != null & dResultsC != null) {
+            final double[][][] results = resultsC.getDisplacement();
+            final double[][][] dResults = dResultsC.getDisplacement();
+            if (dResults != null) {
+                final int width = dResults.length;
+                final int height = dResults[0].length;
 
-            int y2 = 1;
-            outerloop:
-            for (int y = height - 1; y >= 0; y--) {
-                for (int x = 0; x < width; x++) {
-                    if (dResults[x][y] != null) {
-                        y2 = y;
-                        break outerloop;
+                int y2 = 1;
+                outerloop:
+                for (int y = height - 1; y >= 0; y--) {
+                    for (int x = 0; x < width; x++) {
+                        if (dResults[x][y] != null) {
+                            y2 = y;
+                            break outerloop;
+                        }
                     }
                 }
-            }
-            int y1 = 1;
-            outerloop:
-            for (int y = height - 1; y >= 0; y--) {
-                for (int x = 0; x < width; x++) {
-                    if (results[x][y] != null) {
-                        y1 = y;
-                        break outerloop;
+                int y1 = 1;
+                outerloop:
+                for (int y = height - 1; y >= 0; y--) {
+                    for (int x = 0; x < width; x++) {
+                        if (results[x][y] != null) {
+                            y1 = y;
+                            break outerloop;
+                        }
                     }
                 }
+                result = y2 / (double) y1;
             }
-            result = y2 / (double) y1;
-        } else {
-            result = 1;
         }
 
         return result;
