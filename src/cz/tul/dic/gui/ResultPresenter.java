@@ -5,7 +5,6 @@ import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.target.ExportTarget;
@@ -395,16 +394,21 @@ public class ResultPresenter implements Initializable {
     }
 
     private void openTwoPointStrainAnalysis(final Context context) throws ComputationException, IOException {
-        final Stage[] stages = this.charts.keySet().toArray(new Stage[0]);
         SinglePointChartHandler chart1 = null, chart2 = null;
 
-        for (int i = stages.length - 1; i >= 0; i--) {
-            if (stages[i].isShowing() && charts.get(stages[i]) instanceof SinglePointChartHandler) {
-                if (chart1 == null) {
-                    chart1 = (SinglePointChartHandler) charts.get(stages[i]);
+        final Iterator<Stage> it = this.charts.keySet().iterator();
+        Stage s;
+        while (it.hasNext()) {
+            s = it.next();
+            if (s.isShowing()) {
+                if (charts.get(s) instanceof SinglePointChartHandler) {
+                    if (chart1 == null) {
+                        chart1 = (SinglePointChartHandler) charts.get(s);
+                    } else {
+                        chart2 = (SinglePointChartHandler) charts.get(s);
+                    }
                 } else {
-                    chart2 = (SinglePointChartHandler) charts.get(stages[i]);
-                    break;
+                    it.remove();
                 }
             }
         }
@@ -436,7 +440,7 @@ public class ResultPresenter implements Initializable {
                     stage.setY(stage.getY() + y1 + 10);
                 });
                 stage.setTitle(ch.buildTitle());
-                stage.setScene(new Scene(root));                
+                stage.setScene(new Scene(root));
                 stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
                 stage.show();
             }
@@ -564,7 +568,7 @@ public class ResultPresenter implements Initializable {
         }
 
         @Override
-        public void displayData(final Direction dir) throws ComputationException {            
+        public void displayData(final Direction dir) throws ComputationException {
             final double tickUnit = fpsM.getTickLength();
 
             // TODO
