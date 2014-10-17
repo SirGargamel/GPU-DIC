@@ -29,7 +29,7 @@ import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
 import org.pmw.tinylog.labellers.TimestampLabeller;
-import org.pmw.tinylog.policies.DailyPolicy;
+import org.pmw.tinylog.policies.WeeklyPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
 
@@ -98,7 +98,7 @@ public class DicMain extends Application {
     private void configureTinyLog(final boolean debug) throws IOException {
         Configurator c = Configurator.defaultConfig();
         c.writingThread(true);
-        c.writer(new MultiWriter(new ConsoleWriter(), new RollingFileWriter("log.txt", 10, new TimestampLabeller("yyyy-MM-dd"), new DailyPolicy())));
+        c.writer(new MultiWriter(new ConsoleWriter(), new RollingFileWriter("log.txt", 10, new TimestampLabeller("yyyy-MM-dd"), new WeeklyPolicy())));
         if (debug) {
             c.level(LoggingLevel.TRACE);
         } else {
