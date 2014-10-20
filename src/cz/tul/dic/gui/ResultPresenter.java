@@ -15,6 +15,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -233,9 +235,9 @@ public class ResultPresenter implements Initializable {
 
     @FXML
 
-    private void handleLimitsAction(ActionEvent event) {
-        final String minS = textMin.getText();
-        final String maxS = textMax.getText();
+    private void handleLimitsAction(ActionEvent event) {        
+        final String minS = textMin.getText().replaceAll(",", ".");
+        final String maxS = textMax.getText().replaceAll(",", ".");
         if (minS != null && !minS.isEmpty() && maxS != null && !maxS.isEmpty()) {
             try {
                 final double min = Double.valueOf(minS);
