@@ -245,10 +245,10 @@ public class ExportUtils {
             if (val >= min && val <= max) {
                 if (val < midlle) {
                     fract = -(val - midlle) / half;
-                    h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
+                    h = (float) (fract * COLOR_RANGE_POS + COLOR_CENTER + COLOR_GAP);
                 } else {
                     fract = (val - midlle) / half;
-                    h = (float) (fract * COLOR_RANGE_POS + COLOR_CENTER + COLOR_GAP);
+                    h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
                 }
             } else {
                 h = 1;
