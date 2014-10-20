@@ -272,7 +272,7 @@ public class ResultPresenter implements Initializable {
         final CommandLinksDialog.CommandLinksButtonType avi = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeAvi"), false);
         final CommandLinksDialog.CommandLinksButtonType img = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeImage"), true);
         final CommandLinksDialog.CommandLinksButtonType csv = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeCsv"), false);
-        final CommandLinksDialog dlg = new CommandLinksDialog(img, csv);
+        final CommandLinksDialog dlg = new CommandLinksDialog(img, csv, avi);
         dlg.setTitle(Lang.getString("Save"));
         dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
         final ObjectProperty<Integer> result = new SimpleObjectProperty<>(null);
