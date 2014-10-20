@@ -24,7 +24,7 @@
                                 </Button>
                                 <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#handleButtonActionStop" />
                                 <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" />
-                                <TextField fx:id="textIndex" editable="false" minWidth="35.0" prefHeight="25.0" prefWidth="35.0" />
+                                <TextField fx:id="textIndex" minWidth="35.0" onAction="#handleRoundAction" prefHeight="25.0" prefWidth="35.0" />
                             </children>
                             <BorderPane.margin>
                                 <Insets bottom="2.0" left="2.0" top="2.0" />

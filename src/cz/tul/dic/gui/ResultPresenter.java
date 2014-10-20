@@ -180,17 +180,6 @@ public class ResultPresenter implements Initializable {
     }
 
     @FXML
-    private void handleTextActionIndex(ActionEvent event) {
-        try {
-            int newIndex = Integer.parseInt(textIndex.getText());
-            changeIndex(newIndex - index);
-        } catch (NumberFormatException ex) {
-            textIndex.setText(Integer.toString(index));
-        }
-        event.consume();
-    }
-
-    @FXML
     private void handleTextKeyTyped(KeyEvent keyEvent) {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
             keyEvent.consume();
@@ -234,8 +223,7 @@ public class ResultPresenter implements Initializable {
     }
 
     @FXML
-
-    private void handleLimitsAction(ActionEvent event) {        
+    private void handleLimitsAction(ActionEvent event) {
         final String minS = textMin.getText().replaceAll(",", ".");
         final String maxS = textMax.getText().replaceAll(",", ".");
         if (minS != null && !minS.isEmpty() && maxS != null && !maxS.isEmpty()) {
@@ -251,6 +239,32 @@ public class ResultPresenter implements Initializable {
         }
 
         displayImage();
+    }
+
+    @FXML
+    private void handleRoundAction(ActionEvent event) {
+        final String rndS = textIndex.getText();
+        if (rndS != null && !rndS.isEmpty()) {
+            try {
+                final int rnd = Integer.valueOf(rndS);
+
+                final TaskContainer tc = Context.getInstance().getTc();
+                if (rnd < 0) {
+                    index = 0;
+                } else if (rnd >= tc.getImages().size()) {
+                    index = tc.getImages().size() - 1;
+                } else {
+                    index = rnd;
+                }
+
+                final FpsManager fpsM = new FpsManager(tc);
+                labelTime.setText(Utils.format(fpsM.getTime(index)).concat(fpsM.getTickUnit()));
+                textIndex.setText(String.valueOf(index));
+
+                displayImage();
+            } catch (NumberFormatException ex) {
+            }
+        }
     }
 
     private ExportTarget determineTarget() {

@@ -64,17 +64,36 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
 
     public void displayImage() {
         final TaskContainer tc = Context.getInstance().getTc();
-        final cz.tul.dic.data.Image i = tc.getImage(imageIndex);
-        final Image img = SwingFXUtils.toFXImage(i, null);
+        if (tc != null) {
+            final cz.tul.dic.data.Image i = tc.getImage(imageIndex);
+            final Image img = SwingFXUtils.toFXImage(i, null);
 
-        Platform.runLater(() -> {
-            image.setImage(img);
+            Platform.runLater(() -> {
+                image.setImage(img);
 
-            getChildren().clear();
-            getChildren().add(image);
+                getChildren().clear();
+                getChildren().add(image);
 
-            loadRois();
-        });
+                loadRois();
+            });
+        }
+    }
+
+    public void setImageIndex(final int index) {
+        final TaskContainer tc = Context.getInstance().getTc();
+        if (tc != null) {
+            if (index < 0) {
+                imageIndex = 0;
+            } else if (index >= tc.getImages().size()) {
+                imageIndex = tc.getImages().size() - 1;
+            } else {
+                imageIndex = index;
+            }
+            if (imageIndexProperty != null) {
+                imageIndexProperty.setValue(Integer.toString(imageIndex));
+            }
+            displayImage();
+        }
     }
 
     void loadRois() {

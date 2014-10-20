@@ -27,7 +27,7 @@
 <padding>
 <Insets right="5.0" />
 </padding></Label>
-                        <TextField fx:id="textIndex" editable="false" minWidth="35.0" onAction="#handleTextActionIndex" onKeyTyped="#handleTextKeyTyped" prefWidth="35.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" /><Label text="%Time">
+                        <TextField fx:id="textIndex" minWidth="35.0" onAction="#handleRoundAction" onKeyTyped="#handleTextKeyTyped" prefWidth="35.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" /><Label text="%Time">
 <padding>
 <Insets left="5.0" />
 </padding></Label><Label fx:id="labelTime" text="0us" textAlignment="CENTER">

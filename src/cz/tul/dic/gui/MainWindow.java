@@ -1,6 +1,8 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.FpsManager;
+import cz.tul.dic.Utils;
 import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -475,6 +477,18 @@ public class MainWindow implements Initializable {
             keyEvent.consume();
         } else {
             saveFacetSize();
+        }
+    }
+
+    @FXML
+    private void handleRoundAction(ActionEvent event) {
+        final String rndS = textIndex.getText();
+        if (rndS != null && !rndS.isEmpty()) {
+            try {
+                final int rnd = Integer.valueOf(rndS);
+                imagePane.setImageIndex(rnd);
+            } catch (NumberFormatException ex) {
+            }
         }
     }
 
