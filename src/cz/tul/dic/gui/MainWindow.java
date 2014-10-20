@@ -55,6 +55,10 @@ import org.pmw.tinylog.Logger;
 public class MainWindow implements Initializable {
 
     private static final String LAST_DIR = "lastDir";
+    private static final int EXTRA_WIDTH = 135;
+    private static final int EXTRA_HEIGHT = 105;
+    private static final int MIN_WIDTH = 330;
+    private static final int MIN_HEIGHT = 345;
 
     @FXML
     private TextField textFs;
@@ -181,8 +185,8 @@ public class MainWindow implements Initializable {
                                 textIndex.textProperty().setValue("0");
                                 imagePane.displayImage();
 
-                                imagePane.getScene().getWindow().setWidth(tc.getImage(0).getWidth() + 143);
-                                imagePane.getScene().getWindow().setHeight(tc.getImage(0).getHeight() + 114);
+                                imagePane.getScene().getWindow().setWidth(Math.max(tc.getImage(0).getWidth() + EXTRA_WIDTH, MIN_WIDTH));
+                                imagePane.getScene().getWindow().setHeight(Math.max(tc.getImage(0).getHeight() + EXTRA_HEIGHT, MIN_HEIGHT));
 
                                 final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
                                 if (o != null) {

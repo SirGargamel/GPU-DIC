@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="301.0" prefWidth="402.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.MainWindow">
+<AnchorPane id="AnchorPane" minWidth="220.0" prefHeight="270.0" prefWidth="310.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.MainWindow">
     <children>
         <BorderPane fx:id="mainBp" prefHeight="301.0" prefWidth="402.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <center>
@@ -24,7 +24,7 @@
                                 </Button>
                                 <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#handleButtonActionStop" />
                                 <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#handleButtonActionNext" />
-                                <TextField fx:id="textIndex" editable="false" prefHeight="25.0" prefWidth="25.0" />
+                                <TextField fx:id="textIndex" editable="false" minWidth="35.0" prefHeight="25.0" prefWidth="35.0" />
                             </children>
                             <BorderPane.margin>
                                 <Insets bottom="2.0" left="2.0" top="2.0" />
