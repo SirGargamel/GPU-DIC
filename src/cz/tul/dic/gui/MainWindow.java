@@ -35,6 +35,7 @@ import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -44,8 +45,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-import org.controlsfx.control.action.Action;
-import org.controlsfx.dialog.Dialogs;
+import org.controlsfx.dialog.CommandLinksDialog;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -200,11 +200,7 @@ public class MainWindow implements Initializable {
             }
         };
 
-        Dialogs.create()
-                .title(Lang.getString("Wait"))
-                .message(Lang.getString("LoadingData"))
-                .masthead(null)
-                .showWorkerProgress(worker);
+        Dialogs.showProgress(worker, Lang.getString("LoadingData"));
 
         Thread th = new Thread(worker);
         th.setDaemon(true);
@@ -215,21 +211,15 @@ public class MainWindow implements Initializable {
                 final String err = worker.get();
                 if (err != null) {
                     Platform.runLater(() -> {
-                        Dialogs.create()
-                                .title(Lang.getString("error"))
-                                .masthead(null)
-                                .message(err)
-                                .showWarning();
+                        Dialogs.showWarning(
+                                Lang.getString("error"),
+                                err);
                     });
 
                 }
             } catch (InterruptedException | ExecutionException ex) {
                 Platform.runLater(() -> {
-                    Dialogs.create()
-                            .title(Lang.getString("error"))
-                            .masthead(null)
-                            .message(ex.getLocalizedMessage())
-                            .showException(ex);
+                    Dialogs.showException(ex);
                 });
             }
         });
@@ -243,45 +233,44 @@ public class MainWindow implements Initializable {
     private void handleButtonActionSave(ActionEvent event) throws IOException {
         saveFacetSize();
 
-        final String config = Lang.getString("TypeConfig");
-        final String configT = Lang.getString("TypeConfigD");
-        final String binary = Lang.getString("TypeBinary");
-        final String binaryT = Lang.getString("TypeBinaryD");
-        final Action a = Dialogs.create()
-                .masthead(null)
-                .title(Lang.getString("Save"))
-                .message(Lang.getString("ChooseDataType"))
-                .showCommandLinks(null, new Dialogs.CommandLink(config, configT), new Dialogs.CommandLink(binary, binaryT));
-        final String val = a.textProperty().get();
-        if (!val.equals("@@dlg.cancel.button")) {
-            // pick target file        
-            final FileChooser fc = new FileChooser();
-            final File in = (File) Context.getInstance().getTc().getParameter(TaskParameter.IN);
-            fc.setInitialDirectory(in.getParentFile());
-            fc.getExtensionFilters().clear();
-            if (val.equals(config)) {
-                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*".concat(NameGenerator.EXT_CONFIG).concat(")"), "*".concat(NameGenerator.EXT_CONFIG)));
-                fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_CONFIG));
-            } else if (val.equals(binary)) {
-                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*".concat(NameGenerator.EXT_BINARY).concat(")"), "*".concat(NameGenerator.EXT_BINARY)));
-                fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_BINARY));
-            }
-
-            File target = fc.showSaveDialog(buttonRun.getScene().getWindow());
-            if (target != null) {
-                if (val.equals(config)) {
-                    if (!target.getName().endsWith(NameGenerator.EXT_CONFIG)) {
-                        target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_CONFIG));
-                    }
-                    TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc(), target);
-                } else if (val.equals(binary)) {
-                    if (!target.getName().endsWith(NameGenerator.EXT_BINARY)) {
-                        target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_BINARY));
-                    }
-                    TaskContainerUtils.serializeTaskToBinary(Context.getInstance().getTc(), target);
+        final CommandLinksDialog.CommandLinksButtonType config = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeConfig"), Lang.getString("TypeConfigD"), true);
+        final CommandLinksDialog.CommandLinksButtonType binary = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeBinary"), Lang.getString("TypeBinaryD"), false);
+        final CommandLinksDialog dlg = new CommandLinksDialog(config, binary);
+        dlg.setTitle(Lang.getString("Save"));
+        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+        dlg.showAndWait().ifPresent((ButtonType t) -> {
+            try {
+                // pick target file        
+                final FileChooser fc = new FileChooser();
+                final File in = (File) Context.getInstance().getTc().getParameter(TaskParameter.IN);
+                fc.setInitialDirectory(in.getParentFile());
+                fc.getExtensionFilters().clear();
+                if (t == config.getButtonType()) {
+                    fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*".concat(NameGenerator.EXT_CONFIG).concat(")"), "*".concat(NameGenerator.EXT_CONFIG)));
+                    fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_CONFIG));
+                } else if (t == binary.getButtonType()) {
+                    fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*".concat(NameGenerator.EXT_BINARY).concat(")"), "*".concat(NameGenerator.EXT_BINARY)));
+                    fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_BINARY));
                 }
+
+                File target = fc.showSaveDialog(buttonRun.getScene().getWindow());
+                if (target != null) {
+                    if (t == config.getButtonType()) {
+                        if (!target.getName().endsWith(NameGenerator.EXT_CONFIG)) {
+                            target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_CONFIG));
+                        }
+                        TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc(), target);
+                    } else if (t == binary.getButtonType()) {
+                        if (!target.getName().endsWith(NameGenerator.EXT_BINARY)) {
+                            target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_BINARY));
+                        }
+                        TaskContainerUtils.serializeTaskToBinary(Context.getInstance().getTc(), target);
+                    }
+                }
+            } catch (IOException ex) {
+                Logger.warn(ex);
             }
-        }
+        });
     }
 
     @FXML
@@ -293,11 +282,7 @@ public class MainWindow implements Initializable {
                 TaskContainerUtils.checkTaskValidity(tc);
                 ComplexTaskSolver cts = new ComplexTaskSolver();
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
-                Dialogs.create()
-                        .title(Lang.getString("Wait"))
-                        .message(Lang.getString("Computing"))
-                        .masthead(null)
-                        .showWorkerProgress(worker);
+                Dialogs.showProgress(worker, Lang.getString("Computing"));
 
                 Thread th = new Thread(worker);
                 th.setDaemon(true);
@@ -308,11 +293,9 @@ public class MainWindow implements Initializable {
                         final Exception err = worker.get();
                         if (err != null) {
                             Platform.runLater(() -> {
-                                Dialogs.create()
-                                        .title(Lang.getString("Exception"))
-                                        .message(err.getLocalizedMessage())
-                                        .masthead(null)
-                                        .showWarning();
+                                Dialogs.showWarning(
+                                        Lang.getString("Exception"),
+                                        err.getLocalizedMessage());
                             });
                             Logger.error(err);
 
@@ -328,16 +311,10 @@ public class MainWindow implements Initializable {
                 th.setDaemon(true);
                 th.start();
             } else {
-                Dialogs.create()
-                        .title(Lang.getString("error"))
-                        .message(Lang.getString("noTC"))
-                        .showError();
+                Dialogs.showError(Lang.getString("noTC"));
             }
         } catch (NumberFormatException ex) {
-            Dialogs.create()
-                    .title(Lang.getString("error"))
-                    .message(Lang.getString("wrongFS"))
-                    .showError();
+            Dialogs.showError(Lang.getString("wrongFS"));
         }
     }
 

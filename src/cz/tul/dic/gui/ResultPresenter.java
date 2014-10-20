@@ -23,6 +23,8 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -36,6 +38,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -48,8 +51,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import org.controlsfx.control.action.Action;
-import org.controlsfx.dialog.Dialogs;
+import org.controlsfx.dialog.CommandLinksDialog;
 import org.pmw.tinylog.Logger;
 
 public class ResultPresenter implements Initializable {
@@ -195,38 +197,42 @@ public class ResultPresenter implements Initializable {
 
     @FXML
     private void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
-        final String c1 = Lang.getString("TypeMap");
-        final String t1 = Lang.getString("TypeMapD");
-        final String c2 = Lang.getString("TypeSequence");
-        final String t2 = Lang.getString("TypeSequenceD");
-        final Action a = Dialogs.create()
-                .masthead(null)
-                .title(Lang.getString("Save"))
-                .message(Lang.getString("ChooseDataType"))
-                .showCommandLinks(null, new Dialogs.CommandLink(c1, t1), new Dialogs.CommandLink(c2, t2));
-        final String val = a.textProperty().get();
         final TaskContainer tc = Context.getInstance().getTc();
-        if (val.equals(c1)) {
-            final ExportTarget et = determineTarget();
-            if (et != null) {
-                switch (et) {
-                    case FILE:
-                        Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateMap(tc, index, choiceDir.getValue())), index));
-                        break;
-                    case CSV:
-                        Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index));
-                        break;
-                    default:
-                        Logger.warn("Illegal target - {0}", et);
-                        break;
+        final CommandLinksDialog.CommandLinksButtonType map = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeMap"), Lang.getString("TypeMapD"), true);
+        final CommandLinksDialog.CommandLinksButtonType sequence = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeSequence"), Lang.getString("TypeSequenceD"), false);
+        final CommandLinksDialog dlg = new CommandLinksDialog(map, sequence);
+        dlg.setTitle(Lang.getString("Save"));
+        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+        dlg.showAndWait().ifPresent((ButtonType t) -> {
+            try {
+                if (t == map.getButtonType()) {
+                    final ExportTarget et = determineTarget();
+                    if (et != null) {
+                        switch (et) {
+                            case FILE: {
+                                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateMap(tc, index, choiceDir.getValue())), index));
+                            }
+                            break;
+                            case CSV:
+                                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index));
+                                break;
+                            default:
+                                Logger.warn("Illegal target - {0}", et);
+                                break;
+                        }
+
+                    }
+                } else if (t == sequence.getButtonType()) {
+                    Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), determineType()));
                 }
+            } catch (IOException | ComputationException ex) {
+                Logger.warn(ex);
             }
-        } else if (val.equals(c2)) {
-            Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), determineType()));
-        }
+        });
     }
 
     @FXML
+
     private void handleLimitsAction(ActionEvent event) {
         final String minS = textMin.getText();
         final String maxS = textMax.getText();
@@ -246,42 +252,40 @@ public class ResultPresenter implements Initializable {
     }
 
     private ExportTarget determineTarget() {
-        final String c1 = Lang.getString("TypeImage");
-        final String c2 = Lang.getString("TypeCsv");
-        final Action a = Dialogs.create()
-                .title(Lang.getString("Save"))
-                .message(Lang.getString("ChooseDataType"))
-                .showCommandLinks(null, new Dialogs.CommandLink(c1, null), new Dialogs.CommandLink(c2, null));
-        final String val = a.textProperty().get();
-        final ExportTarget result;
-        if (val.equals(c1)) {
-            result = ExportTarget.FILE;
-        } else if (val.equals(c2)) {
-            result = ExportTarget.CSV;
-        } else {
-            result = null;
-        }
-        return result;
+        final CommandLinksDialog.CommandLinksButtonType img = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeImage"), true);
+        final CommandLinksDialog.CommandLinksButtonType csv = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeCsv"), false);
+        final CommandLinksDialog dlg = new CommandLinksDialog(img, csv);
+        dlg.setTitle(Lang.getString("Save"));
+        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+        final ObjectProperty<ExportTarget> result = new SimpleObjectProperty<>(null);
+        dlg.showAndWait().ifPresent((ButtonType t) -> {
+            if (t == img.getButtonType()) {
+                result.setValue(ExportTarget.FILE);
+            } else if (t == csv.getButtonType()) {
+                result.setValue(ExportTarget.CSV);
+            }
+        });
+        return result.getValue();
     }
 
     private int determineType() {
-        final String c1 = Lang.getString("TypeAvi");
-        final String c2 = Lang.getString("TypeImage");
-        final String c3 = Lang.getString("TypeCsv");
-        final Action a = Dialogs.create()
-                .title(Lang.getString("Save"))
-                .message(Lang.getString("ChooseSequenceType"))
-                .showCommandLinks(null, new Dialogs.CommandLink(c1, null), new Dialogs.CommandLink(c2, null), new Dialogs.CommandLink(c3, null));
-        final String val = a.textProperty().get();
-        final int result;
-        if (val.equals(c1)) {
-            result = ExportTask.EXPORT_SEQUENCE_AVI;
-        } else if (val.equals(c2)) {
-            result = ExportTask.EXPORT_SEQUENCE_BMP;
-        } else {
-            result = ExportTask.EXPORT_SEQUENCE_CSV;
-        }
-        return result;
+        final CommandLinksDialog.CommandLinksButtonType avi = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeAvi"), false);
+        final CommandLinksDialog.CommandLinksButtonType img = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeImage"), true);
+        final CommandLinksDialog.CommandLinksButtonType csv = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeCsv"), false);
+        final CommandLinksDialog dlg = new CommandLinksDialog(img, csv);
+        dlg.setTitle(Lang.getString("Save"));
+        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+        final ObjectProperty<Integer> result = new SimpleObjectProperty<>(null);
+        dlg.showAndWait().ifPresent((ButtonType t) -> {
+            if (t == img.getButtonType()) {
+                result.setValue(ExportTask.EXPORT_SEQUENCE_BMP);
+            } else if (t == csv.getButtonType()) {
+                result.setValue(ExportTask.EXPORT_SEQUENCE_CSV);
+            } else if (t == avi.getButtonType()) {
+                result.setValue(ExportTask.EXPORT_SEQUENCE_AVI);
+            }
+        });
+        return result.getValue();
     }
 
     private void stopVideo() {

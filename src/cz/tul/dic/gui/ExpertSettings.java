@@ -24,7 +24,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import org.controlsfx.dialog.Dialogs;
 
 /**
  * FXML Controller class
@@ -77,11 +76,9 @@ public class ExpertSettings implements Initializable {
                     newLimits = null;
                 }
                 if (newLimits == null) {
-                    Dialogs.create()
-                            .title(Lang.getString("Warning"))
-                            .message(Lang.getString("IllegalLimitsR"))
-                            .masthead(null)
-                            .showInformation();
+                    Dialogs.showInfo(
+                            Lang.getString("Warning"),
+                            Lang.getString("IllegalLimitsR"));
                 }
             }
             tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
@@ -91,11 +88,9 @@ public class ExpertSettings implements Initializable {
             if (!limits.isEmpty()) {
                 newLimitsD = doubleArrayFromString(limits);
                 if (newLimitsD == null) {
-                    Dialogs.create()
-                            .title(Lang.getString("Warning"))
-                            .message(Lang.getString("IllegalLimitsD"))
-                            .masthead(null)
-                            .showInformation();
+                    Dialogs.showInfo(
+                            Lang.getString("Warning"),
+                            Lang.getString("IllegalLimitsD"));
                 }
             }
             tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimitsD);
@@ -115,7 +110,7 @@ public class ExpertSettings implements Initializable {
                             updateProgress(0, 2);
                             try {
                                 new StrainEstimation().computeStrain(tc);
-                                updateProgress(1, 2);                                
+                                updateProgress(1, 2);
                             } catch (ComputationException ex) {
                                 result = ex.getLocalizedMessage();
                             }
@@ -123,11 +118,7 @@ public class ExpertSettings implements Initializable {
                             return result;
                         }
                     };
-                    Dialogs.create()
-                            .title(Lang.getString("Wait"))
-                            .message(Lang.getString("Computing"))
-                            .masthead(null)
-                            .showWorkerProgress(worker);
+                    Dialogs.showProgress(worker, Lang.getString("Computing"));
 
                     Thread th = new Thread(worker);
                     th.setDaemon(true);
@@ -138,26 +129,20 @@ public class ExpertSettings implements Initializable {
                             final String err = worker.get();
                             if (err != null) {
                                 Platform.runLater(() -> {
-                                    Dialogs.create()
-                                            .title(Lang.getString("error"))
-                                            .masthead(null)
-                                            .message(err)
-                                            .showWarning();
+                                    Dialogs.showWarning(
+                                            Lang.getString("error"),
+                                            err);
                                 });
 
                             }
                         } catch (InterruptedException | ExecutionException ex) {
                             Platform.runLater(() -> {
-                                Dialogs.create()
-                                        .title(Lang.getString("error"))
-                                        .masthead(null)
-                                        .message(ex.getLocalizedMessage())
-                                        .showException(ex);
+                                Dialogs.showException(ex);
                             });
                         }
                     });
                     th.setDaemon(true);
-                    th.start();                    
+                    th.start();
                 }
             }
         }
@@ -181,14 +166,14 @@ public class ExpertSettings implements Initializable {
             keyEvent.consume();
         }
     }
-    
+
     @FXML
     private void handleTextKeyTypedRounds(KeyEvent keyEvent) {
         if (!"0123456789,".contains(keyEvent.getCharacter())) {
             keyEvent.consume();
         }
     }
-    
+
     @FXML
     private void handleTextKeyTypedDeformations(KeyEvent keyEvent) {
         if (!"0123456789;-+".contains(keyEvent.getCharacter())) {
