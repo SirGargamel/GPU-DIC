@@ -29,7 +29,7 @@ import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
 import org.pmw.tinylog.labellers.TimestampLabeller;
-import org.pmw.tinylog.policies.WeeklyPolicy;
+import org.pmw.tinylog.policies.MonthlyPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
 
@@ -54,9 +54,7 @@ public class DicMain extends Application {
         "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
         "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
         "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
-        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config", 
-
-    //        "d:\\temp\\6203652m\\6203652m.avi.config",
+        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config", //        "d:\\temp\\6203652m\\6203652m.avi.config",
     //        "d:\\temp\\9905121m\\9905121m.avi.config",
     //        "d:\\temp\\7202845m\\7202845m.avi.config",
     //        "d:\\temp\\6107544m\\6107544m.avi.config",
@@ -98,7 +96,11 @@ public class DicMain extends Application {
     private void configureTinyLog(final boolean debug) throws IOException {
         Configurator c = Configurator.defaultConfig();
         c.writingThread(true);
-        c.writer(new MultiWriter(new ConsoleWriter(), new RollingFileWriter("log.txt", 10, new TimestampLabeller("yyyy-MM-dd"), new WeeklyPolicy())));
+        try {
+            c.writer(new MultiWriter(new ConsoleWriter(), new RollingFileWriter("log.txt", 12, new TimestampLabeller("yyyy-MM"), new MonthlyPolicy())));
+        } catch (Exception ex) {
+            c.writer(new ConsoleWriter());
+        }
         if (debug) {
             c.level(LoggingLevel.TRACE);
         } else {
