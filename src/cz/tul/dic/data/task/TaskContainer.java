@@ -1,5 +1,6 @@
 package cz.tul.dic.data.task;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.ROI;
@@ -51,7 +52,7 @@ public class TaskContainer extends Observable implements Serializable {
         results = Collections.synchronizedList(new LinkedList<>());
         displacement = new ConcurrentHashMap<>();
         strain = new ConcurrentHashMap<>();
-        hints = EnumSet.noneOf(Hint.class);                
+        hints = EnumSet.noneOf(Hint.class);
 
         this.input = input;
     }
@@ -94,7 +95,7 @@ public class TaskContainer extends Observable implements Serializable {
         try {
             images = new LinkedList<>();
             InputLoader.loadInput(this);
-        } catch (IOException ex) {
+        } catch (IOException | ComputationException ex) {
             Logger.error("Error loading input files");
             Logger.trace(ex);
         }

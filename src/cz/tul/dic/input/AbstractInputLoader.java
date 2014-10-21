@@ -1,5 +1,6 @@
 package cz.tul.dic.input;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
@@ -17,12 +18,12 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class AbstractInputLoader {
 
-    private static final String EXT_UDA = ".uda";    
+    private static final String EXT_UDA = ".uda";
     private static final String TEXT_SPEED = "Speed";
     private static final String TEXT_FPS = "fps";
     private static final String TEXT_EXTRA = "[=]";
 
-    public abstract List<Image> loadData(final Object in, final TaskContainer tc) throws IOException;
+    public abstract List<Image> loadData(final Object in, final TaskContainer tc) throws IOException, ComputationException;
 
     public abstract Class getSupporteType();
 

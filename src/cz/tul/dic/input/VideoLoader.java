@@ -1,5 +1,7 @@
 package cz.tul.dic.input;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.Config;
 import cz.tul.dic.data.ConfigType;
@@ -31,7 +33,7 @@ public class VideoLoader extends AbstractInputLoader {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {
+    public List<Image> loadData(Object in, TaskContainer tc) throws IOException, ComputationException {
         if (!(in instanceof File)) {
             throw new IllegalArgumentException("VideoLoader needs a single file as input.");
         }
@@ -39,7 +41,15 @@ public class VideoLoader extends AbstractInputLoader {
             throw new FileNotFoundException("VirtualDub is not available.");
         }
 
-        final File input = (File) in;
+        File input = (File) in;
+        if (!input.exists()) {
+            final File inputSource = (File) tc.getParameter(TaskParameter.IN);
+            input = new File(inputSource.getParent().concat(File.separator).concat(input.getName()));
+            if (!input.exists()) {
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Input file " + in.toString() + " not found.");
+            }
+        }
+
         final File temp = Utils.getTempDir(tc);
         final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(NameGenerator.EXT_CONFIG));
         // check cache
@@ -66,11 +76,12 @@ public class VideoLoader extends AbstractInputLoader {
             } catch (InterruptedException ex) {
                 throw new IOException("VirtualDub has been interrupted.", ex);
             }
+            final String inputName = input.getName();
             files = Arrays.asList(temp.listFiles(new FilenameFilter() {
 
                 @Override
                 public boolean accept(File dir, String name) {
-                    return name.startsWith(input.getName()) && !name.endsWith(NameGenerator.EXT_CONFIG);
+                    return name.startsWith(inputName) && !name.endsWith(NameGenerator.EXT_CONFIG);
                 }
             }));
 
@@ -88,7 +99,7 @@ public class VideoLoader extends AbstractInputLoader {
         }
         // list of all bmp files inside temp dir with roght name        
         final ImageLoader il = new ImageLoader();
-        final List<Image> result = il.loadData(files, tc);        
+        final List<Image> result = il.loadData(files, tc);
 
         loadUdaFile(input.getAbsolutePath(), tc);
 

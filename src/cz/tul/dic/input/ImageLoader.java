@@ -1,5 +1,7 @@
 package cz.tul.dic.input;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -13,7 +15,7 @@ public class ImageLoader extends AbstractInputLoader {
     private static final Class<?> TYPE = List.class;
 
     @Override
-    public List<Image> loadData(Object in, TaskContainer tc) throws IOException {
+    public List<Image> loadData(Object in, TaskContainer tc) throws IOException, ComputationException {
         final Class<?> c = in.getClass();
         if (!TYPE.isAssignableFrom(c)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
@@ -26,10 +28,21 @@ public class ImageLoader extends AbstractInputLoader {
         }
 
         final List<Image> result = new ArrayList<>(data.size());
+        final File inputSource = (File) tc.getParameter(TaskParameter.IN);
 
         Image img;
+        File image;
         for (int i = 0; i < data.size(); i++) {
-            img = Image.loadImageFromDisk(data.get(i));
+            image = data.get(i);
+            if (!image.exists()) {
+                image = new File(inputSource.getParent().concat(File.separator).concat(image.getName()));
+                image = new File(image.getName());
+                if (!image.exists()) {
+                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Input file " + image.toString() + " not found.");
+                }
+            }
+
+            img = Image.loadImageFromDisk(image);
             result.add(img);
         }
 
