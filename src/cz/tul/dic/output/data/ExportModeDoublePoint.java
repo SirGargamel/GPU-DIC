@@ -92,8 +92,8 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
     private double calculateStrain(final double[][][] displacement, final Direction dir, final int x1, final int y1, final int x2, final int y2) throws ComputationException {
         final double dx = x2 - x1;
         final double dy = y2 - y1;
-        final double difX = (displacement[x1][y1][0] - displacement[x2][y2][0]) * Math.signum(dx);
-        final double difY = (displacement[x1][y1][1] - displacement[x2][y2][1]) * Math.signum(dx);
+        final double difX = displacement[x2][y2][0] - displacement[x1][y1][0];
+        final double difY = displacement[x2][y2][1] - displacement[x1][y1][1];
         final double val;
         switch (dir) {
             case Exx:
