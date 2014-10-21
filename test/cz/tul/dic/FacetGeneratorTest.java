@@ -67,7 +67,7 @@ public class FacetGeneratorTest {
         Assert.assertEquals(25, data.get(ROI_CENTER).size());
     }
     
-    private TaskContainer prepareTask(final ROI roi, final int facetSize, FacetGeneratorMethod mode, final int spacing) throws IOException, URISyntaxException {
+    private TaskContainer prepareTask(final ROI roi, final int facetSize, FacetGeneratorMethod mode, final int spacing) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
