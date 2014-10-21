@@ -43,7 +43,7 @@ public class ExportTargetFile implements IExportTarget {
     public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, final TaskContainer tc) throws IOException, ComputationException {
         if (data instanceof double[][] || data == null) {
             // export image
-            exportImage((double[][]) data, direction, targetParam, dataParams, tc);
+            exportImage((double[][]) data, direction, targetParam, dataParams, tc, findMinMax((double[][]) data));
         } else if (data instanceof List) {
             List<double[][]> dataList = (List<double[][]>) data;
             // export video
@@ -62,10 +62,12 @@ public class ExportTargetFile implements IExportTarget {
                     sb.append("0");
                 }
                 final NumberFormat nf = new DecimalFormat(sb.toString());
+
+                final double[] minMax = findMinMax(dataList);
                 for (int i = 0; i < dataList.size(); i++) {
                     if (image) {
                         if (dataList.get(i) != null) {
-                            exportImage(dataList.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION_IMAGE), new int[]{i}, tc);
+                            exportImage(dataList.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION_IMAGE), new int[]{i}, tc, minMax);
                         }
                     } else {
                         Exporter.exportData(new ExportTask(direction, ExportMode.SEQUENCE, ExportTarget.CSV, new File(subTarget + "-" + nf.format(i) + EXTENSION_CSV), null), tc, dataList.get(i));
@@ -77,7 +79,7 @@ public class ExportTargetFile implements IExportTarget {
         }
     }
 
-    private void exportImage(final double[][] data, Direction direction, final Object targetParams, int[] dataParams, final TaskContainer tc) throws IOException, ComputationException {
+    private void exportImage(final double[][] data, Direction direction, final Object targetParams, int[] dataParams, final TaskContainer tc, final double[] minMax) throws IOException, ComputationException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParams.getClass());
         }
@@ -92,7 +94,7 @@ public class ExportTargetFile implements IExportTarget {
         final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay;
         if (data != null) {
-            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(data, direction));
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(data, direction, minMax[1], minMax[0]));
         } else {
             overlay = background;
         }
@@ -110,24 +112,9 @@ public class ExportTargetFile implements IExportTarget {
         final String fullName = out.getName();
 
         final String name = fullName.substring(0, fullName.lastIndexOf("."));
-
         final File temp = Utils.getTempDir(tc);
 
-        double globalMaxPos = -Double.MAX_VALUE, globalMaxNeg = Double.MAX_VALUE;
-        for (double[][] daa : data) {
-            if (daa != null) {
-                for (double[] da : daa) {
-                    for (double d : da) {
-                        if (d > globalMaxPos) {
-                            globalMaxPos = d;
-                        }
-                        if (d < globalMaxNeg) {
-                            globalMaxNeg = d;
-                        }
-                    }
-                }
-            }
-        }
+        final double[] minMax = findMinMax(data);
 
         final int posCount = ((int) Math.log10(data.size())) + 1;
         final StringBuilder sb = new StringBuilder();
@@ -144,7 +131,7 @@ public class ExportTargetFile implements IExportTarget {
             final BufferedImage overlay;
             map = data.get(i);
             if (map != null) {
-                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(map, direction, globalMaxPos, globalMaxNeg));
+                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(map, direction, minMax[1], minMax[0]));
             } else {
                 overlay = background;
             }
@@ -177,8 +164,44 @@ public class ExportTargetFile implements IExportTarget {
         Utils.deleteTempDir(tc);
     }
 
-    private String loadScript() throws IOException {
-        InputStream in = ExportTargetFile.class.getResourceAsStream(SCRIPT_NAME);
+    private double[] findMinMax(final List<double[][]> data) {
+        double max = -Double.MAX_VALUE, min = Double.MAX_VALUE;
+        for (double[][] daa : data) {
+            if (daa != null) {
+                for (double[] da : daa) {
+                    for (double d : da) {
+                        if (d > max) {
+                            max = d;
+                        }
+                        if (d < min) {
+                            min = d;
+                        }
+                    }
+                }
+            }
+        }
+        return new double[]{min, max};
+    }
+
+    private double[] findMinMax(final double[][] data) {
+        double max = -Double.MAX_VALUE, min = Double.MAX_VALUE;
+        for (double[] da : data) {
+            for (double d : da) {
+                if (d > max) {
+                    max = d;
+                }
+                if (d < min) {
+                    min = d;
+                }
+            }
+        }
+        return new double[]{min, max};
+    }
+
+    private String
+            loadScript() throws IOException {
+        InputStream in = ExportTargetFile.class
+                .getResourceAsStream(SCRIPT_NAME);
         StringBuilder sb = new StringBuilder();
         try (BufferedReader bin = new BufferedReader(new InputStreamReader(in))) {
             while (bin.ready()) {
@@ -186,6 +209,7 @@ public class ExportTargetFile implements IExportTarget {
                 sb.append("\n");
             }
         }
+
         return sb.toString();
     }
 
