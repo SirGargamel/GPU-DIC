@@ -321,7 +321,7 @@ public class ExportUtils {
             g.drawString(nf.format(middle - thirdOfHalf), width - BAR_SIZE_VERT, halfHeight - halfHeight / 3);
             g.drawString(nf.format(middle - thirdOfHalf * 2), width - BAR_SIZE_VERT, halfHeight - halfHeight / 3 * 2);
         } else {
-            g.drawString(nf.format(middle - half), width - BAR_SIZE_VERT, metrics.getHeight() - halfHeight / 2);
+            g.drawString(nf.format(middle - half / 2.0), width - BAR_SIZE_VERT, metrics.getHeight() - halfHeight / 2);
         }
         g.drawString(nf.format(min), width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
 
@@ -336,7 +336,7 @@ public class ExportUtils {
             g.drawString(nf.format(middle + thirdOfHalf), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 3);
             g.drawString(nf.format(middle + thirdOfHalf * 2), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 3 * 2);
         } else {
-            g.drawString(nf.format(middle + half), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 2);
+            g.drawString(nf.format(middle + half / 2.0), width - BAR_SIZE_VERT + minusWidth, halfHeight + halfHeight / 2);
         }
         g.drawString(nf.format(max), width - BAR_SIZE_VERT + minusWidth, height - 2);
 
@@ -372,7 +372,7 @@ public class ExportUtils {
             g.drawString(nf.format(middle - thirdOfHalf), halfWidth - halfWidth / 3, tY);
             g.drawString(nf.format(middle - thirdOfHalf * 2), halfWidth - halfWidth / 3 * 2, tY);
         } else {
-            g.drawString(nf.format(middle - half), halfWidth - halfWidth / 2 - tWidth / 2, tY);
+            g.drawString(nf.format(middle - half / 2.0), halfWidth - halfWidth / 2 - tWidth / 2, tY);
         }
         g.drawString(nf.format(min), 0, tY);
 
@@ -387,7 +387,7 @@ public class ExportUtils {
             g.drawString(nf.format(middle + thirdOfHalf), halfWidth + halfWidth / 3 - tWidth, tY);
             g.drawString(nf.format(middle + thirdOfHalf * 2), halfWidth + halfWidth / 3 * 2 - tWidth, tY);
         } else {
-            g.drawString(nf.format(middle + half), halfWidth + halfWidth / 2 - tWidth / 2, tY);
+            g.drawString(nf.format(middle + half / 2.0), halfWidth + halfWidth / 2 - tWidth / 2, tY);
         }
         g.drawString(nf.format(max), width - tWidth, tY);
 
