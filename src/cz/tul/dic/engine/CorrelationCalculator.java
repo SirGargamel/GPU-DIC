@@ -29,13 +29,15 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public final class CorrelationCalculator extends Observable {
-    
+
     private final CLContext context;
     private final CLDevice device;
     // dynamic
     private KernelType kernelType;
     private Interpolation interpolation;
     private TaskSplitMethod taskSplitVariant;
+    private Kernel kernel;
+    private boolean stop;
 
     public CorrelationCalculator() {
 
@@ -51,7 +53,9 @@ public final class CorrelationCalculator extends Observable {
             ROI roi, List<Facet> facets,
             double[] deformationLimits, DeformationDegree defDegree,
             int facetSize, Object taskSplitValue) throws ComputationException {
-        final Kernel kernel = Kernel.createKernel(kernelType);
+        stop = false;
+
+        kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared - {0}", kernel);
 
         final List<CorrelationResult> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, taskSplitValue);
@@ -79,6 +83,10 @@ public final class CorrelationCalculator extends Observable {
             ComputationTask ct;
             CorrelationResult bestSubResult = null;
             while (it.hasNext()) {
+                if (stop) {
+                    return result;
+                }
+
                 ct = it.next();
                 ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));
                 kernel.finishRound();
@@ -149,6 +157,14 @@ public final class CorrelationCalculator extends Observable {
 
     public void setTaskSplitVariant(TaskSplitMethod taskSplitVariant) {
         this.taskSplitVariant = taskSplitVariant;
+    }
+
+    public void stop() {
+        stop = true;
+        if (kernel != null) {
+            kernel.stop();
+        }
+        Logger.debug("Stopping correlation counter.");
     }
 
 }

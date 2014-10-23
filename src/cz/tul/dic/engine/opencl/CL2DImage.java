@@ -48,4 +48,8 @@ public class CL2DImage extends Kernel {
         return false;
     }
 
+    @Override
+    public void stop() {
+    }
+
 }

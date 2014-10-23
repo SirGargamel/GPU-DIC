@@ -39,6 +39,7 @@ public class Engine extends Observable {
     private static final Engine instance;
     private final CorrelationCalculator correlation;
     private final StrainEstimation strain;
+    private boolean stop;
 
     static {
         instance = new Engine();
@@ -49,11 +50,12 @@ public class Engine extends Observable {
     }
 
     private Engine() {
-        correlation = new CorrelationCalculator();        
+        correlation = new CorrelationCalculator();
         strain = new StrainEstimation();
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
+        stop = false;
         setChanged();
         notifyObservers(0);
 
@@ -63,6 +65,10 @@ public class Engine extends Observable {
         final Set<Hint> hints = tc.getHints();
         int r, nextR, currentRound = 0;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
+            if (stop) {
+                return;
+            }
+
             r = e.getKey();
             nextR = e.getValue();
 
@@ -78,6 +84,9 @@ public class Engine extends Observable {
         Stats.dumpDeformationsStatisticsPerQuality(tc);
 
         if (!hints.contains(Hint.NO_STRAIN)) {
+            if (stop) {
+                return;
+            }
             setChanged();
             notifyObservers(StrainEstimation.class);
             strain.computeStrain(tc);
@@ -85,9 +94,11 @@ public class Engine extends Observable {
 
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
-    }        
+    }
 
     public void computeRound(final TaskContainer tc, final int roundFrom, final int roundTo) throws ComputationException, IOException {
+        stop = false;
+
         Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, tc);
         final Set<Hint> hints = tc.getHints();
         if (hints.contains(Hint.NO_STATS)) {
@@ -114,6 +125,9 @@ public class Engine extends Observable {
 
         // compute round                
         for (ROI roi : tc.getRois(roundFrom)) {
+            if (stop) {                
+                return;
+            }
             // compute and store result
             setChanged();
             notifyObservers(CorrelationCalculator.class);
@@ -125,12 +139,12 @@ public class Engine extends Observable {
                             tc.getDeformationLimits(roundFrom, roi),
                             DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
                             tc.getFacetSize(roundFrom, roi), taskSplitValue));
-        }        
+        }
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
-        DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);        
-        
+        DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);
+
         if (DebugControl.isDebugMode()) {
             Stats.dumpDeformationsStatisticsUsage(tc, roundFrom);
             Stats.dumpDeformationsStatisticsPerQuality(tc, roundFrom);
@@ -140,7 +154,7 @@ public class Engine extends Observable {
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
     }
-    
+
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
         Iterator<ExportTask> it = tc.getExports().iterator();
         ExportTask et;
@@ -151,10 +165,17 @@ public class Engine extends Observable {
             }
         }
     }
-    
+
     private boolean isStrainExport(ExportTask et) {
         final Direction dir = et.getDirection();
         return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
+    }
+
+    public void stop() {
+        stop = true;
+        correlation.stop();
+        strain.stop();        
+        Logger.debug("Stopping engine.");
     }
 
 }

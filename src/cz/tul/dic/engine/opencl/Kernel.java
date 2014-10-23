@@ -390,4 +390,6 @@ public abstract class Kernel {
         return kernelName;
     }
 
+    public abstract void stop();
+
 }

@@ -37,12 +37,17 @@ public class ComplexTaskSolver extends Observable {
     private final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
+    private final StrainEstimation strain;
+    private boolean stop;
 
     public ComplexTaskSolver() {
         bottomShifts = new LinkedList<>();
+        strain = new StrainEstimation();
     }
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
+        stop = false;
+        
         TaskContainerUtils.checkTaskValidity(tc);
         tc.clearResultData();
         bottomShifts.clear();
@@ -61,6 +66,10 @@ public class ComplexTaskSolver extends Observable {
         int r, nextR, repeat;
         boolean good;
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
+            if (stop) {
+                return;
+            }
+
             r = e.getKey();
             nextR = e.getValue();
 
@@ -70,6 +79,9 @@ public class ComplexTaskSolver extends Observable {
             repeat = 0;
             good = true;
             do {
+                if (stop) {
+                    return;
+                }
                 if (!good) {
                     crm.increaseLimits(r);
                 }
@@ -79,6 +91,9 @@ public class ComplexTaskSolver extends Observable {
             } while (!good && repeat < LIMIT_REPETITION);
             crm.generateNextRound(r, nextR);
 
+            if (stop) {
+                return;
+            }
             setChanged();
             notifyObservers(RectROIManager.class);
             if (crm.hasMoved()) {
@@ -119,7 +134,9 @@ public class ComplexTaskSolver extends Observable {
         Stats.dumpDeformationsStatisticsUsage(tc);
         Stats.dumpDeformationsStatisticsPerQuality(tc);
 
-        StrainEstimation strain = new StrainEstimation();
+        if (stop) {
+            return;
+        }        
         strain.computeStrain(tc);
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
@@ -180,6 +197,13 @@ public class ComplexTaskSolver extends Observable {
 
     public List<Double> getBottomShifts() {
         return bottomShifts;
+    }
+
+    public void stop() {
+        stop = true;        
+        Engine.getInstance().stop();
+        strain.stop();
+        Logger.debug("Stopping complex task solver.");
     }
 
 }

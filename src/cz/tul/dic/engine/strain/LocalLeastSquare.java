@@ -33,9 +33,12 @@ public class LocalLeastSquare extends StrainEstimator {
     private static final int INDEX_ERRA = 6;
     private static final int INDEX_ERRB = 7;
     private static final double COEFF_ADJUST = 100;
+    private boolean stop;
 
     @Override
     void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) throws ComputationException {
+        stop = false;
+
         final double[][][] displacement = TaskContainerUtils.getDisplacement(tc, roundFrom, roundTo).getDisplacement();
         if (displacement != null) {
             final int width = displacement.length;
@@ -48,6 +51,10 @@ public class LocalLeastSquare extends StrainEstimator {
             final List<ExecutionUnit> l = new ArrayList<>(width * height);
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
+                    if (stop) {
+                        return;
+                    }
+
                     if (displacement[x][y] != null) {
                         l.add(new ExecutionUnit(x, y, displacement, windowSize));
                     }
@@ -67,9 +74,15 @@ public class LocalLeastSquare extends StrainEstimator {
                     result[eu.getX()][eu.getY()] = eu.getResult();
                     resultQuality[0][eu.getX()][eu.getY()] = eu.getErrors()[0];
                     resultQuality[1][eu.getX()][eu.getY()] = eu.getErrors()[1];
+
+                    if (stop) {
+                        es.shutdownNow();
+                    }
                 }
             } catch (InterruptedException | ExecutionException ex) {
-                Logger.error(ex);
+                if (!stop) {
+                    Logger.error(ex);
+                }
             }
 
             if (DebugControl.isDebugMode()) {
@@ -149,6 +162,11 @@ public class LocalLeastSquare extends StrainEstimator {
         result[StrainResult.Exy] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]) * COEFF_ADJUST;
 
         return result;
+    }
+
+    @Override
+    void stop() {
+        stop = true;
     }
 
     private static class ExecutionUnit implements Callable<ExecutionUnit> {

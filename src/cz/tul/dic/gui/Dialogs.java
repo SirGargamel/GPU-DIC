@@ -3,6 +3,8 @@ package cz.tul.dic.gui;
 import cz.tul.dic.gui.lang.Lang;
 import javafx.concurrent.Worker;
 import javafx.scene.control.Alert;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import org.controlsfx.dialog.ExceptionDialog;
 import org.controlsfx.dialog.ProgressDialog;
@@ -47,6 +49,11 @@ public class Dialogs {
         dlg.initModality(Modality.APPLICATION_MODAL);
         dlg.setTitle(Lang.getString("Wait"));
         dlg.setHeaderText(text);
+        dlg.getDialogPane().setOnKeyReleased((KeyEvent event) -> {            
+            if (event.getCode().equals(KeyCode.ESCAPE)) {
+                worker.cancel();
+            }
+        });
         dlg.show();
     }
 

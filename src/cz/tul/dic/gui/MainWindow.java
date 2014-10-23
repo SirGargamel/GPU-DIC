@@ -1,8 +1,6 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.FpsManager;
-import cz.tul.dic.Utils;
 import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -22,6 +20,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 import javafx.animation.KeyFrame;
@@ -180,7 +179,7 @@ public class MainWindow implements Initializable {
                         updateProgress(4, 5);
                         Platform.runLater(() -> {
                             final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
-                            stage.setTitle("DIC - " + in.getName());
+                            stage.setTitle(Lang.getString("Title") + " - " + in.getName());
                             if (imagePane != null && imagePane.getScene() != null) {
                                 adjustConfigButtons(false);
                                 adjustImageButtons(false);
@@ -203,6 +202,20 @@ public class MainWindow implements Initializable {
                 updateProgress(5, 5);
 
                 return result;
+            }
+
+            @Override
+            protected void cancelled() {
+                super.cancelled();
+
+                adjustResultButtons(true);
+                adjustConfigButtons(true);
+                adjustImageButtons(true);
+
+                Context.getInstance().setTc(null);
+
+                final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
+                stage.setTitle(Lang.getString("Title"));
             }
         };
 
@@ -227,6 +240,7 @@ public class MainWindow implements Initializable {
                 Platform.runLater(() -> {
                     Dialogs.showException(ex);
                 });
+            } catch (CancellationException ex) {
             }
         });
         th.setDaemon(true);
@@ -304,7 +318,6 @@ public class MainWindow implements Initializable {
                                         err.getLocalizedMessage());
                             });
                             Logger.error(err);
-
                         } else {
                             Platform.runLater(() -> {
                                 buttonResults.setDisable(false);
@@ -312,6 +325,10 @@ public class MainWindow implements Initializable {
                         }
                     } catch (InterruptedException | ExecutionException ex) {
                         Logger.error(ex);
+                    } catch (CancellationException ex) {
+                        Platform.runLater(() -> {
+                            buttonResults.setDisable(false);
+                        });
                     }
                 });
                 th.setDaemon(true);
@@ -596,6 +613,17 @@ public class MainWindow implements Initializable {
             cts.deleteObserver(this);
 
             return result;
+        }
+
+        @Override
+        protected void cancelled() {
+            super.cancelled();
+
+            Engine.getInstance().stop();
+            cts.stop();
+
+            Engine.getInstance().deleteObserver(this);
+            cts.deleteObserver(this);
         }
 
         @Override

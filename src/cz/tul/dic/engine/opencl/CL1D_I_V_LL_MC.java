@@ -51,4 +51,8 @@ public class CL1D_I_V_LL_MC extends Kernel {
         return true;
     }
 
+    @Override
+    public void stop() {
+    }
+
 }

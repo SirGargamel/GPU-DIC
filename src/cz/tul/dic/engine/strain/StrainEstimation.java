@@ -18,6 +18,7 @@ import org.pmw.tinylog.Logger;
 public class StrainEstimation extends Observable {
 
     private static final Map<StrainEstimationMethod, StrainEstimator> data;
+    private boolean stop;
 
     static {
         data = new HashMap<>();
@@ -41,10 +42,19 @@ public class StrainEstimation extends Observable {
     }
 
     public void computeStrain(final TaskContainer tc) throws ComputationException {
+        stop = false;
+
         final int roudZero = TaskContainerUtils.getFirstRound(tc);
         int counter = 0;
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
+            if (stop) {
+                return;
+            }
             computeStrain(tc, e.getKey(), e.getValue());
+
+            if (stop) {
+                return;
+            }
             computeStrain(tc, roudZero, e.getValue());
 
             counter++;
@@ -53,9 +63,16 @@ public class StrainEstimation extends Observable {
         }
     }
 
+    public void stop() {
+        stop = true;
+        Logger.debug("Stopping strain estimation.");
+    }
+
     public static abstract class StrainEstimator {
 
         abstract void estimateStrain(final TaskContainer tc, final int roundFrom, int roundTo) throws ComputationException;
+
+        abstract void stop();
 
     }
 

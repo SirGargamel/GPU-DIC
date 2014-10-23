@@ -16,6 +16,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     private static final int ARGUMENT_INDEX_D_BASE = 15;
     private static final int LWS0_BASE = 32;
     private final WorkSizeManager wsm;
+    private boolean stop;
 
     public CL1D_I_V_LL_MC_D() {
         super("CL1D_I_V_LL_MC_D");
@@ -30,6 +31,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             final CLBuffer<FloatBuffer> results,
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount) {
+        stop = false;
         final int facetArea = facetSize * facetSize;
         int lws0 = Kernel.roundUp(calculateLws0base(), facetArea);
         lws0 = Math.min(lws0, device.getMaxWorkItemSizes()[0]);
@@ -63,7 +65,10 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 if (counter == eventList.capacity()) {
                     eventList = new CLEventList(facetCount);
                     counter = 0;                    
-                }                
+                }    
+                if (stop) {
+                    return;
+                }
 
                 facetSubCount = Math.min(wsm.getFacetCount(), facetCount - currentBaseFacet);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
@@ -117,6 +122,11 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     @Override
     boolean isDriven() {
         return true;
+    }
+    
+    @Override
+    public void stop() {
+        stop = true;
     }
 
 }
