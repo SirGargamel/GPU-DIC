@@ -7,9 +7,12 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportTask;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -20,6 +23,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.imageio.ImageIO;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -298,11 +302,6 @@ public class TaskContainer extends Observable implements Serializable {
         }
     }
 
-    private void readObject(ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
-        stream.defaultReadObject();
-    }
-
     public TaskContainer cloneInputTask() {
         final TaskContainer result = new TaskContainer(input);
         result.images = images;
@@ -315,5 +314,39 @@ public class TaskContainer extends Observable implements Serializable {
     @Override
     public String toString() {
         return params.toString();
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        try {
+            out.defaultWriteObject();
+            out.writeInt(images.size()); // how many images are serialized?
+            for (BufferedImage eachImage : images) {
+                ImageIO.write(eachImage, "bmp", out); // png is lossless            
+            }
+            out.flush();
+        } catch (IOException ex) {
+            Logger.error(ex);
+            throw ex;
+        }
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        try {
+            in.defaultReadObject();
+            final int imageCount = in.readInt();
+            images = new ArrayList<>(imageCount);
+            BufferedImage img;
+            for (int i = 0; i < imageCount; i++) {
+                img = ImageIO.read(in);
+                if (img != null) {
+                    images.add(Image.createImage(img));
+                } else {
+                    System.out.println(i);
+                }
+            }
+        } catch (IOException ex) {
+            Logger.error(ex);
+            throw ex;
+        }
     }
 }

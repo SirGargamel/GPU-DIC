@@ -31,6 +31,10 @@ public class ComputationException extends Exception {
         
         this.cause = cause;
     }
+
+    public ComputationExceptionCause getExceptionCause() {
+        return cause;
+    }
     
     @Override
     public String toString() {

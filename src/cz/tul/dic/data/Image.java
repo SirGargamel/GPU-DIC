@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
  */
 public class Image extends BufferedImage {
 
-    private int[] grayScale;
+    private transient int[] grayScale;
 
     public static Image loadImageFromDisk(final File in) throws IOException {
         if (!in.exists() || !in.isFile()) {
@@ -31,8 +31,16 @@ public class Image extends BufferedImage {
 
     private Image(int width, int height, int imageType) {
         super(width, height, imageType);
-    }
+    }    
 
+    public int[] toBWArray() {
+        if (grayScale == null) {
+            createBw();
+        }
+
+        return grayScale;
+    }
+    
     private void createBw() {
         final int width = getWidth();
         final int height = getHeight();
@@ -49,14 +57,6 @@ public class Image extends BufferedImage {
                 grayScale[y * width + x] = val;
             }
         }
-    }
-
-    public int[] toBWArray() {
-        if (grayScale == null) {
-            createBw();
-        }
-
-        return grayScale;
     }
 
 }

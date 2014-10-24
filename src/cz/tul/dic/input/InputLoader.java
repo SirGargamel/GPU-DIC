@@ -1,6 +1,7 @@
 package cz.tul.dic.input;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import java.io.IOException;
@@ -44,18 +45,28 @@ public class InputLoader {
         }
 
         if (loader != null) {
-            final List<Image> images = loader.loadData(in, tc);
-            for (int i = 0; i < images.size(); i++) {
-                tc.addImage(images.get(i));
+            try {
+                final List<Image> images = loader.loadData(in, tc);
+                for (int i = 0; i < images.size(); i++) {
+                    tc.addImage(images.get(i));
+                }
+                final StringBuilder sb = new StringBuilder();
+                sb.append("InputLoader statistics - loaded ");
+                sb.append(images.size());
+                sb.append(" images from ");
+                sb.append(in);
+                sb.append(" using ");
+                sb.append(loader.getClass());
+                Logger.trace(sb.toString());
+            } catch (ComputationException ex) {
+                if (ex.getExceptionCause().equals(ComputationExceptionCause.ILLEGAL_TASK_DATA)) {
+                    if (tc.getImages().isEmpty()) {
+                        throw ex;
+                    }
+                } else {
+                    throw ex;
+                }
             }
-            final StringBuilder sb = new StringBuilder();
-            sb.append("InputLoader statistics - loaded ");
-            sb.append(images.size());
-            sb.append(" images from ");
-            sb.append(in);
-            sb.append(" using ");
-            sb.append(loader.getClass());
-            Logger.trace(sb.toString());
         } else {
             throw new IllegalArgumentException("Unsupported type of input data - " + cls.toString());
         }
