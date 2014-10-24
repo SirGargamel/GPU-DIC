@@ -21,6 +21,8 @@ public class OpenCLSplitter extends TaskSplitter {
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
     private static final double COEFF_LIMIT_ADJUST = 0.75;
+    private static final long COEFF_MEM_LIMIT_MAX = 6;
+    private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX;
     private final int facetSize, ID;
     private final List<OpenCLSplitter> subSplitters;
     private final boolean subSplitter;
@@ -173,7 +175,7 @@ public class OpenCLSplitter extends TaskSplitter {
         final long fullSize = imageSize + deformationsSize + reserve + facetDataSize + facetCentersSize + resultSize;
 
         final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
-        final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
+        final long maxMem = DeviceManager.getDevice().getGlobalMemSize() * COEFF_MEM_LIMIT / COEFF_MEM_LIMIT_MAX;
         boolean result = fullSize >= 0 && fullSize <= maxMem;
         result &= resultCount <= Integer.MAX_VALUE;
         result &= facetCount <= Integer.MAX_VALUE;
@@ -183,12 +185,24 @@ public class OpenCLSplitter extends TaskSplitter {
         result &= deformationsSize >= 0 && deformationsSize <= maxAllocMem;
         result &= facetDataSize >= 0 && facetDataSize <= maxAllocMem;
         result &= facetCentersSize >= 0 && facetCentersSize <= maxAllocMem;
-
-//        System.out.print(result + " - ");
-//        System.out.print(Arrays.toString(new long[]{deformations.length / deformationArraySize, facetCount}));
-//        System.out.print(" - ");
-//        System.out.println(Arrays.toString(new long[]{deformationsSize, facetDataSize, facetCentersSize, facetCentersSize, resultSize, fullSize, maxAllocMem, maxMem}));
         return result;
+    }
+
+    @Override
+    public void signalTaskSizeTooBig() {
+        COEFF_MEM_LIMIT--;
+        Logger.debug("Lowering task size to {0} / {1}.", COEFF_MEM_LIMIT, COEFF_MEM_LIMIT_MAX);
+    }
+
+    @Override
+    public boolean isSplitterReady() {
+        return COEFF_MEM_LIMIT > 0;
+    }
+
+    @Override
+    public void resetTaskSize() {
+        COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX;
+        Logger.debug("Reseting task size full.");
     }
 
 }

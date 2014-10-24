@@ -26,7 +26,7 @@ public abstract class TaskSplitter implements Iterator<ComputationTask> {
         this.deformationLimits = deformationLimits;        
     }
 
-    public static Iterator<ComputationTask> prepareSplitter(Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits, final ROI roi, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
+    public static TaskSplitter prepareSplitter(Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits, final ROI roi, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
         switch (ts) {
             case NONE:
                 return new NoSplit(image1, image2, facets, deformationLimits);
@@ -38,5 +38,11 @@ public abstract class TaskSplitter implements Iterator<ComputationTask> {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of task splitting - " + ts);
         }
     }
+    
+    public abstract void signalTaskSizeTooBig();
+    
+    public abstract void resetTaskSize();
+    
+    public abstract boolean isSplitterReady();
 
 }

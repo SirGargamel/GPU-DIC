@@ -52,4 +52,18 @@ public class StaticSplit extends TaskSplitter {
 
         return new ComputationTask(image1, image2, sublist, deformationLimits, false);
     }
+    
+    @Override
+    public void signalTaskSizeTooBig() {
+        hasNext = false;
+    }
+
+    @Override
+    public boolean isSplitterReady() {
+        return hasNext;
+    }
+    
+    @Override
+    public void resetTaskSize() {        
+    }
 }

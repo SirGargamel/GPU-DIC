@@ -35,4 +35,17 @@ public class NoSplit extends TaskSplitter {
         throw new UnsupportedOperationException("Not supported.");
     }
 
+    @Override
+    public void signalTaskSizeTooBig() {
+    }
+
+    @Override
+    public boolean isSplitterReady() {
+        return hasNext;
+    }
+
+    @Override
+    public void resetTaskSize() {        
+    }
+
 }

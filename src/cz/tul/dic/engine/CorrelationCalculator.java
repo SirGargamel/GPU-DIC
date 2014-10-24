@@ -79,32 +79,49 @@ public final class CorrelationCalculator extends Observable {
         try {
             kernel.prepareKernel(context, device, facetSize, defDegree, interpolation);
 
-            final Iterator<ComputationTask> it = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
-            ComputationTask ct;
-            CorrelationResult bestSubResult = null;
-            while (it.hasNext()) {
-                if (stop) {
-                    return result;
-                }
+            TaskSplitter ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
+            ts.resetTaskSize();
+            boolean finished = false;
+            CLException lastEx = null;
+            while (ts.isSplitterReady() && !finished) {
+                try {
+                    ComputationTask ct;
+                    CorrelationResult bestSubResult = null;
+                    while (ts.hasNext()) {
+                        if (stop) {
+                            return result;
+                        }
 
-                ct = it.next();
-                ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));
-                kernel.finishRound();
-                // pick best results for this computation task and discard ct data 
-                if (ct.isSubtask()) {
-                    bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
-                } else if (bestSubResult != null) {
-                    bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
-                    // store result
-                    final int globalFacetIndex = facets.indexOf(ct.getFacets().get(0));
-                    if (globalFacetIndex < 0) {
-                        throw new IllegalArgumentException("Local facet not found in global registry.");
+                        ct = ts.next();
+                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));
+                        kernel.finishRound();
+                        // pick best results for this computation task and discard ct data 
+                        if (ct.isSubtask()) {
+                            bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
+                        } else if (bestSubResult != null) {
+                            bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
+                            // store result
+                            final int globalFacetIndex = facets.indexOf(ct.getFacets().get(0));
+                            if (globalFacetIndex < 0) {
+                                throw new IllegalArgumentException("Local facet not found in global registry.");
+                            }
+                            result.set(globalFacetIndex, bestSubResult);
+                            bestSubResult = null;
+                        } else {
+                            pickBestResultsForTask(ct, result, facets);
+                        }
                     }
-                    result.set(globalFacetIndex, bestSubResult);
-                    bestSubResult = null;
-                } else {
-                    pickBestResultsForTask(ct, result, facets);
+
+                    finished = true;
+                } catch (CLException ex) {
+                    ts.signalTaskSizeTooBig();
+                    ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
+                    lastEx = ex;
                 }
+            }
+
+            if (!finished && lastEx != null) {
+                throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx.getLocalizedMessage());
             }
         } catch (CLException ex) {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
