@@ -586,13 +586,14 @@ public class MainWindow implements Initializable {
 
         private final ComplexTaskSolver cts;
         private final TaskContainer tc;
-        private final int roundCount;
+        private final int roundCount, roundOne;
         private int round;
 
         public ComputationObserver(ComplexTaskSolver cts, final TaskContainer tc) {
             this.cts = cts;
             this.tc = tc;
             roundCount = TaskContainerUtils.getRounds(tc).keySet().size();
+            roundOne = TaskContainerUtils.getFirstRound(tc);
         }
 
         @Override
@@ -630,7 +631,7 @@ public class MainWindow implements Initializable {
         public void update(Observable o, Object arg) {
             if (arg instanceof Integer) {
                 round = (int) arg;
-                updateProgress(round, roundCount);
+                updateProgress(round - roundOne, roundCount);
             } else if (arg instanceof Class) {
                 final Class cls = (Class) arg;
                 final StringBuilder sb = new StringBuilder();

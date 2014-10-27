@@ -63,7 +63,7 @@ public class Engine extends Observable {
         TaskContainerUtils.checkTaskValidity(tc);
 
         final Set<Hint> hints = tc.getHints();
-        int r, nextR, currentRound = 0;
+        int r, nextR;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             if (stop) {
                 return;
@@ -74,10 +74,9 @@ public class Engine extends Observable {
 
             computeRound(tc, r, nextR);
             exportRound(tc, r);
-
-            currentRound++;
+            
             setChanged();
-            notifyObservers(currentRound);
+            notifyObservers(nextR);
         }
 
         Stats.dumpDeformationsStatisticsUsage(tc);
