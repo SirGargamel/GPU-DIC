@@ -48,7 +48,7 @@ public class Dialogs {
         final ProgressDialog dlg = new ProgressDialog(worker);
         dlg.initModality(Modality.APPLICATION_MODAL);
         dlg.setTitle(Lang.getString("Wait"));
-        dlg.setHeaderText(text);
+        dlg.setHeaderText(text.concat("\n").concat(Lang.getString("EscCancel")));
         dlg.getDialogPane().setOnKeyReleased((KeyEvent event) -> {            
             if (event.getCode().equals(KeyCode.ESCAPE)) {
                 worker.cancel();
