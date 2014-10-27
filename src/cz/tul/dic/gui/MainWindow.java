@@ -15,7 +15,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -588,12 +590,16 @@ public class MainWindow implements Initializable {
         private final TaskContainer tc;
         private final int roundCount, roundOne;
         private int round;
+        private StringBuilder action, time;
 
         public ComputationObserver(ComplexTaskSolver cts, final TaskContainer tc) {
             this.cts = cts;
             this.tc = tc;
             roundCount = TaskContainerUtils.getRounds(tc).keySet().size();
             roundOne = TaskContainerUtils.getFirstRound(tc);
+
+            time = new StringBuilder();
+            action = new StringBuilder();
         }
 
         @Override
@@ -632,17 +638,25 @@ public class MainWindow implements Initializable {
             if (arg instanceof Integer) {
                 round = (int) arg;
                 updateProgress(round - roundOne, roundCount);
+            } else if (arg instanceof Long) {
+                final long roundTime = (long) arg;
+                final int roundsLeft = roundCount - (round - roundOne);
+                final String timeLeft = new SimpleDateFormat("hh:mm:ss").format(new Date(System.currentTimeMillis() + roundTime * roundsLeft));
+                time.setLength(0);
+                time.append(Lang.getString("FinishTime"))
+                        .append(" : ")
+                        .append(timeLeft);
             } else if (arg instanceof Class) {
                 final Class cls = (Class) arg;
-                final StringBuilder sb = new StringBuilder();
-                sb.append("[");
-                sb.append(Lang.getString("Round"));
-                sb.append(" ");
-                sb.append(round);
-                sb.append("] ");
-                sb.append(Lang.getString(cls.getSimpleName()));
-                updateMessage(sb.toString());
+                action.setLength(0);
+                action.append("[")
+                        .append(Lang.getString("Round"))
+                        .append(" ")
+                        .append(round)
+                        .append("] ")
+                        .append(Lang.getString(cls.getSimpleName()));
             }
+            updateMessage(action.toString().concat("\n").concat(time.toString()));
         }
     }
 }

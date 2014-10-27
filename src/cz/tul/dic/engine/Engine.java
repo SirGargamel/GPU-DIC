@@ -74,7 +74,7 @@ public class Engine extends Observable {
 
             computeRound(tc, r, nextR);
             exportRound(tc, r);
-            
+
             setChanged();
             notifyObservers(nextR);
         }
@@ -97,6 +97,8 @@ public class Engine extends Observable {
 
     public void computeRound(final TaskContainer tc, final int roundFrom, final int roundTo) throws ComputationException, IOException {
         stop = false;
+
+        long time = System.currentTimeMillis();
 
         Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, tc);
         final Set<Hint> hints = tc.getHints();
@@ -124,7 +126,7 @@ public class Engine extends Observable {
 
         // compute round                
         for (ROI roi : tc.getRois(roundFrom)) {
-            if (stop) {                
+            if (stop) {
                 return;
             }
             // compute and store result
@@ -152,6 +154,9 @@ public class Engine extends Observable {
         }
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
+
+        setChanged();
+        notifyObservers(System.currentTimeMillis() - time);
     }
 
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
@@ -173,7 +178,7 @@ public class Engine extends Observable {
     public void stop() {
         stop = true;
         correlation.stop();
-        strain.stop();        
+        strain.stop();
         Logger.debug("Stopping engine.");
     }
 
