@@ -47,7 +47,7 @@ public final class WorkSizeManager {
 
         Logger.debug("Initializing work sizes for dynamic task management.");
         INITIAL_WORK_SIZE_D = 1000;
-        init = true;
+        init = false;
 
         final CorrelationCalculator cc = new CorrelationCalculator();
         cc.setKernel(KernelType.CL_1D_I_V_LL_MC_D);
@@ -57,20 +57,19 @@ public final class WorkSizeManager {
         try {
             final Image img = Image.createImage(new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY));
             final double[] deformationLimits = new double[]{-49, 50, 0.1, -49, 50, 0.1};
-            final int fs = 11;
+            final int fs = 30;
             final List<Facet> facets = new ArrayList<>(1);
             facets.add(Facet.createFacet(fs, 0, 0));
             cc.computeCorrelations(
                     img, img,
                     new RectangleROI(0, 0, 100, 100), facets,
                     deformationLimits, DeformationDegree.FIRST,
-                    fs, new Object[]{6, fs});
+                    fs, null);
+            init = true;
         } catch (ComputationException ex) {
             Logger.warn("Failed to initialize work sizes.");
             Logger.debug(ex);
         }
-
-        init = false;
     }
 
     public WorkSizeManager() {
@@ -113,7 +112,7 @@ public final class WorkSizeManager {
 
     private void computeNextWorkSize() {
         if (!timeData.isEmpty()) {
-            final long[] max = findMaxValue();
+            final long[] max = findMaxTimeValue();
             final int[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
             workSizeF = newMax[0];
             workSizeD = newMax[1];
@@ -124,7 +123,7 @@ public final class WorkSizeManager {
         }
     }
 
-    private long[] findMaxValue() {
+    private long[] findMaxTimeValue() {
         final long[] result = new long[]{0, 0, -1};
 
         long t;
