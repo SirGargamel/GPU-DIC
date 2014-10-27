@@ -19,7 +19,6 @@ import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import org.pmw.tinylog.Logger;
@@ -114,9 +113,13 @@ public final class CorrelationCalculator extends Observable {
 
                     finished = true;
                 } catch (CLException ex) {
-                    ts.signalTaskSizeTooBig();
-                    ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
-                    lastEx = ex;
+                    if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
+                        ts.signalTaskSizeTooBig();
+                        ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
+                        lastEx = ex;
+                    } else {
+                        throw ex;
+                    }
                 }
             }
 
@@ -130,6 +133,7 @@ public final class CorrelationCalculator extends Observable {
         Logger.trace("{0} correlations computed.", result.size());
         return result;
     }
+    private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
 
     private CorrelationResult pickBetterResult(final CorrelationResult r1, final CorrelationResult r2) {
         final CorrelationResult result;
