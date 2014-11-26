@@ -15,9 +15,11 @@ import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,14 +34,22 @@ import org.pmw.tinylog.Logger;
  */
 public class Stats {
 
+    public static final boolean ENABLE_GPU_RESULTS = true;
     private static final boolean ENABLE_DEF_USAGE = true;
     private static final boolean ENABLE_DEF_QUALITY = true;
     private static final boolean ENABLE_FACET_QUALITY = true;
     private static final boolean ENABLE_POINT_QUALITY = true;
-    private static final boolean ENABLE_POINT_STATS = false;
+    private static final boolean ENABLE_POINT_STATS = true;
     private static final boolean ENABLE_REGRESSION_QUALITY = true;
+    private static TaskContainer tc;
+    private static int gpuBatch;
 
-    public static void dumpDeformationsStatisticsUsage(final TaskContainer tc, final int round) throws IOException {
+    public static void setTaskContainer(final TaskContainer tc) {
+        Stats.tc = tc;
+        gpuBatch = 0;
+    }
+
+    public static void dumpDeformationsStatisticsUsage(final int round) throws IOException {
         if (ENABLE_DEF_USAGE) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
@@ -77,7 +87,7 @@ public class Stats {
         }
     }
 
-    public static void dumpDeformationsStatisticsUsage(final TaskContainer tc) throws IOException {
+    public static void dumpDeformationsStatisticsUsage() throws IOException {
         if (ENABLE_DEF_USAGE) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
@@ -121,7 +131,7 @@ public class Stats {
         }
     }
 
-    public static void dumpDeformationsStatisticsPerQuality(final TaskContainer tc, final int round) throws IOException {
+    public static void dumpDeformationsStatisticsPerQuality(final int round) throws IOException {
         if (ENABLE_DEF_QUALITY) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Map<ROI, List<CorrelationResult>> results = tc.getResults(round);
@@ -154,7 +164,7 @@ public class Stats {
         }
     }
 
-    public static void dumpDeformationsStatisticsPerQuality(final TaskContainer tc) throws IOException {
+    public static void dumpDeformationsStatisticsPerQuality() throws IOException {
         if (ENABLE_DEF_QUALITY) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Set<Integer> rounds = TaskContainerUtils.getRounds(tc).keySet();
@@ -193,6 +203,32 @@ public class Stats {
         }
     }
 
+    public static void dumpGpuResults(final float[] resultData, final List<Facet> facets, final double[] deformationLimits) {
+        if (ENABLE_GPU_RESULTS) {
+            final File outFile = new File(NameGenerator.generateGpuResultsDump(tc, gpuBatch++));
+            outFile.getParentFile().mkdirs();
+            try (BufferedWriter out = new BufferedWriter(new FileWriter(outFile))) {
+                out.write(Arrays.toString(deformationLimits));
+                out.newLine();
+
+                final int defCountPerFacet = resultData.length / facets.size();
+                int facetCounter = 0;
+                for (Facet f : facets) {
+                    out.write(f.toString());
+                    out.newLine();
+                    for (int i = facetCounter * defCountPerFacet; i < (facetCounter + 1) * defCountPerFacet; i++) {
+                        out.write(Float.toString(resultData[i]));
+                        out.newLine();
+                    }
+                    facetCounter++;
+                }
+            } catch (IOException ex) {
+                java.util.logging.Logger.getLogger(Stats.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }
+
     private static void saveDump(final String fileName, final String textDump) throws IOException {
         final File outFile = new File(fileName);
         outFile.getParentFile().mkdirs();
@@ -201,7 +237,7 @@ public class Stats {
         }
     }
 
-    public static void drawFacetQualityStatistics(final TaskContainer tc, final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
+    public static void drawFacetQualityStatistics(final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
         if (ENABLE_FACET_QUALITY) {
             final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
             out.getParentFile().mkdirs();
@@ -226,7 +262,7 @@ public class Stats {
         }
     }
 
-    public static void drawPointResultStatistics(final TaskContainer tc, final int roundFrom, final int roundTo) throws IOException, ComputationException {
+    public static void drawPointResultStatistics(final int roundFrom, final int roundTo) throws IOException, ComputationException {
         if (ENABLE_POINT_QUALITY) {
             final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
             out.getParentFile().mkdirs();

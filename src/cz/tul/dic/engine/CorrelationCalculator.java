@@ -14,6 +14,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
+import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.Kernel;
 import cz.tul.dic.engine.opencl.KernelType;
@@ -29,6 +30,7 @@ import org.pmw.tinylog.Logger;
  */
 public final class CorrelationCalculator extends Observable {
 
+    private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
     private final CLContext context;
     private final CLDevice device;
     // dynamic
@@ -92,7 +94,7 @@ public final class CorrelationCalculator extends Observable {
                         }
 
                         ct = ts.next();
-                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));
+                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));                        
                         kernel.finishRound();
                         // pick best results for this computation task and discard ct data 
                         if (ct.isSubtask()) {
@@ -133,7 +135,6 @@ public final class CorrelationCalculator extends Observable {
         Logger.trace("{0} correlations computed.", result.size());
         return result;
     }
-    private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
 
     private CorrelationResult pickBetterResult(final CorrelationResult r1, final CorrelationResult r2) {
         final CorrelationResult result;

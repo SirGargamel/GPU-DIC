@@ -1,6 +1,7 @@
 package cz.tul.dic.data;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  *
@@ -11,24 +12,6 @@ public class Facet implements Serializable {
     private final int[] data;
     private final double[] center;
     private final int size;
-
-    private Facet(int[] data, double[] center, int size) {
-        this.data = data;
-        this.center = center;
-        this.size = size;
-    }
-
-    public int[] getData() {
-        return data;
-    }
-
-    public double[] getCenter() {
-        return center;
-    }
-
-    public int getSize() {
-        return size;
-    }
 
     public static Facet createFacet(int size, int... topLeft) {
         if (topLeft.length < Coordinates.DIMENSION) {
@@ -53,5 +36,35 @@ public class Facet implements Serializable {
         final Facet result = new Facet(data, new double[]{centerX, centerY}, size);
         return result;
     }
+    
+    private Facet(int[] data, double[] center, int size) {
+        this.data = data;
+        this.center = center;
+        this.size = size;
+    }
+
+    public int[] getData() {
+        return data;
+    }
+
+    public double[] getCenter() {
+        return center;
+    }
+
+    public int getSize() {
+        return size;
+    }
+    
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Facet -- loc : ");
+        sb.append(Arrays.toString(center));
+        sb.append(", size : ");
+        sb.append(size);
+        return sb.toString();
+    }
+
+    
 
 }

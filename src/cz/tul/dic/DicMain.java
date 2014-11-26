@@ -7,6 +7,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
@@ -125,25 +126,25 @@ public class DicMain extends Application {
         for (String s : FILES_TO_DEBUG) {
             for (int size = fs1; size <= fs2; size += 5) {
                 try {
-                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
-                    tc = Context.getInstance().getTc();
-                    if ((int) tc.getParameter(TaskParameter.FACET_SIZE) < size) {
-                        System.out.println("STOPPING --- " + tc.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
-                        break;
-                    }
-                    InputLoader.loadInput(tc);
-                    tc.setParameter(TaskParameter.IN, new File(s));
-                    tc.setParameter(TaskParameter.FACET_SIZE, size);
-                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
-//                    commenceComputationDynamic(tc);
-                    commenceComputationDynamicSpacingSweep(tc, (int) min, (int) max);
+//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
+//                    tc = Context.getInstance().getTc();
+//                    if ((int) tc.getParameter(TaskParameter.FACET_SIZE) < size) {
+//                        System.out.println("STOPPING --- " + tc.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
+//                        break;
+//                    }
+//                    InputLoader.loadInput(tc);
+//                    tc.setParameter(TaskParameter.IN, new File(s));
+//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
+//                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
+////                    commenceComputationDynamic(tc);
+//                    commenceComputationDynamicSpacingSweep(tc, (int) min, (int) max);
 
-//            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi.config")));
-//            TaskContainer tc = Context.getInstance().getTc();
-//            InputLoader.loadInput(tc);
+            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\image\\image.avi-fast.config")));
+            tc = Context.getInstance().getTc();
+            InputLoader.loadInput(tc);
 //            tc.setParameter(TaskParameter.FACET_SIZE, 20);
-//            tc.setParameter(TaskParameter.FACET_GENERATOR_MODE, FacetGeneratorMode.CLASSIC);
-//            Computation.commenceComputationDynamic(tc);
+//            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
+            commenceComputation(tc);
 //
 //            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {

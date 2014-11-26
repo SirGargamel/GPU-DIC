@@ -35,6 +35,10 @@ public class DebugControl {
     public static boolean isDebugMode() {
         return debugMode;
     }
+    
+    public static boolean isGpuDebugEnabled() {
+        return isDebugMode() && Stats.ENABLE_GPU_RESULTS;
+    }
 
     public static void startDebugMode() {
         debugMode = true;
@@ -67,13 +71,13 @@ public class DebugControl {
 
     public static void performStatisticsDump(final TaskContainer tc) throws IOException, ComputationException {
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
-            Stats.dumpDeformationsStatisticsUsage(tc, e.getKey());
-            Stats.dumpDeformationsStatisticsPerQuality(tc, e.getKey());
-            Stats.drawPointResultStatistics(tc, e.getKey(), e.getValue());
+            Stats.dumpDeformationsStatisticsUsage(e.getKey());
+            Stats.dumpDeformationsStatisticsPerQuality(e.getKey());
+            Stats.drawPointResultStatistics(e.getKey(), e.getValue());
         }
 
-        Stats.dumpDeformationsStatisticsPerQuality(tc);
-        Stats.dumpDeformationsStatisticsUsage(tc);
+        Stats.dumpDeformationsStatisticsPerQuality();
+        Stats.dumpDeformationsStatisticsUsage();
         new StrainEstimation().computeStrain(tc);
     }
 

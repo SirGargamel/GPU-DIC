@@ -19,6 +19,7 @@ public class NameGenerator {
     public static final String EXT_MAP = ".bmp";
     public static final String EXT_SEQUENCE = ".avi";
     public static final String EXT_BINARY = ".task";
+    private static final String TEXT_GPU_RESULTS = "gpuResults";
     private static final String TEXT_QUALITY_DEFORMATION = "deformationQuality";
     private static final String TEXT_QUALITY_DEFORMATION_BOOL = "deformationQualityBool";
     private static final String TEXT_QUALITY_FACET = "correlationQualityFacet";
@@ -89,6 +90,10 @@ public class NameGenerator {
 
     public static String generate2DValueHistogram(final TaskContainer tc, final int round, final int x, final int y) {
         return new Generator(tc).name(TEXT_HISTOGRAM).time(round).text(TEXT_HISTOGRAM).intVal(x).intVal(y).finalize(EXT_CSV);
+    }
+    
+    public static String generateGpuResultsDump(final TaskContainer tc, final int batch) {
+        return new Generator(tc).name(TEXT_GPU_RESULTS).text(TEXT_GPU_RESULTS).intVal(batch).finalize(EXT_TXT);
     }
 
     private static class Generator {

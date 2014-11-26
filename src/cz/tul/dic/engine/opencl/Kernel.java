@@ -19,6 +19,8 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.debug.DebugControl;
+import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.io.BufferedReader;
@@ -167,6 +169,13 @@ public abstract class Kernel {
         runKernel(clImageA, clImageB,
                 clFacetData, clFacetCenters,
                 clDeformationLimits, clDefStepCount, clResults, (int) deformationCount, imageA.getWidth(), facetSize, facetCount);
+        
+        if (DebugControl.isGpuDebugEnabled()) {
+            queue.putReadBuffer(clResults, true);
+            final float[] results = readBuffer(clResults.getBuffer());
+            Stats.dumpGpuResults(results, facets, deformationLimits);
+            
+        }
 
         final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) deformationCount);
         final int[] positions = findPos(clResults, facetCount, (int) deformationCount, maxValuesCl);
