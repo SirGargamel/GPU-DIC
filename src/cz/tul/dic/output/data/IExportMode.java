@@ -8,10 +8,10 @@ import cz.tul.dic.output.Direction;
 /**
  *
  * @author Petr Jecmen
- * @param <O>
+ * @param <T>
  */
-public interface IExportMode<O> {        
-    
-    O exportData(final TaskContainer tc, final Direction direction, final int[] dataParams) throws ComputationException;
-    
+public interface IExportMode<T> {
+
+    T exportData(final TaskContainer tc, final Direction direction, final int... dataParams) throws ComputationException;    
+
 }

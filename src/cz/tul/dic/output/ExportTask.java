@@ -16,9 +16,6 @@ import java.io.Serializable;
  */
 public class ExportTask implements Serializable {
 
-    public static final int EXPORT_SEQUENCE_AVI = 0;
-    public static final int EXPORT_SEQUENCE_CSV = 1;
-    public static final int EXPORT_SEQUENCE_BMP = 2;
     private static final String SEPARATOR = ";";
     private final ExportMode mode;
     private final ExportTarget target;
@@ -54,13 +51,17 @@ public class ExportTask implements Serializable {
     public static ExportTask generatePointExport(final ExportTarget target, final Object targetArg, final int x, final int y) {
         return new ExportTask(Direction.dDy, ExportMode.POINT, target, targetArg, new int[]{x, y});
     }
-    
+
     public static ExportTask generateDoublePointExport(final ExportTarget target, final Object targetArg, final int x1, final int y1, final int x2, final int y2) {
-        return new ExportTask(Direction.dDy, ExportMode.DOUBLE_POINT, target, targetArg, new int[]{x1, y1, x2, y2});
+        return new ExportTask(null, ExportMode.DOUBLE_POINT, target, targetArg, new int[]{x1, y1, x2, y2});
     }
 
-    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final int mode) {
-        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, new int[]{mode});
+    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg) {
+        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, null);
+    }
+
+    public static ExportTask generateVideoExport(final Direction dir, final Object targetArg) {
+        return new ExportTask(dir, ExportMode.VIDEO, ExportTarget.FILE, targetArg, null);
     }
 
     public ExportTask(final Direction direction, final ExportMode mode, final ExportTarget target, final Object targetParam, final int[] dataParams) {
@@ -108,7 +109,7 @@ public class ExportTask implements Serializable {
                 sb.append(Integer.toString(i));
                 sb.append(SEPARATOR);
             }
-        }        
+        }
         sb.setLength(sb.length() - SEPARATOR.length());
 
         return sb.toString();

@@ -15,8 +15,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -214,7 +212,7 @@ public class ResultPresenter implements Initializable {
 
                     }
                 } else if (t == sequence.getButtonType()) {
-                    Exporter.export(tc, ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), determineType()));
+                    Exporter.export(tc, determineType(tc));
                 }
             } catch (IOException | ComputationException ex) {
                 Logger.warn(ex);
@@ -284,21 +282,21 @@ public class ResultPresenter implements Initializable {
         return result.getValue();
     }
 
-    private int determineType() {
+    private ExportTask determineType(final TaskContainer tc) {
         final CommandLinksDialog.CommandLinksButtonType avi = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeAvi"), false);
         final CommandLinksDialog.CommandLinksButtonType img = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeImage"), true);
         final CommandLinksDialog.CommandLinksButtonType csv = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeCsv"), false);
         final CommandLinksDialog dlg = new CommandLinksDialog(img, csv, avi);
         dlg.setTitle(Lang.getString("Save"));
         dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
-        final ObjectProperty<Integer> result = new SimpleObjectProperty<>(null);
+        final ObjectProperty<ExportTask> result = new SimpleObjectProperty<>(null);
         dlg.showAndWait().ifPresent((ButtonType t) -> {
             if (t == img.getButtonType()) {
-                result.setValue(ExportTask.EXPORT_SEQUENCE_BMP);
+                result.setValue(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue()))));
             } else if (t == csv.getButtonType()) {
-                result.setValue(ExportTask.EXPORT_SEQUENCE_CSV);
+                result.setValue(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, choiceDir.getValue()))));
             } else if (t == avi.getButtonType()) {
-                result.setValue(ExportTask.EXPORT_SEQUENCE_AVI);
+                result.setValue(ExportTask.generateVideoExport(choiceDir.getValue(), new File(NameGenerator.generateSequence(tc, choiceDir.getValue()))));
             }
         });
         return result.getValue();

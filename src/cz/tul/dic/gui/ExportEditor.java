@@ -10,7 +10,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -154,9 +153,9 @@ public class ExportEditor implements Initializable {
                     dlg2.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
                     dlg2.showAndWait().ifPresent((ButtonType t2) -> {
                         if (t2 == img.getButtonType()) {
-                            tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, dir)), ExportTask.EXPORT_SEQUENCE_BMP));
+                            tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, dir))));
                         } else if (t2 == csv.getButtonType()) {
-                            tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, dir)), ExportTask.EXPORT_SEQUENCE_CSV));
+                            tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, dir))));
                         }
                     });
                 }
@@ -173,7 +172,7 @@ public class ExportEditor implements Initializable {
             } else if (t == sequence.getButtonType()) {
                 final Direction dir = pickDirection();
                 if (dir != null) {
-                    tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, dir)), ExportTask.EXPORT_SEQUENCE_AVI));
+                    tc.addExport(ExportTask.generateVideoExport(dir, new File(NameGenerator.generateSequence(tc, dir))));
                 }
             }
         });

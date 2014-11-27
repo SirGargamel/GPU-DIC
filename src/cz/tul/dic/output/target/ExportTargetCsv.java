@@ -1,34 +1,32 @@
 package cz.tul.dic.output.target;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.data.ExportMode;
+import cz.tul.dic.output.data.IExportMode;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.List;
 import java.util.Map;
 
-public class ExportTargetCsv implements IExportTarget {    
-    
-    @Override
-    public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException {
-        if (data instanceof Map<?, ?>) {
-            // export image
-            exportPoint((Map<Direction, double[]>) data, targetParam, new FpsManager(tc));
-        } else if (data instanceof double[][]) {
-            // export map
-            exportMap((double[][]) data, targetParam);
-        } else if (data != null) {
-            throw new IllegalArgumentException("Unsupported data for CSV export - " + data.getClass());
-        }
-    }
+public class ExportTargetCsv extends AbstractExportTarget {
 
-    private void exportMap(final double[][] data, final Object targetParam) throws IOException {
+    private static final String EXTENSION = ".csv";
+
+    @Override
+    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, Direction direction, Object targetParam, int[] dataParams) throws IOException, ComputationException {
+        exportMap(tc, exporter.exportData(tc, direction, dataParams), direction, targetParam, dataParams);
+    }
+    
+    void exportMap(final TaskContainer tc, final double[][] data, Direction direction, Object targetParam, int[] dataParams) throws IOException, ComputationException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
-        }
+        }        
 
         final File target = (File) targetParam;
         Utils.ensureDirectoryExistence(target.getParentFile());
@@ -45,16 +43,18 @@ public class ExportTargetCsv implements IExportTarget {
             }
             CsvWriter.writeDataToCsv(target, out);
         }
-
     }
 
-    private void exportPoint(final Map<Direction, double[]> data, final Object targetParam, final FpsManager fpsM) throws IOException {
+    @Override
+    void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
 
-        
-        final File target = (File) targetParam;            
+        final Map<Direction, double[]> data = exporter.exportData(tc, null, dataParams);
+        final FpsManager fpsM = new FpsManager(tc);
+
+        final File target = (File) targetParam;
 
         if (data != null) {
             int l = 0;
@@ -72,7 +72,6 @@ public class ExportTargetCsv implements IExportTarget {
                 out[0][d.ordinal() + 1] = d.toString();
             }
             // data
-
             for (int i = 0; i < l; i++) {
                 out[i + 1][0] = Utils.format(fpsM.getTime(i + 1));
                 for (Direction d : Direction.values()) {
@@ -87,8 +86,32 @@ public class ExportTargetCsv implements IExportTarget {
     }
 
     @Override
-    public boolean supportsMode(ExportMode mode) {
-        return ExportMode.POINT.equals(mode) || ExportMode.MAP.equals(mode);
+    void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+        exportPoint(tc, exporter, targetParam, dataParams);
+    }
+
+    @Override
+    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam) throws IOException, ComputationException {
+        final List<double[][]> data = exporter.exportData(tc, direction, null);
+        
+        final File target = (File) targetParam;
+        final String path = target.getAbsolutePath();
+        final String subTarget = path.substring(0, path.lastIndexOf("."));
+
+        final int posCount = ((int) Math.log10(data.size())) + 1;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < posCount; i++) {
+            sb.append("0");
+        }
+        final NumberFormat nf = new DecimalFormat(sb.toString());
+        for (int i = 0; i < data.size(); i++) {
+            exportMap(tc, data.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION), null);
+        }
+    }
+
+    @Override
+    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam) throws IOException, ComputationException {
+        throw new UnsupportedOperationException("Unsupported mode.");
     }
 
 }

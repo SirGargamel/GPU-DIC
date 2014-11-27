@@ -6,31 +6,21 @@ import cz.tul.dic.gui.Context;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportUtils;
+import cz.tul.dic.output.data.IExportMode;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
-public class ExportTargetGUI implements IExportTarget {
+public class ExportTargetGUI extends AbstractExportTarget {
 
     @Override
-    public void exportData(Object data, Direction direction, Object targetParam, int[] dataParams, TaskContainer tc) throws IOException, ComputationException {
-        if (!(targetParam instanceof Context)) {
-            throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
-        }
-        if (data instanceof double[][] || data == null) {
-            exportImage((double[][]) data, direction, targetParam, dataParams, tc);
-        } else if (data instanceof Map) {
-            exportPoint((Map<Direction, double[]>) data, targetParam, dataParams, tc);
-        } else {
-            throw new IllegalArgumentException("Illegal type of data - " + targetParam.getClass());
-        }
-
-    }
-
-    private void exportImage(final double[][] data, Direction direction, final Object targetParam, int[] dataParams, final TaskContainer tc) throws ComputationException {
+    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, Direction direction, Object targetParam, int[] dataParams) throws ComputationException {
         if (dataParams.length < 1) {
             throw new IllegalArgumentException("Not enough data parameters.");
         }
+
+        final double[][] data = exporter.exportData(tc, direction, dataParams);
 
         final int position = dataParams[0];
         final BufferedImage background = tc.getImage(position);
@@ -49,21 +39,34 @@ public class ExportTargetGUI implements IExportTarget {
         context.storeMapExport(overlay, position, ExportMode.MAP, direction);
     }
 
-    private void exportPoint(final Map<Direction, double[]> data, final Object targetParam, int[] dataParams, final TaskContainer tc) {
+    @Override
+    void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws ComputationException {
         if (dataParams.length < 2) {
             throw new IllegalArgumentException("Not enough data parameters.");
         }
         final Context context = (Context) targetParam;
-        if (dataParams.length == 2) {
-            context.storePointExport(data, dataParams[0], dataParams[1]);
-        } else {
-            context.storePointExport(data, dataParams[0], dataParams[1], dataParams[2], dataParams[3]);
-        }
+        final Map<Direction, double[]> data = exporter.exportData(tc, null, dataParams);
+        context.storePointExport(data, dataParams[0], dataParams[1]);
     }
 
     @Override
-    public boolean supportsMode(ExportMode mode) {
-        return !ExportMode.SEQUENCE.equals(mode);
+    void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+        if (dataParams.length < 4) {
+            throw new IllegalArgumentException("Not enough data parameters.");
+        }
+        final Context context = (Context) targetParam;
+        final Map<Direction, double[]> data = exporter.exportData(tc, null, dataParams);
+        context.storePointExport(data, dataParams[0], dataParams[1], dataParams[2], dataParams[3]);
+    }
+
+    @Override
+    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam) throws IOException, ComputationException {
+        throw new UnsupportedOperationException("Unsupported mode.");
+    }
+
+    @Override
+    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam) throws IOException, ComputationException {
+        throw new UnsupportedOperationException("Unsupported mode.");
     }
 
 }

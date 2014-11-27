@@ -119,6 +119,9 @@ public class ExportModeMap implements IExportMode<double[][]> {
                     double newY;
                     for (int y = 0; y < height - 1; y++) {
                         newY = y / stretchFactor;
+                        if (newY > height - 1) {
+                            continue;
+                        }
                         for (int x = 0; x < width; x++) {
                             stretchedResult[x][y] = interpolate(
                                     result[x][(int) Math.floor(newY)],

@@ -7,7 +7,6 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.strain.StrainEstimation;
-import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
@@ -55,7 +54,9 @@ public class DicMain extends Application {
         "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
         "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
         "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
-        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config", //        "d:\\temp\\6203652m\\6203652m.avi.config",
+        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config", 
+
+    //        "d:\\temp\\6203652m\\6203652m.avi.config",
     //        "d:\\temp\\9905121m\\9905121m.avi.config",
     //        "d:\\temp\\7202845m\\7202845m.avi.config",
     //        "d:\\temp\\6107544m\\6107544m.avi.config",
@@ -123,7 +124,7 @@ public class DicMain extends Application {
         final double min = 1;
         final double max = fs2 / 2;
         TaskContainer tc;
-        for (String s : FILES_TO_DEBUG) {
+//        for (String s : FILES_TO_DEBUG) {
             for (int size = fs1; size <= fs2; size += 5) {
                 try {
 //                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
@@ -139,12 +140,13 @@ public class DicMain extends Application {
 ////                    commenceComputationDynamic(tc);
 //                    commenceComputationDynamicSpacingSweep(tc, (int) min, (int) max);
 
-            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\image\\image.avi-fast.config")));
-            tc = Context.getInstance().getTc();
-            InputLoader.loadInput(tc);
+                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\image\\image.avi-fast.config")));
+                    tc = Context.getInstance().getTc();
+                    InputLoader.loadInput(tc);
 //            tc.setParameter(TaskParameter.FACET_SIZE, 20);
 //            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
-            commenceComputation(tc);
+//            commenceComputation(tc);
+                    textExports(tc);
 //
 //            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
@@ -193,7 +195,7 @@ public class DicMain extends Application {
                 }
             }
         }
-    }
+//    }
 
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
@@ -277,4 +279,15 @@ public class DicMain extends Application {
         }
     }
 
+    private static void textExports(final TaskContainer tc) throws IOException, ComputationException {
+        Engine.getInstance().computeTask(tc);
+        tc.addExport(ExportTask.generateDoublePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvDoublePoint(tc, 100, 100, 110, 110)), 100, 100, 110, 110));
+        tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, 1, Direction.Dx)), 1));
+        tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, 2, Direction.dDy)), 2));
+        tc.addExport(ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, 100, 100)), 100, 100));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, Direction.Dx))));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, Direction.Dx))));
+        tc.addExport(ExportTask.generateVideoExport(Direction.Dx, new File(NameGenerator.generateSequence(tc, Direction.Dx))));
+        Exporter.export(tc);
+    }
 }
