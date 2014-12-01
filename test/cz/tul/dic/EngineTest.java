@@ -15,7 +15,7 @@ import cz.tul.dic.engine.CorrelationCalculator;
 import cz.tul.dic.engine.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
-import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
@@ -266,7 +266,6 @@ public class EngineTest {
                     if (l != null) {
                         if (!l.contains(color)) {
                             errorCount++;
-//                            System.out.println(x + "; " + y);
                         }
                     }
                 }
@@ -281,6 +280,10 @@ public class EngineTest {
             sb.append(tc.getParameter(TaskParameter.KERNEL));
             sb.append("; ");
             sb.append(tc.getParameter(TaskParameter.INTERPOLATION));
+            sb.append("; ");
+            sb.append(tc.getParameter(TaskParameter.TASK_SPLIT_METHOD));
+            sb.append("; ");
+            sb.append(tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD));
             sb.append("; ");
             final Map<ROI, double[]> limits = tc.getDeformationLimits(0);
             if (limits != null && limits.values().iterator().hasNext()) {

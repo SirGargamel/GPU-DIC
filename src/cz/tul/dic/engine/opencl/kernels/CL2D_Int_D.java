@@ -1,41 +1,46 @@
-package cz.tul.dic.engine.opencl;
+package cz.tul.dic.engine.opencl.kernels;
 
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
 import com.jogamp.opencl.CLImage2d;
+import com.jogamp.opencl.CLMemory;
+import cz.tul.dic.engine.opencl.WorkSizeManager;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-public class CL1D_I_V_LL_MC_D extends Kernel {
+public class CL2D_Int_D extends Kernel {
 
     private static final int ARGUMENT_INDEX_G_COUNT = 11;
     private static final int ARGUMENT_INDEX_F_COUNT = 12;
     private static final int ARGUMENT_INDEX_F_BASE = 13;
     private static final int ARGUMENT_INDEX_D_COUNT = 14;
     private static final int ARGUMENT_INDEX_D_BASE = 15;
-    private static final int LWS0_BASE = 32;
+    private static final int LWS0_BASE = 1;
+    private static final int LWS1_BASE = 32;
     private final WorkSizeManager wsm;
     private boolean stop;
 
-    public CL1D_I_V_LL_MC_D() {
-        super("CL1D_I_V_LL_MC_D");
+    public CL2D_Int_D() {
+        super("CL2D_Int_D");
         wsm = new WorkSizeManager();
     }
 
     @Override
-    void runKernel(final CLImage2d<IntBuffer> imgA, final CLImage2d<IntBuffer> imgB,
+    void runKernel(final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
             final CLBuffer<IntBuffer> facetData,
             final CLBuffer<FloatBuffer> facetCenters,
-            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts, 
+            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results,
             final int deformationCount, final int imageWidth,
             final int facetSize, final int facetCount) {
         stop = false;
         final int facetArea = facetSize * facetSize;
-        int lws0 = Kernel.roundUp(calculateLws0base(), facetArea);
-        lws0 = Math.min(lws0, device.getMaxWorkItemSizes()[0]);
-
+        
+        final int lws0 = calculateLws0();
+        int lws1 = Kernel.roundUp(calculateLws1Base(), facetArea);
+        lws1 = Math.min(lws1, device.getMaxWorkItemSizes()[0]);        
+        
         kernelDIC.rewind();
         kernelDIC.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)
                 .putArg(imageWidth)
@@ -52,7 +57,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         wsm.setMaxFacetCount(facetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        int facetGlobalWorkSize, facetSubCount = 1, deformationSubCount;
+        int facetGlobalWorkSize, deformationGlobalWorkSize, facetSubCount = 1, deformationSubCount;
         long time;
         CLEvent event;
         int currentBaseFacet = 0, currentBaseDeformation;
@@ -64,8 +69,8 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
             while (currentBaseDeformation < deformationCount) {
                 if (counter == eventList.capacity()) {
                     eventList = new CLEventList(facetCount);
-                    counter = 0;                    
-                }    
+                    counter = 0;
+                }
                 if (stop) {
                     return;
                 }
@@ -73,10 +78,11 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 facetSubCount = Math.min(wsm.getFacetCount(), facetCount - currentBaseFacet);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
-                facetGlobalWorkSize = Kernel.roundUp(lws0, deformationSubCount) * facetSubCount;
+                facetGlobalWorkSize = Kernel.roundUp(lws0, facetSubCount);
+                deformationGlobalWorkSize = Kernel.roundUp(lws1, deformationSubCount);
 
-                groupCountPerFacet = deformationSubCount / lws0;
-                if (deformationCount % lws0 > 0) {
+                groupCountPerFacet = deformationSubCount / lws1;
+                if (deformationCount % lws1 > 0) {
                     groupCountPerFacet++;
                 }
 
@@ -85,7 +91,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 kernelDIC.setArg(ARGUMENT_INDEX_F_BASE, currentBaseFacet);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
-                queue.put1DRangeKernel(kernelDIC, 0, facetGlobalWorkSize, lws0, eventList);
+                queue.put2DRangeKernel(kernelDIC, 0, 0, facetGlobalWorkSize, deformationGlobalWorkSize, lws0, lws1, eventList);
 
                 queue.putWaitForEvent(eventList, counter, true);
                 event = eventList.getEvent(counter);
@@ -102,28 +108,23 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         eventList.release();
     }
 
-    private int calculateLws0base() {
+    private int calculateLws1Base() {
 //        final IntBuffer val = Buffers.newDirectIntBuffer(5);
 //        context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), queue.getDevice().getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
 //        return val.get(0);
+        return LWS1_BASE;
+    }
+    
+    private int calculateLws0() {
         return LWS0_BASE;
     }
-
-    @Override
-    boolean usesMemoryCoalescing() {
-        return true;
-    }
-
-    @Override
-    boolean usesVectorization() {
-        return true;
-    }
+    
 
     @Override
     boolean isDriven() {
         return true;
     }
-    
+
     @Override
     public void stop() {
         stop = true;

@@ -12,7 +12,7 @@ import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
-import cz.tul.dic.engine.opencl.KernelType;
+import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.generators.facet.FacetGenerator;

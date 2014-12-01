@@ -1,5 +1,6 @@
 package cz.tul.dic.engine.opencl;
 
+import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;

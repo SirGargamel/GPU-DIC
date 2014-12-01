@@ -184,7 +184,9 @@ public class Stats {
                             if (cr != null) {
                                 val = (int) (cr.getValue() * 10);
                                 counter = counters.get(val);
-                                counter.inc(cr.getDeformation());
+                                if (counter != null) {
+                                    counter.inc(cr.getDeformation());
+                                }
                             }
                         }
                     }

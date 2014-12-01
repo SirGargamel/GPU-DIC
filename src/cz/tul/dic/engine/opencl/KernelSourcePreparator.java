@@ -6,6 +6,7 @@ import cz.tul.dic.data.deformation.Deformation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,13 +30,13 @@ public class KernelSourcePreparator {
     private final String kernelName;
     private String kernel;
 
-    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final boolean usesVectorization, final Interpolation interpolation) throws IOException, ComputationException {
+    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final boolean usesVectorization, final Interpolation interpolation, final boolean usesImage) throws IOException, ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         kp.loadKernel();
         kp.prepareFacetSize(facetSize);
         kp.prepareDeformations(deg, usesVectorization);
-        kp.prepareInterpolation(interpolation);
+        kp.prepareInterpolation(interpolation, usesImage);
 
         return kp.kernel;
     }
@@ -45,7 +46,7 @@ public class KernelSourcePreparator {
     }
 
     private void loadKernel() throws IOException {
-        try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(kernelName.concat(KERNEL_EXTENSION))))) {
+        try (BufferedReader bin = new BufferedReader(new InputStreamReader(Kernel.class.getResourceAsStream(kernelName.concat(KERNEL_EXTENSION))))) {
             final StringBuilder sb = new StringBuilder();
             while (bin.ready()) {
                 sb.append(bin.readLine());
@@ -116,7 +117,7 @@ public class KernelSourcePreparator {
                     sb.append("counter = counter / deformationCounts[");
                     sb.append(i);
                     sb.append("];\n");
-                }              
+                }
                 for (int i = 0; i < 6; i++) {
                     sb.append("deformation[");
                     sb.append(i);
@@ -127,7 +128,7 @@ public class KernelSourcePreparator {
                     sb.append("] * deformationLimits[");
                     sb.append(i * 3 + 2);
                     sb.append("];\n");
-                }                
+                }
                 kernel = kernel.replaceAll(REPLACE_DEFORMATION_COMPUTATION, sb.toString());
                 // coeff computation
                 sb.setLength(0);
@@ -183,7 +184,7 @@ public class KernelSourcePreparator {
                     sb.append("counter = counter / deformationCounts[");
                     sb.append(i);
                     sb.append("];\n");
-                }              
+                }
                 for (int i = 0; i < 12; i++) {
                     sb.append("deformation[");
                     sb.append(i);
@@ -194,7 +195,7 @@ public class KernelSourcePreparator {
                     sb.append("] * deformationLimits[");
                     sb.append(i * 3 + 2);
                     sb.append("];\n");
-                }  
+                }
                 kernel = kernel.replaceAll(REPLACE_DEFORMATION_COMPUTATION, sb.toString());
                 // coeff computation
                 sb.setLength(0);
@@ -291,17 +292,22 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(DeformationUtils.getDeformationArrayLength(deg)));
     }
 
-    private void prepareInterpolation(final Interpolation interpolation) throws ComputationException {
-        String resourceName;
+    private void prepareInterpolation(final Interpolation interpolation, final boolean usesImage) throws ComputationException {
+        String resourceName = "interpolate-";
         switch (interpolation) {
             case BILINEAR:
-                resourceName = "interpolate-bilinear.cl";
+                resourceName = resourceName.concat("bilinear");
                 break;
             case BICUBIC:
-                resourceName = "interpolate-bicubic.cl";
+                resourceName = resourceName.concat("bicubic");
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of interpolation.");
+        }
+        if (usesImage) {
+            resourceName = resourceName.concat("-image.cl");
+        } else {
+            resourceName = resourceName.concat("-array.cl");
         }
         try (final BufferedReader br = new BufferedReader(new InputStreamReader(KernelSourcePreparator.class.getResourceAsStream("/cz/tul/dic/engine/opencl/interpolation/".concat(resourceName))))) {
             final StringBuilder sb = new StringBuilder();

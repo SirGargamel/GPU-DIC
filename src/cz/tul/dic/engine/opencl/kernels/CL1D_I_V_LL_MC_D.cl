@@ -2,6 +2,9 @@ constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | C
 
 %INT%
 
+/**
+ * @author Petr Jecmen, Technical University of Liberec
+ */
 kernel void CL1D_I_V_LL_MC_D(
     read_only image2d_t imageA, read_only image2d_t imageB, 
     global read_only int2 * facets, global read_only float2 * facetCenters,
@@ -73,7 +76,7 @@ kernel void CL1D_I_V_LL_MC_D(
         facetI[i] = read_imageui(imageA, sampler, facetLocal[i]).x;
         meanF += facetI[i];
         
-        deformedI[i] = interpolate(deformedFacet[i], imageB);
+        deformedI[i] = interpolate(deformedFacet[i].x, deformedFacet[i].y, imageB);
         meanG += deformedI[i];
     } 
     meanF /= (float) facetSize2;

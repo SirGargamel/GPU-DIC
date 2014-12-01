@@ -1,9 +1,9 @@
-inline int interpolate(const float2 coords, read_only image2d_t image) {
-    const float ix = floor(coords.x);
-    const float dx = coords.x - ix;
+inline int interpolate(const float x, const float y, read_only image2d_t image) {
+    const float ix = floor(x);
+    const float dx = x - ix;
     
-    const float iy = floor(coords.y);
-    const float dy = coords.y - iy;
+    const float iy = floor(y);
+    const float dy = y - iy;
 
     float intensity = 0;    
     intensity += read_imageui(image, sampler, (float2)(ix, iy)).x * (1 - dx) * (1 - dy);
