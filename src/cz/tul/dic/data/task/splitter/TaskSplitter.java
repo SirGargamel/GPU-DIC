@@ -17,16 +17,16 @@ public abstract class TaskSplitter implements Iterator<ComputationTask> {
 
     protected final Image image1, image2;
     protected final List<Facet> facets;
-    protected final double[] deformationLimits;
+    protected final List<double[]> deformationLimits;
 
-    public TaskSplitter(final Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits) {
+    public TaskSplitter(final Image image1, Image image2, final List<Facet> facets, final List<double[]> deformationLimits) {
         this.image1 = image1;
         this.image2 = image2;
         this.facets = facets;
         this.deformationLimits = deformationLimits;        
     }
 
-    public static TaskSplitter prepareSplitter(Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits, final ROI roi, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
+    public static TaskSplitter prepareSplitter(Image image1, Image image2, final List<Facet> facets, final List<double[]> deformationLimits, final ROI roi, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
         switch (ts) {
             case NONE:
                 return new NoSplit(image1, image2, facets, deformationLimits);

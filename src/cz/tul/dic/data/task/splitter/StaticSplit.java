@@ -14,7 +14,7 @@ public class StaticSplit extends TaskSplitter {
     private boolean hasNext;
     private int index;
 
-    public StaticSplit(Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits, final Object taskSplitValue) throws ComputationException {
+    public StaticSplit(Image image1, Image image2, final List<Facet> facets, final List<double[]> deformationLimits, final Object taskSplitValue) throws ComputationException {
         super(image1, image2, facets, deformationLimits);
 
         if (taskSplitValue != null) {

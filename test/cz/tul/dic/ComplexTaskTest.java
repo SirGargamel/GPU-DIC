@@ -55,10 +55,10 @@ public class ComplexTaskTest {
         final ComplexTaskSolver cts = new ComplexTaskSolver();
         assert (!cts.isValidComplexTask(tc));
 
-        final CircularROI cRoi1 = new CircularROI(46, 16, 15);
-        final CircularROI cRoi2 = new CircularROI(125, 14, 15);
-        final CircularROI cRoi3 = new CircularROI(46, 88, 15);
-        final CircularROI cRoi4 = new CircularROI(124, 88, 15);
+        final CircularROI cRoi1 = new CircularROI(46, 16, 19);
+        final CircularROI cRoi2 = new CircularROI(125, 14, 19);
+        final CircularROI cRoi3 = new CircularROI(46, 88, 19);
+        final CircularROI cRoi4 = new CircularROI(124, 88, 19);
         tc.addRoi(BASE_ROUND, cRoi1);
         tc.addRoi(BASE_ROUND, cRoi2);
         tc.addRoi(BASE_ROUND, cRoi3);

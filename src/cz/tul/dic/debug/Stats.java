@@ -205,21 +205,21 @@ public class Stats {
         }
     }
 
-    public static void dumpGpuResults(final float[] resultData, final List<Facet> facets, final double[] deformationLimits) {
+    public static void dumpGpuResults(final float[] resultData, final List<Facet> facets, final List<double[]> deformationLimits) {
         if (ENABLE_GPU_RESULTS) {
             final File outFile = new File(NameGenerator.generateGpuResultsDump(tc, gpuBatch++));
             outFile.getParentFile().mkdirs();
             try (BufferedWriter out = new BufferedWriter(new FileWriter(outFile))) {
-                out.write(Arrays.toString(deformationLimits));
                 out.newLine();
 
                 final int defCountPerFacet = resultData.length / facets.size();
-                int facetCounter = 0;
-                for (Facet f : facets) {
-                    out.write(f.toString());
+                int facetCounter = 0;                
+                for (int i = 0; i < facets.size(); i++) {
+                    out.write(facets.get(i).toString());                    
+                    out.write(Arrays.toString(deformationLimits.get(i)));
                     out.newLine();
-                    for (int i = facetCounter * defCountPerFacet; i < (facetCounter + 1) * defCountPerFacet; i++) {
-                        out.write(Float.toString(resultData[i]));
+                    for (int r = facetCounter * defCountPerFacet; r < (facetCounter + 1) * defCountPerFacet; r++) {
+                        out.write(Float.toString(resultData[r]));
                         out.newLine();
                     }
                     facetCounter++;

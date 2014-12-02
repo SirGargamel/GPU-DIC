@@ -14,7 +14,6 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
-import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
@@ -52,7 +51,7 @@ public final class CorrelationCalculator extends Observable {
     public List<CorrelationResult> computeCorrelations(
             Image image1, Image image2,
             ROI roi, List<Facet> facets,
-            double[] deformationLimits, DeformationDegree defDegree,
+            List<double[]> deformationLimits, DeformationDegree defDegree,
             int facetSize, Object taskSplitValue) throws ComputationException {
         stop = false;
 
@@ -70,7 +69,7 @@ public final class CorrelationCalculator extends Observable {
     private List<CorrelationResult> computeCorrelations(
             Image image1, Image image2,
             ROI roi, final Kernel kernel, List<Facet> facets,
-            double[] deformationLimits, DeformationDegree defDegree,
+            List<double[]> deformationLimits, DeformationDegree defDegree,
             int facetSize, Object taskSplitValue) throws ComputationException {
         final List<CorrelationResult> result = new ArrayList<>(facets.size());
         for (int i = 0; i < facets.size(); i++) {

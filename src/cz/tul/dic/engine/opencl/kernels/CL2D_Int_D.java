@@ -3,7 +3,6 @@ package cz.tul.dic.engine.opencl.kernels;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
-import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLMemory;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import java.nio.FloatBuffer;
@@ -17,7 +16,7 @@ public class CL2D_Int_D extends Kernel {
     private static final int ARGUMENT_INDEX_D_COUNT = 14;
     private static final int ARGUMENT_INDEX_D_BASE = 15;
     private static final int LWS0_BASE = 1;
-    private static final int LWS1_BASE = 32;
+    private static final int LWS1_BASE = 64;
     private final WorkSizeManager wsm;
     private boolean stop;
 

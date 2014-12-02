@@ -49,7 +49,7 @@ public class CL15D_pF_D extends Kernel {
         wsm.setMaxFacetCount(facetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        int facetGlobalWorkSize, deformationSubCount;
+        int globalWorkSize, deformationSubCount;
         long time;
         CLEvent event;
         int currentBaseFacet = 0, currentBaseDeformation;
@@ -70,11 +70,11 @@ public class CL15D_pF_D extends Kernel {
 
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
-                facetGlobalWorkSize = Kernel.roundUp(lws0, deformationSubCount);
+                globalWorkSize = Kernel.roundUp(lws0, deformationSubCount);
 
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
-                queue.put1DRangeKernel(kernelDIC, 0, facetGlobalWorkSize, lws0, eventList);
+                queue.put1DRangeKernel(kernelDIC, 0, globalWorkSize, lws0, eventList);
 
                 queue.putWaitForEvent(eventList, counter, true);
                 event = eventList.getEvent(counter);

@@ -51,13 +51,14 @@ public final class WorkSizeManager {
         init = false;
 
         final CorrelationCalculator cc = new CorrelationCalculator();
-        cc.setKernel(KernelType.CL_1D_I_V_LL_MC_D);
+        cc.setKernel(KernelType.CL1D_I_V_LL_MC_D);
         cc.setInterpolation(Interpolation.BICUBIC);
         cc.setTaskSplitVariant(TaskSplitMethod.DYNAMIC);
 
         try {
             final Image img = Image.createImage(new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY));
-            final double[] deformationLimits = new double[]{-49, 50, 0.1, -49, 50, 0.1};
+            final List<double[]> deformationLimits = new ArrayList<>(1);
+            deformationLimits.add(new double[]{-49, 50, 0.1, -49, 50, 0.1});
             final int fs = 30;
             final List<Facet> facets = new ArrayList<>(1);
             facets.add(Facet.createFacet(fs, 0, 0));

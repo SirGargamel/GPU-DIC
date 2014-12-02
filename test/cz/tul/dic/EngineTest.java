@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -396,7 +397,7 @@ public class EngineTest {
                 correlation.computeCorrelations(
                         tc.getImage(ROUND), tc.getImage(ROUND + 1),
                         roi, roiFacets,
-                        tc.getDeformationLimits(ROUND, roi),
+                        generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi), null));
 
@@ -404,6 +405,10 @@ public class EngineTest {
 
         Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
         Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
+    }
+    
+    private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
+        return Collections.nCopies(facetCount, limits);
     }
 
     @Test
@@ -445,7 +450,7 @@ public class EngineTest {
                 correlation.computeCorrelations(
                         tc.getImage(ROUND), tc.getImage(ROUND + 1),
                         roi, roiFacets,
-                        tc.getDeformationLimits(ROUND, roi),
+                        generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi), null));
 

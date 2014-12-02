@@ -24,7 +24,7 @@ kernel void CL2D_Int_D(
         return;
     } 
     const size_t deformationId = get_global_id(1);
-    if (deformationId >= deformationCount) {
+    if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
         return;
     }
     float deformation[%DEF_D%];

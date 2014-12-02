@@ -23,6 +23,7 @@ import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -138,7 +139,7 @@ public class Engine extends Observable {
                     correlation.computeCorrelations(
                             tc.getImage(roundFrom), tc.getImage(roundTo),
                             roi, facets.get(roi),
-                            tc.getDeformationLimits(roundFrom, roi),
+                            generateDeformations(tc.getDeformationLimits(roundFrom, roi), facets.get(roi).size()),
                             DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
                             tc.getFacetSize(roundFrom, roi), taskSplitValue));
         }
@@ -160,6 +161,10 @@ public class Engine extends Observable {
         notifyObservers(System.currentTimeMillis() - time);
     }
 
+    private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
+        return Collections.nCopies(facetCount, limits);
+    }
+    
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
         Iterator<ExportTask> it = tc.getExports().iterator();
         ExportTask et;

@@ -28,12 +28,14 @@ import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -43,35 +45,19 @@ import org.pmw.tinylog.Logger;
 public abstract class Kernel {
 
     public static Kernel createKernel(final KernelType kernelType) {
-        switch (kernelType) {
-            case CL_15D_pF_D:
-                return new CL15D_pF_D();
-            case CL_2D_INT_D:
-                return new CL2D_Int_D();
-            case CL_1D_I_V_LL_D:
-                return new CL1D_I_V_LL_D();
-            case CL_1D_I_V_LL_MC_D:
-                return new CL1D_I_V_LL_MC_D();
-            default:
-                Logger.warn("Using default kernel.");
-                return new CL1D_I_V_LL_MC_D();
+        try {
+            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));
+            return (Kernel) cls.newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            Logger.warn("Error instantiating class {0}, using default kernel.", kernelType);
+            Logger.error(ex);
+            return new CL1D_I_V_LL_MC_D();
         }
     }
 
     private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
     private static final String KERNEL_REDUCE = "reduce";
     private static final String KERNEL_FIND_POS = "findPos";
-
-    public static int roundUp(int groupSize, int globalSize) {
-        int r = globalSize % groupSize;
-        int result;
-        if (r == 0) {
-            result = globalSize;
-        } else {
-            result = globalSize + groupSize - r;
-        }
-        return result;
-    }
     private final String kernelName;
     protected CLContext context;
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
@@ -130,7 +116,7 @@ public abstract class Kernel {
         }
     }
 
-    public List<CorrelationResult> compute(Image imageA, Image imageB, List<Facet> facets, double[] deformationLimits, int deformationLength) throws ComputationException {
+    public List<CorrelationResult> compute(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, int deformationLength) throws ComputationException {
         final CLMemory<IntBuffer> clImageA, clImageB;
         final CLBuffer<IntBuffer> clFacetData, clDefStepCount;
         final CLBuffer<FloatBuffer> clFacetCenters;
@@ -166,7 +152,7 @@ public abstract class Kernel {
         queue.putWriteBuffer(clDeformationLimits, false);
         clDefStepCount = generateDeformationStepCounts(deformationLimits);
         queue.putWriteBuffer(clDefStepCount, true);
-        final long deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits);
+        final long deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits.get(0));
 
         Logger.trace("Computing task " + facetCount + " facets, " + deformationCount + " deformations.");
         final long size = facetCount * deformationCount;
@@ -246,15 +232,21 @@ public abstract class Kernel {
         return result;
     }
 
-    private List<CorrelationResult> createResults(final float[] values, final int[] positions, final double[] deformationLimits) {
+    private List<CorrelationResult> createResults(final float[] values, final int[] positions, final List<double[]> deformationLimits) {
         if (values.length != positions.length) {
             throw new IllegalArgumentException("Array lengths mismatch.");
         }
 
-        final int[] deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
         final List<CorrelationResult> result = new ArrayList<>(values.length);
-        for (int i = 0; i < values.length; i++) {
-            result.add(new CorrelationResult(values[i], DeformationUtils.extractDeformation(positions[i], deformationLimits, deformationCounts)));
+
+        double[] limits;
+        int[] counts;
+        for (int f = 0; f < deformationLimits.size(); f++) {
+
+            limits = deformationLimits.get(f);
+            counts = DeformationUtils.generateDeformationCounts(limits);
+
+            result.add(new CorrelationResult(values[f], DeformationUtils.extractDeformation(positions[f], limits, counts)));
         }
 
         return result;
@@ -303,7 +295,7 @@ public abstract class Kernel {
         clRoundMem.add(result);
         return result;
     }
-    
+
     private CLBuffer<IntBuffer> generateImageArray(final Image image) {
         final int[] data = image.toBWArray();
         final CLBuffer<IntBuffer> result = context.createIntBuffer(data.length, CLMemory.Mem.READ_ONLY);
@@ -376,11 +368,13 @@ public abstract class Kernel {
         return result;
     }
 
-    private CLBuffer<FloatBuffer> generateDeformationLimits(final double[] deformationLimits) {
-        final CLBuffer<FloatBuffer> result = context.createFloatBuffer(deformationLimits.length, CLMemory.Mem.READ_ONLY);
+    private CLBuffer<FloatBuffer> generateDeformationLimits(final List<double[]> deformationLimits) {
+        final CLBuffer<FloatBuffer> result = context.createFloatBuffer(deformationLimits.size() * deformationLimits.get(0).length, CLMemory.Mem.READ_ONLY);
         final FloatBuffer buffer = result.getBuffer();
-        for (double d : deformationLimits) {
-            buffer.put((float) d);
+        for (double[] dA : deformationLimits) {
+            for (double d : dA) {
+                buffer.put((float) d);
+            }
         }
         buffer.rewind();
 
@@ -388,13 +382,18 @@ public abstract class Kernel {
         return result;
     }
 
-    private CLBuffer<IntBuffer> generateDeformationStepCounts(final double[] deformationLimits) {
-        final int[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
+    private CLBuffer<IntBuffer> generateDeformationStepCounts(final List<double[]> deformationLimits) {
+        final List<int[]> counts = new ArrayList<>(deformationLimits.size());
+        for (double[] dA : deformationLimits) {
+            counts.add(DeformationUtils.generateDeformationCounts(dA));
+        }
 
-        final CLBuffer<IntBuffer> result = context.createIntBuffer(counts.length, CLMemory.Mem.READ_ONLY);
+        final CLBuffer<IntBuffer> result = context.createIntBuffer(counts.size() * counts.get(0).length, CLMemory.Mem.READ_ONLY);
         final IntBuffer buffer = result.getBuffer();
-        for (int i : counts) {
-            buffer.put((int) i);
+        for (int[] iA : counts) {
+            for (int i : iA) {
+                buffer.put(i);
+            }
         }
         buffer.rewind();
         clRoundMem.add(result);
@@ -427,5 +426,16 @@ public abstract class Kernel {
     }
 
     public abstract void stop();
+
+    static int roundUp(int groupSize, int globalSize) {
+        int r = globalSize % groupSize;
+        int result;
+        if (r == 0) {
+            result = globalSize;
+        } else {
+            result = globalSize + groupSize - r;
+        }
+        return result;
+    }
 
 }

@@ -14,7 +14,7 @@ public class NoSplit extends TaskSplitter {
 
     private boolean hasNext;
 
-    public NoSplit(Image image1, Image image2, final List<Facet> facets, final double[] deformationLimits) {
+    public NoSplit(Image image1, Image image2, final List<Facet> facets, final List<double[]> deformationLimits) {
         super(image1, image2, facets, deformationLimits);
         hasNext = true;
     }

@@ -73,19 +73,38 @@ public class KernelSourcePreparator {
             dx = "dx";
             dy = "dy";
         }
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();        
         switch (deg) {
             case ZERO:
-                // deformation generation
-                sb.setLength(0);
+                // deformation generation            
+                sb.append("const int limitsBase = facetId * 2;\n");
                 sb.append("int counter = deformationId;\n");
-                sb.append("deformation[0] = counter % deformationCounts[0];\n");
-                sb.append("counter = counter / deformationCounts[0];\n");
-                sb.append("deformation[1] = counter;\n");
-                sb.append("deformation[0] = deformationLimits[0] + deformation[0] * deformationLimits[2];\n");
-                sb.append("deformation[1] = deformationLimits[3] + deformation[1] * deformationLimits[5];\n");
-//                sb.append("deformation[0] = 0;\n");
-//                sb.append("deformation[1] = 0;\n");
+//                sb.append("deformation[0] = counter % deformationCounts[0];\n");
+//                sb.append("counter = counter / deformationCounts[0];\n");
+//                sb.append("deformation[1] = counter;\n");
+//                sb.append("deformation[0] = deformationLimits[0] + deformation[0] * deformationLimits[2];\n");
+//                sb.append("deformation[1] = deformationLimits[3] + deformation[1] * deformationLimits[5];\n");
+                for (int i = 0; i < 2; i++) {
+                    sb.append("deformation[");
+                    sb.append(i);
+                    sb.append("] = counter % deformationCounts[limitsBase + ");
+                    sb.append(i);
+                    sb.append("];\n");
+                    sb.append("counter = counter / deformationCounts[limitsBase + ");
+                    sb.append(i);
+                    sb.append("];\n");
+                }
+                for (int i = 0; i < 2; i++) {
+                    sb.append("deformation[");
+                    sb.append(i);
+                    sb.append("] = deformationLimits[limitsBase + ");
+                    sb.append(i * 3);
+                    sb.append("] + deformation[");
+                    sb.append(i);
+                    sb.append("] * deformationLimits[limitsBase + ");
+                    sb.append(i * 3 + 2);
+                    sb.append("];\n");
+                }
                 kernel = kernel.replaceAll(REPLACE_DEFORMATION_COMPUTATION, sb.toString());
                 // coeff computation
                 sb.setLength(0);
@@ -105,27 +124,27 @@ public class KernelSourcePreparator {
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
                 break;
             case FIRST:
-                // deformation generation
-                sb.setLength(0);
+                // deformation generation                
+                sb.append("const int limitsBase = facetId * 6;\n");
                 sb.append("int counter = deformationId;\n");
                 for (int i = 0; i < 6; i++) {
                     sb.append("deformation[");
                     sb.append(i);
-                    sb.append("] = counter % deformationCounts[");
+                    sb.append("] = counter % deformationCounts[limitsBase + ");
                     sb.append(i);
                     sb.append("];\n");
-                    sb.append("counter = counter / deformationCounts[");
+                    sb.append("counter = counter / deformationCounts[limitsBase + ");
                     sb.append(i);
                     sb.append("];\n");
                 }
                 for (int i = 0; i < 6; i++) {
                     sb.append("deformation[");
                     sb.append(i);
-                    sb.append("] = deformationLimits[");
+                    sb.append("] = deformationLimits[limitsBase + ");
                     sb.append(i * 3);
                     sb.append("] + deformation[");
                     sb.append(i);
-                    sb.append("] * deformationLimits[");
+                    sb.append("] * deformationLimits[limitsBase + ");
                     sb.append(i * 3 + 2);
                     sb.append("];\n");
                 }
@@ -173,26 +192,26 @@ public class KernelSourcePreparator {
                 break;
             case SECOND:
                 // deformation generation
-                sb.setLength(0);
+                sb.append("const int limitsBase = facetId * 12;\n");
                 sb.append("int counter = deformationId;\n");
                 for (int i = 0; i < 12; i++) {
                     sb.append("deformation[");
                     sb.append(i);
-                    sb.append("] = counter % deformationCounts[");
+                    sb.append("] = counter % deformationCounts[limitsBase + ");
                     sb.append(i);
                     sb.append("];\n");
-                    sb.append("counter = counter / deformationCounts[");
+                    sb.append("counter = counter / deformationCounts[limitsBase + ");
                     sb.append(i);
                     sb.append("];\n");
                 }
                 for (int i = 0; i < 12; i++) {
                     sb.append("deformation[");
                     sb.append(i);
-                    sb.append("] = deformationLimits[");
+                    sb.append("] = deformationLimits[limitsBase + ");
                     sb.append(i * 3);
                     sb.append("] + deformation[");
                     sb.append(i);
-                    sb.append("] * deformationLimits[");
+                    sb.append("] * deformationLimits[limitsBase + ");
                     sb.append(i * 3 + 2);
                     sb.append("];\n");
                 }

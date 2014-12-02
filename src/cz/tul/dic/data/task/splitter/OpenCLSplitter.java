@@ -29,11 +29,11 @@ public class OpenCLSplitter extends TaskSplitter {
     private boolean hasNext;
     private int facetIndex;
 
-    public OpenCLSplitter(Image image1, Image image2, List<Facet> facets, double[] deformationLimits) {
+    public OpenCLSplitter(Image image1, Image image2, List<Facet> facets, List<double[]> deformationLimits) {
         this(image1, image2, facets, deformationLimits, false);
     }
 
-    private OpenCLSplitter(Image image1, Image image2, List<Facet> facets, double[] deformationLimits, boolean subSplitter) {
+    private OpenCLSplitter(Image image1, Image image2, List<Facet> facets, List<double[]> deformationLimits, boolean subSplitter) {
         super(image1, image2, facets, deformationLimits);
 
         subSplitters = new LinkedList<>();
@@ -71,9 +71,9 @@ public class OpenCLSplitter extends TaskSplitter {
 
     @Override
     public ComputationTask next() {
-        final int deformationLimitsArraySize = deformationLimits.length;
+        final int deformationLimitsArraySize = deformationLimits.get(facetIndex).length;
         List<Facet> sublist = null;
-        double[] checkedDeformations = null;
+        List<double[]> checkedDeformations = null;
         ComputationTask ct = null;
         if (!subSplitters.isEmpty()) {
             ct = subSplitters.get(0).next();
@@ -81,7 +81,7 @@ public class OpenCLSplitter extends TaskSplitter {
             final int rest = facets.size() - facetIndex;
 
             int taskSize = rest;
-            final long l = DeformationUtils.calculateDeformationCount(deformationLimits);
+            final long l = DeformationUtils.calculateDeformationCount(deformationLimits.get(facetIndex));
             while (taskSize > 1 && !isMemOk(l, taskSize, facetSize, deformationLimitsArraySize)) {
                 taskSize *= COEFF_LIMIT_ADJUST;
             }
@@ -92,29 +92,36 @@ public class OpenCLSplitter extends TaskSplitter {
                 } else {
                     Logger.warn("Too many deformations in task, {0} generating subsplitters.", ID);
                 }
-                checkedDeformations = new double[deformationLimitsArraySize];
-                System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);
 
                 sublist = new ArrayList<>(1);
                 sublist.add(facets.get(facetIndex));
 
-                final int[] stepCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
+                final double[] oldLimits = deformationLimits.get(facetIndex);
+                final int[] stepCounts = DeformationUtils.generateDeformationCounts(oldLimits);
                 final int minIndex = findMinIndexBiggerThanZero(stepCounts);
                 final int newStepCount = stepCounts[minIndex] / 2 - 1;
-                final double midPoint = deformationLimits[minIndex * 3] + newStepCount * deformationLimits[minIndex * 3 + 2];
-                checkedDeformations = new double[deformationLimitsArraySize];
-                System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);
-                checkedDeformations[minIndex * 3 + 1] = midPoint;
-                Logger.trace(Arrays.toString(deformationLimits));
-                Logger.trace(Arrays.toString(checkedDeformations));
-                subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
-                checkedDeformations = new double[deformationLimitsArraySize];
-                System.arraycopy(deformationLimits, 0, checkedDeformations, 0, deformationLimitsArraySize);
-                checkedDeformations[minIndex * 3] = midPoint + deformationLimits[minIndex * 3 + 2];
-                Logger.trace(Arrays.toString(checkedDeformations));
-                subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
-                Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
+                final double midPoint = oldLimits[minIndex * 3] + newStepCount * oldLimits[minIndex * 3 + 2];
 
+                double[] newLimits = new double[deformationLimitsArraySize];
+                System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
+                newLimits[minIndex * 3 + 1] = midPoint;
+                Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));                
+                checkedDeformations = new ArrayList<>(1);
+                checkedDeformations.add(newLimits);
+                System.out.println(Arrays.toString(oldLimits));
+                System.out.println(Arrays.toString(newLimits));
+                subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
+                
+                newLimits = new double[deformationLimitsArraySize];
+                System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
+                newLimits[minIndex * 3] = midPoint + oldLimits[minIndex * 3 + 2];
+                Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
+                checkedDeformations = new ArrayList<>(1);
+                checkedDeformations.add(newLimits);
+                System.out.println(Arrays.toString(newLimits));
+                subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
+                
+                Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
                 ct = subSplitters.get(0).next();
             } else {
                 checkedDeformations = deformationLimits;
@@ -136,9 +143,11 @@ public class OpenCLSplitter extends TaskSplitter {
         if (ct == null) {
             ct = new ComputationTask(image1, image2, sublist, checkedDeformations, subSplitter);
             if (subSplitter) {
-                Logger.trace("{0} computing {1}", ID, Arrays.toString(ct.getDeformationLimits()));
+                Logger.trace("{0} computing subtask {1}", ID, Arrays.toString(ct.getDeformationLimits().get(0)));
+            } else if (sublist != null) {
+                Logger.trace("{0} computing task with {1} facets.", ID, sublist.size());
             } else {
-                Logger.trace("{0} computing subtask {1}", ID, Arrays.toString(ct.getDeformationLimits()));
+                Logger.error("NULL facet sublist !!!");
             }
         } else {
             if (subSplitters.isEmpty()) {
@@ -166,7 +175,7 @@ public class OpenCLSplitter extends TaskSplitter {
 
     private boolean isMemOk(final long deformationCount, final long facetCount, final long facetSize, final long deformationArraySize) {
         final long imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
-        final long deformationsSize = deformationArraySize * SIZE_FLOAT;
+        final long deformationsSize = deformationArraySize * facetCount * SIZE_FLOAT;
         final long reserve = 32 * SIZE_INT;
         final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
         final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;

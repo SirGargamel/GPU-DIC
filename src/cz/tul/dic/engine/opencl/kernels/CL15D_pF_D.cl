@@ -14,21 +14,21 @@ kernel void CL15D_pF_D(
     global write_only float * result,    
     const int imageWidth, const int deformationCount,
     const int facetSize, const int facetCount,
-    const int facetIndex,
+    const int facetId,
     const int deformationSubCount, const int deformationBase)
 {
     // id checks       
-    const size_t deformationId = get_global_id(0);
+    const size_t deformationId = get_global_id(0);    
     if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
         return;
-    }    
+    }        
     float deformation[%DEF_D%];
     %DEF_C%
     // index computation
     const int facetSize2 = facetSize * facetSize;
     const int facetCoordCount = facetSize2 * 2;
-    const int baseIndexFacet = facetIndex * facetCoordCount;         
-    const int baseIndexFacetCenter = facetIndex * 2; 
+    const int baseIndexFacet = facetId * facetCoordCount;         
+    const int baseIndexFacetCenter = facetId * 2; 
     const int baseIndexDeformation = deformationId * 6;
     // deform facet
     float deformedFacet[-1*-1*2];    
