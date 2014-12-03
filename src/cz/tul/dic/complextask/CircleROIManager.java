@@ -10,7 +10,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.CorrelationResult;
+import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import java.util.ArrayList;

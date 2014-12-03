@@ -11,12 +11,13 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.engine.CorrelationCalculator;
-import cz.tul.dic.engine.CorrelationResult;
+import cz.tul.dic.engine.opencl.solvers.TaskSolver;
+import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
@@ -377,7 +378,7 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final CorrelationCalculator correlation = new CorrelationCalculator();
+        final TaskSolver correlation = TaskSolver.initSolver(Solver.BruteForce);
         correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
@@ -394,9 +395,9 @@ public class EngineTest {
         tc.setResult(
                 ROUND,
                 roi,
-                correlation.computeCorrelations(
+                correlation.solve(
                         tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                        roi, roiFacets,
+                        roiFacets,
                         generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi), null));
@@ -430,7 +431,7 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final CorrelationCalculator correlation = new CorrelationCalculator();
+        final TaskSolver correlation = TaskSolver.initSolver(Solver.BruteForce);
         correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
@@ -447,9 +448,9 @@ public class EngineTest {
         tc.setResult(
                 ROUND,
                 roi,
-                correlation.computeCorrelations(
+                correlation.solve(
                         tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                        roi, roiFacets,
+                        roiFacets,
                         generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi), null));

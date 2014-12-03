@@ -26,7 +26,7 @@ public abstract class TaskSplitter implements Iterator<ComputationTask> {
         this.deformationLimits = deformationLimits;        
     }
 
-    public static TaskSplitter prepareSplitter(Image image1, Image image2, final List<Facet> facets, final List<double[]> deformationLimits, final ROI roi, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
+    public static TaskSplitter prepareSplitter(Image image1, Image image2, final List<Facet> facets, final List<double[]> deformationLimits, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
         switch (ts) {
             case NONE:
                 return new NoSplit(image1, image2, facets, deformationLimits);

@@ -13,7 +13,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
-import cz.tul.dic.engine.CorrelationResult;
+import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.output.NameGenerator;

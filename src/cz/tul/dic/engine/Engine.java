@@ -1,5 +1,6 @@
 package cz.tul.dic.engine;
 
+import cz.tul.dic.engine.opencl.solvers.TaskSolver;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -14,6 +15,7 @@ import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.output.Direction;
@@ -38,8 +40,8 @@ import org.pmw.tinylog.Logger;
 public class Engine extends Observable {
 
     private static final Engine instance;
-    private final CorrelationCalculator correlation;
     private final StrainEstimation strain;
+    private TaskSolver correlation;
     private boolean stop;
 
     static {
@@ -51,7 +53,6 @@ public class Engine extends Observable {
     }
 
     private Engine() {
-        correlation = new CorrelationCalculator();
         strain = new StrainEstimation();
     }
 
@@ -114,12 +115,13 @@ public class Engine extends Observable {
         notifyObservers(TaskContainerUtils.class);
         TaskContainerUtils.checkTaskValidity(tc);
 
-        // prepare parameters
+        // prepare correlation calculator
+        correlation = TaskSolver.initSolver((Solver) tc.getParameter(TaskParameter.CORRELATION_CALCULATION));
         correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
-        correlation.setTaskSplitVariant(taskSplit);
+        correlation.setTaskSplitVariant(taskSplit, taskSplitValue);
 
         // prepare data
         setChanged();
@@ -133,15 +135,15 @@ public class Engine extends Observable {
             }
             // compute and store result
             setChanged();
-            notifyObservers(CorrelationCalculator.class);
+            notifyObservers(TaskSolver.class);
             tc.setResult(
                     roundFrom, roi,
-                    correlation.computeCorrelations(
+                    correlation.solve(
                             tc.getImage(roundFrom), tc.getImage(roundTo),
-                            roi, facets.get(roi),
+                            facets.get(roi),
                             generateDeformations(tc.getDeformationLimits(roundFrom, roi), facets.get(roi).size()),
                             DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
-                            tc.getFacetSize(roundFrom, roi), taskSplitValue));
+                            tc.getFacetSize(roundFrom, roi)));
         }
 
         setChanged();
@@ -164,7 +166,7 @@ public class Engine extends Observable {
     private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
         return Collections.nCopies(facetCount, limits);
     }
-    
+
     private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
         Iterator<ExportTask> it = tc.getExports().iterator();
         ExportTask et;

@@ -602,6 +602,11 @@ public class TaskContainerUtils {
             Logger.warn("Adding default result quality.");
             tc.setParameter(TaskParameter.RESULT_QUALITY, TaskDefaultValues.DEFAULT_RESULT_QUALITY);
         }
+        final Object correlation = tc.getParameter(TaskParameter.CORRELATION_CALCULATION);
+        if (correlation == null) {
+            Logger.warn("Adding default solver.");
+            tc.setParameter(TaskParameter.CORRELATION_CALCULATION, TaskDefaultValues.DEFAULT_SOLVER);
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 
@@ -14,6 +15,7 @@ import cz.tul.dic.generators.facet.FacetGeneratorMethod;
  */
 public interface TaskDefaultValues {
 
+    Solver DEFAULT_SOLVER = Solver.BruteForce; 
     DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION_METHOD = DisplacementCalculation.FIND_MAX_AND_AVERAGE;
     int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     int DEFAULT_FPS = 5000;    

@@ -5,10 +5,10 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.engine.CorrelationCalculator;
+import cz.tul.dic.engine.opencl.solvers.TaskSolver;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,10 +50,10 @@ public final class WorkSizeManager {
         INITIAL_WORK_SIZE_D = 1000;
         init = false;
 
-        final CorrelationCalculator cc = new CorrelationCalculator();
+        final TaskSolver cc = TaskSolver.initSolver(Solver.BruteForce);
         cc.setKernel(KernelType.CL1D_I_V_LL_MC_D);
         cc.setInterpolation(Interpolation.BICUBIC);
-        cc.setTaskSplitVariant(TaskSplitMethod.DYNAMIC);
+        cc.setTaskSplitVariant(TaskSplitMethod.DYNAMIC, null);
 
         try {
             final Image img = Image.createImage(new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY));
@@ -62,11 +62,11 @@ public final class WorkSizeManager {
             final int fs = 30;
             final List<Facet> facets = new ArrayList<>(1);
             facets.add(Facet.createFacet(fs, 0, 0));
-            cc.computeCorrelations(
+            cc.solve(
                     img, img,
-                    new RectangleROI(0, 0, 100, 100), facets,
+                    facets,
                     deformationLimits, DeformationDegree.FIRST,
-                    fs, null);
+                    fs);
             init = true;
         } catch (ComputationException ex) {
             Logger.warn("Failed to initialize work sizes.");

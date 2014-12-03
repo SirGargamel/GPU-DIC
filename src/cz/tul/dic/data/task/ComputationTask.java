@@ -2,7 +2,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.engine.CorrelationResult;
+import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import java.util.List;
 
 /**

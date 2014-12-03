@@ -4,7 +4,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.engine.CorrelationResult;
+import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportTask;
 import java.awt.image.BufferedImage;

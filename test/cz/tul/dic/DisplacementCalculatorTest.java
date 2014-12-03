@@ -4,7 +4,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.CorrelationResult;
+import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;

@@ -8,7 +8,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.CorrelationResult;
+import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.engine.displacement.FindMaxAndAverage;
 import cz.tul.dic.output.CsvWriter;

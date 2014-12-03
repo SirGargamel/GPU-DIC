@@ -1,4 +1,4 @@
-package cz.tul.dic.engine;
+package cz.tul.dic.engine.opencl.solvers;
 
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
@@ -9,7 +9,6 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -27,38 +26,55 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public final class CorrelationCalculator extends Observable {
+public abstract class TaskSolver extends Observable {
 
     private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
-    private final CLContext context;
-    private final CLDevice device;
+    final CLContext context;
+    final CLDevice device;
     // dynamic
-    private KernelType kernelType;
-    private Interpolation interpolation;
-    private TaskSplitMethod taskSplitVariant;
-    private Kernel kernel;
-    private boolean stop;
+    KernelType kernelType;
+    Interpolation interpolation;
+    TaskSplitMethod taskSplitVariant;
+    Kernel kernel;
+    int facetSize;
+    Object taskSplitValue;
+    boolean stop;
 
-    public CorrelationCalculator() {
+    public static TaskSolver initSolver(final Solver type) {
+        try {
+            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.solvers.".concat(type.toString()));
+            return (TaskSolver) cls.newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            Logger.warn("Error instantiating class {0}, using default correlation calculator.", type);
+            Logger.error(ex);
+            return new BruteForce();
+        }
+    }
 
+    TaskSolver() {
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
 
         kernelType = TaskDefaultValues.DEFAULT_KERNEL;
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
+        taskSplitVariant = TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD;
+        taskSplitValue = null;
     }
 
-    public List<CorrelationResult> computeCorrelations(
+    public List<CorrelationResult> solve(
             Image image1, Image image2,
-            ROI roi, List<Facet> facets,
+            List<Facet> facets,
             List<double[]> deformationLimits, DeformationDegree defDegree,
-            int facetSize, Object taskSplitValue) throws ComputationException {
+            int facetSize) throws ComputationException {
         stop = false;
 
         kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared - {0}", kernel);
 
-        final List<CorrelationResult> result = computeCorrelations(image1, image2, roi, kernel, facets, deformationLimits, defDegree, facetSize, taskSplitValue);
+        this.facetSize = facetSize;
+        this.taskSplitValue = taskSplitValue;
+
+        final List<CorrelationResult> result = solve(image1, image2, kernel, facets, deformationLimits, defDegree);
 
         kernel.finishComputation();
 
@@ -66,11 +82,14 @@ public final class CorrelationCalculator extends Observable {
 
     }
 
-    private List<CorrelationResult> computeCorrelations(
+    abstract List<CorrelationResult> solve(
             Image image1, Image image2,
-            ROI roi, final Kernel kernel, List<Facet> facets,
-            List<double[]> deformationLimits, DeformationDegree defDegree,
-            int facetSize, Object taskSplitValue) throws ComputationException {
+            final Kernel kernel, List<Facet> facets,
+            List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException;
+
+    List<CorrelationResult> computeTask(Image image1, Image image2,
+            final Kernel kernel, List<Facet> facets,
+            List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException {
         final List<CorrelationResult> result = new ArrayList<>(facets.size());
         for (int i = 0; i < facets.size(); i++) {
             result.add(null);
@@ -79,7 +98,7 @@ public final class CorrelationCalculator extends Observable {
         try {
             kernel.prepareKernel(context, device, facetSize, defDegree, interpolation);
 
-            TaskSplitter ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
+            TaskSplitter ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
             ts.resetTaskSize();
             boolean finished = false;
             CLException lastEx = null;
@@ -93,7 +112,7 @@ public final class CorrelationCalculator extends Observable {
                         }
 
                         ct = ts.next();
-                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));                        
+                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));
                         kernel.finishRound();
                         // pick best results for this computation task and discard ct data 
                         if (ct.isSubtask()) {
@@ -116,7 +135,7 @@ public final class CorrelationCalculator extends Observable {
                 } catch (CLException ex) {
                     if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
                         ts.signalTaskSizeTooBig();
-                        ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, roi, taskSplitVariant, taskSplitValue);
+                        ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
                         lastEx = ex;
                     } else {
                         throw ex;
@@ -132,6 +151,7 @@ public final class CorrelationCalculator extends Observable {
         }
 
         Logger.trace("{0} correlations computed.", result.size());
+
         return result;
     }
 
@@ -176,8 +196,9 @@ public final class CorrelationCalculator extends Observable {
         this.interpolation = interpolation;
     }
 
-    public void setTaskSplitVariant(TaskSplitMethod taskSplitVariant) {
+    public void setTaskSplitVariant(TaskSplitMethod taskSplitVariant, Object taskSplitValue) {
         this.taskSplitVariant = taskSplitVariant;
+        this.taskSplitValue = taskSplitValue;
     }
 
     public void stop() {

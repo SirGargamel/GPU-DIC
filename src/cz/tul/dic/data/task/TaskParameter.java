@@ -5,6 +5,7 @@ import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import java.io.File;
@@ -33,6 +34,7 @@ public enum TaskParameter {
     STRAIN_ESTIMATION_METHOD(StrainEstimationMethod.class),
     STRAIN_ESTIMATION_PARAM(Double.class),    
     DEFORMATION_LIMITS(double[].class),
+    CORRELATION_CALCULATION(Solver.class);
     ;
 
     private final Class type;

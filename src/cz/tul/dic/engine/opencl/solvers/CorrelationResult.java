@@ -1,4 +1,4 @@
-package cz.tul.dic.engine;
+package cz.tul.dic.engine.opencl.solvers;
 
 import java.io.Serializable;
 
