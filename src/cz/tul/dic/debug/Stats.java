@@ -34,13 +34,13 @@ import org.pmw.tinylog.Logger;
  */
 public class Stats {
 
-    public static final boolean ENABLE_GPU_RESULTS = true;
+    private static final boolean ENABLE_GPU_RESULTS = false;
     private static final boolean ENABLE_DEF_USAGE = true;
     private static final boolean ENABLE_DEF_QUALITY = true;
     private static final boolean ENABLE_FACET_QUALITY = true;
-    private static final boolean ENABLE_POINT_QUALITY = true;
-    private static final boolean ENABLE_POINT_STATS = true;
-    private static final boolean ENABLE_REGRESSION_QUALITY = true;
+    private static final boolean ENABLE_POINT_QUALITY = false;
+    private static final boolean ENABLE_POINT_STATS = false;
+    private static final boolean ENABLE_REGRESSION_QUALITY = false;
     private static TaskContainer tc;
     private static int gpuBatch;
 
@@ -305,6 +305,10 @@ public class Stats {
                 Logger.warn(ex);
             }
         }
+    }
+
+    public static boolean isGpuDebugEnabled() {
+        return DebugControl.isDebugMode() && Stats.ENABLE_GPU_RESULTS;
     }
 
 }

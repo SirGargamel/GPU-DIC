@@ -36,10 +36,6 @@ public class DebugControl {
         return debugMode;
     }
     
-    public static boolean isGpuDebugEnabled() {
-        return isDebugMode() && Stats.ENABLE_GPU_RESULTS;
-    }
-
     public static void startDebugMode() {
         debugMode = true;
         debugModeStarted = true;

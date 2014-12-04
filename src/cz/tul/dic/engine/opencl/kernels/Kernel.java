@@ -166,7 +166,7 @@ public abstract class Kernel {
                 clFacetData, clFacetCenters,
                 clDeformationLimits, clDefStepCount, clResults, (int) deformationCount, imageA.getWidth(), facetSize, facetCount);
 
-        if (DebugControl.isGpuDebugEnabled()) {
+        if (Stats.isGpuDebugEnabled()) {
             queue.putReadBuffer(clResults, true);
             final float[] results = readBuffer(clResults.getBuffer());
             Stats.dumpGpuResults(results, facets, deformationLimits);
