@@ -71,8 +71,7 @@ public abstract class TaskSolver extends Observable {
         kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared - {0}", kernel);
 
-        this.facetSize = facetSize;
-        this.taskSplitValue = taskSplitValue;
+        this.facetSize = facetSize;        
 
         final List<CorrelationResult> result = solve(image1, image2, kernel, facets, deformationLimits, defDegree);
 
