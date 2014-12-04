@@ -7,5 +7,6 @@ package cz.tul.dic.engine.opencl.solvers;
 public enum Solver {
 
     BruteForce,
-    
+    CoarseFine,
+
 }

@@ -91,35 +91,37 @@ public class EngineTest {
             for (Interpolation i : Interpolation.values()) {
                 for (TaskSplitMethod ts : TaskSplitMethod.values()) {
                     for (FacetGeneratorMethod fgm : FacetGeneratorMethod.values()) {
-                        for (String s : DEF_ZERO_FILES) {
-                            tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc, s));
-                            tc = generateTask(s, DEF_ZERO_F, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc, s));
-                        }
+                        for (Solver slvr : Solver.values()) {
+                            for (String s : DEF_ZERO_FILES) {
+                                tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm, slvr);
+                                errors.add(checkResultsBack(tc, s));
+                                tc = generateTask(s, DEF_ZERO_F, kt, i, ts, fgm, slvr);
+                                errors.add(checkResultsBack(tc, s));
+                            }
 
-                        for (String s : DEF_FIRST_FILES) {
-                            tc = generateTask(s, DEF_FIRST, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc, s));
-                            tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc, s));
-                        }
+                            for (String s : DEF_FIRST_FILES) {
+                                tc = generateTask(s, DEF_FIRST, kt, i, ts, fgm, slvr);
+                                errors.add(checkResultsBack(tc, s));
+                                tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
+                                errors.add(checkResultsBack(tc, s));
+                            }
 
-                        for (String s : DEF_ZERO_FIRST_FILES) {
-                            tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc, s));
-                        }
+                            for (String s : DEF_ZERO_FIRST_FILES) {
+                                tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
+                                errors.add(checkResultsBack(tc, s));
+                            }
 
-                        for (String s : DEF_SECOND_FILES) {
-                            tc = generateTask(s, DEF_SECOND, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc, s));
-                            tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc, s));
-                        }
+                            for (String s : DEF_SECOND_FILES) {
+                                tc = generateTask(s, DEF_SECOND, kt, i, ts, fgm, slvr);
+                                errors.add(checkResultsBack(tc, s));
+                                tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
+                                errors.add(checkResultsBack(tc, s));
+                            }
 
-                        for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
-                            tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm);
-                            errors.add(checkResultsBack(tc, s));
+                            for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
+                                tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
+                                errors.add(checkResultsBack(tc, s));
+                            }
                         }
                     }
                 }
@@ -133,7 +135,8 @@ public class EngineTest {
     private TaskContainer generateTask(
             final String outFilename, final double[] deformations,
             final KernelType kernel, final Interpolation interpolation,
-            final TaskSplitMethod taskSplit, final FacetGeneratorMethod fgm) throws IOException, URISyntaxException, ComputationException {
+            final TaskSplitMethod taskSplit, final FacetGeneratorMethod fgm,
+            final Solver solver) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
@@ -154,6 +157,7 @@ public class EngineTest {
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
         tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, taskSplit);
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, fgm);
+        tc.setParameter(TaskParameter.SOLVER, solver);
 
         Engine.getInstance().computeTask(tc);
 
@@ -287,6 +291,8 @@ public class EngineTest {
             sb.append("; ");
             sb.append(tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD));
             sb.append("; ");
+            sb.append(tc.getParameter(TaskParameter.SOLVER));
+            sb.append("; ");
             final Map<ROI, double[]> limits = tc.getDeformationLimits(0);
             if (limits != null && limits.values().iterator().hasNext()) {
                 sb.append(Arrays.toString(limits.values().iterator().next()));
@@ -407,7 +413,7 @@ public class EngineTest {
         Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
         Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
     }
-    
+
     private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
         return Collections.nCopies(facetCount, limits);
     }
