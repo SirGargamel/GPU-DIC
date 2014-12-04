@@ -116,7 +116,7 @@ public class Engine extends Observable {
         TaskContainerUtils.checkTaskValidity(tc);
 
         // prepare correlation calculator
-        correlation = TaskSolver.initSolver((Solver) tc.getParameter(TaskParameter.CORRELATION_CALCULATION));
+        correlation = TaskSolver.initSolver((Solver) tc.getParameter(TaskParameter.SOLVER));
         correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
