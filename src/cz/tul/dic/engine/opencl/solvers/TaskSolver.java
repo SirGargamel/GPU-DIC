@@ -71,14 +71,15 @@ public abstract class TaskSolver extends Observable {
         kernel = Kernel.createKernel(kernelType);
         Logger.trace("Kernel prepared - {0}", kernel);
 
-        this.facetSize = facetSize;        
+        this.facetSize = facetSize;
 
-        final List<CorrelationResult> result = solve(image1, image2, kernel, facets, deformationLimits, defDegree);
-
-        kernel.finishComputation();
-
-        return result;
-
+        try {
+            final List<CorrelationResult> result = solve(image1, image2, kernel, facets, deformationLimits, defDegree);
+            return result;
+        } catch (Exception ex) {
+            kernel.finishComputation();
+            throw ex;
+        }
     }
 
     abstract List<CorrelationResult> solve(
@@ -132,6 +133,7 @@ public abstract class TaskSolver extends Observable {
 
                     finished = true;
                 } catch (CLException ex) {
+                    kernel.finishRound();
                     if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
                         ts.signalTaskSizeTooBig();
                         ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);

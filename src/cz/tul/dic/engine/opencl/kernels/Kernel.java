@@ -272,7 +272,9 @@ public abstract class Kernel {
     }
 
     public void finishComputation() {
-        queue.finish();
+        if (queue != null && !queue.isReleased()) {
+            queue.finish();            
+        }
         clearMem(clGlobalMem);
     }
 
