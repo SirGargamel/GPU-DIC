@@ -20,7 +20,7 @@ public class OpenCLSplitter extends TaskSplitter {
     private static final long SIZE_INT = 4;
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
-    private static final double COEFF_LIMIT_ADJUST = 0.75;
+    private static final double COEFF_LIMIT_ADJUST = 0.7;
     private static final long COEFF_MEM_LIMIT_MAX = 6;
     private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX;
     private final int facetSize, ID;
@@ -176,7 +176,7 @@ public class OpenCLSplitter extends TaskSplitter {
 
     private boolean isMemOk(final long deformationCount, final long facetCount, final long facetSize, final long deformationArraySize) {
         final long imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
-        final long deformationsSize = deformationArraySize * facetCount * SIZE_FLOAT;
+        final long deformationsSize = 2 * deformationArraySize * facetCount * SIZE_FLOAT;
         final long reserve = 32 * SIZE_INT;
         final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
         final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;
