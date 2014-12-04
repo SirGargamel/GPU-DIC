@@ -22,7 +22,6 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
-import cz.tul.dic.engine.opencl.KernelSourcePreparator;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.io.BufferedReader;

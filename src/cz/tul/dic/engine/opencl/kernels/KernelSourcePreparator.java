@@ -1,4 +1,4 @@
-package cz.tul.dic.engine.opencl;
+package cz.tul.dic.engine.opencl.kernels;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
