@@ -382,7 +382,7 @@ public class EngineTest {
         correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
-        correlation.setTaskSplitVariant(taskSplit);
+        correlation.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
         Map<ROI, List<Facet>> facets = new HashMap<>(1);
         final List<Facet> roiFacets = new ArrayList<>(4);
@@ -400,7 +400,7 @@ public class EngineTest {
                         roiFacets,
                         generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
-                        tc.getFacetSize(ROUND, roi), null));
+                        tc.getFacetSize(ROUND, roi)));
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
@@ -435,7 +435,7 @@ public class EngineTest {
         correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
-        correlation.setTaskSplitVariant(taskSplit);
+        correlation.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
         Map<ROI, List<Facet>> facets = new HashMap<>(1);
         final List<Facet> roiFacets = new ArrayList<>(4);
@@ -453,7 +453,7 @@ public class EngineTest {
                         roiFacets,
                         generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
-                        tc.getFacetSize(ROUND, roi), null));
+                        tc.getFacetSize(ROUND, roi)));
 
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
