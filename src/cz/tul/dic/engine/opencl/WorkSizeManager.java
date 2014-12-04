@@ -1,13 +1,11 @@
 package cz.tul.dic.engine.opencl;
 
-import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.task.splitter.TaskSplitMethod;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.engine.opencl.solvers.TaskSolver;
-import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -50,10 +48,10 @@ public final class WorkSizeManager {
         INITIAL_WORK_SIZE_D = 1000;
         init = false;
 
-        final TaskSolver cc = TaskSolver.initSolver(Solver.BruteForce);
-        cc.setKernel(KernelType.CL1D_I_V_LL_MC_D);
-        cc.setInterpolation(Interpolation.BICUBIC);
-        cc.setTaskSplitVariant(TaskSplitMethod.DYNAMIC, null);
+        final TaskSolver cc = TaskSolver.initSolver(TaskDefaultValues.DEFAULT_SOLVER);
+        cc.setKernel(TaskDefaultValues.DEFAULT_KERNEL);
+        cc.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
+        cc.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
 
         try {
             final Image img = Image.createImage(new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY));
