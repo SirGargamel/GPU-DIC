@@ -124,13 +124,14 @@ public class OpenCLSplitter extends TaskSplitter {
                 Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
                 ct = subSplitters.get(0).next();
             } else {
-                checkedDeformations = deformationLimits;
+                checkedDeformations = new ArrayList<>(taskSize);
                 sublist = new ArrayList<>(taskSize);
                 final int facetCount = facets.size();
 
                 int count = 0;
                 while (count < taskSize && facetIndex < facetCount) {
                     sublist.add(facets.get(facetIndex));
+                    checkedDeformations.add(deformationLimits.get(facetIndex));
 
                     count++;
                     facetIndex++;
