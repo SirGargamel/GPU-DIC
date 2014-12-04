@@ -27,7 +27,7 @@ public interface TaskDefaultValues {
     int DEFAULT_FACET_SPACING = 1;
     int DEFAULT_FACET_SIZE = 20;
     Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;
-    KernelType DEFAULT_KERNEL = KernelType.CL1D_I_V_LL_MC_D;
+    KernelType DEFAULT_KERNEL = KernelType.CL1D_I_V_LL_D;
     double DEFAULT_MM_TO_PX_RATIO = 1;
     ResultCompilation DEFAULT_RESULT_COMPILATION = ResultCompilation.MAJOR_AVERAGING;
     double DEFAULT_RESULT_QUALITY = 0.5;
