@@ -16,21 +16,6 @@ public class CoarseFine extends TaskSolver {
 
     @Override
     List<CorrelationResult> solve(Image image1, Image image2, Kernel kernel, List<Facet> facets, List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException {
-        switch (defDegree) {
-            case ZERO:
-                return computeTask(
-                        image1, image2,
-                        kernel, facets, deformationLimits, defDegree);
-            default:
-                return computeTask(
-                        image1, image2,
-                        kernel, facets,
-                        performCoarseSearch(image1, image2, kernel, facets, deformationLimits),
-                        defDegree);
-        }
-    }
-
-    private List<double[]> performCoarseSearch(Image image1, Image image2, Kernel kernel, List<Facet> facets, List<double[]> deformationLimits) throws ComputationException {
         final int facetCount = deformationLimits.size();
         final List<double[]> zeroOrderLimits = new ArrayList<>(facetCount);
         double[] temp;
@@ -41,7 +26,7 @@ public class CoarseFine extends TaskSolver {
         }
         final List<CorrelationResult> coarseResults = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
 
-        final List<double[]> result = new ArrayList<>(facetCount);
+        final List<double[]> fineLimits = new ArrayList<>(facetCount);
         double[] newLimits, coarseResult;
         int l;
         for (int i = 0; i < facetCount; i++) {
@@ -59,10 +44,14 @@ public class CoarseFine extends TaskSolver {
             newLimits[DeformationLimit.VMAX] = coarseResult[Coordinates.Y];
             newLimits[DeformationLimit.VSTEP] = 0;
 
-            result.add(newLimits);
+            fineLimits.add(newLimits);
         }
 
-        return result;
+        return computeTask(
+                image1, image2,
+                kernel, facets,
+                fineLimits,
+                defDegree);
     }
 
 }
