@@ -13,6 +13,7 @@ import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.output.ExportTask;
 import java.io.File;
@@ -410,6 +411,9 @@ public class TaskContainerUtils {
                         break;
                     case ROUND_LIMITS:
                         result.setParameter(tp, intArrayFromString(e.getValue()));
+                        break;
+                    case SOLVER:
+                        result.setParameter(tp, Solver.valueOf(e.getValue()));
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);
