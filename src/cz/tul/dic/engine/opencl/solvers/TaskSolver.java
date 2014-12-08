@@ -61,7 +61,7 @@ public abstract class TaskSolver extends Observable {
         taskSplitValue = null;
     }
 
-    public List<CorrelationResult> solve(
+    public synchronized List<CorrelationResult> solve(
             Image image1, Image image2,
             List<Facet> facets,
             List<double[]> deformationLimits, DeformationDegree defDegree,
