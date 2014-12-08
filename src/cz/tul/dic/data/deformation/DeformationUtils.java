@@ -2,7 +2,7 @@ package cz.tul.dic.data.deformation;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -79,6 +79,14 @@ public class DeformationUtils {
         }
         return size;
     }
+    
+    public static int findMaxDeformationCount(final List<int[]> limits) {
+        double max = 0;
+        for (int[] iA : limits) {
+            max = Math.max(max, iA[iA.length - 1]);
+        }
+        return (int) max;
+    }
 
     private static int computeSize(final double[] limits, final int base) {
         final int result;
@@ -111,15 +119,18 @@ public class DeformationUtils {
 
     public static int[] generateDeformationCounts(final double[] deformationLimits) {
         final int l = deformationLimits.length / 3;
-        final int[] counts = new int[l];
+        final int[] counts = new int[l + 1];
 
+        int total = 1;
         for (int i = 0; i < l; i++) {
             counts[i] = (int) Math.round((deformationLimits[i * 3 + 1] - deformationLimits[i * 3]) / deformationLimits[i * 3 + 2]) + 1;
+            total *= counts[i];
         }
+        counts[l] = total;
         return counts;
     }
     
-    public static int getDeformationArrayLength(final DeformationDegree deg) {
+    public static int getDeformationCoeffCount(final DeformationDegree deg) {
         final int result;
         switch (deg) {
             case ZERO:

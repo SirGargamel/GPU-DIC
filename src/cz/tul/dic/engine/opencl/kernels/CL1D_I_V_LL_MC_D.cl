@@ -30,9 +30,8 @@ kernel void CL1D_I_V_LL_MC_D(
     local int2 facetLocal[-1*-1];
     int index;
     if (groupSize >= facetSize2) {
-        if (localId < facetSize2) {
-            index = localId*facetCount + facetId;            
-            facetLocal[localId] = facets[index];            
+        if (localId < facetSize2) {            
+            facetLocal[localId] = facets[localId*facetCount + facetId];            
         }    
     } else {
         const int runCount = facetSize2 / groupSize;

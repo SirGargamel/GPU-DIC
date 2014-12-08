@@ -35,11 +35,11 @@ public class CL2D_Int_D extends Kernel {
             final int facetSize, final int facetCount) {
         stop = false;
         final int facetArea = facetSize * facetSize;
-        
+
         final int lws0 = calculateLws0();
         int lws1 = Kernel.roundUp(calculateLws1Base(), facetArea);
-        lws1 = Math.min(lws1, device.getMaxWorkItemSizes()[0]);        
-        
+        lws1 = Math.min(lws1, device.getMaxWorkItemSizes()[0]);
+
         kernelDIC.rewind();
         kernelDIC.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)
                 .putArg(imageWidth)
@@ -74,7 +74,7 @@ public class CL2D_Int_D extends Kernel {
                     return;
                 }
 
-                facetSubCount = Math.min(wsm.getFacetCount(), facetCount - currentBaseFacet);
+                facetSubCount = Math.min(wsm.getFacetCount(), facetCount - currentBaseFacet);                
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
                 facetGlobalWorkSize = Kernel.roundUp(lws0, facetSubCount);
@@ -113,15 +113,9 @@ public class CL2D_Int_D extends Kernel {
 //        return val.get(0);
         return LWS1_BASE;
     }
-    
+
     private int calculateLws0() {
         return LWS0_BASE;
-    }
-    
-
-    @Override
-    boolean isDriven() {
-        return true;
     }
 
     @Override

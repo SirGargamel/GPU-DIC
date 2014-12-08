@@ -57,46 +57,38 @@ kernel void CL2D_Int_D(
     float facetI[-1*-1];
     float meanF = 0;
     float meanG = 0; 
-    float val;
     for (int i = 0; i < facetSize2; i++) {
         i2 = i*2;
         index = baseIndexFacet + i2;
                 
-        // facet is just array of int coords        
-        val = imageA[computeIndex(facets[index], facets[index + 1], imageWidth)];        
-        facetI[i] = val;
-        meanF += val;
-        
-        val = interpolate(deformedFacet[i2], deformedFacet[i2 + 1], imageB, imageWidth);                        
-        deformedI[i] = val;
-        meanG += val;
+        // facet is just array of int coords              
+        facetI[i] = imageA[computeIndex(facets[index], facets[index + 1], imageWidth)];
+        meanF += facetI[i];
+                               
+        deformedI[i] = interpolate(deformedFacet[i2], deformedFacet[i2 + 1], imageB, imageWidth);
+        meanG += deformedI[i];
     } 
     meanF /= (float) facetSize2;
     meanG /= (float) facetSize2;
     
     float deltaF = 0;
-    float deltaG = 0;    
-    for (int i = 0; i < facetSize2; i++) {
-        i2 = i*2;
-        index = baseIndexFacet + i2;
-                                     
-        val = facetI[i] - meanF;
-        facetI[i] = val;
-        deltaF += val * val;
-                
-        val = deformedI[i] - meanG;
-        deformedI[i] = val;
-        deltaG += val * val;
+    float deltaG = 0;   
+    for (int i = 0; i < facetSize2; i++) {                                             
+        facetI[i] -= meanF;
+        deltaF += facetI[i] * facetI[i];
+                        
+        deformedI[i] -= meanG;
+        deltaG += deformedI[i] * deformedI[i];
     }   
     
-    val = 0;                  
-    for (int i = 0; i < facetSize2; i++) {        
-        index = baseIndexFacet + i*2;        
-        val += facetI[i] * deformedI[i];
-    }
-    val /= sqrt(deltaF) * sqrt(deltaG);  
+    float resultVal = 0;           
+    if (deltaF != 0 && deltaG != 0) {
+        for (int i = 0; i < facetSize2; i++) {            
+            resultVal += facetI[i] * deformedI[i];
+        }
+        resultVal /= sqrt(deltaF) * sqrt(deltaG);  
+    }    
     
-    //store result
-    index = facetId * deformationCount + deformationId;
-    result[index] = val;    
+    //store result    
+    result[facetId * deformationCount + deformationId] = resultVal;   
 }

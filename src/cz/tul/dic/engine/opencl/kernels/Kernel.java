@@ -149,12 +149,18 @@ public abstract class Kernel {
 
         clDeformationLimits = generateDeformationLimits(deformationLimits);
         queue.putWriteBuffer(clDeformationLimits, false);
-        clDefStepCount = generateDeformationStepCounts(deformationLimits);
-        queue.putWriteBuffer(clDefStepCount, true);
-        final long deformationCount = (int) DeformationUtils.calculateDeformationCount(deformationLimits.get(0));
 
-        Logger.trace("Computing task " + facetCount + " facets, " + deformationCount + " deformations.");
-        final long size = facetCount * deformationCount;
+        final List<int[]> deformationCounts = new ArrayList<>(deformationLimits.size());
+        for (double[] dA : deformationLimits) {
+            deformationCounts.add(DeformationUtils.generateDeformationCounts(dA));
+        }
+        clDefStepCount = generateDeformationStepCounts(deformationCounts);
+        queue.putWriteBuffer(clDefStepCount, true);
+
+        int maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
+
+        Logger.trace("Computing task " + facetCount + " facets, " + maxDeformationCount + " deformations.");
+        final long size = facetCount * maxDeformationCount;
         if (size <= 0 || size >= Integer.MAX_VALUE) {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
         }
@@ -164,17 +170,19 @@ public abstract class Kernel {
 
         runKernel(clImageA, clImageB,
                 clFacetData, clFacetCenters,
-                clDeformationLimits, clDefStepCount, clResults, (int) deformationCount, imageA.getWidth(), facetSize, facetCount);
+                clDeformationLimits, clDefStepCount,
+                clResults,
+                maxDeformationCount,
+                imageA.getWidth(), facetSize, facetCount);
 
         if (Stats.isGpuDebugEnabled()) {
             queue.putReadBuffer(clResults, true);
             final float[] results = readBuffer(clResults.getBuffer());
             Stats.dumpGpuResults(results, facets, deformationLimits);
-
         }
 
-        final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) deformationCount);
-        final int[] positions = findPos(clResults, facetCount, (int) deformationCount, maxValuesCl);
+        final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
+        final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
 
         return createResults(readBuffer(maxValuesCl.getBuffer()), positions, deformationLimits);
     }
@@ -184,7 +192,7 @@ public abstract class Kernel {
             final CLBuffer<FloatBuffer> facetCenters,
             final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results,
-            final int deformationCount, final int imageWidth,
+            final int maxDeformationCount, final int imageWidth,
             final int facetSize, final int facetCount);
 
     private CLBuffer<FloatBuffer> findMax(final CLBuffer<FloatBuffer> results, final int facetCount, final int deformationCount) {
@@ -273,7 +281,7 @@ public abstract class Kernel {
 
     public void finishComputation() {
         if (queue != null && !queue.isReleased()) {
-            queue.finish();            
+            queue.finish();
         }
         clearMem(clGlobalMem);
     }
@@ -383,12 +391,7 @@ public abstract class Kernel {
         return result;
     }
 
-    private CLBuffer<IntBuffer> generateDeformationStepCounts(final List<double[]> deformationLimits) {
-        final List<int[]> counts = new ArrayList<>(deformationLimits.size());
-        for (double[] dA : deformationLimits) {
-            counts.add(DeformationUtils.generateDeformationCounts(dA));
-        }
-
+    private CLBuffer<IntBuffer> generateDeformationStepCounts(final List<int[]> counts) {
         final CLBuffer<IntBuffer> result = context.createIntBuffer(counts.size() * counts.get(0).length, CLMemory.Mem.READ_ONLY);
         final IntBuffer buffer = result.getBuffer();
         for (int[] iA : counts) {
