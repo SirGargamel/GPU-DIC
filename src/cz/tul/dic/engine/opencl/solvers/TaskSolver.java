@@ -139,6 +139,8 @@ public abstract class TaskSolver extends Observable {
                 }
             }
 
+            kernel.finishComputation();
+
             if (!finished && lastEx != null) {
                 throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx.getLocalizedMessage());
             }

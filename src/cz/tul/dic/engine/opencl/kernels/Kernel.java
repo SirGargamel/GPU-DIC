@@ -19,7 +19,6 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
@@ -27,14 +26,12 @@ import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -165,7 +162,6 @@ public abstract class Kernel {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
         }
         clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
-
         clRoundMem.add(clResults);
 
         runKernel(clImageA, clImageB,
@@ -284,6 +280,9 @@ public abstract class Kernel {
             queue.finish();
         }
         clearMem(clGlobalMem);
+        for (CLMemory mem : context.getMemoryObjects()) {
+            mem.release();
+        }
     }
 
     private void clearMem(final Set<CLResource> mems) {
@@ -386,7 +385,6 @@ public abstract class Kernel {
             }
         }
         buffer.rewind();
-
         clRoundMem.add(result);
         return result;
     }
