@@ -79,7 +79,7 @@ public class EngineTest {
     private static final String[] DEF_ZERO_FIRST_SECOND_FILES = new String[]{
         "out_2_0_1_1_0_0_1_0_0_0_0_1", "out_-1_-1_0_0_1_0_0_0.5_1_0_0_0"};
     private static final double[] DEF_LARGE = new double[]{
-        -4, 4, 0.25, -4, 4, 0.25,
+        -3, 3, 0.25, -3, 3, 0.25,
         -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
         -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
 
@@ -198,8 +198,9 @@ public class EngineTest {
         Set<String> errors = new HashSet<>();
 
         for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
+            System.out.println("New task !!!");
             tc = generateTask(s, DEF_LARGE);
-            errors.add(computeAndCheckTask(tc, s));
+            errors.add(computeAndCheckTask(tc, s));            
         }
 
         errors.remove(null);
