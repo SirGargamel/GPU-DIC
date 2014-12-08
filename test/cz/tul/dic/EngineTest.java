@@ -94,33 +94,33 @@ public class EngineTest {
                         for (Solver slvr : Solver.values()) {
                             for (String s : DEF_ZERO_FILES) {
                                 tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm, slvr);
-                                errors.add(checkResultsBack(tc, s));
+                                errors.add(computeAndCheckTask(tc, s));
                                 tc = generateTask(s, DEF_ZERO_F, kt, i, ts, fgm, slvr);
-                                errors.add(checkResultsBack(tc, s));
+                                errors.add(computeAndCheckTask(tc, s));
                             }
 
                             for (String s : DEF_FIRST_FILES) {
                                 tc = generateTask(s, DEF_FIRST, kt, i, ts, fgm, slvr);
-                                errors.add(checkResultsBack(tc, s));
+                                errors.add(computeAndCheckTask(tc, s));
                                 tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
-                                errors.add(checkResultsBack(tc, s));
+                                errors.add(computeAndCheckTask(tc, s));
                             }
 
                             for (String s : DEF_ZERO_FIRST_FILES) {
                                 tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
-                                errors.add(checkResultsBack(tc, s));
+                                errors.add(computeAndCheckTask(tc, s));
                             }
 
                             for (String s : DEF_SECOND_FILES) {
                                 tc = generateTask(s, DEF_SECOND, kt, i, ts, fgm, slvr);
-                                errors.add(checkResultsBack(tc, s));
+                                errors.add(computeAndCheckTask(tc, s));
                                 tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
-                                errors.add(checkResultsBack(tc, s));
+                                errors.add(computeAndCheckTask(tc, s));
                             }
 
                             for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
                                 tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
-                                errors.add(checkResultsBack(tc, s));
+                                errors.add(computeAndCheckTask(tc, s));
                             }
                         }
                     }
@@ -159,8 +159,6 @@ public class EngineTest {
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, fgm);
         tc.setParameter(TaskParameter.SOLVER, solver);
 
-        Engine.getInstance().computeTask(tc);
-
         return tc;
     }
 
@@ -171,15 +169,15 @@ public class EngineTest {
 
         for (String s : DEF_ZERO_FILES) {
             tc = generateTask(s, DEF_ZERO);
-            errors.add(checkResultsBack(tc, s));
+            errors.add(computeAndCheckTask(tc, s));
             tc = generateTask(s, DEF_ZERO_F);
-            errors.add(checkResultsBack(tc, s));
+            errors.add(computeAndCheckTask(tc, s));
         }
         for (String s : DEF_FIRST_FILES) {
             tc = generateTask(s, DEF_FIRST);
-            errors.add(checkResultsBack(tc, s));
+            errors.add(computeAndCheckTask(tc, s));
             tc = generateTask(s, DEF_FIRST_F);
-            errors.add(checkResultsBack(tc, s));
+            errors.add(computeAndCheckTask(tc, s));
         }
 
         errors.remove(null);
@@ -193,7 +191,7 @@ public class EngineTest {
 
         for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
             tc = generateTask(s, DEF_LARGE);
-            errors.add(checkResultsBack(tc, s));
+            errors.add(computeAndCheckTask(tc, s));
         }
 
         errors.remove(null);
@@ -221,7 +219,13 @@ public class EngineTest {
         return tc;
     }
 
-    private String checkResultsBack(final TaskContainer tc, final String fileName) {
+    private String computeAndCheckTask(final TaskContainer tc, final String fileName) {
+        try {
+            Engine.getInstance().computeTask(tc);
+        } catch (ComputationException | IOException ex) {
+            return generateDescription(fileName, tc, -1, ex.getLocalizedMessage());
+        }
+
         final Image img1 = tc.getImage(ROUND);
         final Image img2 = tc.getImage(ROUND + 1);
         double[][][] results = tc.getDisplacement(ROUND, ROUND + 1).getDisplacement();
@@ -279,32 +283,41 @@ public class EngineTest {
         }
 
         if (errorCount > 0) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("\n");
-            sb.append(fileName);
-            sb.append("; ");
-            sb.append(tc.getParameter(TaskParameter.KERNEL));
-            sb.append("; ");
-            sb.append(tc.getParameter(TaskParameter.INTERPOLATION));
-            sb.append("; ");
-            sb.append(tc.getParameter(TaskParameter.TASK_SPLIT_METHOD));
-            sb.append("; ");
-            sb.append(tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD));
-            sb.append("; ");
-            sb.append(tc.getParameter(TaskParameter.SOLVER));
-            sb.append("; ");
-            final Map<ROI, double[]> limits = tc.getDeformationLimits(0);
-            if (limits != null && limits.values().iterator().hasNext()) {
-                sb.append(Arrays.toString(limits.values().iterator().next()));
-            } else {
-                sb.append("No limits !!!");
-            }
-            sb.append(" - ");
-            sb.append(errorCount);
-            return sb.toString();
+            return generateDescription(fileName, tc, errorCount);
         } else {
             return null;
         }
+    }
+
+    private String generateDescription(final String fileName, final TaskContainer tc, int errorCount, String... extra) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        sb.append(fileName);
+        sb.append("; ");
+        sb.append(tc.getParameter(TaskParameter.KERNEL));
+        sb.append("; ");
+        sb.append(tc.getParameter(TaskParameter.INTERPOLATION));
+        sb.append("; ");
+        sb.append(tc.getParameter(TaskParameter.TASK_SPLIT_METHOD));
+        sb.append("; ");
+        sb.append(tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD));
+        sb.append("; ");
+        sb.append(tc.getParameter(TaskParameter.SOLVER));
+        sb.append("; ");
+        final Map<ROI, double[]> limits = tc.getDeformationLimits(0);
+        if (limits != null && limits.values().iterator().hasNext()) {
+            sb.append(Arrays.toString(limits.values().iterator().next()));
+        } else {
+            sb.append("No limits !!!");
+        }
+        sb.append(" - ");
+        sb.append(errorCount);
+        sb.append("; ");
+        for (String s : extra) {
+            sb.append(s);
+            sb.append("  ");
+        }
+        return sb.toString();
     }
 
     @Test
@@ -411,7 +424,7 @@ public class EngineTest {
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
         Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
-        Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
+        Assert.assertNull(computeAndCheckTask(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
     }
 
     private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
@@ -466,6 +479,6 @@ public class EngineTest {
         for (CorrelationResult cr : tc.getResult(ROUND, roi)) {
             Assert.assertNotNull(cr);
         }
-        Assert.assertNull(checkResultsBack(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
+        Assert.assertNull(computeAndCheckTask(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
     }
 }
