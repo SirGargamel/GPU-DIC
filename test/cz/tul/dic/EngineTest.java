@@ -87,41 +87,49 @@ public class EngineTest {
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
         TaskContainer tc;
         Set<String> errors = new HashSet<>();
+        int counter = 0;
+        final Solver slvr = Solver.BruteForce;
         for (KernelType kt : KernelType.values()) {
             for (Interpolation i : Interpolation.values()) {
                 for (TaskSplitMethod ts : TaskSplitMethod.values()) {
                     for (FacetGeneratorMethod fgm : FacetGeneratorMethod.values()) {
-                        for (Solver slvr : Solver.values()) {
-                            for (String s : DEF_ZERO_FILES) {
-                                tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm, slvr);
-                                errors.add(computeAndCheckTask(tc, s));
-                                tc = generateTask(s, DEF_ZERO_F, kt, i, ts, fgm, slvr);
-                                errors.add(computeAndCheckTask(tc, s));
-                            }
+                        for (String s : DEF_ZERO_FILES) {
+                            tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm, slvr);
+                            errors.add(computeAndCheckTask(tc, s));
+                            counter++;
+                            tc = generateTask(s, DEF_ZERO_F, kt, i, ts, fgm, slvr);
+                            errors.add(computeAndCheckTask(tc, s));
+                            counter++;
+                        }
 
-                            for (String s : DEF_FIRST_FILES) {
-                                tc = generateTask(s, DEF_FIRST, kt, i, ts, fgm, slvr);
-                                errors.add(computeAndCheckTask(tc, s));
-                                tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
-                                errors.add(computeAndCheckTask(tc, s));
-                            }
+                        for (String s : DEF_FIRST_FILES) {
+                            tc = generateTask(s, DEF_FIRST, kt, i, ts, fgm, slvr);
+                            errors.add(computeAndCheckTask(tc, s));
+                            counter++;
+                            tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
+                            errors.add(computeAndCheckTask(tc, s));
+                            counter++;
+                        }
 
-                            for (String s : DEF_ZERO_FIRST_FILES) {
-                                tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
-                                errors.add(computeAndCheckTask(tc, s));
-                            }
+                        for (String s : DEF_ZERO_FIRST_FILES) {
+                            tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
+                            errors.add(computeAndCheckTask(tc, s));
+                            counter++;
+                        }
 
-                            for (String s : DEF_SECOND_FILES) {
-                                tc = generateTask(s, DEF_SECOND, kt, i, ts, fgm, slvr);
-                                errors.add(computeAndCheckTask(tc, s));
-                                tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
-                                errors.add(computeAndCheckTask(tc, s));
-                            }
+                        for (String s : DEF_SECOND_FILES) {
+                            tc = generateTask(s, DEF_SECOND, kt, i, ts, fgm, slvr);
+                            errors.add(computeAndCheckTask(tc, s));
+                            counter++;
+                            tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
+                            errors.add(computeAndCheckTask(tc, s));
+                            counter++;
+                        }
 
-                            for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
-                                tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
-                                errors.add(computeAndCheckTask(tc, s));
-                            }
+                        for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
+                            tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
+                            errors.add(computeAndCheckTask(tc, s));
+                            counter++;
                         }
                     }
                 }
@@ -129,7 +137,7 @@ public class EngineTest {
         }
 
         errors.remove(null);
-        Assert.assertEquals(errors.toString(), 0, errors.size());
+        Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
     private TaskContainer generateTask(
