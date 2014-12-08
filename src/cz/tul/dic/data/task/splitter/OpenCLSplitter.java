@@ -20,9 +20,9 @@ public class OpenCLSplitter extends TaskSplitter {
     private static final long SIZE_INT = 4;
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
-    private static final double COEFF_LIMIT_ADJUST = 0.7;
+    private static final double COEFF_LIMIT_ADJUST = 0.75;
     private static final long COEFF_MEM_LIMIT_MAX = 6;
-    private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX;
+    private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX - 2;
     private final int facetSize, ID;
     private final List<OpenCLSplitter> subSplitters;
     private final boolean subSplitter;
@@ -105,22 +105,19 @@ public class OpenCLSplitter extends TaskSplitter {
                 double[] newLimits = new double[deformationLimitsArraySize];
                 System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
                 newLimits[minIndex * 3 + 1] = midPoint;
-                Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));                
+                Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
                 checkedDeformations = new ArrayList<>(1);
                 checkedDeformations.add(newLimits);
-                System.out.println(Arrays.toString(oldLimits));
-                System.out.println(Arrays.toString(newLimits));
                 subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
-                
+
                 newLimits = new double[deformationLimitsArraySize];
                 System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
                 newLimits[minIndex * 3] = midPoint + oldLimits[minIndex * 3 + 2];
                 Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
                 checkedDeformations = new ArrayList<>(1);
                 checkedDeformations.add(newLimits);
-                System.out.println(Arrays.toString(newLimits));
                 subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
-                
+
                 Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
                 ct = subSplitters.get(0).next();
             } else {
