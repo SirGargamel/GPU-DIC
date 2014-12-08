@@ -73,13 +73,8 @@ public abstract class TaskSolver extends Observable {
 
         this.facetSize = facetSize;
 
-        try {
-            final List<CorrelationResult> result = solve(image1, image2, kernel, facets, deformationLimits, defDegree);
-            return result;
-        } catch (Exception ex) {
-            kernel.finishComputation();
-            throw ex;
-        }
+        final List<CorrelationResult> result = solve(image1, image2, kernel, facets, deformationLimits, defDegree);
+        return result;
     }
 
     abstract List<CorrelationResult> solve(
@@ -112,7 +107,7 @@ public abstract class TaskSolver extends Observable {
                         }
 
                         ct = ts.next();
-                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationArrayLength(defDegree)));
+                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationCoeffCount(defDegree)));
                         kernel.finishRound();
                         // pick best results for this computation task and discard ct data 
                         if (ct.isSubtask()) {
