@@ -2,6 +2,7 @@ package cz.tul.dic.data.deformation;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,9 +81,9 @@ public class DeformationUtils {
         return size;
     }
     
-    public static int findMaxDeformationCount(final List<int[]> limits) {
+    public static int findMaxDeformationCount(final List<int[]> counts) {
         double max = 0;
-        for (int[] iA : limits) {
+        for (int[] iA : counts) {
             max = Math.max(max, iA[iA.length - 1]);
         }
         return (int) max;
@@ -117,6 +118,14 @@ public class DeformationUtils {
         return result;
     }
 
+    public static List<int[]> generateDeformationCounts(final List<double[]> deformationLimits) {
+        final List<int[]> result = new ArrayList<>(deformationLimits.size());
+        for (double[] limits : deformationLimits) {
+            result.add(generateDeformationCounts(limits));
+        }
+        return result;
+    }
+    
     public static int[] generateDeformationCounts(final double[] deformationLimits) {
         final int l = deformationLimits.length / 3;
         final int[] counts = new int[l + 1];

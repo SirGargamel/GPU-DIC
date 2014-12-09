@@ -147,10 +147,7 @@ public abstract class Kernel {
         clDeformationLimits = generateDeformationLimits(deformationLimits);
         queue.putWriteBuffer(clDeformationLimits, false);
 
-        final List<int[]> deformationCounts = new ArrayList<>(deformationLimits.size());
-        for (double[] dA : deformationLimits) {
-            deformationCounts.add(DeformationUtils.generateDeformationCounts(dA));
-        }
+        final List<int[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
         clDefStepCount = generateDeformationStepCounts(deformationCounts);
         queue.putWriteBuffer(clDefStepCount, true);
 

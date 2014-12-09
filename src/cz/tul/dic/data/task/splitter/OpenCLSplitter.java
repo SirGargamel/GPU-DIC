@@ -81,12 +81,13 @@ public class OpenCLSplitter extends TaskSplitter {
             final int rest = facets.size() - facetIndex;
 
             int taskSize = rest;
-            final long l = DeformationUtils.calculateDeformationCount(deformationLimits.get(facetIndex));
-            while (taskSize > 1 && !isMemOk(l, taskSize, facetSize, deformationLimitsArraySize)) {
+            final List<int[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
+            final long deformaiontCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
+            while (taskSize > 1 && !isMemOk(deformaiontCount, taskSize, facetSize, deformationLimitsArraySize)) {
                 taskSize *= COEFF_LIMIT_ADJUST;
             }
 
-            if (taskSize == 1 && !isMemOk(l, taskSize, facetSize, deformationLimitsArraySize)) {
+            if (taskSize == 1 && !isMemOk(deformaiontCount, taskSize, facetSize, deformationLimitsArraySize)) {
                 if (subSplitter) {
                     Logger.warn("Too many deformations in subtask, {0} generating subsplitters.", ID);
                 } else {
@@ -171,9 +172,9 @@ public class OpenCLSplitter extends TaskSplitter {
         return minPos;
     }
 
-    private boolean isMemOk(final long deformationCount, final long facetCount, final long facetSize, final long deformationArraySize) {
+    private boolean isMemOk(final long deformationCount, final long facetCount, final long facetSize, final long deformationLimitsArraySize) {
         final long imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
-        final long deformationsSize = 2 * deformationArraySize * facetCount * SIZE_FLOAT;
+        final long deformationsSize = 2 * deformationLimitsArraySize * facetCount * SIZE_FLOAT;
         final long reserve = 32 * SIZE_INT;
         final long facetDataSize = facetSize * facetSize * 2 * SIZE_INT * facetCount;
         final long facetCentersSize = 2 * SIZE_FLOAT * facetCount;
@@ -182,7 +183,7 @@ public class OpenCLSplitter extends TaskSplitter {
         final long fullSize = imageSize + deformationsSize + reserve + facetDataSize + facetCentersSize + resultSize;
 
         final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
-        final long maxMem = DeviceManager.getDevice().getGlobalMemSize() * COEFF_MEM_LIMIT / COEFF_MEM_LIMIT_MAX;
+        final long maxMem = DeviceManager.getDevice().getGlobalMemSize() / COEFF_MEM_LIMIT_MAX * COEFF_MEM_LIMIT;
         boolean result = fullSize >= 0 && fullSize <= maxMem;
         result &= resultCount <= Integer.MAX_VALUE;
         result &= facetCount <= Integer.MAX_VALUE;
