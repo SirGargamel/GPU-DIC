@@ -31,7 +31,7 @@ public class Utils {
 
         final DecimalFormatSymbols decimalSymbol = new DecimalFormatSymbols(Locale.getDefault());
         decimalSymbol.setDecimalSeparator('.');
-        nfDouble = new DecimalFormat("#0.###", decimalSymbol);
+        nfDouble = new DecimalFormat("#0.00#", decimalSymbol);
         nfInt = new DecimalFormat("00", decimalSymbol);
     }
 
