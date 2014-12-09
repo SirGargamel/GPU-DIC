@@ -22,7 +22,7 @@ public class OpenCLSplitter extends TaskSplitter {
     private static final long SIZE_PIXEL = 4;
     private static final double COEFF_LIMIT_ADJUST = 0.75;
     private static final long COEFF_MEM_LIMIT_MAX = 6;
-    private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX - 2;
+    private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX - 5;
     private final int facetSize, ID;
     private final List<OpenCLSplitter> subSplitters;
     private final boolean subSplitter;
