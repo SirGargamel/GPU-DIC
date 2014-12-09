@@ -73,12 +73,12 @@ public class Engine extends Observable {
 
             r = e.getKey();
             nextR = e.getValue();
+            
+            setChanged();
+            notifyObservers(r);
 
             computeRound(tc, r, nextR);
-            exportRound(tc, r);
-
-            setChanged();
-            notifyObservers(nextR);
+            exportRound(tc, r);            
         }
 
         Stats.dumpDeformationsStatisticsUsage();

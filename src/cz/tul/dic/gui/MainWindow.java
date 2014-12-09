@@ -590,13 +590,13 @@ public class MainWindow implements Initializable {
         private final TaskContainer tc;
         private final int roundCount, roundOne;
         private int round;
-        private StringBuilder action, time;
+        private final StringBuilder action, time;
 
         public ComputationObserver(ComplexTaskSolver cts, final TaskContainer tc) {
             this.cts = cts;
             this.tc = tc;
             roundCount = TaskContainerUtils.getRounds(tc).keySet().size();
-            roundOne = TaskContainerUtils.getFirstRound(tc);
+            roundOne = TaskContainerUtils.getFirstRound(tc);            
 
             time = new StringBuilder();
             action = new StringBuilder();
@@ -640,7 +640,7 @@ public class MainWindow implements Initializable {
                 updateProgress(round - roundOne, roundCount);
             } else if (arg instanceof Long) {
                 final long roundTime = (long) arg;
-                final int roundsLeft = roundCount - (round - roundOne);
+                final int roundsLeft = roundCount - (round - roundOne) - 1;
                 final String timeLeft = new SimpleDateFormat("hh:mm:ss").format(new Date(System.currentTimeMillis() + roundTime * roundsLeft));
                 time.setLength(0);
                 time.append(Lang.getString("FinishTime"))
