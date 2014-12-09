@@ -136,7 +136,7 @@ public class Stats {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Map<ROI, List<CorrelationResult>> results = tc.getResults(round);
 
-            for (int i = 0; i < 11; i++) {
+            for (int i = -10; i < 11; i++) {
                 counters.put(i, ValueCounter.createCounter());
             }
 
