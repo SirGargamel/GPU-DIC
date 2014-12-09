@@ -328,6 +328,9 @@ public class TaskContainerUtils {
 
     public static TaskContainer deserializeTaskFromConfig(final File in) throws IOException, ComputationException {
         final Config config = Config.loadConfig(in);
+        if (config == null) {
+            throw new IllegalArgumentException("Non-existent config.");
+        }
         if (!Config.determineType(config).equals(ConfigType.TASK)) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_CONFIG, "Not a task config.");
         }
