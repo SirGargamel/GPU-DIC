@@ -22,7 +22,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
 
     public CL1D_I_V_LL_MC_D() {
         super("CL1D_I_V_LL_MC_D");
-        wsm = new WorkSizeManager();
+        wsm = new WorkSizeManager(KernelType.CL1D_I_V_LL_MC_D);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class CL15D_pF_D extends Kernel {
 
     public CL15D_pF_D() {
         super("CL15D_pF_D");
-        wsm = new WorkSizeManager();
+        wsm = new WorkSizeManager(KernelType.CL15D_pF_D);
     }
 
     @Override

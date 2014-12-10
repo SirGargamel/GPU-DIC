@@ -204,7 +204,7 @@ public class ExpertSettings implements Initializable {
 
         comboFGMode.getSelectionModel().select(TaskDefaultValues.DEFAULT_FACET_GENERATOR);
         comboTSVariant.getSelectionModel().select(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);
-        comboKernel.getSelectionModel().select(TaskDefaultValues.DEFAULT_KERNEL);
+        comboKernel.getSelectionModel().selectFirst();
         comboInterpolation.getSelectionModel().select(TaskDefaultValues.DEFAULT_INTERPOLATION);
         textFGSpacing.setText(String.valueOf(TaskDefaultValues.DEFAULT_FACET_SPACING));
         textTSValue.setText(String.valueOf(TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER));

@@ -14,6 +14,7 @@ import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
 import cz.tul.dic.engine.opencl.DeviceManager;
+import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -55,7 +56,7 @@ public abstract class TaskSolver extends Observable {
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
 
-        kernelType = TaskDefaultValues.DEFAULT_KERNEL;
+        kernelType = WorkSizeManager.getBestKernel();
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
         taskSplitVariant = TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD;
         taskSplitValue = null;

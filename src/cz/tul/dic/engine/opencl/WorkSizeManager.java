@@ -5,10 +5,11 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.TaskDefaultValues;
+import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.solvers.TaskSolver;
-import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,13 +28,14 @@ public final class WorkSizeManager {
     private static final long MAX_TIME_BASE = 1_000_000_000; // 1s
     private static final long MAX_TIME;
     private static final int INITIAL_WORK_SIZE_F = 1;
-    private static int INITIAL_WORK_SIZE_D;
+    private static final int INITIAL_WORK_SIZE_D = 1000;
     private static final double GROWTH_LIMIT_A = 0.5;
     private static final double GROWTH_LIMIT_B = 0.75;
     private static final double GROWTH_FACTOR_A = 0.75;
     private static final double GROWTH_FACTOR_B = 1.25;
-    private static boolean init;
-    private final Map<Integer, Map<Integer, Long>> timeData;
+    private static final KernelType BEST_KERNEL;
+    private static final Map<KernelType, Map<Integer, Map<Integer, Long>>> TIME_DATA;
+    private final KernelType kernel;
     private int workSizeF, workSizeD, maxF, maxD;
 
     static {
@@ -43,37 +45,64 @@ public final class WorkSizeManager {
         } else {
             MAX_TIME = MAX_TIME_LIN * MAX_TIME_BASE;
         }
+        TIME_DATA = new EnumMap<>(KernelType.class);
+        for (KernelType kt : KernelType.values()) {
+            TIME_DATA.put(kt, new HashMap<>());
+        }
 
-        Logger.debug("Initializing work sizes for dynamic task management.");
-        INITIAL_WORK_SIZE_D = 1000;
-        init = false;
+        Logger.debug("Initializing best kernel.");
 
         final TaskSolver cc = TaskSolver.initSolver(TaskDefaultValues.DEFAULT_SOLVER);
-        cc.setKernel(TaskDefaultValues.DEFAULT_KERNEL);
         cc.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
         cc.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
 
         try {
-            final Image img = Image.createImage(new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY));
-            final List<double[]> deformationLimits = new ArrayList<>(1);
-            deformationLimits.add(new double[]{-49, 50, 0.1, -49, 50, 0.1});
-            final int fs = 30;
-            final List<Facet> facets = new ArrayList<>(1);
-            facets.add(Facet.createFacet(fs, 0, 0));
-            cc.solve(
-                    img, img,
-                    facets,
-                    deformationLimits, DeformationDegree.FIRST,
-                    fs);
-            init = true;
+            for (KernelType kt : KernelType.values()) {
+                cc.setKernel(kt);
+                final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
+                final List<double[]> deformationLimits = new ArrayList<>(2);
+                final double[] limits = new double[]{-49, 50, 0.05, -49, 50, 0.05};
+                deformationLimits.add(limits);
+                deformationLimits.add(limits);
+                final int fs = 30;
+                final List<Facet> facets = new ArrayList<>(2);
+                facets.add(Facet.createFacet(fs, 0, 0));
+                facets.add(Facet.createFacet(fs, 0, 0));
+                cc.solve(
+                        img, img,
+                        facets,
+                        deformationLimits, DeformationDegree.FIRST,
+                        fs);
+            }
         } catch (ComputationException ex) {
             Logger.warn("Failed to initialize work sizes.");
             Logger.debug(ex);
         }
+        // find best performing kernel        
+        double performance;
+        double bestPerformance = Double.NEGATIVE_INFINITY;
+        KernelType bestKernel = null;
+        for (KernelType kt : KernelType.values()) {
+            for (Entry<Integer, Map<Integer, Long>> e : TIME_DATA.get(kt).entrySet()) {
+                for (Entry<Integer, Long> e2 : e.getValue().entrySet()) {
+                    performance = (e.getKey() * e2.getKey()) / (double) e2.getValue();
+                    if (performance > bestPerformance) {
+                        bestPerformance = performance;
+                        bestKernel = kt;
+                    }
+                }
+            }
+        }
+        BEST_KERNEL = bestKernel;
+        Logger.debug("{0} selected as best kernel.", BEST_KERNEL);
     }
 
-    public WorkSizeManager() {
-        timeData = new HashMap<>();
+    public static KernelType getBestKernel() {
+        return BEST_KERNEL;
+    }
+
+    public WorkSizeManager(final KernelType kernel) {
+        this.kernel = kernel;
         reset();
     }
 
@@ -96,14 +125,13 @@ public final class WorkSizeManager {
     public void reset() {
         workSizeF = INITIAL_WORK_SIZE_F;
         workSizeD = INITIAL_WORK_SIZE_D;
-        timeData.clear();
     }
 
     public void storeTime(final int workSizeF, final int workSizeD, final long time) {
-        Map<Integer, Long> m = timeData.get(workSizeF);
+        Map<Integer, Long> m = TIME_DATA.get(kernel).get(workSizeF);
         if (m == null) {
             m = new TreeMap<>();
-            timeData.put(workSizeF, m);
+            TIME_DATA.get(kernel).put(workSizeF, m);
         }
 
         m.put(workSizeD, time);
@@ -111,15 +139,11 @@ public final class WorkSizeManager {
     }
 
     private void computeNextWorkSize() {
-        if (!timeData.isEmpty()) {
+        if (!TIME_DATA.get(kernel).isEmpty()) {
             final long[] max = findMaxTimeValue();
             final int[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
             workSizeF = newMax[0];
             workSizeD = newMax[1];
-
-            if (init) {
-                INITIAL_WORK_SIZE_D = workSizeD;
-            }
         }
     }
 
@@ -128,7 +152,7 @@ public final class WorkSizeManager {
 
         long t;
         int f, d;
-        for (Entry<Integer, Map<Integer, Long>> e : timeData.entrySet()) {
+        for (Entry<Integer, Map<Integer, Long>> e : TIME_DATA.get(kernel).entrySet()) {
             for (Entry<Integer, Long> e2 : e.getValue().entrySet()) {
                 t = e2.getValue();
                 if (t < MAX_TIME) {

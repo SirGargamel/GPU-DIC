@@ -11,6 +11,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.ResultCompilation;
+import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
@@ -561,7 +562,7 @@ public class TaskContainerUtils {
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
         if (kernel == null) {
             Logger.warn("Adding default kernel.");
-            tc.setParameter(TaskParameter.KERNEL, TaskDefaultValues.DEFAULT_KERNEL);
+            tc.setParameter(TaskParameter.KERNEL, WorkSizeManager.getBestKernel());
         }
         final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
         if (facetGenMode == null) {

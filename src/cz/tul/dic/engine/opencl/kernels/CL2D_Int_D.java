@@ -22,7 +22,7 @@ public class CL2D_Int_D extends Kernel {
 
     public CL2D_Int_D() {
         super("CL2D_Int_D");
-        wsm = new WorkSizeManager();
+        wsm = new WorkSizeManager(KernelType.CL2D_Int_D);
     }
 
     @Override
