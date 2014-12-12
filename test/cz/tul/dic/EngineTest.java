@@ -198,9 +198,8 @@ public class EngineTest {
         Set<String> errors = new HashSet<>();
 
         for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
-            System.out.println("New task !!!");
             tc = generateTask(s, DEF_LARGE);
-            errors.add(computeAndCheckTask(tc, s));            
+            errors.add(computeAndCheckTask(tc, s));
         }
 
         errors.remove(null);
@@ -235,6 +234,10 @@ public class EngineTest {
             return generateDescription(fileName, tc, -1, ex.getLocalizedMessage());
         }
 
+        return checkTask(tc, fileName);
+    }
+
+    private String checkTask(final TaskContainer tc, final String fileName) {
         final Image img1 = tc.getImage(ROUND);
         final Image img2 = tc.getImage(ROUND + 1);
         double[][][] results = tc.getDisplacement(ROUND, ROUND + 1).getDisplacement();
@@ -459,11 +462,11 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final TaskSolver correlation = TaskSolver.initSolver(Solver.BruteForce);
-        correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
-        correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
+        final TaskSolver solver = TaskSolver.initSolver(Solver.BruteForce);
+        solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
+        solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
-        correlation.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
+        solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
         Map<ROI, List<Facet>> facets = new HashMap<>(1);
         final List<Facet> roiFacets = new ArrayList<>(4);
@@ -476,18 +479,25 @@ public class EngineTest {
         tc.setResult(
                 ROUND,
                 roi,
-                correlation.solve(
+                solver.solve(
                         tc.getImage(ROUND), tc.getImage(ROUND + 1),
                         roiFacets,
                         generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi)));
-
+        solver.endTask();
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
-        for (CorrelationResult cr : tc.getResult(ROUND, roi)) {
-            Assert.assertNotNull(cr);
+        Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
+
+        final List<CorrelationResult> results = tc.getResult(ROUND, roi);        
+        CorrelationResult cr1, cr2;
+        for (int i = 1; i < tc.getResult(ROUND, roi).size(); i++) {
+            cr1 = results.get(i - 1);
+            Assert.assertNotNull(cr1);
+            cr2 = results.get(i);
+            Assert.assertNotNull(cr2);
+            Assert.assertArrayEquals(cr1.getDeformation(), cr2.getDeformation(), 0.001);
         }
-        Assert.assertNull(computeAndCheckTask(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
     }
 }

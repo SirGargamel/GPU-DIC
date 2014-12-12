@@ -17,12 +17,14 @@ import org.pmw.tinylog.Logger;
  */
 public class OpenCLSplitter extends TaskSplitter {
 
+    private static int COUNTER = 0;
     private static final long SIZE_INT = 4;
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
     private static final double COEFF_LIMIT_ADJUST = 0.75;
     private static final long COEFF_MEM_LIMIT_MAX = 6;
-    private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX - 5;
+    private static final long COEFF_MEM_LIMIT_INIT = COEFF_MEM_LIMIT_MAX - 1;
+    private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_INIT;
     private final int facetSize, ID;
     private final List<OpenCLSplitter> subSplitters;
     private final boolean subSplitter;
@@ -46,7 +48,7 @@ public class OpenCLSplitter extends TaskSplitter {
             hasNext = false;
         }
 
-        ID = (int) (Integer.MAX_VALUE * Math.random());
+        ID = COUNTER++;        
     }
 
     @Override
@@ -88,12 +90,6 @@ public class OpenCLSplitter extends TaskSplitter {
             }
 
             if (taskSize == 1 && !isMemOk(deformaiontCount, taskSize, facetSize, deformationLimitsArraySize)) {
-                if (subSplitter) {
-                    Logger.warn("Too many deformations in subtask, {0} generating subsplitters.", ID);
-                } else {
-                    Logger.warn("Too many deformations in task, {0} generating subsplitters.", ID);
-                }
-
                 sublist = new ArrayList<>(1);
                 sublist.add(facets.get(facetIndex));
 
@@ -119,7 +115,11 @@ public class OpenCLSplitter extends TaskSplitter {
                 checkedDeformations.add(newLimits);
                 subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
 
-                Logger.trace("--- {0} splits into {1}; {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
+                if (subSplitter) {
+                    Logger.warn("Too many deformations in subtask, {0} generating subsplitters - {1}, {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
+                } else {
+                    Logger.warn("Too many deformations in task, {0} generating subsplitters - {1}, {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
+                }
                 ct = subSplitters.get(0).next();
             } else {
                 checkedDeformations = new ArrayList<>(taskSize);
@@ -209,7 +209,7 @@ public class OpenCLSplitter extends TaskSplitter {
 
     @Override
     public void resetTaskSize() {
-        COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_MAX;
+        COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_INIT;
         Logger.debug("Reseting task size full.");
     }
 

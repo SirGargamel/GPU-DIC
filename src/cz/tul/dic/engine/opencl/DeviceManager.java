@@ -2,6 +2,7 @@ package cz.tul.dic.engine.opencl;
 
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
+import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.util.Filter;
 import java.nio.ByteBuffer;
@@ -15,8 +16,8 @@ public class DeviceManager {
 
     private static final CLDevice.Type DEVICE_TYPE = CLDevice.Type.GPU;
     private static final CLPlatform platform;
-    private static final CLContext context;
     private static final CLDevice device;
+    private static final CLContext context;
 
     static {
         @SuppressWarnings("unchecked")
@@ -33,20 +34,31 @@ public class DeviceManager {
         } else {
             device = tmpD;
         }
-        Logger.debug("Using " + device);        
+        Logger.debug("Using " + device);
 
         context = CLContext.create(device);
         context.addCLErrorHandler((String string, ByteBuffer bb, long l) -> {
             Logger.error("CLError - " + string);
         });
-    }
 
-    public static CLPlatform getPlatform() {
-        return platform;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            clearContext();
+            if (!context.isReleased()) {
+                context.release();
+            }
+        }));
     }
 
     public static CLContext getContext() {
         return context;
+    }
+
+    public static void clearContext() {
+        if (context != null) {
+            for (CLMemory mem : context.getMemoryObjects()) {
+                mem.release();
+            }
+        }
     }
 
     public static CLDevice getDevice() {

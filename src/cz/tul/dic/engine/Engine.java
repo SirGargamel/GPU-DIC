@@ -41,7 +41,7 @@ public class Engine extends Observable {
 
     private static final Engine instance;
     private final StrainEstimation strain;
-    private TaskSolver correlation;
+    private TaskSolver solver;
     private boolean stop;
 
     static {
@@ -116,12 +116,12 @@ public class Engine extends Observable {
         TaskContainerUtils.checkTaskValidity(tc);
 
         // prepare correlation calculator
-        correlation = TaskSolver.initSolver((Solver) tc.getParameter(TaskParameter.SOLVER));
-        correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
-        correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
+        solver = TaskSolver.initSolver((Solver) tc.getParameter(TaskParameter.SOLVER));
+        solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
+        solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
-        correlation.setTaskSplitVariant(taskSplit, taskSplitValue);
+        solver.setTaskSplitVariant(taskSplit, taskSplitValue);
 
         // prepare data
         setChanged();
@@ -138,7 +138,7 @@ public class Engine extends Observable {
             notifyObservers(TaskSolver.class);
             tc.setResult(
                     roundFrom, roi,
-                    correlation.solve(
+                    solver.solve(
                             tc.getImage(roundFrom), tc.getImage(roundTo),
                             facets.get(roi),
                             generateDeformations(tc.getDeformationLimits(roundFrom, roi), facets.get(roi).size()),
@@ -156,6 +156,8 @@ public class Engine extends Observable {
             Stats.drawFacetQualityStatistics(facets, roundFrom, roundTo);
             Stats.drawPointResultStatistics(roundFrom, roundTo);
         }
+        
+        solver.endTask();
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
 
@@ -185,7 +187,7 @@ public class Engine extends Observable {
 
     public void stop() {
         stop = true;
-        correlation.stop();
+        solver.stop();
         strain.stop();
         Logger.debug("Stopping engine.");
     }

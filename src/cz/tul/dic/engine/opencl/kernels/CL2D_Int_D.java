@@ -1,5 +1,6 @@
 package cz.tul.dic.engine.opencl.kernels;
 
+import cz.tul.dic.engine.opencl.OpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
@@ -20,8 +21,8 @@ public class CL2D_Int_D extends Kernel {
     private final WorkSizeManager wsm;
     private boolean stop;
 
-    public CL2D_Int_D() {
-        super("CL2D_Int_D");
+    public CL2D_Int_D(final OpenCLMemoryManager memManager) {
+        super("CL2D_Int_D", memManager);
         wsm = new WorkSizeManager(KernelType.CL2D_Int_D);
     }
 

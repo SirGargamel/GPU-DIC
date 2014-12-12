@@ -1,5 +1,6 @@
 package cz.tul.dic.engine.opencl.kernels;
 
+import cz.tul.dic.engine.opencl.OpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
@@ -20,8 +21,8 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     private final WorkSizeManager wsm;
     private boolean stop;
 
-    public CL1D_I_V_LL_MC_D() {
-        super("CL1D_I_V_LL_MC_D");
+    public CL1D_I_V_LL_MC_D(final OpenCLMemoryManager memManager) {
+        super("CL1D_I_V_LL_MC_D", memManager);
         wsm = new WorkSizeManager(KernelType.CL1D_I_V_LL_MC_D);
     }
 
@@ -112,17 +113,17 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     }
 
     @Override
-    boolean usesMemoryCoalescing() {
+    public boolean usesMemoryCoalescing() {
         return true;
     }
 
     @Override
-    boolean usesVectorization() {
+    public boolean usesVectorization() {
         return true;
     }
 
     @Override
-    boolean usesImage() {
+    public boolean usesImage() {
         return true;
     }
     

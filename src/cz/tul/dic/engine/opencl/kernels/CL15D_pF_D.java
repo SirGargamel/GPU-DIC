@@ -1,5 +1,6 @@
 package cz.tul.dic.engine.opencl.kernels;
 
+import cz.tul.dic.engine.opencl.OpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
@@ -17,8 +18,8 @@ public class CL15D_pF_D extends Kernel {
     private final WorkSizeManager wsm;
     private boolean stop;
 
-    public CL15D_pF_D() {
-        super("CL15D_pF_D");
+    public CL15D_pF_D(final OpenCLMemoryManager memManager) {
+        super("CL15D_pF_D", memManager);
         wsm = new WorkSizeManager(KernelType.CL15D_pF_D);
     }
 

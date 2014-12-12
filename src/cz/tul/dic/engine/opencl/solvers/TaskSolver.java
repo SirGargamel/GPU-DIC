@@ -1,7 +1,5 @@
 package cz.tul.dic.engine.opencl.solvers;
 
-import com.jogamp.opencl.CLContext;
-import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLException;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
@@ -18,7 +16,9 @@ import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.engine.opencl.OpenCLMemoryManager;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import org.pmw.tinylog.Logger;
@@ -30,8 +30,7 @@ import org.pmw.tinylog.Logger;
 public abstract class TaskSolver extends Observable {
 
     private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
-    final CLContext context;
-    final CLDevice device;
+    final OpenCLMemoryManager memManager;
     // dynamic
     KernelType kernelType;
     Interpolation interpolation;
@@ -53,13 +52,17 @@ public abstract class TaskSolver extends Observable {
     }
 
     TaskSolver() {
-        device = DeviceManager.getDevice();
-        context = DeviceManager.getContext();
+        memManager = new OpenCLMemoryManager();
 
         kernelType = WorkSizeManager.getBestKernel();
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
         taskSplitVariant = TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD;
         taskSplitValue = null;
+    }
+
+    public void endTask() {
+        memManager.releaseAll();
+        kernel.finishComputation();
     }
 
     public synchronized List<CorrelationResult> solve(
@@ -69,7 +72,7 @@ public abstract class TaskSolver extends Observable {
             int facetSize) throws ComputationException {
         stop = false;
 
-        kernel = Kernel.createKernel(kernelType);
+        kernel = Kernel.createKernel(kernelType, memManager);
         Logger.trace("Kernel prepared - {0}", kernel);
 
         this.facetSize = facetSize;
@@ -92,7 +95,7 @@ public abstract class TaskSolver extends Observable {
         }
 
         try {
-            kernel.prepareKernel(context, device, facetSize, defDegree, interpolation);
+            kernel.prepareKernel(facetSize, defDegree, interpolation);
 
             TaskSplitter ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
             ts.resetTaskSize();
@@ -106,10 +109,9 @@ public abstract class TaskSolver extends Observable {
                         if (stop) {
                             return result;
                         }
-
-                        ct = ts.next();
-                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), DeformationUtils.getDeformationCoeffCount(defDegree)));
-                        kernel.finishRound();
+                        
+                        ct = ts.next();                        
+                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits()));                        
                         // pick best results for this computation task and discard ct data 
                         if (ct.isSubtask()) {
                             bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
@@ -129,7 +131,7 @@ public abstract class TaskSolver extends Observable {
 
                     finished = true;
                 } catch (CLException ex) {
-                    kernel.finishRound();
+                    memManager.releaseAll();
                     if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
                         ts.signalTaskSizeTooBig();
                         ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
@@ -140,12 +142,12 @@ public abstract class TaskSolver extends Observable {
                 }
             }
 
-            kernel.finishComputation();
-
             if (!finished && lastEx != null) {
+                memManager.releaseAll();
                 throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx.getLocalizedMessage());
             }
         } catch (CLException ex) {
+            memManager.releaseAll();
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
         }
 
