@@ -1,19 +1,13 @@
 package cz.tul.dic.debug;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.strain.StrainEstimation;
-import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -67,13 +61,13 @@ public class DebugControl {
 
     public static void performStatisticsDump(final TaskContainer tc) throws IOException, ComputationException {
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
-            Stats.dumpDeformationsStatisticsUsage(e.getKey());
-            Stats.dumpDeformationsStatisticsPerQuality(e.getKey());
-            Stats.drawPointResultStatistics(e.getKey(), e.getValue());
+            Stats.getInstance().dumpDeformationsStatisticsUsage(e.getKey());
+            Stats.getInstance().dumpDeformationsStatisticsPerQuality(e.getKey());
+            Stats.getInstance().drawPointResultStatistics(e.getKey(), e.getValue());
         }
 
-        Stats.dumpDeformationsStatisticsPerQuality();
-        Stats.dumpDeformationsStatisticsUsage();
+        Stats.getInstance().dumpDeformationsStatisticsPerQuality();
+        Stats.getInstance().dumpDeformationsStatisticsUsage();
         new StrainEstimation().computeStrain(tc);
     }
 

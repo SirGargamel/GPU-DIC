@@ -16,7 +16,7 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.debug.Stats;
+import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
@@ -29,6 +29,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
@@ -52,6 +53,7 @@ public abstract class Kernel {
 
     private static final String KERNEL_REDUCE = "reduce";
     private static final String KERNEL_FIND_POS = "findPos";
+    private static final List<IGPUResultsReceiver> resultListeners;
     private final String kernelName;
     protected final CLContext context;
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
@@ -59,6 +61,10 @@ public abstract class Kernel {
     protected final CLCommandQueue queue;
     private final Set<CLResource> clMem;
     private final OpenCLMemoryManager memManager;
+
+    static {
+        resultListeners = new LinkedList<>();
+    }
 
     protected Kernel(String kernelName, final OpenCLMemoryManager memManager) {
         this.kernelName = kernelName;
@@ -124,10 +130,12 @@ public abstract class Kernel {
                 maxDeformationCount,
                 imageA.getWidth(), facetSize, facetCount);
 
-        if (Stats.isGpuDebugEnabled()) {
+        if (!resultListeners.isEmpty()) {
             queue.putReadBuffer(clResults, true);
             final float[] results = readBuffer(clResults.getBuffer());
-            Stats.dumpGpuResults(results, facets, deformationLimits);
+            for (IGPUResultsReceiver rr : resultListeners) {
+                rr.dumpGpuResults(results, facets, deformationLimits);
+            }
         }
 
         final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
@@ -274,6 +282,16 @@ public abstract class Kernel {
             result = globalSize + groupSize - r;
         }
         return result;
+    }
+
+    public static void registerListener(final IGPUResultsReceiver listener) {
+        resultListeners.add(listener);
+        Logger.debug("Registering {0} for GPU results.", listener);
+    }
+
+    public static void deregisterListener(final IGPUResultsReceiver listener) {
+        resultListeners.remove(listener);
+        Logger.debug("Deregistering {0} for GPU results.", listener);
     }
 
 }

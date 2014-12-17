@@ -11,14 +11,12 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
-import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.OpenCLMemoryManager;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import org.pmw.tinylog.Logger;
@@ -109,9 +107,9 @@ public abstract class TaskSolver extends Observable {
                         if (stop) {
                             return result;
                         }
-                        
-                        ct = ts.next();                        
-                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits()));                        
+
+                        ct = ts.next();
+                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits()));
                         // pick best results for this computation task and discard ct data 
                         if (ct.isSubtask()) {
                             bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
@@ -151,7 +149,7 @@ public abstract class TaskSolver extends Observable {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
         }
 
-        Logger.trace("{0} correlations computed.", result.size());
+        Logger.trace("Found solution for {0} facets.", result.size());
 
         return result;
     }

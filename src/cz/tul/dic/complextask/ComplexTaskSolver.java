@@ -131,8 +131,8 @@ public class ComplexTaskSolver extends Observable {
             notifyObservers(currentRound);
         }
 
-        Stats.dumpDeformationsStatisticsUsage();
-        Stats.dumpDeformationsStatisticsPerQuality();
+        Stats.getInstance().dumpDeformationsStatisticsUsage();
+        Stats.getInstance().dumpDeformationsStatisticsPerQuality();
 
         if (stop) {
             return;

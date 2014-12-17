@@ -11,6 +11,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.engine.displacement.FindMaxAndAverage;
+import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
@@ -32,7 +33,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Ječmen
  */
-public class Stats {
+public class Stats implements IGPUResultsReceiver {
 
     private static final boolean ENABLE_GPU_RESULTS = false;
     private static final boolean ENABLE_DEF_USAGE = true;
@@ -41,15 +42,27 @@ public class Stats {
     private static final boolean ENABLE_POINT_QUALITY = false;
     private static final boolean ENABLE_POINT_STATS = false;
     private static final boolean ENABLE_REGRESSION_QUALITY = false;
-    private static TaskContainer tc;
-    private static int gpuBatch;
+    private static final Stats INSTANCE;
+    private TaskContainer tc;
+    private int gpuBatch;
 
-    public static void setTaskContainer(final TaskContainer tc) {
-        Stats.tc = tc;
+    static {
+        INSTANCE = new Stats();
+        if (ENABLE_GPU_RESULTS) {
+            Kernel.registerListener(INSTANCE);
+        }
+    }
+
+    public static Stats getInstance() {
+        return INSTANCE;
+    }
+
+    public void setTaskContainer(final TaskContainer tc) {
+        this.tc = tc;
         gpuBatch = 0;
     }
 
-    public static void dumpDeformationsStatisticsUsage(final int round) throws IOException {
+    public void dumpDeformationsStatisticsUsage(final int round) throws IOException {
         if (ENABLE_DEF_USAGE) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
@@ -87,7 +100,7 @@ public class Stats {
         }
     }
 
-    public static void dumpDeformationsStatisticsUsage() throws IOException {
+    public void dumpDeformationsStatisticsUsage() throws IOException {
         if (ENABLE_DEF_USAGE) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
@@ -131,7 +144,7 @@ public class Stats {
         }
     }
 
-    public static void dumpDeformationsStatisticsPerQuality(final int round) throws IOException {
+    public void dumpDeformationsStatisticsPerQuality(final int round) throws IOException {
         if (ENABLE_DEF_QUALITY) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Map<ROI, List<CorrelationResult>> results = tc.getResults(round);
@@ -147,7 +160,11 @@ public class Stats {
                     if (cr != null) {
                         val = (int) (cr.getValue() * 10);
                         counter = counters.get(val);
-                        counter.inc(cr.getDeformation());
+                        if (counter != null) {
+                            counter.inc(cr.getDeformation());
+                        } else {
+                            Logger.warn("Illegal correlation value - {0}", cr.getValue());
+                        }
                     }
                 }
             }
@@ -164,7 +181,7 @@ public class Stats {
         }
     }
 
-    public static void dumpDeformationsStatisticsPerQuality() throws IOException {
+    public void dumpDeformationsStatisticsPerQuality() throws IOException {
         if (ENABLE_DEF_QUALITY) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Set<Integer> rounds = TaskContainerUtils.getRounds(tc).keySet();
@@ -205,7 +222,8 @@ public class Stats {
         }
     }
 
-    public static void dumpGpuResults(final float[] resultData, final List<Facet> facets, final List<double[]> deformationLimits) {
+    @Override
+    public void dumpGpuResults(final float[] resultData, final List<Facet> facets, final List<double[]> deformationLimits) {
         if (ENABLE_GPU_RESULTS) {
             final File outFile = new File(NameGenerator.generateGpuResultsDump(tc, gpuBatch++));
             outFile.getParentFile().mkdirs();
@@ -213,9 +231,9 @@ public class Stats {
                 out.newLine();
 
                 final int defCountPerFacet = resultData.length / facets.size();
-                int facetCounter = 0;                
+                int facetCounter = 0;
                 for (int i = 0; i < facets.size(); i++) {
-                    out.write(facets.get(i).toString());                    
+                    out.write(facets.get(i).toString());
                     out.write(Arrays.toString(deformationLimits.get(i)));
                     out.newLine();
                     for (int r = facetCounter * defCountPerFacet; r < (facetCounter + 1) * defCountPerFacet; r++) {
@@ -239,7 +257,7 @@ public class Stats {
         }
     }
 
-    public static void drawFacetQualityStatistics(final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
+    public void drawFacetQualityStatistics(final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
         if (ENABLE_FACET_QUALITY) {
             final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
             out.getParentFile().mkdirs();
@@ -264,7 +282,7 @@ public class Stats {
         }
     }
 
-    public static void drawPointResultStatistics(final int roundFrom, final int roundTo) throws IOException, ComputationException {
+    public void drawPointResultStatistics(final int roundFrom, final int roundTo) throws IOException, ComputationException {
         if (ENABLE_POINT_QUALITY) {
             final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
             out.getParentFile().mkdirs();
@@ -273,7 +291,7 @@ public class Stats {
         }
     }
 
-    public static void exportPointSubResultsStatistics(final Analyzer2D counter, final String name) {
+    public void exportPointSubResultsStatistics(final Analyzer2D counter, final String name) {
         if (ENABLE_POINT_STATS) {
             final File out = new File(name);
             out.getParentFile().mkdirs();
@@ -293,7 +311,7 @@ public class Stats {
         }
     }
 
-    public static void drawRegressionQualities(final Image img, final double[][][] resultQuality, final String nameA, final String nameB) throws ComputationException {
+    public void drawRegressionQualities(final Image img, final double[][][] resultQuality, final String nameA, final String nameB) throws ComputationException {
         if (ENABLE_REGRESSION_QUALITY) {
             final File out = new File(nameA);
             out.getParentFile().mkdirs();
@@ -307,7 +325,7 @@ public class Stats {
         }
     }
 
-    public static boolean isGpuDebugEnabled() {
+    public boolean isGpuDebugEnabled() {
         return DebugControl.isDebugMode() && Stats.ENABLE_GPU_RESULTS;
     }
 

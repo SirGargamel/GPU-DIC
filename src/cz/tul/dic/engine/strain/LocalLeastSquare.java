@@ -86,7 +86,7 @@ public class LocalLeastSquare extends StrainEstimator {
             }
 
             if (DebugControl.isDebugMode()) {
-                Stats.drawRegressionQualities(
+                Stats.getInstance().drawRegressionQualities(
                         tc.getImage(roundTo), resultQuality,
                         NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Exx),
                         NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Eyy));

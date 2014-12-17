@@ -490,7 +490,7 @@ public class EngineTest {
 
         Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
 
-        final List<CorrelationResult> results = tc.getResult(ROUND, roi);        
+        final List<CorrelationResult> results = tc.getResult(ROUND, roi);
         CorrelationResult cr1, cr2;
         for (int i = 1; i < tc.getResult(ROUND, roi).size(); i++) {
             cr1 = results.get(i - 1);

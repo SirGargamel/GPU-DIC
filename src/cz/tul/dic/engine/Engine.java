@@ -81,8 +81,8 @@ public class Engine extends Observable {
             exportRound(tc, r);            
         }
 
-        Stats.dumpDeformationsStatisticsUsage();
-        Stats.dumpDeformationsStatisticsPerQuality();
+        Stats.getInstance().dumpDeformationsStatisticsUsage();
+        Stats.getInstance().dumpDeformationsStatisticsPerQuality();
 
         if (!hints.contains(Hint.NO_STRAIN)) {
             if (stop) {
@@ -109,7 +109,7 @@ public class Engine extends Observable {
         } else {
             DebugControl.resumeDebugMode();
         }
-        Stats.setTaskContainer(tc);
+        Stats.getInstance().setTaskContainer(tc);
 
         setChanged();
         notifyObservers(TaskContainerUtils.class);
@@ -151,10 +151,10 @@ public class Engine extends Observable {
         DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);
 
         if (DebugControl.isDebugMode()) {
-            Stats.dumpDeformationsStatisticsUsage(roundFrom);
-            Stats.dumpDeformationsStatisticsPerQuality(roundFrom);
-            Stats.drawFacetQualityStatistics(facets, roundFrom, roundTo);
-            Stats.drawPointResultStatistics(roundFrom, roundTo);
+            Stats.getInstance().dumpDeformationsStatisticsUsage(roundFrom);
+            Stats.getInstance().dumpDeformationsStatisticsPerQuality(roundFrom);
+            Stats.getInstance().drawFacetQualityStatistics(facets, roundFrom, roundTo);
+            Stats.getInstance().drawPointResultStatistics(roundFrom, roundTo);
         }
         
         solver.endTask();

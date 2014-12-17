@@ -1,6 +1,7 @@
 package cz.tul.dic.engine.opencl.solvers;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  *
@@ -22,6 +23,15 @@ public class CorrelationResult implements Serializable {
     public CorrelationResult(float value, double[] deformation) {
         this.value = value;
         this.deformation = deformation;
+    }
+    
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(Arrays.toString(deformation));
+        sb.append(": ");
+        sb.append(value);
+        return sb.toString();
     }
 
 }

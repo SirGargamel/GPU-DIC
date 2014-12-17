@@ -8,5 +8,7 @@ public enum Solver {
 
     BruteForce,
     CoarseFine,
+    NewtonRaphson,
+    NewtonRaphsonForward,
 
 }
