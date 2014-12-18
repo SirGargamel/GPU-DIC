@@ -9,6 +9,7 @@ import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.List;
+import org.pmw.tinylog.Logger;
 
 public class CoarseFine extends TaskSolver {
 
@@ -29,6 +30,7 @@ public class CoarseFine extends TaskSolver {
         final List<double[]> fineLimits = new ArrayList<>(facetCount);
         double[] newLimits, coarseResult;
         int l;
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < facetCount; i++) {
             coarseResult = coarseResults.get(i).getDeformation();
             temp = deformationLimits.get(i);
@@ -45,7 +47,14 @@ public class CoarseFine extends TaskSolver {
             newLimits[DeformationLimit.VSTEP] = 0;
 
             fineLimits.add(newLimits);
+            
+            sb.append("Coarse result for facet nr.")
+                                .append(i)
+                                .append(" - ")
+                                .append(coarseResults.get(i))
+                                .append("\n");
         }
+        Logger.trace(sb);
 
         return computeTask(
                 image1, image2,

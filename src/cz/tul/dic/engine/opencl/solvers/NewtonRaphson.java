@@ -29,8 +29,8 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final int COUNT_STEP = 5;
-    private static final int LIMITS_ROUNDS = 50;
-    private static final double LIMIT_MIN_GROWTH = 0.005;
+    private static final int LIMITS_ROUNDS = 20;
+    private static final double LIMIT_MIN_GROWTH = 0.01;
     private float[] gpuData;
 
     @Override
@@ -82,7 +82,9 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
         boolean[] compute = new boolean[facetCount];
         Arrays.fill(compute, true);
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
+            sb.setLength(0);
             time = System.nanoTime();
 
             results = computeTask(image1, image2, kernel, facets, limitsList, defDegree);
@@ -107,17 +109,28 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
                             limitsList.set(j, generateLimits(solution, limits));
                         } else {
                             compute[j] = false;
-                            Logger.trace("Stopping computation for facet nr.{0} due to quality increment.", j);
+                            sb.append("Stopping computation for facet nr.")
+                                    .append(j)
+                                    .append(" due to low quality increment.")
+                                    .append("\n");
                         }
-                        Logger.trace("New results for facet nr. {0} - {1},", j, results.get(j));
+                        sb.append("New results for facet nr.")
+                                .append(j)
+                                .append(" - ")
+                                .append(results.get(j))
+                                .append("\n");
                         results.set(j, newResult);
                     } catch (SingularMatrixException ex) {
                         compute[j] = false;
-                        Logger.debug("Stopping computation for facet nr.{0} due to singular hessian matrix.", j);
+                        sb.append("Stopping computation for facet nr.")
+                                .append(j)
+                                .append(" due to singular hessian matrix.")
+                                .append("\n");
                     }
                 }
             }
 
+            Logger.trace(sb);
             Logger.trace("Round time: " + ((System.nanoTime() - time) / 1_000_000) + "ms.");
         }
 

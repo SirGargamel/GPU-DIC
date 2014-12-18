@@ -27,8 +27,8 @@ public class NewtonRaphsonForward extends TaskSolver implements IGPUResultsRecei
 
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final int COUNT_STEP = 5;
-    private static final int LIMITS_ROUNDS = 50;
-    private static final double LIMIT_MIN_GROWTH = 0.005;
+    private static final int LIMITS_ROUNDS = 20;
+    private static final double LIMIT_MIN_GROWTH = 0.01;
     private float[] gpuData;
 
     @Override
@@ -67,7 +67,7 @@ public class NewtonRaphsonForward extends TaskSolver implements IGPUResultsRecei
             limitsList.add(generateLimits(solution, newLimits));
         }
 
-        final int[] indices = generateIndices(coeffCount);
+        final int[] indices = prepareIndices(coeffCount);
 
         List<CorrelationResult> results = coarseResults;
         RealVector gradient, solutionVec;
@@ -80,7 +80,9 @@ public class NewtonRaphsonForward extends TaskSolver implements IGPUResultsRecei
 
         boolean[] compute = new boolean[facetCount];
         Arrays.fill(compute, true);
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
+            sb.setLength(0);
             time = System.nanoTime();
 
             results = computeTask(image1, image2, kernel, facets, limitsList, defDegree);
@@ -105,17 +107,28 @@ public class NewtonRaphsonForward extends TaskSolver implements IGPUResultsRecei
                             limitsList.set(j, generateLimits(solution, limits));
                         } else {
                             compute[j] = false;
-                            Logger.trace("Stopping computation for facet nr.{0} due to quality increment.", j);
+                            sb.append("Stopping computation for facet nr.")
+                                    .append(j)
+                                    .append(" due to low quality increment.")
+                                    .append("\n");
                         }
-                        Logger.trace("New results for facet nr. {0} - {1},", j, results.get(j));
+                        sb.append("New results for facet nr.")
+                                .append(j)
+                                .append(" - ")
+                                .append(results.get(j))
+                                .append("\n");
                         results.set(j, newResult);
                     } catch (SingularMatrixException ex) {
                         compute[j] = false;
-                        Logger.debug("Stopping computation for facet nr.{0} due to singular hessian matrix.", j);
+                        sb.append("Stopping computation for facet nr.")
+                                .append(j)
+                                .append(" due to singular hessian matrix.")
+                                .append("\n");
                     }
                 }
             }
 
+            Logger.trace(sb);
             Logger.trace("Round time: " + ((System.nanoTime() - time) / 1_000_000) + "ms.");
         }
 
@@ -150,7 +163,7 @@ public class NewtonRaphsonForward extends TaskSolver implements IGPUResultsRecei
 
         final int deformationCount = resultData.length / facetCount;
         final int resultsBase = facetIndex * deformationCount;
-        final int[] indices = generateIndices(coeffCount);
+        final int[] indices = prepareIndices(coeffCount);
         for (int i = 0; i < coeffCount; i++) {
             // right index
             indices[i]++;
@@ -163,7 +176,7 @@ public class NewtonRaphsonForward extends TaskSolver implements IGPUResultsRecei
         return new ArrayRealVector(data);
     }
 
-    private static int[] generateIndices(final int coeffCount) {
+    private static int[] prepareIndices(final int coeffCount) {
         final int[] indices = new int[coeffCount];
         Arrays.fill(indices, COUNT_STEP / 2);
         return indices;
@@ -174,7 +187,7 @@ public class NewtonRaphsonForward extends TaskSolver implements IGPUResultsRecei
 
         final int deformationCount = resultData.length / facetCount;
         final int resultsBase = facetIndex * deformationCount;
-        final int[] indices = generateIndices(coeffCount);
+        final int[] indices = prepareIndices(coeffCount);
 
         // direct approach with forward difference
         double subResultA, subResultB;
