@@ -7,10 +7,10 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -70,6 +70,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         }
 
         final int[] indices = prepareIndices(coeffCount);
+        final List<Facet> facetsToCompute = new ArrayList<>(facets);
 
         List<CorrelationResult> results = coarseResults;
         RealVector gradient, solutionVec;
@@ -77,62 +78,76 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         DecompositionSolver solver;
         CorrelationResult newResult;
         double[] limits;
-        float increment;
-        long time;
+        float increment;        
+        Iterator<Facet> it;
+        Facet f;
+        int facetIndexGlobal, facetIndexLocal;
+        final List<Facet> finishedFacets = new LinkedList<>();
 
-        boolean[] compute = new boolean[facetCount];
-        Arrays.fill(compute, true);
         final StringBuilder sb = new StringBuilder();
+        final long time = System.nanoTime();
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
-            sb.setLength(0);
-            time = System.nanoTime();
+            sb.setLength(0);            
 
-            results = computeTask(image1, image2, kernel, facets, limitsList, defDegree);
+            computeTask(image1, image2, kernel, facetsToCompute, limitsList, defDegree);
 
-            for (int j = 0; j < facetCount; j++) {
-                if (compute[j]) {
-                    try {
-                        // store results with computed quality
-                        newResult = new CorrelationResult(gpuData[generateIndex(indices)], solutionList.get(j));
-                        increment = newResult.getValue() - results.get(j).getValue();
-                        if (increment > LIMIT_MIN_GROWTH) {
-                            // prepare data for next step
-                            limits = limitsList.get(j);
-                            gradient = generateGradient(gpuData, j, facetCount, coeffCount, limits);
-                            hessianMatrix = generateHessianMatrix(gpuData, j, facetCount, coeffCount, limits);
-                            // calculate next step
-                            solver = new QRDecomposition(hessianMatrix).getSolver();
-                            solutionVec = solver.solve(gradient);
-                            // prepare data for next step
-                            solution = solutionVec.toArray();
-                            solutionList.set(j, solution);
-                            limitsList.set(j, generateLimits(solution, limits));
-                        } else {
-                            compute[j] = false;
-                            sb.append("Stopping computation for facet nr.")
-                                    .append(j)
-                                    .append(" due to low quality increment.")
-                                    .append("\n");
-                        }
-                        sb.append("New results for facet nr.")
-                                .append(j)
-                                .append(" - ")
-                                .append(results.get(j))
-                                .append("\n");
-                        results.set(j, newResult);
-                    } catch (SingularMatrixException ex) {
-                        compute[j] = false;
-                        sb.append("Stopping computation for facet nr.")
-                                .append(j)
-                                .append(" due to singular hessian matrix.")
-                                .append("\n");
-                    }
+            finishedFacets.clear();
+            it = facetsToCompute.iterator();
+            facetIndexLocal = 0;
+            while (it.hasNext()) {
+                f = it.next();
+                facetIndexGlobal = facets.indexOf(f);
+
+                try {
+                    // store results with computed quality
+                    newResult = new CorrelationResult(gpuData[generateIndex(indices)], solutionList.get(facetIndexLocal));
+                    increment = newResult.getValue() - results.get(facetIndexGlobal).getValue();
+                    sb.append("New results for facet nr.")
+                            .append(facetIndexGlobal)
+                            .append(" - ")
+                            .append(results.get(facetIndexGlobal));
+                    results.set(facetIndexGlobal, newResult);
+                    if (increment > LIMIT_MIN_GROWTH) {
+                        // prepare data for next step
+                        limits = limitsList.get(facetIndexLocal);
+                        gradient = generateGradient(gpuData, facetIndexLocal, facetCount, coeffCount, limits);
+                        hessianMatrix = generateHessianMatrix(gpuData, facetIndexLocal, facetCount, coeffCount, limits);
+                        // calculate next step
+                        solver = new QRDecomposition(hessianMatrix).getSolver();
+                        solutionVec = solver.solve(gradient);
+                        // prepare data for next step
+                        solution = solutionVec.toArray();
+                        solutionList.set(facetIndexLocal, solution);
+                        limitsList.set(facetIndexLocal, generateLimits(solution, limits));
+                    } else if (i > 0) {
+                        sb.append(", stopping computation for facet nr.")
+                                .append(facetIndexGlobal)
+                                .append(" due to low quality increment.");
+                        finishedFacets.add(f);
+                    }                    
+                } catch (SingularMatrixException ex) {
+                    sb.append(", stopping computation for facet nr.")
+                            .append(facetIndexGlobal)
+                            .append(" due to singular hessian matrix.");
+                    finishedFacets.add(f);
                 }
+
+                sb.append("\n");
+                facetIndexLocal++;
+            }
+            for (Facet facet : finishedFacets) {
+                facetIndexLocal = facetsToCompute.indexOf(facet);
+                facetsToCompute.remove(facetIndexLocal);
+                limitsList.remove(facetIndexLocal);
             }
 
-            Logger.trace(sb);
-            Logger.trace("Round time: " + ((System.nanoTime() - time) / 1_000_000) + "ms.");
+            Logger.trace(sb);            
+
+            if (facetsToCompute.isEmpty()) {
+                break;
+            }
         }
+        Logger.trace("Round time: " + ((System.nanoTime() - time) / 1_000_000) + "ms.");
 
         Kernel.deregisterListener(this);
 
