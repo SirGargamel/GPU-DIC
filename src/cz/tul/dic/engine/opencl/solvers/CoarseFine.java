@@ -23,14 +23,39 @@ public class CoarseFine extends TaskSolver {
         for (double[] dA : deformationLimits) {
             temp = new double[COUNT_ZERO_ORDER_LIMITS];
             System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
+            temp[DeformationLimit.UMIN] = Math.floor(temp[DeformationLimit.UMIN]);
+            temp[DeformationLimit.UMAX] = Math.ceil(temp[DeformationLimit.UMAX]);
+            temp[DeformationLimit.USTEP] = 1;
+            temp[DeformationLimit.VMIN] = Math.floor(temp[DeformationLimit.VMIN]);
+            temp[DeformationLimit.VMAX] = Math.ceil(temp[DeformationLimit.VMAX]);
+            temp[DeformationLimit.VSTEP] = 1;
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> coarseResults = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+        List<CorrelationResult> coarseResults = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+
+        final StringBuilder sb = new StringBuilder();
+        double[] coarseResult, newLimits;
+        int l;        
+        for (int i = 0; i < facetCount; i++) {
+            coarseResult = coarseResults.get(i).getDeformation();
+            temp = zeroOrderLimits.get(i);
+
+            temp[DeformationLimit.UMIN] = coarseResult[Coordinates.X] - 1;
+            temp[DeformationLimit.UMAX] = coarseResult[Coordinates.X] + 1;
+            temp[DeformationLimit.USTEP] = 0.1;
+            temp[DeformationLimit.VMIN] = coarseResult[Coordinates.Y] - 1;
+            temp[DeformationLimit.VMAX] = coarseResult[Coordinates.Y] + 1;
+            temp[DeformationLimit.VSTEP] = 0.1;
+
+            sb.append("Coarse result for facet nr.")
+                    .append(i)
+                    .append(" - ")
+                    .append(coarseResults.get(i))
+                    .append("\n");
+        }
+        coarseResults = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
 
         final List<double[]> fineLimits = new ArrayList<>(facetCount);
-        double[] newLimits, coarseResult;
-        int l;
-        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < facetCount; i++) {
             coarseResult = coarseResults.get(i).getDeformation();
             temp = deformationLimits.get(i);
@@ -47,12 +72,12 @@ public class CoarseFine extends TaskSolver {
             newLimits[DeformationLimit.VSTEP] = 0;
 
             fineLimits.add(newLimits);
-            
-            sb.append("Coarse result for facet nr.")
-                                .append(i)
-                                .append(" - ")
-                                .append(coarseResults.get(i))
-                                .append("\n");
+
+            sb.append("Fine result for facet nr.")
+                    .append(i)
+                    .append(" - ")
+                    .append(coarseResults.get(i))
+                    .append("\n");
         }
         Logger.trace(sb);
 
