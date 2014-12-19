@@ -27,7 +27,6 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class TaskSolver extends Observable {
 
-    private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
     final OpenCLMemoryManager memManager;
     // dynamic
     KernelType kernelType;
@@ -98,7 +97,7 @@ public abstract class TaskSolver extends Observable {
             TaskSplitter ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
             ts.resetTaskSize();
             boolean finished = false;
-            CLException lastEx = null;
+            Exception lastEx = null;
             while (ts.isSplitterReady() && !finished) {
                 try {
                     ComputationTask ct;
@@ -128,12 +127,18 @@ public abstract class TaskSolver extends Observable {
                     }
 
                     finished = true;
-                } catch (CLException ex) {
+                } catch (ComputationException ex) {
                     memManager.releaseAll();
-                    if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
-                        ts.signalTaskSizeTooBig();
-                        ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
-                        lastEx = ex;
+                    if (ex instanceof ComputationException) {
+                        final ComputationException exC = (ComputationException) ex;
+                        if (exC.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
+                            Logger.warn(exC);
+                            ts.signalTaskSizeTooBig();
+                            ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
+                            lastEx = ex;
+                        } else {
+                            throw ex;
+                        }
                     } else {
                         throw ex;
                     }

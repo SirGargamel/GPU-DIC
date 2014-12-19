@@ -55,70 +55,74 @@ public class OpenCLMemoryManager {
         queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
     }
 
-    public void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {        
-        if (imageA != this.imageA) {
-            release(clImageA);
-            this.imageA = imageA;
+    public void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
+        try {
+            if (imageA != this.imageA) {
+                release(clImageA);
+                this.imageA = imageA;
 
-            if (kernel.usesImage()) {
-                clImageA = generateImage2d_t(imageA);
-                queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
-            } else {
-                clImageA = generateImageArray(imageA);
-                queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageA, false);
+                if (kernel.usesImage()) {
+                    clImageA = generateImage2d_t(imageA);
+                    queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
+                } else {
+                    clImageA = generateImageArray(imageA);
+                    queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageA, false);
+                }
             }
-        }
-        if (imageB != this.imageB) {
-            release(clImageB);
-            this.imageB = imageB;
+            if (imageB != this.imageB) {
+                release(clImageB);
+                this.imageB = imageB;
 
-            if (kernel.usesImage()) {
-                clImageB = generateImage2d_t(imageB);
-                queue.putWriteImage((CLImage2d<IntBuffer>) clImageB, false);
-            } else {
-                clImageB = generateImageArray(imageB);
-                queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageB, false);
+                if (kernel.usesImage()) {
+                    clImageB = generateImage2d_t(imageB);
+                    queue.putWriteImage((CLImage2d<IntBuffer>) clImageB, false);
+                } else {
+                    clImageB = generateImageArray(imageB);
+                    queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageB, false);
+                }
             }
-        }
 
-        boolean changedResults = false;
-        if (facets != this.facets) {
-            release(clFacetData);
-            release(clFacetCenters);
-            this.facets = facets;
+            boolean changedResults = false;
+            if (facets != this.facets) {
+                release(clFacetData);
+                release(clFacetCenters);
+                this.facets = facets;
 
-            clFacetData = generateFacetData(facets, kernel.usesMemoryCoalescing());
-            queue.putWriteBuffer(clFacetData, false);
+                clFacetData = generateFacetData(facets, kernel.usesMemoryCoalescing());
+                queue.putWriteBuffer(clFacetData, false);
 
-            clFacetCenters = generateFacetCenters(facets);
-            queue.putWriteBuffer(clFacetCenters, false);
+                clFacetCenters = generateFacetCenters(facets);
+                queue.putWriteBuffer(clFacetCenters, false);
 
-            changedResults = true;
-        }
-        if (deformationLimits != this.deformationLimits) {
-            release(clDeformationLimits);
-            release(clDefStepCount);
-            this.deformationLimits = deformationLimits;
-
-            clDeformationLimits = generateDeformationLimits(deformationLimits);
-            queue.putWriteBuffer(clDeformationLimits, false);
-
-            deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
-            clDefStepCount = generateDeformationStepCounts(deformationCounts);
-            queue.putWriteBuffer(clDefStepCount, false);
-
-            changedResults = true;
-        }
-
-        if (changedResults) {
-            release(clResults);
-
-            maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
-            final long size = facets.size() * maxDeformationCount;
-            if (size <= 0 || size >= Integer.MAX_VALUE) {
-                throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
+                changedResults = true;
             }
-            clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
+            if (deformationLimits != this.deformationLimits) {
+                release(clDeformationLimits);
+                release(clDefStepCount);
+                this.deformationLimits = deformationLimits;
+
+                clDeformationLimits = generateDeformationLimits(deformationLimits);
+                queue.putWriteBuffer(clDeformationLimits, false);
+
+                deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
+                clDefStepCount = generateDeformationStepCounts(deformationCounts);
+                queue.putWriteBuffer(clDefStepCount, false);
+
+                changedResults = true;
+            }
+
+            if (changedResults) {
+                release(clResults);
+
+                maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
+                final long size = facets.size() * maxDeformationCount;
+                if (size <= 0 || size >= Integer.MAX_VALUE) {
+                    throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
+                }
+                clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
+            }
+        } catch (OutOfMemoryError e) {
+            throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
         }
     }
 
@@ -237,7 +241,7 @@ public class OpenCLMemoryManager {
         release(clImageB);
         release(clResults);
         release(context);
-        release(queue);        
+        release(queue);
     }
 
     public CLMemory<IntBuffer> getClImageA() {

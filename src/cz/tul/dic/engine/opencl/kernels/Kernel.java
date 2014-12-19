@@ -5,6 +5,7 @@ import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
+import com.jogamp.opencl.CLException;
 import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLProgram;
@@ -16,6 +17,7 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.data.task.splitter.TaskSplitter;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
@@ -51,6 +53,7 @@ public abstract class Kernel {
         }
     }
 
+    private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
     private static final String KERNEL_REDUCE = "reduce";
     private static final String KERNEL_FIND_POS = "findPos";
     private static final List<IGPUResultsReceiver> resultListeners;
@@ -119,29 +122,37 @@ public abstract class Kernel {
         }
         final int facetSize = facets.get(0).getSize();
 
-        memManager.assignData(imageA, imageB, facets, deformationLimits, this);
-        final CLBuffer<FloatBuffer> clResults = memManager.getClResults();
-        final int maxDeformationCount = memManager.getMaxDeformationCount();
+        try {
+            memManager.assignData(imageA, imageB, facets, deformationLimits, this);
+            final CLBuffer<FloatBuffer> clResults = memManager.getClResults();
+            final int maxDeformationCount = memManager.getMaxDeformationCount();
 
-        runKernel(memManager.getClImageA(), memManager.getClImageB(),
-                memManager.getClFacetData(), memManager.getClFacetCenters(),
-                memManager.getClDeformationLimits(), memManager.getClDefStepCount(),
-                clResults,
-                maxDeformationCount,
-                imageA.getWidth(), facetSize, facetCount);
+            runKernel(memManager.getClImageA(), memManager.getClImageB(),
+                    memManager.getClFacetData(), memManager.getClFacetCenters(),
+                    memManager.getClDeformationLimits(), memManager.getClDefStepCount(),
+                    clResults,
+                    maxDeformationCount,
+                    imageA.getWidth(), facetSize, facetCount);
 
-        if (!resultListeners.isEmpty()) {
-            queue.putReadBuffer(clResults, true);
-            final float[] results = readBuffer(clResults.getBuffer());
-            for (IGPUResultsReceiver rr : resultListeners) {
-                rr.dumpGpuResults(results, facets, deformationLimits);
+            if (!resultListeners.isEmpty()) {
+                queue.putReadBuffer(clResults, true);
+                final float[] results = readBuffer(clResults.getBuffer());
+                for (IGPUResultsReceiver rr : resultListeners) {
+                    rr.dumpGpuResults(results, facets, deformationLimits);
+                }
+            }
+
+            final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
+            final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
+
+            return createResults(readBuffer(maxValuesCl.getBuffer()), positions, deformationLimits);
+        } catch (CLException ex) {
+            if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
+                throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex.getCLErrorString());
+            } else {
+                throw ex;
             }
         }
-
-        final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
-        final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
-
-        return createResults(readBuffer(maxValuesCl.getBuffer()), positions, deformationLimits);
     }
 
     abstract void runKernel(final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
