@@ -154,7 +154,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         return results;
     }
 
-    private static double[] generateLimits(final double[] solution, final double[] oldLimits) {
+    protected static double[] generateLimits(final double[] solution, final double[] oldLimits) {
         final double[] newLimits = Arrays.copyOf(oldLimits, oldLimits.length);
         double step;
         for (int i = 0; i < solution.length; i++) {
@@ -165,7 +165,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         return newLimits;
     }
 
-    private static int generateIndex(final int... indices) {
+    protected static int generateIndex(final int... indices) {
         int result = indices[0];
         for (int i = 1; i < indices.length; i++) {
             result *= COUNT_STEP;
@@ -175,7 +175,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
     }
 
     // central difference
-    private static RealVector generateGradient(float[] resultData, final int facetIndex, final int facetCount, final int coeffCount, final double[] deformationLimits) {
+    protected RealVector generateGradient(float[] resultData, final int facetIndex, final int facetCount, final int coeffCount, final double[] deformationLimits) {
         final double[] data = new double[coeffCount];
 
         final int deformationCount = resultData.length / facetCount;
@@ -194,13 +194,13 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         return new ArrayRealVector(data);
     }
 
-    private static int[] prepareIndices(final int coeffCount) {
+    protected static int[] prepareIndices(final int coeffCount) {
         final int[] indices = new int[coeffCount];
         Arrays.fill(indices, COUNT_STEP / 2);
         return indices;
     }
 
-    private static RealMatrix generateHessianMatrix(float[] resultData, final int facetIndex, final int facetCount, final int coeffCount, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(float[] resultData, final int facetIndex, final int facetCount, final int coeffCount, final double[] deformationLimits) {
         final double[][] data = new double[coeffCount][coeffCount];
 
         final int deformationCount = resultData.length / facetCount;
