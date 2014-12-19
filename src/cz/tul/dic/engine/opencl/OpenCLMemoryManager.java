@@ -61,16 +61,22 @@ public class OpenCLMemoryManager {
                 release(clImageA);
                 this.imageA = imageA;
 
-                if (kernel.usesImage()) {
-                    clImageA = generateImage2d_t(imageA);
-                    queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
+                if (imageA == this.imageB) {
+                    clImageA = clImageB;
                 } else {
-                    clImageA = generateImageArray(imageA);
-                    queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageA, false);
+                    if (kernel.usesImage()) {
+                        clImageA = generateImage2d_t(imageA);
+                        queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
+                    } else {
+                        clImageA = generateImageArray(imageA);
+                        queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageA, false);
+                    }
                 }
             }
             if (imageB != this.imageB) {
-                release(clImageB);
+                if (clImageA != clImageB) {
+                    release(clImageB);
+                }
                 this.imageB = imageB;
 
                 if (kernel.usesImage()) {
@@ -83,7 +89,7 @@ public class OpenCLMemoryManager {
             }
 
             boolean changedResults = false;
-            if (facets != this.facets) {
+            if (!facets.equals(this.facets)) {
                 release(clFacetData);
                 release(clFacetCenters);
                 this.facets = facets;
@@ -96,7 +102,7 @@ public class OpenCLMemoryManager {
 
                 changedResults = true;
             }
-            if (deformationLimits != this.deformationLimits) {
+            if (!deformationLimits.equals(this.deformationLimits)) {
                 release(clDeformationLimits);
                 release(clDefStepCount);
                 this.deformationLimits = deformationLimits;
