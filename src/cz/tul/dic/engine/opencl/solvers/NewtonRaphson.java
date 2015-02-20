@@ -184,17 +184,15 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         }
 
         //sub-pixel stepping
-        double[] coarseResult, newLimits;
+        double[] coarseResult;
         int l;
         do {
             step /= 10.0;
             if (step < minStep) {
-                if (step * 10 == minStep) {
-                    System.err.println("Stopping due to low step - " + step + " vs. " + minStep);
+                if (step * 10 == minStep) {                    
                     break;
                 } else {
-                    step = minStep;
-                    System.err.println("Adjusting step to minStep - " + minStep);
+                    step = minStep;                    
                 }
             }
 
