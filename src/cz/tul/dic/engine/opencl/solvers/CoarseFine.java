@@ -39,6 +39,13 @@ public class CoarseFine extends TaskSolver {
             zeroOrderLimits.add(temp);
         }
         results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+        sb.append("Initial results, step [").append(step).append("]:");
+        for (int i = 0; i < facetCount; i++) {
+            sb.append(i)
+                    .append(" - ")
+                    .append(results.get(i))
+                    .append("; ");
+        }
 
         double minStep = 1;
         for (double[] dA : deformationLimits) {
@@ -75,19 +82,23 @@ public class CoarseFine extends TaskSolver {
                 temp[DeformationLimit.VSTEP] = step;
 
                 zeroOrderLimits.add(temp);
-
-                sb.append("Coarse result for facet nr.")
-                        .append(i)
-                        .append(" - ")
-                        .append(results.get(i))
-                        .append("\n");
             }
             results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+
+            sb.append("Finer results, step [").append(step).append("]:");
+            for (int i = 0; i < facetCount; i++) {
+                sb.append(i)
+                        .append(" - ")
+                        .append(results.get(i))
+                        .append("; ");
+            }
+
         } while (step > STEP_MINIMAL);
 
         //higher order search
         if (defDegree != DeformationDegree.ZERO) {
             final List<double[]> higherOrderLimits = new ArrayList<>(facetCount);
+
             for (int i = 0; i < facetCount; i++) {
                 coarseResult = results.get(i).getDeformation();
                 temp = deformationLimits.get(i);
@@ -104,25 +115,26 @@ public class CoarseFine extends TaskSolver {
                 newLimits[DeformationLimit.VSTEP] = 0;
 
                 higherOrderLimits.add(newLimits);
-
-                sb.append("Coarse result for facet nr.")
-                        .append(i)
-                        .append(" - ")
-                        .append(results.get(i))
-                        .append("\n");
             }
-            Logger.trace(sb);
-
             results = computeTask(
                     image1, image2,
                     kernel, facets,
                     higherOrderLimits,
                     defDegree);
+
+            sb.append("Higher order results: ");
+            for (int i = 0; i < facetCount; i++) {
+                sb.append(i)
+                        .append(" - ")
+                        .append(results.get(i))
+                        .append("; ");
+            }
         }
+        Logger.trace(sb);
 
         return results;
     }
-    
+
     @Override
     boolean needsBestResult() {
         return true;
