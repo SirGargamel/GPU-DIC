@@ -17,7 +17,6 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.data.task.splitter.TaskSplitter;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
@@ -114,7 +113,7 @@ public abstract class Kernel {
         }
     }
 
-    public List<CorrelationResult> compute(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits) throws ComputationException {
+    public List<CorrelationResult> compute(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, boolean findBest) throws ComputationException {
         final int facetCount = facets.size();
         if (facets.isEmpty()) {
             Logger.warn("Empty facets for computation.");
@@ -142,10 +141,17 @@ public abstract class Kernel {
                 }
             }
 
-            final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
-            final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
+            final List<CorrelationResult> result;
+            if (findBest) {
+                final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
+                final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
 
-            return createResults(readBuffer(maxValuesCl.getBuffer()), positions, deformationLimits);
+                result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, deformationLimits);
+            } else {
+                result = null;
+            }
+            return result;
+
         } catch (CLException ex) {
             if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
                 throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex.getCLErrorString());

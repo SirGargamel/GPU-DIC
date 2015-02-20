@@ -16,5 +16,10 @@ public class BruteForce extends TaskSolver {
             List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException {
         return computeTask(image1, image2, kernel, facets, deformationLimits, defDegree);
     }
+    
+    @Override
+    boolean needsBestResult() {
+        return true;
+    }
 
 }

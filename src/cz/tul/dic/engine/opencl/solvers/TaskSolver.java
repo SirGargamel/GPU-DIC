@@ -83,6 +83,8 @@ public abstract class TaskSolver extends Observable {
             final Kernel kernel, List<Facet> facets,
             List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException;
 
+    abstract boolean needsBestResult();
+
     List<CorrelationResult> computeTask(Image image1, Image image2,
             final Kernel kernel, List<Facet> facets,
             List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException {
@@ -108,7 +110,7 @@ public abstract class TaskSolver extends Observable {
                         }
 
                         ct = ts.next();
-                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits()));
+                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), needsBestResult()));
                         // pick best results for this computation task and discard ct data 
                         if (ct.isSubtask()) {
                             bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));

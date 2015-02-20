@@ -26,8 +26,7 @@ import org.pmw.tinylog.Logger;
  * @author Petr Ječmen
  */
 public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
-
-    private static final int COUNT_ZERO_ORDER_LIMITS = 6;
+    
     private static final int COUNT_STEP = 5;
     private static final int LIMITS_ROUNDS = 20;
     private static final double LIMIT_MIN_GROWTH = 0.01;
@@ -39,16 +38,11 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
         final int facetCount = deformationLimits.size();
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
+        
+        final TaskSolver cf = new CoarseFine();        
+        final List<CorrelationResult> coarseResults = cf.solve(image1, image2, kernel, facets, deformationLimits, DeformationDegree.ZERO);
 
-        final List<double[]> zeroOrderLimits = new ArrayList<>(facetCount);
         double[] temp;
-        for (double[] dA : deformationLimits) {
-            temp = new double[COUNT_ZERO_ORDER_LIMITS];
-            System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
-            zeroOrderLimits.add(temp);
-        }
-        final List<CorrelationResult> coarseResults = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
-
         final List<double[]> limitsList = new ArrayList<>(facetCount);
         final List<double[]> solutionList = new ArrayList<>(facetCount);
         double[] newLimits, coarseResult, solution;
@@ -78,7 +72,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         DecompositionSolver solver;
         CorrelationResult newResult;
         double[] limits;
-        float increment;        
+        float increment;
         Iterator<Facet> it;
         Facet f;
         int facetIndexGlobal, facetIndexLocal;
@@ -87,7 +81,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         final StringBuilder sb = new StringBuilder();
         final long time = System.nanoTime();
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
-            sb.setLength(0);            
+            sb.setLength(0);
 
             computeTask(image1, image2, kernel, facetsToCompute, limitsList, defDegree);
 
@@ -124,7 +118,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
                                 .append(facetIndexGlobal)
                                 .append(" due to low quality increment.");
                         finishedFacets.add(f);
-                    }                    
+                    }
                 } catch (SingularMatrixException ex) {
                     sb.append(", stopping computation for facet nr.")
                             .append(facetIndexGlobal)
@@ -141,7 +135,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
                 limitsList.remove(facetIndexLocal);
             }
 
-            Logger.trace(sb);            
+            Logger.trace(sb);
 
             if (facetsToCompute.isEmpty()) {
                 break;
@@ -248,6 +242,11 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
     @Override
     public void dumpGpuResults(float[] resultData, List<Facet> facets, List<double[]> deformationLimits) {
         this.gpuData = resultData;
+    }
+
+    @Override
+    boolean needsBestResult() {
+        return false;
     }
 
 }

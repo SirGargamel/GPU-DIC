@@ -14,78 +14,118 @@ import org.pmw.tinylog.Logger;
 public class CoarseFine extends TaskSolver {
 
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
+    private static final double STEP_INITIAL = 1;
+    private static final double STEP_MINIMAL = 0.01;
 
     @Override
     List<CorrelationResult> solve(Image image1, Image image2, Kernel kernel, List<Facet> facets, List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException {
         final int facetCount = deformationLimits.size();
-        final List<double[]> zeroOrderLimits = new ArrayList<>(facetCount);
+        final StringBuilder sb = new StringBuilder();
+        List<double[]> zeroOrderLimits = new ArrayList<>(facetCount);
+        List<CorrelationResult> results;
         double[] temp;
+        double step = STEP_INITIAL;
+
+        // initial pixel step
         for (double[] dA : deformationLimits) {
             temp = new double[COUNT_ZERO_ORDER_LIMITS];
             System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
             temp[DeformationLimit.UMIN] = Math.floor(temp[DeformationLimit.UMIN]);
             temp[DeformationLimit.UMAX] = Math.ceil(temp[DeformationLimit.UMAX]);
-            temp[DeformationLimit.USTEP] = 1;
+            temp[DeformationLimit.USTEP] = step;
             temp[DeformationLimit.VMIN] = Math.floor(temp[DeformationLimit.VMIN]);
             temp[DeformationLimit.VMAX] = Math.ceil(temp[DeformationLimit.VMAX]);
-            temp[DeformationLimit.VSTEP] = 1;
+            temp[DeformationLimit.VSTEP] = step;
             zeroOrderLimits.add(temp);
         }
-        List<CorrelationResult> coarseResults = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+        results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
 
-        final StringBuilder sb = new StringBuilder();
+        double minStep = 1;
+        for (double[] dA : deformationLimits) {
+            minStep = Math.min(minStep, Math.min(dA[DeformationLimit.USTEP], dA[DeformationLimit.VSTEP]));
+        }
+
+        //sub-pixel stepping
         double[] coarseResult, newLimits;
-        int l;        
-        for (int i = 0; i < facetCount; i++) {
-            coarseResult = coarseResults.get(i).getDeformation();
-            temp = zeroOrderLimits.get(i);
+        int l;
+        do {
+            step /= 10.0;
+            if (step < minStep) {
+                if (step * 10 == minStep) {
+                    System.err.println("Stopping due to low step - " + step + " vs. " + minStep);
+                    break;
+                } else {
+                    step = minStep;
+                    System.err.println("Adjusting step to minStep - " + minStep);
+                }
+            }
 
-            temp[DeformationLimit.UMIN] = coarseResult[Coordinates.X] - 1;
-            temp[DeformationLimit.UMAX] = coarseResult[Coordinates.X] + 1;
-            temp[DeformationLimit.USTEP] = 0.1;
-            temp[DeformationLimit.VMIN] = coarseResult[Coordinates.Y] - 1;
-            temp[DeformationLimit.VMAX] = coarseResult[Coordinates.Y] + 1;
-            temp[DeformationLimit.VSTEP] = 0.1;
+            zeroOrderLimits.clear();
+            zeroOrderLimits = new ArrayList<>(facetCount);
 
-            sb.append("Coarse result for facet nr.")
-                    .append(i)
-                    .append(" - ")
-                    .append(coarseResults.get(i))
-                    .append("\n");
+            for (int i = 0; i < facetCount; i++) {
+                coarseResult = results.get(i).getDeformation();
+                temp = new double[COUNT_ZERO_ORDER_LIMITS];
+
+                temp[DeformationLimit.UMIN] = coarseResult[Coordinates.X] - (10 * step);
+                temp[DeformationLimit.UMAX] = coarseResult[Coordinates.X] + (10 * step);
+                temp[DeformationLimit.USTEP] = step;
+                temp[DeformationLimit.VMIN] = coarseResult[Coordinates.Y] - (10 * step);
+                temp[DeformationLimit.VMAX] = coarseResult[Coordinates.Y] + (10 * step);
+                temp[DeformationLimit.VSTEP] = step;
+
+                zeroOrderLimits.add(temp);
+
+                sb.append("Coarse result for facet nr.")
+                        .append(i)
+                        .append(" - ")
+                        .append(results.get(i))
+                        .append("\n");
+            }
+            results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+        } while (step > STEP_MINIMAL);
+
+        //higher order search
+        if (defDegree != DeformationDegree.ZERO) {
+            final List<double[]> higherOrderLimits = new ArrayList<>(facetCount);
+            for (int i = 0; i < facetCount; i++) {
+                coarseResult = results.get(i).getDeformation();
+                temp = deformationLimits.get(i);
+                l = temp.length;
+
+                newLimits = new double[l];
+                System.arraycopy(temp, 0, newLimits, 0, l);
+
+                newLimits[DeformationLimit.UMIN] = coarseResult[Coordinates.X];
+                newLimits[DeformationLimit.UMAX] = coarseResult[Coordinates.X];
+                newLimits[DeformationLimit.USTEP] = 0;
+                newLimits[DeformationLimit.VMIN] = coarseResult[Coordinates.Y];
+                newLimits[DeformationLimit.VMAX] = coarseResult[Coordinates.Y];
+                newLimits[DeformationLimit.VSTEP] = 0;
+
+                higherOrderLimits.add(newLimits);
+
+                sb.append("Coarse result for facet nr.")
+                        .append(i)
+                        .append(" - ")
+                        .append(results.get(i))
+                        .append("\n");
+            }
+            Logger.trace(sb);
+
+            results = computeTask(
+                    image1, image2,
+                    kernel, facets,
+                    higherOrderLimits,
+                    defDegree);
         }
-        coarseResults = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
 
-        final List<double[]> fineLimits = new ArrayList<>(facetCount);
-        for (int i = 0; i < facetCount; i++) {
-            coarseResult = coarseResults.get(i).getDeformation();
-            temp = deformationLimits.get(i);
-            l = temp.length;
-
-            newLimits = new double[l];
-            System.arraycopy(temp, 0, newLimits, 0, l);
-
-            newLimits[DeformationLimit.UMIN] = coarseResult[Coordinates.X];
-            newLimits[DeformationLimit.UMAX] = coarseResult[Coordinates.X];
-            newLimits[DeformationLimit.USTEP] = 0;
-            newLimits[DeformationLimit.VMIN] = coarseResult[Coordinates.Y];
-            newLimits[DeformationLimit.VMAX] = coarseResult[Coordinates.Y];
-            newLimits[DeformationLimit.VSTEP] = 0;
-
-            fineLimits.add(newLimits);
-
-            sb.append("Fine result for facet nr.")
-                    .append(i)
-                    .append(" - ")
-                    .append(coarseResults.get(i))
-                    .append("\n");
-        }
-        Logger.trace(sb);
-
-        return computeTask(
-                image1, image2,
-                kernel, facets,
-                fineLimits,
-                defDegree);
+        return results;
+    }
+    
+    @Override
+    boolean needsBestResult() {
+        return true;
     }
 
 }
