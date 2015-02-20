@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.tul.dic.engine.opencl;
+package cz.tul.dic.engine.opencl.memory;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opencl.CLBuffer;
@@ -20,6 +20,7 @@ import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -29,25 +30,21 @@ import java.util.List;
  *
  * @author Petr Ječmen
  */
-public class OpenCLMemoryManager {
+public abstract class OpenCLMemoryManager {
 
-    private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
-    private Image imageA, imageB;
-    private List<Facet> facets;
-    private List<double[]> deformationLimits;
-    private List<int[]> deformationCounts;
-    private int maxDeformationCount;
+    private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);    
+    protected int maxDeformationCount;
     // OpenCL entities
-    private CLMemory<IntBuffer> clImageA, clImageB;
-    private CLBuffer<IntBuffer> clFacetData;
-    private CLBuffer<FloatBuffer> clFacetCenters;
-    private CLBuffer<FloatBuffer> clDeformationLimits;
-    private CLBuffer<IntBuffer> clDefStepCount;
-    private CLBuffer<FloatBuffer> clResults;
+    protected CLMemory<IntBuffer> clImageA, clImageB;
+    protected CLBuffer<IntBuffer> clFacetData;
+    protected CLBuffer<FloatBuffer> clFacetCenters;
+    protected CLBuffer<FloatBuffer> clDeformationLimits;
+    protected CLBuffer<IntBuffer> clDefStepCount;
+    protected CLBuffer<FloatBuffer> clResults;
     // OpenCL context        
-    private final CLCommandQueue queue;
-    private final CLDevice device;
-    private final CLContext context;
+    protected final CLCommandQueue queue;
+    protected final CLDevice device;
+    protected final CLContext context;
 
     public OpenCLMemoryManager() {
         device = DeviceManager.getDevice();
@@ -55,84 +52,9 @@ public class OpenCLMemoryManager {
         queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
     }
 
-    public void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
-        try {
-            if (imageA != this.imageA) {
-                release(clImageA);
-                this.imageA = imageA;
+    public abstract void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException;
 
-                if (imageA == this.imageB) {
-                    clImageA = clImageB;
-                } else {
-                    if (kernel.usesImage()) {
-                        clImageA = generateImage2d_t(imageA);
-                        queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
-                    } else {
-                        clImageA = generateImageArray(imageA);
-                        queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageA, false);
-                    }
-                }
-            }
-            if (imageB != this.imageB) {
-                if (clImageA != clImageB) {
-                    release(clImageB);
-                }
-                this.imageB = imageB;
-
-                if (kernel.usesImage()) {
-                    clImageB = generateImage2d_t(imageB);
-                    queue.putWriteImage((CLImage2d<IntBuffer>) clImageB, false);
-                } else {
-                    clImageB = generateImageArray(imageB);
-                    queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageB, false);
-                }
-            }
-
-            boolean changedResults = false;
-            if (!facets.equals(this.facets)) {
-                release(clFacetData);
-                release(clFacetCenters);
-                this.facets = facets;
-
-                clFacetData = generateFacetData(facets, kernel.usesMemoryCoalescing());
-                queue.putWriteBuffer(clFacetData, false);
-
-                clFacetCenters = generateFacetCenters(facets);
-                queue.putWriteBuffer(clFacetCenters, false);
-
-                changedResults = true;
-            }
-            if (!deformationLimits.equals(this.deformationLimits)) {
-                release(clDeformationLimits);
-                release(clDefStepCount);
-                this.deformationLimits = deformationLimits;
-
-                clDeformationLimits = generateDeformationLimits(deformationLimits);
-                queue.putWriteBuffer(clDeformationLimits, false);
-
-                deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
-                clDefStepCount = generateDeformationStepCounts(deformationCounts);
-                queue.putWriteBuffer(clDefStepCount, false);
-
-                changedResults = true;
-            }
-
-            if (changedResults) {
-                release(clResults);
-
-                maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
-                final long size = facets.size() * maxDeformationCount;
-                if (size <= 0 || size >= Integer.MAX_VALUE) {
-                    throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
-                }
-                clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
-            }
-        } catch (OutOfMemoryError e) {
-            throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
-        }
-    }
-
-    private CLImage2d<IntBuffer> generateImage2d_t(final Image image) {
+    protected CLImage2d<IntBuffer> generateImage2d_t(final Image image) {
         final CLImage2d<IntBuffer> result = context.createImage2d(
                 Buffers.newDirectIntBuffer(image.toBWArray()),
                 image.getWidth(), image.getHeight(),
@@ -140,7 +62,7 @@ public class OpenCLMemoryManager {
         return result;
     }
 
-    private CLBuffer<IntBuffer> generateImageArray(final Image image) {
+    protected CLBuffer<IntBuffer> generateImageArray(final Image image) {
         final int[] data = image.toBWArray();
         final CLBuffer<IntBuffer> result = context.createIntBuffer(data.length, CLMemory.Mem.READ_ONLY);
         final IntBuffer buffer = result.getBuffer();
@@ -151,7 +73,7 @@ public class OpenCLMemoryManager {
         return result;
     }
 
-    private CLBuffer<IntBuffer> generateFacetData(final List<Facet> facets, final boolean useMemoryCoalescing) {
+    protected CLBuffer<IntBuffer> generateFacetData(final List<Facet> facets, final boolean useMemoryCoalescing) {
         final int facetSize = facets.get(0).getSize();
         final int facetArea = facetSize * facetSize;
         final int dataSize = facetArea * Coordinates.DIMENSION;
@@ -185,7 +107,7 @@ public class OpenCLMemoryManager {
         return result;
     }
 
-    private CLBuffer<FloatBuffer> generateFacetCenters(final List<Facet> facets) {
+    protected CLBuffer<FloatBuffer> generateFacetCenters(final List<Facet> facets) {
         final int dataSize = Coordinates.DIMENSION;
         final float[] data = new float[facets.size() * dataSize];
 
@@ -208,7 +130,7 @@ public class OpenCLMemoryManager {
         return result;
     }
 
-    private CLBuffer<FloatBuffer> generateDeformationLimits(final List<double[]> deformationLimits) {
+    protected CLBuffer<FloatBuffer> generateDeformationLimits(final List<double[]> deformationLimits) {
         final CLBuffer<FloatBuffer> result = context.createFloatBuffer(deformationLimits.size() * deformationLimits.get(0).length, CLMemory.Mem.READ_ONLY);
         final FloatBuffer buffer = result.getBuffer();
         for (double[] dA : deformationLimits) {
@@ -220,7 +142,7 @@ public class OpenCLMemoryManager {
         return result;
     }
 
-    private CLBuffer<IntBuffer> generateDeformationStepCounts(final List<int[]> counts) {
+    protected CLBuffer<IntBuffer> generateDeformationStepCounts(final List<int[]> counts) {
         final CLBuffer<IntBuffer> result = context.createIntBuffer(counts.size() * counts.get(0).length, CLMemory.Mem.READ_ONLY);
         final IntBuffer buffer = result.getBuffer();
         for (int[] iA : counts) {
@@ -232,7 +154,7 @@ public class OpenCLMemoryManager {
         return result;
     }
 
-    private void release(CLResource mem) {
+    protected void release(CLResource mem) {
         if (mem != null && !mem.isReleased()) {
             mem.release();
         }

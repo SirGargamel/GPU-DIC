@@ -1,6 +1,6 @@
 package cz.tul.dic.engine.opencl.kernels;
 
-import cz.tul.dic.engine.opencl.OpenCLMemoryManager;
+import cz.tul.dic.engine.opencl.memory.OpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
