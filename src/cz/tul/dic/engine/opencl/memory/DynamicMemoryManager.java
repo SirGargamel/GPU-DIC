@@ -54,7 +54,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
             }
 
             boolean changedResults = false;
-            if (!facets.equals(this.facets)) {
+            if (facets != this.facets || !facets.equals(this.facets)) {
                 release(clFacetData);
                 release(clFacetCenters);
                 this.facets = facets;
@@ -67,7 +67,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
 
                 changedResults = true;
             }
-            if (!deformationLimits.equals(this.deformationLimits)) {
+            if (deformationLimits != this.deformationLimits || !deformationLimits.equals(this.deformationLimits)) {
                 release(clDeformationLimits);
                 release(clDefStepCount);
                 this.deformationLimits = deformationLimits;
