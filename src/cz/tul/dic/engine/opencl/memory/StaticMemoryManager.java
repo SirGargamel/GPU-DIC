@@ -14,8 +14,11 @@ import java.util.List;
 
 public class StaticMemoryManager extends OpenCLMemoryManager {
 
+    public StaticMemoryManager() {
+    }
+
     @Override
-    public void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
+    public void assignDataToGPU(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
         try {
             release(clImageA);
             release(clImageB);

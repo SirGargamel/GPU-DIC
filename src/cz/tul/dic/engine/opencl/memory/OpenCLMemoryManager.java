@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.tul.dic.engine.opencl.memory;
 
 import com.jogamp.common.nio.Buffers;
@@ -25,6 +20,8 @@ import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
@@ -32,7 +29,18 @@ import java.util.List;
  */
 public abstract class OpenCLMemoryManager {
 
-    private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);    
+    private static final OpenCLMemoryManager INSTANCE;
+
+    static {
+        INSTANCE = new DynamicMemoryManager();
+    }
+
+    public static OpenCLMemoryManager init() {
+        return INSTANCE;
+    }
+
+    private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
+    private final Lock lock;
     protected int maxDeformationCount;
     // OpenCL entities
     protected CLMemory<IntBuffer> clImageA, clImageB;
@@ -46,13 +54,24 @@ public abstract class OpenCLMemoryManager {
     protected final CLDevice device;
     protected final CLContext context;
 
-    public OpenCLMemoryManager() {
+    OpenCLMemoryManager() {
         device = DeviceManager.getDevice();
         context = DeviceManager.getContext();
         queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
+        
+        lock = new ReentrantLock();
     }
 
-    public abstract void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException;
+    public void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
+        lock.lock();
+        assignDataToGPU(imageA, imageB, facets, deformationLimits, kernel);
+    }
+    
+    public abstract void assignDataToGPU(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException;
+    
+    public void unlockData() {
+        lock.unlock();
+    }
 
     protected CLImage2d<IntBuffer> generateImage2d_t(final Image image) {
         final CLImage2d<IntBuffer> result = context.createImage2d(

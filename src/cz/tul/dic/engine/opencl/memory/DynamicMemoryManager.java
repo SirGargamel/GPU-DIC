@@ -13,16 +13,19 @@ import java.nio.IntBuffer;
 import java.util.List;
 
 public class DynamicMemoryManager extends OpenCLMemoryManager {
-    
+
     private Image imageA, imageB;
     private List<Facet> facets;
     private List<double[]> deformationLimits;
-    private List<int[]> deformationCounts;    
+    private List<int[]> deformationCounts;
+
+    DynamicMemoryManager() {
+    }
 
     @Override
-    public void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
+    public void assignDataToGPU(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
         try {
-            if (imageA != this.imageA) {
+            if (imageA != this.imageA || clImageA.isReleased()) {
                 release(clImageA);
                 this.imageA = imageA;
 
@@ -38,7 +41,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
                     }
                 }
             }
-            if (imageB != this.imageB) {
+            if (imageB != this.imageB || clImageB.isReleased()) {
                 if (clImageA != clImageB) {
                     release(clImageB);
                 }
@@ -54,7 +57,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
             }
 
             boolean changedResults = false;
-            if (facets != this.facets || !facets.equals(this.facets)) {
+            if (facets != this.facets || !facets.equals(this.facets) || clFacetData.isReleased()) {
                 release(clFacetData);
                 release(clFacetCenters);
                 this.facets = facets;
@@ -67,7 +70,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
 
                 changedResults = true;
             }
-            if (deformationLimits != this.deformationLimits || !deformationLimits.equals(this.deformationLimits)) {
+            if (deformationLimits != this.deformationLimits || !deformationLimits.equals(this.deformationLimits) || clDeformationLimits.isReleased()) {
                 release(clDeformationLimits);
                 release(clDefStepCount);
                 this.deformationLimits = deformationLimits;
@@ -82,7 +85,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
                 changedResults = true;
             }
 
-            if (changedResults) {
+            if (changedResults || clResults.isReleased()) {
                 release(clResults);
 
                 maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);

@@ -15,7 +15,6 @@ import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
-import cz.tul.dic.engine.opencl.memory.DynamicMemoryManager;
 import cz.tul.dic.engine.opencl.memory.OpenCLMemoryManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +49,7 @@ public abstract class TaskSolver extends Observable {
     }
 
     TaskSolver() {
-        memManager = new DynamicMemoryManager();
+        memManager = OpenCLMemoryManager.init();
 
         kernelType = WorkSizeManager.getBestKernel();
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;

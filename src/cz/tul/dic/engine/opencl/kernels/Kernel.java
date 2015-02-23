@@ -123,6 +123,7 @@ public abstract class Kernel {
         }
         final int facetSize = facets.get(0).getSize();
 
+        final List<CorrelationResult> result;
         try {
             memManager.assignData(imageA, imageB, facets, deformationLimits, this);
             final CLBuffer<FloatBuffer> clResults = memManager.getClResults();
@@ -143,7 +144,6 @@ public abstract class Kernel {
                 }
             }
 
-            final List<CorrelationResult> result;
             if (findBest || Stats.getInstance().isGpuDebugEnabled()) {
                 final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
                 final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
@@ -153,13 +153,14 @@ public abstract class Kernel {
                 result = null;
             }
             return result;
-
         } catch (CLException ex) {
             if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
                 throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex.getCLErrorString());
             } else {
                 throw ex;
             }
+        } finally {
+            memManager.unlockData();
         }
     }
 
