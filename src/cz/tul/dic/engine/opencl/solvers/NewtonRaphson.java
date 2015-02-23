@@ -92,13 +92,13 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
             finishedFacets.clear();
             it = facetsToCompute.iterator();
             facetIndexLocal = 0;
+            sb.append("Results for round ").append(i).append(": ");
             while (it.hasNext()) {
                 f = it.next();
                 facetIndexGlobal = facets.indexOf(f);
 
                 try {
-                    // store results with computed quality
-                    sb.append("Results for round ").append(i).append(": ");
+                    // store results with computed quality                    
                     newResult = new CorrelationResult(gpuData[generateIndex(indices)], solutionList.get(facetIndexLocal));
                     increment = newResult.getValue() - results.get(facetIndexGlobal).getValue();
                     sb.append(facetIndexGlobal)
