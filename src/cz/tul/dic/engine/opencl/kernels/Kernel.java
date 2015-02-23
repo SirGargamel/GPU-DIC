@@ -17,7 +17,9 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.IGPUResultsReceiver;
+import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
@@ -142,7 +144,7 @@ public abstract class Kernel {
             }
 
             final List<CorrelationResult> result;
-            if (findBest) {
+            if (findBest || Stats.getInstance().isGpuDebugEnabled()) {
                 final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
                 final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
 
