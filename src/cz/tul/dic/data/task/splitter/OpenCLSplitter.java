@@ -182,7 +182,7 @@ public class OpenCLSplitter extends TaskSplitter {
         final long resultSize = resultCount * SIZE_FLOAT;
         final long fullSize = imageSize + deformationsSize + reserve + facetDataSize + facetCentersSize + resultSize;
 
-        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
+        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize() / COEFF_MEM_LIMIT_MAX * COEFF_MEM_LIMIT;
         final long maxMem = DeviceManager.getDevice().getGlobalMemSize() / COEFF_MEM_LIMIT_MAX * COEFF_MEM_LIMIT;
         boolean result = fullSize >= 0 && fullSize <= maxMem;
         result &= resultCount <= Integer.MAX_VALUE;
