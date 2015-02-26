@@ -4,23 +4,16 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
-import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.strain.StrainEstimation;
-import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.gui.lang.Lang;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
@@ -35,18 +28,6 @@ public class ExpertSettings implements Initializable {
     private static final String ROUND_SPLITTER = ",";
     private static final String LIMITS_SPLITTER = ";";
     @FXML
-    private ComboBox<FacetGeneratorMethod> comboFGMode;
-    @FXML
-    private ComboBox<TaskSplitMethod> comboTSVariant;
-    @FXML
-    private ComboBox<KernelType> comboKernel;
-    @FXML
-    private ComboBox<Interpolation> comboInterpolation;
-    @FXML
-    private TextField textFGSpacing;
-    @FXML
-    private TextField textTSValue;
-    @FXML
     private TextField textRoundLimits;
     @FXML
     private TextField textWindowSize;
@@ -57,13 +38,6 @@ public class ExpertSettings implements Initializable {
     private void handleButtonActionOk(ActionEvent event) throws InterruptedException, ExecutionException {
         final TaskContainer tc = Context.getInstance().getTc();
         if (tc != null) {
-            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, comboFGMode.getValue());
-            tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, comboTSVariant.getValue());
-            tc.setParameter(TaskParameter.KERNEL, comboKernel.getValue());
-            tc.setParameter(TaskParameter.INTERPOLATION, comboInterpolation.getValue());
-            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, Integer.valueOf(textFGSpacing.getText()));
-            tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, Integer.valueOf(textTSValue.getText()));
-
             String limits = textRoundLimits.getText();
             int[] newLimits = null;
             if (!limits.isEmpty()) {
@@ -151,7 +125,7 @@ public class ExpertSettings implements Initializable {
     }
 
     private void closeWindow() {
-        final Stage stage = (Stage) comboFGMode.getScene().getWindow();
+        final Stage stage = (Stage) textRoundLimits.getScene().getWindow();
         stage.close();
     }
 
@@ -189,59 +163,13 @@ public class ExpertSettings implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        final ObservableList<FacetGeneratorMethod> comboBoxData = FXCollections.observableArrayList();
-        comboBoxData.addAll(FacetGeneratorMethod.values());
-        comboFGMode.setItems(comboBoxData);
-        final ObservableList<TaskSplitMethod> comboBoxData2 = FXCollections.observableArrayList();
-        comboBoxData2.addAll(TaskSplitMethod.values());
-        comboTSVariant.setItems(comboBoxData2);
-        final ObservableList<KernelType> comboBoxData3 = FXCollections.observableArrayList();
-        comboBoxData3.addAll(KernelType.values());
-        comboKernel.setItems(comboBoxData3);
-        final ObservableList<Interpolation> comboBoxData4 = FXCollections.observableArrayList();
-        comboBoxData4.addAll(Interpolation.values());
-        comboInterpolation.setItems(comboBoxData4);
-
-        comboFGMode.getSelectionModel().select(TaskDefaultValues.DEFAULT_FACET_GENERATOR);
-        comboTSVariant.getSelectionModel().select(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);
-        comboKernel.getSelectionModel().selectFirst();
-        comboInterpolation.getSelectionModel().select(TaskDefaultValues.DEFAULT_INTERPOLATION);
-        textFGSpacing.setText(String.valueOf(TaskDefaultValues.DEFAULT_FACET_SPACING));
-        textTSValue.setText(String.valueOf(TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER));
         textWindowSize.setText(String.valueOf(TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER));
         textRoundLimits.setText("");
         textDefLimits.setText(toString(TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST));
 
         final TaskContainer tc = Context.getInstance().getTc();
         if (tc != null) {
-            Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
-            if (o != null) {
-                comboFGMode.getSelectionModel().select((FacetGeneratorMethod) o);
-            }
-            o = tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM);
-            if (o != null) {
-                textFGSpacing.setText(o.toString());
-            }
-
-            o = tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
-            if (o != null) {
-                comboTSVariant.getSelectionModel().select((TaskSplitMethod) o);
-            }
-            o = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
-            if (o != null) {
-                textTSValue.setText(o.toString());
-            }
-
-            o = tc.getParameter(TaskParameter.KERNEL);
-            if (o != null) {
-                comboKernel.getSelectionModel().select((KernelType) o);
-            }
-
-            o = tc.getParameter(TaskParameter.INTERPOLATION);
-            if (o != null) {
-                comboInterpolation.getSelectionModel().select((Interpolation) o);
-            }
-
+            Object o;
             o = tc.getParameter(TaskParameter.ROUND_LIMITS);
             if (o != null) {
                 final int[] limits = (int[]) o;
