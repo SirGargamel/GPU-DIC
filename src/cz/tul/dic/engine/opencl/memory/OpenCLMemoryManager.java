@@ -10,11 +10,9 @@ import com.jogamp.opencl.CLImageFormat;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLResource;
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.FloatBuffer;
@@ -32,7 +30,7 @@ public abstract class OpenCLMemoryManager {
     private static final OpenCLMemoryManager INSTANCE;
 
     static {
-        INSTANCE = new DynamicMemoryManager();
+        INSTANCE = new StaticMemoryManager();
     }
 
     public static OpenCLMemoryManager init() {
@@ -189,6 +187,14 @@ public abstract class OpenCLMemoryManager {
         release(clResults);
         release(context);
         release(queue);
+        
+        clDefStepCount = null;
+        clDeformationLimits = null;
+        clFacetCenters = null;
+        clFacetData = null;
+        clImageA = null;
+        clImageB = null;
+        clResults = null;
     }
 
     public CLMemory<IntBuffer> getClImageA() {
