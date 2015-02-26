@@ -5,16 +5,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" minWidth="220.0" prefHeight="270.0" prefWidth="310.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.MainWindow">
+<AnchorPane id="AnchorPane" minWidth="220.0" prefHeight="374.0" prefWidth="393.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.tul.dic.gui.MainWindow">
     <children>
-        <BorderPane fx:id="mainBp" prefHeight="301.0" prefWidth="402.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <BorderPane fx:id="mainBp" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <center>
-                <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                <BorderPane BorderPane.alignment="CENTER">
                     <center>      
                         <cz.tul.dic.gui.InputPresenter fx:id="imagePane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />                        
                     </center>
                     <bottom>
-                        <HBox maxHeight="30.0" prefHeight="100.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="BOTTOM_CENTER">
+                        <HBox fx:id="boxImage" maxHeight="30.0" minWidth="225.0" spacing="10.0" BorderPane.alignment="BOTTOM_CENTER">
                             <children>
                                 <Button fx:id="buttonPrev" mnemonicParsing="false" onAction="#handleButtonActionPrev" />
                                 <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#handleButtonActionPlay">
@@ -29,16 +29,19 @@
                             <BorderPane.margin>
                                 <Insets bottom="2.0" left="2.0" top="2.0" />
                             </BorderPane.margin>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
                         </HBox>
                     </bottom>
                 </BorderPane>
             </center>
             <bottom>
-                <HBox maxHeight="30.0" prefHeight="100.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
+                <HBox fx:id="boxBottom" minWidth="275.0" spacing="10.0" BorderPane.alignment="CENTER">
                     <children>
-                        <Button fx:id="buttonRun" layoutX="10.0" layoutY="100.0" onAction="#handleButtonActionRun" text="%Run" />
-                        <Button fx:id="buttonResults" layoutX="10.0" layoutY="135.0" onAction="#handleButtonActionResults" text="%Results" />
-                        <Button fx:id="buttonSave" mnemonicParsing="false" onAction="#handleButtonActionSave" text="%Save">
+                        <Button fx:id="buttonRun" layoutX="10.0" layoutY="100.0" onAction="#handleButtonActionRun" prefWidth="100.0" text="%Run" />
+                        <Button fx:id="buttonResults" layoutX="10.0" layoutY="135.0" onAction="#handleButtonActionResults" prefWidth="75.0" text="%Results" />
+                        <Button fx:id="buttonSave" mnemonicParsing="false" onAction="#handleButtonActionSave" prefWidth="75.0" text="%Save">
                             <HBox.margin>
                                 <Insets />
                             </HBox.margin>
@@ -47,21 +50,28 @@
                     <BorderPane.margin>
                         <Insets left="2.0" />
                     </BorderPane.margin>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
                 </HBox>
             </bottom>
             <right>
-                <VBox spacing="5.0" BorderPane.alignment="CENTER">
+                <VBox fx:id="boxRight" spacing="10.0" BorderPane.alignment="CENTER">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#handleButtonActionInput" text="%Input" /><Button fx:id="buttonRealSize" mnemonicParsing="false" onAction="#handleButtonActionRealSize" text="%RealSizeW" />
-                        <Button fx:id="buttonROI" layoutX="10.0" layoutY="70.0" onAction="#handleButtonActionROI" text="%ROI" />
-                        <Button fx:id="buttonExport" mnemonicParsing="false" onAction="#handleButtonActionExport" text="%Exports" />
+                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleButtonActionInput" text="%Input" /><Button fx:id="buttonRealSize" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleButtonActionRealSize" text="%RealSizeW" />
+                        <Button fx:id="buttonROI" layoutX="10.0" layoutY="70.0" maxWidth="1.7976931348623157E308" onAction="#handleButtonActionROI" text="%ROI" />
+                        <Button fx:id="buttonExport" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleButtonActionExport" text="%Exports" />
+                        <Button fx:id="buttonExpert" layoutX="130.0" layoutY="70.0" maxWidth="1.7976931348623157E308" onAction="#handleButtonActionExpert" text="%Expert" />
+                  <ComboBox fx:id="comboScenario" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="103.0" promptText="%Scenario" />
                         <Label fx:id="labelFs" layoutX="10.0" layoutY="40.0" text="%fs" />
-                        <TextField fx:id="textFs" layoutX="130.0" layoutY="40.0" onKeyTyped="#handleTextKeyTyped" prefWidth="55.0" BorderPane.alignment="CENTER" />
-                        <Button fx:id="buttonExpert" layoutX="130.0" layoutY="70.0" onAction="#handleButtonActionExpert" text="%Expert" />
+                        <TextField fx:id="textFs" layoutX="130.0" layoutY="40.0" maxWidth="1.7976931348623157E308" onKeyTyped="#handleTextKeyTyped" prefWidth="55.0" BorderPane.alignment="CENTER" />
                     </children>
                     <BorderPane.margin>
                         <Insets left="2.0" />
                     </BorderPane.margin>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
                 </VBox>
             </right>
             

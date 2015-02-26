@@ -18,7 +18,9 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
@@ -28,6 +30,9 @@ import java.util.prefs.Preferences;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -39,15 +44,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import org.controlsfx.dialog.CommandLinksDialog;
 import org.pmw.tinylog.Logger;
 
@@ -58,10 +67,8 @@ import org.pmw.tinylog.Logger;
 public class MainWindow implements Initializable {
 
     private static final String LAST_DIR = "lastDir";
-    private static final int EXTRA_WIDTH = 135;
-    private static final int EXTRA_HEIGHT = 105;
-    private static final int MIN_WIDTH = 330;
-    private static final int MIN_HEIGHT = 345;
+    private static final int EXTRA_WIDTH = 19;
+    private static final int EXTRA_HEIGHT = 43;
 
     @FXML
     private TextField textFs;
@@ -91,6 +98,14 @@ public class MainWindow implements Initializable {
     private Button buttonSave;
     @FXML
     private InputPresenter imagePane;
+    @FXML
+    private ComboBox<Scenario> comboScenario;
+    @FXML
+    private VBox boxRight;
+    @FXML
+    private HBox boxBottom;
+    @FXML
+    private HBox boxImage;
     private Timeline timeLine;
 
     @FXML
@@ -188,8 +203,18 @@ public class MainWindow implements Initializable {
                                 textIndex.textProperty().setValue("0");
                                 imagePane.displayImage();
 
-                                imagePane.getScene().getWindow().setWidth(Math.max(tc.getImage(0).getWidth() + EXTRA_WIDTH, MIN_WIDTH));
-                                imagePane.getScene().getWindow().setHeight(Math.max(tc.getImage(0).getHeight() + EXTRA_HEIGHT, MIN_HEIGHT));
+                                double size;
+                                size = Math.max(
+                                        tc.getImage(0).getWidth() + boxRight.getWidth() + EXTRA_WIDTH,
+                                        boxBottom.getMinWidth() + EXTRA_WIDTH);
+                                size = Math.max(
+                                        size,
+                                        boxImage.getMinWidth() + boxRight.getWidth() + EXTRA_WIDTH);
+                                imagePane.getScene().getWindow().setWidth(size);
+                                size = Math.max(
+                                        tc.getImage(0).getHeight() + boxImage.getHeight() + boxBottom.getHeight() + EXTRA_HEIGHT,
+                                        boxRight.getPrefHeight());
+                                imagePane.getScene().getWindow().setHeight(size);
 
                                 final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
                                 if (o != null) {
@@ -524,6 +549,31 @@ public class MainWindow implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        final ObservableList<Scenario> comboBoxData = FXCollections.observableArrayList();
+        comboBoxData.addAll(Scenario.values());
+        comboScenario.setItems(comboBoxData);
+        comboScenario.valueProperty().addListener((ObservableValue<? extends Scenario> observable, Scenario oldValue, Scenario newValue) -> {
+            final TaskContainer tc = Context.getInstance().getTc();
+            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, newValue.getFacetSpacing());
+            System.err.println("Set spacing to " + newValue.getFacetSpacing());
+        });
+        comboScenario.setConverter(new StringConverter<Scenario>() {
+
+            private final Map<String, Scenario> data = new HashMap<>(Scenario.values().length);
+
+            @Override
+            public String toString(Scenario object) {
+                final String result = Lang.getString(object.toString());
+                data.put(result, object);
+                return result;
+            }
+
+            @Override
+            public Scenario fromString(String string) {
+                return data.get(string);
+            }
+        });
+
         textFs.setText(Integer.toString(TaskDefaultValues.DEFAULT_FACET_SIZE));
 
         imagePane.initialize(url, rb);
@@ -577,6 +627,7 @@ public class MainWindow implements Initializable {
         buttonRun.setDisable(disabled);
         textFs.setDisable(disabled);
         buttonSave.setDisable(disabled);
+        comboScenario.setDisable(disabled);
     }
 
     private void adjustResultButtons(final boolean disabled) {
@@ -596,7 +647,7 @@ public class MainWindow implements Initializable {
             this.cts = cts;
             this.tc = tc;
             roundCount = TaskContainerUtils.getRounds(tc).keySet().size();
-            roundOne = TaskContainerUtils.getFirstRound(tc);            
+            roundOne = TaskContainerUtils.getFirstRound(tc);
 
             time = new StringBuilder();
             action = new StringBuilder();
@@ -658,5 +709,23 @@ public class MainWindow implements Initializable {
             }
             updateMessage(action.toString().concat("\n").concat(time.toString()));
         }
+    }
+
+    private static enum Scenario {
+
+        Precise(1),
+        Default(2),
+        Coarse(5);
+
+        private final int facetSpacing;
+
+        private Scenario(int facetSpacing) {
+            this.facetSpacing = facetSpacing;
+        }
+
+        public int getFacetSpacing() {
+            return facetSpacing;
+        }
+
     }
 }
