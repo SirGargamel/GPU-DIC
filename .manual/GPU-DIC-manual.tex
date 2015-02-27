@@ -3,7 +3,7 @@
 \usepackage[czech, english]{babel}
 \selectlanguage{czech}
 \usepackage[FM, EN, bwtitles, noheader]{tul}
-\usepackage[bookmarks]{hyperref}
+\usepackage[bookmarks,unicode]{hyperref}
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{todonotes}
@@ -98,6 +98,7 @@ V některých speciálních případech může být žádoucí změnit i další
 \item[Exporty] otevře okno pro specifikaci exportů provedených po dokončení výpočtu
 \item[Velikost facetu] slouží pro zadání velikosti facetu použitou během výpočtu
 \item[Expertní nastavení] slouží pro nastavení specifických parametrů enginu
+\item[Scénář] souží pro nastavení přesnosti výpočtu (vyšší přesnost prodlužuje délku výpočtu)
 \item[Šipky] slouží pro prohlížení obrázků
 \item[Spustit výpočet] spustí výpočet
 \item[Výsledky] otevře okno pro prezentaci výsledků (dostupné po dokončení výpočtu)
@@ -162,12 +163,6 @@ Proces vyznačení je prostý, uživatel vyznačí známý horizontální rozmě
 \end{figure}
 V tomto okně lze nastavit detailní parametry enginu, většinu z nich není v běžném případě nutné nastavovat. V této sekci nebudou jednotlivé volby popisovány, pouze bude uveden jejich systémový název, který lze dohledat v kapitole \ref{sec:parameters}, kde je uveden i jejich podrobný popis.
 \begin{description}
-\item[Varianta generátoru] FACET\textunderscore GENERATOR\textunderscore METHOD
-\item[Parametr generování] FACET\textunderscore GENERATOR\textunderscore PARAM
-\item[Varianta rozdělení] TASK\textunderscore SPLIT\textunderscore METHOD
-\item[Parametr rozdělení] TASK\textunderscore SPLIT\textunderscore PARAM
-\item[Kernel] KERNEL
-\item[Interpolace] INTERPOLATION
 \item[Limity kol] ROUND\textunderscore LIMITS
 \item[Velikost okna] STRAIN\textunderscore ESTIMATION\textunderscore PARAM
 \item[Limity deformací] DEFORMATION\textunderscore LIMITS 
