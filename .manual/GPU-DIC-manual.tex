@@ -2,12 +2,11 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[czech, english]{babel}
 \selectlanguage{czech}
-\usepackage[FM, EN, bwtitles, noheader]{tul}
+\usepackage[FM, EN, noheader]{tul}
 \usepackage[bookmarks,unicode]{hyperref}
 \usepackage{float}
 \usepackage{graphicx}
-\usepackage{todonotes}
-\presetkeys{todonotes}{inline}{}
+
 \newcommand{\classname}[1]{\texttt{#1}}
 \TULphone{+420\,485\,353\,030}
 \TULmail{Petr.Jecmen@tul.cz}
@@ -28,15 +27,6 @@
 	columns=fullflexible,
 	showstringspaces=false,
 	language=Java
-}
-\lstdefinelanguage{XML}
-{
-	morestring=[b]",
-	morestring=[s]{>}{<},
-	morecomment=[s]{<?}{?>},
-	identifierstyle=\color{darkblue},
-	keywordstyle=\color{cyan},
-	morekeywords={xmlns,version,type}
 }
 
 \addto\captionsenglish{
@@ -251,7 +241,7 @@ Dále lze v souboru nastavit i parametry enginu. Identifikátor parametru se tvo
 V ukázkách lze nalézt dva soubory. První je dalo by se říci minimalistický - obsahuje minimální počet parametrů pro úspěšný výpočet. Vstupem je video, ROI jsou čtyři kružnice označující pozici čelistí (což zajistí inteligentní posunovaní jak ROI čelistí, tak automatické vytvoření ROI vzorku) a velikost facetu. Je nutné dát pozor na zápis ROI, který se bohužel nevejde na jeden řádek a je tudíž zalomen. V reálném souboru je ale nutné dodržet, aby ROI pro dané kolo byly všechny napsány na jednom řádku (čili v ukázce se jedná o jeden dlouhý řádek rozdělený na několik).\\
 Druhá ukázka pak představuje plnou konfiguraci, ukazuje i definici ROI pro jednotlivá kola - druhé kolo má obdélníkový ROI používající specifikované limity deformací (pouze posuny) při velikosti facetu 25, zatímco ve třetím kole se použijí výchozí hodnoty jak pro limity, tak pro velikost facetu.
 \newpage
-\section{Ukázky konfiguračních souborů}
+\subsection{Ukázky konfiguračních souborů}
 \label{sec:configExample}
 \begin{lstlisting}[title=Jednoduchý konfigurační soubor pro automatický výpočet]
 INPUT :: D:\temp\7202845m\7202845m.avi
