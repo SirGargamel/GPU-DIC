@@ -15,7 +15,7 @@ import cz.tul.dic.generators.facet.FacetGeneratorMethod;
  */
 public interface TaskDefaultValues {
 
-    Solver DEFAULT_SOLVER = Solver.BruteForce; 
+    Solver DEFAULT_SOLVER = Solver.NewtonRaphson; 
     DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION_METHOD = DisplacementCalculation.FIND_MAX_AND_AVERAGE;
     int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     int DEFAULT_FPS = 5000;    
