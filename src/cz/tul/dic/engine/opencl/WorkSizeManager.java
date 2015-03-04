@@ -6,6 +6,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.opencl.solvers.TaskSolver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public final class WorkSizeManager {
                 cc.solve(
                         img, img,
                         facets,
-                        deformationLimits, DeformationDegree.FIRST,
+                        deformationLimits, DeformationDegree.ZERO,
                         fs);
             }
         } catch (ComputationException ex) {
