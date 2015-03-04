@@ -48,14 +48,12 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         final List<double[]> limitsList = new ArrayList<>(facetCount);
         final List<double[]> solutionList = new ArrayList<>(facetCount);
         double[] newLimits, coarseResult, solution;
-        int l;
         for (int i = 0; i < facetCount; i++) {
             coarseResult = coarseResults.get(i).getDeformation();
             temp = deformationLimits.get(i);
-            l = temp.length;
 
-            newLimits = new double[l];
-            System.arraycopy(temp, 0, newLimits, 0, l);
+            newLimits = new double[coeffCount * 3];
+            System.arraycopy(temp, 0, newLimits, 0, Math.min(temp.length, newLimits.length));
             for (int j = 0; j < coeffCount; j++) {
                 newLimits[j * 3 + 2] /= 10.0;
             }
@@ -189,10 +187,10 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         do {
             step /= 10.0;
             if (step < minStep) {
-                if (step * 10 == minStep) {                    
+                if (step * 10 == minStep) {
                     break;
                 } else {
-                    step = minStep;                    
+                    step = minStep;
                 }
             }
 
