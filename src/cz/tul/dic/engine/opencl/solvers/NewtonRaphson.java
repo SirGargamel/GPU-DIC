@@ -64,6 +64,8 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         }
 
         final int[] indices = prepareIndices(coeffCount);
+        final int middleIndex = generateIndex(indices);
+        final int deformationCountPerFacet = coeffCount * COUNT_STEP;
         final List<Facet> facetsToCompute = new ArrayList<>(facets);
 
         List<CorrelationResult> results = coarseResults;
@@ -82,6 +84,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
         final StringBuilder sb = new StringBuilder();
         final long time = System.nanoTime();
+        int resultIndex;
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
             sb.setLength(0);
 
@@ -96,8 +99,9 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
                 facetIndexGlobal = facets.indexOf(f);
 
                 try {
-                    // store results with computed quality                    
-                    newResult = new CorrelationResult(gpuData[generateIndex(indices)], solutionList.get(facetIndexLocal));
+                    // store results with computed quality  
+                    resultIndex = facetIndexLocal * deformationCountPerFacet + middleIndex;
+                    newResult = new CorrelationResult(gpuData[resultIndex], solutionList.get(facetIndexLocal));
                     increment = newResult.getValue() - results.get(facetIndexGlobal).getValue();
                     sb.append(facetIndexGlobal)
                             .append(" - ")
