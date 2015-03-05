@@ -36,8 +36,8 @@ import org.pmw.tinylog.Logger;
 public class Stats implements IGPUResultsReceiver {
 
     private static final boolean ENABLE_GPU_RESULTS = false;
-    private static final boolean ENABLE_DEF_USAGE = true;
-    private static final boolean ENABLE_DEF_QUALITY = true;
+    private static final boolean ENABLE_DEF_USAGE = false;
+    private static final boolean ENABLE_DEF_QUALITY = false;
     private static final boolean ENABLE_FACET_QUALITY = true;
     private static final boolean ENABLE_POINT_QUALITY = false;
     private static final boolean ENABLE_POINT_STATS = false;
@@ -268,13 +268,15 @@ public class Stats implements IGPUResultsReceiver {
             List<CorrelationResult> results;
             List<Facet> facets;
             double[] center;
+            CorrelationResult result;
             for (ROI roi : allResults.keySet()) {
                 results = allResults.get(roi);
                 facets = allFacets.get(roi);
                 for (int i = 0; i < results.size(); i++) {
                     center = facets.get(i).getCenter();
-                    if (results.get(i) != null) {
-                        resultData[(int) Math.round(center[0])][(int) Math.round(center[1])] = results.get(i).getValue();
+                    result = results.get(i);
+                    if (result != null) {
+                        resultData[(int) Math.round(center[0])][(int) Math.round(center[1])] = result.getValue();
                     }
                 }
             }
