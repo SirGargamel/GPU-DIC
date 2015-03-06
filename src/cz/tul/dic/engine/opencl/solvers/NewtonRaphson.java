@@ -84,15 +84,16 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
         final StringBuilder sb = new StringBuilder();
         final long time = System.nanoTime();
-        int resultIndex;
+        int resultIndex, counterFinished;
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
             sb.setLength(0);
+            facetIndexLocal = 0;
+            counterFinished = 0;
+            finishedFacets.clear();
 
             computeTask(image1, image2, kernel, facetsToCompute, limitsList, defDegree);
-
-            finishedFacets.clear();
-            it = facetsToCompute.iterator();
-            facetIndexLocal = 0;
+            
+            it = facetsToCompute.iterator();            
             sb.append("Results for round ").append(i).append(": ");
             while (it.hasNext()) {
                 f = it.next();
@@ -122,10 +123,12 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
                     } else if (i > 0) {
                         sb.append(", stop - low quality increment");
                         finishedFacets.add(f);
+                        counterFinished++;
                     }
                 } catch (SingularMatrixException ex) {
                     sb.append(", stop - singular hessian matrix");
                     finishedFacets.add(f);
+                    counterFinished++;
                 }
 
                 sb.append("; ");
@@ -137,6 +140,9 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
                 limitsList.remove(facetIndexLocal);
             }
 
+            sb.append("\n Stopped ");
+            sb.append(counterFinished);
+            sb.append(" facets.");
             Logger.trace(sb);
 
             if (facetsToCompute.isEmpty()) {
