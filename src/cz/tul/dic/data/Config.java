@@ -2,7 +2,6 @@ package cz.tul.dic.data;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class Config {
                     if (split.length != 2) {
                         throw new IOException("Illegal text found inside config file - " + line);
                     } else {
-                        result.put(split[0], split[1]);
+                        result.put(split[0].trim(), split[1].trim());
                     }
                 }
             }
