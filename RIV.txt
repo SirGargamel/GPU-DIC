@@ -1,0 +1,9 @@
+Data do RIVu
+R59 - Interní identifikaèní kód		-	asi èíslo smlouvy
+R37 - Technické parametry výsledky	-	smlouva s LENAMem a asi licence
+R38 - ??? ekonomicke parametry vysledku
+R39, R40, R41 - LENAM info
+RN3 - A
+RN4 - A
+RX3 - A
+R75 - èíslo smlouvy
