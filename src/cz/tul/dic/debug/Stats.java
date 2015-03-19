@@ -1,3 +1,8 @@
+/* Copyright (C) LENAM, s.r.o. - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
+ */
 package cz.tul.dic.debug;
 
 import cz.tul.dic.ComputationException;
@@ -37,7 +42,7 @@ public class Stats implements IGPUResultsReceiver {
 
     private static final boolean ENABLE_GPU_RESULTS = false;
     private static final boolean ENABLE_DEF_USAGE = false;
-    private static final boolean ENABLE_DEF_QUALITY = false;
+    private static final boolean ENABLE_DEF_QUALITY = true;
     private static final boolean ENABLE_FACET_QUALITY = true;
     private static final boolean ENABLE_POINT_QUALITY = false;
     private static final boolean ENABLE_POINT_STATS = false;

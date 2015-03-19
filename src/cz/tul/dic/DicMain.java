@@ -1,3 +1,8 @@
+/* Copyright (C) LENAM, s.r.o. - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
+ */
 package cz.tul.dic;
 
 import cz.tul.dic.complextask.ComplexTaskSolver;
@@ -48,20 +53,63 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
-
-        "d:\\temp\\.test spacing\\6107544m\\6107544m.avi.config",
-        "d:\\temp\\.test spacing\\6113599m\\6113599m.avi.config",
-        "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
-        "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
-        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
-        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config", 
-
-    //        "d:\\temp\\6203652m\\6203652m.avi.config",
-    //        "d:\\temp\\9905121m\\9905121m.avi.config",
-    //        "d:\\temp\\7202845m\\7202845m.avi.config",
-    //        "d:\\temp\\6107544m\\6107544m.avi.config",
-    //        "d:\\temp\\6113599m\\6113599m.avi.config",
-    //        "d:\\temp\\9112502m\\9112502m.avi.config",
+        //        "d:\\temp\\.test spacing\\6107544m\\6107544m.avi.config",
+        //        "d:\\temp\\.test spacing\\6113599m\\6113599m.avi.config",
+        //        "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
+        //        "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
+        //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
+        //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
+        //////////////////////////////        
+//                "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR.small.config",
+//                "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR.small.config",
+//                "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR.small.config",
+//                "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR2.small.config",
+//                "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR2.small.config",
+//                "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR2.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR2.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR2.small.config",
+//                "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR2.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6203652m.avi.CF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\9905121m.avi.CF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\7202845m.avi.CF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6107544m.avi.CF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6113599m.avi.CF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\9112502m.avi.CF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6203652m.avi.BF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\9905121m.avi.BF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\7202845m.avi.BF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6107544m.avi.BF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\6113599m.avi.BF.small.config",
+//                "d:\\temp\\.smallSolverCompare\\9112502m.avi.BF.small.config",
+          ////////////////////////////
+//        "d:\\temp\\.solverCompare\\6203652m.avi.NR.config",
+//        "d:\\temp\\.solverCompare\\9905121m.avi.NR.config",
+//        "d:\\temp\\.solverCompare\\7202845m.avi.NR.config",
+//        "d:\\temp\\.solverCompare\\6107544m.avi.NR.config",
+//        "d:\\temp\\.solverCompare\\6113599m.avi.NR.config",
+//        "d:\\temp\\.solverCompare\\9112502m.avi.NR.config",
+//        "d:\\temp\\.solverCompare\\6203652m.avi.NR2.config",
+//        "d:\\temp\\.solverCompare\\9905121m.avi.NR2.config",
+//        "d:\\temp\\.solverCompare\\7202845m.avi.NR2.config",
+//        "d:\\temp\\.solverCompare\\6107544m.avi.NR2.config",
+//        "d:\\temp\\.solverCompare\\6113599m.avi.NR2.config",
+//        "d:\\temp\\.solverCompare\\9112502m.avi.NR2.config",        
+//        "d:\\temp\\.solverCompare\\6203652m.avi.CF.config",
+//        "d:\\temp\\.solverCompare\\9905121m.avi.CF.config",
+//        "d:\\temp\\.solverCompare\\7202845m.avi.CF.config",
+//        "d:\\temp\\.solverCompare\\6107544m.avi.CF.config",
+//        "d:\\temp\\.solverCompare\\6113599m.avi.CF.config",
+//        "d:\\temp\\.solverCompare\\9112502m.avi.CF.config",
+        "d:\\temp\\.solverCompare\\6203652m.avi.BF.config",
+        "d:\\temp\\.solverCompare\\9905121m.avi.BF.config",
+        "d:\\temp\\.solverCompare\\7202845m.avi.BF.config",
+        "d:\\temp\\.solverCompare\\6107544m.avi.BF.config",
+        "d:\\temp\\.solverCompare\\6113599m.avi.BF.config",
+        "d:\\temp\\.solverCompare\\9112502m.avi.BF.config",
+        
     };
 
     @Override
@@ -119,34 +167,35 @@ public class DicMain extends Application {
     }
 
     private void performComputationTest() {
-        final int fs1 = 15;
-        final int fs2 = 15;
+        final int fs1 = 10; //10
+        final int fs2 = 30; //30
         final double min = 1;
         final double max = fs2 / 2;
         TaskContainer tc;
-//        for (String s : FILES_TO_DEBUG) {
-            for (int size = fs1; size <= fs2; size += 5) {
+        for (int size = fs1; size <= fs2; size += 5) {
+            for (String s : FILES_TO_DEBUG) {
                 try {
-//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
-//                    tc = Context.getInstance().getTc();
-//                    if ((int) tc.getParameter(TaskParameter.FACET_SIZE) < size) {
-//                        System.out.println("STOPPING --- " + tc.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
-//                        break;
-//                    }
-//                    InputLoader.loadInput(tc);
-//                    tc.setParameter(TaskParameter.IN, new File(s));
-//                    tc.setParameter(TaskParameter.FACET_SIZE, size);
+                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
+                    tc = Context.getInstance().getTc();
+                    if ((int) tc.getParameter(TaskParameter.FACET_SIZE) < size) {
+                        System.out.println("STOPPING --- " + tc.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
+                        break;
+                    }
+                    tc.setParameter(TaskParameter.IN, new File(s));
+                    tc.setParameter(TaskParameter.FACET_SIZE, size);
 //                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
-////                    commenceComputationDynamic(tc);
+//                    tc.setParameter(TaskParameter.SOLVER, Solver.CoarseFine);
+                    InputLoader.loadInput(tc);
+                    commenceComputationDynamic(tc);
 //                    commenceComputationDynamicSpacingSweep(tc, (int) min, (int) max);
 
-                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\image\\image.avi-fast.config")));
-                    tc = Context.getInstance().getTc();
-                    InputLoader.loadInput(tc);
+//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\image\\image.avi-fast.config")));
+//                    tc = Context.getInstance().getTc();
+//                    InputLoader.loadInput(tc);
 //            tc.setParameter(TaskParameter.FACET_SIZE, 20);
 //            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
 //            commenceComputation(tc);
-                    textExports(tc);
+//                    textExports(tc);
 //
 //            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
 //                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
@@ -195,18 +244,6 @@ public class DicMain extends Application {
                 }
             }
         }
-//    }
-
-    /**
-     * The main() method is ignored in correctly deployed JavaFX application.
-     * main() serves only as fallback in case the application can not be
-     * launched through deployment artifacts, e.g., in IDEs with limited FX
-     * support. NetBeans ignores main().
-     *
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
     }
 
     private static void commenceComputation(TaskContainer tc) throws IOException, ComputationException {
@@ -289,5 +326,17 @@ public class DicMain extends Application {
         tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, Direction.Dx))));
         tc.addExport(ExportTask.generateVideoExport(Direction.Dx, new File(NameGenerator.generateSequence(tc, Direction.Dx))));
         Exporter.export(tc);
+    }
+
+    /**
+     * The main() method is ignored in correctly deployed JavaFX application.
+     * main() serves only as fallback in case the application can not be
+     * launched through deployment artifacts, e.g., in IDEs with limited FX
+     * support. NetBeans ignores main().
+     *
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        launch(args);
     }
 }

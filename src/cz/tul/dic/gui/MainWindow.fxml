@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* Copyright (C) LENAM, s.r.o. - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Petr Jecmen &lt;petr.jecmen@tul.cz>, 2015
+ */
+
+-->
 
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
