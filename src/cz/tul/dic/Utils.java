@@ -7,7 +7,10 @@ package cz.tul.dic;
 
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.license.License;
+import cz.tul.dic.license.LicenseHandler;
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -102,15 +105,25 @@ public class Utils {
     public static String format(final double val) {
         return nfDouble.format(val);
     }
-    
+
     public static String format(final int val) {
         return nfInt.format(val);
     }
-    
+
     public static double[][] generateNaNarray(final int width, final int height) {
         final double[][] result = new double[width][height];
         for (double[] dA : result) {
             Arrays.fill(dA, Double.NaN);
+        }
+        return result;
+    }
+
+    public static boolean checkLicense(final File licenseFile) {
+        boolean result = false;
+        try {
+            final License license = LicenseHandler.readLicenseFile(licenseFile);
+            result = LicenseHandler.checkLicense(license);
+        } catch (IOException ex) {
         }
         return result;
     }

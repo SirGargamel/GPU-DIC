@@ -23,12 +23,16 @@ import cz.tul.dic.output.NameGenerator;
 import cz.tul.dic.output.target.ExportTarget;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
@@ -46,6 +50,7 @@ public class DicMain extends Application {
 
     private static final String DEBUG_SMALL = "-d";
     private static final String DEBUG_COMPUTE = "-debug";
+    private static final File LICENSE = new File("license.dat");
     private static final String[] FILES_TO_DEBUG = new String[]{
         //        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
@@ -60,57 +65,55 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
         //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
         //////////////////////////////        
-//                "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR.small.config",
-//                "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR.small.config",
-//                "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR.small.config",
-//                "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR2.small.config",
-//                "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR2.small.config",
-//                "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR2.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR2.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR2.small.config",
-//                "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR2.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6203652m.avi.CF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\9905121m.avi.CF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\7202845m.avi.CF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6107544m.avi.CF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6113599m.avi.CF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\9112502m.avi.CF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6203652m.avi.BF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\9905121m.avi.BF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\7202845m.avi.BF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6107544m.avi.BF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\6113599m.avi.BF.small.config",
-//                "d:\\temp\\.smallSolverCompare\\9112502m.avi.BF.small.config",
-          ////////////////////////////
-//        "d:\\temp\\.solverCompare\\6203652m.avi.NR.config",
-//        "d:\\temp\\.solverCompare\\9905121m.avi.NR.config",
-//        "d:\\temp\\.solverCompare\\7202845m.avi.NR.config",
-//        "d:\\temp\\.solverCompare\\6107544m.avi.NR.config",
-//        "d:\\temp\\.solverCompare\\6113599m.avi.NR.config",
-//        "d:\\temp\\.solverCompare\\9112502m.avi.NR.config",
-//        "d:\\temp\\.solverCompare\\6203652m.avi.NR2.config",
-//        "d:\\temp\\.solverCompare\\9905121m.avi.NR2.config",
-//        "d:\\temp\\.solverCompare\\7202845m.avi.NR2.config",
-//        "d:\\temp\\.solverCompare\\6107544m.avi.NR2.config",
-//        "d:\\temp\\.solverCompare\\6113599m.avi.NR2.config",
-//        "d:\\temp\\.solverCompare\\9112502m.avi.NR2.config",        
-//        "d:\\temp\\.solverCompare\\6203652m.avi.CF.config",
-//        "d:\\temp\\.solverCompare\\9905121m.avi.CF.config",
-//        "d:\\temp\\.solverCompare\\7202845m.avi.CF.config",
-//        "d:\\temp\\.solverCompare\\6107544m.avi.CF.config",
-//        "d:\\temp\\.solverCompare\\6113599m.avi.CF.config",
-//        "d:\\temp\\.solverCompare\\9112502m.avi.CF.config",
+        //                "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR2.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR2.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR2.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR2.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR2.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR2.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6203652m.avi.CF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\9905121m.avi.CF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\7202845m.avi.CF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6107544m.avi.CF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6113599m.avi.CF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\9112502m.avi.CF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6203652m.avi.BF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\9905121m.avi.BF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\7202845m.avi.BF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6107544m.avi.BF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\6113599m.avi.BF.small.config",
+        //                "d:\\temp\\.smallSolverCompare\\9112502m.avi.BF.small.config",
+        ////////////////////////////
+        //        "d:\\temp\\.solverCompare\\6203652m.avi.NR.config",
+        //        "d:\\temp\\.solverCompare\\9905121m.avi.NR.config",
+        //        "d:\\temp\\.solverCompare\\7202845m.avi.NR.config",
+        //        "d:\\temp\\.solverCompare\\6107544m.avi.NR.config",
+        //        "d:\\temp\\.solverCompare\\6113599m.avi.NR.config",
+        //        "d:\\temp\\.solverCompare\\9112502m.avi.NR.config",
+        //        "d:\\temp\\.solverCompare\\6203652m.avi.NR2.config",
+        //        "d:\\temp\\.solverCompare\\9905121m.avi.NR2.config",
+        //        "d:\\temp\\.solverCompare\\7202845m.avi.NR2.config",
+        //        "d:\\temp\\.solverCompare\\6107544m.avi.NR2.config",
+        //        "d:\\temp\\.solverCompare\\6113599m.avi.NR2.config",
+        //        "d:\\temp\\.solverCompare\\9112502m.avi.NR2.config",        
+        //        "d:\\temp\\.solverCompare\\6203652m.avi.CF.config",
+        //        "d:\\temp\\.solverCompare\\9905121m.avi.CF.config",
+        //        "d:\\temp\\.solverCompare\\7202845m.avi.CF.config",
+        //        "d:\\temp\\.solverCompare\\6107544m.avi.CF.config",
+        //        "d:\\temp\\.solverCompare\\6113599m.avi.CF.config",
+        //        "d:\\temp\\.solverCompare\\9112502m.avi.CF.config",
         "d:\\temp\\.solverCompare\\6203652m.avi.BF.config",
         "d:\\temp\\.solverCompare\\9905121m.avi.BF.config",
         "d:\\temp\\.solverCompare\\7202845m.avi.BF.config",
         "d:\\temp\\.solverCompare\\6107544m.avi.BF.config",
         "d:\\temp\\.solverCompare\\6113599m.avi.BF.config",
-        "d:\\temp\\.solverCompare\\9112502m.avi.BF.config",
-        
-    };
+        "d:\\temp\\.solverCompare\\9112502m.avi.BF.config",};
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -128,19 +131,48 @@ public class DicMain extends Application {
             performComputationTest();
         }
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        final ResourceBundle rb = Lang.getBundle();
-        fxmlLoader.setResources(rb);
+        boolean validLicense = Utils.checkLicense(LICENSE);
+        if (!validLicense) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(Lang.getString("LicenseMissingTitle"));
+            alert.setHeaderText(null);
+            alert.setContentText(Lang.getString("LicenseMissingText"));
+            alert.showAndWait();
 
-        final Parent root = FXMLLoader.load(getClass().getResource("/cz/tul/dic/gui/MainWindow.fxml"), rb);
+            final FileChooser chooser = new FileChooser();
+            chooser.setTitle(Lang.getString("LicenseMissingSelectTitle"));
+            chooser.setInitialFileName("license.dat");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("License file [license.dat]", "license.dat"));            
+            final File license = chooser.showOpenDialog(null);
+            if (license != null) {
+                validLicense = Utils.checkLicense(license);
+                if (validLicense) {
+                    Files.copy(license.toPath(), LICENSE.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+            } else {
+                alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle(Lang.getString("LicenseMissingTitle"));
+                alert.setHeaderText(null);
+                alert.setContentText(Lang.getString("LicenseMissingText2"));
+                alert.showAndWait();
+            }
+        }
 
-        final Scene scene = new Scene(root);
+        if (validLicense) {
+            final FXMLLoader fxmlLoader = new FXMLLoader();
+            final ResourceBundle rb = Lang.getBundle();
+            fxmlLoader.setResources(rb);
 
-        stage.setScene(scene);
-        stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
-        stage.setTitle(rb.getString("Title"));
-        stage.setResizable(false);
-        stage.show();
+            final Parent root = FXMLLoader.load(getClass().getResource("/cz/tul/dic/gui/MainWindow.fxml"), rb);
+
+            final Scene scene = new Scene(root);
+
+            stage.setScene(scene);
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+            stage.setTitle(rb.getString("Title"));
+            stage.setResizable(false);
+            stage.show();
+        }
     }
 
     private void configureTinyLog(final boolean debug) throws IOException {
