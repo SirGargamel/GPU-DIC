@@ -1,9 +1,38 @@
-Data do RIVu
-R59 - Interní identifikaèní kód		-	asi èíslo smlouvy
-R37 - Technické parametry výsledky	-	smlouva s LENAMem a asi licence
-R38 - ??? ekonomicke parametry vysledku
+Seznam domácích tvùrcù - Petr Jeèmen, Josef Novák
+Obor výsledku - I - Informatika
+Druh výsledku - R - Software
+R06 - GPU-DIC
+R07 - èeský jazyk
+R08 - GPU-DIC
+R09 - 2014
+R10 - 2
+R11 - 2
+R12 - C (Podléhá obchodnímu tajemství)
+R13 - GPU, DIC, image processing
+R59 - 14/8230/011
+R37 - Technické parametry výsledku
+Subjekt -
+LENAM s.r.o.
+IÈ 	48291579
+Klostermannova 690/15, 460 01, Liberec 1
+
+Kontaktní osoba -
+Doc. Ing. Antonín Potìšil, CSc.
++420 602 174 470
+antonin.potesil@lenam.cz
+
+Datum uzavøení smlouvy 31.1.2014
+
+R38 - Ekonomické parametry výsledku
+Téma øešení projektu je orientované do oblasti progresivních poèítaèových technologií, které se pozitivnì promítnou do materiálového inženýrství, aby tak pøispìly k výbìru napø. i biomateriálù, které jsou vyvíjeny s ohledem na kvalitu životního prostøedí èi na vývoj nových materiálù napø. v oblasti automotive, více šetrných k životnímu prostøedí a pøispívajících k bezpeènosti posádky dopravních prostøedkù a chodcù.
+
 R39, R40, R41 - LENAM info
+R39 - LENAM s.r.o.
+R40 - 48291579
+R41 - Èeská Republika
+
 RN3 - A
 RN4 - A
-RX3 - A
-R75 - èíslo smlouvy
+R75 - 14/8230/011
+
+Aplikace umožòuje detailní analýzu chování materiálu bìhem experimentální zkoušky. Cílem je urychlení výpoètu a získání detailních výsledkù pro celý povrch materiálu na rozdíl od dosavadní analýzy materiálu jako monolitu. Zásadní know how se nachází v oblasti zpracování obrazu a paralelních výpoètù. 
