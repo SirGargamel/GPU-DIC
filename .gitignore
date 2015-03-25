@@ -7,3 +7,5 @@ log*.txt
 /manifest.mf
 /cov-int/
 /log.txt
+/LicenseManager/
+/license.dat
