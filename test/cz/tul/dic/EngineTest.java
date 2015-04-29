@@ -66,28 +66,12 @@ public class EngineTest {
         -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
     private static final double[] DEF_FIRST_F = new double[]{
         -2, 2, 1, -2, 2, 1,
-        -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
-    private static final String[] DEF_SECOND_FILES = new String[]{
-        "out_0_0_0_0_0_0_0_0.5_0_0_0_0", "out_0_0_0_0_0_0_0_0_1_0_0_0",
-        "out_0_0_0_0_0_0_0_0_0_0.5_0_0", "out_0_0_0_0_0_0_0_0_0_0_0_1",
-        "out_0_0_0_0_0_0_0_0_1_0_0_1", "out_0_0_0_0_0_0_0_0.5_0_0.5_0_0"
-    };
-    private static final double[] DEF_SECOND = new double[]{
-        0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        -0.0, 0.0, 0.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -0.0, 0.0, 0.0, -1.0, 1.0, 0.5};
-    private static final double[] DEF_SECOND_F = new double[]{
-        -1, 2, 1, -1, 1, 1,
-        -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
-        -0.0, 0.0, 0.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -0.0, 0.0, 0.0, -1.0, 1.0, 0.5};
+        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};    
     private static final String[] DEF_ZERO_FIRST_FILES = new String[]{
-        "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};
-    private static final String[] DEF_ZERO_FIRST_SECOND_FILES = new String[]{
-        "out_2_0_1_1_0_0_1_0_0_0_0_1", "out_-1_-1_0_0_1_0_0_0.5_1_0_0_0"};
+        "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};    
     private static final double[] DEF_LARGE = new double[]{
         -3, 3, 0.25, -3, 3, 0.25,
-        -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
-        -1.0, 1.0, 1.0, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 1.0, -1.0, 1.0, 0.5};
+        -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
@@ -119,21 +103,6 @@ public class EngineTest {
 
                         for (String s : DEF_ZERO_FIRST_FILES) {
                             tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
-                            errors.add(computeAndCheckTask(tc, s));
-                            counter++;
-                        }
-
-                        for (String s : DEF_SECOND_FILES) {
-                            tc = generateTask(s, DEF_SECOND, kt, i, ts, fgm, slvr);
-                            errors.add(computeAndCheckTask(tc, s));
-                            counter++;
-                            tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
-                            errors.add(computeAndCheckTask(tc, s));
-                            counter++;
-                        }
-
-                        for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
-                            tc = generateTask(s, DEF_SECOND_F, kt, i, ts, fgm, slvr);
                             errors.add(computeAndCheckTask(tc, s));
                             counter++;
                         }
@@ -205,7 +174,7 @@ public class EngineTest {
         TaskContainer tc;
         Set<String> errors = new HashSet<>();
 
-        for (String s : DEF_ZERO_FIRST_SECOND_FILES) {
+        for (String s : DEF_ZERO_FIRST_FILES) {
             tc = generateTask(s, DEF_LARGE);
             errors.add(computeAndCheckTask(tc, s));
         }
@@ -402,7 +371,7 @@ public class EngineTest {
     public void testEngineMultiFacet() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_SECOND_FILES[0] + ".bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
 
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
@@ -411,17 +380,17 @@ public class EngineTest {
         final int fs = 11;
 
         tc.addRoi(ROUND, roi);
-        tc.setDeformationLimits(ROUND, roi, DEF_SECOND_F);
+        tc.setDeformationLimits(ROUND, roi, DEF_FIRST_F);
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, fs);
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final TaskSolver correlation = TaskSolver.initSolver(Solver.BruteForce);
-        correlation.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
-        correlation.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
+        final TaskSolver solver = TaskSolver.initSolver(Solver.BruteForce);
+        solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
+        solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
-        correlation.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
+        solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
         Map<ROI, List<Facet>> facets = new HashMap<>(1);
         final List<Facet> roiFacets = new ArrayList<>(4);
@@ -434,17 +403,17 @@ public class EngineTest {
         tc.setResult(
                 ROUND,
                 roi,
-                correlation.solve(
+                solver.solve(
                         tc.getImage(ROUND), tc.getImage(ROUND + 1),
                         roiFacets,
                         generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi)));
-
+        solver.endTask();
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
         Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
-        Assert.assertNull(computeAndCheckTask(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
+        Assert.assertNull(computeAndCheckTask(tc, DEF_ZERO_FIRST_FILES[0]));
     }
 
     private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
@@ -455,7 +424,7 @@ public class EngineTest {
     public void testEngineMultiFacetLarge() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_SECOND_FILES[0] + ".bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
 
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
@@ -496,7 +465,8 @@ public class EngineTest {
         solver.endTask();
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
-        Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_SECOND_FILES[0]));
+        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
+        Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
 
         final List<CorrelationResult> results = tc.getResult(ROUND, roi);
         CorrelationResult cr1, cr2;

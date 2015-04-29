@@ -217,7 +217,7 @@ Tento parametr určuje velikost okna při výpočtu pole přetvoření. Tento pa
 \item[MM\textunderscore TO\textunderscore PX\textunderscore RATIO] [double]\\
 Koeficient pro přepočet rozměru okna přetvoření z milimetrů na pixely. Jedná se o hodnotu, která říká, kolik pixelů v obraze je jeden milimetr v reálném světě.
 \item[DEFORMATION\textunderscore LIMITS] [double ; double ; double...]\\
-Limity deformací určují, jaké deformace se v obraze předpokládají a tím pádem jaké deformace se budou testovat. V literatuře se koeficienty značí jako U, V, UX, UY ,VX, VY, UXX, UYY, UXY, VVXX, VYY, VXY.  Hodnoty se pro každý koeficient zadávají ve tvaru MIN, MAX, KROK, koeficienty mohou být dva (testovat se budou pouze posuny), 6 (kromě posunutí také prodloužení a smyk) nebo 12 (přidají se nelineární deformace). Tím pádem se musí zadat 6, 18 nebo 36 hodnot oddělených středníkem. Matematické využití koeficientů lze nalézt v přiložené literatuře. Jako výchozí hodnota se používají deformace prvního řádu s následujícím zadáním :-2; 2; 0.25; -1; 3; 0.25; -0.2; 0.0; 0.05; -0.5; 0.5; 0.1; -0.5; 0.5; 0.1; 0.0; 0.5; 0.1. V překladu jde o to, že posuny se testují po 0.25 pixelech, v ose X se testují pouze malé posuny. Deformace prvního řádu pak testují prodloužení od žádného (0) do prodloužení na jeden a půl násobek (0.5) v ose Y a malou kompresi v ose X (-0.2). Smyk pak záporný i kladný v obou osách (-0.5 až 0.5). Vliv koeficientů na deformaci lze vyzkoušet v přiloženém nástroji \emph{DIC\textunderscore DeformationGenerator} (ovládání programu je popsáno v kapitole \ref{sec:generator}), v následujícím seznamu lze nalézt jednoduchý popis, co který koeficient znamená.
+Limity deformací určují, jaké deformace se v obraze předpokládají a tím pádem jaké deformace se budou testovat. V literatuře se koeficienty značí jako U, V, UX, UY ,VX, VY, UXX, UYY, UXY, VVXX, VYY, VXY.  Hodnoty se pro každý koeficient zadávají ve tvaru MIN, MAX, KROK, koeficienty mohou být dva (testovat se budou pouze posuny), 6 (kromě posunutí také prodloužení a smyk) nebo 12 (přidají se nelineární deformace). Tím pádem se musí zadat 6, 18 nebo 36 hodnot oddělených středníkem. Matematické využití koeficientů lze nalézt v přiložené literatuře. Jako výchozí hodnota se používají deformace prvního řádu s následujícím zadáním :-2; 2; 0.25; -1; 3; 0.25; -0.2; 0.0; 0.05; -0.5; 0.5; 0.1; -0.5; 0.5; 0.1; 0.0; 0.5; 0.1. V překladu jde o to, že posuny se testují po 0.25 pixelech, v ose X se testují pouze malé posuny. Deformace prvního řádu pak testují prodloužení od žádného (0) do prodloužení na jeden a půl násobek (0.5) v ose Y a malou kompresi v ose X (-0.2). Smyk pak záporný i kladný v obou osách (-0.5 až 0.5). Vliv koeficientů na deformaci lze vyzkoušet v přiloženém nástroji \emph{DIC\textunderscore Utils} (ovládání programu je popsáno v kapitole \ref{sec:generator}), v následujícím seznamu lze nalézt jednoduchý popis, co který koeficient znamená.
 \begin{description}
 \item[U] posunutí v ose X
 \item[V] posunutí v ose Y
@@ -225,12 +225,6 @@ Limity deformací určují, jaké deformace se v obraze předpokládají a tím 
 \item[UY] zkosení v ose X
 \item[VX] zkosení v ose Y
 \item[VY] roztažení v ose Y
-\item[UXX] jednostranné natažení v ose X
-\item[UYY] ohnutí v ose X
-\item[UXY] zploštění do trojúhelníku ve směru Y
-\item[VXX] ohnutí v ose Y
-\item[VYY] jednostranné natažení v ose Y
-\item[VXY] zploštění do trojúhelníku ve směru X
 \end{description}
 \end{description}
 \newpage
@@ -264,7 +258,7 @@ PARAM_ROUND_LIMITS :: 2;4
 PARAM_DEFORMATION_LIMITS :: -1.0;1.0;0.1;-2.0;5.0;0.1
 \end{lstlisting}
 \newpage
-\section{Ovládání programu DIC\textunderscore DeformationGenerator}
+\section{Ovládání programu DIC\textunderscore Utils}
 \label{sec:generator}
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{defGen.png}\\Okno programu}
