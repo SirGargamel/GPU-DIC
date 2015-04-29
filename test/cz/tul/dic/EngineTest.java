@@ -66,12 +66,12 @@ public class EngineTest {
         -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5, -2.0, 2.0, 0.5};
     private static final double[] DEF_FIRST_F = new double[]{
         -2, 2, 1, -2, 2, 1,
-        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};    
+        -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5, -1.0, 1.0, 0.5};
     private static final String[] DEF_ZERO_FIRST_FILES = new String[]{
-        "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};    
+        "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};
     private static final double[] DEF_LARGE = new double[]{
-        -3, 3, 0.25, -3, 3, 0.25,
-        -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0};
+        -5, 5, 0.25, -5, 5, 0.2,
+        -1.0, 1.0, 0.05, -1.0, 1.0, 0.2, -1.0, 1.0, 0.2, -1.0, 1.0, 0.1};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
@@ -131,8 +131,9 @@ public class EngineTest {
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
-        
+
         tc.addHint(Hint.NO_STRAIN);
+        tc.addHint(Hint.NO_STATS);
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
@@ -174,11 +175,8 @@ public class EngineTest {
         TaskContainer tc;
         Set<String> errors = new HashSet<>();
 
-        for (String s : DEF_ZERO_FIRST_FILES) {
-            tc = generateTask(s, DEF_LARGE);
-            errors.add(computeAndCheckTask(tc, s));
-        }
-
+        tc = generateTask(DEF_ZERO_FIRST_FILES[2], DEF_LARGE);
+        errors.add(computeAndCheckTask(tc, DEF_ZERO_FIRST_FILES[2]));
         errors.remove(null);
         Assert.assertEquals(errors.toString(), 0, errors.size());
     }
@@ -196,10 +194,12 @@ public class EngineTest {
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
 
+        tc.addHint(Hint.NO_STRAIN);
+        tc.addHint(Hint.NO_STATS);
+
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
-
-        Engine.getInstance().computeTask(tc);
+        tc.setParameter(TaskParameter.SOLVER, Solver.BruteForce);
 
         return tc;
     }
@@ -413,7 +413,7 @@ public class EngineTest {
         DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
         Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
-        Assert.assertNull(computeAndCheckTask(tc, DEF_ZERO_FIRST_FILES[0]));
+        Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
     }
 
     private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
@@ -447,8 +447,6 @@ public class EngineTest {
 
         Map<ROI, List<Facet>> facets = new HashMap<>(1);
         final List<Facet> roiFacets = new ArrayList<>(4);
-        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
-        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
         roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
         roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
         facets.put(roi, roiFacets);
