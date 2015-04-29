@@ -17,31 +17,33 @@ import org.apache.commons.math3.linear.RealVector;
 public class NewtonRaphsonForward extends NewtonRaphson {
 
     @Override
-    protected RealVector generateGradient(float[] resultData, final int facetIndex, final int facetCount, final int coeffCount, final double[] deformationLimits) {
+    protected RealVector generateGradient(final float[] resultData, final int facetIndex, final int facetCount, final int[] counts, final double[] deformationLimits) {
+        final int coeffCount = counts.length - 1;
         final double[] data = new double[coeffCount];
 
         final int deformationCount = resultData.length / facetCount;
         final int resultsBase = facetIndex * deformationCount;
-        final int[] indices = prepareIndices(coeffCount);
+        final int[] indices = prepareIndices(counts);
         for (int i = 0; i < coeffCount; i++) {
             // right index
             indices[i]++;
-            data[i] = resultData[resultsBase + generateIndex(indices)];
+            data[i] = resultData[resultsBase + generateIndex(counts, indices)];
             // left index
             indices[i]--;
-            data[i] -= resultData[resultsBase + generateIndex(indices)];
+            data[i] -= resultData[resultsBase + generateIndex(counts, indices)];
             data[i] /= deformationLimits[i * 3 + 2];
         }
         return new ArrayRealVector(data);
     }
 
     @Override
-    protected RealMatrix generateHessianMatrix(float[] resultData, final int facetIndex, final int facetCount, final int coeffCount, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(final float[] resultData, final int facetIndex, final int facetCount, final int[] counts, final double[] deformationLimits) {
+        final int coeffCount = counts.length - 1;
         final double[][] data = new double[coeffCount][coeffCount];
 
         final int deformationCount = resultData.length / facetCount;
         final int resultsBase = facetIndex * deformationCount;
-        final int[] indices = prepareIndices(coeffCount);
+        final int[] indices = prepareIndices(counts);
 
         // direct approach with forward difference
         double subResultA, subResultB;
@@ -49,16 +51,16 @@ public class NewtonRaphsonForward extends NewtonRaphson {
             for (int j = i; j < coeffCount; j++) {
                 indices[i]++;
                 indices[j]++;
-                subResultA = resultData[resultsBase + generateIndex(indices)];
+                subResultA = resultData[resultsBase + generateIndex(counts, indices)];
                 indices[j]--;
-                subResultA -= resultData[resultsBase + generateIndex(indices)];
+                subResultA -= resultData[resultsBase + generateIndex(counts, indices)];
                 subResultA /= deformationLimits[j * 3 + 2];
 
                 indices[i]--;
                 indices[j]++;
-                subResultB = resultData[resultsBase + generateIndex(indices)];
+                subResultB = resultData[resultsBase + generateIndex(counts, indices)];
                 indices[j]--;
-                subResultB -= resultData[resultsBase + generateIndex(indices)];
+                subResultB -= resultData[resultsBase + generateIndex(counts, indices)];
                 subResultB /= deformationLimits[j * 3 + 2];
 
                 data[i][j] = (subResultA - subResultB) / deformationLimits[i * 3 + 2];

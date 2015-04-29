@@ -43,7 +43,10 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
     private float[] gpuData;
 
     @Override
-    List<CorrelationResult> solve(Image image1, Image image2, Kernel kernel, List<Facet> facets, List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException {
+    List<CorrelationResult> solve(
+            final Image image1, final Image image2,
+            final Kernel kernel, final List<Facet> facets,
+            final List<double[]> deformationLimits, final DeformationDegree defDegree) throws ComputationException {
         final int facetCount = deformationLimits.size();
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
@@ -52,6 +55,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         double[] temp;
         final List<double[]> limitsList = new ArrayList<>(facetCount);
         final List<double[]> solutionList = new ArrayList<>(facetCount);
+        List<int[]> countsList;
         double[] newLimits, coarseResult, solution;
         for (int i = 0; i < facetCount; i++) {
             coarseResult = coarseResults.get(i).getDeformation();
@@ -67,18 +71,16 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
             solutionList.add(solution);
             limitsList.add(generateLimits(solution, newLimits));
         }
+        countsList = DeformationUtils.generateDeformationCounts(limitsList);
 
-        final int[] indices = prepareIndices(coeffCount);
-        final int middleIndex = generateIndex(indices);
-        final int deformationCountPerFacet = coeffCount * COUNT_STEP;
         final List<Facet> facetsToCompute = new ArrayList<>(facets);
-
         List<CorrelationResult> results = coarseResults;
         RealVector gradient, solutionVec;
         RealMatrix hessianMatrix;
         DecompositionSolver solver;
         CorrelationResult newResult;
         double[] limits;
+        int[] counts;
         float increment;
         Iterator<Facet> it;
         Facet f;
@@ -89,24 +91,26 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
         final StringBuilder sb = new StringBuilder();
         final long time = System.nanoTime();
-        int resultIndex, counterFinished;
+        int baseIndex, resultIndex = 0, counterFinished;
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
             sb.setLength(0);
+            baseIndex = 0;
             facetIndexLocal = 0;
             counterFinished = 0;
             finishedFacets.clear();
 
             computeTask(image1, image2, kernel, facetsToCompute, limitsList, defDegree);
-            
-            it = facetsToCompute.iterator();            
+
+            it = facetsToCompute.iterator();
             sb.append("Results for round ").append(i).append(": ");
             while (it.hasNext()) {
                 f = it.next();
                 facetIndexGlobal = facets.indexOf(f);
+                counts = countsList.get(facetIndexLocal);
 
                 try {
                     // store results with computed quality  
-                    resultIndex = facetIndexLocal * deformationCountPerFacet + middleIndex;
+                    resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
                     newResult = new CorrelationResult(gpuData[resultIndex], solutionList.get(facetIndexLocal));
                     increment = newResult.getValue() - results.get(facetIndexGlobal).getValue();
                     sb.append(facetIndexGlobal)
@@ -116,8 +120,8 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
                     if (increment > LIMIT_MIN_GROWTH) {
                         // prepare data for next step
                         limits = limitsList.get(facetIndexLocal);
-                        gradient = generateGradient(gpuData, facetIndexLocal, facetCount, coeffCount, limits);
-                        hessianMatrix = generateHessianMatrix(gpuData, facetIndexLocal, facetCount, coeffCount, limits);
+                        gradient = generateGradient(gpuData, facetIndexLocal, facetCount, counts, limits);
+                        hessianMatrix = generateHessianMatrix(gpuData, facetIndexLocal, facetCount, counts, limits);
                         // calculate next step
                         solver = new QRDecomposition(hessianMatrix).getSolver();
                         solutionVec = solver.solve(gradient);
@@ -138,6 +142,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
                 sb.append("; ");
                 facetIndexLocal++;
+                baseIndex += counts[coeffCount];
             }
             for (Facet facet : finishedFacets) {
                 facetIndexLocal = facetsToCompute.indexOf(facet);
@@ -153,6 +158,8 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
             if (facetsToCompute.isEmpty()) {
                 break;
             }
+
+            countsList = DeformationUtils.generateDeformationCounts(limitsList);
         }
         Logger.trace("Round time: " + ((System.nanoTime() - time) / 1_000_000) + "ms.");
 
@@ -241,57 +248,62 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
     }
 
     protected static double[] generateLimits(final double[] solution, final double[] oldLimits) {
+        final int halfStep = COUNT_STEP / 2;
         final double[] newLimits = Arrays.copyOf(oldLimits, oldLimits.length);
         double step;
         for (int i = 0; i < solution.length; i++) {
             step = oldLimits[i * 3 + 2];
-            newLimits[i * 3] = solution[i] - 2 * step;
-            newLimits[i * 3 + 1] = solution[i] + 2 * step;
+            newLimits[i * 3] = solution[i] - halfStep * step;
+            newLimits[i * 3 + 1] = solution[i] + halfStep * step;
         }
         return newLimits;
     }
 
-    protected static int generateIndex(final int... indices) {
+    protected static int generateIndex(final int[] counts, final int[] indices) {
         int result = indices[0];
         for (int i = 1; i < indices.length; i++) {
-            result *= COUNT_STEP;
+            result *= counts[i];
             result += indices[i];
         }
         return result;
     }
 
     // central difference
-    protected RealVector generateGradient(float[] resultData, final int facetIndex, final int facetCount, final int coeffCount, final double[] deformationLimits) {
+    protected RealVector generateGradient(float[] resultData, final int facetIndex, final int facetCount, final int[] counts, final double[] deformationLimits) {
+        final int coeffCount = counts.length - 1;
         final double[] data = new double[coeffCount];
 
         final int deformationCount = resultData.length / facetCount;
         final int resultsBase = facetIndex * deformationCount;
-        final int[] indices = prepareIndices(coeffCount);
+        final int[] indices = prepareIndices(counts);
         for (int i = 0; i < coeffCount; i++) {
             // right index
             indices[i]++;
-            data[i] = resultData[resultsBase + generateIndex(indices)];
+            data[i] = resultData[resultsBase + generateIndex(counts, indices)];
             // left index
             indices[i] -= 2;
-            data[i] -= resultData[resultsBase + generateIndex(indices)];
+            data[i] -= resultData[resultsBase + generateIndex(counts, indices)];
             data[i] /= 2 * deformationLimits[i * 3 + 2];
             indices[i]++;
         }
         return new ArrayRealVector(data);
     }
 
-    protected static int[] prepareIndices(final int coeffCount) {
-        final int[] indices = new int[coeffCount];
-        Arrays.fill(indices, COUNT_STEP / 2);
+    protected static int[] prepareIndices(final int[] counts) {
+        final int[] indices = new int[counts.length - 1];
+        for (int i = 0; i < indices.length; i++) {
+            indices[i] = counts[i] / 2;
+        }
         return indices;
     }
 
-    protected RealMatrix generateHessianMatrix(float[] resultData, final int facetIndex, final int facetCount, final int coeffCount, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(float[] resultData, final int facetIndex, final int facetCount, final int[] counts, final double[] deformationLimits) {
+        final int coeffCount = counts.length - 1;
         final double[][] data = new double[coeffCount][coeffCount];
 
         final int deformationCount = resultData.length / facetCount;
         final int resultsBase = facetIndex * deformationCount;
-        final int[] indices = prepareIndices(coeffCount);
+        final int[] indices = prepareIndices(counts);
 
         // upper triangle approach
         double step;
@@ -299,26 +311,26 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
             step = deformationLimits[i * 3 + 2];
 
             indices[i]++;
-            data[i][i] = resultData[resultsBase + generateIndex(indices)];
+            data[i][i] = resultData[resultsBase + generateIndex(counts, indices)];
             indices[i] -= 2;
-            data[i][i] += resultData[resultsBase + generateIndex(indices)];
+            data[i][i] += resultData[resultsBase + generateIndex(counts, indices)];
             indices[i]++;
-            data[i][i] -= 2 * resultData[resultsBase + generateIndex(indices)];
+            data[i][i] -= 2 * resultData[resultsBase + generateIndex(counts, indices)];
             data[i][i] /= step * step * 4;
         }
         for (int i = 0; i < coeffCount; i++) {
             for (int j = i + 1; j < coeffCount; j++) {
                 indices[i]++;
                 indices[j]++;
-                data[i][j] = resultData[resultsBase + generateIndex(indices)];
+                data[i][j] = resultData[resultsBase + generateIndex(counts, indices)];
                 indices[i] -= 2;
                 indices[j] -= 2;
-                data[i][j] += resultData[resultsBase + generateIndex(indices)];
+                data[i][j] += resultData[resultsBase + generateIndex(counts, indices)];
                 indices[j] += 2;
-                data[i][j] -= resultData[resultsBase + generateIndex(indices)];
+                data[i][j] -= resultData[resultsBase + generateIndex(counts, indices)];
                 indices[i] += 2;
                 indices[j] -= 2;
-                data[i][j] -= resultData[resultsBase + generateIndex(indices)];
+                data[i][j] -= resultData[resultsBase + generateIndex(counts, indices)];
                 indices[i]--;
                 indices[j]++;
 
