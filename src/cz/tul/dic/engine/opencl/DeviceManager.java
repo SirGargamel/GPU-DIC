@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl;
 
+import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLMemory;
@@ -20,11 +21,22 @@ import org.pmw.tinylog.Logger;
 public class DeviceManager {
 
     private static final CLDevice.Type DEVICE_TYPE = CLDevice.Type.GPU;
-    private static final CLPlatform platform;
-    private static final CLDevice device;
-    private static final CLContext context;
+    private static CLPlatform platform;
+    private static CLDevice device;
+    private static CLContext context;
+    private static CLCommandQueue queue;
 
     static {
+        initContext();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            clearMem();
+        }));
+    }
+
+    public static void initContext() {
+        clearMem();
+
         @SuppressWarnings("unchecked")
         final CLPlatform tmpP = CLPlatform.getDefault((Filter<CLPlatform>) (CLPlatform i) -> i.getMaxFlopsDevice(CLDevice.Type.GPU) != null && i.listCLDevices(CLDevice.Type.CPU).length == 0);
         if (tmpP == null) {
@@ -45,29 +57,39 @@ public class DeviceManager {
         context.addCLErrorHandler((String string, ByteBuffer bb, long l) -> {
             Logger.error("CLError - " + string);
         });
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            clearContext();
-            if (!context.isReleased()) {
-                context.release();
-            }
-        }));
+        
+        queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
     }
 
     public static CLContext getContext() {
         return context;
     }
 
-    public static void clearContext() {
+    private static void clearMem() {
         if (context != null) {
+            Logger.warn("Reseting context memory.");
             for (CLMemory mem : context.getMemoryObjects()) {
-                mem.release();
+                if (mem != null && !mem.isReleased()) {
+                    mem.release();
+                }
             }
+            if (!context.isReleased()) {
+                Logger.warn("Releasing context.");
+                context.release();
+            }
+        }
+        if (queue != null && !queue.isReleased()) {
+            Logger.warn("Releasing command queue.");
+            queue.release();
         }
     }
 
     public static CLDevice getDevice() {
         return device;
+    }
+
+    public static CLCommandQueue getQueue() {
+        return queue;
     }
 
 }

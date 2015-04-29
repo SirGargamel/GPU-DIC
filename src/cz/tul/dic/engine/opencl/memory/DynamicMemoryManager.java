@@ -38,7 +38,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
                     clImageA = clImageB;
                 } else {
                     if (kernel.usesImage()) {
-                        clImageA = generateImage2d_t(imageA);
+                        clImageA = generateImage2d(imageA);
                         queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
                     } else {
                         clImageA = generateImageArray(imageA);
@@ -53,7 +53,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
                 this.imageB = imageB;
 
                 if (kernel.usesImage()) {
-                    clImageB = generateImage2d_t(imageB);
+                    clImageB = generateImage2d(imageB);
                     queue.putWriteImage((CLImage2d<IntBuffer>) clImageB, false);
                 } else {
                     clImageB = generateImageArray(imageB);

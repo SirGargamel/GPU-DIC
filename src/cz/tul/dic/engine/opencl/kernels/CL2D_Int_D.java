@@ -44,7 +44,7 @@ public class CL2D_Int_D extends Kernel {
 
         final int lws0 = calculateLws0();
         int lws1 = Kernel.roundUp(calculateLws1Base(), facetArea);
-        lws1 = Math.min(lws1, device.getMaxWorkItemSizes()[0]);
+        lws1 = Math.min(lws1, getMaxWorkItemSize());
 
         kernelDIC.rewind();
         kernelDIC.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)

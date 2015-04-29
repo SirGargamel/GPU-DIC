@@ -9,7 +9,6 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
-import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLImageFormat;
 import com.jogamp.opencl.CLMemory;
@@ -32,17 +31,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class OpenCLMemoryManager {
 
-    private static final OpenCLMemoryManager INSTANCE;
-
-    static {
-        INSTANCE = new StaticMemoryManager();
-    }
+    private static final OpenCLMemoryManager INSTANCE;    
 
     public static OpenCLMemoryManager init() {
         return INSTANCE;
     }
 
-    private static final CLImageFormat IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
+    private static final CLImageFormat IMAGE_FORMAT;
     private final Lock lock;
     protected int maxDeformationCount;
     // OpenCL entities
@@ -53,30 +48,33 @@ public abstract class OpenCLMemoryManager {
     protected CLBuffer<IntBuffer> clDefStepCount;
     protected CLBuffer<FloatBuffer> clResults;
     // OpenCL context        
-    protected final CLCommandQueue queue;
-    protected final CLDevice device;
-    protected final CLContext context;
+    protected CLCommandQueue queue;
+    protected CLContext context;
+    
+    static {
+        DeviceManager.initContext();
+        INSTANCE = new StaticMemoryManager();
+        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);                
+    }
 
     OpenCLMemoryManager() {
-        device = DeviceManager.getDevice();
-        context = DeviceManager.getContext();
-        queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
-        
         lock = new ReentrantLock();
     }
 
-    public void assignData(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
-        lock.lock();
+    public void assignData(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final Kernel kernel) throws ComputationException {
+        lock.lock();        
+        context = DeviceManager.getContext();
+        queue = DeviceManager.getQueue();
         assignDataToGPU(imageA, imageB, facets, deformationLimits, kernel);
     }
-    
-    public abstract void assignDataToGPU(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException;
-    
+
+    public abstract void assignDataToGPU(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final Kernel kernel) throws ComputationException;
+
     public void unlockData() {
         lock.unlock();
     }
 
-    protected CLImage2d<IntBuffer> generateImage2d_t(final Image image) {
+    protected CLImage2d<IntBuffer> generateImage2d(final Image image) {
         final CLImage2d<IntBuffer> result = context.createImage2d(
                 Buffers.newDirectIntBuffer(image.toBWArray()),
                 image.getWidth(), image.getHeight(),
@@ -176,7 +174,7 @@ public abstract class OpenCLMemoryManager {
         return result;
     }
 
-    protected void release(CLResource mem) {
+    protected void release(final CLResource mem) {
         if (mem != null && !mem.isReleased()) {
             mem.release();
         }
@@ -190,8 +188,6 @@ public abstract class OpenCLMemoryManager {
         release(clImageA);
         release(clImageB);
         release(clResults);
-        release(context);
-        release(queue);
         
         clDefStepCount = null;
         clDeformationLimits = null;
@@ -232,18 +228,6 @@ public abstract class OpenCLMemoryManager {
 
     public int getMaxDeformationCount() {
         return maxDeformationCount;
-    }
-
-    public CLContext getContext() {
-        return context;
-    }
-
-    public CLCommandQueue getQueue() {
-        return queue;
-    }
-
-    public CLDevice getDevice() {
-        return device;
     }
 
 }

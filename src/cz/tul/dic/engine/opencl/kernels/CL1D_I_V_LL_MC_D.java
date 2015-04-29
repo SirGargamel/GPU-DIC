@@ -42,7 +42,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         stop = false;
         final int facetArea = facetSize * facetSize;
         int lws0 = Kernel.roundUp(calculateLws0base(), facetArea);
-        lws0 = Math.min(lws0, device.getMaxWorkItemSizes()[0]);
+        lws0 = Math.min(lws0, getMaxWorkItemSize());
 
         kernelDIC.rewind();
         kernelDIC.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)

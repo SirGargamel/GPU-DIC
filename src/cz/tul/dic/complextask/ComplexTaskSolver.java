@@ -85,6 +85,7 @@ public class ComplexTaskSolver extends Observable {
             good = true;
             do {
                 if (stop) {
+                    Engine.getInstance().endTask();
                     return;
                 }
                 if (!good) {
@@ -97,6 +98,7 @@ public class ComplexTaskSolver extends Observable {
             crm.generateNextRound(r, nextR);
 
             if (stop) {
+                Engine.getInstance().endTask();
                 return;
             }
             setChanged();
@@ -138,6 +140,8 @@ public class ComplexTaskSolver extends Observable {
 
         Stats.getInstance().dumpDeformationsStatisticsUsage();
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
+        
+        Engine.getInstance().endTask();
 
         if (stop) {
             return;

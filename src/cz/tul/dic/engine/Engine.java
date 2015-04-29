@@ -42,27 +42,28 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Ječmen
  */
-public class Engine extends Observable {
+public final class Engine extends Observable {
 
-    private static final Engine instance;
+    private static final Engine INSTANCE;
     private final StrainEstimation strain;
     private TaskSolver solver;
-    private boolean stop;
+    private boolean stopEngine;
 
     static {
-        instance = new Engine();
+        INSTANCE = new Engine();
     }
 
     public static Engine getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     private Engine() {
+        super();
         strain = new StrainEstimation();
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
-        stop = false;
+        stopEngine = false;
         setChanged();
         notifyObservers(0);
 
@@ -72,25 +73,26 @@ public class Engine extends Observable {
         final Set<Hint> hints = tc.getHints();
         int r, nextR;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
-            if (stop) {
+            if (stopEngine) {
+                endTask();
                 return;
             }
 
             r = e.getKey();
             nextR = e.getValue();
-            
+
             setChanged();
             notifyObservers(r);
 
             computeRound(tc, r, nextR);
-            exportRound(tc, r);            
+            exportRound(tc, r);
         }
 
         Stats.getInstance().dumpDeformationsStatisticsUsage();
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
 
         if (!hints.contains(Hint.NO_STRAIN)) {
-            if (stop) {
+            if (stopEngine) {
                 return;
             }
             setChanged();
@@ -98,62 +100,64 @@ public class Engine extends Observable {
             strain.computeStrain(tc);
         }
 
+        endTask();
+
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
     }
 
-    public void computeRound(final TaskContainer tc, final int roundFrom, final int roundTo) throws ComputationException, IOException {
-        stop = false;
+    public void computeRound(final TaskContainer task, final int roundFrom, final int roundTo) throws ComputationException, IOException {
+        stopEngine = false;
 
-        long time = System.currentTimeMillis();
+        final long time = System.currentTimeMillis();
 
-        Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, tc);
-        final Set<Hint> hints = tc.getHints();
+        Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, task);
+        final Set<Hint> hints = task.getHints();
         if (hints.contains(Hint.NO_STATS)) {
             DebugControl.pauseDebugMode();
         } else {
             DebugControl.resumeDebugMode();
         }
-        Stats.getInstance().setTaskContainer(tc);
+        Stats.getInstance().setTaskContainer(task);
 
         setChanged();
         notifyObservers(TaskContainerUtils.class);
-        TaskContainerUtils.checkTaskValidity(tc);
+        TaskContainerUtils.checkTaskValidity(task);
 
         // prepare correlation calculator
-        solver = TaskSolver.initSolver((Solver) tc.getParameter(TaskParameter.SOLVER));
-        solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
-        solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
-        final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
-        final Object taskSplitValue = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
+        solver = TaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
+        solver.setKernel((KernelType) task.getParameter(TaskParameter.KERNEL));
+        solver.setInterpolation((Interpolation) task.getParameter(TaskParameter.INTERPOLATION));
+        final TaskSplitMethod taskSplit = (TaskSplitMethod) task.getParameter(TaskParameter.TASK_SPLIT_METHOD);
+        final Object taskSplitValue = task.getParameter(TaskParameter.TASK_SPLIT_PARAM);
         solver.setTaskSplitVariant(taskSplit, taskSplitValue);
 
         // prepare data
         setChanged();
         notifyObservers(FacetGenerator.class);
-        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(tc, roundFrom);
+        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(task, roundFrom);
 
         // compute round                
-        for (ROI roi : tc.getRois(roundFrom)) {
-            if (stop) {
+        for (ROI roi : task.getRois(roundFrom)) {
+            if (stopEngine) {
                 return;
             }
             // compute and store result
             setChanged();
             notifyObservers(TaskSolver.class);
-            tc.setResult(
+            task.setResult(
                     roundFrom, roi,
                     solver.solve(
-                            tc.getImage(roundFrom), tc.getImage(roundTo),
+                            task.getImage(roundFrom), task.getImage(roundTo),
                             facets.get(roi),
-                            generateDeformations(tc.getDeformationLimits(roundFrom, roi), facets.get(roi).size()),
-                            DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(roundFrom, roi)),
-                            tc.getFacetSize(roundFrom, roi)));
+                            generateDeformations(task.getDeformationLimits(roundFrom, roi), facets.get(roi).size()),
+                            DeformationUtils.getDegreeFromLimits(task.getDeformationLimits(roundFrom, roi)),
+                            task.getFacetSize(roundFrom, roi)));
         }
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
-        DisplacementCalculator.computeDisplacement(tc, roundFrom, roundTo, facets);
+        DisplacementCalculator.computeDisplacement(task, roundFrom, roundTo, facets);
 
         if (DebugControl.isDebugMode()) {
             Stats.getInstance().dumpDeformationsStatisticsUsage(roundFrom);
@@ -161,8 +165,6 @@ public class Engine extends Observable {
             Stats.getInstance().drawFacetQualityStatistics(facets, roundFrom, roundTo);
             Stats.getInstance().drawPointResultStatistics(roundFrom, roundTo);
         }
-        
-        solver.endTask();
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
 
@@ -170,28 +172,34 @@ public class Engine extends Observable {
         notifyObservers(System.currentTimeMillis() - time);
     }
 
+    public void endTask() {
+        if (solver != null) {
+            solver.endTask();
+        }
+    }
+
     private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
         return Collections.nCopies(facetCount, limits);
     }
 
-    private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
-        Iterator<ExportTask> it = tc.getExports().iterator();
-        ExportTask et;
+    private void exportRound(final TaskContainer task, final int round) throws IOException, ComputationException {
+        final Iterator<ExportTask> it = task.getExports().iterator();
+        ExportTask eTask;
         while (it.hasNext()) {
-            et = it.next();
-            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round && !isStrainExport(et)) {
-                Exporter.export(tc, et);
+            eTask = it.next();
+            if (eTask.getMode().equals(ExportMode.MAP) && eTask.getDataParams()[0] == round && !isStrainExport(eTask)) {
+                Exporter.export(task, eTask);
             }
         }
     }
 
-    private boolean isStrainExport(ExportTask et) {
-        final Direction dir = et.getDirection();
+    private boolean isStrainExport(final ExportTask eTask) {
+        final Direction dir = eTask.getDirection();
         return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
     }
 
     public void stop() {
-        stop = true;
+        stopEngine = true;
         solver.stop();
         strain.stop();
         Logger.debug("Stopping engine.");

@@ -22,7 +22,6 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.DeviceManager;
@@ -65,8 +64,7 @@ public abstract class Kernel {
     private static final List<IGPUResultsReceiver> resultListeners;
     private final String kernelName;
     protected final CLContext context;
-    protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
-    protected final CLDevice device;
+    protected CLKernel kernelDIC, kernelReduce, kernelFindPos;    
     protected final CLCommandQueue queue;
     private final Set<CLResource> clMem;
     private final OpenCLMemoryManager memManager;
@@ -79,10 +77,9 @@ public abstract class Kernel {
         this.kernelName = kernelName;
         clMem = new HashSet<>();
         this.memManager = memManager;
-
-        device = memManager.getDevice();
-        queue = memManager.getQueue();
-        context = memManager.getContext();
+        
+        queue = DeviceManager.getQueue();
+        context = DeviceManager.getContext();
     }
 
     public void prepareKernel(final int facetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
@@ -178,7 +175,7 @@ public abstract class Kernel {
             final int facetSize, final int facetCount);
 
     private CLBuffer<FloatBuffer> findMax(final CLBuffer<FloatBuffer> results, final int facetCount, final int deformationCount) {
-        final int lws0 = device.getMaxWorkItemSizes()[0];
+        final int lws0 = getMaxWorkItemSize();
         final CLBuffer<FloatBuffer> maxVal = context.createFloatBuffer(facetCount, CLMemory.Mem.WRITE_ONLY);
 
         kernelReduce.rewind();
@@ -197,9 +194,13 @@ public abstract class Kernel {
 
         return maxVal;
     }
+    
+    protected int getMaxWorkItemSize() {
+        return DeviceManager.getDevice().getMaxWorkItemSizes()[0];
+    }
 
     private int[] findPos(final CLBuffer<FloatBuffer> results, final int facetCount, final int deformationCount, final CLBuffer<FloatBuffer> vals) {
-        final int lws0 = device.getMaxWorkItemSizes()[0];
+        final int lws0 = getMaxWorkItemSize();
         final CLBuffer<IntBuffer> maxVal = context.createIntBuffer(facetCount, CLMemory.Mem.WRITE_ONLY);
 
         kernelFindPos.rewind();
@@ -259,7 +260,6 @@ public abstract class Kernel {
             queue.finish();
         }
         clearMem(clMem);
-        DeviceManager.clearContext();
     }
 
     private void clearMem(final Set<CLResource> mems) {

@@ -28,9 +28,9 @@ public class StaticMemoryManager extends OpenCLMemoryManager {
             release(clImageA);
             release(clImageB);
             if (kernel.usesImage()) {
-                clImageA = generateImage2d_t(imageA);
+                clImageA = generateImage2d(imageA);
                 queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
-                clImageB = generateImage2d_t(imageB);
+                clImageB = generateImage2d(imageB);
                 queue.putWriteImage((CLImage2d<IntBuffer>) clImageB, false);
             } else {
                 clImageA = generateImageArray(imageA);

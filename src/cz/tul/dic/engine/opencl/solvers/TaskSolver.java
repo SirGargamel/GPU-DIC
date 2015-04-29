@@ -16,6 +16,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.TaskSplitter;
+import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
@@ -65,6 +66,7 @@ public abstract class TaskSolver extends Observable {
     public void endTask() {
         memManager.releaseAll();
         kernel.finishComputation();
+        DeviceManager.initContext();
     }
 
     public synchronized List<CorrelationResult> solve(
@@ -217,6 +219,7 @@ public abstract class TaskSolver extends Observable {
         if (kernel != null) {
             kernel.stop();
         }
+        endTask();
         Logger.debug("Stopping correlation counter.");
     }
 
