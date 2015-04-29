@@ -12,6 +12,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.DisplacementResult;
+import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -161,6 +162,8 @@ public class EngineTest {
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
+        
+        tc.addHint(Hint.NO_STRAIN);
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
