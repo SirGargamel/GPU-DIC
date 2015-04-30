@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -76,13 +77,13 @@ public class EngineTest {
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
         TaskContainer tc;
-        Set<String> errors = new HashSet<>();
+        Set<String> errors = new LinkedHashSet<>();
         int counter = 0;
         final Solver slvr = Solver.BruteForce;
-        for (KernelType kt : KernelType.values()) {
-            for (Interpolation i : Interpolation.values()) {
-                for (TaskSplitMethod ts : TaskSplitMethod.values()) {
-                    for (FacetGeneratorMethod fgm : FacetGeneratorMethod.values()) {
+        for (Interpolation i : Interpolation.values()) {
+            for (TaskSplitMethod ts : TaskSplitMethod.values()) {
+                for (FacetGeneratorMethod fgm : FacetGeneratorMethod.values()) {
+                    for (KernelType kt : KernelType.values()) {
                         for (String s : DEF_ZERO_FILES) {
                             tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm, slvr);
                             errors.add(computeAndCheckTask(tc, s));
@@ -302,9 +303,10 @@ public class EngineTest {
         sb.append(" - ");
         sb.append(errorCount);
         sb.append("; ");
+        sb.append(tc.getResults(ROUND));
         for (String s : extra) {
+            sb.append("; ");
             sb.append(s);
-            sb.append("  ");
         }
         return sb.toString();
     }
