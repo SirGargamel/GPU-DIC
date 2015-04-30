@@ -19,11 +19,8 @@ import java.util.List;
 
 public class StaticMemoryManager extends OpenCLMemoryManager {
 
-    public StaticMemoryManager() {
-    }
-
     @Override
-    public void assignDataToGPU(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
+    public void assignDataToGPU(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final Kernel kernel) throws ComputationException {
         try {
             release(clImageA);
             release(clImageB);
@@ -38,14 +35,14 @@ public class StaticMemoryManager extends OpenCLMemoryManager {
                 clImageB = generateImageArray(imageB);
                 queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageB, false);
             }
-
+            
             release(clFacetData);
             release(clFacetCenters);
             clFacetData = generateFacetData(facets, kernel.usesMemoryCoalescing());
             queue.putWriteBuffer(clFacetData, false);
             clFacetCenters = generateFacetCenters(facets);
             queue.putWriteBuffer(clFacetCenters, false);
-
+            
             release(clDeformationLimits);
             release(clDefStepCount);
             clDeformationLimits = generateDeformationLimits(deformationLimits);
@@ -53,7 +50,7 @@ public class StaticMemoryManager extends OpenCLMemoryManager {
             final List<int[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
             clDefStepCount = generateDeformationStepCounts(deformationCounts);
             queue.putWriteBuffer(clDefStepCount, false);
-
+            
             release(clResults);
             maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
             final long size = facets.size() * maxDeformationCount;

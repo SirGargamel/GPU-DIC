@@ -10,6 +10,7 @@ import com.jogamp.opencl.CLContext;
 import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLPlatform;
+import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.util.Filter;
 import java.nio.ByteBuffer;
 import org.pmw.tinylog.Logger;
@@ -30,12 +31,12 @@ public class DeviceManager {
         initContext();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            clearMem();
+            clearMemory();
         }));
     }
 
-    public static void initContext() {
-        clearMem();
+    private static void initContext() {
+        clearMemory();
 
         @SuppressWarnings("unchecked")
         final CLPlatform tmpP = CLPlatform.getDefault((Filter<CLPlatform>) (CLPlatform i) -> i.getMaxFlopsDevice(CLDevice.Type.GPU) != null && i.listCLDevices(CLDevice.Type.CPU).length == 0);
@@ -57,7 +58,7 @@ public class DeviceManager {
         context.addCLErrorHandler((String string, ByteBuffer bb, long l) -> {
             Logger.error("CLError - " + string);
         });
-        
+
         queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
     }
 
@@ -65,7 +66,7 @@ public class DeviceManager {
         return context;
     }
 
-    private static void clearMem() {
+    public static void clearMemory() {
         if (context != null) {
             Logger.warn("Reseting context memory.");
             for (CLMemory mem : context.getMemoryObjects()) {
@@ -73,14 +74,11 @@ public class DeviceManager {
                     mem.release();
                 }
             }
-            if (!context.isReleased()) {
-                Logger.warn("Releasing context.");
-                context.release();
+            for (CLProgram mem : context.getPrograms()) {
+                if (mem != null && !mem.isReleased()) {
+                    mem.release();
+                }
             }
-        }
-        if (queue != null && !queue.isReleased()) {
-            Logger.warn("Releasing command queue.");
-            queue.release();
         }
     }
 

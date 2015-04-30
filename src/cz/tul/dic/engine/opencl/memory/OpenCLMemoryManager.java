@@ -52,7 +52,7 @@ public abstract class OpenCLMemoryManager {
     protected CLContext context;
     
     static {
-        DeviceManager.initContext();
+        DeviceManager.clearMemory();
         INSTANCE = new StaticMemoryManager();
         IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);                
     }
@@ -180,7 +180,7 @@ public abstract class OpenCLMemoryManager {
         }
     }
 
-    public void releaseAll() {
+    public void clearMemory() {
         release(clDefStepCount);
         release(clDeformationLimits);
         release(clFacetCenters);
@@ -188,14 +188,6 @@ public abstract class OpenCLMemoryManager {
         release(clImageA);
         release(clImageB);
         release(clResults);
-        
-        clDefStepCount = null;
-        clDeformationLimits = null;
-        clFacetCenters = null;
-        clFacetData = null;
-        clImageA = null;
-        clImageB = null;
-        clResults = null;
     }
 
     public CLMemory<IntBuffer> getClImageA() {

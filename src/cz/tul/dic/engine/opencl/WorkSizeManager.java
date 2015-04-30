@@ -58,13 +58,13 @@ public final class WorkSizeManager {
 
         Logger.debug("Initializing best kernel.");
 
-        final TaskSolver cc = TaskSolver.initSolver(TaskDefaultValues.DEFAULT_SOLVER);
-        cc.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
-        cc.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
+        final TaskSolver solver = TaskSolver.initSolver(TaskDefaultValues.DEFAULT_SOLVER);
+        solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
+        solver.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
 
         try {
             for (KernelType kt : KernelType.values()) {
-                cc.setKernel(kt);
+                solver.setKernel(kt);
                 final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
                 final List<double[]> deformationLimits = new ArrayList<>(2);
                 final double[] limits = new double[]{-49, 50, 0.05, -49, 50, 0.05};
@@ -74,7 +74,7 @@ public final class WorkSizeManager {
                 final List<Facet> facets = new ArrayList<>(2);
                 facets.add(Facet.createFacet(fs, 0, 0));
                 facets.add(Facet.createFacet(fs, 0, 0));
-                cc.solve(
+                solver.solve(
                         img, img,
                         facets,
                         deformationLimits, DeformationDegree.ZERO,
@@ -84,6 +84,7 @@ public final class WorkSizeManager {
             Logger.warn("Failed to initialize work sizes.");
             Logger.debug(ex);
         }
+        solver.endTask();
         // find best performing kernel        
         double performance;
         double bestPerformance = Double.NEGATIVE_INFINITY;

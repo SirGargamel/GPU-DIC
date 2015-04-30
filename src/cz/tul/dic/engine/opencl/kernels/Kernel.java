@@ -137,6 +137,7 @@ public abstract class Kernel {
                     clResults,
                     maxDeformationCount,
                     imageA.getWidth(), facetSize, facetCount);
+            queue.flush();
 
             if (!resultListeners.isEmpty()) {
                 queue.putReadBuffer(clResults, true);
@@ -191,6 +192,7 @@ public abstract class Kernel {
             queue.put1DRangeKernel(kernelReduce, 0, lws0, lws0);
         }
         queue.putReadBuffer(maxVal, true);
+        queue.flush();
 
         return maxVal;
     }
@@ -255,10 +257,7 @@ public abstract class Kernel {
         return false;
     }
 
-    public void finishComputation() {
-        if (queue != null && !queue.isReleased()) {
-            queue.finish();
-        }
+    public void clearMemory() {
         clearMem(clMem);
     }
 

@@ -64,9 +64,9 @@ public abstract class TaskSolver extends Observable {
     }
 
     public void endTask() {
-        memManager.releaseAll();
-        kernel.finishComputation();
-        DeviceManager.initContext();
+        memManager.clearMemory();
+        kernel.clearMemory();
+        DeviceManager.clearMemory();
     }
 
     public synchronized List<CorrelationResult> solve(
@@ -82,6 +82,9 @@ public abstract class TaskSolver extends Observable {
         this.facetSize = facetSize;
 
         final List<CorrelationResult> result = solve(image1, image2, kernel, facets, deformationLimits, defDegree);
+        
+        kernel.clearMemory();
+        
         return result;
     }
 
@@ -137,7 +140,7 @@ public abstract class TaskSolver extends Observable {
 
                     finished = true;
                 } catch (ComputationException ex) {
-                    memManager.releaseAll();
+                    memManager.clearMemory();
                     if (ex instanceof ComputationException) {
                         final ComputationException exC = (ComputationException) ex;
                         if (exC.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
@@ -155,11 +158,11 @@ public abstract class TaskSolver extends Observable {
             }
 
             if (!finished && lastEx != null) {
-                memManager.releaseAll();
+                memManager.clearMemory();
                 throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx.getLocalizedMessage());
             }
         } catch (CLException ex) {
-            memManager.releaseAll();
+            memManager.clearMemory();
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
         }
 
