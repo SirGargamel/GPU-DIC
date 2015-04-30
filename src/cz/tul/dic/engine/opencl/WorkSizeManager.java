@@ -64,21 +64,23 @@ public final class WorkSizeManager {
 
         try {
             for (KernelType kt : KernelType.values()) {
-                solver.setKernel(kt);
-                final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
-                final List<double[]> deformationLimits = new ArrayList<>(2);
-                final double[] limits = new double[]{-49, 50, 0.05, -49, 50, 0.05};
-                deformationLimits.add(limits);
-                deformationLimits.add(limits);
-                final int fs = 30;
-                final List<Facet> facets = new ArrayList<>(2);
-                facets.add(Facet.createFacet(fs, 0, 0));
-                facets.add(Facet.createFacet(fs, 0, 0));
-                solver.solve(
-                        img, img,
-                        facets,
-                        deformationLimits, DeformationDegree.ZERO,
-                        fs);
+                if (kt.isSafeToUse()) {
+                    solver.setKernel(kt);
+                    final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
+                    final List<double[]> deformationLimits = new ArrayList<>(2);
+                    final double[] limits = new double[]{-49, 50, 0.05, -49, 50, 0.05};
+                    deformationLimits.add(limits);
+                    deformationLimits.add(limits);
+                    final int fs = 30;
+                    final List<Facet> facets = new ArrayList<>(2);
+                    facets.add(Facet.createFacet(fs, 0, 0));
+                    facets.add(Facet.createFacet(fs, 0, 0));
+                    solver.solve(
+                            img, img,
+                            facets,
+                            deformationLimits, DeformationDegree.ZERO,
+                            fs);
+                }
             }
         } catch (ComputationException ex) {
             Logger.warn("Failed to initialize work sizes.");

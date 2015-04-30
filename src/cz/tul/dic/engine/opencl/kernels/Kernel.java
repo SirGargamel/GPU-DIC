@@ -9,7 +9,6 @@ import cz.tul.dic.engine.opencl.memory.OpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
-import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLException;
 import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLMemory;
@@ -48,14 +47,20 @@ import org.pmw.tinylog.Logger;
 public abstract class Kernel {
 
     public static Kernel createKernel(final KernelType kernelType, final OpenCLMemoryManager memManager) {
+        Kernel result;
         try {
             final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));
-            return (Kernel) cls.getConstructor(OpenCLMemoryManager.class).newInstance(memManager);
+            result = (Kernel) cls.getConstructor(OpenCLMemoryManager.class).newInstance(memManager);
+
+            if (!kernelType.isSafeToUse()) {
+                Logger.warn("Kernel \"{0}\" is not safe to use, results might be inprecise !!!.", kernelType);
+            }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.warn("Error instantiating class {0}, using default kernel.", kernelType);
             Logger.error(ex);
-            return new CL1D_I_V_LL_MC_D(memManager);
+            result = new CL1D_I_V_LL_MC_D(memManager);
         }
+        return result;
     }
 
     private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
@@ -64,7 +69,7 @@ public abstract class Kernel {
     private static final List<IGPUResultsReceiver> resultListeners;
     private final String kernelName;
     protected final CLContext context;
-    protected CLKernel kernelDIC, kernelReduce, kernelFindPos;    
+    protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
     protected final CLCommandQueue queue;
     private final Set<CLResource> clMem;
     private final OpenCLMemoryManager memManager;
@@ -77,7 +82,7 @@ public abstract class Kernel {
         this.kernelName = kernelName;
         clMem = new HashSet<>();
         this.memManager = memManager;
-        
+
         queue = DeviceManager.getQueue();
         context = DeviceManager.getContext();
     }
@@ -196,7 +201,7 @@ public abstract class Kernel {
 
         return maxVal;
     }
-    
+
     protected int getMaxWorkItemSize() {
         return DeviceManager.getDevice().getMaxWorkItemSizes()[0];
     }
