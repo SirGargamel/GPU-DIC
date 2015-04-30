@@ -204,7 +204,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         }
 
         //sub-pixel stepping
-        double[] coarseResult;
+        double[] coarseResult, defLimits;
         int l;
         do {
             step /= 10.0;
@@ -221,13 +221,14 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
             for (int i = 0; i < facetCount; i++) {
                 coarseResult = results.get(i).getDeformation();
+                defLimits = deformationLimits.get(i);
                 temp = new double[COUNT_ZERO_ORDER_LIMITS];
 
-                temp[DeformationLimit.UMIN] = coarseResult[Coordinates.X] - (10 * step);
-                temp[DeformationLimit.UMAX] = coarseResult[Coordinates.X] + (10 * step);
+                temp[DeformationLimit.UMIN] = Math.max(coarseResult[Coordinates.X] - (10 * step), defLimits[DeformationLimit.UMIN]);
+                temp[DeformationLimit.UMAX] = Math.min(coarseResult[Coordinates.X] + (10 * step), defLimits[DeformationLimit.UMAX]);
                 temp[DeformationLimit.USTEP] = step;
-                temp[DeformationLimit.VMIN] = coarseResult[Coordinates.Y] - (10 * step);
-                temp[DeformationLimit.VMAX] = coarseResult[Coordinates.Y] + (10 * step);
+                temp[DeformationLimit.VMIN] = Math.max(coarseResult[Coordinates.Y] - (10 * step), defLimits[DeformationLimit.VMIN]);
+                temp[DeformationLimit.VMAX] = Math.min(coarseResult[Coordinates.Y] + (10 * step), defLimits[DeformationLimit.VMAX]);
                 temp[DeformationLimit.VSTEP] = step;
 
                 zeroOrderLimits.add(temp);
