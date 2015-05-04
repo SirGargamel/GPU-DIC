@@ -6,14 +6,10 @@
 package cz.tul.dic.output.target;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.data.ExportMode;
-import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.ExportUtils;
-import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.data.IExportMode;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -41,7 +37,7 @@ public class ExportTargetFile extends AbstractExportTarget {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam) throws IOException, ComputationException {
+    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         final List<double[][]> data = exporter.exportData(tc, direction, null);
 
         final File target = (File) targetParam;
@@ -55,21 +51,45 @@ public class ExportTargetFile extends AbstractExportTarget {
         }
         final NumberFormat nf = new DecimalFormat(sb.toString());
 
-        final double[] minMax = findMinMax(data);
+        double[] minMax = null;
+        if (Double.isNaN(limits[0])) {
+            minMax = findMinMax(data);
+            limits[0] = minMax[0];
+        }
+        if (Double.isNaN(limits[1])) {
+            if (minMax == null) {
+                minMax = findMinMax(data);
+            }
+            limits[1] = minMax[1];
+        }
+
         for (int i = 0; i < data.size(); i++) {
             if (data.get(i) != null) {
-                exportMap(data.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION), new int[]{i}, tc, minMax);
+                exportMap(data.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION), new int[]{i}, tc, limits);
             }
         }
     }
 
     @Override
-    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, Direction direction, Object targetParam, int[] dataParams) throws IOException, ComputationException {
+    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException {
         final double[][] data = exporter.exportData(tc, direction, dataParams);
-        exportMap(data, direction, targetParam, dataParams, tc, findMinMax(data));
+
+        double[] minMax = null;
+        if (Double.isNaN(limits[0])) {
+            minMax = findMinMax(data);
+            limits[0] = minMax[0];
+        }
+        if (Double.isNaN(limits[1])) {
+            if (minMax == null) {
+                minMax = findMinMax(data);
+            }
+            limits[1] = minMax[1];
+        }
+
+        exportMap(data, direction, targetParam, dataParams, tc, limits);
     }
 
-    private void exportMap(final double[][] data, Direction direction, final Object targetParams, int[] dataParams, final TaskContainer tc, final double[] minMax) throws IOException, ComputationException {
+    private void exportMap(final double[][] data, final Direction direction, final Object targetParams, final int[] dataParams, final TaskContainer tc, final double[] limits) throws IOException, ComputationException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParams.getClass());
         }
@@ -84,7 +104,7 @@ public class ExportTargetFile extends AbstractExportTarget {
         final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay;
         if (data != null) {
-            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(data, direction, minMax[1], minMax[0]));
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(data, direction, limits[0], limits[1]));
         } else {
             overlay = background;
         }
@@ -93,7 +113,7 @@ public class ExportTargetFile extends AbstractExportTarget {
     }
 
     @Override
-    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParams) throws IOException, ComputationException {
+    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParams, final double[] limits) throws IOException, ComputationException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Input parameter has to be the target file. - " + targetParams);
         }
@@ -107,7 +127,17 @@ public class ExportTargetFile extends AbstractExportTarget {
         final String name = fullName.substring(0, fullName.lastIndexOf("."));
         final File temp = Utils.getTempDir(tc);
 
-        final double[] minMax = findMinMax(data);
+        double[] minMax = null;
+        if (Double.isNaN(limits[0])) {
+            minMax = findMinMax(data);
+            limits[0] = minMax[0];
+        }
+        if (Double.isNaN(limits[1])) {
+            if (minMax == null) {
+                minMax = findMinMax(data);
+            }
+            limits[1] = minMax[1];
+        }
 
         final int posCount = ((int) Math.log10(data.size())) + 1;
         final StringBuilder sb = new StringBuilder();
@@ -124,7 +154,7 @@ public class ExportTargetFile extends AbstractExportTarget {
             final BufferedImage overlay;
             map = data.get(i);
             if (map != null) {
-                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(map, direction, minMax[1], minMax[0]));
+                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(map, direction, limits[0], limits[1]));
             } else {
                 overlay = background;
             }

@@ -158,9 +158,9 @@ public class ExportEditor implements Initializable {
                     dlg2.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
                     dlg2.showAndWait().ifPresent((ButtonType t2) -> {
                         if (t2 == img.getButtonType()) {
-                            tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, dir))));
+                            tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, dir)), null));
                         } else if (t2 == csv.getButtonType()) {
-                            tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, dir))));
+                            tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, dir)), null));
                         }
                     });
                 }

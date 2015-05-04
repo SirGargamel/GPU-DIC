@@ -23,15 +23,15 @@ import java.text.NumberFormat;
  *
  * @author Petr Jecmen
  */
-public class ExportUtils {
+public final class ExportUtils {
 
     private static final int IMAGE_TYPE = BufferedImage.TYPE_3BYTE_BGR;
     private static final float ALPHA = 0.75f;
     private static final Color COLORBACKGROUND = Color.BLACK;
     private static final Color COLOR_TEXT = Color.BLACK;
-    private static final int BAR_SIZE_VERT = 30;    
+    private static final int BAR_SIZE_VERT = 30;
     private static final int BAR_SIZE_HOR = 15;
-    private static final NumberFormat nf = new DecimalFormat("0.0#");
+    private static final NumberFormat NF = new DecimalFormat("0.0#");
     private static final double COLOR_CENTER = 75 / 360.0;
     private static final double COLOR_GAP = 5 / 360.0;
     private static final double COLOR_RANGE_POS = 160 / 360.0;
@@ -52,7 +52,9 @@ public class ExportUtils {
     public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
         boolean result = false;
 
-        if (rois != null) {
+        if (rois == null) {
+            result = true;
+        } else {
             for (ROI roi : rois) {
                 if (roi == null) {
                     continue;
@@ -64,8 +66,6 @@ public class ExportUtils {
                     break;
                 }
             }
-        } else {
-            result = true;
         }
 
         return result;
@@ -146,7 +146,7 @@ public class ExportUtils {
         final int width = Math.max(background.getWidth(), foreground.getWidth());
         final int height = Math.max(background.getHeight(), foreground.getHeight());
         final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
-        Graphics2D g = out.createGraphics();
+        final Graphics2D g = out.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
         g.drawImage(background, 0, 0, null);
@@ -180,10 +180,10 @@ public class ExportUtils {
             }
         }
 
-        return createImageFromMap(mapData, dir, max, min);
+        return createImageFromMap(mapData, dir, min, max);
     }
 
-    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double max, final double min) throws ComputationException {
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double min, final double max) throws ComputationException {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
@@ -192,7 +192,7 @@ public class ExportUtils {
         final int height = mapData[1].length;
 
         final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
-        Graphics2D g = out.createGraphics();
+        final Graphics2D g = out.createGraphics();
         g.setColor(COLORBACKGROUND);
         g.drawRect(0, 0, width, height);
 
@@ -207,7 +207,7 @@ public class ExportUtils {
             case Dabs:
             case dEabs:
             case Eabs:
-            case rDabs:                
+            case rDabs:
             case dDy:
             case Dy:
             case dEyy:
@@ -282,12 +282,12 @@ public class ExportUtils {
 
         g.setColor(COLOR_TEXT);
         if (height > LIMIT_HEIGHT) {
-            g.drawString(nf.format(middle - quarter), width - BAR_SIZE_VERT, height / 4 * 3);
-            g.drawString(nf.format(middle + quarter), width - BAR_SIZE_VERT, height / 4);
+            g.drawString(NF.format(middle - quarter), width - BAR_SIZE_VERT, height / 4 * 3);
+            g.drawString(NF.format(middle + quarter), width - BAR_SIZE_VERT, height / 4);
         }
-        g.drawString(nf.format(middle), width - BAR_SIZE_VERT, height / 2 + metrics.getHeight() / 3);
-        g.drawString(nf.format(max), width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
-        g.drawString(nf.format(min), width - BAR_SIZE_VERT, height - 2);
+        g.drawString(NF.format(middle), width - BAR_SIZE_VERT, height / 2 + metrics.getHeight() / 3);
+        g.drawString(NF.format(max), width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
+        g.drawString(NF.format(min), width - BAR_SIZE_VERT, height - 2);
 
         g.dispose();
     }
@@ -301,28 +301,31 @@ public class ExportUtils {
 
         final int y = image.getHeight() - 1 - BAR_SIZE_HOR;
         final int tY = image.getHeight() - 3;
-        final int tWidth = metrics.stringWidth(nf.format(max));
+        final int tWidth = metrics.stringWidth(NF.format(max));
 
         final double middle = (max + min) / 2.0;
-        final double quarter = (max - middle) / 2.0;        
-              
-        for (int x = 0; x < width; x++) {
-            g.setColor(new Color(deformationToRGB(width - x -1, 0, width - 1)));
+        final double quarter = (max - middle) / 2.0;
+
+        for (int x = 0; x < width; x++) {            
+            g.setColor(new Color(deformationToRGB(width - x - 1, 0, width - 1)));
             g.drawRect(width - 1 - x, y, 1, BAR_SIZE_HOR);
         }
 
         g.setColor(COLOR_TEXT);
         if (width > LIMIT_WIDTH) {
-            g.drawString(nf.format(middle - quarter), halfWidth - halfWidth / 2, tY);            
-            g.drawString(nf.format(middle + quarter), halfWidth + halfWidth / 2 - tWidth, tY);            
+            g.drawString(NF.format(middle - quarter), halfWidth - halfWidth / 2, tY);
+            g.drawString(NF.format(middle + quarter), halfWidth + halfWidth / 2 - tWidth, tY);
         }
-        g.drawString(nf.format(min), 0, tY);
-        g.drawString(nf.format(max), width - tWidth, tY);
+        g.drawString(NF.format(min), 0, tY);
+        g.drawString(NF.format(max), width - tWidth, tY);
 
-        final String val = nf.format(middle);
+        final String val = NF.format(middle);
         g.drawString(val, halfWidth - metrics.stringWidth(val) / 2, tY);
 
         g.dispose();
+    }
+
+    private ExportUtils() {
     }
 
 }

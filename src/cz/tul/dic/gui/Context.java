@@ -38,14 +38,13 @@ public class Context {
     private TaskContainer tc;
     private final Map<Integer, Map<Direction, BufferedImage>> exportCacheImages;
     private final Map<String, Map<Direction, double[]>> exportCachePoints;
-    private double min, max;
+    private double[] limits;
 
     private Context() {
         exportCacheImages = new HashMap<>();
         exportCachePoints = new HashMap<>();
         
-        min = Double.NaN;
-        max = min;
+        limits = new double[] {Double.NaN, Double.NaN};
     }
 
     public TaskContainer getTc() {
@@ -62,7 +61,7 @@ public class Context {
     public BufferedImage getMapResult(final int round, final Direction dir) throws ComputationException {
         BufferedImage result = null;
         try {
-            Exporter.export(tc, ExportTask.generateMapExport(dir, ExportTarget.GUI, this, round));
+            Exporter.export(tc, ExportTask.generateMapExport(dir, ExportTarget.GUI, this, round, limits));
             Map<Direction, BufferedImage> m = exportCacheImages.get(round);
             if (m != null) {
                 result = m.get(dir);
@@ -137,12 +136,11 @@ public class Context {
         }
     }
 
-    public void setLimits(final double min, final double max) {
-        this.min = min;
-        this.max = max;
+    public void setLimits(final double[] limits) {
+        this.limits = limits;
     }
     
     public double[] getLimits() {
-        return new double[]{min, max};
+        return limits;
     }
 }

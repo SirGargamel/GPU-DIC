@@ -204,11 +204,11 @@ public class ResultPresenter implements Initializable {
                     if (et != null) {
                         switch (et) {
                             case FILE: {
-                                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateMap(tc, index, choiceDir.getValue())), index));
+                                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateMap(tc, index, choiceDir.getValue())), index, getLimits()));
                             }
                             break;
                             case CSV:
-                                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index));
+                                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index, getLimits()));
                                 break;
                             default:
                                 Logger.warn("Illegal target - {0}", et);
@@ -227,21 +227,25 @@ public class ResultPresenter implements Initializable {
 
     @FXML
     private void handleLimitsAction(ActionEvent event) {
+        Context.getInstance().setLimits(getLimits());
+
+        displayImage();
+    }
+
+    private double[] getLimits() {
+        final double[] result = new double[]{Double.NaN, Double.NaN};
         final String minS = textMin.getText().replaceAll(",", ".");
         final String maxS = textMax.getText().replaceAll(",", ".");
         if (minS != null && !minS.isEmpty() && maxS != null && !maxS.isEmpty()) {
             try {
-                final double min = Double.valueOf(minS);
-                final double max = Double.valueOf(maxS);
-                Context.getInstance().setLimits(min, max);
+                result[0] = Double.valueOf(minS);
+                result[1] = Double.valueOf(maxS);
             } catch (NumberFormatException ex) {
-                Context.getInstance().setLimits(Double.NaN, Double.NaN);
+                result[0] = Double.NaN;
+                result[1] = Double.NaN;
             }
-        } else {
-            Context.getInstance().setLimits(Double.NaN, Double.NaN);
         }
-
-        displayImage();
+        return result;
     }
 
     @FXML
@@ -297,11 +301,11 @@ public class ResultPresenter implements Initializable {
         final ObjectProperty<ExportTask> result = new SimpleObjectProperty<>(null);
         dlg.showAndWait().ifPresent((ButtonType t) -> {
             if (t == img.getButtonType()) {
-                result.setValue(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue()))));
+                result.setValue(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), getLimits()));
             } else if (t == csv.getButtonType()) {
-                result.setValue(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, choiceDir.getValue()))));
+                result.setValue(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), getLimits()));
             } else if (t == avi.getButtonType()) {
-                result.setValue(ExportTask.generateVideoExport(choiceDir.getValue(), new File(NameGenerator.generateSequence(tc, choiceDir.getValue()))));
+                result.setValue(ExportTask.generateVideoExport(choiceDir.getValue(), new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), getLimits()));
             }
         });
         return result.getValue();

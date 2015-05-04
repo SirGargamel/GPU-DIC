@@ -14,7 +14,7 @@ import java.io.Serializable;
  *
  * @author Petr Jecmen
  */
-public class ExportTask implements Serializable {
+public final class ExportTask implements Serializable {
 
     private static final String SEPARATOR = ";";
     private final ExportMode mode;
@@ -22,6 +22,7 @@ public class ExportTask implements Serializable {
     private final Direction direction;
     private final Object targetParam;
     private final int[] dataParams;
+    private final double[] limits;
 
     public static ExportTask generateExportTask(final String data) {
         final String[] split = data.split(SEPARATOR);
@@ -44,8 +45,8 @@ public class ExportTask implements Serializable {
         return result;
     }
 
-    public static ExportTask generateMapExport(final Direction dir, final ExportTarget target, final Object targetArg, final int round) {
-        return new ExportTask(dir, ExportMode.MAP, target, targetArg, new int[]{round});
+    public static ExportTask generateMapExport(final Direction dir, final ExportTarget target, final Object targetArg, final int round, final double[] limits) {
+        return new ExportTask(dir, ExportMode.MAP, target, targetArg, new int[]{round}, limits);
     }
 
     public static ExportTask generatePointExport(final ExportTarget target, final Object targetArg, final int x, final int y) {
@@ -56,20 +57,26 @@ public class ExportTask implements Serializable {
         return new ExportTask(null, ExportMode.DOUBLE_POINT, target, targetArg, new int[]{x1, y1, x2, y2});
     }
 
-    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg) {
-        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, null);
+    public static ExportTask generateSequenceExport(final Direction dir, final ExportTarget target, final Object targetArg, final double[] limits) {
+        return new ExportTask(dir, ExportMode.SEQUENCE, target, targetArg, null, limits);
     }
 
-    public static ExportTask generateVideoExport(final Direction dir, final Object targetArg) {
-        return new ExportTask(dir, ExportMode.VIDEO, ExportTarget.FILE, targetArg, null);
+    public static ExportTask generateVideoExport(final Direction dir, final Object targetArg, final double... limits) {
+        return new ExportTask(dir, ExportMode.VIDEO, ExportTarget.FILE, targetArg, null, limits);
     }
 
-    public ExportTask(final Direction direction, final ExportMode mode, final ExportTarget target, final Object targetParam, final int[] dataParams) {
+    private ExportTask(final Direction direction, final ExportMode mode, final ExportTarget target, final Object targetParam, final int[] dataParams, final double... limits) {
         this.mode = mode;
         this.target = target;
         this.direction = direction;
         this.targetParam = targetParam;
         this.dataParams = dataParams;
+
+        if (limits != null && limits.length > 1) {
+            this.limits = limits;
+        } else {
+            this.limits = new double[]{Double.NaN, Double.NaN};
+        }
     }
 
     public ExportMode getMode() {
@@ -90,6 +97,10 @@ public class ExportTask implements Serializable {
 
     public Object getTargetParam() {
         return targetParam;
+    }
+
+    public double[] getLimits() {
+        return limits;
     }
 
     @Override

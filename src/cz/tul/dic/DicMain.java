@@ -284,9 +284,9 @@ public class DicMain extends Application {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).values()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r, null));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r, null));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r, null));
 //            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
 //            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
 //            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
@@ -305,11 +305,11 @@ public class DicMain extends Application {
         // displacement export
         tc.getExports().clear();
         for (int r : TaskContainerUtils.getRounds(tc).values()) {
-            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDx)), r, null));
+            tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDy)), r, null));
 //            tc.addExport(ExportTask.generateMapExport(Direction.dDabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.dDabs)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r));
-            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dx)), r, null));
+            tc.addExport(ExportTask.generateMapExport(Direction.Dy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dy)), r, null));
 //            tc.addExport(ExportTask.generateMapExport(Direction.Dabs, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, r, Direction.Dabs)), r));
         }
         long time = System.nanoTime();
@@ -351,11 +351,11 @@ public class DicMain extends Application {
     private static void textExports(final TaskContainer tc) throws IOException, ComputationException {
         Engine.getInstance().computeTask(tc);
         tc.addExport(ExportTask.generateDoublePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvDoublePoint(tc, 100, 100, 110, 110)), 100, 100, 110, 110));
-        tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, 1, Direction.Dx)), 1));
-        tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, 2, Direction.dDy)), 2));
+        tc.addExport(ExportTask.generateMapExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, 1, Direction.Dx)), 1, null));
+        tc.addExport(ExportTask.generateMapExport(Direction.dDy, ExportTarget.FILE, new File(NameGenerator.generateMap(tc, 2, Direction.dDy)), 2, null));
         tc.addExport(ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, 100, 100)), 100, 100));
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, Direction.Dx))));
-        tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, Direction.Dx))));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, Direction.Dx)), null));
+        tc.addExport(ExportTask.generateSequenceExport(Direction.Dx, ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, Direction.Dx)), null));
         tc.addExport(ExportTask.generateVideoExport(Direction.Dx, new File(NameGenerator.generateSequence(tc, Direction.Dx))));
         Exporter.export(tc);
     }

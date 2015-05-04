@@ -19,14 +19,14 @@ public class ExportTargetCsv extends AbstractExportTarget {
     private static final String EXTENSION = ".csv";
 
     @Override
-    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, Direction direction, Object targetParam, int[] dataParams) throws IOException, ComputationException {
-        exportMap(tc, exporter.exportData(tc, direction, dataParams), direction, targetParam, dataParams);
+    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException {
+        exportMap(exporter.exportData(tc, direction, dataParams), targetParam, limits);
     }
-    
-    void exportMap(final TaskContainer tc, final double[][] data, Direction direction, Object targetParam, int[] dataParams) throws IOException, ComputationException {
+
+    private void exportMap(final double[][] data, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
-        }        
+        }
 
         final File target = (File) targetParam;
         Utils.ensureDirectoryExistence(target.getParentFile());
@@ -36,9 +36,20 @@ public class ExportTargetCsv extends AbstractExportTarget {
             final int height = data[0].length;
             final String[][] out = new String[height][width];
 
+            final double min = limits[0];
+            final double max = limits[1];
+
+            double val;
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    out[y][x] = Double.toString(data[x][y]);
+                    val = data[x][y];
+                    if (!Double.isNaN(min)) {
+                        val = Math.max(val, min);
+                    }
+                    if (!Double.isNaN(max)) {
+                        val = Math.min(val, max);
+                    }
+                    out[y][x] = Double.toString(val);
                 }
             }
             CsvWriter.writeDataToCsv(target, out);
@@ -91,12 +102,12 @@ public class ExportTargetCsv extends AbstractExportTarget {
     }
 
     @Override
-    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam) throws IOException, ComputationException {
+    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         final List<double[][]> data = exporter.exportData(tc, direction, null);
-        
+
         final File target = (File) targetParam;
         final String path = target.getAbsolutePath();
-        final String subTarget = path.substring(0, path.lastIndexOf("."));
+        final String subTarget = path.substring(0, path.lastIndexOf('.'));
 
         final int posCount = ((int) Math.log10(data.size())) + 1;
         final StringBuilder sb = new StringBuilder();
@@ -105,12 +116,12 @@ public class ExportTargetCsv extends AbstractExportTarget {
         }
         final NumberFormat nf = new DecimalFormat(sb.toString());
         for (int i = 0; i < data.size(); i++) {
-            exportMap(tc, data.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION), null);
+            exportMap(data.get(i), new File(subTarget + "-" + nf.format(i) + EXTENSION), limits);
         }
     }
 
     @Override
-    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam) throws IOException, ComputationException {
+    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 
