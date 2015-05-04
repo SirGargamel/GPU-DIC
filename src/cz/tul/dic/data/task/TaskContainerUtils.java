@@ -12,6 +12,8 @@ import cz.tul.dic.data.ConfigType;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -522,23 +524,24 @@ public class TaskContainerUtils {
             Logger.warn("Adding default facetSize.");
             tc.setParameter(TaskParameter.FACET_SIZE, TaskDefaultValues.DEFAULT_FACET_SIZE);
         }
+        final Object dorder = tc.getParameter(TaskParameter.DEFORMATION_ORDER);
+        if (dorder == null) {
+            Logger.warn("Adding default deformation order.");
+            tc.setParameter(TaskParameter.DEFORMATION_ORDER, TaskDefaultValues.DEFAULT_DEFORMATION_DEGREE);
+        }
         final Object dl = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
         if (dl == null) {
             Logger.warn("Adding default deformation limits.");
-            tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
-        } else {
-            final double[] limits = (double[]) dl;
-            final double[] newLimits;
-            if (limits.length < 6) {
-                newLimits = new double[6];
-            } else if (limits.length > 6 && limits.length < 18) {
-                newLimits = new double[18];
-            } else if (limits.length > 18) {
-                newLimits = new double[36];
+            if (tc.getParameter(TaskParameter.DEFORMATION_ORDER) == DeformationDegree.ZERO) {
+                tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO);
             } else {
-                newLimits = new double[limits.length];
+                tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
             }
-            System.arraycopy(limits, 0, newLimits, 0, limits.length);
+        } else {
+            final DeformationDegree deg = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_ORDER);
+            final double[] limits = (double[]) dl;
+            final double[] newLimits = new double[DeformationUtils.getDeformationCoeffCount(deg)];
+            System.arraycopy(limits, 0, newLimits, 0, Math.min(limits.length, newLimits.length));
             tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimits);
         }
         Image img;

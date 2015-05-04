@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.data.task;
 
+import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
@@ -39,6 +40,7 @@ public enum TaskParameter {
     STRAIN_ESTIMATION_METHOD(StrainEstimationMethod.class),
     STRAIN_ESTIMATION_PARAM(Double.class),    
     DEFORMATION_LIMITS(double[].class),
+    DEFORMATION_ORDER(DeformationDegree.class),
     SOLVER(Solver.class);
     ;
 

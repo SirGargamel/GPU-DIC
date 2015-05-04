@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--
 /* Copyright (C) LENAM, s.r.o. - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
@@ -70,7 +71,9 @@
                         <Button fx:id="buttonROI" layoutX="10.0" layoutY="70.0" maxWidth="1.7976931348623157E308" onAction="#handleButtonActionROI" text="%ROI" />
                         <Button fx:id="buttonExport" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleButtonActionExport" text="%Exports" />
                         <Button fx:id="buttonExpert" layoutX="130.0" layoutY="70.0" maxWidth="1.7976931348623157E308" onAction="#handleButtonActionExpert" text="%Expert" />
-                  <ComboBox fx:id="comboScenario" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="103.0" promptText="%Scenario" />
+                  <ComboBox fx:id="comboScenario" maxWidth="1.7976931348623157E308" promptText="%Scenario" />
+                  <Label text="%DefOrder" />
+                  <ComboBox fx:id="comboOrder" maxWidth="1.7976931348623157E308" promptText="%FIRST" />
                         <Label fx:id="labelFs" layoutX="10.0" layoutY="40.0" text="%fs" />
                         <TextField fx:id="textFs" layoutX="130.0" layoutY="40.0" maxWidth="1.7976931348623157E308" onKeyTyped="#handleTextKeyTyped" prefWidth="55.0" BorderPane.alignment="CENTER" />
                     </children>

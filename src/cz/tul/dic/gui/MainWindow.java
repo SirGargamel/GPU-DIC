@@ -7,6 +7,7 @@ package cz.tul.dic.gui;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplexTaskSolver;
+import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
@@ -105,6 +106,8 @@ public class MainWindow implements Initializable {
     private InputPresenter imagePane;
     @FXML
     private ComboBox<Scenario> comboScenario;
+    @FXML
+    private ComboBox<DeformationDegree> comboOrder;
     @FXML
     private VBox boxRight;
     @FXML
@@ -554,13 +557,12 @@ public class MainWindow implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        final ObservableList<Scenario> comboBoxData = FXCollections.observableArrayList();
-        comboBoxData.addAll(Scenario.values());
-        comboScenario.setItems(comboBoxData);
+        final ObservableList<Scenario> comboScenarioData = FXCollections.observableArrayList();
+        comboScenarioData.addAll(Scenario.values());
+        comboScenario.setItems(comboScenarioData);
         comboScenario.valueProperty().addListener((ObservableValue<? extends Scenario> observable, Scenario oldValue, Scenario newValue) -> {
             final TaskContainer tc = Context.getInstance().getTc();
-            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, newValue.getFacetSpacing());
-            System.err.println("Set spacing to " + newValue.getFacetSpacing());
+            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, newValue.getFacetSpacing());            
         });
         comboScenario.setConverter(new StringConverter<Scenario>() {
 
@@ -575,6 +577,30 @@ public class MainWindow implements Initializable {
 
             @Override
             public Scenario fromString(String string) {
+                return data.get(string);
+            }
+        });
+        
+        final ObservableList<DeformationDegree> comboOrderData = FXCollections.observableArrayList();
+        comboOrderData.addAll(DeformationDegree.values());
+        comboOrder.setItems(comboOrderData);
+        comboOrder.valueProperty().addListener((ObservableValue<? extends DeformationDegree> observable, DeformationDegree oldValue, DeformationDegree newValue) -> {
+            final TaskContainer tc = Context.getInstance().getTc();
+            tc.setParameter(TaskParameter.DEFORMATION_ORDER, newValue);            
+        });
+        comboOrder.setConverter(new StringConverter<DeformationDegree>() {
+
+            private final Map<String, DeformationDegree> data = new HashMap<>(DeformationDegree.values().length);
+
+            @Override
+            public String toString(DeformationDegree object) {
+                final String result = Lang.getString(object.toString());
+                data.put(result, object);
+                return result;
+            }
+
+            @Override
+            public DeformationDegree fromString(String string) {
                 return data.get(string);
             }
         });
@@ -633,6 +659,7 @@ public class MainWindow implements Initializable {
         textFs.setDisable(disabled);
         buttonSave.setDisable(disabled);
         comboScenario.setDisable(disabled);
+        comboOrder.setDisable(disabled);
     }
 
     private void adjustResultButtons(final boolean disabled) {
