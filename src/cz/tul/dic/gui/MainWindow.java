@@ -74,7 +74,7 @@ public class MainWindow implements Initializable {
 
     private static final String LAST_DIR = "lastDir";
     private static final int EXTRA_WIDTH = 19;
-    private static final int EXTRA_HEIGHT = 43;
+    private static final int EXTRA_HEIGHT = 88;
 
     @FXML
     private TextField textFs;
