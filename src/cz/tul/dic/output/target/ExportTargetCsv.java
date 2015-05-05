@@ -10,8 +10,10 @@ import cz.tul.dic.output.data.IExportMode;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class ExportTargetCsv extends AbstractExportTarget {
@@ -108,15 +110,20 @@ public class ExportTargetCsv extends AbstractExportTarget {
         final File target = (File) targetParam;
         final String path = target.getAbsolutePath();
         final String subTarget = path.substring(0, path.lastIndexOf('.'));
-
-        final int posCount = ((int) Math.log10(data.size())) + 1;
+        
+        final FpsManager fpsM = new FpsManager(tc);
+        final int posCount = ((int) Math.log10(fpsM.getTime(data.size() - 1))) + 1;
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < posCount; i++) {
             sb.append("0");
         }
-        final NumberFormat nf = new DecimalFormat(sb.toString());
+        sb.append(".0#");
+        final DecimalFormatSymbols decimalSymbol = new DecimalFormatSymbols(Locale.getDefault());
+        decimalSymbol.setDecimalSeparator('.');
+        final NumberFormat nf = new DecimalFormat(sb.toString(), decimalSymbol);
+
         for (int i = 0; i < data.size(); i++) {
-            exportMap(data.get(i), new File(subTarget + "-" + nf.format(i) + EXTENSION), limits);
+            exportMap(data.get(i), new File(subTarget + "-" + nf.format(fpsM.getTime(i)) + fpsM.getTickUnit() + EXTENSION), limits);
         }
     }
 

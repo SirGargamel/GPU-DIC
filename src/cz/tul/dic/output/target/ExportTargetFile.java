@@ -6,6 +6,7 @@
 package cz.tul.dic.output.target;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.Direction;
@@ -19,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.imageio.ImageIO;
 
@@ -43,13 +46,17 @@ public class ExportTargetFile extends AbstractExportTarget {
         final File target = (File) targetParam;
         final String path = target.getAbsolutePath();
         final String subTarget = path.substring(0, path.lastIndexOf("."));
-
-        final int posCount = ((int) Math.log10(data.size())) + 1;
+        
+        final FpsManager fpsM = new FpsManager(tc);
+        final int posCount = ((int) Math.log10(fpsM.getTime(data.size() - 1))) + 1;
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < posCount; i++) {
             sb.append("0");
         }
-        final NumberFormat nf = new DecimalFormat(sb.toString());
+        sb.append(".0#");
+        final DecimalFormatSymbols decimalSymbol = new DecimalFormatSymbols(Locale.getDefault());
+        decimalSymbol.setDecimalSeparator('.');
+        final NumberFormat nf = new DecimalFormat(sb.toString(), decimalSymbol);
 
         double[] minMax = null;
         if (Double.isNaN(limits[0])) {
@@ -65,7 +72,7 @@ public class ExportTargetFile extends AbstractExportTarget {
 
         for (int i = 0; i < data.size(); i++) {
             if (data.get(i) != null) {
-                exportMap(data.get(i), direction, new File(subTarget + "-" + nf.format(i) + EXTENSION), new int[]{i}, tc, limits);
+                exportMap(data.get(i), direction, new File(subTarget + "-" + nf.format(fpsM.getTime(i)) + fpsM.getTickUnit() + EXTENSION), new int[]{i}, tc, limits);
             }
         }
     }
