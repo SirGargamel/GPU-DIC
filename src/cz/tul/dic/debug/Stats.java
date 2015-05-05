@@ -23,12 +23,16 @@ import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
@@ -40,26 +44,64 @@ import org.pmw.tinylog.Logger;
  */
 public class Stats implements IGPUResultsReceiver {
 
-    private static final boolean ENABLE_GPU_RESULTS = false;
-    private static final boolean ENABLE_DEF_USAGE = false;
-    private static final boolean ENABLE_DEF_QUALITY = true;
-    private static final boolean ENABLE_FACET_QUALITY = true;
-    private static final boolean ENABLE_POINT_QUALITY = false;
-    private static final boolean ENABLE_POINT_STATS = false;
-    private static final boolean ENABLE_REGRESSION_QUALITY = false;
     private static final Stats INSTANCE;
+    private final EnumMap<Types, Boolean> data;
     private TaskContainer tc;
     private int gpuBatch;
 
     static {
         INSTANCE = new Stats();
-        if (ENABLE_GPU_RESULTS) {
+        try {
+            INSTANCE.loadConfig(Stats.class.getResourceAsStream("stats.properties"));
+        } catch (IOException ex) {
+            Logger.error("Error loading internal stats properites.", ex);
+        }
+        try {
+            INSTANCE.loadConfig(new FileInputStream("stats.properties"));
+            Logger.info("Loading external stats.properties.");
+        } catch (IOException ex) {
+            // do nothing, external stats not found
+        }
+        if (INSTANCE.get(Types.GPU_RESULTS)) {
             Kernel.registerListener(INSTANCE);
         }
     }
 
+    private Stats() {
+        data = new EnumMap<>(Types.class);
+    }
+
     public static Stats getInstance() {
         return INSTANCE;
+    }
+
+    public void loadConfig(final InputStream in) throws IOException {
+        final Properties prop = new Properties();
+        prop.load(in);
+
+        Types type;
+        Boolean val;
+        String valS;
+        for (String s : prop.stringPropertyNames()) {
+            try {
+                type = Types.valueOf(s);
+                valS = prop.getProperty(s);
+                if (valS.equalsIgnoreCase("true")) {
+                    val = Boolean.TRUE;
+                } else if (valS.equalsIgnoreCase("false")) {
+                    val = Boolean.FALSE;
+                } else {
+                    throw new IllegalArgumentException("Cannot parse into Boolean: \"" + valS + "\" for property " + type);
+                }
+                data.put(type, val);
+            } catch (IllegalArgumentException ex) {
+                Logger.warn("Illegal item in stats properties file - " + ex.getLocalizedMessage());
+            }
+        }
+    }
+
+    private boolean get(Types type) {
+        return data.containsKey(type) && data.get(type);
     }
 
     public void setTaskContainer(final TaskContainer tc) {
@@ -68,7 +110,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void dumpDeformationsStatisticsUsage(final int round) throws IOException {
-        if (ENABLE_DEF_USAGE) {
+        if (get(Types.DEF_USAGE)) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
             final ValueCounter quality = ValueCounter.createCounter();
@@ -106,7 +148,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void dumpDeformationsStatisticsUsage() throws IOException {
-        if (ENABLE_DEF_USAGE) {
+        if (get(Types.DEF_USAGE)) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
             final ValueCounter quality = ValueCounter.createCounter();
@@ -150,7 +192,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void dumpDeformationsStatisticsPerQuality(final int round) throws IOException {
-        if (ENABLE_DEF_QUALITY) {
+        if (get(Types.DEF_QUALITY)) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Map<ROI, List<CorrelationResult>> results = tc.getResults(round);
 
@@ -187,7 +229,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void dumpDeformationsStatisticsPerQuality() throws IOException {
-        if (ENABLE_DEF_QUALITY) {
+        if (get(Types.DEF_QUALITY)) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Set<Integer> rounds = TaskContainerUtils.getRounds(tc).keySet();
 
@@ -229,7 +271,7 @@ public class Stats implements IGPUResultsReceiver {
 
     @Override
     public void dumpGpuResults(final float[] resultData, final List<Facet> facets, final List<double[]> deformationLimits) {
-        if (ENABLE_GPU_RESULTS) {
+        if (get(Types.GPU_RESULTS)) {
             final File outFile = new File(NameGenerator.generateGpuResultsDump(tc, gpuBatch++));
             outFile.getParentFile().mkdirs();
             try (BufferedWriter out = new BufferedWriter(new FileWriter(outFile))) {
@@ -263,7 +305,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void drawFacetQualityStatistics(final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
-        if (ENABLE_FACET_QUALITY) {
+        if (get(Types.FACET_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
             out.getParentFile().mkdirs();
 
@@ -290,7 +332,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void drawPointResultStatistics(final int roundFrom, final int roundTo) throws IOException, ComputationException {
-        if (ENABLE_POINT_QUALITY) {
+        if (get(Types.POINT_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
             out.getParentFile().mkdirs();
 
@@ -299,19 +341,19 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void exportPointSubResultsStatistics(final Analyzer2D counter, final String name) {
-        if (ENABLE_POINT_STATS) {
+        if (get(Types.POINT_STATS)) {
             final File out = new File(name);
             out.getParentFile().mkdirs();
 
             final List<double[]> vals = counter.listValues();
-            final String[][] data = new String[vals.size()][2];
+            final String[][] values = new String[vals.size()][2];
             final double precision = counter.getPrecision();
             for (int i = 0; i < vals.size(); i++) {
-                data[i][0] = Utils.format(precision * (int) Math.round(vals.get(i)[0] / precision));
-                data[i][1] = Utils.format(precision * (int) Math.round(vals.get(i)[1] / precision));
+                values[i][0] = Utils.format(precision * (int) Math.round(vals.get(i)[0] / precision));
+                values[i][1] = Utils.format(precision * (int) Math.round(vals.get(i)[1] / precision));
             }
             try {
-                CsvWriter.writeDataToCsv(new File(name), data);
+                CsvWriter.writeDataToCsv(new File(name), values);
             } catch (IOException ex) {
                 java.util.logging.Logger.getLogger(FindMaxAndAverage.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -319,7 +361,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void drawRegressionQualities(final Image img, final double[][][] resultQuality, final String nameA, final String nameB) throws ComputationException {
-        if (ENABLE_REGRESSION_QUALITY) {
+        if (get(Types.REGRESSION_QUALITY)) {
             final File out = new File(nameA);
             out.getParentFile().mkdirs();
 
@@ -333,7 +375,19 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public boolean isGpuDebugEnabled() {
-        return DebugControl.isDebugMode() && Stats.ENABLE_GPU_RESULTS;
+        return DebugControl.isDebugMode() && Stats.getInstance().get(Types.GPU_RESULTS);
+    }
+
+    public static enum Types {
+
+        GPU_RESULTS,
+        DEF_USAGE,
+        DEF_QUALITY,
+        FACET_QUALITY,
+        POINT_QUALITY,
+        POINT_STATS,
+        REGRESSION_QUALITY
+
     }
 
 }
