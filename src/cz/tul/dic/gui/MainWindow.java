@@ -562,7 +562,7 @@ public class MainWindow implements Initializable {
         comboScenario.setItems(comboScenarioData);
         comboScenario.valueProperty().addListener((ObservableValue<? extends Scenario> observable, Scenario oldValue, Scenario newValue) -> {
             final TaskContainer tc = Context.getInstance().getTc();
-            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, newValue.getFacetSpacing());            
+            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, newValue.getFacetSpacing());
         });
         comboScenario.setConverter(new StringConverter<Scenario>() {
 
@@ -580,13 +580,13 @@ public class MainWindow implements Initializable {
                 return data.get(string);
             }
         });
-        
+
         final ObservableList<DeformationDegree> comboOrderData = FXCollections.observableArrayList();
         comboOrderData.addAll(DeformationDegree.values());
         comboOrder.setItems(comboOrderData);
         comboOrder.valueProperty().addListener((ObservableValue<? extends DeformationDegree> observable, DeformationDegree oldValue, DeformationDegree newValue) -> {
             final TaskContainer tc = Context.getInstance().getTc();
-            tc.setParameter(TaskParameter.DEFORMATION_ORDER, newValue);            
+            tc.setParameter(TaskParameter.DEFORMATION_ORDER, newValue);
         });
         comboOrder.setConverter(new StringConverter<DeformationDegree>() {
 
@@ -721,6 +721,8 @@ public class MainWindow implements Initializable {
             if (arg instanceof Integer) {
                 round = (int) arg;
                 updateProgress(round - roundOne, roundCount);
+            } else if (arg instanceof Double) {
+                updateProgress(round - roundOne + (double) arg, (double) roundCount);
             } else if (arg instanceof Long) {
                 final long roundTime = (long) arg;
                 final int roundsLeft = roundCount - (round - roundOne) - 1;

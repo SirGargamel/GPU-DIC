@@ -11,6 +11,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
+import javafx.stage.StageStyle;
 import org.controlsfx.dialog.ExceptionDialog;
 import org.controlsfx.dialog.ProgressDialog;
 
@@ -35,6 +36,7 @@ public class Dialogs {
     private static void showDialog(final Alert.AlertType type, final String title, final String text) {
         final Alert dlg = new Alert(type);
         dlg.initModality(Modality.APPLICATION_MODAL);
+        dlg.initStyle(StageStyle.UTILITY);
         dlg.setHeaderText("");        
         dlg.setTitle(title);        
         dlg.getDialogPane().setContentText(text);        
@@ -44,14 +46,16 @@ public class Dialogs {
     public static void showException(Throwable t) {
         final ExceptionDialog dlg = new ExceptionDialog(t);
         dlg.initModality(Modality.APPLICATION_MODAL);
+        dlg.initStyle(StageStyle.UTILITY);
         dlg.setTitle(Lang.getString("error"));
         dlg.setHeaderText(t.getLocalizedMessage());
         dlg.showAndWait();
     }
 
-    public static void showProgress(final Worker<?> worker, final String text) {
+    public static void showProgress(final Worker<?> worker, final String text) {        
         final ProgressDialog dlg = new ProgressDialog(worker);
         dlg.initModality(Modality.APPLICATION_MODAL);
+        dlg.initStyle(StageStyle.UTILITY);
         dlg.setTitle(Lang.getString("Wait"));
         dlg.setHeaderText(text.concat("\n").concat(Lang.getString("EscCancel")));
         dlg.getDialogPane().setOnKeyReleased((KeyEvent event) -> {            

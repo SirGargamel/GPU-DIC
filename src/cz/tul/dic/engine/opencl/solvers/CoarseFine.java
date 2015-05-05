@@ -31,7 +31,29 @@ public class CoarseFine extends TaskSolver {
         double[] temp;
         double step = STEP_INITIAL;
 
+        double minStep = 1;
+        for (double[] dA : deformationLimits) {
+            minStep = Math.min(minStep, Math.min(dA[DeformationLimit.USTEP], dA[DeformationLimit.VSTEP]));
+        }
+        int roundCount = 1;
+        double tempStep = step;
+        do {
+            tempStep /= 10.0;
+            if (tempStep < minStep) {
+                if (tempStep * 10 == minStep) {
+                    break;
+                } else {
+                    tempStep = minStep;
+                }
+            }
+            roundCount++;
+        } while (tempStep > STEP_MINIMAL);
+        if (defDegree != DeformationDegree.ZERO) {
+            roundCount++;
+        }
+
         // initial pixel step
+        int round = 0;
         for (double[] dA : deformationLimits) {
             temp = new double[COUNT_ZERO_ORDER_LIMITS];
             System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
@@ -51,11 +73,7 @@ public class CoarseFine extends TaskSolver {
                     .append(results.get(i))
                     .append("; ");
         }
-
-        double minStep = 1;
-        for (double[] dA : deformationLimits) {
-            minStep = Math.min(minStep, Math.min(dA[DeformationLimit.USTEP], dA[DeformationLimit.VSTEP]));
-        }
+        signalizeRoundComplete(++round, roundCount);
 
         //sub-pixel stepping
         double[] coarseResult, newLimits;
@@ -63,10 +81,10 @@ public class CoarseFine extends TaskSolver {
         do {
             step /= 10.0;
             if (step < minStep) {
-                if (step * 10 == minStep) {                    
+                if (step * 10 == minStep) {
                     break;
                 } else {
-                    step = minStep;                    
+                    step = minStep;
                 }
             }
 
@@ -95,7 +113,7 @@ public class CoarseFine extends TaskSolver {
                         .append(results.get(i))
                         .append("; ");
             }
-
+            signalizeRoundComplete(++round, roundCount);            
         } while (step > STEP_MINIMAL);
 
         //higher order search
@@ -132,10 +150,16 @@ public class CoarseFine extends TaskSolver {
                         .append(results.get(i))
                         .append("; ");
             }
+            signalizeRoundComplete(++round, roundCount);
         }
         Logger.trace(sb);
 
         return results;
+    }
+
+    private void signalizeRoundComplete(final int round, final int roundCount) {
+        setChanged();
+        notifyObservers(1 / (double) roundCount * round);
     }
 
     @Override

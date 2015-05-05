@@ -51,6 +51,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
         final List<CorrelationResult> coarseResults = performInitialResultEstimation(image1, image2, kernel, facets, deformationLimits);
+        notifyProgress(facetCount, facetCount);
 
         double[] temp;
         final List<double[]> limitsList = new ArrayList<>(facetCount);
@@ -154,6 +155,8 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
             sb.append(counterFinished);
             sb.append(" facets.");
             Logger.trace(sb);
+            
+            notifyProgress(facetsToCompute.size(), facetCount);
 
             if (facetsToCompute.isEmpty()) {
                 break;
@@ -352,6 +355,11 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
     @Override
     boolean needsBestResult() {
         return true;
+    }
+    
+    private void notifyProgress(final int facetsToCompute, final int facetCount) {
+        setChanged();
+        notifyObservers(0.5 + 0.5 * ((facetCount - facetsToCompute) / facetCount));
     }
 
 }

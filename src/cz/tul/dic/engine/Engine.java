@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
 
@@ -42,7 +43,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Ječmen
  */
-public final class Engine extends Observable {
+public final class Engine extends Observable implements Observer {
 
     private static final Engine INSTANCE;
     private final StrainEstimation strain;
@@ -126,6 +127,7 @@ public final class Engine extends Observable {
 
         // prepare correlation calculator
         solver = TaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
+        solver.addObserver(this);
         solver.setKernel((KernelType) task.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) task.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) task.getParameter(TaskParameter.TASK_SPLIT_METHOD);
@@ -170,6 +172,8 @@ public final class Engine extends Observable {
 
         setChanged();
         notifyObservers(System.currentTimeMillis() - time);
+        
+        solver.deleteObserver(this);
     }
 
     public void endTask() {
@@ -203,6 +207,16 @@ public final class Engine extends Observable {
         solver.stop();
         strain.stop();
         Logger.debug("Stopping engine.");
+    }
+
+    @Override
+    public void update(final Observable o, final Object arg) {
+        if (o instanceof TaskSolver) {
+            setChanged();
+            notifyObservers(arg);
+        } else {
+            Logger.error("Illegal observable notification - " + o.toString());
+        }
     }
 
 }

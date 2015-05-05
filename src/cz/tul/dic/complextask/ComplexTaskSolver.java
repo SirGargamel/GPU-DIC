@@ -17,6 +17,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.opencl.solvers.TaskSolver;
 import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
@@ -31,13 +32,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Observable;
+import java.util.Observer;
 import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class ComplexTaskSolver extends Observable {
+public class ComplexTaskSolver extends Observable implements Observer {
 
     private final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
@@ -47,23 +49,22 @@ public class ComplexTaskSolver extends Observable {
 
     public ComplexTaskSolver() {
         bottomShifts = new LinkedList<>();
-        strain = new StrainEstimation();
+        strain = new StrainEstimation();                
     }
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
         stop = false;
+        Engine.getInstance().addObserver(this);
         
         TaskContainerUtils.checkTaskValidity(tc);
         tc.clearResultData();
         bottomShifts.clear();
 
-        final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
-        int currentRound = 0;
-        final int baseRound = rounds[0];
+        final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);        
+        final int baseRound = rounds[0];        
 
         setChanged();
-        notifyObservers(currentRound);
-
+        notifyObservers(baseRound);
         final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
         final TaskContainer tcR = rrm.getTc();
@@ -77,6 +78,9 @@ public class ComplexTaskSolver extends Observable {
 
             r = e.getKey();
             nextR = e.getValue();
+            
+            setChanged();
+            notifyObservers(r);
 
             setChanged();
             notifyObservers(CircleROIManager.class);
@@ -131,11 +135,7 @@ public class ComplexTaskSolver extends Observable {
             tc.setDisplacement(r, nextR, tcR.getDisplacement(r, nextR));
 
             exportRound(tc, r);
-            bottomShifts.add(crm.getShiftBottom());
-
-            currentRound++;
-            setChanged();
-            notifyObservers(currentRound);
+            bottomShifts.add(crm.getShiftBottom());                        
         }
 
         Stats.getInstance().dumpDeformationsStatisticsUsage();
@@ -160,6 +160,8 @@ public class ComplexTaskSolver extends Observable {
             out[i + 1][1] = Utils.format(bottomShifts.get(i) * pxToMm);
         }
         CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), out);
+        
+        Engine.getInstance().deleteObserver(this);
     }
 
     private boolean checkResultsQuality(final CircleROIManager crm, int round) {
@@ -213,6 +215,14 @@ public class ComplexTaskSolver extends Observable {
         Engine.getInstance().stop();
         strain.stop();
         Logger.debug("Stopping complex task solver.");
+    }
+
+    @Override
+    public void update(final Observable o, final Object arg) {
+        if (o instanceof Engine && arg instanceof Double) {
+            setChanged();
+            notifyObservers(arg);
+        }
     }
 
 }
