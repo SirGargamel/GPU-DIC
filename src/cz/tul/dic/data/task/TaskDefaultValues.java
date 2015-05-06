@@ -9,7 +9,6 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
@@ -26,15 +25,14 @@ public final class TaskDefaultValues {
     public static final int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     public static final int DEFAULT_FPS = 5000;
     public static final DeformationDegree DEFAULT_DEFORMATION_DEGREE = DeformationDegree.FIRST;
-    public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-2.0, 2.0, 0.25, -1, 5, 0.25};
+    public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-5.0, 5.0, 0.25, -5, 5, 0.25};
     public static final double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
-        -1.5, 1.5, 0.5, -1.0, 2.0, 0.5,
-        -0.25, 0.05, 0.05, -0.4, 0.25, 0.05, -0.25, 0.45, 0.05, -0.25, 0.5, 0.1};
+        -3.0, 3.0, 0.25, -3, 3, 0.25,
+        -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05};
     public static final FacetGeneratorMethod DEFAULT_FACET_GENERATOR = FacetGeneratorMethod.TIGHT;
     public static final int DEFAULT_FACET_SPACING = 1;
     public static final int DEFAULT_FACET_SIZE = 20;
     public static final Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;
-//    KernelType DEFAULT_KERNEL = KernelType.CL1D_I_V_LL_D;
     public static final double DEFAULT_MM_TO_PX_RATIO = 1;
     public static final ResultCompilation DEFAULT_RESULT_COMPILATION = ResultCompilation.MAJOR_AVERAGING;
     public static final double DEFAULT_RESULT_QUALITY = 0.5;
@@ -43,4 +41,7 @@ public final class TaskDefaultValues {
     public static final TaskSplitMethod DEFAULT_TASK_SPLIT_METHOD = TaskSplitMethod.DYNAMIC;
     public static final int DEFAULT_TASK_SPLIT_PARAMETER = 1000;
     public static final int DEFAULT_WINDOW_SIZE = 0;
+
+    private TaskDefaultValues() {
+    }
 }
