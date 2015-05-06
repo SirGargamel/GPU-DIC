@@ -48,7 +48,9 @@ import javafx.fxml.Initializable;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
@@ -63,7 +65,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import org.controlsfx.dialog.CommandLinksDialog;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -296,11 +297,12 @@ public class MainWindow implements Initializable {
     private void handleButtonActionSave(ActionEvent event) throws IOException {
         saveFacetSize();
 
-        final CommandLinksDialog.CommandLinksButtonType config = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeConfig"), Lang.getString("TypeConfigD"), true);
-        final CommandLinksDialog.CommandLinksButtonType binary = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeBinary"), Lang.getString("TypeBinaryD"), false);
-        final CommandLinksDialog dlg = new CommandLinksDialog(config, binary);
+        final ButtonType config = new ButtonType(Lang.getString("TypeConfig"));
+        final ButtonType binary = new ButtonType(Lang.getString("TypeBinary"));
+        final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        final Alert dlg = new Alert(Alert.AlertType.CONFIRMATION, null, config, binary, cancel);
         dlg.setTitle(Lang.getString("Save"));
-        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+        dlg.setHeaderText(Lang.getString("ChooseDataType"));
         dlg.showAndWait().ifPresent((ButtonType t) -> {
             try {
                 // pick target file        
@@ -308,22 +310,22 @@ public class MainWindow implements Initializable {
                 final File in = (File) Context.getInstance().getTc().getParameter(TaskParameter.IN);
                 fc.setInitialDirectory(in.getParentFile());
                 fc.getExtensionFilters().clear();
-                if (t == config.getButtonType()) {
+                if (t == config) {
                     fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Config files (*".concat(NameGenerator.EXT_CONFIG).concat(")"), "*".concat(NameGenerator.EXT_CONFIG)));
                     fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_CONFIG));
-                } else if (t == binary.getButtonType()) {
+                } else if (t == binary) {
                     fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Task files (*".concat(NameGenerator.EXT_BINARY).concat(")"), "*".concat(NameGenerator.EXT_BINARY)));
                     fc.setInitialFileName(in.getName().concat(NameGenerator.EXT_BINARY));
                 }
 
                 File target = fc.showSaveDialog(buttonRun.getScene().getWindow());
                 if (target != null) {
-                    if (t == config.getButtonType()) {
+                    if (t == config) {
                         if (!target.getName().endsWith(NameGenerator.EXT_CONFIG)) {
                             target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_CONFIG));
                         }
                         TaskContainerUtils.serializeTaskToConfig(Context.getInstance().getTc(), target);
-                    } else if (t == binary.getButtonType()) {
+                    } else if (t == binary) {
                         if (!target.getName().endsWith(NameGenerator.EXT_BINARY)) {
                             target = new File(target.getAbsolutePath().concat(NameGenerator.EXT_BINARY));
                         }

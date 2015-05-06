@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javafx.animation.KeyFrame;
@@ -42,7 +43,10 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -56,7 +60,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import org.controlsfx.dialog.CommandLinksDialog;
 import org.pmw.tinylog.Logger;
 
 public class ResultPresenter implements Initializable {
@@ -192,37 +195,40 @@ public class ResultPresenter implements Initializable {
     @FXML
     private void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
         final TaskContainer tc = Context.getInstance().getTc();
-        final CommandLinksDialog.CommandLinksButtonType map = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeMap"), Lang.getString("TypeMapD"), true);
-        final CommandLinksDialog.CommandLinksButtonType sequence = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeSequence"), Lang.getString("TypeSequenceD"), false);
-        final CommandLinksDialog dlg = new CommandLinksDialog(map, sequence);
+        final ButtonType map = new ButtonType(Lang.getString("TypeMap"));
+        final ButtonType sequence = new ButtonType(Lang.getString("TypeSequence"));
+        final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        final Alert dlg = new Alert(AlertType.CONFIRMATION, null, map, sequence, cancel);
         dlg.setTitle(Lang.getString("Save"));
-        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
-        dlg.showAndWait().ifPresent((ButtonType t) -> {
-            try {
-                if (t == map.getButtonType()) {
-                    final ExportTarget et = determineTarget();
-                    if (et != null) {
-                        switch (et) {
-                            case FILE: {
-                                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateMap(tc, index, choiceDir.getValue())), index, getLimits()));
-                            }
-                            break;
-                            case CSV:
-                                Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), et, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index, getLimits()));
-                                break;
-                            default:
-                                Logger.warn("Illegal target - {0}", et);
-                                break;
+        dlg.setHeaderText(Lang.getString("ChooseDataType"));
+        final Optional<ButtonType> result = dlg.showAndWait();
+        final ButtonType button = result.get();
+        try {
+            if (button == map) {
+                final ExportTarget eTarget = determineTarget();
+                if (eTarget != null) {
+                    switch (eTarget) {
+                        case FILE: {
+                            Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), eTarget, new File(NameGenerator.generateMap(tc, index, choiceDir.getValue())), index, getLimits()));
                         }
-
+                        break;
+                        case CSV:
+                            Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), eTarget, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index, getLimits()));
+                            break;
+                        default:
+                            Logger.warn("Illegal target - {0}", eTarget);
+                            break;
                     }
-                } else if (t == sequence.getButtonType()) {
+                }
+            } else if (button == sequence) {
+                final ExportTask eTask = determineType(tc);
+                if (eTask != null) {
                     Exporter.export(tc, determineType(tc));
                 }
-            } catch (IOException | ComputationException ex) {
-                Logger.warn(ex);
             }
-        });
+        } catch (IOException | ComputationException ex) {
+            Logger.warn(ex);
+        }
     }
 
     @FXML
@@ -275,16 +281,17 @@ public class ResultPresenter implements Initializable {
     }
 
     private ExportTarget determineTarget() {
-        final CommandLinksDialog.CommandLinksButtonType img = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeImage"), true);
-        final CommandLinksDialog.CommandLinksButtonType csv = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeCsv"), false);
-        final CommandLinksDialog dlg = new CommandLinksDialog(img, csv);
+        final ButtonType img = new ButtonType(Lang.getString("TypeImage"));
+        final ButtonType csv = new ButtonType(Lang.getString("TypeCsv"));
+        final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        final Alert dlg = new Alert(AlertType.CONFIRMATION, null, img, csv, cancel);
         dlg.setTitle(Lang.getString("Save"));
-        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+        dlg.setHeaderText(Lang.getString("ChooseDataType"));
         final ObjectProperty<ExportTarget> result = new SimpleObjectProperty<>(null);
         dlg.showAndWait().ifPresent((ButtonType t) -> {
-            if (t == img.getButtonType()) {
+            if (t == img) {
                 result.setValue(ExportTarget.FILE);
-            } else if (t == csv.getButtonType()) {
+            } else if (t == csv) {
                 result.setValue(ExportTarget.CSV);
             }
         });
@@ -292,19 +299,20 @@ public class ResultPresenter implements Initializable {
     }
 
     private ExportTask determineType(final TaskContainer tc) {
-        final CommandLinksDialog.CommandLinksButtonType avi = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeAvi"), false);
-        final CommandLinksDialog.CommandLinksButtonType img = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeImage"), true);
-        final CommandLinksDialog.CommandLinksButtonType csv = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeCsv"), false);
-        final CommandLinksDialog dlg = new CommandLinksDialog(img, csv, avi);
+        final ButtonType avi = new ButtonType(Lang.getString("TypeAvi"));
+        final ButtonType img = new ButtonType(Lang.getString("TypeImage"));
+        final ButtonType csv = new ButtonType(Lang.getString("TypeCsv"));
+        final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        final Alert dlg = new Alert(AlertType.CONFIRMATION, null, avi, img, csv, cancel);
         dlg.setTitle(Lang.getString("Save"));
-        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+        dlg.setHeaderText(Lang.getString("ChooseDataType"));
         final ObjectProperty<ExportTask> result = new SimpleObjectProperty<>(null);
         dlg.showAndWait().ifPresent((ButtonType t) -> {
-            if (t == img.getButtonType()) {
+            if (t == img) {
                 result.setValue(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), getLimits()));
-            } else if (t == csv.getButtonType()) {
+            } else if (t == csv) {
                 result.setValue(ExportTask.generateSequenceExport(choiceDir.getValue(), ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), getLimits()));
-            } else if (t == avi.getButtonType()) {
+            } else if (t == avi) {
                 result.setValue(ExportTask.generateVideoExport(choiceDir.getValue(), new File(NameGenerator.generateSequence(tc, choiceDir.getValue())), getLimits()));
             }
         });
@@ -379,15 +387,19 @@ public class ResultPresenter implements Initializable {
                     });
                     stage.setTitle(ch.buildTitle());
                     stage.setScene(new Scene(root));
-                    stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+                    stage
+                            .getIcons().add(new javafx.scene.image.Image(MainWindow.class
+                                            .getResourceAsStream("logo.png")));
                     stage.show();
 
                     openTwoPointStrainAnalysis(context);
                 }
             } catch (IOException e) {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
+
             } catch (ComputationException ex) {
-                java.util.logging.Logger.getLogger(ResultPresenter.class.getName()).log(Level.SEVERE, null, ex);
+                java.util.logging.Logger.getLogger(ResultPresenter.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
 
@@ -468,7 +480,9 @@ public class ResultPresenter implements Initializable {
                 });
                 stage.setTitle(ch.buildTitle());
                 stage.setScene(new Scene(root));
-                stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+                stage
+                        .getIcons().add(new javafx.scene.image.Image(MainWindow.class
+                                        .getResourceAsStream("logo.png")));
                 stage.show();
             }
         }
@@ -504,6 +518,7 @@ public class ResultPresenter implements Initializable {
                 }
             } else {
                 it.remove();
+
             }
         }
     }

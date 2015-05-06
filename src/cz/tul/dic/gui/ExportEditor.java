@@ -21,7 +21,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
@@ -38,7 +40,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import org.controlsfx.dialog.CommandLinksDialog;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -140,31 +141,32 @@ public class ExportEditor implements Initializable {
 
     @FXML
     private void handleButtonActionAdd(ActionEvent event) {
-        final CommandLinksDialog.CommandLinksButtonType map = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeMap"), Lang.getString("TypeMapD"), true);
-        final CommandLinksDialog.CommandLinksButtonType point = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypePoint"), Lang.getString("TypePointD"), false);
-        final CommandLinksDialog.CommandLinksButtonType sequence = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeSequence"), Lang.getString("TypeSequenceD"), false);
-        final CommandLinksDialog dlg = new CommandLinksDialog(map, sequence);
+        final ButtonType map = new ButtonType(Lang.getString("TypeMap"));
+        final ButtonType point = new ButtonType(Lang.getString("TypePoint"));
+        final ButtonType sequence = new ButtonType(Lang.getString("TypeSequence"));
+        final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        final Alert dlg = new Alert(Alert.AlertType.CONFIRMATION, null, map, point, sequence, cancel);
         dlg.setTitle(Lang.getString("Export"));
-        dlg.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+        dlg.setHeaderText(Lang.getString("ChooseDataType"));
         dlg.showAndWait().ifPresent((ButtonType t) -> {
             final TaskContainer tc = Context.getInstance().getTc();
-            if (t == map.getButtonType()) {
+            if (t == map) {
                 final Direction dir = pickDirection();
                 if (dir != null) {
-                    final CommandLinksDialog.CommandLinksButtonType img = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeImage"), true);
-                    final CommandLinksDialog.CommandLinksButtonType csv = new CommandLinksDialog.CommandLinksButtonType(Lang.getString("TypeCsv"), false);
-                    final CommandLinksDialog dlg2 = new CommandLinksDialog(img, csv);
+                    final ButtonType img = new ButtonType(Lang.getString("TypeImage"));
+                    final ButtonType csv = new ButtonType(Lang.getString("TypeCsv"));                    
+                    final Alert dlg2 = new Alert(Alert.AlertType.CONFIRMATION, null, img, csv, cancel);
                     dlg2.setTitle(Lang.getString("Export"));
-                    dlg2.getDialogPane().setContentText(Lang.getString("ChooseDataType"));
+                    dlg2.setHeaderText(Lang.getString("ChooseDataType"));
                     dlg2.showAndWait().ifPresent((ButtonType t2) -> {
-                        if (t2 == img.getButtonType()) {
+                        if (t2 == img) {
                             tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.FILE, new File(NameGenerator.generateSequence(tc, dir)), null));
-                        } else if (t2 == csv.getButtonType()) {
+                        } else if (t2 == csv) {
                             tc.addExport(ExportTask.generateSequenceExport(dir, ExportTarget.CSV, new File(NameGenerator.generateSequence(tc, dir)), null));
                         }
                     });
                 }
-            } else if (t == point.getButtonType()) {
+            } else if (t == point) {
                 final TextInputDialog dlg2 = new TextInputDialog("0; 0");
                 dlg2.setTitle(Lang.getString("Export"));
                 dlg2.setContentText(Lang.getString("ChooseCoords"));
@@ -174,7 +176,7 @@ public class ExportEditor implements Initializable {
                     final int y = Integer.parseInt(split[1].trim());
                     tc.addExport(ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(tc, x, y)), x, y));
                 });
-            } else if (t == sequence.getButtonType()) {
+            } else if (t == sequence) {
                 final Direction dir = pickDirection();
                 if (dir != null) {
                     tc.addExport(ExportTask.generateVideoExport(dir, new File(NameGenerator.generateSequence(tc, dir))));
