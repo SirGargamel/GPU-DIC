@@ -418,12 +418,8 @@ public class MainWindow implements Initializable {
             stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
-            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
-
-                @Override
-                public void handle(WindowEvent event) {
-                    controller.actualizeExports();
-                }
+            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, (WindowEvent event1) -> {
+                controller.actualizeExports();
             });
             stage.showAndWait();
         } catch (IOException e) {
