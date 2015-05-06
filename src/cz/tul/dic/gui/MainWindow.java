@@ -160,6 +160,7 @@ public class MainWindow implements Initializable {
             protected String call() throws Exception {
                 String result = null;
                 boolean error = false;
+                final boolean needsInputLoad;
 
                 updateProgress(0, 5);
                 final File in = fileList.get(0);
@@ -170,9 +171,11 @@ public class MainWindow implements Initializable {
                     switch (ext) {
                         case "avi":
                             Context.getInstance().setTc(new TaskContainer(in));
+                            needsInputLoad = true;
                             break;
                         case "config":
                             Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(in));
+                            needsInputLoad = true;
                             break;
                         case "task":
                             try {
@@ -184,14 +187,17 @@ public class MainWindow implements Initializable {
                                 error = true;
                                 result = Lang.getString("wrongBin");
                             }
+                            needsInputLoad = false;
                             break;
                         default:
                             error = true;
+                            needsInputLoad = false;
                             result = Lang.getString("wrongIn");
                     }
                 } else {
                     updateProgress(1, 5);
                     Context.getInstance().setTc(new TaskContainer(fileList));
+                    needsInputLoad = true;
                 }
                 updateProgress(2, 5);
                 if (!error) {
@@ -200,7 +206,9 @@ public class MainWindow implements Initializable {
                         final TaskContainer tc = Context.getInstance().getTc();
                         tc.setParameter(TaskParameter.IN, in);
                         tc.addObserver(imagePane);
-                        InputLoader.loadInput(tc);
+                        if (needsInputLoad) {
+                            InputLoader.loadInput(tc);
+                        }
                         updateProgress(4, 5);
                         Platform.runLater(() -> {
                             final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
