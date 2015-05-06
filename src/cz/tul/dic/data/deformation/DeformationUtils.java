@@ -161,5 +161,9 @@ public class DeformationUtils {
         }
         return result;
     }
+    
+    public static int getDeformationLimitsArrayLength(final DeformationDegree deg) {        
+        return getDeformationCoeffCount(deg) * 3;
+    }
 
 }

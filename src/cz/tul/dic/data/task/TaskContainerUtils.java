@@ -543,7 +543,7 @@ public class TaskContainerUtils {
         } else {
             final DeformationDegree deg = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_ORDER);
             final double[] limits = (double[]) dl;
-            final double[] newLimits = new double[DeformationUtils.getDeformationCoeffCount(deg)];
+            final double[] newLimits = new double[DeformationUtils.getDeformationLimitsArrayLength(deg)];
             System.arraycopy(limits, 0, newLimits, 0, Math.min(limits.length, newLimits.length));
             tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimits);
         }
