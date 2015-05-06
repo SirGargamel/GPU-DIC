@@ -45,7 +45,7 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public class TaskContainerUtils {
-
+    
     private static final String CONFIG_EMPTY = "NONE";
     private static final String CONFIG_EXPORTS = "EXPORT_";
     private static final String CONFIG_INPUT = "INPUT";
@@ -54,7 +54,7 @@ public class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_ROI = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
-
+    
     public static Map<Integer, Integer> getRounds(final TaskContainer tc) {
         final Map<Integer, Integer> result = new TreeMap<>();
         if (tc != null) {
@@ -72,18 +72,18 @@ public class TaskContainerUtils {
         }
         return result;
     }
-
+    
     public static int getFirstRound(final TaskContainer tc) {
         return getRounds(tc).keySet().iterator().next();
     }
-
+    
     public static int getMaxRoundCount(final TaskContainer tc) {
         return tc.getImages().size() - 1;
     }
-
+    
     public static int getDeformationArrayLength(final TaskContainer tc, final int round, final ROI roi) throws ComputationException {
         int result;
-
+        
         final double[] limits = tc.getDeformationLimits(round, roi);
         switch (limits.length) {
             case 6:
@@ -98,31 +98,31 @@ public class TaskContainerUtils {
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal deformation parameters set.");
         }
-
+        
         return result;
     }
-
+    
     public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi, final double[] deformations) throws ComputationException {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
-
+        
         final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
         final double[] result = new double[deformationArrayLength];
         System.arraycopy(deformations, deformationArrayLength * index, result, 0, deformationArrayLength);
-
+        
         return result;
     }
-
+    
     public static DisplacementResult getDisplacement(final TaskContainer tc, final int startImageIndex, final int endImageIndex) throws ComputationException {
         DisplacementResult result = tc.getDisplacement(startImageIndex, endImageIndex);
-
+        
         if (result == null) {
             final Image img = tc.getImage(startImageIndex);
             final int width = img.getWidth();
             final int height = img.getHeight();
             final double[][][] resultData = new double[width][height][];
-
+            
             double posX, posY;
             int iX, iY;
             double[][][] data;
@@ -140,7 +140,7 @@ public class TaskContainerUtils {
                     posY = y;
                     iX = x;
                     iY = y;
-
+                    
                     while (indexFrom != endImageIndex) {
                         do {
                             dr = tc.getDisplacement(indexFrom, indexTo);
@@ -156,7 +156,7 @@ public class TaskContainerUtils {
                         if (data == null) {
                             break;
                         }
-
+                        
                         val = data[iX][iY];
                         if (val != null) {
                             notNull = true;
@@ -166,30 +166,30 @@ public class TaskContainerUtils {
                             break;
                         }
                         inited = true;
-
+                        
                         indexFrom = indexTo;
                         indexTo = endImageIndex;
-
+                        
                         iX = (int) Math.round(posX);
                         iY = (int) Math.round(posY);
                         if (posX < 0 || posY < 0 || iX >= data.length || iY >= data[x].length) {
                             break;
                         }
                     }
-
+                    
                     if (notNull) {
                         resultData[x][y] = new double[]{posX - x, posY - y};
                     }
                 }
             }
-
+            
             result = new DisplacementResult(resultData, null);
             tc.setDisplacement(startImageIndex, endImageIndex, result);
         }
-
+        
         return result;
     }
-
+    
     public static double getStretchFactor(final TaskContainer tc, final int endImageIndex) {
         final int startImageIndex = getFirstRound(tc);
         double result = 1.0;
@@ -201,7 +201,7 @@ public class TaskContainerUtils {
             if (dResults != null) {
                 final int width = dResults.length;
                 final int height = dResults[0].length;
-
+                
                 int y2 = 1;
                 outerloop:
                 for (int y = height - 1; y >= 0; y--) {
@@ -225,10 +225,10 @@ public class TaskContainerUtils {
                 result = y2 / (double) y1;
             }
         }
-
+        
         return result;
     }
-
+    
     public static void serializeTaskToConfig(final TaskContainer tc, final File out) throws IOException {
         final Config config = new Config();
         final int roundCount = getMaxRoundCount(tc);
@@ -272,7 +272,7 @@ public class TaskContainerUtils {
                 if (sb.length() > CONFIG_SEPARATOR.length()) {
                     sb.setLength(sb.length() - CONFIG_SEPARATOR.length());
                 }
-
+                
                 config.put(CONFIG_ROIS.concat(Integer.toString(round)), sb.toString());
                 prevRoi = rois;
             }
@@ -295,14 +295,14 @@ public class TaskContainerUtils {
             config.put(CONFIG_EXPORTS.concat(Integer.toString(i)), et.toString());
             i++;
         }
-
+        
         Config.saveConfig(config, ConfigType.TASK, out);
-
+        
     }
-
+    
     private static String toString(final double[] data) {
         final StringBuilder sb = new StringBuilder();
-
+        
         if (data != null) {
             for (double d : data) {
                 sb.append(" ");
@@ -313,13 +313,13 @@ public class TaskContainerUtils {
         } else {
             sb.append(CONFIG_EMPTY);
         }
-
+        
         return sb.toString();
     }
-
+    
     private static String toString(final int[] data) {
         final StringBuilder sb = new StringBuilder();
-
+        
         if (data != null) {
             for (int d : data) {
                 sb.append(" ");
@@ -330,10 +330,10 @@ public class TaskContainerUtils {
         } else {
             sb.append(CONFIG_EMPTY);
         }
-
+        
         return sb.toString();
     }
-
+    
     public static TaskContainer deserializeTaskFromConfig(final File in) throws IOException, ComputationException {
         final Config config = Config.loadConfig(in);
         if (config == null) {
@@ -342,7 +342,7 @@ public class TaskContainerUtils {
         if (!Config.determineType(config).equals(ConfigType.TASK)) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_CONFIG, "Not a task config.");
         }
-
+        
         final TaskContainer result;
         // input
         final String input = config.get(CONFIG_INPUT);
@@ -399,6 +399,9 @@ public class TaskContainerUtils {
                     case DEFORMATION_LIMITS:
                         result.setParameter(tp, doubleArrayFromString(e.getValue()));
                         break;
+                    case DEFORMATION_ORDER:
+                        result.setParameter(tp, DeformationDegree.valueOf(e.getValue()));
+                        break;
                     case FACET_SIZE:
                         result.setParameter(tp, Integer.valueOf(e.getValue()));
                         break;
@@ -433,24 +436,24 @@ public class TaskContainerUtils {
                 result.addExport(ExportTask.generateExportTask(e.getValue()));
             }
         }
-
+        
         return result;
     }
-
+    
     private static double[] doubleArrayFromString(final String data) {
         final double[] result;
         if (data.equals(CONFIG_EMPTY)) {
             result = null;
         } else {
-            final String[] split = data.split(CONFIG_SEPARATOR_ARRAY);
+            final String[] split = data.split(CONFIG_SEPARATOR_ARRAY);            
             result = new double[split.length];
             for (int i = 0; i < split.length; i++) {
-                result[i] = Double.valueOf(split[i].trim());
+                result[i] = Double.valueOf(split[i].trim().replace(',', '.'));
             }
         }
         return result;
     }
-
+    
     private static int[] intArrayFromString(final String data) {
         final int[] result;
         if (data.equals(CONFIG_EMPTY)) {
@@ -464,10 +467,10 @@ public class TaskContainerUtils {
         }
         return result;
     }
-
+    
     public static Set<Facet> getAllFacets(final Map<ROI, List<Facet>> facets) {
         final Set<Facet> result = new HashSet<>();
-
+        
         if (facets != null) {
             for (List<Facet> l : facets.values()) {
                 if (l != null) {
@@ -475,16 +478,16 @@ public class TaskContainerUtils {
                 }
             }
         }
-
+        
         return result;
     }
-
+    
     public static void setUniformFacetSize(final TaskContainer tc, final int round, final int facetSize) {
         for (ROI roi : tc.getRois(round)) {
             tc.addFacetSize(round, roi, facetSize);
         }
     }
-
+    
     public static void serializeTaskToBinary(final TaskContainer tc, final File target) throws IOException {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
             out.writeObject(tc);
@@ -492,7 +495,7 @@ public class TaskContainerUtils {
             out.reset();
         }
     }
-
+    
     public static TaskContainer deserializeTaskFromBinary(final File source) throws IOException, ClassNotFoundException {
         TaskContainer result;
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(source))) {
@@ -500,7 +503,7 @@ public class TaskContainerUtils {
         }
         return result;
     }
-
+    
     public static void checkTaskValidity(final TaskContainer tc) throws ComputationException {
         final Object in = tc.getParameter(TaskParameter.IN);
         if (in == null) {
@@ -624,5 +627,5 @@ public class TaskContainerUtils {
             tc.setParameter(TaskParameter.SOLVER, TaskDefaultValues.DEFAULT_SOLVER);
         }
     }
-
+    
 }
