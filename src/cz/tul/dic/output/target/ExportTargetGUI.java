@@ -22,18 +22,27 @@ public class ExportTargetGUI extends AbstractExportTarget {
 
         final double[][] data = exporter.exportData(tc, direction, dataParams);
 
+        final double[] minMax;
+        if (Double.isNaN(limits[0]) || Double.isNaN(limits[1])) {
+            minMax = ExportUtils.findMinMax(data);
+            if (!Double.isNaN(limits[0])) {
+                minMax[0] = limits[0];
+            }
+            if (!Double.isNaN(limits[1])) {
+                minMax[1] = limits[1];
+            }
+        } else {
+            minMax = new double[]{limits[0], limits[1]};
+        }
+
         final int position = dataParams[0];
-        final BufferedImage background = tc.getImage(position);        
+        final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay;
         if (data == null) {
             overlay = background;
         } else {
-            if (Double.isNaN(limits[0]) || Double.isNaN(limits[1])) {
-                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction));
-            } else {
-                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction, limits[0], limits[1]));
-            }
-        }        
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction, minMax));
+        }
         final Context context = (Context) targetParam;
         context.storeMapExport(overlay, position, ExportMode.MAP, direction);
     }
@@ -42,7 +51,7 @@ public class ExportTargetGUI extends AbstractExportTarget {
     void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws ComputationException {
         if (dataParams.length < 2) {
             throw new IllegalArgumentException("Not enough data parameters.");
-        }        
+        }
         final Map<Direction, double[]> data = exporter.exportData(tc, null, dataParams);
         final Context context = (Context) targetParam;
         context.storePointExport(data, dataParams[0], dataParams[1]);
@@ -52,7 +61,7 @@ public class ExportTargetGUI extends AbstractExportTarget {
     void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
         if (dataParams.length < 4) {
             throw new IllegalArgumentException("Not enough data parameters.");
-        }        
+        }
         final Map<Direction, double[]> data = exporter.exportData(tc, null, dataParams);
         final Context context = (Context) targetParam;
         context.storePointExport(data, dataParams[0], dataParams[1], dataParams[2], dataParams[3]);

@@ -132,13 +132,13 @@ public class ResultPresenter implements Initializable {
             if (i != null) {
                 final Image img = SwingFXUtils.toFXImage(i, null);
                 image.setImage(img);
-                
+
                 final Scene s = image.getParent().getScene();
                 if (s != null) {
                     double width = Math.max(MIN_WIDTH, image.getParent().getBoundsInLocal().getWidth() + EXTRA_WIDTH);
                     s.getWindow().setWidth(width);
                     s.getWindow().setHeight(image.getParent().getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
-                }                
+                }
             } else {
                 image.setImage(null);
             }
@@ -238,18 +238,18 @@ public class ResultPresenter implements Initializable {
     }
 
     private double[] getLimits() {
-        final double[] result = new double[]{Double.NaN, Double.NaN};
-        final String minS = textMin.getText().replaceAll(",", ".");
-        final String maxS = textMax.getText().replaceAll(",", ".");
-        if (minS != null && !minS.isEmpty() && maxS != null && !maxS.isEmpty()) {
-            try {
-                result[0] = Double.valueOf(minS);
-                result[1] = Double.valueOf(maxS);
-            } catch (NumberFormatException ex) {
-                result[0] = Double.NaN;
-                result[1] = Double.NaN;
-            }
+        final double[] result = new double[]{Double.NaN, Double.NaN};                
+        try {
+            final String min = textMin.getText().replaceAll(",", ".");
+            result[0] = Double.valueOf(min);
+        } catch (NumberFormatException ex) {
         }
+        try {
+            final String max = textMax.getText().replaceAll(",", ".");
+            result[1] = Double.valueOf(max);
+        } catch (NumberFormatException ex) {
+        }
+
         return result;
     }
 
@@ -326,6 +326,7 @@ public class ResultPresenter implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        Context.getInstance().setLimits(getLimits());
         index = 0;
 
         final ObservableList<Direction> comboBoxData = FXCollections.observableArrayList();

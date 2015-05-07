@@ -63,7 +63,7 @@ public abstract class AbstractExportTarget {
 
     abstract void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam, double[] limits) throws IOException, ComputationException;
 
-    abstract void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, final Object targetParams, double[] limits) throws IOException, ComputationException;
+    abstract void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, final Object targetParams, double[] limits) throws IOException, ComputationException;           
 
     @SuppressWarnings("unchecked")
     private static <T> IExportMode<T> getExporter(final ExportMode em) {

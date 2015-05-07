@@ -139,8 +139,4 @@ public class Context {
     public void setLimits(final double[] limits) {
         this.limits = limits;
     }
-    
-    public double[] getLimits() {
-        return limits;
-    }
 }

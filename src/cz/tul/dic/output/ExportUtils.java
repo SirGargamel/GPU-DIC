@@ -163,27 +163,34 @@ public final class ExportUtils {
         }
 
         final int width = mapData.length;
-        final int height = mapData[1].length;
+        final int height = mapData[0].length;
+        final double[] minMax = findMinMax(mapData);
 
-        double max = 0, min = 0, val;
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                val = mapData[x][y];
-                if (!Double.isNaN(val)) {
-                    if (val > max) {
-                        max = val;
+        return createImageFromMap(mapData, dir, minMax);
+    }
+
+    public static double[] findMinMax(final double[][] data) {
+        double max = Double.NEGATIVE_INFINITY, min = Double.POSITIVE_INFINITY;
+        for (double[] da : data) {
+            for (double d : da) {
+                if (!Double.isNaN(d)) {
+                    if (d > max) {
+                        max = d;
                     }
-                    if (val < min) {
-                        min = val;
+                    if (d < min) {
+                        min = d;
                     }
                 }
             }
         }
-
-        return createImageFromMap(mapData, dir, min, max);
+        if (max == Double.NEGATIVE_INFINITY) {
+            min = 0;
+            max = 0;
+        }
+        return new double[]{min, max};
     }
 
-    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double min, final double max) throws ComputationException {
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double[] minMax) throws ComputationException {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
@@ -224,7 +231,7 @@ public final class ExportUtils {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                out.setRGB(x, y, deformationToRGB(mapData[x][y], min, max));
+                out.setRGB(x, y, deformationToRGB(mapData[x][y], minMax[0], minMax[1]));
             }
         }
 
@@ -241,14 +248,14 @@ public final class ExportUtils {
             case Eyy:
             case Exy:
             case rDy:
-                drawVerticalBar(out, max, min);
+                drawVerticalBar(out, minMax[0], minMax[1]);
                 break;
             case dDx:
             case Dx:
             case dExx:
             case Exx:
             case rDx:
-                drawHorizontalBar(out, max, min);
+                drawHorizontalBar(out, minMax[0], minMax[1]);
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
@@ -289,7 +296,7 @@ public final class ExportUtils {
         return result;
     }
 
-    private static void drawVerticalBar(final BufferedImage image, final double max, final double min) {
+    private static void drawVerticalBar(final BufferedImage image, final double min, final double max) {
         final int height = image.getHeight();
 
         final Graphics2D g = image.createGraphics();
@@ -318,7 +325,7 @@ public final class ExportUtils {
         g.dispose();
     }
 
-    private static void drawHorizontalBar(final BufferedImage image, final double max, final double min) {
+    private static void drawHorizontalBar(final BufferedImage image, final double min, final double max) {
         final int width = image.getWidth();
         final int halfWidth = width / 2;
 

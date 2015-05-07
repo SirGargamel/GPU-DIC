@@ -335,7 +335,7 @@ public class Stats implements IGPUResultsReceiver {
         if (get(Types.POINT_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
             out.getParentFile().mkdirs();
-
+            
             ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getDisplacement(roundFrom, roundTo).getQuality(), Direction.Dabs)), "BMP", out);
         }
     }
@@ -376,7 +376,7 @@ public class Stats implements IGPUResultsReceiver {
 
     public boolean isGpuDebugEnabled() {
         return DebugControl.isDebugMode() && Stats.getInstance().get(Types.GPU_RESULTS);
-    }
+    }    
 
     public static enum Types {
 
