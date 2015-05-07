@@ -37,6 +37,7 @@ public abstract class AbstractExportTarget {
         switch (mode) {
             case POINT:
                 exportPoint(tc, getExporter(mode), et.getTargetParam(), et.getDataParams());
+                break;
             case DOUBLE_POINT:
                 exportDoublePoint(tc, getExporter(mode), et.getTargetParam(), et.getDataParams());
                 break;

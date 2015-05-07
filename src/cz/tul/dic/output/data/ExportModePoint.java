@@ -109,7 +109,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
                     }
 
-                    if (direction.isMm()) {
+                    if (dir.isMm()) {
                         data[r] *= pxToMm;
                     }
                 }
