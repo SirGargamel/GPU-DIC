@@ -189,9 +189,35 @@ public final class ExportUtils {
         }
 
         final int width = mapData.length;
-        final int height = mapData[1].length;
+        final int height = mapData[0].length;
+        final BufferedImage out;
 
-        final BufferedImage out = new BufferedImage(width, height, IMAGE_TYPE);
+        switch (dir) {
+            case dDabs:
+            case Dabs:
+            case dEabs:
+            case Eabs:
+            case rDabs:
+            case dDy:
+            case Dy:
+            case dEyy:
+            case dExy:
+            case Eyy:
+            case Exy:
+            case rDy:
+                out = new BufferedImage(width + BAR_SIZE_VERT, height, IMAGE_TYPE);
+                break;
+            case dDx:
+            case Dx:
+            case dExx:
+            case Exx:
+            case rDx:
+                out = new BufferedImage(width, height + BAR_SIZE_HOR, IMAGE_TYPE);
+                break;
+            default:
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+        }
+
         final Graphics2D g = out.createGraphics();
         g.setColor(COLORBACKGROUND);
         g.drawRect(0, 0, width, height);
@@ -306,7 +332,7 @@ public final class ExportUtils {
         final double middle = (max + min) / 2.0;
         final double quarter = (max - middle) / 2.0;
 
-        for (int x = 0; x < width; x++) {            
+        for (int x = 0; x < width; x++) {
             g.setColor(new Color(deformationToRGB(width - x - 1, 0, width - 1)));
             g.drawRect(width - 1 - x, y, 1, BAR_SIZE_HOR);
         }

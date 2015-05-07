@@ -130,15 +130,15 @@ public class ResultPresenter implements Initializable {
         try {
             final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
             if (i != null) {
+                final Image img = SwingFXUtils.toFXImage(i, null);
+                image.setImage(img);
+                
                 final Scene s = image.getParent().getScene();
                 if (s != null) {
                     double width = Math.max(MIN_WIDTH, image.getParent().getBoundsInLocal().getWidth() + EXTRA_WIDTH);
                     s.getWindow().setWidth(width);
                     s.getWindow().setHeight(image.getParent().getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
-                }
-
-                final Image img = SwingFXUtils.toFXImage(i, null);
-                image.setImage(img);
+                }                
             } else {
                 image.setImage(null);
             }
@@ -182,7 +182,6 @@ public class ResultPresenter implements Initializable {
     private void handleChoiceChange(ActionEvent event) {
         displayImage();
         actualizeCharts(choiceDir.getValue());
-        event.consume();
     }
 
     @FXML
