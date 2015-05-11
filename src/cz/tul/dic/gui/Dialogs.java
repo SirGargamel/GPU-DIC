@@ -66,14 +66,12 @@ public class Dialogs {
         alert.setHeaderText(t.getLocalizedMessage());
 
         String exceptionText;
-        try {
-            // Create expandable Exception.
-            final StringWriter sw = new StringWriter();
-            final PrintWriter pw = new PrintWriter(sw);
-            t.printStackTrace(pw);
-            exceptionText = sw.toString();
-            pw.close();
-            sw.close();
+        try (final StringWriter sw = new StringWriter()) {
+            try (final PrintWriter pw = new PrintWriter(sw)) {
+                // Create expandable Exception.
+                t.printStackTrace(pw);
+                exceptionText = sw.toString();
+            }
         } catch (IOException ex) {
             exceptionText = "Error printing exception - " + ex.getLocalizedMessage();
         }
