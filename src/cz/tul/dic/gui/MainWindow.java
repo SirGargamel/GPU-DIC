@@ -41,7 +41,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -156,19 +155,21 @@ public class MainWindow implements Initializable {
     }
 
     private Task loadInput(List<File> fileList) {
-        Task<String> worker = new Task<String>() {
+        final Task<String> worker = new Task<String>() {
+            private boolean cancel = false;
+
             @Override
             protected String call() throws Exception {
                 String result = null;
                 boolean error = false;
                 final boolean needsInputLoad;
 
-                updateProgress(0, 5);
+                updateProgress(0, 4);
                 final File in = fileList.get(0);
                 if (fileList.size() == 1) {
                     final String name = in.getName();
                     final String ext = name.substring(name.lastIndexOf(".") + 1);
-                    updateProgress(1, 5);
+                    updateProgress(1, 4);
                     switch (ext) {
                         case "avi":
                             Context.getInstance().setTc(new TaskContainer(in));
@@ -196,21 +197,30 @@ public class MainWindow implements Initializable {
                             result = Lang.getString("wrongIn");
                     }
                 } else {
-                    updateProgress(1, 5);
+                    updateProgress(1, 4);
                     Context.getInstance().setTc(new TaskContainer(fileList));
                     needsInputLoad = true;
                 }
-                updateProgress(2, 5);
+                updateProgress(2, 4);
+                if (cancel) {
+                    handleCancel();
+                    return result;
+                }
+
                 if (!error) {
                     try {
-                        updateProgress(3, 5);
                         final TaskContainer tc = Context.getInstance().getTc();
                         tc.setParameter(TaskParameter.IN, in);
                         tc.addObserver(imagePane);
                         if (needsInputLoad) {
                             InputLoader.loadInput(tc);
                         }
-                        updateProgress(4, 5);
+                        updateProgress(3, 4);
+                        if (cancel) {
+                            handleCancel();
+                            return result;
+                        }
+
                         Platform.runLater(() -> {
                             final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
                             stage.setTitle(Lang.getString("Title") + " - " + in.getName());
@@ -243,7 +253,7 @@ public class MainWindow implements Initializable {
                         result = Lang.getString("IO", ex.getLocalizedMessage());
                     }
                 }
-                updateProgress(5, 5);
+                updateProgress(4, 4);
 
                 return result;
             }
@@ -252,6 +262,10 @@ public class MainWindow implements Initializable {
             protected void cancelled() {
                 super.cancelled();
 
+                cancel = true;
+            }
+
+            private void handleCancel() {
                 adjustResultButtons(true);
                 adjustConfigButtons(true);
                 adjustImageButtons(true);

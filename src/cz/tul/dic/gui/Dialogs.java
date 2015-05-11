@@ -11,16 +11,16 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
+import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -103,11 +103,10 @@ public class Dialogs {
         dlg.initStyle(StageStyle.UTILITY);
         dlg.setTitle(Lang.getString("Wait"));
         dlg.setHeaderText(text.concat("\n").concat(Lang.getString("EscCancel")));
-        dlg.getDialogPane().setOnKeyReleased((KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.ESCAPE)) {
-                worker.cancel();
-            }
-        });
+        final EventHandler<DialogEvent> handler = (DialogEvent event) -> {
+            worker.cancel();
+        };
+        dlg.setOnCloseRequest(handler);
         dlg.show();
     }
 
@@ -122,13 +121,12 @@ public class Dialogs {
             progress = new ProgressBar();
             message = new Label();
             message.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-            
 
             buildGui();
             assignListeners(worker);
         }
 
-        private void buildGui() {            
+        private void buildGui() {
             progress.setPrefSize(Double.MAX_VALUE, Region.USE_COMPUTED_SIZE);
             message.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
 
@@ -146,10 +144,9 @@ public class Dialogs {
         private void assignListeners(final Worker worker) {
             worker.progressProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
                 progress.progressProperty().set((double) newValue);
-                System.out.println("Update progress to " + newValue);
             });
             worker.messageProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-                message.textProperty().set(newValue);                
+                message.textProperty().set(newValue);
             });
             worker.runningProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                 if (!newValue) {
