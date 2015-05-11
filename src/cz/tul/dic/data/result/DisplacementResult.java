@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.data.task;
+package cz.tul.dic.data.result;
 
 import java.io.Serializable;
 
@@ -16,7 +16,7 @@ public class DisplacementResult implements Serializable {
     private final double[][][] deformation;
     private final double[][] quality;
 
-    public DisplacementResult(double[][][] deformation, double[][] quality) {
+    public DisplacementResult(final double[][][] deformation, final double[][] quality) {
         this.deformation = deformation;
         this.quality = quality;
     }

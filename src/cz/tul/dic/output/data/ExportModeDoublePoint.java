@@ -7,7 +7,7 @@ package cz.tul.dic.output.data;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.task.DisplacementResult;
+import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.output.Direction;
@@ -56,14 +56,14 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                     case dEyy:
                     case dExy:
                     case dEabs:
-                        dr = tc.getDisplacement(r - 1, r);
+                        dr = tc.getResult(r - 1, r).getDisplacementResult();
                         results = dr != null ? dr.getDisplacement() : null;
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        dr = TaskContainerUtils.getDisplacement(tc, roundZero, r);
+                        dr = tc.getResult(roundZero, r).getDisplacementResult();
                         results = dr != null ? dr.getDisplacement() : null;
                         break;
                     default:

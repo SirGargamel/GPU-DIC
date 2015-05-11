@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.solvers;
 
+import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;

@@ -11,19 +11,20 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
-import cz.tul.dic.data.task.DisplacementResult;
+import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.opencl.solvers.TaskSolver;
-import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
+import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.data.result.Result;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
@@ -218,7 +219,7 @@ public class EngineTest {
     private String checkTask(final TaskContainer tc, final String fileName) {
         final Image img1 = tc.getImage(ROUND);
         final Image img2 = tc.getImage(ROUND + 1);
-        double[][][] results = tc.getDisplacement(ROUND, ROUND + 1).getDisplacement();
+        double[][][] results = tc.getResult(ROUND, ROUND + 1).getDisplacementResult().getDisplacement();
 
         // displacement map
         final Map<Integer, Map<Integer, List<Integer>>> defMap = new HashMap<>();
@@ -273,7 +274,13 @@ public class EngineTest {
         }
 
         if (errorCount > 0) {
-            return generateDescription(fileName, tc, errorCount);
+            final KernelType kt = (KernelType) tc.getParameter(TaskParameter.KERNEL);
+            if (kt.isSafeToUse()) {
+                return generateDescription(fileName, tc, errorCount);
+            } else {
+                System.out.println(" !!! Failed task, but kernel is not safe to use - " + generateDescription(fileName, tc, errorCount));
+                return null;
+            }
         } else {
             return null;
         }
@@ -303,7 +310,7 @@ public class EngineTest {
         sb.append(" - ");
         sb.append(errorCount);
         sb.append("; ");
-        sb.append(tc.getResults(ROUND));
+        sb.append(tc.getResult(ROUND, ROUND + 1).getCorrelations());
         for (String s : extra) {
             sb.append("; ");
             sb.append(s);
@@ -326,15 +333,19 @@ public class EngineTest {
 
         final int width = tc.getImage(ROUND).getWidth();
         final int height = tc.getImage(ROUND).getHeight();
-        tc.setDisplacement(0, 1, new DisplacementResult(prepareArray(width, height, 0), null));
-        tc.setDisplacement(1, 2, new DisplacementResult(prepareArray(width, height, 0), null));
-        tc.setDisplacement(2, 3, new DisplacementResult(prepareArray(width, height, 1), null));
-        tc.setDisplacement(3, 4, new DisplacementResult(prepareArray(width, height, 1), null));
+        tc.setResult(0, 1, new Result(new DisplacementResult(prepareArray(width, height, 0), null)));
+        tc.setResult(1, 2, new Result(new DisplacementResult(prepareArray(width, height, 0), null)));
+        tc.setResult(2, 3, new Result(new DisplacementResult(prepareArray(width, height, 1), null)));
+        tc.setResult(3, 4, new Result(new DisplacementResult(prepareArray(width, height, 1), null)));
 
-        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 1).getDisplacement(), prepareArray(width, height, 0), 0);
-        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 2).getDisplacement(), prepareArray(width, height, 0), 0);
-        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 3).getDisplacement(), prepareArray(width, height, 1), 0);
-        assert equals(TaskContainerUtils.getDisplacement(tc, 0, 4).getDisplacement(), prepareArray(width, height, 2), 1);
+        tc.setResult(0, 2, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 2)));
+        tc.setResult(0, 3, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 3)));
+        tc.setResult(0, 4, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 4)));
+
+        assert equals(tc.getResult(0, 1).getDisplacementResult().getDisplacement(), prepareArray(width, height, 0), 0);
+        assert equals(tc.getResult(0, 2).getDisplacementResult().getDisplacement(), prepareArray(width, height, 0), 0);
+        assert equals(tc.getResult(0, 3).getDisplacementResult().getDisplacement(), prepareArray(width, height, 1), 0);
+        assert equals(tc.getResult(0, 4).getDisplacementResult().getDisplacement(), prepareArray(width, height, 2), 1);
     }
 
     private double[][][] prepareArray(final int width, final int height, final double val) {
@@ -402,9 +413,8 @@ public class EngineTest {
         roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
         facets.put(roi, roiFacets);
 
-        tc.setResult(
-                ROUND,
-                roi,
+        final Map<ROI, List<CorrelationResult>> results = new HashMap<>(1);
+        results.put(roi,
                 solver.solve(
                         tc.getImage(ROUND), tc.getImage(ROUND + 1),
                         roiFacets,
@@ -412,9 +422,11 @@ public class EngineTest {
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi)));
         solver.endTask();
-        DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
-        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
+        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, facets, tc, ROUND);
+        tc.setResult(ROUND, ROUND + 1, new Result(results, displacement));
+
+        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
         Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
     }
 
@@ -453,9 +465,8 @@ public class EngineTest {
         roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
         facets.put(roi, roiFacets);
 
-        tc.setResult(
-                ROUND,
-                roi,
+        final Map<ROI, List<CorrelationResult>> results = new HashMap<>(1);
+        results.put(roi,
                 solver.solve(
                         tc.getImage(ROUND), tc.getImage(ROUND + 1),
                         roiFacets,
@@ -463,17 +474,19 @@ public class EngineTest {
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi)));
         solver.endTask();
-        DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, facets);
 
-        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, roi).size());
+        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, facets, tc, ROUND);
+        tc.setResult(ROUND, ROUND + 1, new Result(results, displacement));
+
+        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
         Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
 
-        final List<CorrelationResult> results = tc.getResult(ROUND, roi);
+        final List<CorrelationResult> computedResults = tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi);
         CorrelationResult cr1, cr2;
-        for (int i = 1; i < tc.getResult(ROUND, roi).size(); i++) {
-            cr1 = results.get(i - 1);
+        for (int i = 1; i < computedResults.size(); i++) {
+            cr1 = computedResults.get(i - 1);
             Assert.assertNotNull(cr1);
-            cr2 = results.get(i);
+            cr2 = computedResults.get(i);
             Assert.assertNotNull(cr2);
             Assert.assertArrayEquals(cr1.getDeformation(), cr2.getDeformation(), 0.001);
         }

@@ -13,7 +13,7 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
+import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.engine.displacement.FindMaxAndAverage;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
@@ -114,7 +114,7 @@ public class Stats implements IGPUResultsReceiver {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
             final ValueCounter quality = ValueCounter.createCounter();
-            final Map<ROI, List<CorrelationResult>> results = tc.getResults(round);
+            final Map<ROI, List<CorrelationResult>> results = tc.getResult(round, round + 1).getCorrelations();
             final double resultQuality = (double) tc.getParameter(TaskParameter.RESULT_QUALITY);
 
             int val;
@@ -158,7 +158,7 @@ public class Stats implements IGPUResultsReceiver {
             int val;
             Map<ROI, List<CorrelationResult>> results;
             for (Integer round : rounds) {
-                results = tc.getResults(round);
+                results = tc.getResult(round, round + 1).getCorrelations();
                 if (results != null) {
                     for (ROI roi : results.keySet()) {
                         for (CorrelationResult cr : results.get(roi)) {
@@ -194,7 +194,7 @@ public class Stats implements IGPUResultsReceiver {
     public void dumpDeformationsStatisticsPerQuality(final int round) throws IOException {
         if (get(Types.DEF_QUALITY)) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
-            final Map<ROI, List<CorrelationResult>> results = tc.getResults(round);
+            final Map<ROI, List<CorrelationResult>> results = tc.getResult(round, round + 1).getCorrelations();
 
             for (int i = -10; i < 11; i++) {
                 counters.put(i, ValueCounter.createCounter());
@@ -241,7 +241,7 @@ public class Stats implements IGPUResultsReceiver {
             ValueCounter counter;
             Map<ROI, List<CorrelationResult>> results;
             for (Integer round : rounds) {
-                results = tc.getResults(round);
+                results = tc.getResult(round, round + 1).getCorrelations();
                 if (results != null) {
                     for (ROI roi : results.keySet()) {
                         for (CorrelationResult cr : results.get(roi)) {
@@ -309,7 +309,7 @@ public class Stats implements IGPUResultsReceiver {
             final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
             out.getParentFile().mkdirs();
 
-            final Map<ROI, List<CorrelationResult>> allResults = tc.getResults(roundFrom);
+            final Map<ROI, List<CorrelationResult>> allResults = tc.getResult(roundFrom, roundTo).getCorrelations();
             final Image img = tc.getImage(roundTo);
             final double[][] resultData = Utils.generateNaNarray(img.getWidth(), img.getHeight());
             List<CorrelationResult> results;
@@ -335,8 +335,8 @@ public class Stats implements IGPUResultsReceiver {
         if (get(Types.POINT_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
             out.getParentFile().mkdirs();
-            
-            ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getDisplacement(roundFrom, roundTo).getQuality(), Direction.Dabs)), "BMP", out);
+
+            ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getResult(roundFrom, roundTo).getDisplacementResult().getQuality(), Direction.Dabs)), "BMP", out);
         }
     }
 
@@ -376,7 +376,7 @@ public class Stats implements IGPUResultsReceiver {
 
     public boolean isGpuDebugEnabled() {
         return DebugControl.isDebugMode() && Stats.getInstance().get(Types.GPU_RESULTS);
-    }    
+    }
 
     public static enum Types {
 

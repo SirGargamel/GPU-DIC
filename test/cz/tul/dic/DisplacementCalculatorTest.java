@@ -9,10 +9,11 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
-import cz.tul.dic.engine.ResultCompilation;
+import cz.tul.dic.data.result.CorrelationResult;
+import cz.tul.dic.engine.displacement.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
+import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
@@ -21,7 +22,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.Test;
 
 /**
@@ -34,17 +37,17 @@ public class DisplacementCalculatorTest {
 
     @Test
     public void testDisplacementCalculator() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{2, 0, 0, 0, 0, 0}));
-        checkResults(tc, 2, 0);
+        DisplacementResult result = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{2, 0, 0, 0, 0, 0}));
+        checkResults(result, 2, 0);
 
-        tc = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{0, 2, 0, 0, 0, 0}));
-        checkResults(tc, 0, 2);
+        result = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{0, 2, 0, 0, 0, 0}));
+        checkResults(result, 0, 2);
 
-        tc = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{2, -2, 0, 0, 0, 0}));
-        checkResults(tc, 2, -2);
+        result = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{2, -2, 0, 0, 0, 0}));
+        checkResults(result, 2, -2);
     }
 
-    private TaskContainer prepareAndComputeDisplacement(final CorrelationResult deformation) throws IOException, URISyntaxException, ComputationException {
+    private DisplacementResult prepareAndComputeDisplacement(final CorrelationResult deformation) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
@@ -67,15 +70,14 @@ public class DisplacementCalculatorTest {
 
         final List<CorrelationResult> results = new ArrayList<>(1);
         results.add(deformation);
-        tc.setResult(ROUND, roi, results);
+        final Map<ROI, List<CorrelationResult>> resultMap = new HashMap<>(1);
+        resultMap.put(roi, results);        
 
-        DisplacementCalculator.computeDisplacement(tc, ROUND, ROUND + 1, FacetGenerator.generateFacets(tc, ROUND));
-
-        return tc;
+        return DisplacementCalculator.computeDisplacement(resultMap, FacetGenerator.generateFacets(tc, ROUND), tc, ROUND);        
     }
 
-    private void checkResults(final TaskContainer tc, final double dx, final double dy) {
-        double[][][] results = tc.getDisplacement(ROUND, ROUND + 1).getDisplacement();
+    private void checkResults(final DisplacementResult result, final double dx, final double dy) {
+        double[][][] results = result.getDisplacement();
         for (double[][] dAA : results) {
             for (double[] dA : dAA) {
                 if (dA != null) {

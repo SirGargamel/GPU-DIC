@@ -8,10 +8,11 @@ package cz.tul.dic.engine.strain;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
+import cz.tul.dic.data.result.Result;
+import cz.tul.dic.data.result.StrainResult;
 import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.NameGenerator;
@@ -44,7 +45,8 @@ public class LocalLeastSquare extends StrainEstimator {
     void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) throws ComputationException {
         stop = false;
 
-        final double[][][] displacement = TaskContainerUtils.getDisplacement(tc, roundFrom, roundTo).getDisplacement();
+        final Result subResult = tc.getResult(roundFrom, roundTo);
+        final double[][][] displacement = subResult.getDisplacementResult().getDisplacement();
         if (displacement != null) {
             final int width = displacement.length;
             final int height = displacement[0].length;
@@ -97,7 +99,7 @@ public class LocalLeastSquare extends StrainEstimator {
                         NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.Eyy));
             }
 
-            tc.setStrain(roundFrom, roundTo, result);
+            tc.setResult(roundFrom, roundTo, new Result(subResult, new StrainResult(result, resultQuality)));
         }
     }
 
@@ -162,9 +164,9 @@ public class LocalLeastSquare extends StrainEstimator {
     private static double[] computeStrains(final double[] coeffs) {
         final double[] result = new double[3];
 
-        result[StrainResult.Exx] = coeffs[INDEX_A1] * COEFF_ADJUST;
-        result[StrainResult.Eyy] = coeffs[INDEX_B2] * COEFF_ADJUST;
-        result[StrainResult.Exy] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]) * COEFF_ADJUST;
+        result[StrainResultDirection.E_XX] = coeffs[INDEX_A1] * COEFF_ADJUST;
+        result[StrainResultDirection.E_YY] = coeffs[INDEX_B2] * COEFF_ADJUST;
+        result[StrainResultDirection.E_XY] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]) * COEFF_ADJUST;
 
         return result;
     }

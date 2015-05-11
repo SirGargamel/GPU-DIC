@@ -15,7 +15,7 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
+import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
@@ -134,7 +134,7 @@ public class CircleROIManager extends ROIManager {
         final Analyzer1D analyzer = new Analyzer1D();
         analyzer.setPrecision(PRECISION);
 
-        for (CorrelationResult cr : tc.getResult(round, roi)) {
+        for (CorrelationResult cr : tc.getResult(round, round + 1).getCorrelations().get(roi)) {
             if (cr != null && cr.getValue() >= LIMIT_RESULT_QUALITY) {
                 analyzer.addValue(cr.getDeformation()[Coordinates.Y]);
             }

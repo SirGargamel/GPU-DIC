@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.solvers;
 
+import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
@@ -92,7 +93,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
 
         final StringBuilder sb = new StringBuilder();
         final long time = System.nanoTime();
-        int baseIndex, resultIndex = 0, counterFinished;
+        int baseIndex, resultIndex, counterFinished;
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
             sb.setLength(0);
             baseIndex = 0;
@@ -155,7 +156,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
             sb.append(counterFinished);
             sb.append(" facets.");
             Logger.trace(sb);
-            
+
             notifyProgress(facetsToCompute.size(), facetCount);
 
             if (facetsToCompute.isEmpty()) {
@@ -356,10 +357,12 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
     boolean needsBestResult() {
         return true;
     }
-    
+
     private void notifyProgress(final int facetsToCompute, final int facetCount) {
-        setChanged();
-        notifyObservers(0.5 + 0.5 * ((facetCount - facetsToCompute) / facetCount));
+        if (facetCount > 0) {
+            setChanged();
+            notifyObservers(0.5 + 0.5 * ((facetCount - facetsToCompute) / facetCount));
+        }
     }
 
 }

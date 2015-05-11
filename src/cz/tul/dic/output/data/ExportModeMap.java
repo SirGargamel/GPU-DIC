@@ -8,7 +8,7 @@ package cz.tul.dic.output.data;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.FpsManager;
-import cz.tul.dic.data.task.DisplacementResult;
+import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -18,7 +18,7 @@ import cz.tul.dic.output.ExportUtils;
 public class ExportModeMap implements IExportMode<double[][]> {
 
     @Override
-    public double[][] exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {
+    public double[][] exportData(final TaskContainer tc, final Direction direction, final int[] dataParams) throws ComputationException {
         if (dataParams == null || dataParams.length < 1) {
             throw new IllegalArgumentException("Not wnough input parameters (position required).");
         }
@@ -33,26 +33,26 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case rDx:
             case rDy:
             case rDabs:
-                dr = tc.getDisplacement(round - 1, round);
+                dr = tc.getResult(round - 1, round).getDisplacementResult();
                 results = dr != null ? dr.getDisplacement() : null;
                 break;
             case Dx:
             case Dy:
             case Dabs:
-                dr = TaskContainerUtils.getDisplacement(tc, roundZero, round);
+                dr = tc.getResult(roundZero, round).getDisplacementResult();
                 results = dr != null ? dr.getDisplacement() : null;
                 break;
             case dExx:
             case dEyy:
             case dExy:
             case dEabs:
-                results = tc.getStrain(round - 1, round);
+                results = tc.getResult(round - 1, round).getStrainResult().getStrain();
                 break;
             case Exx:
             case Eyy:
             case Exy:
             case Eabs:
-                results = tc.getStrain(roundZero, round);
+                results = tc.getResult(roundZero, round).getStrainResult().getStrain();
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
@@ -114,7 +114,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
 
         // stretch result to ending ROI
         if (direction.isStretch()) {
-            dr = tc.getDisplacement(round - 1, round);
+            dr = tc.getResult(round - 1, round).getDisplacementResult();
             if (dr != null) {
                 final double[][][] tempData = dr.getDisplacement();
                 if (tempData != null) {

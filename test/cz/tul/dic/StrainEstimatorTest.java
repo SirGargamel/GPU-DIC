@@ -6,12 +6,13 @@
 package cz.tul.dic;
 
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.task.DisplacementResult;
+import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.data.result.Result;
 import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.engine.strain.StrainResult;
+import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -47,10 +48,10 @@ public class StrainEstimatorTest {
             {{0, 0}, null, {2, 0.5}, {2, 0.0}, null},
             {null, null, {0, 0}, null, null},
             {null, null, null, null, null},};
-        tc.setDisplacement(ROUND, ROUND + 1, new DisplacementResult(displacement, null));
+        tc.setResult(ROUND, ROUND + 1, new Result(new DisplacementResult(displacement, null)));
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
-        final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
+        final double[][][] strains = tc.getResult(ROUND, ROUND + 1).getStrainResult().getStrain();
 
         Assert.assertNotNull(strains[2][2]);
 
@@ -88,18 +89,18 @@ public class StrainEstimatorTest {
                 dA[1] = dY;
             }
         }
-        tc.setDisplacement(ROUND, ROUND + 1, new DisplacementResult(displacement, null));
+        tc.setResult(ROUND, ROUND + 1, new Result(new DisplacementResult(displacement, null)));
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
 
-        final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
+        final double[][][] strains = tc.getResult(ROUND, ROUND + 1).getStrainResult().getStrain();
 
         for (int x = 0; x < img.getWidth(); x++) {
             for (int y = 0; y < img.getHeight(); y++) {
                 Assert.assertNotNull(strains[x][y]);
-                Assert.assertEquals("Exx", 0.0, strains[x][y][StrainResult.Exx], DELTA);
-                Assert.assertEquals("Eyy", 0.0, strains[x][y][StrainResult.Eyy], DELTA);
-                Assert.assertEquals("Exy", 0.0, strains[x][y][StrainResult.Exy], DELTA);
+                Assert.assertEquals("Exx", 0.0, strains[x][y][StrainResultDirection.E_XX], DELTA);
+                Assert.assertEquals("Eyy", 0.0, strains[x][y][StrainResultDirection.E_YY], DELTA);
+                Assert.assertEquals("Exy", 0.0, strains[x][y][StrainResultDirection.E_XY], DELTA);
             }
         }
     }
@@ -121,17 +122,17 @@ public class StrainEstimatorTest {
             {{2, 1}, {2, 0.5}, {2, 0.0}},
             {{3, 1}, {3, 0.5}, {3, 0.0}}
         };
-        tc.setDisplacement(ROUND, ROUND + 1, new DisplacementResult(displacement, null));
+        tc.setResult(ROUND, ROUND + 1, new Result(new DisplacementResult(displacement, null)));
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
-        final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
+        final double[][][] strains = tc.getResult(ROUND, ROUND + 1).getStrainResult().getStrain();
 
         for (double[][] strain : strains) {
             for (double[] strain1 : strain) {
                 Assert.assertNotNull(strain1);
-                Assert.assertEquals("Exx", 100.0, strain1[StrainResult.Exx], DELTA);
-                Assert.assertEquals("Eyy", -50.0, strain1[StrainResult.Eyy], DELTA);
-                Assert.assertEquals("Exy", 0.0, strain1[StrainResult.Exy], DELTA);
+                Assert.assertEquals("Exx", 100.0, strain1[StrainResultDirection.E_XX], DELTA);
+                Assert.assertEquals("Eyy", -50.0, strain1[StrainResultDirection.E_YY], DELTA);
+                Assert.assertEquals("Exy", 0.0, strain1[StrainResultDirection.E_XY], DELTA);
             }
         }
     }
@@ -153,17 +154,17 @@ public class StrainEstimatorTest {
             {{1, 0.5}, {0, 0.5}, {-1, 0.5}},
             {{1, 0.0}, {0, 0.0}, {-1, 0.0}}
         };
-        tc.setDisplacement(ROUND, ROUND + 1, new DisplacementResult(displacement, null));
+        tc.setResult(ROUND, ROUND + 1, new Result(new DisplacementResult(displacement, null)));
 
         new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
-        final double[][][] strains = tc.getStrain(ROUND, ROUND + 1);
+        final double[][][] strains = tc.getResult(ROUND, ROUND + 1).getStrainResult().getStrain();
 
         for (double[][] strain : strains) {
             for (double[] strain1 : strain) {
                 Assert.assertNotNull(strain1);
-                Assert.assertEquals("Exx", 0.0, strain1[StrainResult.Exx], DELTA);
-                Assert.assertEquals("Eyy", 0.0, strain1[StrainResult.Eyy], DELTA);
-                Assert.assertEquals("Exy", -75.0, strain1[StrainResult.Exy], DELTA);
+                Assert.assertEquals("Exx", 0.0, strain1[StrainResultDirection.E_XX], DELTA);
+                Assert.assertEquals("Eyy", 0.0, strain1[StrainResultDirection.E_YY], DELTA);
+                Assert.assertEquals("Exy", -75.0, strain1[StrainResultDirection.E_XY], DELTA);
             }
         }
     }

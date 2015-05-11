@@ -3,16 +3,13 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.strain;
+package cz.tul.dic.engine.displacement;
 
 /**
  *
- * @author Petr Ječmen
+ * @author Petr Jecmen
  */
-public interface StrainResult {
-
-    int Exx = 0;
-    int Eyy = 1;
-    int Exy = 2;
-
+public enum ResultCompilation {
+        
+    MAJOR_AVERAGING,;
 }

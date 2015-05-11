@@ -7,7 +7,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.engine.ResultCompilation;
+import cz.tul.dic.engine.displacement.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.kernels.KernelType;

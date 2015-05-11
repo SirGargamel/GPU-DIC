@@ -9,7 +9,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.engine.strain.StrainResult;
+import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -99,21 +99,21 @@ public final class ExportUtils {
         switch (dir) {
             case Exx:
             case dExx:
-                result = results[StrainResult.Exx];
+                result = results[StrainResultDirection.E_XX];
                 break;
             case Eyy:
             case dEyy:
-                result = results[StrainResult.Eyy];
+                result = results[StrainResultDirection.E_YY];
                 break;
             case Exy:
             case dExy:
-                result = results[StrainResult.Exy];
+                result = results[StrainResultDirection.E_XY];
                 break;
             case Eabs:
             case dEabs:
-                final double val1 = results[StrainResult.Exx];
-                final double val2 = results[StrainResult.Eyy];
-                final double val3 = results[StrainResult.Exy];
+                final double val1 = results[StrainResultDirection.E_XX];
+                final double val2 = results[StrainResultDirection.E_YY];
+                final double val3 = results[StrainResultDirection.E_XY];
                 result = Math.sqrt(val1 * val1 + val2 * val2 + val3 * val3);
                 break;
             default:

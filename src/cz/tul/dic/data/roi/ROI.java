@@ -13,21 +13,19 @@ import java.io.Serializable;
  */
 public abstract class ROI implements Serializable {
 
-    static final String SEPARATOR = ";";
+    protected static final String SEPARATOR = ";";
 
     public static ROI generateROI(final String data) {
         final String[] split = data.split(SEPARATOR);
+        ROI result;
         if (split.length == 4) {
-            return new RectangleROI(Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]), Double.valueOf(split[3]));
+            result = new RectangleROI(Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]), Double.valueOf(split[3]));
         } else if (split.length == 3) {
-            return new CircularROI(Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]));
+            result = new CircularROI(Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]));
         } else {
             throw new IllegalArgumentException("3 or 4 values required for ROI - " + data);
         }
-    }
-
-    public ROI() {
-
+        return result;
     }
 
     public abstract int getX1();

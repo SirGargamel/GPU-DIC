@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.solvers;
 
+import cz.tul.dic.data.result.CorrelationResult;
 import com.jogamp.opencl.CLException;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;

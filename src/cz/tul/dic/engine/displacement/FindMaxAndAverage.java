@@ -13,13 +13,12 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.FacetUtils;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.data.task.DisplacementResult;
+import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
-import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
-import cz.tul.dic.engine.ResultCompilation;
+import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.output.NameGenerator;
 import java.util.HashMap;
@@ -33,7 +32,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
     private static final double PRECISION = 0.5;
 
     @Override
-    public void buildFinalResults(TaskContainer tc, int round, int nextRound, Map<ROI, List<Facet>> facetMap) throws ComputationException {
+    public DisplacementResult buildFinalResults(final Map<ROI, List<CorrelationResult>> correlationResults, Map<ROI, List<Facet>> facetMap, final TaskContainer tc, final int round) throws ComputationException {
         final Image img = tc.getImage(round);
         final int width = img.getWidth();
         final int height = img.getHeight();
@@ -60,9 +59,9 @@ public class FindMaxAndAverage extends DisplacementCalculator {
             upperBound = Math.min(upperBound, height - 1);
             counters.clear();
 
-            for (ROI roi : tc.getRois(round)) {
+            for (ROI roi : correlationResults.keySet()) {
                 facets = facetMap.get(roi);
-                results = tc.getResult(round, roi);
+                results = correlationResults.get(roi);
 
                 for (int i = 0; i < facets.size(); i++) {
                     if (results.get(i) == null) {
@@ -75,7 +74,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
 
                     d = cr.getDeformation();
                     quality = cr.getValue();
-                    
+
                     f = facets.get(i);
                     if (f == null) {
                         Logger.warn("No facet - {0}", f);
@@ -91,13 +90,13 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                         y = e.getKey()[Coordinates.Y];
 
                         if (y >= lowerBound && y <= upperBound) {
-                            getAnalyzer(counters, x, y).addValue(new double[] {e.getValue()[0], e.getValue()[1], quality});
+                            getAnalyzer(counters, x, y).addValue(new double[]{e.getValue()[0], e.getValue()[1], quality});
                         }
                     }
                 }
             }
 
-            double[] majorVal, val = new double[2];            
+            double[] majorVal, val = new double[2];
             int count;
             double maxDist2 = 4 * PRECISION * PRECISION;
             final ResultCompilation rc = (ResultCompilation) tc.getParameter(TaskParameter.RESULT_COMPILATION);
@@ -112,38 +111,32 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     counter = eY.getValue();
                     if (counter != null) {
                         majorVal = counter.findMajorValue();
-                        if (rc.equals(ResultCompilation.MAJOR)) {
-                            finalDisplacement[x][y] = new double[]{majorVal[0], majorVal[1]};
-                        } else if (rc.equals(ResultCompilation.MAJOR_AVERAGING)) {
-                            count = 0;
-                            val[0] = 0;
-                            val[1] = 0;
-                            quality = 0;
 
-                            for (double[] vals : counter.listValues()) {
-                                if (dist2(vals, majorVal) <= maxDist2) {
-                                    val[0] += vals[0];
-                                    val[1] += vals[1];
-                                    quality += vals[2];
-                                    count++;
-                                }
+                        count = 0;
+                        val[0] = 0;
+                        val[1] = 0;
+                        quality = 0;
+                        for (double[] vals : counter.listValues()) {
+                            if (dist2(vals, majorVal) <= maxDist2) {
+                                val[0] += vals[0];
+                                val[1] += vals[1];
+                                quality += vals[2];
+                                count++;
                             }
-
-                            finalDisplacement[x][y] = new double[]{val[0] / (double) count, val[1] / (double) count};
-                            finalQuality[x][y] = quality / (double) count;
-                        } else {
-                            throw new UnsupportedOperationException("Unsupported method of result compilation - " + rc);
                         }
 
+                        finalDisplacement[x][y] = new double[]{val[0] / (double) count, val[1] / (double) count};
+                        finalQuality[x][y] = quality / (double) count;
+
                         if (DebugControl.isDebugMode()) {
-                            Stats.getInstance().exportPointSubResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, nextRound, x, y));
+                            Stats.getInstance().exportPointSubResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, round, x, y));
                         }
                     }
                 }
             }
         }
 
-        tc.setDisplacement(round, nextRound, new DisplacementResult(finalDisplacement, finalQuality));
+        return new DisplacementResult(finalDisplacement, finalQuality);
     }
 
     private Analyzer2D getAnalyzer(final Map<Integer, Map<Integer, Analyzer2D>> maps, final int x, final int y) {

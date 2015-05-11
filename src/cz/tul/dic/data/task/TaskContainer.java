@@ -9,7 +9,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.ROI;
-import cz.tul.dic.engine.opencl.solvers.CorrelationResult;
+import cz.tul.dic.data.result.Result;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportTask;
 import java.awt.image.BufferedImage;
@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.imageio.ImageIO;
 import org.pmw.tinylog.Logger;
 
@@ -47,10 +48,9 @@ public class TaskContainer extends Observable implements Serializable {
     private final Set<Hint> hints;
     // generated data
     private transient List<Image> images;
-    // results
-    private final List<Map<ROI, List<CorrelationResult>>> results;
-    private final Map<Integer, Map<Integer, double[][][]>> strain;
-    private final Map<Integer, Map<Integer, DisplacementResult>> displacement;
+    // results    
+    private final List<Result> results;
+    private final Map<Integer, Map<Integer, Result>> cumulativeResults;
 
     public TaskContainer(final Object input) {
         params = new HashMap<>();
@@ -58,9 +58,8 @@ public class TaskContainer extends Observable implements Serializable {
         facetSizes = new Container<>();
         deformationLimits = new Container<>();
         exports = new HashSet<>();
-        results = Collections.synchronizedList(new LinkedList<>());
-        displacement = new ConcurrentHashMap<>();
-        strain = new ConcurrentHashMap<>();
+        results = new CopyOnWriteArrayList<>();
+        cumulativeResults = new ConcurrentHashMap<>();
         hints = EnumSet.noneOf(Hint.class);
 
         this.input = input;
@@ -217,76 +216,37 @@ public class TaskContainer extends Observable implements Serializable {
         return result;
     }
 
-    public void setResult(final int round, final ROI roi, final List<CorrelationResult> result) {
-        Map<ROI, List<CorrelationResult>> m = results.get(round);
-        if (m == null) {
-            m = new HashMap<>();
-            results.add(round, m);
+    public void setResult(final int roundFrom, final int roundTo, final Result result) {
+        if (roundFrom + 1 == roundTo) {
+            if (results.size() < roundTo + 1) {
+                for (int i = 0; i < roundTo - results.size(); i++) {
+                    results.add(null);
+                }
+                results.add(result);
+            } else {
+                results.set(roundTo, result);
+            }
+        } else {
+            Map<Integer, Result> m = cumulativeResults.get(roundFrom);
+            if (m == null) {
+                m = new HashMap<>(1);
+                cumulativeResults.put(roundFrom, m);
+            }
+
+            m.put(roundTo, result);
         }
-
-        m.put(roi, result);
     }
 
-    public void setResults(final int round, final Map<ROI, List<CorrelationResult>> result) {
-        while (results.size() <= round) {
-            results.add(null);
-        }
-
-        results.set(round, result);
-    }
-
-    public List<CorrelationResult> getResult(final int round, final ROI roi) {
-        final Map<ROI, List<CorrelationResult>> m = results.get(round);
-        final List<CorrelationResult> result = m == null ? null : m.get(roi);
-        return result;
-    }
-
-    public Map<ROI, List<CorrelationResult>> getResults(final int round) {
-        return results.get(round);
-    }
-
-    public DisplacementResult getDisplacement(final int roundFrom, final int roundTo) {
-        DisplacementResult result = null;
-        if (displacement.containsKey(roundFrom)) {
-            result = displacement.get(roundFrom).get(roundTo);
+    public Result getResult(final int roundFrom, final int roundTo) {
+        final Result result;
+        if (roundFrom + 1 == roundTo) {
+            result = results.get(roundTo);
+        } else if (cumulativeResults.containsKey(roundFrom)) {
+            result = cumulativeResults.get(roundFrom).get(roundTo);
+        } else {
+            result = null;
         }
         return result;
-    }
-
-    public Map<Integer, Map<Integer, DisplacementResult>> getDisplacements() {
-        return displacement;
-    }
-
-    public void setDisplacement(final int roundFrom, final int roundTo, final DisplacementResult result) {
-        Map<Integer, DisplacementResult> m = displacement.get(roundFrom);
-        if (m == null) {
-            m = new ConcurrentHashMap<>();
-            displacement.put(roundFrom, m);
-        }
-        m.put(roundTo, result);
-
-        setChanged();
-        notifyObservers();
-    }
-
-    public double[][][] getStrain(final int roundFrom, final int roundTo) {
-        double[][][] result = null;
-        if (strain.containsKey(roundFrom)) {
-            result = strain.get(roundFrom).get(roundTo);
-        }
-        return result;
-    }
-
-    public void setStrain(final int roundFrom, final int roundTo, final double[][][] result) {
-        Map<Integer, double[][][]> m = strain.get(roundFrom);
-        if (m == null) {
-            m = new ConcurrentHashMap<>();
-            strain.put(roundFrom, m);
-        }
-        m.put(roundTo, result);
-
-        setChanged();
-        notifyObservers();
     }
 
     public void addExport(final ExportTask et) {
@@ -299,8 +259,7 @@ public class TaskContainer extends Observable implements Serializable {
 
     public void clearResultData() {
         results.clear();
-        displacement.clear();
-        strain.clear();
+        cumulativeResults.clear();
 
         for (int i = 0; i < TaskContainerUtils.getMaxRoundCount(this); i++) {
             results.add(null);
@@ -326,7 +285,7 @@ public class TaskContainer extends Observable implements Serializable {
             out.defaultWriteObject();
             out.writeInt(images.size()); // how many images are serialized?
             for (BufferedImage eachImage : images) {
-                ImageIO.write(eachImage, "bmp", out); // png is lossless            
+                ImageIO.write(eachImage, "bmp", out); // bmp is lossless            
             }
             out.flush();
         } catch (IOException ex) {

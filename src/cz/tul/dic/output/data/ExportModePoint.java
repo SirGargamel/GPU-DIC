@@ -8,10 +8,10 @@ package cz.tul.dic.output.data;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.FpsManager;
-import cz.tul.dic.data.task.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
 import java.util.EnumMap;
@@ -20,7 +20,7 @@ import java.util.Map;
 public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
 
     @Override
-    public Map<Direction, double[]> exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {
+    public Map<Direction, double[]> exportData(final TaskContainer tc, final Direction direction, final int[] dataParams) throws ComputationException {
         if (dataParams == null || dataParams.length < 2) {
             throw new IllegalArgumentException("Not enough input parameters (position [x, y] required).");
         }
@@ -40,7 +40,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
 
         final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
 
-        DisplacementResult dr;
+        DisplacementResult displacement;
         double[][][] results;
         double[] data;
         for (Direction dir : Direction.values()) {
@@ -53,26 +53,26 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     case rDx:
                     case rDy:
                     case rDabs:
-                        dr = tc.getDisplacement(r - 1, r);
-                        results = dr != null ? dr.getDisplacement() : null;
+                        displacement = tc.getResult(r - 1, r).getDisplacementResult();
+                        results = displacement != null ? displacement.getDisplacement() : null;
                         break;
                     case Dx:
                     case Dy:
                     case Dabs:
-                        dr = TaskContainerUtils.getDisplacement(tc, roundZero, r);
-                        results = dr != null ? dr.getDisplacement() : null;
+                        displacement = tc.getResult(roundZero, r).getDisplacementResult();
+                        results = displacement != null ? displacement.getDisplacement() : null;
                         break;
                     case dExx:
                     case dEyy:
                     case dExy:
                     case dEabs:
-                        results = tc.getStrain(r - 1, r);
+                        results = tc.getResult(r - 1, r).getStrainResult().getStrain();
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        results = tc.getStrain(roundZero, r);
+                        results = tc.getResult(roundZero, r).getStrainResult().getStrain();
                         break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);

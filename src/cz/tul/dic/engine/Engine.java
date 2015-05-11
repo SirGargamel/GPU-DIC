@@ -21,6 +21,9 @@ import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.data.result.CorrelationResult;
+import cz.tul.dic.data.result.DisplacementResult;
+import cz.tul.dic.data.result.Result;
 import cz.tul.dic.engine.strain.StrainEstimation;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.output.Direction;
@@ -31,6 +34,7 @@ import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +76,7 @@ public final class Engine extends Observable implements Observer {
         TaskContainerUtils.checkTaskValidity(tc);
 
         final Set<Hint> hints = tc.getHints();
-        int r, nextR;
+        int r, nextR, baseR = -1;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             if (stopEngine) {
                 endTask();
@@ -86,6 +90,14 @@ public final class Engine extends Observable implements Observer {
             notifyObservers(r);
 
             computeRound(tc, r, nextR);
+
+            if (baseR == -1) {
+                baseR = r;
+            } else {
+                tc.setResult(baseR, nextR, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, nextR, r)));
+                // TODO compute cumulative strain
+            }
+
             exportRound(tc, r);
         }
 
@@ -93,6 +105,7 @@ public final class Engine extends Observable implements Observer {
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
 
         if (!hints.contains(Hint.NO_STRAIN)) {
+            // TODO compute strain after deformations (overlap)
             if (stopEngine) {
                 return;
             }
@@ -140,6 +153,7 @@ public final class Engine extends Observable implements Observer {
         final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(task, roundFrom);
 
         // compute round                
+        final Map<ROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());
         for (ROI roi : task.getRois(roundFrom)) {
             if (stopEngine) {
                 return;
@@ -147,8 +161,8 @@ public final class Engine extends Observable implements Observer {
             // compute and store result
             setChanged();
             notifyObservers(TaskSolver.class);
-            task.setResult(
-                    roundFrom, roi,
+            correlations.put(
+                    roi,
                     solver.solve(
                             task.getImage(roundFrom), task.getImage(roundTo),
                             facets.get(roi),
@@ -159,7 +173,9 @@ public final class Engine extends Observable implements Observer {
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
-        DisplacementCalculator.computeDisplacement(task, roundFrom, roundTo, facets);
+        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(correlations, facets, task, roundFrom);
+
+        task.setResult(roundFrom, roundTo, new Result(correlations, displacement));
 
         if (DebugControl.isDebugMode()) {
             Stats.getInstance().dumpDeformationsStatisticsUsage(roundFrom);
@@ -172,7 +188,7 @@ public final class Engine extends Observable implements Observer {
 
         setChanged();
         notifyObservers(System.currentTimeMillis() - time);
-        
+
         solver.deleteObserver(this);
     }
 

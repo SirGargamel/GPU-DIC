@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.data.result;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -25,11 +25,11 @@ public class CorrelationResult implements Serializable {
         return deformation;
     }
 
-    public CorrelationResult(float value, double[] deformation) {
+    public CorrelationResult(final float value, final double[] deformation) {
         this.value = value;
         this.deformation = deformation;
     }
-    
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
