@@ -22,25 +22,25 @@ public class ExportTargetGUI extends AbstractExportTarget {
 
         final double[][] data = exporter.exportData(tc, direction, dataParams);
 
-        final double[] minMax;
-        if (Double.isNaN(limits[0]) || Double.isNaN(limits[1])) {
-            minMax = ExportUtils.findMinMax(data);
-            if (!Double.isNaN(limits[0])) {
-                minMax[0] = limits[0];
-            }
-            if (!Double.isNaN(limits[1])) {
-                minMax[1] = limits[1];
-            }
-        } else {
-            minMax = new double[]{limits[0], limits[1]};
-        }
-
         final int position = dataParams[0];
         final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay;
         if (data == null) {
             overlay = background;
         } else {
+            final double[] minMax;
+            if (Double.isNaN(limits[0]) || Double.isNaN(limits[1])) {
+                minMax = ExportUtils.findMinMax(data);
+                if (!Double.isNaN(limits[0])) {
+                    minMax[0] = limits[0];
+                }
+                if (!Double.isNaN(limits[1])) {
+                    minMax[1] = limits[1];
+                }
+            } else {
+                minMax = new double[]{limits[0], limits[1]};
+            }
+
             overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction, minMax));
         }
         final Context context = (Context) targetParam;

@@ -7,7 +7,7 @@ package cz.tul.dic.output.data;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.result.DisplacementResult;
+import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.output.Direction;
@@ -34,12 +34,12 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
         final int x2 = dataParams[2];
         final int y2 = dataParams[3];
 
-        DisplacementResult dr;
+        Result res;
         double[][][] results;
         double[] data;
         for (Direction dir : Direction.values()) {
             data = result.get(dir);
-            for (int r = 0; r < roundCount; r++) {
+            for (int round = 0; round < roundCount; round++) {
                 switch (dir) {
                     case dDx:
                     case dDy:
@@ -47,31 +47,35 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                     case rDx:
                     case rDy:
                     case rDabs:
+                        res = tc.getResult(round - 1, round);
+                        results = res == null ? null : res.getDisplacementResult().getDisplacement();
+                        break;
                     case Dx:
                     case Dy:
                     case Dabs:
-                        results = null;
+                        res = tc.getResult(roundZero, round);
+                        results = res == null ? null : res.getDisplacementResult().getDisplacement();
                         break;
                     case dExx:
                     case dEyy:
                     case dExy:
                     case dEabs:
-                        dr = tc.getResult(r - 1, r).getDisplacementResult();
-                        results = dr != null ? dr.getDisplacement() : null;
+                        res = tc.getResult(round - 1, round);
+                        results = res == null ? null : res.getStrainResult().getStrain();
                         break;
                     case Exx:
                     case Eyy:
                     case Exy:
                     case Eabs:
-                        dr = tc.getResult(roundZero, r).getDisplacementResult();
-                        results = dr != null ? dr.getDisplacement() : null;
+                        res = tc.getResult(roundZero, round);
+                        results = res == null ? null : res.getStrainResult().getStrain();
                         break;
                     default:
                         throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
                 }
 
                 if (results == null || results.length < x1 || results[0].length < y1 || results.length < x2 || results[0].length < y2 || results[x1][y1] == null || results[x2][y2] == null) {
-                    data[r] = 0;
+                    data[round] = 0;
                 } else {
                     switch (dir) {
                         case dExx:
@@ -82,7 +86,7 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                         case Eyy:
                         case Exy:
                         case Eabs:
-                            data[r] = calculateStrain(results, dir, x1, y1, x2, y2);
+                            data[round] = calculateStrain(results, dir, x1, y1, x2, y2);
                             break;
                         default:
                             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");

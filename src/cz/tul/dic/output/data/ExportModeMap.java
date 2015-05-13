@@ -9,6 +9,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.data.result.DisplacementResult;
+import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -22,7 +23,8 @@ public class ExportModeMap implements IExportMode<double[][]> {
         if (dataParams == null || dataParams.length < 1) {
             throw new IllegalArgumentException("Not wnough input parameters (position required).");
         }
-        DisplacementResult dr;
+
+        Result res;
         final int round = dataParams[0];
         final int roundZero = TaskContainerUtils.getFirstRound(tc);
         final double[][][] results;
@@ -33,26 +35,28 @@ public class ExportModeMap implements IExportMode<double[][]> {
             case rDx:
             case rDy:
             case rDabs:
-                dr = tc.getResult(round - 1, round).getDisplacementResult();
-                results = dr != null ? dr.getDisplacement() : null;
+                res = tc.getResult(round - 1, round);
+                results = res == null ? null : res.getDisplacementResult().getDisplacement();
                 break;
             case Dx:
             case Dy:
             case Dabs:
-                dr = tc.getResult(roundZero, round).getDisplacementResult();
-                results = dr != null ? dr.getDisplacement() : null;
+                res = tc.getResult(roundZero, round);
+                results = res == null ? null : res.getDisplacementResult().getDisplacement();
                 break;
             case dExx:
             case dEyy:
             case dExy:
             case dEabs:
-                results = tc.getResult(round - 1, round).getStrainResult().getStrain();
+                res = tc.getResult(round - 1, round);
+                results = res == null ? null : res.getStrainResult().getStrain();
                 break;
             case Exx:
             case Eyy:
             case Exy:
             case Eabs:
-                results = tc.getResult(roundZero, round).getStrainResult().getStrain();
+                res = tc.getResult(roundZero, round);
+                results = res == null ? null : res.getStrainResult().getStrain();
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
@@ -114,28 +118,25 @@ public class ExportModeMap implements IExportMode<double[][]> {
 
         // stretch result to ending ROI
         if (direction.isStretch()) {
-            dr = tc.getResult(round - 1, round).getDisplacementResult();
-            if (dr != null) {
-                final double[][][] tempData = dr.getDisplacement();
-                if (tempData != null) {
-                    final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);
+            final DisplacementResult dr = tc.getResult(round - 1, round).getDisplacementResult();
+            if (dr != null && dr.getDisplacement() != null) {
+                final double stretchFactor = TaskContainerUtils.getStretchFactor(tc, round);
 
-                    final double[][] stretchedResult = new double[width][height];
-                    double newY;
-                    for (int y = 0; y < height - 1; y++) {
-                        newY = y / stretchFactor;
-                        if (newY > height - 1) {
-                            continue;
-                        }
-                        for (int x = 0; x < width; x++) {
-                            stretchedResult[x][y] = interpolate(
-                                    result[x][(int) Math.floor(newY)],
-                                    result[x][(int) Math.ceil(newY)],
-                                    newY % 1);
-                        }
+                final double[][] stretchedResult = new double[width][height];
+                double newY;
+                for (int y = 0; y < height - 1; y++) {
+                    newY = y / stretchFactor;
+                    if (newY > height - 1) {
+                        continue;
                     }
-                    result = stretchedResult;
+                    for (int x = 0; x < width; x++) {
+                        stretchedResult[x][y] = interpolate(
+                                result[x][(int) Math.floor(newY)],
+                                result[x][(int) Math.ceil(newY)],
+                                newY % 1);
+                    }
                 }
+                result = stretchedResult;
             }
         }
 
