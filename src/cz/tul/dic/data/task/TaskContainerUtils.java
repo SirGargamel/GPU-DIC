@@ -8,8 +8,8 @@ package cz.tul.dic.data.task;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.Config;
-import cz.tul.dic.data.ConfigType;
+import cz.tul.dic.data.config.Config;
+import cz.tul.dic.data.config.ConfigType;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import org.pmw.tinylog.Logger;
@@ -282,17 +281,17 @@ public class TaskContainerUtils {
             // video file
             result = new TaskContainer(new File(input));
         }
-        // rois, exports, parameters
-        String key;
+        // rois, exports, parameters        
+        String value;
         TaskParameter tp;
         int index;
         String[] split;
         ROI roi;
-        for (Entry<String, String> e : config.entrySet()) {
-            key = e.getKey();
+        for (String key : config.keySet()) {
+            value = config.get(key);
             if (key.startsWith(CONFIG_ROIS)) {
                 index = Integer.parseInt(key.replaceFirst(CONFIG_ROIS, ""));
-                final String[] splitPairs = e.getValue().split(CONFIG_SEPARATOR);
+                final String[] splitPairs = value.split(CONFIG_SEPARATOR);
                 for (String s : splitPairs) {
                     split = s.split(CONFIG_SEPARATOR_ROI);
                     if (split.length == 3) {
@@ -312,52 +311,52 @@ public class TaskContainerUtils {
                 tp = TaskParameter.valueOf(key.replaceFirst(CONFIG_PARAMETERS, ""));
                 switch (tp) {
                     case IN:
-                        result.setParameter(tp, new File(e.getValue()));
+                        result.setParameter(tp, new File(value));
                         break;
                     case FACET_GENERATOR_METHOD:
-                        result.setParameter(tp, FacetGeneratorMethod.valueOf(e.getValue()));
+                        result.setParameter(tp, FacetGeneratorMethod.valueOf(value));
                         break;
                     case FACET_GENERATOR_PARAM:
-                        result.setParameter(tp, Integer.valueOf(e.getValue()));
+                        result.setParameter(tp, Integer.valueOf(value));
                         break;
                     case DEFORMATION_LIMITS:
-                        result.setParameter(tp, doubleArrayFromString(e.getValue()));
+                        result.setParameter(tp, doubleArrayFromString(value));
                         break;
                     case DEFORMATION_ORDER:
-                        result.setParameter(tp, DeformationDegree.valueOf(e.getValue()));
+                        result.setParameter(tp, DeformationDegree.valueOf(value));
                         break;
                     case FACET_SIZE:
-                        result.setParameter(tp, Integer.valueOf(e.getValue()));
+                        result.setParameter(tp, Integer.valueOf(value));
                         break;
                     case FPS:
-                        result.setParameter(tp, Integer.valueOf(e.getValue()));
+                        result.setParameter(tp, Integer.valueOf(value));
                         break;
                     case INTERPOLATION:
-                        result.setParameter(tp, Interpolation.valueOf(e.getValue()));
+                        result.setParameter(tp, Interpolation.valueOf(value));
                         break;
                     case KERNEL:
-                        result.setParameter(tp, KernelType.valueOf(e.getValue()));
+                        result.setParameter(tp, KernelType.valueOf(value));
                         break;
                     case RESULT_COMPILATION:
-                        result.setParameter(tp, ResultCompilation.valueOf(e.getValue()));
+                        result.setParameter(tp, ResultCompilation.valueOf(value));
                         break;
                     case TASK_SPLIT_METHOD:
-                        result.setParameter(tp, TaskSplitMethod.valueOf(e.getValue()));
+                        result.setParameter(tp, TaskSplitMethod.valueOf(value));
                         break;
                     case TASK_SPLIT_PARAM:
-                        result.setParameter(tp, Integer.valueOf(e.getValue()));
+                        result.setParameter(tp, Integer.valueOf(value));
                         break;
                     case ROUND_LIMITS:
-                        result.setParameter(tp, intArrayFromString(e.getValue()));
+                        result.setParameter(tp, intArrayFromString(value));
                         break;
                     case SOLVER:
-                        result.setParameter(tp, Solver.valueOf(e.getValue()));
+                        result.setParameter(tp, Solver.valueOf(value));
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);
                 }
             } else if (key.startsWith(CONFIG_EXPORTS)) {
-                result.addExport(ExportTask.generateExportTask(e.getValue()));
+                result.addExport(ExportTask.generateExportTask(value));
             }
         }
 

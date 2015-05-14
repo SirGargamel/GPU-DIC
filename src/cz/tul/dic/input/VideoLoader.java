@@ -8,8 +8,8 @@ package cz.tul.dic.input;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.Utils;
-import cz.tul.dic.data.Config;
-import cz.tul.dic.data.ConfigType;
+import cz.tul.dic.data.config.Config;
+import cz.tul.dic.data.config.ConfigType;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -25,7 +25,6 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import org.pmw.tinylog.Logger;
 
 public class VideoLoader extends AbstractInputLoader {
@@ -114,20 +113,19 @@ public class VideoLoader extends AbstractInputLoader {
     private boolean isCacheDataValid(final File source, final File tempFolder, final Config config) {
         boolean result = true;
 
-        if (!tempFolder.isDirectory() || config == null || config.isEmpty() || !Config.determineType(config).equals(ConfigType.SEQUENCE)) {
+        if (!tempFolder.isDirectory() || config == null || config.keySet().isEmpty() || !Config.determineType(config).equals(ConfigType.SEQUENCE)) {
             result = false;
         } else {
             final String baseTempPath = tempFolder.getAbsolutePath().concat(File.separator);
             File tempFile;
-            String key, fileName;
+            String fileName;
             long valueConfig, valueFile;
-            for (Entry<String, String> e : config.entrySet()) {
-                key = e.getKey();
+            for (String key : config.keySet()) {
                 if (key.startsWith(PREFIX_SIZE)) {
                     fileName = key.replaceFirst(PREFIX_SIZE, "");
                     if (fileName.equals(source.getName())) {
                         valueFile = source.length();
-                        valueConfig = Long.parseLong(e.getValue());
+                        valueConfig = Long.parseLong(config.get(key));
                         if (valueFile != valueConfig) {
                             result = false;
                             break;
@@ -139,7 +137,7 @@ public class VideoLoader extends AbstractInputLoader {
                             break;
                         }
                         valueFile = tempFile.length();
-                        valueConfig = Long.parseLong(e.getValue());
+                        valueConfig = Long.parseLong(config.get(key));
                         if (valueFile != valueConfig) {
                             result = false;
                             break;
@@ -149,7 +147,7 @@ public class VideoLoader extends AbstractInputLoader {
                     fileName = key.replaceFirst(PREFIX_MOD, "");
                     if (fileName.equals(source.getName())) {
                         valueFile = source.lastModified();
-                        valueConfig = Long.parseLong(e.getValue());
+                        valueConfig = Long.parseLong(config.get(key));
                         if (valueFile != valueConfig) {
                             result = false;
                             break;
@@ -161,7 +159,7 @@ public class VideoLoader extends AbstractInputLoader {
                             break;
                         }
                         valueFile = tempFile.lastModified();
-                        valueConfig = Long.parseLong(e.getValue());
+                        valueConfig = Long.parseLong(config.get(key));
                         if (valueFile != valueConfig) {
                             result = false;
                             break;
@@ -178,9 +176,8 @@ public class VideoLoader extends AbstractInputLoader {
         final String baseTempPath = tempFolder.getAbsolutePath().concat(File.separator);
         File tempFile;
         final List<File> result = new LinkedList<>();
-        String key, fileName;
-        for (Entry<String, String> e : config.entrySet()) {
-            key = e.getKey();
+        String fileName;
+        for (String key : config.keySet()) {
             if (key.startsWith(PREFIX_SIZE)) {
                 fileName = key.replaceFirst(PREFIX_SIZE, "");
                 if (!fileName.equals(source.getName())) {
