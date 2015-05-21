@@ -25,9 +25,9 @@ public final class TaskDefaultValues {
     public static final int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     public static final int DEFAULT_FPS = 5000;
     public static final DeformationDegree DEFAULT_DEFORMATION_DEGREE = DeformationDegree.FIRST;
-    public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-5.0, 5.0, 0.25, -5, 5, 0.25};
+    public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-10.0, 10.0, 0.25, -10, 10, 0.25};
     public static final double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
-        -3.0, 3.0, 0.25, -3, 3, 0.25,
+        -10.0, 10.0, 0.25, -10, 10, 0.25,
         -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05};
     public static final FacetGeneratorMethod DEFAULT_FACET_GENERATOR = FacetGeneratorMethod.TIGHT;
     public static final int DEFAULT_FACET_SPACING = 1;
