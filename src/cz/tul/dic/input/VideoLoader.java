@@ -22,7 +22,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.pmw.tinylog.Logger;
@@ -177,7 +179,9 @@ public class VideoLoader extends AbstractInputLoader {
         File tempFile;
         final List<File> result = new LinkedList<>();
         String fileName;
-        for (String key : config.keySet()) {
+        final List<String> files = new ArrayList<>(config.keySet());
+        Collections.sort(files);
+        for (String key : files) {
             if (key.startsWith(PREFIX_SIZE)) {
                 fileName = key.replaceFirst(PREFIX_SIZE, "");
                 if (!fileName.equals(source.getName())) {
