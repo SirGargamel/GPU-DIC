@@ -41,21 +41,6 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
             data = result.get(dir);
             for (int round = 0; round < roundCount; round++) {
                 switch (dir) {
-                    case dDx:
-                    case dDy:
-                    case dDabs:
-                    case rDx:
-                    case rDy:
-                    case rDabs:
-                        res = tc.getResult(round - 1, round);
-                        results = res == null ? null : res.getDisplacementResult().getDisplacement();
-                        break;
-                    case Dx:
-                    case Dy:
-                    case Dabs:
-                        res = tc.getResult(roundZero, round);
-                        results = res == null ? null : res.getDisplacementResult().getDisplacement();
-                        break;
                     case dExx:
                     case dEyy:
                     case dExy:
@@ -71,7 +56,7 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                         results = res == null ? null : res.getStrainResult().getStrain();
                         break;
                     default:
-                        throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
+                        results = null;
                 }
 
                 if (results == null || results.length < x1 || results[0].length < y1 || results.length < x2 || results[0].length < y2 || results[x1][y1] == null || results[x2][y2] == null) {
@@ -89,7 +74,7 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                             data[round] = calculateStrain(results, dir, x1, y1, x2, y2);
                             break;
                         default:
-                            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                            // ignore other directions
                     }
                 }
             }
