@@ -7,7 +7,6 @@ package cz.tul.dic.engine.opencl.solvers;
 
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
@@ -39,8 +38,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
     private static final int COUNT_STEP = 5;
     private static final int LIMITS_ROUNDS = 20;
     private static final double LIMIT_MIN_GROWTH = 0.01;
-    private static final double STEP_INITIAL = 1;
-    private static final double STEP_MINIMAL = 0.01;
+    private static final double STEP = 1;    
     private float[] gpuData;
 
     @Override
@@ -180,74 +178,26 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         List<CorrelationResult> results;
         final StringBuilder sb = new StringBuilder();
 
-        // initial pixel step
-        double step = STEP_INITIAL;
+        // initial pixel step        
         for (double[] dA : deformationLimits) {
             temp = new double[COUNT_ZERO_ORDER_LIMITS];
             System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
             temp[DeformationLimit.UMIN] = Math.floor(temp[DeformationLimit.UMIN]);
             temp[DeformationLimit.UMAX] = Math.ceil(temp[DeformationLimit.UMAX]);
-            temp[DeformationLimit.USTEP] = step;
+            temp[DeformationLimit.USTEP] = STEP;
             temp[DeformationLimit.VMIN] = Math.floor(temp[DeformationLimit.VMIN]);
             temp[DeformationLimit.VMAX] = Math.ceil(temp[DeformationLimit.VMAX]);
-            temp[DeformationLimit.VSTEP] = step;
+            temp[DeformationLimit.VSTEP] = STEP;
             zeroOrderLimits.add(temp);
         }
         results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
-        sb.append("Initial results, step [").append(step).append("]:");
+        sb.append("Initial results, step [").append(STEP).append("]:");
         for (int i = 0; i < facetCount; i++) {
             sb.append(i)
                     .append(" - ")
                     .append(results.get(i))
                     .append("; ");
-        }
-
-        double minStep = 1;
-        for (double[] dA : deformationLimits) {
-            minStep = Math.min(minStep, Math.min(dA[DeformationLimit.USTEP], dA[DeformationLimit.VSTEP]));
-        }
-
-        //sub-pixel stepping
-        double[] coarseResult, defLimits;
-        int l;
-        do {
-            step /= 10.0;
-            if (step < minStep) {
-                if (step * 10 == minStep) {
-                    break;
-                } else {
-                    step = minStep;
-                }
-            }
-
-            zeroOrderLimits.clear();
-            zeroOrderLimits = new ArrayList<>(facetCount);
-
-            for (int i = 0; i < facetCount; i++) {
-                coarseResult = results.get(i).getDeformation();
-                defLimits = deformationLimits.get(i);
-                temp = new double[COUNT_ZERO_ORDER_LIMITS];
-
-                temp[DeformationLimit.UMIN] = Math.max(coarseResult[Coordinates.X] - (10 * step), defLimits[DeformationLimit.UMIN]);
-                temp[DeformationLimit.UMAX] = Math.min(coarseResult[Coordinates.X] + (10 * step), defLimits[DeformationLimit.UMAX]);
-                temp[DeformationLimit.USTEP] = step;
-                temp[DeformationLimit.VMIN] = Math.max(coarseResult[Coordinates.Y] - (10 * step), defLimits[DeformationLimit.VMIN]);
-                temp[DeformationLimit.VMAX] = Math.min(coarseResult[Coordinates.Y] + (10 * step), defLimits[DeformationLimit.VMAX]);
-                temp[DeformationLimit.VSTEP] = step;
-
-                zeroOrderLimits.add(temp);
-            }
-            results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
-
-            sb.append("Finer results, step [").append(step).append("]:");
-            for (int i = 0; i < facetCount; i++) {
-                sb.append(i)
-                        .append(" - ")
-                        .append(results.get(i))
-                        .append("; ");
-            }
-
-        } while (step > STEP_MINIMAL);
+        }        
 
         return results;
     }
