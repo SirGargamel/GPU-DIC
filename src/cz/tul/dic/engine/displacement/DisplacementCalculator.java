@@ -52,6 +52,10 @@ public abstract class DisplacementCalculator {
     abstract DisplacementResult buildFinalResults(final Map<ROI, List<CorrelationResult>> correlationResults, Map<ROI, List<Facet>> facetMap, final TaskContainer tc, final int round) throws ComputationException;
 
     public static DisplacementResult computeCumulativeDisplacement(final TaskContainer tc, final int roundFrom, final int roundTo) {
+        if (roundFrom >= roundTo) {
+            throw new IllegalArgumentException("Source round must be lower than target round.");
+        }
+        
         DisplacementResult displacement = null;
         Result tempResult = tc.getResult(roundFrom, roundTo);
         if (tempResult != null) {

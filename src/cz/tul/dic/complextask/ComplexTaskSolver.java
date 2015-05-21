@@ -17,9 +17,10 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.data.result.Result;
-import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.engine.OverlapComputation;
+import cz.tul.dic.engine.strain.StrainEstimationMethod;
+import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
@@ -28,12 +29,16 @@ import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -45,12 +50,11 @@ public class ComplexTaskSolver extends Observable implements Observer {
     private final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
-    private final StrainEstimation strain;
+    private StrainEstimator strain;
     private boolean stop;
 
     public ComplexTaskSolver() {
         bottomShifts = new LinkedList<>();
-        strain = new StrainEstimation();
     }
 
     public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
@@ -61,6 +65,8 @@ public class ComplexTaskSolver extends Observable implements Observer {
         tc.clearResultData();
         bottomShifts.clear();
 
+        strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
+
         final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
         final int baseRound = rounds[0];
 
@@ -69,6 +75,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
         final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
         final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
         final TaskContainer tcR = rrm.getTc();
+        final Set<Future<Void>> futures = new HashSet<>();
 
         int r, nextR, baseR = -1, repeat;
         boolean good;
@@ -136,7 +143,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
             if (baseR == -1) {
                 baseR = r;
             } else {
-                tc.setResult(baseR, nextR, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, nextR, r)));
+                futures.add(Engine.getInstance().getExecutorService().submit(new OverlapComputation(tc, baseR, nextR, strain)));
             }
 
             exportRound(tc, r);
@@ -151,7 +158,18 @@ public class ComplexTaskSolver extends Observable implements Observer {
         if (stop) {
             return;
         }
-        strain.computeStrain(tc);
+
+        // wait for overlapping computations
+        try {
+            setChanged();
+            notifyObservers(StrainEstimator.class);
+            for (Future f : futures) {
+                f.get();
+            }
+        } catch (InterruptedException | ExecutionException | NullPointerException ex) {
+            Logger.warn(ex);
+        }
+
         Exporter.export(tc);
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
 

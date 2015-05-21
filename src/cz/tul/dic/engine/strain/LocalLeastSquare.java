@@ -13,7 +13,6 @@ import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.result.StrainResult;
-import cz.tul.dic.engine.strain.StrainEstimation.StrainEstimator;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.NameGenerator;
 import java.util.ArrayList;
@@ -21,8 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
@@ -40,10 +37,17 @@ public class LocalLeastSquare extends StrainEstimator {
     private static final int INDEX_ERRB = 7;
     private static final double COEFF_ADJUST = 100;
     private boolean stop;
+    
+    public LocalLeastSquare() {
+        super();
+    }
 
     @Override
-    void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) throws ComputationException {
+    public void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) throws ComputationException {
         stop = false;
+        if (roundFrom >= roundTo) {
+            throw new IllegalArgumentException("Source round must be lower than target round.");
+        }
 
         final Result subResult = tc.getResult(roundFrom, roundTo);
         final double[][][] displacement = subResult.getDisplacementResult().getDisplacement();
@@ -71,9 +75,7 @@ public class LocalLeastSquare extends StrainEstimator {
             final double[][][] result = new double[width][height][];
             final double[][][] resultQuality = new double[][][]{Utils.generateNaNarray(width, height), Utils.generateNaNarray(width, height)};
             try {
-                final int threadCount = Runtime.getRuntime().availableProcessors();
-                final ExecutorService es = Executors.newWorkStealingPool(threadCount);
-                final List<Future<ExecutionUnit>> results = es.invokeAll(l);
+                final List<Future<ExecutionUnit>> results = exec.invokeAll(l);
 
                 ExecutionUnit eu;
                 for (Future<ExecutionUnit> f : results) {
@@ -81,10 +83,6 @@ public class LocalLeastSquare extends StrainEstimator {
                     result[eu.getX()][eu.getY()] = eu.getResult();
                     resultQuality[0][eu.getX()][eu.getY()] = eu.getErrors()[0];
                     resultQuality[1][eu.getX()][eu.getY()] = eu.getErrors()[1];
-
-                    if (stop) {
-                        es.shutdownNow();
-                    }
                 }
             } catch (InterruptedException | ExecutionException ex) {
                 if (!stop) {
@@ -172,7 +170,7 @@ public class LocalLeastSquare extends StrainEstimator {
     }
 
     @Override
-    void stop() {
+    public void stop() {
         stop = true;
     }
 

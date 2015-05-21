@@ -10,7 +10,7 @@ import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.Result;
-import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.io.File;
@@ -36,7 +36,8 @@ public class StrainEstimatorTest {
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         final TaskContainer tc = new TaskContainer(input);
 
-        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
+        final StrainEstimationMethod method = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, method);
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, 1.0);
         tc.setParameter(TaskParameter.MM_TO_PX_RATIO, 1.0);
         tc.setParameter(TaskParameter.RESULT_QUALITY, 0.5);
@@ -50,7 +51,7 @@ public class StrainEstimatorTest {
             {null, null, null, null, null},};
         tc.setResult(ROUND, ROUND + 1, new Result(new DisplacementResult(displacement, null)));
 
-        new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
+        StrainEstimator.initStrainEstimator(method).estimateStrain(tc, ROUND, ROUND + 1);
         final double[][][] strains = tc.getResult(ROUND, ROUND + 1).getStrainResult().getStrain();
 
         Assert.assertNotNull(strains[2][2]);
@@ -77,7 +78,8 @@ public class StrainEstimatorTest {
         input.add(Paths.get(getClass().getResource("/resources/" + fileOut).toURI()).toFile());
         final TaskContainer tc = new TaskContainer(input);
 
-        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
+        final StrainEstimationMethod method = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, method);
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, 5.0);
         tc.setParameter(TaskParameter.MM_TO_PX_RATIO, 1.0);
 
@@ -91,7 +93,7 @@ public class StrainEstimatorTest {
         }
         tc.setResult(ROUND, ROUND + 1, new Result(new DisplacementResult(displacement, null)));
 
-        new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
+        StrainEstimator.initStrainEstimator(method).estimateStrain(tc, ROUND, ROUND + 1);
 
         final double[][][] strains = tc.getResult(ROUND, ROUND + 1).getStrainResult().getStrain();
 
@@ -112,7 +114,8 @@ public class StrainEstimatorTest {
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         final TaskContainer tc = new TaskContainer(input);
 
-        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
+        final StrainEstimationMethod method = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, method);
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, 3.0);
         tc.setParameter(TaskParameter.MM_TO_PX_RATIO, 1.0);
 
@@ -124,7 +127,7 @@ public class StrainEstimatorTest {
         };
         tc.setResult(ROUND, ROUND + 1, new Result(new DisplacementResult(displacement, null)));
 
-        new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
+        StrainEstimator.initStrainEstimator(method).estimateStrain(tc, ROUND, ROUND + 1);
         final double[][][] strains = tc.getResult(ROUND, ROUND + 1).getStrainResult().getStrain();
 
         for (double[][] strain : strains) {
@@ -144,7 +147,8 @@ public class StrainEstimatorTest {
         input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
         final TaskContainer tc = new TaskContainer(input);
 
-        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, StrainEstimationMethod.LOCAL_LEAST_SQUARES);
+        final StrainEstimationMethod method = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
+        tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, method);
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, 3.0);
         tc.setParameter(TaskParameter.MM_TO_PX_RATIO, 1.0);
 
@@ -156,7 +160,7 @@ public class StrainEstimatorTest {
         };
         tc.setResult(ROUND, ROUND + 1, new Result(new DisplacementResult(displacement, null)));
 
-        new StrainEstimation().computeStrain(tc, ROUND, ROUND + 1);
+        StrainEstimator.initStrainEstimator(method).estimateStrain(tc, ROUND, ROUND + 1);
         final double[][][] strains = tc.getResult(ROUND, ROUND + 1).getStrainResult().getStrain();
 
         for (double[][] strain : strains) {

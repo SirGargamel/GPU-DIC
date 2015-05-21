@@ -24,7 +24,8 @@ import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.result.Result;
-import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.engine.strain.StrainEstimator;
+import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.generators.facet.FacetGenerator;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
@@ -35,12 +36,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -50,7 +56,8 @@ import org.pmw.tinylog.Logger;
 public final class Engine extends Observable implements Observer {
 
     private static final Engine INSTANCE;
-    private final StrainEstimation strain;
+    private final ExecutorService exec;
+    private StrainEstimator strain;
     private TaskSolver solver;
     private boolean stopEngine;
 
@@ -64,7 +71,7 @@ public final class Engine extends Observable implements Observer {
 
     private Engine() {
         super();
-        strain = new StrainEstimation();
+        exec = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() - 1);
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
@@ -75,7 +82,10 @@ public final class Engine extends Observable implements Observer {
         tc.clearResultData();
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final Set<Hint> hints = tc.getHints();
+        strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
+        final Set<Future<Void>> futures = new HashSet<>();
+
+//        final Set<Hint> hints = tc.getHints();
         int r, nextR, baseR = -1;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             if (stopEngine) {
@@ -94,8 +104,10 @@ public final class Engine extends Observable implements Observer {
             if (baseR == -1) {
                 baseR = r;
             } else {
-                tc.setResult(baseR, nextR, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, nextR, r)));
-                // TODO compute cumulative strain
+                futures.add(exec.submit(new OverlapComputation(tc, baseR, nextR, strain)));
+//                tc.setResult(baseR, nextR, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, nextR, r)));
+//                strain.computeStrain(tc, r, nextR);
+//                strain.computeStrain(tc, baseR, nextR);
             }
 
             exportRound(tc, r);
@@ -104,14 +116,23 @@ public final class Engine extends Observable implements Observer {
         Stats.getInstance().dumpDeformationsStatisticsUsage();
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
 
-        if (!hints.contains(Hint.NO_STRAIN)) {
-            // TODO compute strain after deformations (overlap)
-            if (stopEngine) {
-                return;
-            }
+//        if (!hints.contains(Hint.NO_STRAIN)) {
+//            // TODO compute strain after deformations (overlap)
+//            if (stopEngine) {
+//                return;
+//            }
+//            setChanged();
+//            notifyObservers(StrainEstimator.class);
+//            strain.computeStrain(tc);
+//        }
+        try {
             setChanged();
-            notifyObservers(StrainEstimation.class);
-            strain.computeStrain(tc);
+            notifyObservers(StrainEstimator.class);
+            for (Future f : futures) {
+                f.get();
+            }
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.warn(ex);
         }
 
         endTask();
@@ -146,6 +167,8 @@ public final class Engine extends Observable implements Observer {
         final TaskSplitMethod taskSplit = (TaskSplitMethod) task.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = task.getParameter(TaskParameter.TASK_SPLIT_PARAM);
         solver.setTaskSplitVariant(taskSplit, taskSplitValue);
+        
+        strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
 
         // prepare data
         setChanged();
@@ -177,11 +200,21 @@ public final class Engine extends Observable implements Observer {
 
         task.setResult(roundFrom, roundTo, new Result(correlations, displacement));
 
+        final Future future = exec.submit(new OverlapComputation(task, roundFrom, roundTo, strain));
+
         if (DebugControl.isDebugMode()) {
             Stats.getInstance().dumpDeformationsStatisticsUsage(roundFrom);
             Stats.getInstance().dumpDeformationsStatisticsPerQuality(roundFrom);
             Stats.getInstance().drawFacetQualityStatistics(facets, roundFrom, roundTo);
             Stats.getInstance().drawPointResultStatistics(roundFrom, roundTo);
+        }
+
+        try {
+            setChanged();
+            notifyObservers(StrainEstimator.class);
+            future.get();
+        } catch (InterruptedException | ExecutionException | NullPointerException ex) {
+            Logger.warn(ex);
         }
 
         Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
@@ -222,6 +255,7 @@ public final class Engine extends Observable implements Observer {
         stopEngine = true;
         solver.stop();
         strain.stop();
+        exec.shutdownNow();
         Logger.debug("Stopping engine.");
     }
 
@@ -234,5 +268,10 @@ public final class Engine extends Observable implements Observer {
             Logger.error("Illegal observable notification - " + o.toString());
         }
     }
+
+    public ExecutorService getExecutorService() {
+        return exec;
+    }
+
 
 }

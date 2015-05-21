@@ -8,7 +8,7 @@ package cz.tul.dic.debug;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class DebugControl {
 
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
         Stats.getInstance().dumpDeformationsStatisticsUsage();
-        new StrainEstimation().computeStrain(tc);
+        StrainEstimator.computeStrain(tc);
     }
 
 }

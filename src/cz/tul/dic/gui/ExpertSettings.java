@@ -9,7 +9,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.gui.lang.Lang;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -88,7 +88,7 @@ public class ExpertSettings implements Initializable {
                             String result = null;
                             updateProgress(0, 2);
                             try {
-                                new StrainEstimation().computeStrain(tc);
+                                StrainEstimator.computeStrain(tc);
                                 updateProgress(1, 2);
                             } catch (ComputationException ex) {
                                 result = ex.getLocalizedMessage();
