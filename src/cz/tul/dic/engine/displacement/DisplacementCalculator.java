@@ -27,6 +27,7 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class DisplacementCalculator {
 
+    private static final int INTERPOLATION_DIM = 2;
     private static final Map<DisplacementCalculation, DisplacementCalculator> DATA;
 
     static {
@@ -55,7 +56,7 @@ public abstract class DisplacementCalculator {
         if (roundFrom >= roundTo) {
             throw new IllegalArgumentException("Source round must be lower than target round.");
         }
-        
+
         DisplacementResult displacement = null;
         Result tempResult = tc.getResult(roundFrom, roundTo);
         if (tempResult != null) {
@@ -69,21 +70,15 @@ public abstract class DisplacementCalculator {
             final double[][][] resultData = new double[width][height][];
 
             double posX, posY;
-            int iX, iY;
             double[][][] data;
             double[] val;
             int indexFrom, indexTo;
-            boolean notNull, inited;
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    notNull = false;
-                    inited = false;
                     indexFrom = roundFrom;
                     indexTo = roundTo;
                     posX = x;
                     posY = y;
-                    iX = x;
-                    iY = y;
 
                     while (indexFrom != roundTo) {
                         do {
@@ -102,29 +97,19 @@ public abstract class DisplacementCalculator {
                             break;
                         }
 
-                        val = data[iX][iY];
-                        if (val != null) {
-                            notNull = true;
-                            posX += val[Coordinates.X];
-                            posY += val[Coordinates.Y];
-                        } else if (!inited) {
-                            break;
-                        }
-                        inited = true;
+                        val = interpolate(posX, posY, data);
+                        posX += val[Coordinates.X];
+                        posY += val[Coordinates.Y];
 
                         indexFrom = indexTo;
                         indexTo = roundTo;
 
-                        iX = (int) Math.round(posX);
-                        iY = (int) Math.round(posY);
-                        if (posX < 0 || posY < 0 || iX >= data.length || iY >= data[x].length) {
+                        if (posX < 0 || posY < 0 || posX > data.length - 1 || posY > data[0].length - 1) {
                             break;
                         }
                     }
 
-                    if (notNull) {
-                        resultData[x][y] = new double[]{posX - x, posY - y};
-                    }
+                    resultData[x][y] = new double[]{posX - x, posY - y};
                 }
             }
 
@@ -132,6 +117,38 @@ public abstract class DisplacementCalculator {
         }
 
         return displacement;
+    }
+
+    private static double[] interpolate(final double x, final double y, final double[][][] data) {
+        if (data.length == 0 || data[0].length == 0) {
+            throw new IllegalArgumentException("Zero length data not supported.");
+        }
+        if (x > data.length - 1 || y > data[0].length - 1) {
+            throw new IllegalArgumentException("Indexes out of bounds.");
+        }
+        final double[] result = new double[INTERPOLATION_DIM];
+
+        final int intX = (int) x;
+        final double dX = x - intX;
+        final int intY = (int) y;
+        final double dY = y - intY;
+
+        if (data[intX][intY] != null) {
+            for (int dim = 0; dim < INTERPOLATION_DIM; dim++) {
+                result[dim] += data[intX][intY][dim] * (1 - dX) * (1 - dY);
+                if (intX < data.length - 1) {
+                    result[dim] += data[intX + 1][intY][dim] * dX * (1 - dY);
+                    if (intY < data[intX].length - 1) {
+                        result[dim] += data[intX + 1][intY + 1][dim] * dX * dY;
+                    }
+                }
+                if (intY < data[intX].length - 1) {
+                    result[dim] += data[intX][intY + 1][dim] * (1 - dX) * dY;
+                }
+            }
+        }
+
+        return result;
     }
 
 }

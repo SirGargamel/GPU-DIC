@@ -316,69 +316,7 @@ public class EngineTest {
             sb.append(s);
         }
         return sb.toString();
-    }
-
-    @Test
-    public void testCumulativeResultCounter() throws IOException, URISyntaxException, ComputationException {
-        final List<File> input = new ArrayList<>(4);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        final TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
-        tc.setParameter(TaskParameter.IN, input.get(0));
-        TaskContainerUtils.checkTaskValidity(tc);
-
-        final int width = tc.getImage(ROUND).getWidth();
-        final int height = tc.getImage(ROUND).getHeight();
-        tc.setResult(0, 1, new Result(new DisplacementResult(prepareArray(width, height, 0), null)));
-        tc.setResult(1, 2, new Result(new DisplacementResult(prepareArray(width, height, 0), null)));
-        tc.setResult(2, 3, new Result(new DisplacementResult(prepareArray(width, height, 1), null)));
-        tc.setResult(3, 4, new Result(new DisplacementResult(prepareArray(width, height, 1), null)));
-
-        tc.setResult(0, 2, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 2)));
-        tc.setResult(0, 3, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 3)));
-        tc.setResult(0, 4, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 4)));
-
-        assert equals(tc.getResult(0, 1).getDisplacementResult().getDisplacement(), prepareArray(width, height, 0), 0);
-        assert equals(tc.getResult(0, 2).getDisplacementResult().getDisplacement(), prepareArray(width, height, 0), 0);
-        assert equals(tc.getResult(0, 3).getDisplacementResult().getDisplacement(), prepareArray(width, height, 1), 0);
-        assert equals(tc.getResult(0, 4).getDisplacementResult().getDisplacement(), prepareArray(width, height, 2), 1);
-    }
-
-    private double[][][] prepareArray(final int width, final int height, final double val) {
-        final double[][][] result = new double[width][height][Coordinates.DIMENSION];
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                Arrays.fill(result[x][y], val);
-            }
-        }
-        return result;
-    }
-
-    private boolean equals(final double[][][] A, final double[][][] B, final int gap) {
-        boolean result = true;
-
-        if (A != null && B != null) {
-            loop:
-            for (int x = 0; x < A.length - gap; x++) {
-                for (int y = 0; y < A[x].length - gap; y++) {
-                    for (int z = 0; z < A[x][y].length; z++) {
-                        if (A[x][y][z] != B[x][y][z]) {
-                            result = false;
-                            break loop;
-                        }
-                    }
-                }
-            }
-        } else {
-            result = false;
-        }
-
-        return result;
-    }
+    }    
 
     @Test
     public void testEngineMultiFacet() throws IOException, URISyntaxException, ComputationException {
