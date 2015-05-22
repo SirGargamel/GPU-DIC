@@ -12,7 +12,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.strain.StrainEstimation;
+import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
@@ -66,58 +66,59 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
         //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
         //////////////////////////////        
-        //                        "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR2.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR2.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR2.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR2.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR2.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR2.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6203652m.avi.CF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\9905121m.avi.CF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\7202845m.avi.CF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6107544m.avi.CF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6113599m.avi.CF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\9112502m.avi.CF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6203652m.avi.BF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\9905121m.avi.BF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\7202845m.avi.BF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6107544m.avi.BF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\6113599m.avi.BF.small.config",
-        //                        "d:\\temp\\.smallSolverCompare\\9112502m.avi.BF.small.config",
-        ////////////////////////////
-        //        "d:\\temp\\.solverCompare\\6203652m.avi.NR.config",
-        //        "d:\\temp\\.solverCompare\\9905121m.avi.NR.config",
-        //        "d:\\temp\\.solverCompare\\7202845m.avi.NR.config",
-        //        "d:\\temp\\.solverCompare\\6107544m.avi.NR.config",
-        //        "d:\\temp\\.solverCompare\\6113599m.avi.NR.config",
-        //        "d:\\temp\\.solverCompare\\9112502m.avi.NR.config",
-        //        "d:\\temp\\.solverCompare\\6203652m.avi.NR2.config",
-        //        "d:\\temp\\.solverCompare\\9905121m.avi.NR2.config",
-        //        "d:\\temp\\.solverCompare\\7202845m.avi.NR2.config",
-        //        "d:\\temp\\.solverCompare\\6107544m.avi.NR2.config",
-        //        "d:\\temp\\.solverCompare\\6113599m.avi.NR2.config",
-        //        "d:\\temp\\.solverCompare\\9112502m.avi.NR2.config",        
-        //        "d:\\temp\\.solverCompare\\6203652m.avi.CF.config",
-        //        "d:\\temp\\.solverCompare\\9905121m.avi.CF.config",
-        //        "d:\\temp\\.solverCompare\\7202845m.avi.CF.config",
-        //        "d:\\temp\\.solverCompare\\6107544m.avi.CF.config",
-        //        "d:\\temp\\.solverCompare\\6113599m.avi.CF.config",
-        //        "d:\\temp\\.solverCompare\\9112502m.avi.CF.config",
-        //        "d:\\temp\\.solverCompare\\6203652m.avi.BF.config",
-        //        "d:\\temp\\.solverCompare\\9905121m.avi.BF.config",
-        //        "d:\\temp\\.solverCompare\\7202845m.avi.BF.config",
-        //        "d:\\temp\\.solverCompare\\6107544m.avi.BF.config",
-        //        "d:\\temp\\.solverCompare\\6113599m.avi.BF.config",
-        //        "d:\\temp\\.solverCompare\\9112502m.avi.BF.config",
-        "z:\\TUL\\DIC\\testData\\.custom\\ShiftX.config",
-        "z:\\TUL\\DIC\\testData\\.custom\\ShiftXY.config",
-        "z:\\TUL\\DIC\\testData\\.custom\\StretchX.config",};
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR.small.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR.small.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR.small.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR.small.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR.small.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR.small.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR2.small.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR2.small.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR2.small.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR2.small.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR2.small.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR2.small.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi.CF.small.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi.CF.small.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi.CF.small.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi.CF.small.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi.CF.small.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi.CF.small.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi.BF.small.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi.BF.small.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi.BF.small.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi.BF.small.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi.BF.small.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi.BF.small.config", ////////////////////////////
+    //        "d:\\temp\\.solverCompare\\6203652m.avi.NR.config",
+    //        "d:\\temp\\.solverCompare\\9905121m.avi.NR.config",
+    //        "d:\\temp\\.solverCompare\\7202845m.avi.NR.config",
+    //        "d:\\temp\\.solverCompare\\6107544m.avi.NR.config",
+    //        "d:\\temp\\.solverCompare\\6113599m.avi.NR.config",
+    //        "d:\\temp\\.solverCompare\\9112502m.avi.NR.config",
+    //        "d:\\temp\\.solverCompare\\6203652m.avi.NR2.config",
+    //        "d:\\temp\\.solverCompare\\9905121m.avi.NR2.config",
+    //        "d:\\temp\\.solverCompare\\7202845m.avi.NR2.config",
+    //        "d:\\temp\\.solverCompare\\6107544m.avi.NR2.config",
+    //        "d:\\temp\\.solverCompare\\6113599m.avi.NR2.config",
+    //        "d:\\temp\\.solverCompare\\9112502m.avi.NR2.config",        
+    //        "d:\\temp\\.solverCompare\\6203652m.avi.CF.config",
+    //        "d:\\temp\\.solverCompare\\9905121m.avi.CF.config",
+    //        "d:\\temp\\.solverCompare\\7202845m.avi.CF.config",
+    //        "d:\\temp\\.solverCompare\\6107544m.avi.CF.config",
+    //        "d:\\temp\\.solverCompare\\6113599m.avi.CF.config",
+    //        "d:\\temp\\.solverCompare\\9112502m.avi.CF.config",
+    //        "d:\\temp\\.solverCompare\\6203652m.avi.BF.config",
+    //        "d:\\temp\\.solverCompare\\9905121m.avi.BF.config",
+    //        "d:\\temp\\.solverCompare\\7202845m.avi.BF.config",
+    //        "d:\\temp\\.solverCompare\\6107544m.avi.BF.config",
+    //        "d:\\temp\\.solverCompare\\6113599m.avi.BF.config",
+    //        "d:\\temp\\.solverCompare\\9112502m.avi.BF.config",
+    ///////////////////////////////
+    //            "z:\\TUL\\DIC\\testData\\.custom\\ShiftX.config",
+    //            "z:\\TUL\\DIC\\testData\\.custom\\ShiftXY.config",
+    //            "z:\\TUL\\DIC\\testData\\.custom\\StretchX.config",
+    };
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -221,14 +222,18 @@ public class DicMain extends Application {
                     }
                     task.setParameter(TaskParameter.IN, new File(s));
                     task.setParameter(TaskParameter.FACET_SIZE, size);
+                    task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, size / 2);
 //                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
 //                    tc.setParameter(TaskParameter.SOLVER, Solver.CoarseFine);
                     InputLoader.loadInput(task);
 
+//                    TaskContainerUtils.serializeTaskToConfig(task, new File("D:\\test.config"));
+//                    final TaskContainer test = TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\test.config"));
+//                    InputLoader.loadInput(test);
                     addExports(task);
 
                     commenceComputation(task);
-                    
+
                     Exporter.export(task);
 //                    commenceComputationDynamic(tc);
 //                    commenceComputationDynamicSpacingSweep(tc, (int) min, (int) max);
@@ -312,11 +317,11 @@ public class DicMain extends Application {
         TaskContainerUtils.checkTaskValidity(task);
 
         long time = System.nanoTime();
-        Engine.getInstance().computeTask(task);        
-        time = System.nanoTime() - time;        
+        Engine.getInstance().computeTask(task);
+        time = System.nanoTime() - time;
         printInfo("task", task, time);
     }
-    
+
     private static void printInfo(final String descr, final TaskContainer task, final long time) {
         Logger.info("Finished " + descr + ": " + task.getParameter(TaskParameter.FACET_SIZE) + "/" + task.getParameter(TaskParameter.FACET_GENERATOR_PARAM) + "/" + task.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
     }
@@ -326,19 +331,18 @@ public class DicMain extends Application {
 
         long time = System.nanoTime();
         final ComplexTaskSolver cts = new ComplexTaskSolver();
-        cts.solveComplexTask(task);        
-        time = System.nanoTime() - time;        
+        cts.solveComplexTask(task);
+        time = System.nanoTime() - time;
         printInfo("dynamic task", task, time);
     }
 
     private static void commenceComputationDynamicStrainParamSweep(final TaskContainer task, final double strainParamMin, final double strainParamMax) throws ComputationException, IOException {
         commenceComputationDynamic(task);
 
-        // strain sweep and export       
-        final StrainEstimation strain = new StrainEstimation();
+        // strain sweep and export               
         for (double strainParam = strainParamMin; strainParam <= strainParamMax; strainParam++) {
             task.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, strainParam);
-            strain.computeStrain(task);
+            StrainEstimator.computeStrain(task);
 
 //            tc.getExports().clear();
 //            for (int r : TaskContainerUtils.getRounds(tc).values()) {
