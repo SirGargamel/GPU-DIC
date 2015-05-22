@@ -31,7 +31,7 @@ public abstract class DisplacementCalculator {
 
     static {
         DATA = new HashMap<>();
-        DATA.put(DisplacementCalculation.FIND_MAX_AND_AVERAGE, new FindMaxAndAverage());
+        DATA.put(DisplacementCalculation.MAX_WEIGHTED_AVERAGE, new FindMaxAndAverage());
     }
 
     public static DisplacementResult computeDisplacement(final Map<ROI, List<CorrelationResult>> correlationResults, Map<ROI, List<Facet>> facetMap, final TaskContainer tc, final int round) throws ComputationException {

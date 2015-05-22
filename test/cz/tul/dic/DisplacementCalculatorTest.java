@@ -10,7 +10,6 @@ import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
-import cz.tul.dic.engine.displacement.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.data.result.DisplacementResult;
@@ -63,9 +62,8 @@ public class DisplacementCalculatorTest {
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 0);
-        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DisplacementCalculation.FIND_MAX_AND_AVERAGE);
-        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);
-        tc.setParameter(TaskParameter.RESULT_COMPILATION, ResultCompilation.MAJOR_AVERAGING);
+        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DisplacementCalculation.MAX_WEIGHTED_AVERAGE);
+        tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);        
         tc.setParameter(TaskParameter.RESULT_QUALITY, 0.5);
 
         final List<CorrelationResult> results = new ArrayList<>(1);

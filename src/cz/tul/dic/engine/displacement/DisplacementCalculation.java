@@ -11,6 +11,6 @@ package cz.tul.dic.engine.displacement;
  */
 public enum DisplacementCalculation {
 
-    FIND_MAX_AND_AVERAGE;
+    MAX_WEIGHTED_AVERAGE;
     
 }

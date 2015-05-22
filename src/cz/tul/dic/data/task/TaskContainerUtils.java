@@ -17,7 +17,6 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.engine.displacement.ResultCompilation;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
@@ -336,10 +335,7 @@ public class TaskContainerUtils {
                         break;
                     case KERNEL:
                         result.setParameter(tp, KernelType.valueOf(value));
-                        break;
-                    case RESULT_COMPILATION:
-                        result.setParameter(tp, ResultCompilation.valueOf(value));
-                        break;
+                        break;                    
                     case TASK_SPLIT_METHOD:
                         result.setParameter(tp, TaskSplitMethod.valueOf(value));
                         break;
@@ -512,12 +508,7 @@ public class TaskContainerUtils {
         if (interpolation == null) {
             Logger.warn("Adding default interpolation.");
             tc.setParameter(TaskParameter.INTERPOLATION, TaskDefaultValues.DEFAULT_INTERPOLATION);
-        }
-        final Object resultCompilation = tc.getParameter(TaskParameter.RESULT_COMPILATION);
-        if (resultCompilation == null) {
-            Logger.warn("Adding default result compilator.");
-            tc.setParameter(TaskParameter.RESULT_COMPILATION, TaskDefaultValues.DEFAULT_RESULT_COMPILATION);
-        }
+        }        
         final Object strainEstimation = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (strainEstimation == null) {
             Logger.warn("Adding default strain estimator.");

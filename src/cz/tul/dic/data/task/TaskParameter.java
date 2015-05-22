@@ -7,7 +7,6 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.engine.displacement.ResultCompilation;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
@@ -31,8 +30,7 @@ public enum TaskParameter {
     TASK_SPLIT_METHOD(TaskSplitMethod.class),
     TASK_SPLIT_PARAM(Integer.class),
     INTERPOLATION(Interpolation.class),
-    MM_TO_PX_RATIO(Double.class),
-    RESULT_COMPILATION(ResultCompilation.class),
+    MM_TO_PX_RATIO(Double.class),    
     ROUND_LIMITS(int[].class),
     DISPLACEMENT_CALCULATION_METHOD(DisplacementCalculation.class),
     DISPLACEMENT_CALCULATION_PARAM(Integer.class),

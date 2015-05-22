@@ -6,7 +6,6 @@
 package cz.tul.dic.engine.displacement;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
@@ -52,7 +51,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
         Analyzer2D counter;
         Map<int[], double[]> deformedFacet;
         CorrelationResult cr;
-        double quality;
+        double qualitySum, qualitySumWeighed;
         for (int g = 0; g < groupCount; g++) {
             lowerBound = upperBound;
             upperBound += linesPerGroup;
@@ -73,7 +72,7 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     }
 
                     d = cr.getDeformation();
-                    quality = cr.getValue();
+                    qualitySum = cr.getValue();
 
                     f = facets.get(i);
                     if (f == null) {
@@ -90,19 +89,14 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                         y = e.getKey()[Coordinates.Y];
 
                         if (y >= lowerBound && y <= upperBound) {
-                            getAnalyzer(counters, x, y).addValue(new double[]{e.getValue()[0], e.getValue()[1], quality});
+                            getAnalyzer(counters, x, y).addValue(new double[]{e.getValue()[0], e.getValue()[1], qualitySum});
                         }
                     }
                 }
             }
 
-            double[] majorVal, val = new double[2];
-            int count;
-            double maxDist2 = 4 * PRECISION * PRECISION;
-            final ResultCompilation rc = (ResultCompilation) tc.getParameter(TaskParameter.RESULT_COMPILATION);
-            if (rc == null) {
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No result compilation method.");
-            }
+            double[] majorVal, val = new double[2];            
+            double maxDist2 = 4 * PRECISION * PRECISION;            
 
             for (Entry<Integer, Map<Integer, Analyzer2D>> eX : counters.entrySet()) {
                 x = eX.getKey();
@@ -111,22 +105,22 @@ public class FindMaxAndAverage extends DisplacementCalculator {
                     counter = eY.getValue();
                     if (counter != null) {
                         majorVal = counter.findMajorValue();
-
-                        count = 0;
+                        
                         val[0] = 0;
                         val[1] = 0;
-                        quality = 0;
+                        qualitySum = 0;
+                        qualitySumWeighed = 0;
                         for (double[] vals : counter.listValues()) {
-                            if (dist2(vals, majorVal) <= maxDist2) {
-                                val[0] += vals[0];
-                                val[1] += vals[1];
-                                quality += vals[2];
-                                count++;
+                            if (dist2(vals, majorVal) <= maxDist2) {                                
+                                qualitySum += vals[2];
+                                qualitySumWeighed += vals[2] * vals[2];
+                                val[0] += vals[0] * vals[2];
+                                val[1] += vals[1] * vals[2];                                
                             }
                         }
 
-                        finalDisplacement[x][y] = new double[]{val[0] / (double) count, val[1] / (double) count};
-                        finalQuality[x][y] = quality / (double) count;
+                        finalDisplacement[x][y] = new double[]{val[0] / qualitySum, val[1] / qualitySum};
+                        finalQuality[x][y] = qualitySum / qualitySumWeighed;
 
                         if (DebugControl.isDebugMode()) {
                             Stats.getInstance().exportPointSubResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, round, x, y));
