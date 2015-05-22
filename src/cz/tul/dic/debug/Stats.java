@@ -15,7 +15,7 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer2D;
-import cz.tul.dic.engine.displacement.FindMaxAndAverage;
+import cz.tul.dic.engine.displacement.MaxAndWeightedAverage;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
@@ -355,7 +355,7 @@ public class Stats implements IGPUResultsReceiver {
             try {
                 CsvWriter.writeDataToCsv(new File(name), values);
             } catch (IOException ex) {
-                java.util.logging.Logger.getLogger(FindMaxAndAverage.class.getName()).log(Level.SEVERE, null, ex);
+                java.util.logging.Logger.getLogger(MaxAndWeightedAverage.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

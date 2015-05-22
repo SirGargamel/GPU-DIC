@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.pmw.tinylog.Logger;
 
-public class FindMaxAndAverage extends DisplacementCalculator {
+public class MaxAndWeightedAverage extends DisplacementCalculator {
 
     private static final double PRECISION = 0.5;
 
