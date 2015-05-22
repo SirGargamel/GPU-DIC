@@ -23,7 +23,7 @@ kernel void CL2D_Int_D(
     if (facetId >= facetBase + facetSubCount || facetId >= facetCount) {
         return;
     } 
-    const size_t deformationId = get_global_id(1);
+    const size_t deformationId = deformationBase + get_global_id(1);
     if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
         return;
     }

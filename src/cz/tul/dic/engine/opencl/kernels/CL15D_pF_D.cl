@@ -18,7 +18,7 @@ kernel void CL15D_pF_D(
     const int deformationSubCount, const int deformationBase)
 {
     // id checks       
-    const size_t deformationId = get_global_id(0);    
+    const size_t deformationId = deformationBase + get_global_id(0);    
     if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
         return;
     }        

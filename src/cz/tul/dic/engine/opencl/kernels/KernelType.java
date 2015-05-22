@@ -13,8 +13,8 @@ public enum KernelType {
 
     CL1D_I_V_LL_D(true),
     CL1D_I_V_LL_MC_D(true),
-    CL2D_Int_D(false),
-    CL15D_pF_D(false),;
+    CL2D_Int_D(true),
+    CL15D_pF_D(true),;
 
     private final boolean safeToUse;
 

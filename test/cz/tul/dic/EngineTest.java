@@ -5,7 +5,6 @@
  */
 package cz.tul.dic;
 
-import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -316,7 +315,7 @@ public class EngineTest {
             sb.append(s);
         }
         return sb.toString();
-    }    
+    }
 
     @Test
     public void testEngineMultiFacet() throws IOException, URISyntaxException, ComputationException {
