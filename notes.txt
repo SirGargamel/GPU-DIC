@@ -1,6 +1,5 @@
---- Coverity
-https://scan.coverity.com/download?tab=java
-cov-build --dir cov-int ant -f build.xml
+--- SonarQube
+z:\Programovani\..Java\codeQuality\sonar\sonar-runner-2.4\bin\sonar-runner.bat
 
 
 --- Parameter notes
