@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,14 +35,16 @@ import org.junit.Test;
 public class SolverTest {
 
     private static final int BASE_ROUND = 0;
-    private static final int RESULT_LENGTH = 6;
-    private static final double DELTA_0 = 0.5;
-    private static final double DELTA_1 = 0.05;
+    private static final int COEFF_COUNT = 6;
+    private static final double MAX_STEP_DIF = 1;
     private static final double[] LIMITS_0 = new double[]{
         -4, 12, 0.5, -2, 8, 0.5};
-    private static final double[] LIMITS_F = new double[]{
-        -2, 6, 1, -1, 4, 1,
-        -0.05, 0.15, 0.05, -0.05, 0.05, 0.05, -0.15, 0.15, 0.05, -0.05, 0.05, 0.05};
+    private static final double[] LIMITS_0_EXTENDED = new double[]{
+        -4, 8, 0.5, -2, 4, 0.5,
+        -0.01, 0.01, 0.01, -0.01, 0.01, 0.01, -0.01, 0.01, 0.01, -0.01, 0.01, 0.01};
+    private static final double[] LIMITS_1 = new double[]{
+        -2, 2, 0.5, -1, 1, 0.5,
+        -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01};
     private final Map<String, double[]> testFiles0, testFilesF;
 
     public SolverTest() {
@@ -52,28 +54,51 @@ public class SolverTest {
         testFiles0.put("speckle-[2.0, 3.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{2, 3, 0, 0, 0, 0});
 
         testFilesF = new HashMap<>(4);
-        testFilesF.put("speckle-[0.0, 0.0, 0.1, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0.1, 0, 0, 0});
-        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, -0.1, 0.0].bmp", new double[]{0, 0, 0, 0, -0.1, 0});
-        testFilesF.put("speckle-[1.0, 0.0, 0.05, 0.0, 0.1, 0.0].bmp", new double[]{1.0, 0, 0.05, 0, 0.1, 0});
-        testFilesF.put("speckle-[-1.0, -1.0, 0.0, 0.25, -0.1, 0.0].bmp", new double[]{-1.0, -1.0, 0, 0.25, -0.1, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.02, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0.02, 0, 0, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, -0.02, 0.0].bmp", new double[]{0, 0, 0, 0, -0.02, 0});
+        testFilesF.put("speckle-[1.0, 0.0, 0.0, 0.0, 0.0, 0.01].bmp", new double[]{1.0, 0, 0, 0, 0, 0.01});
+        testFilesF.put("speckle-[-1.0, -1.0, 0.0, 0.01, 0.0, 0.0].bmp", new double[]{-1.0, -1.0, 0, 0.01, 0, 0});
     }
 
     @Test
     public void testSolvers() throws IOException, URISyntaxException, ComputationException {
-        final Set<String> errors = new HashSet<>();
+        final Set<String> errors = new LinkedHashSet<>();
         int counter = 0;
+        String msg;
+        TaskContainer task;
         for (Solver solver : Solver.values()) {
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                errors.add(checkResult(e.getValue(), generateAndcomputeTask(e.getKey(), solver, LIMITS_0)));                
+                task = generateAndcomputeTask(e.getKey(), solver, LIMITS_0);
+                msg = checkResult(e.getValue(), task);
+                if (msg != null) {
+                    errors.add(msg);
+                    System.out.print("FAILED - ");
+                }
+                dumpResultsToConsole(solver, e.getKey(), LIMITS_0, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
+                counter++;
+
+                task = generateAndcomputeTask(e.getKey(), solver, LIMITS_0_EXTENDED);
+                msg = checkResult(e.getValue(), task);
+                if (msg != null) {
+                    errors.add(msg);
+                    System.out.print("FAILED - ");
+                }
+                dumpResultsToConsole(solver, e.getKey(), LIMITS_0_EXTENDED, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
                 counter++;
             }
             for (Entry<String, double[]> e : testFilesF.entrySet()) {
-                errors.add(checkResult(e.getValue(), generateAndcomputeTask(e.getKey(), solver, LIMITS_F)));
+                task = generateAndcomputeTask(e.getKey(), solver, LIMITS_1);
+                msg = checkResult(e.getValue(), task);
+                if (msg != null) {
+                    errors.add(msg);
+                    System.out.print("FAILED - ");
+                }
+                dumpResultsToConsole(solver, e.getKey(), LIMITS_1, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
                 counter++;
             }
         }
         errors.remove(null);
-        Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());        
+        Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
     private static TaskContainer generateAndcomputeTask(final String fileOut, final Solver solver, final double[] defLimits) throws IOException, URISyntaxException, ComputationException {
@@ -98,27 +123,23 @@ public class SolverTest {
 
     private static String checkResult(final double[] expected, final TaskContainer task) {
         final double[] actual = condenseResults(task);
+        final double[] limits = (double[]) task.getParameter(TaskParameter.DEFORMATION_LIMITS);
 
         String result = null;
-        for (int dim = 0; dim < 2; dim++) {
-            if (Math.abs(expected[dim] - actual[dim]) > DELTA_0) {
+        double maxDif;
+        for (int dim = 0; dim < COEFF_COUNT; dim++) {
+            maxDif = MAX_STEP_DIF * limits[dim * 3 + 2];
+            if (Math.abs(expected[dim] - actual[dim]) > maxDif) {
                 result = generateMessage(expected, actual, task);
                 break;
             }
         }
-        if (result == null) {
-            for (int dim = 2; dim < RESULT_LENGTH; dim++) {
-                if (Math.abs(expected[dim] - actual[dim]) > DELTA_1) {
-                    result = generateMessage(expected, actual, task);
-                    break;
-                }
-            }
-        }
+
         return result;
     }
 
     private static double[] condenseResults(final TaskContainer task) {
-        final double[] result = new double[RESULT_LENGTH];
+        final double[] result = new double[COEFF_COUNT];
         int counter = 0;
 
         double[] tmp;
@@ -126,17 +147,33 @@ public class SolverTest {
         for (List<CorrelationResult> l : results.values()) {
             for (CorrelationResult cor : l) {
                 tmp = cor.getDeformation();
-                for (int i = 0; i < RESULT_LENGTH; i++) {
+                for (int i = 0; i < COEFF_COUNT; i++) {
                     result[i] += tmp[i];
                 }
                 counter++;
             }
         }
-        for (int i = 0; i < RESULT_LENGTH; i++) {
+        for (int i = 0; i < COEFF_COUNT; i++) {
             result[i] /= (double) counter;
         }
 
         return result;
+    }
+
+    private static void dumpResultsToConsole(final Solver solver, final String file, final double[] limits, final Map<ROI, List<CorrelationResult>> results) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(solver);
+        sb.append(" -- ");
+        sb.append(file);
+        sb.append(" -- ");
+        sb.append(Arrays.toString(limits));
+        for (Entry<ROI, List<CorrelationResult>> e : results.entrySet()) {
+            for (CorrelationResult cr : e.getValue()) {
+                sb.append("\n  ");
+                sb.append(cr);
+            }
+        }
+        System.out.println(sb);
     }
 
     private static String generateMessage(final double[] expected, final double[] actual, final TaskContainer task) {
