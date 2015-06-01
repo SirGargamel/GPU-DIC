@@ -1,6 +1,7 @@
 /build/
 /nbproject/
 /dist/
+/.sonar/
 *.log
 log*.txt
 /build.xml
