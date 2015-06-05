@@ -2,6 +2,7 @@
 /nbproject/
 /dist/
 /.sonar/
+/.jacocoverage/
 *.log
 log*.txt
 /build.xml
