@@ -21,15 +21,8 @@ public class FpsManager {
     public FpsManager(final TaskContainer tc) {
         final int fps = (int) tc.getParameter(TaskParameter.FPS);
         double length = 1 / (double) fps;
-//        if (fps > 10) {
-            length *= 1000;
-            tickUnit = "ms";
-//        } else if (fps > 10000) {
-//            length *= 1000000;
-//            tickUnit = "us";
-//        } else {
-//            tickUnit = "s";
-//        }
+        length *= 1000;
+        tickUnit = "ms";
         tickLength = length;
 
     }

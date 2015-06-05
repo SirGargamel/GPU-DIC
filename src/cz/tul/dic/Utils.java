@@ -27,7 +27,7 @@ import org.pmw.tinylog.LoggingLevel;
  *
  * @author Petr Jecmen
  */
-public class Utils {
+public final class Utils {
 
     private static final String TEMP_DIR_NAME = "temp";
     private static final Map<TaskContainer, List<File>> tempFiles;
@@ -127,5 +127,8 @@ public class Utils {
             Logger.error(ex);
         }
         return result;
+    }
+
+    private Utils() {
     }
 }

@@ -27,19 +27,19 @@ public class CsvOutput {
     private static final Map<Integer, Map<Integer, CsvOutput>> outputters;
     private static final NumberFormat nf;
     private final BufferedWriter out;
-    
+
     static {
         outputters = new HashMap<>();
         nf = new DecimalFormat("000");
     }
-    
+
     public static void addValue(final int round, final int x, final int y, final double[] value) {
         Map<Integer, CsvOutput> m = outputters.get(x);
         if (m == null) {
             m = new HashMap<>();
             outputters.put(x, m);
         }
-        
+
         CsvOutput out = m.get(y);
         if (out == null) {
             try {
@@ -51,13 +51,11 @@ public class CsvOutput {
         }
         out.addLine(value);
     }
-    
+
     public static void closeSession() {
-        outputters.values().stream().forEach((m) -> {
-            m.values().stream().forEach((out) -> {
-                out.closeWriter();
-            });
-        });
+        outputters.values().stream().forEach(
+                (m) -> m.values().stream().forEach(
+                        (out) -> out.closeWriter()));
         outputters.clear();
     }
 
