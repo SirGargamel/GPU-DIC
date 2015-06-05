@@ -119,7 +119,7 @@ public abstract class Kernel {
             }
         } catch (IOException ex) {
             Logger.debug(ex);
-            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());            
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);            
         }
     }
 
@@ -164,7 +164,7 @@ public abstract class Kernel {
             return result;
         } catch (CLException ex) {
             if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
-                throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex.getCLErrorString());
+                throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex);
             } else {
                 throw ex;
             }

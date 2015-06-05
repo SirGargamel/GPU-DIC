@@ -141,7 +141,7 @@ public final class Engine extends Observable implements Observer {
         TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
     }
 
-    public void computeRound(final TaskContainer task, final int roundFrom, final int roundTo) throws ComputationException, IOException {
+    public void computeRound(final TaskContainer task, final int roundFrom, final int roundTo) throws ComputationException {
         stopEngine = false;
 
         final long time = System.currentTimeMillis();

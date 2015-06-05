@@ -16,10 +16,17 @@ public class ComputationException extends Exception {
     /**
      * Creates a new instance of <code>ComputationException</code> without
      * detail message.
+     *
      * @param cause
      */
     public ComputationException(final ComputationExceptionCause cause) {
         super();
+        
+        this.cause = cause;
+    }
+    
+    public ComputationException(final ComputationExceptionCause cause, final Exception ex) {
+        super(ex);
         
         this.cause = cause;
     }
@@ -36,7 +43,7 @@ public class ComputationException extends Exception {
         
         this.cause = cause;
     }
-
+    
     public ComputationExceptionCause getExceptionCause() {
         return cause;
     }

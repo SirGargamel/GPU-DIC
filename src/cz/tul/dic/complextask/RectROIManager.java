@@ -31,7 +31,7 @@ public class RectROIManager extends ROIManager {
     private final CircleROIManager crm;
     private RectangleROI rect;
 
-    public static RectROIManager prepareManager(TaskContainer tc, final CircleROIManager crm, final int initialRound) throws ComputationException, IOException {
+    public static RectROIManager prepareManager(TaskContainer tc, final CircleROIManager crm, final int initialRound) throws ComputationException {
         final TaskContainer tcR = tc.cloneInputTask();
 
         RectangleROI rect = null;

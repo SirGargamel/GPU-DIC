@@ -109,7 +109,7 @@ public class Stats implements IGPUResultsReceiver {
         gpuBatch = 0;
     }
 
-    public void dumpDeformationsStatisticsUsage(final int round) throws IOException {
+    public void dumpDeformationsStatisticsUsage(final int round) {
         if (get(Types.DEF_USAGE)) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
@@ -147,7 +147,7 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void dumpDeformationsStatisticsUsage() throws IOException {
+    public void dumpDeformationsStatisticsUsage() {
         if (get(Types.DEF_USAGE)) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
@@ -191,7 +191,7 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void dumpDeformationsStatisticsPerQuality(final int round) throws IOException {
+    public void dumpDeformationsStatisticsPerQuality(final int round) {
         if (get(Types.DEF_QUALITY)) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Map<ROI, List<CorrelationResult>> results = tc.getResult(round, round + 1).getCorrelations();
@@ -228,7 +228,7 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void dumpDeformationsStatisticsPerQuality() throws IOException {
+    public void dumpDeformationsStatisticsPerQuality() {
         if (get(Types.DEF_QUALITY)) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Set<Integer> rounds = TaskContainerUtils.getRounds(tc).keySet();
@@ -296,15 +296,17 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    private static void saveDump(final String fileName, final String textDump) throws IOException {
+    private static void saveDump(final String fileName, final String textDump) {
         final File outFile = new File(fileName);
         outFile.getParentFile().mkdirs();
         try (FileWriter out = new FileWriter(outFile)) {
             out.write(textDump);
+        } catch (IOException ex) {
+            Logger.error(ex);
         }
     }
 
-    public void drawFacetQualityStatistics(final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws IOException, ComputationException {
+    public void drawFacetQualityStatistics(final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws ComputationException {
         if (get(Types.FACET_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
             out.getParentFile().mkdirs();
@@ -327,16 +329,24 @@ public class Stats implements IGPUResultsReceiver {
                     }
                 }
             }
-            ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.Dabs)), "BMP", out);
+            try {
+                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.Dabs)), "BMP", out);
+            } catch (IOException ex) {
+                Logger.error(ex);
+            }
         }
     }
 
-    public void drawPointResultStatistics(final int roundFrom, final int roundTo) throws IOException, ComputationException {
+    public void drawPointResultStatistics(final int roundFrom, final int roundTo) throws ComputationException {
         if (get(Types.POINT_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
             out.getParentFile().mkdirs();
 
-            ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getResult(roundFrom, roundTo).getDisplacementResult().getQuality(), Direction.Dabs)), "BMP", out);
+            try {
+                ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getResult(roundFrom, roundTo).getDisplacementResult().getQuality(), Direction.Dabs)), "BMP", out);
+            } catch (IOException ex) {
+                Logger.error(ex);
+            }
         }
     }
 

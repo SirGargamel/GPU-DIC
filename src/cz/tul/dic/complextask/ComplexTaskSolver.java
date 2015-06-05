@@ -6,6 +6,7 @@
 package cz.tul.dic.complextask;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.Image;
@@ -57,7 +58,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
         bottomShifts = new LinkedList<>();
     }
 
-    public void solveComplexTask(final TaskContainer tc) throws ComputationException, IOException {
+    public void solveComplexTask(final TaskContainer tc) throws ComputationException {
         stop = false;
         Engine.getInstance().addObserver(this);
 
@@ -170,8 +171,17 @@ public class ComplexTaskSolver extends Observable implements Observer {
             Logger.warn(ex);
         }
 
-        Exporter.export(tc);
-        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
+        try {
+            Exporter.export(tc);
+        } catch (IOException ex) {
+            throw new ComputationException(ComputationExceptionCause.IO, ex);
+        }
+
+        try {
+            TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
+        } catch (IOException ex) {
+            throw new ComputationException(ComputationExceptionCause.IO, ex);
+        }
 
         final FpsManager fpsM = new FpsManager(tc);
         final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
@@ -182,7 +192,11 @@ public class ComplexTaskSolver extends Observable implements Observer {
             out[i + 1][0] = Utils.format(fpsM.getTime(i + 1));
             out[i + 1][1] = Utils.format(bottomShifts.get(i) * pxToMm);
         }
-        CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), out);
+        try {
+            CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), out);
+        } catch (IOException ex) {
+            throw new ComputationException(ComputationExceptionCause.IO, ex);
+        }
 
         Engine.getInstance().deleteObserver(this);
     }
@@ -201,13 +215,17 @@ public class ComplexTaskSolver extends Observable implements Observer {
         return ratio < LIMIT_COUNT_RATIO;
     }
 
-    private void exportRound(final TaskContainer tc, final int round) throws IOException, ComputationException {
+    private void exportRound(final TaskContainer tc, final int round) throws ComputationException {
         Iterator<ExportTask> it = tc.getExports().iterator();
         ExportTask et;
         while (it.hasNext()) {
             et = it.next();
             if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round && !isStrainExport(et)) {
-                Exporter.export(tc, et);
+                try {
+                    Exporter.export(tc, et);
+                } catch (IOException ex) {
+                    throw new ComputationException(ComputationExceptionCause.IO, ex);
+                }
             }
         }
     }

@@ -160,12 +160,12 @@ public abstract class TaskSolver extends Observable {
 
             if (!finished && lastEx != null) {
                 memManager.clearMemory();
-                throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx.getLocalizedMessage());
+                throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx);
             }
         } catch (CLException ex) {
             memManager.clearMemory();
             Logger.debug(ex);
-            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);
         }
 
         Logger.trace("Found solution for {0} facets.", result.size());

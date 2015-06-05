@@ -17,6 +17,7 @@ public enum ComputationExceptionCause {
     ILLEGAL_TASK_DATA,
     OPENCL_ERROR,
     ILLEGAL_CONFIG,
-    MEMORY_ERROR;
+    MEMORY_ERROR,
+    IO;
 
 }
