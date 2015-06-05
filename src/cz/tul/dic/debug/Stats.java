@@ -95,7 +95,7 @@ public class Stats implements IGPUResultsReceiver {
                 }
                 data.put(type, val);
             } catch (IllegalArgumentException ex) {
-                Logger.warn("Illegal item in stats properties file - " + ex.getLocalizedMessage());
+                Logger.warn("Illegal item in stats properties file - " + ex);
             }
         }
     }

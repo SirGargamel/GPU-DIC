@@ -96,12 +96,17 @@ public class DeformationUtils {
 
     private static int computeSize(final double[] limits, final int base) {
         final int result;
-        if (limits[base + 2] != 0 && limits[base] != limits[base + 1]) {
+        
+        if (hasStep(limits, base)) {
             result = (int) ((limits[base + 1] - limits[base]) / limits[base + 2] + 1);
         } else {
             result = 1;
         }
         return result;
+    }
+    
+    private static boolean hasStep(final double[] limits, final int base) {
+        return Double.compare(limits[base + 2], 0) != 0 && Double.compare(limits[base], limits[base + 1]) != 0;
     }
 
     public static double[] extractDeformation(final int index, final double[] deformationLimits, final int[] deformationCounts) {

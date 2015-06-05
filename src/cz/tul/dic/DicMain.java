@@ -189,6 +189,7 @@ public class DicMain extends Application {
             c.writer(new MultiWriter(new ConsoleWriter(), new RollingFileWriter("log.txt", 12, new TimestampLabeller("yyyy-MM"), new MonthlyPolicy())));
         } catch (Exception ex) {
             c.writer(new ConsoleWriter());
+            Logger.error(ex);
         }
         if (debug) {
             c.level(LoggingLevel.TRACE);
@@ -287,7 +288,7 @@ public class DicMain extends Application {
 //                }
                 } catch (IOException | ComputationException ex) {
                     Logger.error(ex);
-                } catch (Exception | Error t) {
+                } catch (Exception t) {
                     Logger.error(t);
                     System.out.println(Context.getInstance().getTc());
                 }

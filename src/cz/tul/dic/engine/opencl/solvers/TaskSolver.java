@@ -164,6 +164,7 @@ public abstract class TaskSolver extends Observable {
             }
         } catch (CLException ex) {
             memManager.clearMemory();
+            Logger.debug(ex);
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
         }
 
@@ -176,7 +177,7 @@ public abstract class TaskSolver extends Observable {
         final CorrelationResult result;
         if (r1 == null) {
             result = r2;
-        } else if (r1.getValue() == r2.getValue()) {
+        } else if (Float.compare(r1.getValue(), r2.getValue()) == 0) {
             result = DeformationUtils.getAbs(r1.getDeformation()) < DeformationUtils.getAbs(r2.getDeformation()) ? r1 : r2;
         } else {
             result = r1.getValue() > r2.getValue() ? r1 : r2;

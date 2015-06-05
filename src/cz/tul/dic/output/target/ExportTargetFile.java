@@ -214,7 +214,7 @@ public class ExportTargetFile extends AbstractExportTarget {
                 }
             }
         }
-        if (max == Double.NEGATIVE_INFINITY) {
+        if (!Double.isFinite(min) || !Double.isFinite(max)) {
             min = 0;
             max = 0;
         }

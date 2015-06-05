@@ -118,7 +118,8 @@ public abstract class Kernel {
                 clMem.add(kernelFindPos);
             }
         } catch (IOException ex) {
-            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());
+            Logger.debug(ex);
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex.getLocalizedMessage());            
         }
     }
 

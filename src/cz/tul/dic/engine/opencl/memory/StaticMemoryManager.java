@@ -16,6 +16,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.IntBuffer;
 import java.util.List;
+import org.pmw.tinylog.Logger;
 
 public class StaticMemoryManager extends OpenCLMemoryManager {
 
@@ -59,6 +60,7 @@ public class StaticMemoryManager extends OpenCLMemoryManager {
             }
             clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
         } catch (OutOfMemoryError e) {
+            Logger.debug(e);
             throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
         }
     }

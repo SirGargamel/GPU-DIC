@@ -22,7 +22,7 @@ public class ImageLoader extends AbstractInputLoader {
     @Override
     public List<Image> loadData(Object in, TaskContainer tc) throws IOException, ComputationException {
         final Class<?> c = in.getClass();
-        if (!TYPE.isAssignableFrom(c)) {
+        if (!(in instanceof List<?>)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
         }
 

@@ -124,6 +124,7 @@ public class Utils {
             final License license = LicenseHandler.readLicenseFile(licenseFile);
             result = LicenseHandler.checkLicense(license);
         } catch (IOException ex) {
+            Logger.error(ex);
         }
         return result;
     }

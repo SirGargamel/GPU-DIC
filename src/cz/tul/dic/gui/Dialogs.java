@@ -29,6 +29,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
+import org.apache.commons.math3.analysis.function.Log;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -73,6 +75,7 @@ public class Dialogs {
                 exceptionText = sw.toString();
             }
         } catch (IOException ex) {
+            Logger.error(ex);
             exceptionText = "Error printing exception - " + ex.getLocalizedMessage();
         }
 

@@ -75,19 +75,38 @@ public class FacetUtils {
         result[Coordinates.Y] = y;
         switch (degree) {
             case SECOND:
-                result[Coordinates.X] += 0.5 * deformation[Deformation.UXX] * dx * dx + 0.5 * deformation[Deformation.UYY] * dy * dy + deformation[Deformation.UXY] * dx * dy;
-                result[Coordinates.Y] += 0.5 * deformation[Deformation.VXX] * dx * dx + 0.5 * deformation[Deformation.VYY] * dy * dy + deformation[Deformation.VXY] * dx * dy;
+                addZeroOrderDeformations(result, deformation);
+                addFirstOrderDeformations(result, deformation, dx, dy);
+                addSecondOrderDeformations(result, deformation, dx, dy);
+                break;
             case FIRST:
-                result[Coordinates.X] += deformation[Deformation.UX] * dx + deformation[Deformation.UY] * dy;
-                result[Coordinates.Y] += deformation[Deformation.VX] * dx + deformation[Deformation.VY] * dy;
+                addZeroOrderDeformations(result, deformation);
+                addFirstOrderDeformations(result, deformation, dx, dy);
+                break;
             case ZERO:
-                result[Coordinates.X] += deformation[Deformation.U];
-                result[Coordinates.Y] += deformation[Deformation.V];
+                addZeroOrderDeformations(result, deformation);
                 break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation.");
-
         }
+    }
+
+    private static double[] addZeroOrderDeformations(final double[] result, final double[] deformation) {
+        result[Coordinates.X] += deformation[Deformation.U];
+        result[Coordinates.Y] += deformation[Deformation.V];
+        return result;
+    }
+
+    private static double[] addFirstOrderDeformations(final double[] result, final double[] deformation, final double dx, final double dy) {
+        result[Coordinates.X] += deformation[Deformation.UX] * dx + deformation[Deformation.UY] * dy;
+        result[Coordinates.Y] += deformation[Deformation.VX] * dx + deformation[Deformation.VY] * dy;
+        return result;
+    }
+
+    private static double[] addSecondOrderDeformations(final double[] result, final double[] deformation, final double dx, final double dy) {
+        result[Coordinates.X] += 0.5 * deformation[Deformation.UXX] * dx * dx + 0.5 * deformation[Deformation.UYY] * dy * dy + deformation[Deformation.UXY] * dx * dy;
+        result[Coordinates.Y] += 0.5 * deformation[Deformation.VXX] * dx * dx + 0.5 * deformation[Deformation.VYY] * dy * dy + deformation[Deformation.VXY] * dx * dy;
+        return result;
     }
 
     public static boolean isPointInsideFacet(final Facet f, final int x, final int y) {
@@ -103,7 +122,7 @@ public class FacetUtils {
 
         return result;
     }
-    
+
     public static boolean areLinesInsideFacet(final Facet f, final int yStart, final int yEnd) {
         boolean result = false;
 

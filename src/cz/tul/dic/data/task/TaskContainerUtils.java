@@ -117,7 +117,7 @@ public class TaskContainerUtils {
         double result = 1.0;
         final DisplacementResult resultsC = tc.getResult(startImageIndex, endImageIndex).getDisplacementResult();
         final DisplacementResult dResultsC = tc.getResult(endImageIndex - 1, endImageIndex).getDisplacementResult();
-        if (resultsC != null & dResultsC != null) {
+        if (resultsC != null && dResultsC != null) {
             final double[][][] results = resultsC.getDisplacement();
             final double[][][] dResults = dResultsC.getDisplacement();
             if (dResults != null) {

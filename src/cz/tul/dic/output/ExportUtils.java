@@ -183,7 +183,7 @@ public final class ExportUtils {
                 }
             }
         }
-        if (max == Double.NEGATIVE_INFINITY) {
+        if (!Double.isFinite(min) || !Double.isFinite(max)) {
             min = 0;
             max = 0;
         }

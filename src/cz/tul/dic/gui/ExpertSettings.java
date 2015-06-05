@@ -22,6 +22,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import org.pmw.tinylog.Logger;
 
 /**
  * FXML Controller class
@@ -78,7 +79,7 @@ public class ExpertSettings implements Initializable {
             final Object old = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
             if (old != null) {
                 final double oldWs = (double) old;
-                if (newWs != oldWs) {
+                if (Double.compare(newWs, oldWs) != 0) {
                     // recompute
                     tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, newWs);
                     Task<String> worker = new Task<String>() {
@@ -92,6 +93,7 @@ public class ExpertSettings implements Initializable {
                                 updateProgress(1, 2);
                             } catch (ComputationException ex) {
                                 result = ex.getLocalizedMessage();
+                                Logger.debug(ex);
                             }
                             updateProgress(2, 2);
                             return result;

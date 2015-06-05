@@ -149,7 +149,7 @@ public class LocalLeastSquare extends StrainEstimator {
                 System.arraycopy(beta, 0, result, 3, 3);
                 result[INDEX_ERRB] = regression.estimateRegressionStandardError();
             } catch (MathIllegalArgumentException ex) {
-                Logger.trace(ex.getLocalizedMessage());
+                Logger.debug(ex);
                 // singular matrix, let solution be zeroes
             }
         } else {

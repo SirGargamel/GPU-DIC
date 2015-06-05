@@ -16,19 +16,17 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.IntBuffer;
 import java.util.List;
+import org.pmw.tinylog.Logger;
 
 public class DynamicMemoryManager extends OpenCLMemoryManager {
 
     private Image imageA, imageB;
     private List<Facet> facets;
     private List<double[]> deformationLimits;
-    private List<int[]> deformationCounts;
-
-    DynamicMemoryManager() {
-    }
+    private List<int[]> deformationCounts;    
 
     @Override
-    public void assignDataToGPU(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, Kernel kernel) throws ComputationException {
+    public void assignDataToGPU(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final Kernel kernel) throws ComputationException {
         try {
             if (imageA != this.imageA || clImageA.isReleased()) {
                 release(clImageA);
@@ -101,6 +99,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
                 clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
             }
         } catch (OutOfMemoryError e) {
+            Logger.debug(e);
             throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
         }
     }

@@ -41,7 +41,7 @@ public class CoarseFine extends TaskSolver {
         do {
             tempStep /= 10.0;
             if (tempStep < minStep) {
-                if (tempStep * 10 == minStep) {
+                if (Double.compare(tempStep * 10, minStep) == 0) {
                     break;
                 } else {
                     tempStep = minStep;
@@ -82,7 +82,7 @@ public class CoarseFine extends TaskSolver {
         do {
             step /= 10.0;
             if (step < minStep) {
-                if (step * 10 == minStep) {
+                if (Double.compare(tempStep * 10, minStep) == 0) {
                     break;
                 } else {
                     step = minStep;

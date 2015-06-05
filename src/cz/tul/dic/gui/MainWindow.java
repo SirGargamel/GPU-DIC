@@ -188,6 +188,7 @@ public class MainWindow implements Initializable {
                             } catch (ClassNotFoundException | IOException ex) {
                                 error = true;
                                 result = Lang.getString("wrongBin");
+                                Logger.error(ex);
                             }
                             needsInputLoad = false;
                             break;
@@ -251,6 +252,7 @@ public class MainWindow implements Initializable {
                         });
                     } catch (IOException ex) {
                         result = Lang.getString("IO", ex.getLocalizedMessage());
+                        Logger.error(ex);
                     }
                 }
                 updateProgress(4, 4);
@@ -298,6 +300,7 @@ public class MainWindow implements Initializable {
                 Platform.runLater(() -> {
                     Dialogs.showException(ex);
                 });
+                Logger.error(ex);
             } catch (CancellationException ex) {
             }
         });
