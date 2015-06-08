@@ -48,7 +48,7 @@ import org.pmw.tinylog.Logger;
  */
 public class ComplexTaskSolver extends Observable implements Observer {
 
-    private final double LIMIT_COUNT_RATIO = 0.5;
+    private static final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
     private StrainEstimator strain;
@@ -122,20 +122,12 @@ public class ComplexTaskSolver extends Observable implements Observer {
             } else {
                 Logger.info("Skipping round " + r + ", no shift detected.");
                 final Image img = rrm.getTc().getImage(r);
-                final double[][][] data = new double[img.getWidth()][img.getHeight()][];
+                final double[][][] data;
                 if (!tcR.getRois(r).isEmpty()) {
                     ROI roi = tcR.getRois(r).iterator().next();
-                    for (int x = roi.getX1(); x <= roi.getX2(); x++) {
-                        if (x < 0 || x >= data.length) {
-                            continue;
-                        }
-                        for (int y = roi.getY1(); y <= roi.getY2(); y++) {
-                            if (y < 0 || y >= data[x].length) {
-                                continue;
-                            }
-                            data[x][y] = new double[2];
-                        }
-                    }
+                    data = generateZeroResults(img, roi);
+                } else {
+                    data = new double[img.getWidth()][img.getHeight()][];
                 }
                 tcR.setResult(r, nextR, new Result(new DisplacementResult(data, null)));
             }
@@ -213,6 +205,22 @@ public class ComplexTaskSolver extends Observable implements Observer {
         }
         final double ratio = countNotGood / (double) count;
         return ratio < LIMIT_COUNT_RATIO;
+    }
+
+    private double[][][] generateZeroResults(final Image img, final ROI roi) {
+        final double[][][] data = new double[img.getWidth()][img.getHeight()][];
+        for (int x = roi.getX1(); x <= roi.getX2(); x++) {
+            if (x < 0 || x >= data.length) {
+                continue;
+            }
+            for (int y = roi.getY1(); y <= roi.getY2(); y++) {
+                if (y < 0 || y >= data[x].length) {
+                    continue;
+                }
+                data[x][y] = new double[2];
+            }
+        }
+        return data;
     }
 
     private void exportRound(final TaskContainer tc, final int round) throws ComputationException {
