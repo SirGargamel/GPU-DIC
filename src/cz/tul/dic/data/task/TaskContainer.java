@@ -305,7 +305,7 @@ public class TaskContainer extends Observable implements Serializable {
                 if (img != null) {
                     images.add(Image.createImage(img));
                 } else {
-                    System.out.println(i);
+                    Logger.error("Error loading images nr." + i);                    
                 }
             }
         } catch (IOException ex) {

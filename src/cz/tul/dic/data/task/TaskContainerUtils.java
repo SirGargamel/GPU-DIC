@@ -42,7 +42,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class TaskContainerUtils {
+public final class TaskContainerUtils {
 
     private static final String CONFIG_EMPTY = "NONE";
     private static final String CONFIG_EXPORTS = "EXPORT_";
@@ -121,34 +121,24 @@ public class TaskContainerUtils {
             final double[][][] results = resultsC.getDisplacement();
             final double[][][] dResults = dResultsC.getDisplacement();
             if (dResults != null) {
-                final int width = dResults.length;
-                final int height = dResults[0].length;
-
-                int y2 = 1;
-                outerloop:
-                for (int y = height - 1; y >= 0; y--) {
-                    for (int x = 0; x < width; x++) {
-                        if (dResults[x][y] != null) {
-                            y2 = y;
-                            break outerloop;
-                        }
-                    }
-                }
-                int y1 = 1;
-                outerloop:
-                for (int y = height - 1; y >= 0; y--) {
-                    for (int x = 0; x < width; x++) {
-                        if (results[x][y] != null) {
-                            y1 = y;
-                            break outerloop;
-                        }
-                    }
-                }
+                final int y2 = finalBottomLine(dResults);
+                final int y1 = finalBottomLine(results);                
                 result = y2 / (double) y1;
             }
         }
 
         return result;
+    }
+
+    private static int finalBottomLine(final double[][][] data) {
+        for (int y = data[0].length - 1; y >= 0; y--) {
+            for (int x = 0; x < data.length; x++) {
+                if (data[x][y] != null) {                    
+                    return y;
+                }
+            }
+        }
+        return 1;
     }
 
     public static void serializeTaskToConfig(final TaskContainer tc, final File out) throws IOException {
@@ -256,8 +246,13 @@ public class TaskContainerUtils {
         return sb.toString();
     }
 
-    public static TaskContainer deserializeTaskFromConfig(final File in) throws IOException, ComputationException {
-        final Config config = Config.loadConfig(in);
+    public static TaskContainer deserializeTaskFromConfig(final File in) throws ComputationException {
+        final Config config;
+        try {
+            config = Config.loadConfig(in);
+        } catch (IOException ex) {
+            throw new ComputationException(ComputationExceptionCause.IO, ex);
+        }
         if (config == null) {
             throw new IllegalArgumentException("Non-existent config.");
         }
@@ -335,7 +330,7 @@ public class TaskContainerUtils {
                         break;
                     case KERNEL:
                         result.setParameter(tp, KernelType.valueOf(value));
-                        break;                    
+                        break;
                     case TASK_SPLIT_METHOD:
                         result.setParameter(tp, TaskSplitMethod.valueOf(value));
                         break;
@@ -415,10 +410,12 @@ public class TaskContainerUtils {
         }
     }
 
-    public static TaskContainer deserializeTaskFromBinary(final File source) throws IOException, ClassNotFoundException {
+    public static TaskContainer deserializeTaskFromBinary(final File source) throws ComputationException {
         TaskContainer result;
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(source))) {
-            result = (TaskContainer) in.readObject();
+            result = (TaskContainer) in.readObject();        
+        } catch (IOException | ClassNotFoundException ex) {
+            throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
         return result;
     }
@@ -508,7 +505,7 @@ public class TaskContainerUtils {
         if (interpolation == null) {
             Logger.warn("Adding default interpolation.");
             tc.setParameter(TaskParameter.INTERPOLATION, TaskDefaultValues.DEFAULT_INTERPOLATION);
-        }        
+        }
         final Object strainEstimation = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (strainEstimation == null) {
             Logger.warn("Adding default strain estimator.");
@@ -540,6 +537,9 @@ public class TaskContainerUtils {
             Logger.warn("Adding default solver.");
             tc.setParameter(TaskParameter.SOLVER, TaskDefaultValues.DEFAULT_SOLVER);
         }
+    }
+
+    private TaskContainerUtils() {
     }
 
 }
