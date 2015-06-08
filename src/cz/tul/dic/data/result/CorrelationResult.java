@@ -17,18 +17,18 @@ public class CorrelationResult implements Serializable {
     private final float value;
     private final double[] deformation;
 
+    public CorrelationResult(final float value, final double[] deformation) {
+        this.value = value;
+        this.deformation = deformation;
+    }
+    
     public float getValue() {
         return value;
     }
 
     public double[] getDeformation() {
         return deformation;
-    }
-
-    public CorrelationResult(final float value, final double[] deformation) {
-        this.value = value;
-        this.deformation = deformation;
-    }
+    }    
 
     @Override
     public String toString() {

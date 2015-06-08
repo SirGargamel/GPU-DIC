@@ -9,10 +9,13 @@ package cz.tul.dic.data;
  *
  * @author Petr Jecmen
  */
-public interface Coordinates {
+public final class Coordinates {
 
-    int DIMENSION = 2;
-    int X = 0;
-    int Y = 1;
-    
+    public static final int DIMENSION = 2;
+    public static final int X = 0;
+    public static final int Y = 1;
+
+    private Coordinates() {
+    }
+
 }

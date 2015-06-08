@@ -12,13 +12,19 @@ import java.util.Arrays;
  *
  * @author Petr Jecmen
  */
-public class Facet implements Serializable {
+public final class Facet implements Serializable {
 
     private final int[] data;
     private final double[] center;
     private final int size;
 
-    public static Facet createFacet(int size, int... topLeft) {
+    private Facet(final int[] data, final double[] center, final int size) {
+        this.data = data;
+        this.center = center;
+        this.size = size;
+    }
+
+    public static Facet createFacet(final int size, final int... topLeft) {
         if (topLeft.length < Coordinates.DIMENSION) {
             throw new IllegalArgumentException("Not enough coordinates for facet center (" + (Coordinates.DIMENSION - topLeft.length) + " more needed).");
         }
@@ -38,14 +44,7 @@ public class Facet implements Serializable {
                 data[index + 1] = topLeft[Coordinates.Y] + y;
             }
         }
-        final Facet result = new Facet(data, new double[]{centerX, centerY}, size);
-        return result;
-    }
-    
-    private Facet(int[] data, double[] center, int size) {
-        this.data = data;
-        this.center = center;
-        this.size = size;
+        return new Facet(data, new double[]{centerX, centerY}, size);
     }
 
     public int[] getData() {
@@ -59,7 +58,7 @@ public class Facet implements Serializable {
     public int getSize() {
         return size;
     }
-    
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -69,7 +68,5 @@ public class Facet implements Serializable {
         sb.append(size);
         return sb.toString();
     }
-
-    
 
 }

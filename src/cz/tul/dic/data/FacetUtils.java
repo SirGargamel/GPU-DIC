@@ -18,7 +18,7 @@ import java.util.Map.Entry;
  *
  * @author Petr Jecmen
  */
-public class FacetUtils {
+public final class FacetUtils {
 
     private static final Map<int[], double[]> CACHE;
 
@@ -135,6 +135,9 @@ public class FacetUtils {
         }
 
         return result;
+    }
+
+    private FacetUtils() {
     }
 
 }
