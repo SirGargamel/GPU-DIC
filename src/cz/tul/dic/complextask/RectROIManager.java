@@ -13,12 +13,11 @@ import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -31,6 +30,29 @@ public class RectROIManager extends ROIManager {
     private final CircleROIManager crm;
     private RectangleROI rect;
 
+    private RectROIManager(TaskContainer tc, final CircleROIManager crm, final int initialRound) throws ComputationException {
+        super(tc);
+        this.crm = crm;
+
+        for (ROI r : tc.getRois(initialRound)) {
+            if (r instanceof RectangleROI) {
+                if (rect == null) {
+                    rect = (RectangleROI) r;
+                } else {
+                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Only one rectangle ROI allowed.");
+                }
+            }
+        }
+
+        if (rect == null) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No ReactangleROI specified.");
+        }
+
+        defLimits = TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST;
+
+        setRois(initialRound);
+    }
+    
     public static RectROIManager prepareManager(TaskContainer tc, final CircleROIManager crm, final int initialRound) throws ComputationException {
         final TaskContainer tcR = tc.cloneInputTask();
 
@@ -74,7 +96,7 @@ public class RectROIManager extends ROIManager {
         sb.append("]");
         Logger.trace(sb);
 
-        final HashSet<ROI> rois = new HashSet<>(1);
+        final Set<ROI> rois = new HashSet<>(1);
         rois.add(rect);
         tcR.setROIs(initialRound, rois);
 
@@ -82,33 +104,10 @@ public class RectROIManager extends ROIManager {
         tcR.clearResultData();
 
         return new RectROIManager(tcR, crm, initialRound);
-    }
-
-    private RectROIManager(TaskContainer tc, final CircleROIManager crm, final int initialRound) throws ComputationException {
-        super(tc);
-        this.crm = crm;
-
-        for (ROI r : tc.getRois(initialRound)) {
-            if (r instanceof RectangleROI) {
-                if (rect == null) {
-                    rect = (RectangleROI) r;
-                } else {
-                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Only one rectangle ROI allowed.");
-                }
-            }
-        }
-
-        if (rect == null) {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No ReactangleROI specified.");
-        }
-
-        defLimits = TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST;
-
-        setRois(initialRound);
-    }
+    }    
 
     private void setRois(final int round) {
-        final HashSet<ROI> rois = new HashSet<>(1);
+        final Set<ROI> rois = new HashSet<>(1);
         rois.add(rect);
         tc.setROIs(round, rois);
         tc.setDeformationLimits(round, rect, defLimits);
