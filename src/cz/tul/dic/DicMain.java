@@ -51,7 +51,8 @@ public class DicMain extends Application {
 
     private static final String DEBUG_SMALL = "-d";
     private static final String DEBUG_COMPUTE = "-debug";
-    private static final File LICENSE = new File("license.dat");
+    private static final String LICENSE_FILE = "license.dat";
+    private static final File LICENSE = new File(LICENSE_FILE);
     private static final String[] FILES_TO_DEBUG = new String[]{
         //        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
         //        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
@@ -148,8 +149,8 @@ public class DicMain extends Application {
 
             final FileChooser chooser = new FileChooser();
             chooser.setTitle(Lang.getString("LicenseMissingSelectTitle"));
-            chooser.setInitialFileName("license.dat");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("License file [license.dat]", "license.dat"));
+            chooser.setInitialFileName(LICENSE_FILE);
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("License file [license.dat]", LICENSE_FILE));
             final File license = chooser.showOpenDialog(null);
             if (license != null) {
                 validLicense = Utils.checkLicense(license);
@@ -208,9 +209,7 @@ public class DicMain extends Application {
 
     private void performComputationTest() {
         final int fs1 = 5; //10
-        final int fs2 = 30; //30
-        final double min = 1;
-        final double max = fs2 / 2;
+        final int fs2 = 30; //30        
         TaskContainer task;
         for (int size = fs1; size <= fs2; size += 5) {
             for (String s : FILES_TO_DEBUG) {
@@ -237,55 +236,7 @@ public class DicMain extends Application {
 
                     Exporter.export(task);
 //                    commenceComputationDynamic(tc);
-//                    commenceComputationDynamicSpacingSweep(tc, (int) min, (int) max);
-
-//                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\image\\image.avi-fast.config")));
-//                    tc = Context.getInstance().getTc();
-//                    InputLoader.loadInput(tc);
-//            tc.setParameter(TaskParameter.FACET_SIZE, 20);
-//            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
-//            commenceComputation(tc);
-//                    textExports(tc);
-//
-//            TaskContainerUtils.serializeTaskToBinary(tc, new File("D:\\temp\\7202845m.avi.test.task"));
-//                for (FacetGeneratorMode fgm : FacetGeneratorMode.values()) {
-//                for (int windowSize = 0; windowSize < 1; windowSize++) {
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\simulace\\Pldi_Deska_s_otvorem_20snTexturaCoarse.avi.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputation(tc);
-//                }
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("d:\\temp\\7202845m\\7202845m.avi-oneRound-classic.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamic(tc);
-//                
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m\\7202845m.avi.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
-//                
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\7202845m.avi-classic.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
-//                
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9820088m.avi-classic.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamic(tc);
-//                CorrelationCalculator.dumpCounterStats();
-//                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\temp\\9905121m\\9905121m.avi.config")));
-//                tc = Context.getInstance().getTc();
-//                InputLoader.loadInput(tc);
-//                tc.setParameter(TaskParameter.FACET_SIZE, size);
-//                Computation.commenceComputationDynamicStrainParamSweep(tc, ps1, ps2);
-//                }
+//                    commenceComputationDynamicSpacingSweep(tc, 1, fs2 / 2);
                 } catch (IOException | ComputationException ex) {
                     Logger.error(ex);
                 } catch (Exception t) {

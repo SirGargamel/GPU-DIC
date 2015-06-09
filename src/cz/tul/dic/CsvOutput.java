@@ -32,6 +32,13 @@ public class CsvOutput {
         outputters = new HashMap<>();
         nf = new DecimalFormat("000");
     }
+    
+    private CsvOutput(final File target) throws IOException {
+        if (!target.exists()) {
+            target.createNewFile();
+        }
+        out = new BufferedWriter(new FileWriter(target));
+    }
 
     public static void addValue(final int round, final int x, final int y, final double[] value) {
         Map<Integer, CsvOutput> m = outputters.get(x);
@@ -54,17 +61,10 @@ public class CsvOutput {
 
     public static void closeSession() {
         outputters.values().stream().forEach(
-                (m) -> m.values().stream().forEach(
-                        (out) -> out.closeWriter()));
+                m -> m.values().stream().forEach(
+                        out -> out.closeWriter()));
         outputters.clear();
-    }
-
-    private CsvOutput(final File target) throws IOException {
-        if (!target.exists()) {
-            target.createNewFile();
-        }
-        out = new BufferedWriter(new FileWriter(target));
-    }
+    }    
 
     void addLine(final String line) {
         try {
