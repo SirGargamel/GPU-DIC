@@ -71,13 +71,5 @@ public class StaticSplit extends AbstractTaskSplitter {
     @Override
     public boolean isSplitterReady() {
         return hasNextElement;
-    }
-    
-    /**
-     * Task size is fixed so reseting it does not make sense.
-     */
-    @Override
-    public void resetTaskSize() {        
-        throw new UnsupportedOperationException();
-    }
+    }   
 }

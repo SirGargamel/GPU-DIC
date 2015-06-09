@@ -54,7 +54,11 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
             hasNextElement = false;
         }
 
-        splitterId = COUNTER++;        
+        splitterId = COUNTER++;
+        if (COEFF_MEM_LIMIT < COEFF_MEM_LIMIT_INIT) {
+            COEFF_MEM_LIMIT++;
+            Logger.debug("Increasing task size to {0} / {1}.", COEFF_MEM_LIMIT, COEFF_MEM_LIMIT_MAX);
+        }
     }
 
     @Override
@@ -82,7 +86,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        
+
         final int deformationLimitsArraySize = deformationLimits.get(facetIndex).length;
         List<Facet> sublist = null;
         List<double[]> checkedDeformations = null;
@@ -215,12 +219,6 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
     @Override
     public boolean isSplitterReady() {
         return COEFF_MEM_LIMIT > 0;
-    }
-
-    @Override
-    public void resetTaskSize() {
-        COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_INIT;
-        Logger.debug("Reseting task size full.");
     }
 
 }

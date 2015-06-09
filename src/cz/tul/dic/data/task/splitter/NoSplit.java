@@ -27,7 +27,7 @@ public class NoSplit extends AbstractTaskSplitter {
 
     @Override
     public ComputationTask next() {
-        if (hasNext()) {
+        if (!hasNext()) {
             throw new NoSuchElementException();
         }
         hasNextElement = false;
@@ -50,14 +50,6 @@ public class NoSplit extends AbstractTaskSplitter {
     @Override
     public boolean isSplitterReady() {
         return hasNextElement;
-    }
-
-    /**
-     * Not available since the task size is always maximal.
-     */
-    @Override
-    public void resetTaskSize() {
-        throw new UnsupportedOperationException("No task division available.");
     }
 
 }

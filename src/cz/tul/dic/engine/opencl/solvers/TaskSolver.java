@@ -107,8 +107,7 @@ public abstract class TaskSolver extends Observable {
         try {
             kernel.prepareKernel(facetSize, defDegree, interpolation);
 
-            AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
-            ts.resetTaskSize();
+            AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);            
             boolean finished = false;
             Exception lastEx = null;
             while (ts.isSplitterReady() && !finished) {

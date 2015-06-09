@@ -43,9 +43,7 @@ public abstract class AbstractTaskSplitter implements Iterator<ComputationTask> 
         }
     }
 
-    public abstract void signalTaskSizeTooBig();
-
-    public abstract void resetTaskSize();
+    public abstract void signalTaskSizeTooBig();    
 
     public abstract boolean isSplitterReady();
 
