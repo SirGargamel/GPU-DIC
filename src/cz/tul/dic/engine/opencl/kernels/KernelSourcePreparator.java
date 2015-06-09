@@ -29,25 +29,32 @@ public class KernelSourcePreparator {
     private static final String REPLACE_DEFORMATION_DEGREE = "%DEF_D%";
     private static final String REPLACE_DEFORMATION_COMPUTATION = "%DEF_C%";
     private static final String REPLACE_INTERPOLATION = "%INT%";
+    private static final String TEXT_DEFORMATION_ARRAY = "deformation[";
     private static final String PLUS = " + ";
     private static final String MUL = " * ";
     private final String kernelName;
     private String kernel;
 
-    public static String prepareKernel(final String kernelName, final int facetSize, final DeformationDegree deg, final boolean usesVectorization, final Interpolation interpolation, final boolean usesImage) throws IOException, ComputationException {
-        final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
-
-        kp.loadKernel();
-        kp.prepareFacetSize(facetSize);
-        kp.prepareDeformations(deg, usesVectorization);
-        kp.prepareInterpolation(interpolation, usesImage);
-
-        return kp.kernel;
-    }
-
     private KernelSourcePreparator(final String kernelName) {
         this.kernelName = kernelName;
     }
+    
+    public static String prepareKernel(
+            final String kernelName,
+            final int facetSize, final DeformationDegree deg,
+            final boolean usesVectorization, final Interpolation interpolation, final boolean usesImage) throws ComputationException {
+        final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
+
+        try {
+            kp.loadKernel();
+            kp.prepareFacetSize(facetSize);
+            kp.prepareDeformations(deg, usesVectorization);
+            kp.prepareInterpolation(interpolation, usesImage);
+            return kp.kernel;
+        } catch (IOException ex) {
+            throw new ComputationException(ComputationExceptionCause.IO, ex);
+        }
+    }    
 
     private void loadKernel() throws IOException {
         try (BufferedReader bin = new BufferedReader(new InputStreamReader(Kernel.class.getResourceAsStream(kernelName.concat(KERNEL_EXTENSION))))) {
@@ -92,7 +99,7 @@ public class KernelSourcePreparator {
         sb.append("]) { return; }\n");
         sb.append("int counter = deformationId;\n");
         for (int i = 0; i < defCoeffCount; i++) {
-            sb.append("deformation[");
+            sb.append(TEXT_DEFORMATION_ARRAY);
             sb.append(i);
             sb.append("] = counter % deformationCounts[countsBase + ");
             sb.append(i);
@@ -102,7 +109,7 @@ public class KernelSourcePreparator {
             sb.append("];\n");
         }
         for (int i = 0; i < defCoeffCount; i++) {
-            sb.append("deformation[");
+            sb.append(TEXT_DEFORMATION_ARRAY);
             sb.append(i);
             sb.append("] = deformationLimits[limitsBase + ");
             sb.append(i * 3);
@@ -120,7 +127,7 @@ public class KernelSourcePreparator {
                 sb.setLength(0);
                 sb.append(x);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.U)
                         .append("]");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
@@ -128,7 +135,7 @@ public class KernelSourcePreparator {
                 sb.setLength(0);
                 sb.append(y);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.V)
                         .append("]");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
@@ -138,17 +145,17 @@ public class KernelSourcePreparator {
                 sb.setLength(0);
                 sb.append(x);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.U)
                         .append("]");
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.UX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.UY)
                         .append("]");
                 sb.append(MUL);
@@ -158,17 +165,17 @@ public class KernelSourcePreparator {
                 sb.setLength(0);
                 sb.append(y);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.V)
                         .append("]");
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.VX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.VY)
                         .append("]");
                 sb.append(MUL);
@@ -180,17 +187,17 @@ public class KernelSourcePreparator {
                 sb.setLength(0);
                 sb.append(x);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.U)
                         .append("]");
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.UX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.UY)
                         .append("]");
                 sb.append(MUL);
@@ -212,7 +219,7 @@ public class KernelSourcePreparator {
                 sb.append(MUL);
                 sb.append(dy);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.UXY)
                         .append("]");
                 sb.append(MUL);
@@ -224,17 +231,17 @@ public class KernelSourcePreparator {
                 sb.setLength(0);
                 sb.append(y);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.V)
                         .append("]");
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.VX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.VY)
                         .append("]");
                 sb.append(MUL);
@@ -256,7 +263,7 @@ public class KernelSourcePreparator {
                 sb.append(MUL);
                 sb.append(dy);
                 sb.append(PLUS);
-                sb.append("deformation[")
+                sb.append(TEXT_DEFORMATION_ARRAY)
                         .append(Deformation.VXY)
                         .append("]");
                 sb.append(MUL);
@@ -269,7 +276,7 @@ public class KernelSourcePreparator {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation");
         }
         kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(DeformationUtils.getDeformationCoeffCount(deg)));
-    }
+    }    
 
     private void prepareInterpolation(final Interpolation interpolation, final boolean usesImage) throws ComputationException {
         String resourceName = "interpolate-";

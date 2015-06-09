@@ -114,9 +114,6 @@ public class CL2D_Int_D extends Kernel {
     }
 
     private int calculateLws1Base() {
-//        final IntBuffer val = Buffers.newDirectIntBuffer(5);
-//        context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), queue.getDevice().getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
-//        return val.get(0);
         return LWS1_BASE;
     }
 
@@ -125,7 +122,7 @@ public class CL2D_Int_D extends Kernel {
     }
 
     @Override
-    public void stop() {
+    public void stopComputation() {
         stop = true;
     }
 

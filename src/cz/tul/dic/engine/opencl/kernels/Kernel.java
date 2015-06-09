@@ -14,7 +14,6 @@ import com.jogamp.opencl.CLKernel;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.CLResource;
-import com.sun.prism.impl.BufferUtil;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
@@ -46,6 +45,30 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class Kernel {
 
+    private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
+    private static final String KERNEL_REDUCE = "reduce";
+    private static final String KERNEL_FIND_POS = "findPos";
+    private static final List<IGPUResultsReceiver> resultListeners;
+    protected final CLContext context;
+    protected final CLCommandQueue queue;
+    protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
+    private final String kernelName;
+    private final Set<CLResource> clMem;
+    private final OpenCLMemoryManager memManager;
+
+    static {
+        resultListeners = new LinkedList<>();
+    }
+
+    protected Kernel(String kernelName, final OpenCLMemoryManager memManager) {
+        this.kernelName = kernelName;
+        clMem = new HashSet<>();
+        this.memManager = memManager;
+
+        queue = DeviceManager.getQueue();
+        context = DeviceManager.getContext();
+    }
+
     public static Kernel createKernel(final KernelType kernelType, final OpenCLMemoryManager memManager) {
         Kernel result;
         try {
@@ -61,30 +84,6 @@ public abstract class Kernel {
             result = new CL1D_I_V_LL_MC_D(memManager);
         }
         return result;
-    }
-
-    private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
-    private static final String KERNEL_REDUCE = "reduce";
-    private static final String KERNEL_FIND_POS = "findPos";
-    private static final List<IGPUResultsReceiver> resultListeners;
-    private final String kernelName;
-    protected final CLContext context;
-    protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
-    protected final CLCommandQueue queue;
-    private final Set<CLResource> clMem;
-    private final OpenCLMemoryManager memManager;
-
-    static {
-        resultListeners = new LinkedList<>();
-    }
-
-    protected Kernel(String kernelName, final OpenCLMemoryManager memManager) {
-        this.kernelName = kernelName;
-        clMem = new HashSet<>();
-        this.memManager = memManager;
-
-        queue = DeviceManager.getQueue();
-        context = DeviceManager.getContext();
     }
 
     public void prepareKernel(final int facetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
@@ -119,7 +118,7 @@ public abstract class Kernel {
             }
         } catch (IOException ex) {
             Logger.debug(ex);
-            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);            
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);
         }
     }
 
@@ -187,7 +186,7 @@ public abstract class Kernel {
 
         kernelReduce.rewind();
         kernelReduce.setArg(0, results);
-        context.getCL().clSetKernelArg(kernelReduce.ID, 1, lws0 * BufferUtil.SIZEOF_FLOAT, null);
+        context.getCL().clSetKernelArg(kernelReduce.ID, 1, (long) lws0 * Float.BYTES, null);
         kernelReduce.setArg(2, maxVal);
         kernelReduce.setArg(3, deformationCount);
         kernelReduce.setArg(4, 0);
@@ -301,7 +300,7 @@ public abstract class Kernel {
         return kernelName;
     }
 
-    public abstract void stop();
+    public abstract void stopComputation();
 
     static int roundUp(int groupSize, int globalSize) {
         int r = globalSize % groupSize;

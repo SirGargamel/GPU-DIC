@@ -9,7 +9,6 @@ import cz.tul.dic.engine.opencl.memory.OpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
-import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLMemory;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import java.nio.FloatBuffer;
@@ -111,9 +110,6 @@ public class CL1D_I_V_LL_D extends Kernel {
     }
 
     private int calculateLws0base() {
-//        final IntBuffer val = Buffers.newDirectIntBuffer(5);
-//        context.getCL().clGetKernelWorkGroupInfo(kernel.getID(), queue.getDevice().getID(), CLKernelBinding.CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, Integer.SIZE, val, null);
-//        return val.get(0);
         return LWS0_BASE;
     }
 
@@ -128,7 +124,7 @@ public class CL1D_I_V_LL_D extends Kernel {
     }
 
     @Override
-    public void stop() {
+    public void stopComputation() {
         stop = true;
     }
 

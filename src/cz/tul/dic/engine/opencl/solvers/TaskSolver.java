@@ -222,7 +222,7 @@ public abstract class TaskSolver extends Observable {
     public void stop() {
         stop = true;
         if (kernel != null) {
-            kernel.stop();
+            kernel.stopComputation();
         }
         endTask();
         Logger.debug("Stopping correlation counter.");
