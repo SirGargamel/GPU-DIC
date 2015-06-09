@@ -39,14 +39,6 @@ public class CircleROIManager extends ROIManager {
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private double shiftTop, shiftBottom;
 
-    public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) throws ComputationException {
-        final TaskContainer tcC = tc.cloneInputTask();
-
-        tcC.setROIs(initialRound, tc.getRois(initialRound));
-
-        return new CircleROIManager(tcC, initialRound);
-    }
-
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
@@ -93,6 +85,14 @@ public class CircleROIManager extends ROIManager {
         defLimits = DEFAULT_DEFORMATION_LIMITS;
         setROIs(initialRound);
     }
+    
+    public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) throws ComputationException {
+        final TaskContainer tcC = tc.cloneInputTask();
+
+        tcC.setROIs(initialRound, tc.getRois(initialRound));
+
+        return new CircleROIManager(tcC, initialRound);
+    }    
 
     @Override
     public void generateNextRound(int round, int nextRound) {

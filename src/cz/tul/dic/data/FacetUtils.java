@@ -26,6 +26,9 @@ public final class FacetUtils {
         CACHE = new HashMap<>();
     }
 
+    private FacetUtils() {
+    }
+
     public static Map<int[], double[]> deformFacet(final Facet facet, final double[] deformation) throws ComputationException {
         final int[] data = facet.getData();
         final double[] center = facet.getCenter();
@@ -136,8 +139,4 @@ public final class FacetUtils {
 
         return result;
     }
-
-    private FacetUtils() {
-    }
-
 }

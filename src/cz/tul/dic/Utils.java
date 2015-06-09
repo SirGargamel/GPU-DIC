@@ -43,6 +43,9 @@ public final class Utils {
         nfInt = new DecimalFormat("00", decimalSymbol);
     }
 
+    private Utils() {
+    }
+
     public static File getTempDir(final TaskContainer tc) {
         final File in = (File) (tc.getParameter(TaskParameter.IN));
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
@@ -127,8 +130,5 @@ public final class Utils {
             Logger.error(ex);
         }
         return result;
-    }
-
-    private Utils() {
     }
 }
