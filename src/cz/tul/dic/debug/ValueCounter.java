@@ -7,7 +7,6 @@ package cz.tul.dic.debug;
 
 import cz.tul.dic.Utils;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,16 +22,16 @@ public class ValueCounter {
     private final Map<String, Integer> counter;
     private boolean enabled;
 
+    private ValueCounter() {
+        counter = new HashMap<>();
+        enabled = DebugControl.isDebugMode();
+    }
+
     public static ValueCounter createCounter() {
         final ValueCounter rc = new ValueCounter();
         DebugControl.addCounter(rc);
         rc.setEnabled(DebugControl.isDebugMode());
         return rc;
-    }
-    
-    private ValueCounter() {
-        counter = new HashMap<>();
-        enabled = DebugControl.isDebugMode();
     }
 
     public void setEnabled(boolean enabled) {
@@ -44,7 +43,7 @@ public class ValueCounter {
             inc(toString(val));
         }
     }
-    
+
     private String toString(final double[] val) {
         final StringBuilder sb = new StringBuilder("[");
         for (double d : val) {
@@ -85,17 +84,18 @@ public class ValueCounter {
     @Override
     public String toString() {
         List<Map.Entry> a = new ArrayList<>(counter.entrySet());
-        Collections.sort(a, (Map.Entry o1, Map.Entry o2) -> {
-            return ((Comparable) o1.getValue()).compareTo(o2.getValue());
-        });
+        Collections.sort(a,
+                (Map.Entry o1, Map.Entry o2)
+                -> ((Comparable) o1.getValue()).compareTo(o2.getValue())
+        );
 
         final StringBuilder sb = new StringBuilder();
-        a.stream().forEach((e) -> {
-            sb.append("\n")
-                    .append(e.getKey())
-                    .append(" -- ")
-                    .append(e.getValue());
-        });
+        a.stream().forEach(e
+                -> sb.append("\n")
+                .append(e.getKey())
+                .append(" -- ")
+                .append(e.getValue())
+        );
         return sb.toString();
     }
 

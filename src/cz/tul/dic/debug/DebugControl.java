@@ -11,7 +11,6 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -20,7 +19,7 @@ import java.util.Set;
  *
  * @author Petr Ječmen
  */
-public class DebugControl {
+public final class DebugControl {
 
     private static boolean debugMode, debugModeStarted;
     private static final Set<ValueCounter> counters;
@@ -34,7 +33,7 @@ public class DebugControl {
     public static boolean isDebugMode() {
         return debugMode;
     }
-    
+
     public static void startDebugMode() {
         debugMode = true;
         debugModeStarted = true;
@@ -64,7 +63,7 @@ public class DebugControl {
         }
     }
 
-    public static void performStatisticsDump(final TaskContainer tc) throws IOException, ComputationException {
+    public static void performStatisticsDump(final TaskContainer tc) throws ComputationException {
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             Stats.getInstance().dumpDeformationsStatisticsUsage(e.getKey());
             Stats.getInstance().dumpDeformationsStatisticsPerQuality(e.getKey());
@@ -74,6 +73,9 @@ public class DebugControl {
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
         Stats.getInstance().dumpDeformationsStatisticsUsage();
         StrainEstimator.computeStrain(tc);
+    }
+
+    private DebugControl() {
     }
 
 }

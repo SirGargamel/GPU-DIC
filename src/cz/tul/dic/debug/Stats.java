@@ -44,8 +44,10 @@ import org.pmw.tinylog.Logger;
  */
 public class Stats implements IGPUResultsReceiver {
 
+    private static final String FALSE = "false";
+    private static final String TRUE = "true";
     private static final Stats INSTANCE;
-    private final EnumMap<Types, Boolean> data;
+    private final Map<Types, Boolean> data;
     private TaskContainer tc;
     private int gpuBatch;
 
@@ -86,9 +88,9 @@ public class Stats implements IGPUResultsReceiver {
             try {
                 type = Types.valueOf(s);
                 valS = prop.getProperty(s);
-                if (valS.equalsIgnoreCase("true")) {
+                if (TRUE.equalsIgnoreCase(valS)) {
                     val = Boolean.TRUE;
-                } else if (valS.equalsIgnoreCase("false")) {
+                } else if (FALSE.equalsIgnoreCase(valS)) {
                     val = Boolean.FALSE;
                 } else {
                     throw new IllegalArgumentException("Cannot parse into Boolean: \"" + valS + "\" for property " + type);
