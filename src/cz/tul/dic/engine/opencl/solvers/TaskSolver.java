@@ -16,7 +16,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.data.task.splitter.TaskSplitter;
+import cz.tul.dic.data.task.splitter.AbstractTaskSplitter;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
@@ -107,7 +107,7 @@ public abstract class TaskSolver extends Observable {
         try {
             kernel.prepareKernel(facetSize, defDegree, interpolation);
 
-            TaskSplitter ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
+            AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
             ts.resetTaskSize();
             boolean finished = false;
             Exception lastEx = null;
@@ -147,7 +147,7 @@ public abstract class TaskSolver extends Observable {
                         if (exC.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
                             Logger.warn(exC);
                             ts.signalTaskSizeTooBig();
-                            ts = TaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
+                            ts = AbstractTaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
                             lastEx = ex;
                         } else {
                             throw ex;

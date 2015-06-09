@@ -11,7 +11,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class NoSplit extends TaskSplitter {
+public class NoSplit extends AbstractTaskSplitter {
 
     private boolean hasNextElement;
 

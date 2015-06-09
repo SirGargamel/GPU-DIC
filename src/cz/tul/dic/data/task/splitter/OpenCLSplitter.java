@@ -14,13 +14,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class OpenCLSplitter extends TaskSplitter {
+public class OpenCLSplitter extends AbstractTaskSplitter {
 
     private static int COUNTER = 0;
     private static final long SIZE_INT = 4;
@@ -30,10 +31,10 @@ public class OpenCLSplitter extends TaskSplitter {
     private static final long COEFF_MEM_LIMIT_MAX = 6;
     private static final long COEFF_MEM_LIMIT_INIT = COEFF_MEM_LIMIT_MAX - 1;
     private static long COEFF_MEM_LIMIT = COEFF_MEM_LIMIT_INIT;
-    private final int facetSize, ID;
+    private final int facetSize, splitterId;
     private final List<OpenCLSplitter> subSplitters;
     private final boolean subSplitter;
-    private boolean hasNext;
+    private boolean hasNextElement;
     private int facetIndex;
 
     public OpenCLSplitter(Image image1, Image image2, List<Facet> facets, List<double[]> deformationLimits) {
@@ -50,34 +51,38 @@ public class OpenCLSplitter extends TaskSplitter {
             checkIfHasNext();
         } else {
             facetSize = -1;
-            hasNext = false;
+            hasNextElement = false;
         }
 
-        ID = COUNTER++;        
+        splitterId = COUNTER++;        
     }
 
     @Override
     public boolean hasNext() {
-        return hasNext;
+        return hasNextElement;
     }
 
     private void checkIfHasNext() {
-        hasNext = false;
-        while (!subSplitters.isEmpty() && !hasNext) {
+        hasNextElement = false;
+        while (!subSplitters.isEmpty() && !hasNextElement) {
             if (subSplitters.get(0).hasNext()) {
-                hasNext = true;
+                hasNextElement = true;
             } else {
                 subSplitters.remove(0);
             }
         }
 
-        if (!hasNext) {
-            hasNext = facetIndex < facets.size();
+        if (!hasNextElement) {
+            hasNextElement = facetIndex < facets.size();
         }
     }
 
     @Override
     public ComputationTask next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+        
         final int deformationLimitsArraySize = deformationLimits.get(facetIndex).length;
         List<Facet> sublist = null;
         List<double[]> checkedDeformations = null;
@@ -121,9 +126,9 @@ public class OpenCLSplitter extends TaskSplitter {
                 subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
 
                 if (subSplitter) {
-                    Logger.warn("Too many deformations in subtask, {0} generating subsplitters - {1}, {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
+                    Logger.warn("Too many deformations in subtask, {0} generating subsplitters - {1}, {2}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);
                 } else {
-                    Logger.warn("Too many deformations in task, {0} generating subsplitters - {1}, {2}.", ID, subSplitters.get(0).ID, subSplitters.get(1).ID);
+                    Logger.warn("Too many deformations in task, {0} generating subsplitters - {1}, {2}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);
                 }
                 ct = subSplitters.get(0).next();
             } else {
@@ -147,9 +152,9 @@ public class OpenCLSplitter extends TaskSplitter {
         if (ct == null) {
             ct = new ComputationTask(image1, image2, sublist, checkedDeformations, subSplitter);
             if (subSplitter) {
-                Logger.trace("{0} computing subtask {1}", ID, Arrays.toString(ct.getDeformationLimits().get(0)));
+                Logger.trace("{0} computing subtask {1}", splitterId, Arrays.toString(ct.getDeformationLimits().get(0)));
             } else if (sublist != null) {
-                Logger.trace("{0} computing task with {1} facets.", ID, sublist.size());
+                Logger.trace("{0} computing task with {1} facets.", splitterId, sublist.size());
             } else {
                 Logger.error("NULL facet sublist !!!");
             }

@@ -12,11 +12,12 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.ComputationTask;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-public class StaticSplit extends TaskSplitter {
+public class StaticSplit extends AbstractTaskSplitter {
 
     private final int split;
-    private boolean hasNext;
+    private boolean hasNextElement;
     private int index;
 
     public StaticSplit(Image image1, Image image2, final List<Facet> facets, final List<double[]> deformationLimits, final Object taskSplitValue) throws ComputationException {
@@ -33,15 +34,19 @@ public class StaticSplit extends TaskSplitter {
 
     @Override
     public boolean hasNext() {
-        return hasNext;
+        return hasNextElement;
     }
 
     private void checkIfHasNext() {
-        hasNext = index < facets.size();
+        hasNextElement = index < facets.size();
     }
 
     @Override
     public ComputationTask next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+        
         final List<Facet> sublist = new ArrayList<>(split);
         final int facetCount = facets.size();
 
@@ -60,15 +65,19 @@ public class StaticSplit extends TaskSplitter {
     
     @Override
     public void signalTaskSizeTooBig() {
-        hasNext = false;
+        hasNextElement = false;
     }
 
     @Override
     public boolean isSplitterReady() {
-        return hasNext;
+        return hasNextElement;
     }
     
+    /**
+     * Task size is fixed so reseting it does not make sense.
+     */
     @Override
     public void resetTaskSize() {        
+        throw new UnsupportedOperationException();
     }
 }
