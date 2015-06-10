@@ -11,7 +11,6 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
-import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.opencl.solvers.TaskSolver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -106,13 +105,13 @@ public final class WorkSizeManager {
         Logger.debug("{0} selected as best kernel.", BEST_KERNEL);
     }
 
-    public static KernelType getBestKernel() {
-        return BEST_KERNEL;
-    }
-
     public WorkSizeManager(final KernelType kernel) {
         this.kernel = kernel;
         reset();
+    }
+
+    public static KernelType getBestKernel() {
+        return BEST_KERNEL;
     }
 
     public int getFacetCount() {
@@ -159,25 +158,27 @@ public final class WorkSizeManager {
     private long[] findMaxTimeValue() {
         final long[] result = new long[]{0, 0, -1};
 
-        long t;
-        int f, d;
+        long time;
+        int facetCount, deformationCount;
         for (Entry<Integer, Map<Integer, Long>> e : TIME_DATA.get(kernel).entrySet()) {
             for (Entry<Integer, Long> e2 : e.getValue().entrySet()) {
-                t = e2.getValue();
-                if (t < MAX_TIME) {
-                    f = e.getKey();
-                    d = e2.getKey();
-                    if ((f == result[0] && d > result[1])
-                            || f > result[0]) {
-                        result[0] = f;
-                        result[1] = d;
-                        result[2] = t;
-                    }
+                time = e2.getValue();
+                facetCount = e.getKey();
+                deformationCount = e2.getKey();
+                if (isPerformanceBetter(time, facetCount, deformationCount, result)) {
+                    result[0] = facetCount;
+                    result[1] = deformationCount;
+                    result[2] = time;
                 }
             }
         }
 
         return result;
+    }
+
+    private static boolean isPerformanceBetter(final long time, final int facetCount, final int deformationCount, final long[] result) {
+        return (time < MAX_TIME) && ((facetCount == result[0] && deformationCount > result[1])
+                || facetCount > result[0]);
     }
 
     private int[] computeNewCount(final int oldMaxF, final int oldMaxD, final long time) {

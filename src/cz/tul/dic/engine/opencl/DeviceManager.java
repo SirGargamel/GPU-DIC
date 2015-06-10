@@ -19,7 +19,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class DeviceManager {
+public final class DeviceManager {
 
     private static final CLDevice.Type DEVICE_TYPE = CLDevice.Type.GPU;
     private static CLPlatform platform;
@@ -30,9 +30,12 @@ public class DeviceManager {
     static {
         initContext();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            clearMemory();
-        }));
+        Runtime.getRuntime().addShutdownHook(
+                new Thread(() -> clearMemory()
+                ));
+    }
+
+    private DeviceManager() {
     }
 
     private static void initContext() {
@@ -55,9 +58,9 @@ public class DeviceManager {
         Logger.debug("Using " + device);
 
         context = CLContext.create(device);
-        context.addCLErrorHandler((String string, ByteBuffer bb, long l) -> {
-            Logger.error("CLError - " + string);
-        });
+        context.addCLErrorHandler((String string, ByteBuffer bb, long l)
+                -> Logger.error("CLError - " + string)
+        );
 
         queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
     }
