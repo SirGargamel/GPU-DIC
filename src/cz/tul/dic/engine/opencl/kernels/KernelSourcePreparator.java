@@ -7,7 +7,7 @@ package cz.tul.dic.engine.opencl.kernels;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.deformation.Deformation;
+import cz.tul.dic.data.deformation.DeformationDirection;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -128,7 +128,7 @@ public class KernelSourcePreparator {
                 sb.append(x);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.U)
+                        .append(DeformationDirection.U)
                         .append("]");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
 
@@ -136,7 +136,7 @@ public class KernelSourcePreparator {
                 sb.append(y);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.V)
+                        .append(DeformationDirection.V)
                         .append("]");
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
                 break;
@@ -146,17 +146,17 @@ public class KernelSourcePreparator {
                 sb.append(x);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.U)
+                        .append(DeformationDirection.U)
                         .append("]");
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.UX)
+                        .append(DeformationDirection.UX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.UY)
+                        .append(DeformationDirection.UY)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dy);
@@ -166,17 +166,17 @@ public class KernelSourcePreparator {
                 sb.append(y);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.V)
+                        .append(DeformationDirection.V)
                         .append("]");
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.VX)
+                        .append(DeformationDirection.VX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.VY)
+                        .append(DeformationDirection.VY)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dy);
@@ -188,23 +188,23 @@ public class KernelSourcePreparator {
                 sb.append(x);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.U)
+                        .append(DeformationDirection.U)
                         .append("]");
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.UX)
+                        .append(DeformationDirection.UX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.UY)
+                        .append(DeformationDirection.UY)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dy);
                 sb.append(PLUS);
                 sb.append("0.5 * deformation[")
-                        .append(Deformation.UXX)
+                        .append(DeformationDirection.UXX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
@@ -212,7 +212,7 @@ public class KernelSourcePreparator {
                 sb.append(dx);
                 sb.append(PLUS);
                 sb.append("0.5 * deformation[")
-                        .append(Deformation.UYY)
+                        .append(DeformationDirection.UYY)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dy);
@@ -220,7 +220,7 @@ public class KernelSourcePreparator {
                 sb.append(dy);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.UXY)
+                        .append(DeformationDirection.UXY)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
@@ -232,23 +232,23 @@ public class KernelSourcePreparator {
                 sb.append(y);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.V)
+                        .append(DeformationDirection.V)
                         .append("]");
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.VX)
+                        .append(DeformationDirection.VX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.VY)
+                        .append(DeformationDirection.VY)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dy);
                 sb.append(PLUS);
                 sb.append("0.5 * deformation[")
-                        .append(Deformation.VXX)
+                        .append(DeformationDirection.VXX)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);
@@ -256,7 +256,7 @@ public class KernelSourcePreparator {
                 sb.append(dx);
                 sb.append(PLUS);
                 sb.append("0.5 * deformation[")
-                        .append(Deformation.VYY)
+                        .append(DeformationDirection.VYY)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dy);
@@ -264,7 +264,7 @@ public class KernelSourcePreparator {
                 sb.append(dy);
                 sb.append(PLUS);
                 sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(Deformation.VXY)
+                        .append(DeformationDirection.VXY)
                         .append("]");
                 sb.append(MUL);
                 sb.append(dx);

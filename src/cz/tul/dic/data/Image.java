@@ -8,17 +8,20 @@ package cz.tul.dic.data;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import javax.imageio.ImageIO;
 
 /**
  *
  * @author Petr Jecmen
  */
-public class Image extends BufferedImage {
+public final class Image extends BufferedImage {
 
-    private transient int[] grayScale;
+    private int[] grayScale;
 
+    private Image(final int width, final int height, final int imageType) {
+        super(width, height, imageType);
+    }    
+    
     public static Image loadImageFromDisk(final File in) throws IOException {
         if (!in.exists() || !in.isFile()) {
             throw new IllegalArgumentException("Illegal input file.");
@@ -32,10 +35,6 @@ public class Image extends BufferedImage {
         result.getGraphics().drawImage(img, 0, 0, null);
 
         return result;
-    }
-
-    private Image(int width, int height, int imageType) {
-        super(width, height, imageType);
     }    
 
     public int[] toBWArray() {

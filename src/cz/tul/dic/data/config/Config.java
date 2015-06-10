@@ -21,6 +21,10 @@ public class Config {
     private static final String CLASS_ID = Config.class.getSimpleName();
     private final Properties data;
 
+    public Config() {
+        data = new Properties();
+    }
+    
     public static Config loadConfig(final File in) throws IOException {
         final Config result = new Config();
         result.load(in);
@@ -42,11 +46,7 @@ public class Config {
             configFile.put(CLASS_ID, ConfigType.TASK.toString());
         }
         return result;
-    }
-
-    public Config() {
-        data = new Properties();
-    }
+    }    
 
     private void load(final File in) throws IOException {
         data.load(new FileInputStream(in));

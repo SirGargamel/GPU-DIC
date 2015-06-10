@@ -7,7 +7,7 @@ package cz.tul.dic.data;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.deformation.Deformation;
+import cz.tul.dic.data.deformation.DeformationDirection;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import java.util.HashMap;
@@ -95,20 +95,20 @@ public final class FacetUtils {
     }
 
     private static double[] addZeroOrderDeformations(final double[] result, final double[] deformation) {
-        result[Coordinates.X] += deformation[Deformation.U];
-        result[Coordinates.Y] += deformation[Deformation.V];
+        result[Coordinates.X] += deformation[DeformationDirection.U];
+        result[Coordinates.Y] += deformation[DeformationDirection.V];
         return result;
     }
 
     private static double[] addFirstOrderDeformations(final double[] result, final double[] deformation, final double dx, final double dy) {
-        result[Coordinates.X] += deformation[Deformation.UX] * dx + deformation[Deformation.UY] * dy;
-        result[Coordinates.Y] += deformation[Deformation.VX] * dx + deformation[Deformation.VY] * dy;
+        result[Coordinates.X] += deformation[DeformationDirection.UX] * dx + deformation[DeformationDirection.UY] * dy;
+        result[Coordinates.Y] += deformation[DeformationDirection.VX] * dx + deformation[DeformationDirection.VY] * dy;
         return result;
     }
 
     private static double[] addSecondOrderDeformations(final double[] result, final double[] deformation, final double dx, final double dy) {
-        result[Coordinates.X] += 0.5 * deformation[Deformation.UXX] * dx * dx + 0.5 * deformation[Deformation.UYY] * dy * dy + deformation[Deformation.UXY] * dx * dy;
-        result[Coordinates.Y] += 0.5 * deformation[Deformation.VXX] * dx * dx + 0.5 * deformation[Deformation.VYY] * dy * dy + deformation[Deformation.VXY] * dx * dy;
+        result[Coordinates.X] += 0.5 * deformation[DeformationDirection.UXX] * dx * dx + 0.5 * deformation[DeformationDirection.UYY] * dy * dy + deformation[DeformationDirection.UXY] * dx * dy;
+        result[Coordinates.Y] += 0.5 * deformation[DeformationDirection.VXX] * dx * dx + 0.5 * deformation[DeformationDirection.VYY] * dy * dy + deformation[DeformationDirection.VXY] * dx * dy;
         return result;
     }
 

@@ -14,7 +14,10 @@ import java.util.List;
  *
  * @author Petr Jecmen
  */
-public class DeformationUtils {
+public final class DeformationUtils {
+
+    private DeformationUtils() {
+    }
 
     public static double getAbs(final double[] deformation) {
         double result = 0;
@@ -85,7 +88,7 @@ public class DeformationUtils {
         }
         return size;
     }
-    
+
     public static int findMaxDeformationCount(final List<int[]> counts) {
         double max = 0;
         for (int[] iA : counts) {
@@ -96,7 +99,7 @@ public class DeformationUtils {
 
     private static int computeSize(final double[] limits, final int base) {
         final int result;
-        
+
         if (hasStep(limits, base)) {
             result = (int) ((limits[base + 1] - limits[base]) / limits[base + 2] + 1);
         } else {
@@ -104,7 +107,7 @@ public class DeformationUtils {
         }
         return result;
     }
-    
+
     private static boolean hasStep(final double[] limits, final int base) {
         return Double.compare(limits[base + 2], 0) != 0 && Double.compare(limits[base], limits[base + 1]) != 0;
     }
@@ -135,7 +138,7 @@ public class DeformationUtils {
         }
         return result;
     }
-    
+
     public static int[] generateDeformationCounts(final double[] deformationLimits) {
         final int l = deformationLimits.length / 3;
         final int[] counts = new int[l + 1];
@@ -148,7 +151,7 @@ public class DeformationUtils {
         counts[l] = total;
         return counts;
     }
-    
+
     public static int getDeformationCoeffCount(final DeformationDegree deg) {
         final int result;
         switch (deg) {
@@ -166,8 +169,8 @@ public class DeformationUtils {
         }
         return result;
     }
-    
-    public static int getDeformationLimitsArrayLength(final DeformationDegree deg) {        
+
+    public static int getDeformationLimitsArrayLength(final DeformationDegree deg) {
         return getDeformationCoeffCount(deg) * 3;
     }
 
