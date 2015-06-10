@@ -29,6 +29,8 @@ import org.pmw.tinylog.Logger;
 public class MaxAndWeightedAverage extends DisplacementCalculator {
 
     private static final double PRECISION = 0.5;
+    private double[][][] finalDisplacement;
+    private double[][] finalQuality;
 
     @Override
     public DisplacementResult buildFinalResults(final Map<ROI, List<CorrelationResult>> correlationResults, Map<ROI, List<Facet>> facetMap, final TaskContainer tc, final int round) throws ComputationException {
@@ -40,97 +42,116 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
         final int linesPerGroup = (int) tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM) / width;
         final int groupCount = (int) Math.ceil(height / (double) linesPerGroup);
 
-        final double[][][] finalDisplacement = new double[width][height][];
-        final double[][] finalQuality = Utils.generateNaNarray(width, height);
+        finalDisplacement = new double[width][height][];
+        finalQuality = Utils.generateNaNarray(width, height);
         final Map<Integer, Map<Integer, Analyzer2D>> counters = new HashMap<>();
-        List<Facet> facets;
-        List<CorrelationResult> results;
-        Facet f;
-        double[] d;
-        int x, y, lowerBound, upperBound = 0;
-        Analyzer2D counter;
-        Map<int[], double[]> deformedFacet;
-        CorrelationResult cr;
-        double qualitySum, qualitySumWeighed;
+        int lowerBound, upperBound = 0;
         for (int g = 0; g < groupCount; g++) {
             lowerBound = upperBound;
             upperBound += linesPerGroup;
             upperBound = Math.min(upperBound, height - 1);
             counters.clear();
 
-            for (ROI roi : correlationResults.keySet()) {
-                facets = facetMap.get(roi);
-                results = correlationResults.get(roi);
+            prepareDeformedFacetsToCounters(correlationResults, facetMap, resultQuality, lowerBound, upperBound, counters);
 
-                for (int i = 0; i < facets.size(); i++) {
-                    if (results.get(i) == null) {
-                        continue;
-                    }
-                    cr = results.get(i);
-                    if (cr.getValue() < resultQuality) {
-                        continue;
-                    }
+            calculateDisplacementFromCounters(counters, tc, round);
+        }
 
-                    d = cr.getDeformation();
-                    qualitySum = cr.getValue();
+        return new DisplacementResult(finalDisplacement, finalQuality);
+    }
 
-                    f = facets.get(i);
-                    if (f == null) {
-                        Logger.warn("No facet - {0}", f);
-                        continue;
-                    }
-                    if (!FacetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
-                        continue;
-                    }
+    private void prepareDeformedFacetsToCounters(
+            final Map<ROI, List<CorrelationResult>> correlationResults, 
+            final Map<ROI, List<Facet>> facetMap, final double resultQuality, 
+            final int lowerBound, final int upperBound, 
+            final Map<Integer, Map<Integer, Analyzer2D>> counters) throws ComputationException {
+        List<Facet> facets;
+        List<CorrelationResult> results;
+        CorrelationResult cr;
+        double[] d;
+        double qualitySum;
+        Facet f;
+        Map<int[], double[]> deformedFacet;
+        int x;
+        int y;
+        for (ROI roi : correlationResults.keySet()) {
+            facets = facetMap.get(roi);
+            results = correlationResults.get(roi);
 
-                    deformedFacet = FacetUtils.deformFacet(f, d);
-                    for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
-                        x = e.getKey()[Coordinates.X];
-                        y = e.getKey()[Coordinates.Y];
-
-                        if (y >= lowerBound && y <= upperBound) {
-                            getAnalyzer(counters, x, y).addValue(new double[]{e.getValue()[0], e.getValue()[1], qualitySum});
-                        }
-                    }
+            for (int i = 0; i < facets.size(); i++) {
+                if (results.get(i) == null) {
+                    continue;
                 }
-            }
+                cr = results.get(i);
+                if (cr.getValue() < resultQuality) {
+                    continue;
+                }
 
-            double[] majorVal, val = new double[2];            
-            double maxDist2 = 4 * PRECISION * PRECISION;            
+                d = cr.getDeformation();
+                qualitySum = cr.getValue();
 
-            for (Entry<Integer, Map<Integer, Analyzer2D>> eX : counters.entrySet()) {
-                x = eX.getKey();
-                for (Entry<Integer, Analyzer2D> eY : eX.getValue().entrySet()) {
-                    y = eY.getKey();
-                    counter = eY.getValue();
-                    if (counter != null) {
-                        majorVal = counter.findMajorValue();
-                        
-                        val[0] = 0;
-                        val[1] = 0;
-                        qualitySum = 0;
-                        qualitySumWeighed = 0;
-                        for (double[] vals : counter.listValues()) {
-                            if (dist2(vals, majorVal) <= maxDist2) {                                
-                                qualitySum += vals[2];
-                                qualitySumWeighed += vals[2] * vals[2];
-                                val[0] += vals[0] * vals[2];
-                                val[1] += vals[1] * vals[2];                                
-                            }
-                        }
+                f = facets.get(i);
+                if (f == null) {
+                    Logger.warn("No facet - {0}", f);
+                    continue;
+                }
+                if (!FacetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
+                    continue;
+                }
 
-                        finalDisplacement[x][y] = new double[]{val[0] / qualitySum, val[1] / qualitySum};
-                        finalQuality[x][y] = qualitySum / qualitySumWeighed;
+                deformedFacet = FacetUtils.deformFacet(f, d);
+                for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
+                    x = e.getKey()[Coordinates.X];
+                    y = e.getKey()[Coordinates.Y];
 
-                        if (DebugControl.isDebugMode()) {
-                            Stats.getInstance().exportPointSubResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, round, x, y));
-                        }
+                    if (y >= lowerBound && y <= upperBound) {
+                        getAnalyzer(counters, x, y).addValue(new double[]{e.getValue()[0], e.getValue()[1], qualitySum});
                     }
                 }
             }
         }
+    }
 
-        return new DisplacementResult(finalDisplacement, finalQuality);
+    private void calculateDisplacementFromCounters(
+            final Map<Integer, Map<Integer, Analyzer2D>> counters, 
+            final TaskContainer tc, final int round) {
+        int x;
+        int y;
+        Analyzer2D counter;
+        double qualitySum;
+        double qualitySumWeighed;
+        double[] majorVal, val = new double[2];
+        double maxDist2 = 4 * PRECISION * PRECISION;
+        for (Entry<Integer, Map<Integer, Analyzer2D>> eX : counters.entrySet()) {
+            x = eX.getKey();
+            for (Entry<Integer, Analyzer2D> eY : eX.getValue().entrySet()) {
+                y = eY.getKey();
+                counter = eY.getValue();
+                if (counter != null) {
+                    majorVal = counter.findMajorValue();
+
+                    val[0] = 0;
+                    val[1] = 0;
+                    qualitySum = 0;
+                    qualitySumWeighed = 0;
+                    for (double[] vals : counter.listValues()) {
+                        if (dist2(vals, majorVal) <= maxDist2) {
+                            qualitySum += vals[2];
+                            qualitySumWeighed += vals[2] * vals[2];
+                            val[0] += vals[0] * vals[2];
+                            val[1] += vals[1] * vals[2];
+                        }
+                    }
+
+                    finalDisplacement[x][y] = new double[]{val[0] / qualitySum, val[1] / qualitySum};
+                    finalQuality[x][y] = qualitySum / qualitySumWeighed;
+
+                    if (DebugControl.isDebugMode()) {
+                        Stats.getInstance().exportPointSubResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, round, x, y));
+                    }
+                }
+            }
+        }
     }
 
     private Analyzer2D getAnalyzer(final Map<Integer, Map<Integer, Analyzer2D>> maps, final int x, final int y) {
