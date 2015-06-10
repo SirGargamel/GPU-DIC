@@ -185,7 +185,7 @@ public class MainWindow implements Initializable {
                                 Platform.runLater(() -> {
                                     adjustResultButtons(false);
                                 });
-                            } catch (ClassNotFoundException | IOException ex) {
+                            } catch (ComputationException ex) {
                                 error = true;
                                 result = Lang.getString("wrongBin");
                                 Logger.error(ex);
