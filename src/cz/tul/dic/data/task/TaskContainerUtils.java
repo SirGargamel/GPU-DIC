@@ -52,6 +52,9 @@ public final class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_ROI = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
+    
+    private TaskContainerUtils() {
+    }
 
     public static Map<Integer, Integer> getRounds(final TaskContainer tc) {
         final Map<Integer, Integer> result = new TreeMap<>();
@@ -537,9 +540,6 @@ public final class TaskContainerUtils {
             Logger.warn("Adding default solver.");
             tc.setParameter(TaskParameter.SOLVER, TaskDefaultValues.DEFAULT_SOLVER);
         }
-    }
-
-    private TaskContainerUtils() {
-    }
+    }    
 
 }

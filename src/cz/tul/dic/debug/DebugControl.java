@@ -29,6 +29,9 @@ public final class DebugControl {
         debugModeStarted = false;
         counters = new HashSet<>();
     }
+    
+    private DebugControl() {
+    }
 
     public static boolean isDebugMode() {
         return debugMode;
@@ -73,9 +76,6 @@ public final class DebugControl {
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
         Stats.getInstance().dumpDeformationsStatisticsUsage();
         StrainEstimator.computeStrain(tc);
-    }
-
-    private DebugControl() {
-    }
+    }    
 
 }
