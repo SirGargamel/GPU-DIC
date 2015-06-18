@@ -32,7 +32,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public abstract class TaskSolver extends Observable {
+public abstract class AbstractTaskSolver extends Observable {
 
     final AbstractOpenCLMemoryManager memManager;
     // dynamic
@@ -42,26 +42,26 @@ public abstract class TaskSolver extends Observable {
     Kernel kernel;
     int facetSize;
     Object taskSplitValue;
-    boolean stop;
+    boolean stop;    
 
-    public static TaskSolver initSolver(final Solver type) {
-        try {
-            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.solvers.".concat(type.toString()));
-            return (TaskSolver) cls.newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            Logger.warn("Error instantiating class {0}, using default correlation calculator.", type);
-            Logger.error(ex);
-            return new BruteForce();
-        }
-    }
-
-    TaskSolver() {
+    protected AbstractTaskSolver() {
         memManager = AbstractOpenCLMemoryManager.init();
 
         kernelType = WorkSizeManager.getBestKernel();
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
         taskSplitVariant = TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD;
         taskSplitValue = null;
+    }
+    
+    public static AbstractTaskSolver initSolver(final Solver type) {
+        try {
+            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.solvers.".concat(type.toString()));
+            return (AbstractTaskSolver) cls.newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            Logger.warn("Error instantiating class {0}, using default correlation calculator.", type);
+            Logger.error(ex);
+            return new BruteForce();
+        }
     }
 
     public void endTask() {
@@ -137,10 +137,9 @@ public abstract class TaskSolver extends Observable {
                     finished = true;
                 } catch (ComputationException ex) {
                     memManager.clearMemory();
-                    if (ex instanceof ComputationException) {
-                        final ComputationException exC = (ComputationException) ex;
-                        if (exC.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
-                            Logger.warn(exC);
+                    if (ex instanceof ComputationException) {                        
+                        if (ex.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
+                            Logger.warn(ex);
                             ts.signalTaskSizeTooBig();
                             ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
                             lastEx = ex;

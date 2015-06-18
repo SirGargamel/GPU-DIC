@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
-public class CoarseFine extends TaskSolver {
+public class CoarseFine extends AbstractTaskSolver {
 
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final double STEP_INITIAL = 1;

@@ -16,7 +16,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.engine.opencl.solvers.TaskSolver;
+import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
@@ -337,7 +337,7 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final TaskSolver solver = TaskSolver.initSolver(Solver.BRUTE_FORCE);
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
@@ -392,7 +392,7 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final TaskSolver solver = TaskSolver.initSolver(Solver.BRUTE_FORCE);
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);

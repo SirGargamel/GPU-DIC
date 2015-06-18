@@ -6,7 +6,7 @@
 package cz.tul.dic.engine;
 
 import cz.tul.dic.data.task.FullTask;
-import cz.tul.dic.engine.opencl.solvers.TaskSolver;
+import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -59,7 +59,7 @@ public final class Engine extends Observable implements Observer {
     private static final Engine INSTANCE;
     private final ExecutorService exec;
     private StrainEstimator strain;
-    private TaskSolver solver;
+    private AbstractTaskSolver solver;
     private boolean stopEngine;
 
     static {
@@ -161,7 +161,7 @@ public final class Engine extends Observable implements Observer {
         TaskContainerUtils.checkTaskValidity(task);
 
         // prepare correlation calculator
-        solver = TaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
+        solver = AbstractTaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
         solver.addObserver(this);
         solver.setKernel((KernelType) task.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) task.getParameter(TaskParameter.INTERPOLATION));
@@ -184,7 +184,7 @@ public final class Engine extends Observable implements Observer {
             }
             // compute and store result
             setChanged();
-            notifyObservers(TaskSolver.class);
+            notifyObservers(AbstractTaskSolver.class);
             correlations.put(
                     roi,
                     solver.solve(
@@ -263,7 +263,7 @@ public final class Engine extends Observable implements Observer {
 
     @Override
     public void update(final Observable o, final Object arg) {
-        if (o instanceof TaskSolver) {
+        if (o instanceof AbstractTaskSolver) {
             setChanged();
             notifyObservers(arg);
         } else {

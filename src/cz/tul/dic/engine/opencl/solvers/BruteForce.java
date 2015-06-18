@@ -14,7 +14,7 @@ import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.List;
 
-public class BruteForce extends TaskSolver {
+public class BruteForce extends AbstractTaskSolver {
 
     @Override
     public List<CorrelationResult> solve(

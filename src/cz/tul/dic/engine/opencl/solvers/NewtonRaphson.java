@@ -32,7 +32,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Ječmen
  */
-public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
+public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsReceiver {
 
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final int COUNT_STEP = 5;
