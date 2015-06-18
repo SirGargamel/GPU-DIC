@@ -11,9 +11,20 @@ package cz.tul.dic.engine.opencl.solvers;
  */
 public enum Solver {
 
-    BRUTE_FORCE,
-    COARSE_FINE,
-    NEWTON_RHAPSON,
-    NEWTON_RHAPSON_FORWARD,
+    BRUTE_FORCE("BruteForce"),
+    COARSE_FINE("CoarseFine"),
+    NEWTON_RHAPSON("NewtonRaphson"),
+    NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward"),
+    ;
+    
+    private final String className;
+
+    private Solver(final String className) {
+        this.className = className;
+    }
+
+    public String getClassName() {
+        return className;
+    }
 
 }

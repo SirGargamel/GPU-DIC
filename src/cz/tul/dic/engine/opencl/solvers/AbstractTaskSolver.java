@@ -55,7 +55,7 @@ public abstract class AbstractTaskSolver extends Observable {
     
     public static AbstractTaskSolver initSolver(final Solver type) {
         try {
-            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.solvers.".concat(type.toString()));
+            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.solvers.".concat(type.getClassName()));
             return (AbstractTaskSolver) cls.newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.warn("Error instantiating class {0}, using default correlation calculator.", type);
