@@ -40,7 +40,7 @@ public class ExportTargetFile extends AbstractExportTarget {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         final List<double[][]> data = exporter.exportData(tc, direction, null);
 
         final File target = (File) targetParam;
@@ -79,7 +79,7 @@ public class ExportTargetFile extends AbstractExportTarget {
     }
 
     @Override
-    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException {
+    public void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException {
         final double[][] data = exporter.exportData(tc, direction, dataParams);
 
         final double[] minMax;
@@ -122,7 +122,7 @@ public class ExportTargetFile extends AbstractExportTarget {
     }
 
     @Override
-    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParams, final double[] limits) throws IOException, ComputationException {
+    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParams, final double[] limits) throws IOException, ComputationException {
         if (!(targetParams instanceof File)) {
             throw new IllegalArgumentException("Input parameter has to be the target file. - " + targetParams);
         }
@@ -246,12 +246,12 @@ public class ExportTargetFile extends AbstractExportTarget {
     }
 
     @Override
-    void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 
     @Override
-    void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 

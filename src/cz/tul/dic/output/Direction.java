@@ -11,29 +11,29 @@ package cz.tul.dic.output;
  */
 public enum Direction {
 
-    Dx("mm", true, true),
-    Dy("mm", true, true),
-    Dabs("mm", true, true),
-    Exx("%", true, false),
-    Eyy("%", true, false),
-    Exy("%", true, false),
-    Eabs("%", true, false),
-    dDx("mm", false, true),
-    dDy("mm", false, true),
-    dDabs("mm", false, true),
-    dExx("%", false, true),
-    dEyy("%", false, true),
-    dExy("%", false, false),
-    dEabs("%", false, false),
-    rDx("mm/ms", false, true),
-    rDy("mm/ms", false, true),
-    rDabs("mm/ms", false, true),
+    DX("mm", true, true),
+    DY("mm", true, true),
+    DABS("mm", true, true),
+    EXX("%", true, false),
+    EYY("%", true, false),
+    EXY("%", true, false),
+    EABS("%", true, false),
+    D_DX("mm", false, true),
+    D_DY("mm", false, true),
+    D_DABS("mm", false, true),
+    D_EXX("%", false, true),
+    D_EYY("%", false, true),
+    D_EXY("%", false, false),
+    D_EABS("%", false, false),
+    R_DX("mm/ms", false, true),
+    R_DY("mm/ms", false, true),
+    R_DABS("mm/ms", false, true),
     ;
 
     private final String unit;
     private final boolean stretch, mm;
 
-    private Direction(String unit, boolean stretch, boolean mm) {
+    private Direction(final String unit, final boolean stretch, final boolean mm) {
         this.unit = unit;
         this.stretch = stretch;
         this.mm = mm;

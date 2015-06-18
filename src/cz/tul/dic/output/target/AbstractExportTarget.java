@@ -55,15 +55,15 @@ public abstract class AbstractExportTarget {
         }
     }
 
-    abstract void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException;
+    public abstract void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException;
 
-    abstract void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException;
+    public abstract void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException;
 
-    abstract void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException;
+    public abstract void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException;
 
-    abstract void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam, double[] limits) throws IOException, ComputationException;
+    public abstract void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam, double[] limits) throws IOException, ComputationException;
 
-    abstract void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, final Object targetParams, double[] limits) throws IOException, ComputationException;           
+    public abstract void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, final Object targetParams, double[] limits) throws IOException, ComputationException;           
 
     @SuppressWarnings("unchecked")
     private static <T> IExportMode<T> getExporter(final ExportMode em) {

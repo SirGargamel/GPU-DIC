@@ -47,32 +47,32 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
             data = result.get(dir);
             for (int round = 0; round < roundCount; round++) {
                 switch (dir) {
-                    case dDx:
-                    case dDy:
-                    case dDabs:
-                    case rDx:
-                    case rDy:
-                    case rDabs:
+                    case D_DX:
+                    case D_DY:
+                    case D_DABS:
+                    case R_DX:
+                    case R_DY:
+                    case R_DABS:
                         res = tc.getResult(round - 1, round);
                         results = res == null ? null : res.getDisplacementResult().getDisplacement();
                         break;
-                    case Dx:
-                    case Dy:
-                    case Dabs:
+                    case DX:
+                    case DY:
+                    case DABS:
                         res = tc.getResult(roundZero, round);
                         results = res == null ? null : res.getDisplacementResult().getDisplacement();
                         break;
-                    case dExx:
-                    case dEyy:
-                    case dExy:
-                    case dEabs:
+                    case D_EXX:
+                    case D_EYY:
+                    case D_EXY:
+                    case D_EABS:
                         res = tc.getResult(round - 1, round);
                         results = res == null ? null : res.getStrainResult().getStrain();
                         break;
-                    case Exx:
-                    case Eyy:
-                    case Exy:
-                    case Eabs:
+                    case EXX:
+                    case EYY:
+                    case EXY:
+                    case EABS:
                         res = tc.getResult(roundZero, round);
                         results = res == null ? null : res.getStrainResult().getStrain();
                         break;
@@ -84,27 +84,27 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     data[round] = 0;
                 } else {
                     switch (dir) {
-                        case dDx:
-                        case dDy:
-                        case dDabs:
-                        case Dx:
-                        case Dy:
-                        case Dabs:
+                        case D_DX:
+                        case D_DY:
+                        case D_DABS:
+                        case DX:
+                        case DY:
+                        case DABS:
                             data[round] = ExportUtils.calculateDisplacement(results[x][y], dir);
                             break;
-                        case dExx:
-                        case dEyy:
-                        case dExy:
-                        case dEabs:
-                        case Exx:
-                        case Eyy:
-                        case Exy:
-                        case Eabs:
+                        case D_EXX:
+                        case D_EYY:
+                        case D_EXY:
+                        case D_EABS:
+                        case EXX:
+                        case EYY:
+                        case EXY:
+                        case EABS:
                             data[round] = ExportUtils.calculateStrain(results[x][y], dir);
                             break;
-                        case rDx:
-                        case rDy:
-                        case rDabs:
+                        case R_DX:
+                        case R_DY:
+                        case R_DABS:
                             data[round] = ExportUtils.calculateSpeed(results[x][y], dir, time);
                             break;
                         default:

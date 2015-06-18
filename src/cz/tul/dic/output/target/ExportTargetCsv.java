@@ -21,7 +21,7 @@ public class ExportTargetCsv extends AbstractExportTarget {
     private static final String EXTENSION = ".csv";
 
     @Override
-    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException {
+    public void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException {
         exportMap(exporter.exportData(tc, direction, dataParams), targetParam, limits);
     }
 
@@ -59,7 +59,7 @@ public class ExportTargetCsv extends AbstractExportTarget {
     }
 
     @Override
-    void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
@@ -99,12 +99,12 @@ public class ExportTargetCsv extends AbstractExportTarget {
     }
 
     @Override
-    void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
         exportPoint(tc, exporter, targetParam, dataParams);
     }
 
     @Override
-    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         final List<double[][]> data = exporter.exportData(tc, direction, null);
 
         final File target = (File) targetParam;
@@ -128,7 +128,7 @@ public class ExportTargetCsv extends AbstractExportTarget {
     }
 
     @Override
-    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 

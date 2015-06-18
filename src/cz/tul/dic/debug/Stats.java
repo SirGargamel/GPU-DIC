@@ -332,7 +332,7 @@ public class Stats implements IGPUResultsReceiver {
                 }
             }
             try {
-                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.Dabs)), "BMP", out);
+                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.DABS)), "BMP", out);
             } catch (IOException ex) {
                 Logger.error(ex);
             }
@@ -345,7 +345,7 @@ public class Stats implements IGPUResultsReceiver {
             out.getParentFile().mkdirs();
 
             try {
-                ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getResult(roundFrom, roundTo).getDisplacementResult().getQuality(), Direction.Dabs)), "BMP", out);
+                ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getResult(roundFrom, roundTo).getDisplacementResult().getQuality(), Direction.DABS)), "BMP", out);
             } catch (IOException ex) {
                 Logger.error(ex);
             }
@@ -378,8 +378,8 @@ public class Stats implements IGPUResultsReceiver {
             out.getParentFile().mkdirs();
 
             try {
-                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[0], Direction.Exx)), "BMP", new File(nameA));
-                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[1], Direction.Eyy)), "BMP", new File(nameB));
+                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[0], Direction.EXX)), "BMP", new File(nameA));
+                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[1], Direction.EYY)), "BMP", new File(nameB));
             } catch (IOException ex) {
                 Logger.warn(ex);
             }

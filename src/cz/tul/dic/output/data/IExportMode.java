@@ -6,7 +6,6 @@
 package cz.tul.dic.output.data;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.roi.ROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.Direction;
 

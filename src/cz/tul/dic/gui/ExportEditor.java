@@ -186,7 +186,7 @@ public class ExportEditor implements Initializable {
     }
 
     private Direction pickDirection() {
-        final ChoiceDialog<Direction> dlg = new ChoiceDialog<>(Direction.Dabs, Direction.values());
+        final ChoiceDialog<Direction> dlg = new ChoiceDialog<>(Direction.DABS, Direction.values());
         dlg.setHeaderText(Lang.getString("ChooseDirection"));
         dlg.setTitle(Lang.getString("Export"));
         return dlg.showAndWait().orElse(null);

@@ -25,6 +25,7 @@ import java.text.NumberFormat;
  */
 public final class ExportUtils {
 
+    private static final String UNSUPPORTED_DIRECTION = "Unsupported direction.";
     private static final int IMAGE_TYPE = BufferedImage.TYPE_3BYTE_BGR;
     private static final float ALPHA = 0.75f;
     private static final Color COLORBACKGROUND = Color.BLACK;
@@ -38,11 +39,14 @@ public final class ExportUtils {
     private static final double COLOR_RANGE_NEG = 75 / 360.0;
     private static final int LIMIT_WIDTH = 180;
     private static final int LIMIT_HEIGHT = 180;
-    private static final int COLOR_NaN = Color.MAGENTA.getRGB();
+    private static final int COLOR_NAN = Color.MAGENTA.getRGB();
     private static boolean debugMode;
 
     static {
         debugMode = false;
+    }
+
+    private ExportUtils() {
     }
 
     public static void enableDebugMode() {
@@ -74,20 +78,20 @@ public final class ExportUtils {
     public static double calculateDisplacement(final double[] def, final Direction dir) throws ComputationException {
         double result;
         switch (dir) {
-            case Dx:
-            case dDx:
+            case DX:
+            case D_DX:
                 result = def[0];
                 break;
-            case Dy:
-            case dDy:
+            case DY:
+            case D_DY:
                 result = def[1];
                 break;
-            case Dabs:
-            case dDabs:
+            case DABS:
+            case D_DABS:
                 result = Math.sqrt(def[0] * def[0] + def[1] * def[1]);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, UNSUPPORTED_DIRECTION);
         }
 
         return result;
@@ -97,27 +101,27 @@ public final class ExportUtils {
         double result;
 
         switch (dir) {
-            case Exx:
-            case dExx:
+            case EXX:
+            case D_EXX:
                 result = results[StrainResultDirection.E_XX];
                 break;
-            case Eyy:
-            case dEyy:
+            case EYY:
+            case D_EYY:
                 result = results[StrainResultDirection.E_YY];
                 break;
-            case Exy:
-            case dExy:
+            case EXY:
+            case D_EXY:
                 result = results[StrainResultDirection.E_XY];
                 break;
-            case Eabs:
-            case dEabs:
+            case EABS:
+            case D_EABS:
                 final double val1 = results[StrainResultDirection.E_XX];
                 final double val2 = results[StrainResultDirection.E_YY];
                 final double val3 = results[StrainResultDirection.E_XY];
                 result = Math.sqrt(val1 * val1 + val2 * val2 + val3 * val3);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, UNSUPPORTED_DIRECTION);
         }
 
         return result;
@@ -126,13 +130,13 @@ public final class ExportUtils {
     public static double calculateSpeed(final double[] def, final Direction dir, final double time) throws ComputationException {
         double result;
         switch (dir) {
-            case rDx:
+            case R_DX:
                 result = def[0] / time;
                 break;
-            case rDy:
+            case R_DY:
                 result = def[1] / time;
                 break;
-            case rDabs:
+            case R_DABS:
                 result = Math.sqrt(def[0] * def[0] + def[1] * def[1]) / time;
                 break;
             default:
@@ -200,29 +204,29 @@ public final class ExportUtils {
         final BufferedImage out;
 
         switch (dir) {
-            case dDabs:
-            case Dabs:
-            case dEabs:
-            case Eabs:
-            case rDabs:
-            case dDy:
-            case Dy:
-            case dEyy:
-            case dExy:
-            case Eyy:
-            case Exy:
-            case rDy:
+            case D_DABS:
+            case DABS:
+            case D_EABS:
+            case EABS:
+            case R_DABS:
+            case D_DY:
+            case DY:
+            case D_EYY:
+            case D_EXY:
+            case EYY:
+            case EXY:
+            case R_DY:
                 out = new BufferedImage(width + BAR_SIZE_VERT, height, IMAGE_TYPE);
                 break;
-            case dDx:
-            case Dx:
-            case dExx:
-            case Exx:
-            case rDx:
+            case D_DX:
+            case DX:
+            case D_EXX:
+            case EXX:
+            case R_DX:
                 out = new BufferedImage(width, height + BAR_SIZE_HOR, IMAGE_TYPE);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, UNSUPPORTED_DIRECTION);
         }
 
         final Graphics2D g = out.createGraphics();
@@ -236,29 +240,29 @@ public final class ExportUtils {
         }
 
         switch (dir) {
-            case dDabs:
-            case Dabs:
-            case dEabs:
-            case Eabs:
-            case rDabs:
-            case dDy:
-            case Dy:
-            case dEyy:
-            case dExy:
-            case Eyy:
-            case Exy:
-            case rDy:
+            case D_DABS:
+            case DABS:
+            case D_EABS:
+            case EABS:
+            case R_DABS:
+            case D_DY:
+            case DY:
+            case D_EYY:
+            case D_EXY:
+            case EYY:
+            case EXY:
+            case R_DY:
                 drawVerticalBar(out, minMax[0], minMax[1]);
                 break;
-            case dDx:
-            case Dx:
-            case dExx:
-            case Exx:
-            case rDx:
+            case D_DX:
+            case DX:
+            case D_EXX:
+            case EXX:
+            case R_DX:
                 drawHorizontalBar(out, minMax[0], minMax[1]);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, UNSUPPORTED_DIRECTION);
         }
 
         return out;
@@ -268,7 +272,7 @@ public final class ExportUtils {
         final int result;
         if (Double.isNaN(val)) {
             if (debugMode) {
-                result = COLOR_NaN;
+                result = COLOR_NAN;
             } else {
                 result = Color.HSBtoRGB(0, 1, 0);
             }
@@ -356,9 +360,6 @@ public final class ExportUtils {
         g.drawString(val, halfWidth - metrics.stringWidth(val) / 2, tY);
 
         g.dispose();
-    }
-
-    private ExportUtils() {
     }
 
 }

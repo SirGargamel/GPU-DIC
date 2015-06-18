@@ -250,7 +250,7 @@ public final class Engine extends Observable implements Observer {
 
     private boolean isStrainExport(final ExportTask eTask) {
         final Direction dir = eTask.getDirection();
-        return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
+        return dir == Direction.EABS || dir == Direction.EXY || dir == Direction.EXX || dir == Direction.EYY;
     }
 
     public void stop() {

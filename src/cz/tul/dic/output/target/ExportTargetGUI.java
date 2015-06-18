@@ -13,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ExportTargetGUI extends AbstractExportTarget {
+    
+    private static final String NOT_ENOUGH_DATA_PARAMETERS = "Not enough data parameters.";
 
     @Override
-    void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws ComputationException {
+    public void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws ComputationException {
         if (dataParams.length < 1) {
-            throw new IllegalArgumentException("Not enough data parameters.");
+            throw new IllegalArgumentException(NOT_ENOUGH_DATA_PARAMETERS);
         }
 
         final double[][] data = exporter.exportData(tc, direction, dataParams);
@@ -45,12 +47,12 @@ public class ExportTargetGUI extends AbstractExportTarget {
         }
         final Context context = (Context) targetParam;
         context.storeMapExport(overlay, position, ExportMode.MAP, direction);
-    }
+    }    
 
     @Override
-    void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws ComputationException {
+    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws ComputationException {
         if (dataParams.length < 2) {
-            throw new IllegalArgumentException("Not enough data parameters.");
+            throw new IllegalArgumentException(NOT_ENOUGH_DATA_PARAMETERS);
         }
         final Map<Direction, double[]> data = exporter.exportData(tc, null, dataParams);
         final Context context = (Context) targetParam;
@@ -58,9 +60,9 @@ public class ExportTargetGUI extends AbstractExportTarget {
     }
 
     @Override
-    void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
         if (dataParams.length < 4) {
-            throw new IllegalArgumentException("Not enough data parameters.");
+            throw new IllegalArgumentException(NOT_ENOUGH_DATA_PARAMETERS);
         }
         final Map<Direction, double[]> data = exporter.exportData(tc, null, dataParams);
         final Context context = (Context) targetParam;
@@ -68,12 +70,12 @@ public class ExportTargetGUI extends AbstractExportTarget {
     }
 
     @Override
-    void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 
     @Override
-    void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 

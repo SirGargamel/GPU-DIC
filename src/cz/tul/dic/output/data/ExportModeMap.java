@@ -29,32 +29,32 @@ public class ExportModeMap implements IExportMode<double[][]> {
         final int roundZero = TaskContainerUtils.getFirstRound(tc);
         final double[][][] results;
         switch (direction) {
-            case dDx:
-            case dDy:
-            case dDabs:
-            case rDx:
-            case rDy:
-            case rDabs:
+            case D_DX:
+            case D_DY:
+            case D_DABS:
+            case R_DX:
+            case R_DY:
+            case R_DABS:
                 res = tc.getResult(round - 1, round);
                 results = res == null ? null : res.getDisplacementResult().getDisplacement();
                 break;
-            case Dx:
-            case Dy:
-            case Dabs:
+            case DX:
+            case DY:
+            case DABS:
                 res = tc.getResult(roundZero, round);
                 results = res == null ? null : res.getDisplacementResult().getDisplacement();
                 break;
-            case dExx:
-            case dEyy:
-            case dExy:
-            case dEabs:
+            case D_EXX:
+            case D_EYY:
+            case D_EXY:
+            case D_EABS:
                 res = tc.getResult(round - 1, round);
                 results = res == null ? null : res.getStrainResult().getStrain();
                 break;
-            case Exx:
-            case Eyy:
-            case Exy:
-            case Eabs:
+            case EXX:
+            case EYY:
+            case EXY:
+            case EABS:
                 res = tc.getResult(roundZero, round);
                 results = res == null ? null : res.getStrainResult().getStrain();
                 break;
@@ -83,27 +83,27 @@ public class ExportModeMap implements IExportMode<double[][]> {
                 }
 
                 switch (direction) {
-                    case dDx:
-                    case dDy:
-                    case dDabs:
-                    case Dx:
-                    case Dy:
-                    case Dabs:
+                    case D_DX:
+                    case D_DY:
+                    case D_DABS:
+                    case DX:
+                    case DY:
+                    case DABS:
                         result[x][y] = ExportUtils.calculateDisplacement(results[x][y], direction);
                         break;
-                    case dExx:
-                    case dEyy:
-                    case dExy:
-                    case dEabs:
-                    case Exx:
-                    case Eyy:
-                    case Exy:
-                    case Eabs:
+                    case D_EXX:
+                    case D_EYY:
+                    case D_EXY:
+                    case D_EABS:
+                    case EXX:
+                    case EYY:
+                    case EXY:
+                    case EABS:
                         result[x][y] = ExportUtils.calculateStrain(results[x][y], direction);
                         break;
-                    case rDx:
-                    case rDy:
-                    case rDabs:
+                    case R_DX:
+                    case R_DY:
+                    case R_DABS:
                         result[x][y] = ExportUtils.calculateSpeed(results[x][y], direction, time);
                         break;
                     default:

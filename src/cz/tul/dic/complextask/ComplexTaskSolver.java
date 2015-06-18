@@ -240,7 +240,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
 
     private boolean isStrainExport(ExportTask et) {
         final Direction dir = et.getDirection();
-        return dir == Direction.Eabs || dir == Direction.Exy || dir == Direction.Exx || dir == Direction.Eyy;
+        return dir == Direction.EABS || dir == Direction.EXY || dir == Direction.EXX || dir == Direction.EYY;
     }
 
     public boolean isValidComplexTask(final TaskContainer tc) {

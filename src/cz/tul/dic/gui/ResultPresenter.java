@@ -615,26 +615,26 @@ public class ResultPresenter implements Initializable {
 
             // TODO
             switch (dir) {
-                case Dabs:
-                case rDabs:
-                    this.dir = Direction.Eabs;
+                case DABS:
+                case R_DABS:
+                    this.dir = Direction.EABS;
                     break;
-                case dDabs:
-                    this.dir = Direction.dEabs;
+                case D_DABS:
+                    this.dir = Direction.D_EABS;
                     break;
-                case Dx:
-                case rDx:
-                    this.dir = Direction.Exx;
+                case DX:
+                case R_DX:
+                    this.dir = Direction.EXX;
                     break;
-                case dDx:
-                    this.dir = Direction.dExx;
+                case D_DX:
+                    this.dir = Direction.D_EXX;
                     break;
-                case Dy:
-                case rDy:
-                    this.dir = Direction.Eyy;
+                case DY:
+                case R_DY:
+                    this.dir = Direction.EYY;
                     break;
-                case dDy:
-                    this.dir = Direction.dEyy;
+                case D_DY:
+                    this.dir = Direction.D_EYY;
                     break;
                 default:
                     this.dir = dir;

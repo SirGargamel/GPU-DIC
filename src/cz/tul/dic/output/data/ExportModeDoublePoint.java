@@ -41,17 +41,17 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
             data = result.get(dir);
             for (int round = 0; round < roundCount; round++) {
                 switch (dir) {
-                    case dExx:
-                    case dEyy:
-                    case dExy:
-                    case dEabs:
+                    case D_EXX:
+                    case D_EYY:
+                    case D_EXY:
+                    case D_EABS:
                         res = tc.getResult(round - 1, round);
                         results = res == null ? null : res.getStrainResult().getStrain();
                         break;
-                    case Exx:
-                    case Eyy:
-                    case Exy:
-                    case Eabs:
+                    case EXX:
+                    case EYY:
+                    case EXY:
+                    case EABS:
                         res = tc.getResult(roundZero, round);
                         results = res == null ? null : res.getStrainResult().getStrain();
                         break;
@@ -63,14 +63,14 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                     data[round] = 0;
                 } else {
                     switch (dir) {
-                        case dExx:
-                        case dEyy:
-                        case dExy:
-                        case dEabs:
-                        case Exx:
-                        case Eyy:
-                        case Exy:
-                        case Eabs:
+                        case D_EXX:
+                        case D_EYY:
+                        case D_EXY:
+                        case D_EABS:
+                        case EXX:
+                        case EYY:
+                        case EXY:
+                        case EABS:
                             data[round] = calculateStrain(results, dir, x1, y1, x2, y2);
                             break;
                         default:
@@ -90,22 +90,22 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
         final double difY = displacement[x2][y2][1] - displacement[x1][y1][1];
         final double val;
         switch (dir) {
-            case Exx:
-            case dExx:
+            case EXX:
+            case D_EXX:
                 val = difX / dx;
                 break;
-            case Eyy:
-            case dEyy:
+            case EYY:
+            case D_EYY:
                 val = difY / dy;
                 break;
-            case Exy:
-            case dExy:
+            case EXY:
+            case D_EXY:
                 double tmp = difY / dx;
                 tmp += difX / dy;
                 val = tmp / 2.0;
                 break;
-            case Eabs:
-            case dEabs:
+            case EABS:
+            case D_EABS:
                 final double val1 = difX / dx;
                 final double val2 = difY / dy;
                 final double val3 = (difY / dx + difX / dy) / 2.0;
