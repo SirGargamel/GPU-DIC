@@ -44,7 +44,7 @@ public class CircleROIManager extends ROIManager {
 
         tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.TIGHT);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
-        tc.setParameter(TaskParameter.SOLVER, Solver.BruteForce);
+        tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
         tc.addHint(Hint.NO_STRAIN);
         tc.addHint(Hint.NO_CUMULATIVE);
         tc.addHint(Hint.NO_STATS);

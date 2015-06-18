@@ -80,7 +80,7 @@ public class EngineTest {
         TaskContainer tc;
         Set<String> errors = new LinkedHashSet<>();
         int counter = 0;
-        final Solver slvr = Solver.BruteForce;
+        final Solver slvr = Solver.BRUTE_FORCE;
         for (Interpolation i : Interpolation.values()) {
             for (TaskSplitMethod ts : TaskSplitMethod.values()) {
                 for (FacetGeneratorMethod fgm : FacetGeneratorMethod.values()) {
@@ -201,7 +201,7 @@ public class EngineTest {
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
-        tc.setParameter(TaskParameter.SOLVER, Solver.BruteForce);
+        tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
 
         return tc;
     }
@@ -337,7 +337,7 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final TaskSolver solver = TaskSolver.initSolver(Solver.BruteForce);
+        final TaskSolver solver = TaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
@@ -392,7 +392,7 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        final TaskSolver solver = TaskSolver.initSolver(Solver.BruteForce);
+        final TaskSolver solver = TaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);

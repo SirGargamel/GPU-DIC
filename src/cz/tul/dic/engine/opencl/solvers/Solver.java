@@ -11,9 +11,9 @@ package cz.tul.dic.engine.opencl.solvers;
  */
 public enum Solver {
 
-    BruteForce,
-    CoarseFine,
-    NewtonRaphson,
-    NewtonRaphsonForward,
+    BRUTE_FORCE,
+    COARSE_FINE,
+    NEWTON_RHAPSON,
+    NEWTON_RHAPSON_FORWARD,
 
 }

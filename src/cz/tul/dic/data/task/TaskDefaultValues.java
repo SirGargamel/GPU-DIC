@@ -19,7 +19,7 @@ import cz.tul.dic.generators.facet.FacetGeneratorMethod;
  */
 public final class TaskDefaultValues {
 
-    public static final Solver DEFAULT_SOLVER = Solver.NewtonRaphson;
+    public static final Solver DEFAULT_SOLVER = Solver.NEWTON_RHAPSON;
     public static final DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION_METHOD = DisplacementCalculation.MAX_WEIGHTED_AVERAGE;
     public static final int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     public static final int DEFAULT_FPS = 5000;
