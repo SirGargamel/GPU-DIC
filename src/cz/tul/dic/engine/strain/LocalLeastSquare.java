@@ -102,47 +102,47 @@ public class LocalLeastSquare extends StrainEstimator {
     }
 
     private static double[] computeCoeffs(final double[][][] data, final int x, final int y, final int radius) {
-        final List<double[]> Xu = new LinkedList<>();
-        final List<Double> Yu = new LinkedList<>();
-        final List<double[]> Xv = new LinkedList<>();
-        final List<Double> Yv = new LinkedList<>();
+        final List<double[]> xU = new LinkedList<>();
+        final List<Double> yU = new LinkedList<>();
+        final List<double[]> xV = new LinkedList<>();
+        final List<Double> yV = new LinkedList<>();
 
         final int width = data.length;
         final int height = data[x].length;
         for (int i = x - radius; i <= x + radius; i++) {
             for (int j = y - radius; j <= y + radius; j++) {
                 if (i >= 0 && j >= 0 && i < width && j < height && data[i][j] != null) {
-                    Xu.add(new double[]{1, i - x, j - y});
-                    Yu.add(data[i][j][0]);
-                    Xv.add(new double[]{1, i - x, j - y});
-                    Yv.add(data[i][j][1]);
+                    xU.add(new double[]{1, i - x, j - y});
+                    yU.add(data[i][j][0]);
+                    xV.add(new double[]{1, i - x, j - y});
+                    yV.add(data[i][j][1]);
                 }
             }
         }
 
         final double[] result;
-        if (Xu.size() > 3) {
+        if (xU.size() > 3) {
             result = new double[8];
             try {
                 final OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
                 regression.setNoIntercept(true);
 
-                double[] dataY = new double[Yu.size()];
+                double[] dataY = new double[yU.size()];
                 for (int i = 0; i < dataY.length; i++) {
-                    dataY[i] = Yu.get(i);
+                    dataY[i] = yU.get(i);
                 }
-                double[][] dataX = Xu.toArray(new double[][]{});
+                double[][] dataX = xU.toArray(new double[][]{});
 
                 regression.newSampleData(dataY, dataX);
                 double[] beta = regression.estimateRegressionParameters();
                 System.arraycopy(beta, 0, result, 0, 3);
                 result[INDEX_ERRA] = regression.estimateRegressionStandardError();
 
-                dataY = new double[Yv.size()];
+                dataY = new double[yV.size()];
                 for (int i = 0; i < dataY.length; i++) {
-                    dataY[i] = Yv.get(i);
+                    dataY[i] = yV.get(i);
                 }
-                dataX = Xv.toArray(new double[][]{});
+                dataX = xV.toArray(new double[][]{});
 
                 regression.newSampleData(dataY, dataX);
                 beta = regression.estimateRegressionParameters();

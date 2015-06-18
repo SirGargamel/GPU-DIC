@@ -31,17 +31,17 @@ public abstract class StrainEstimator extends Observable {
         data.put(StrainEstimationMethod.LOCAL_LEAST_SQUARES, new LocalLeastSquare());
     }
 
+    public StrainEstimator() {
+        this.exec = Engine.getInstance().getExecutorService();
+    }
+    
     public static StrainEstimator initStrainEstimator(final StrainEstimationMethod type) throws ComputationException {
         if (data.containsKey(type)) {
             return data.get(type);
         } else {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported strain estimation - " + type.toString());
         }
-    }
-
-    public StrainEstimator() {
-        this.exec = Engine.getInstance().getExecutorService();
-    }
+    }    
 
     public abstract void estimateStrain(final TaskContainer tc, final int roundFrom, int roundTo) throws ComputationException;
 
