@@ -19,7 +19,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
-import javafx.scene.control.Button;
 
 /**
  * FXML Controller class

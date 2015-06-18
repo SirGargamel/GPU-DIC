@@ -64,7 +64,7 @@ public class EditableInputPresenter extends InputPresenter {
             final Set<ROI> taskRois;
             if (!rois.isEmpty()) {
                 taskRois = new HashSet<>();
-                rois.stream().forEach((s) -> {
+                rois.stream().forEach(s -> {
                     if (s instanceof Rectangle) {
                         final Rectangle r = (Rectangle) s;
                         taskRois.add(new RectangleROI(r.getX() + r.getTranslateX(), r.getY() + r.getTranslateY(), r.getX() + r.getTranslateX() + r.getWidth(), r.getY() + r.getTranslateY() + r.getHeight()));
@@ -84,9 +84,9 @@ public class EditableInputPresenter extends InputPresenter {
     @Override
     void loadRois() {
         super.loadRois();
-        rois.stream().forEach((s) -> {
-            makeShapeActive(s);
-        });
+        rois.stream().forEach(
+                s -> makeShapeActive(s)
+        );
         roisChanged = false;
     }
 
@@ -207,7 +207,7 @@ public class EditableInputPresenter extends InputPresenter {
 
     private void onMouseRelease(MouseEvent event) {
         handleShapeSize(event);
-        actualShape = null;        
+        actualShape = null;
         saveRois();
     }
 

@@ -25,26 +25,28 @@ import org.pmw.tinylog.Logger;
  */
 public class Context {
 
+    private static final String SEPARATOR = ";";
+    private static final String UNEXPECTED_IO_ERROR = "Unexpected IO error.";
+    private static final String ILLEGAL_TYPE_OF_DATA = "Illegal type of data - ";
+    private static final Context instance;
+    private final Map<Integer, Map<Direction, BufferedImage>> exportCacheImages;
+    private final Map<String, Map<Direction, double[]>> exportCachePoints;
+    private TaskContainer tc;
+    private double[] limits;
+
     static {
         instance = new Context();
     }
 
-    public static Context getInstance() {
-        return instance;
-    }
-
-    private static final String SEPARATOR = ";";
-    private static final Context instance;
-    private TaskContainer tc;
-    private final Map<Integer, Map<Direction, BufferedImage>> exportCacheImages;
-    private final Map<String, Map<Direction, double[]>> exportCachePoints;
-    private double[] limits;
-
     private Context() {
         exportCacheImages = new HashMap<>();
         exportCachePoints = new HashMap<>();
-        
-        limits = new double[] {Double.NaN, Double.NaN};
+
+        limits = new double[]{Double.NaN, Double.NaN};
+    }
+
+    public static Context getInstance() {
+        return instance;
     }
 
     public TaskContainer getTc() {
@@ -67,7 +69,7 @@ public class Context {
                 result = m.get(dir);
             }
         } catch (IOException ex) {
-            Logger.error(ex, "Unexpected IO error.");
+            Logger.error(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;
@@ -79,7 +81,7 @@ public class Context {
             Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.GUI, this, x, y));
             result = exportCachePoints.get(generateKey(x, y));
         } catch (IOException ex) {
-            Logger.error(ex, "Unexpected IO error.");
+            Logger.error(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;
@@ -91,7 +93,7 @@ public class Context {
             Exporter.export(tc, ExportTask.generateDoublePointExport(ExportTarget.GUI, this, x1, y1, x2, y2));
             result = exportCachePoints.get(generateKey(x1, y1, x2, y2));
         } catch (IOException ex) {
-            Logger.error(ex, "Unexpected IO error.");
+            Logger.error(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;
@@ -99,7 +101,7 @@ public class Context {
 
     public void storeMapExport(final Object data, final int round, final ExportMode mode, final Direction dir) {
         if (!(data instanceof BufferedImage)) {
-            throw new IllegalArgumentException("Illegal type of data - " + data.getClass());
+            throw new IllegalArgumentException(ILLEGAL_TYPE_OF_DATA + data.getClass());
         }
 
         Map<Direction, BufferedImage> m = exportCacheImages.get(round);
@@ -113,14 +115,14 @@ public class Context {
 
     public void storePointExport(final Map<Direction, double[]> data, final int x, final int y) {
         if (!(data instanceof EnumMap)) {
-            throw new IllegalArgumentException("Illegal type of data - " + data.getClass());
+            throw new IllegalArgumentException(ILLEGAL_TYPE_OF_DATA + data.getClass());
         }
         exportCachePoints.put(generateKey(x, y), data);
     }
 
     public void storePointExport(final Map<Direction, double[]> data, final int x1, final int y1, final int x2, final int y2) {
         if (!(data instanceof EnumMap)) {
-            throw new IllegalArgumentException("Illegal type of data - " + data.getClass());
+            throw new IllegalArgumentException(ILLEGAL_TYPE_OF_DATA + data.getClass());
         }
         exportCachePoints.put(generateKey(x1, y1, x2, y2), data);
     }

@@ -14,7 +14,6 @@ import cz.tul.dic.output.target.ExportTarget;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -186,7 +185,7 @@ public class ExportEditor implements Initializable {
         actualizeExports();
     }
 
-    private Direction pickDirection() throws NoSuchElementException {
+    private Direction pickDirection() {
         final ChoiceDialog<Direction> dlg = new ChoiceDialog<>(Direction.Dabs, Direction.values());
         dlg.setHeaderText(Lang.getString("ChooseDirection"));
         dlg.setTitle(Lang.getString("Export"));

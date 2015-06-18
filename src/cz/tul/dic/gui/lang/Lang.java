@@ -23,6 +23,9 @@ public final class Lang {
         BUNDLE = ResourceBundle.getBundle("cz.tul.dic.gui.lang.Lang", Locale.getDefault());
     }
 
+    private Lang() {
+    }
+
     public static ResourceBundle getBundle() {
         return BUNDLE;
     }
@@ -41,9 +44,6 @@ public final class Lang {
         }
 
         return result;
-    }
-
-    private Lang() {
     }
 
 }

@@ -73,6 +73,7 @@ import org.pmw.tinylog.Logger;
 public class MainWindow implements Initializable {
 
     private static final String LAST_DIR = "lastDir";
+    private static final String LOGO = "logo.png";
     private static final int EXTRA_WIDTH = 19;
     private static final int EXTRA_HEIGHT = 88;
 
@@ -410,14 +411,14 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("selectROIs"));
             stage.setScene(new Scene(root));
-            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream(LOGO)));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading ROI dialog from JAR.\n{0}", e);
         }
-    }
+    }    
 
     @FXML
     private void handleButtonActionExport(ActionEvent event) {
@@ -432,7 +433,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Exports"));
             stage.setScene(new Scene(root));
-            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream(LOGO)));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.addEventHandler(WindowEvent.WINDOW_SHOWN, (WindowEvent event1) -> {
@@ -451,7 +452,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Expert"));
             stage.setScene(new Scene(root));
-            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream(LOGO)));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
@@ -468,7 +469,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("Results"));
             stage.setScene(new Scene(root));
-            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream(LOGO)));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.setResizable(false);
@@ -489,7 +490,7 @@ public class MainWindow implements Initializable {
             final Stage stage = new Stage();
             stage.setTitle(Lang.getString("RealSizeW"));
             stage.setScene(new Scene(root));
-            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream(LOGO)));
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(imagePane.getScene().getWindow());
             stage.setResizable(false);
@@ -770,9 +771,9 @@ public class MainWindow implements Initializable {
 
     private static enum Scenario {
 
-        Precise(1),
-        Default(2),
-        Coarse(5);
+        PRECISE(1),
+        DEFAULT(2),
+        COARSE(5);
 
         private final int facetSpacing;
 
