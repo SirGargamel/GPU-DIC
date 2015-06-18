@@ -33,8 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class AbstractOpenCLMemoryManager {
 
     private static final AbstractOpenCLMemoryManager INSTANCE;    
-    private static final CLImageFormat IMAGE_FORMAT;
-    private final Lock lock;
+    private static final CLImageFormat IMAGE_FORMAT;    
     protected int maxDeformationCount;
     // OpenCL entities
     protected CLMemory<IntBuffer> clImageA, clImageB;
@@ -45,7 +44,8 @@ public abstract class AbstractOpenCLMemoryManager {
     protected CLBuffer<FloatBuffer> clResults;
     // OpenCL context        
     protected CLCommandQueue queue;
-    protected CLContext context;
+    protected CLContext context;    
+    private final Lock lock;
 
     static {
         DeviceManager.clearMemory();
@@ -74,12 +74,11 @@ public abstract class AbstractOpenCLMemoryManager {
         lock.unlock();
     }
 
-    protected CLImage2d<IntBuffer> generateImage2d(final Image image) {
-        final CLImage2d<IntBuffer> result = context.createImage2d(
+    protected CLImage2d<IntBuffer> generateImage2d(final Image image) {        
+        return context.createImage2d(
                 Buffers.newDirectIntBuffer(image.toBWArray()),
                 image.getWidth(), image.getHeight(),
                 IMAGE_FORMAT, CLMemory.Mem.READ_ONLY);
-        return result;
     }
 
     protected CLBuffer<IntBuffer> generateImageArray(final Image image) {

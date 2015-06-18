@@ -66,13 +66,13 @@ public final class Engine extends Observable implements Observer {
         INSTANCE = new Engine();
     }
 
-    public static Engine getInstance() {
-        return INSTANCE;
-    }
-
     private Engine() {
         super();
         exec = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() - 1);
+    }
+
+    public static Engine getInstance() {
+        return INSTANCE;
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
