@@ -8,8 +8,8 @@ package cz.tul.dic.data.task.splitter;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.data.task.FullTask;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -20,8 +20,8 @@ public class StaticSplit extends AbstractTaskSplitter {
     private boolean hasNextElement;
     private int index;
 
-    public StaticSplit(Image image1, Image image2, final List<Facet> facets, final List<double[]> deformationLimits, final Object taskSplitValue) throws ComputationException {
-        super(image1, image2, facets, deformationLimits);
+    public StaticSplit(final FullTask task, final Object taskSplitValue) throws ComputationException {
+        super(task);
 
         if (taskSplitValue != null) {
             split = (int) taskSplitValue;
@@ -46,7 +46,7 @@ public class StaticSplit extends AbstractTaskSplitter {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        
+
         final List<Facet> sublist = new ArrayList<>(split);
         final int facetCount = facets.size();
 
@@ -62,7 +62,7 @@ public class StaticSplit extends AbstractTaskSplitter {
 
         return new ComputationTask(image1, image2, sublist, deformationLimits, false);
     }
-    
+
     @Override
     public void signalTaskSizeTooBig() {
         hasNextElement = false;
@@ -71,5 +71,5 @@ public class StaticSplit extends AbstractTaskSplitter {
     @Override
     public boolean isSplitterReady() {
         return hasNextElement;
-    }   
+    }
 }

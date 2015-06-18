@@ -8,10 +8,9 @@ package cz.tul.dic.engine.opencl.solvers;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Coordinates;
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationLimit;
+import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +23,9 @@ public class CoarseFine extends TaskSolver {
     private static final double STEP_MINIMAL = 0.01;
 
     @Override
-    List<CorrelationResult> solve(Image image1, Image image2, Kernel kernel, List<Facet> facets, List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException {
-        final int facetCount = deformationLimits.size();
+    public List<CorrelationResult> solve(final Kernel kernel,
+            final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
+        final int facetCount = fullTask.getFacets().size();
         final StringBuilder sb = new StringBuilder();
         List<double[]> zeroOrderLimits = new ArrayList<>(facetCount);
         List<CorrelationResult> results;
@@ -33,7 +33,7 @@ public class CoarseFine extends TaskSolver {
         double step = STEP_INITIAL;
 
         double minStep = 1;
-        for (double[] dA : deformationLimits) {
+        for (double[] dA : fullTask.getDeformationLimits()) {
             minStep = Math.min(minStep, Math.min(dA[DeformationLimit.USTEP], dA[DeformationLimit.VSTEP]));
         }
         int roundCount = 1;
@@ -55,7 +55,7 @@ public class CoarseFine extends TaskSolver {
 
         // initial pixel step
         int round = 0;
-        for (double[] dA : deformationLimits) {
+        for (double[] dA : fullTask.getDeformationLimits()) {
             temp = new double[COUNT_ZERO_ORDER_LIMITS];
             System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
             temp[DeformationLimit.UMIN] = Math.floor(temp[DeformationLimit.UMIN]);
@@ -66,7 +66,10 @@ public class CoarseFine extends TaskSolver {
             temp[DeformationLimit.VSTEP] = step;
             zeroOrderLimits.add(temp);
         }
-        results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+        results = computeTask(
+                kernel,
+                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getFacets(), zeroOrderLimits),
+                DeformationDegree.ZERO);
         sb.append("Initial results, step [").append(step).append("]:");
         for (int i = 0; i < facetCount; i++) {
             sb.append(i)
@@ -105,7 +108,10 @@ public class CoarseFine extends TaskSolver {
 
                 zeroOrderLimits.add(temp);
             }
-            results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+            results = computeTask(
+                    kernel,
+                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getFacets(), zeroOrderLimits),
+                    DeformationDegree.ZERO);
 
             sb.append("Finer results, step [").append(step).append("]:");
             for (int i = 0; i < facetCount; i++) {
@@ -114,7 +120,7 @@ public class CoarseFine extends TaskSolver {
                         .append(results.get(i))
                         .append("; ");
             }
-            signalizeRoundComplete(++round, roundCount);            
+            signalizeRoundComplete(++round, roundCount);
         } while (step > STEP_MINIMAL);
 
         //higher order search
@@ -123,7 +129,7 @@ public class CoarseFine extends TaskSolver {
 
             for (int i = 0; i < facetCount; i++) {
                 coarseResult = results.get(i).getDeformation();
-                temp = deformationLimits.get(i);
+                temp = fullTask.getDeformationLimits().get(i);
                 l = temp.length;
 
                 newLimits = new double[l];
@@ -139,9 +145,8 @@ public class CoarseFine extends TaskSolver {
                 higherOrderLimits.add(newLimits);
             }
             results = computeTask(
-                    image1, image2,
-                    kernel, facets,
-                    higherOrderLimits,
+                    kernel,
+                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getFacets(), higherOrderLimits),
                     defDegree);
 
             sb.append("Higher order results: ");

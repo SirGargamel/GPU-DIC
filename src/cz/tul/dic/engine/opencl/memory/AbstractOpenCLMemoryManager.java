@@ -17,6 +17,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.FloatBuffer;
@@ -29,14 +30,9 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author Petr Ječmen
  */
-public abstract class OpenCLMemoryManager {
+public abstract class AbstractOpenCLMemoryManager {
 
-    private static final OpenCLMemoryManager INSTANCE;    
-
-    public static OpenCLMemoryManager init() {
-        return INSTANCE;
-    }
-
+    private static final AbstractOpenCLMemoryManager INSTANCE;    
     private static final CLImageFormat IMAGE_FORMAT;
     private final Lock lock;
     protected int maxDeformationCount;
@@ -50,25 +46,29 @@ public abstract class OpenCLMemoryManager {
     // OpenCL context        
     protected CLCommandQueue queue;
     protected CLContext context;
-    
+
     static {
         DeviceManager.clearMemory();
         INSTANCE = new StaticMemoryManager();
-        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);                
+        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
+    }
+    
+    public static AbstractOpenCLMemoryManager init() {
+        return INSTANCE;
     }
 
-    OpenCLMemoryManager() {
+    protected AbstractOpenCLMemoryManager() {
         lock = new ReentrantLock();
     }
 
-    public void assignData(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final Kernel kernel) throws ComputationException {
-        lock.lock();        
+    public void assignData(final ComputationTask task, final Kernel kernel) throws ComputationException {
+        lock.lock();
         context = DeviceManager.getContext();
         queue = DeviceManager.getQueue();
-        assignDataToGPU(imageA, imageB, facets, deformationLimits, kernel);
+        assignDataToGPU(task, kernel);
     }
 
-    public abstract void assignDataToGPU(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final Kernel kernel) throws ComputationException;
+    public abstract void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException;
 
     public void unlockData() {
         lock.unlock();

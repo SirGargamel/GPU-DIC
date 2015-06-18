@@ -5,7 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.kernels;
 
-import cz.tul.dic.engine.opencl.memory.OpenCLMemoryManager;
+import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
@@ -16,14 +16,13 @@ import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.CLResource;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.data.result.CorrelationResult;
+import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import java.io.BufferedReader;
@@ -54,13 +53,13 @@ public abstract class Kernel {
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
     private final String kernelName;
     private final Set<CLResource> clMem;
-    private final OpenCLMemoryManager memManager;
+    private final AbstractOpenCLMemoryManager memManager;
 
     static {
         resultListeners = new LinkedList<>();
     }
 
-    protected Kernel(String kernelName, final OpenCLMemoryManager memManager) {
+    protected Kernel(String kernelName, final AbstractOpenCLMemoryManager memManager) {
         this.kernelName = kernelName;
         clMem = new HashSet<>();
         this.memManager = memManager;
@@ -69,11 +68,11 @@ public abstract class Kernel {
         context = DeviceManager.getContext();
     }
 
-    public static Kernel createKernel(final KernelType kernelType, final OpenCLMemoryManager memManager) {
+    public static Kernel createKernel(final KernelType kernelType, final AbstractOpenCLMemoryManager memManager) {
         Kernel result;
         try {
             final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));
-            result = (Kernel) cls.getConstructor(OpenCLMemoryManager.class).newInstance(memManager);
+            result = (Kernel) cls.getConstructor(AbstractOpenCLMemoryManager.class).newInstance(memManager);
 
             if (!kernelType.isSafeToUse()) {
                 Logger.warn("Kernel \"{0}\" is not safe to use, results might be inprecise !!!.", kernelType);
@@ -122,17 +121,17 @@ public abstract class Kernel {
         }
     }
 
-    public List<CorrelationResult> compute(Image imageA, Image imageB, List<Facet> facets, List<double[]> deformationLimits, boolean findBest) throws ComputationException {
-        final int facetCount = facets.size();
-        if (facets.isEmpty()) {
+    public List<CorrelationResult> compute(final ComputationTask task, boolean findBest) throws ComputationException {
+        if (task.getFacets().isEmpty()) {
             Logger.warn("Empty facets for computation.");
             return new ArrayList<>(0);
         }
-        final int facetSize = facets.get(0).getSize();
+        final int facetCount = task.getFacets().size();
+        final int facetSize = task.getFacets().get(0).getSize();
 
         final List<CorrelationResult> result;
         try {
-            memManager.assignData(imageA, imageB, facets, deformationLimits, this);
+            memManager.assignData(task, this);
             final CLBuffer<FloatBuffer> clResults = memManager.getClResults();
             final int maxDeformationCount = memManager.getMaxDeformationCount();
 
@@ -141,14 +140,14 @@ public abstract class Kernel {
                     memManager.getClDeformationLimits(), memManager.getClDefStepCount(),
                     clResults,
                     maxDeformationCount,
-                    imageA.getWidth(), facetSize, facetCount);
+                    task.getImageA().getWidth(), facetSize, facetCount);
             queue.flush();
 
             if (!resultListeners.isEmpty()) {
                 queue.putReadBuffer(clResults, true);
                 final float[] results = readBuffer(clResults.getBuffer());
                 for (IGPUResultsReceiver rr : resultListeners) {
-                    rr.dumpGpuResults(results, facets, deformationLimits);
+                    rr.dumpGpuResults(results, task.getFacets(), task.getDeformationLimits());
                 }
             }
 
@@ -156,7 +155,7 @@ public abstract class Kernel {
                 final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
                 final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
 
-                result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, deformationLimits);
+                result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, task.getDeformationLimits());
             } else {
                 result = null;
             }

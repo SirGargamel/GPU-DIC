@@ -8,11 +8,11 @@ package cz.tul.dic.engine.opencl.solvers;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.debug.IGPUResultsReceiver;
+import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,18 +38,17 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
     private static final int COUNT_STEP = 5;
     private static final int LIMITS_ROUNDS = 20;
     private static final double LIMIT_MIN_GROWTH = 0.01;
-    private static final double STEP = 1;    
+    private static final double STEP = 1;
     private float[] gpuData;
 
     @Override
-    List<CorrelationResult> solve(
-            final Image image1, final Image image2,
-            final Kernel kernel, final List<Facet> facets,
-            final List<double[]> deformationLimits, final DeformationDegree defDegree) throws ComputationException {
-        final int facetCount = deformationLimits.size();
+    public List<CorrelationResult> solve(
+            final Kernel kernel,
+            final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
+        final int facetCount = fullTask.getDeformationLimits().size();
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
-        final List<CorrelationResult> coarseResults = performInitialResultEstimation(image1, image2, kernel, facets, deformationLimits);
+        final List<CorrelationResult> coarseResults = performInitialResultEstimation(kernel, fullTask);
         notifyProgress(facetCount, facetCount);
 
         double[] temp;
@@ -59,7 +58,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         double[] newLimits, coarseResult, solution;
         for (int i = 0; i < facetCount; i++) {
             coarseResult = coarseResults.get(i).getDeformation();
-            temp = deformationLimits.get(i);
+            temp = fullTask.getDeformationLimits().get(i);
 
             newLimits = new double[coeffCount * 3];
             System.arraycopy(temp, 0, newLimits, 0, Math.min(temp.length, newLimits.length));
@@ -73,7 +72,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         }
         countsList = DeformationUtils.generateDeformationCounts(limitsList);
 
-        final List<Facet> facetsToCompute = new ArrayList<>(facets);
+        final List<Facet> facetsToCompute = new ArrayList<>(fullTask.getFacets());
         List<CorrelationResult> results = coarseResults;
         RealVector gradient, solutionVec;
         RealMatrix hessianMatrix;
@@ -99,13 +98,13 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
             counterFinished = 0;
             finishedFacets.clear();
 
-            computeTask(image1, image2, kernel, facetsToCompute, limitsList, defDegree);
+            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), facetsToCompute, limitsList), defDegree);
 
             it = facetsToCompute.iterator();
             sb.append("Results for round ").append(i).append(": ");
             while (it.hasNext()) {
                 f = it.next();
-                facetIndexGlobal = facets.indexOf(f);
+                facetIndexGlobal = fullTask.getFacets().indexOf(f);
                 counts = countsList.get(facetIndexLocal);
 
                 try {
@@ -170,8 +169,8 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         return results;
     }
 
-    List<CorrelationResult> performInitialResultEstimation(Image image1, Image image2, Kernel kernel, List<Facet> facets, List<double[]> deformationLimits) throws ComputationException {
-        final int facetCount = deformationLimits.size();
+    List<CorrelationResult> performInitialResultEstimation(final Kernel kernel, final FullTask fullTask) throws ComputationException {
+        final int facetCount = fullTask.getFacets().size();
 
         double[] temp;
         List<double[]> zeroOrderLimits = new ArrayList<>(facetCount);
@@ -179,7 +178,7 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
         final StringBuilder sb = new StringBuilder();
 
         // initial pixel step        
-        for (double[] dA : deformationLimits) {
+        for (double[] dA : fullTask.getDeformationLimits()) {
             temp = new double[COUNT_ZERO_ORDER_LIMITS];
             System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
             temp[DeformationLimit.UMIN] = Math.floor(temp[DeformationLimit.UMIN]);
@@ -190,14 +189,14 @@ public class NewtonRaphson extends TaskSolver implements IGPUResultsReceiver {
             temp[DeformationLimit.VSTEP] = STEP;
             zeroOrderLimits.add(temp);
         }
-        results = computeTask(image1, image2, kernel, facets, zeroOrderLimits, DeformationDegree.ZERO);
+        results = computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getFacets(), zeroOrderLimits), DeformationDegree.ZERO);
         sb.append("Initial results, step [").append(STEP).append("]:");
         for (int i = 0; i < facetCount; i++) {
             sb.append(i)
                     .append(" - ")
                     .append(results.get(i))
                     .append("; ");
-        }        
+        }
 
         return results;
     }

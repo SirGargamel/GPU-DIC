@@ -6,9 +6,9 @@
 package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,12 +37,12 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
     private boolean hasNextElement;
     private int facetIndex;
 
-    public OpenCLSplitter(Image image1, Image image2, List<Facet> facets, List<double[]> deformationLimits) {
-        this(image1, image2, facets, deformationLimits, false);
+    public OpenCLSplitter(final FullTask task) {
+        this(task, false);
     }
 
-    private OpenCLSplitter(Image image1, Image image2, List<Facet> facets, List<double[]> deformationLimits, boolean subSplitter) {
-        super(image1, image2, facets, deformationLimits);
+    private OpenCLSplitter(final FullTask task, boolean subSplitter) {
+        super(task);
 
         subSplitters = new LinkedList<>();
         this.subSplitter = subSplitter;
@@ -119,7 +119,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
                 Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
                 checkedDeformations = new ArrayList<>(1);
                 checkedDeformations.add(newLimits);
-                subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
+                subSplitters.add(new OpenCLSplitter(new FullTask(image1, image2, sublist, checkedDeformations), true));
 
                 newLimits = new double[deformationLimitsArraySize];
                 System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
@@ -127,7 +127,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
                 Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
                 checkedDeformations = new ArrayList<>(1);
                 checkedDeformations.add(newLimits);
-                subSplitters.add(new OpenCLSplitter(image1, image2, sublist, checkedDeformations, true));
+                subSplitters.add(new OpenCLSplitter(new FullTask(image1, image2, sublist, checkedDeformations), true));
 
                 if (subSplitter) {
                     Logger.warn("Too many deformations in subtask, {0} generating subsplitters - {1}, {2}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);

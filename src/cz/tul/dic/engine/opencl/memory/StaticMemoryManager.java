@@ -13,48 +13,49 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.IntBuffer;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
-public class StaticMemoryManager extends OpenCLMemoryManager {
+public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
 
     @Override
-    public void assignDataToGPU(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final Kernel kernel) throws ComputationException {
+    public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {
         try {
             release(clImageA);
             release(clImageB);
             if (kernel.usesImage()) {
-                clImageA = generateImage2d(imageA);
+                clImageA = generateImage2d(task.getImageA());
                 queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
-                clImageB = generateImage2d(imageB);
+                clImageB = generateImage2d(task.getImageB());
                 queue.putWriteImage((CLImage2d<IntBuffer>) clImageB, false);
             } else {
-                clImageA = generateImageArray(imageA);
+                clImageA = generateImageArray(task.getImageA());
                 queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageA, false);
-                clImageB = generateImageArray(imageB);
+                clImageB = generateImageArray(task.getImageB());
                 queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageB, false);
             }
             
             release(clFacetData);
             release(clFacetCenters);
-            clFacetData = generateFacetData(facets, kernel.usesMemoryCoalescing());
+            clFacetData = generateFacetData(task.getFacets(), kernel.usesMemoryCoalescing());
             queue.putWriteBuffer(clFacetData, false);
-            clFacetCenters = generateFacetCenters(facets);
+            clFacetCenters = generateFacetCenters(task.getFacets());
             queue.putWriteBuffer(clFacetCenters, false);
             
             release(clDeformationLimits);
             release(clDefStepCount);
-            clDeformationLimits = generateDeformationLimits(deformationLimits);
+            clDeformationLimits = generateDeformationLimits(task.getDeformationLimits());
             queue.putWriteBuffer(clDeformationLimits, false);
-            final List<int[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
+            final List<int[]> deformationCounts = DeformationUtils.generateDeformationCounts(task.getDeformationLimits());
             clDefStepCount = generateDeformationStepCounts(deformationCounts);
             queue.putWriteBuffer(clDefStepCount, false);
             
             release(clResults);
             maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
-            final long size = facets.size() * maxDeformationCount;
+            final long size = task.getFacets().size() * maxDeformationCount;
             if (size <= 0 || size >= Integer.MAX_VALUE) {
                 throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
             }

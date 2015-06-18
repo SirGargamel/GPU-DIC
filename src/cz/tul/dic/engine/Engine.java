@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine;
 
+import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.solvers.TaskSolver;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Facet;
@@ -167,7 +168,7 @@ public final class Engine extends Observable implements Observer {
         final TaskSplitMethod taskSplit = (TaskSplitMethod) task.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = task.getParameter(TaskParameter.TASK_SPLIT_PARAM);
         solver.setTaskSplitVariant(taskSplit, taskSplitValue);
-        
+
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
 
         // prepare data
@@ -187,9 +188,10 @@ public final class Engine extends Observable implements Observer {
             correlations.put(
                     roi,
                     solver.solve(
-                            task.getImage(roundFrom), task.getImage(roundTo),
-                            facets.get(roi),
-                            generateDeformations(task.getDeformationLimits(roundFrom, roi), facets.get(roi).size()),
+                            new FullTask(
+                                    task.getImage(roundFrom), task.getImage(roundTo),
+                                    facets.get(roi),
+                                    generateDeformations(task.getDeformationLimits(roundFrom, roi), facets.get(roi).size())),
                             DeformationUtils.getDegreeFromLimits(task.getDeformationLimits(roundFrom, roi)),
                             task.getFacetSize(roundFrom, roi)));
         }
@@ -272,6 +274,5 @@ public final class Engine extends Observable implements Observer {
     public ExecutorService getExecutorService() {
         return exec;
     }
-
 
 }

@@ -10,6 +10,7 @@ import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.TaskDefaultValues;
+import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.solvers.TaskSolver;
 import java.awt.image.BufferedImage;
@@ -75,9 +76,8 @@ public final class WorkSizeManager {
                     facets.add(Facet.createFacet(fs, 0, 0));
                     facets.add(Facet.createFacet(fs, 0, 0));
                     solver.solve(
-                            img, img,
-                            facets,
-                            deformationLimits, DeformationDegree.ZERO,
+                            new FullTask(img, img, facets, deformationLimits),
+                            DeformationDegree.ZERO,
                             fs);
                 }
             }

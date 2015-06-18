@@ -13,26 +13,27 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.IntBuffer;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
-public class DynamicMemoryManager extends OpenCLMemoryManager {
+public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
 
     private Image imageA, imageB;
     private List<Facet> facets;
     private List<double[]> deformationLimits;
-    private List<int[]> deformationCounts;    
+    private List<int[]> deformationCounts;
 
     @Override
-    public void assignDataToGPU(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final Kernel kernel) throws ComputationException {
+    public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {
         try {
-            if (imageA != this.imageA || clImageA.isReleased()) {
+            if (task.getImageA() != imageA || clImageA.isReleased()) {
                 release(clImageA);
-                this.imageA = imageA;
+                imageA = task.getImageA();
 
-                if (imageA == this.imageB) {
+                if (task.getImageA() == imageB) {
                     clImageA = clImageB;
                 } else {
                     if (kernel.usesImage()) {
@@ -44,11 +45,11 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
                     }
                 }
             }
-            if (imageB != this.imageB || clImageB.isReleased()) {
+            if (task.getImageB() != imageB || clImageB.isReleased()) {
                 if (clImageA != clImageB) {
                     release(clImageB);
                 }
-                this.imageB = imageB;
+                imageB = task.getImageB();
 
                 if (kernel.usesImage()) {
                     clImageB = generateImage2d(imageB);
@@ -60,10 +61,10 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
             }
 
             boolean changedResults = false;
-            if (facets != this.facets || !facets.equals(this.facets) || clFacetData.isReleased()) {
+            if (task.getFacets() != facets || !task.getFacets().equals(facets) || clFacetData.isReleased()) {
                 release(clFacetData);
                 release(clFacetCenters);
-                this.facets = facets;
+                facets = task.getFacets();
 
                 clFacetData = generateFacetData(facets, kernel.usesMemoryCoalescing());
                 queue.putWriteBuffer(clFacetData, false);
@@ -73,10 +74,10 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
 
                 changedResults = true;
             }
-            if (deformationLimits != this.deformationLimits || !deformationLimits.equals(this.deformationLimits) || clDeformationLimits.isReleased()) {
+            if (task.getDeformationLimits() != deformationLimits || !task.getDeformationLimits().equals(deformationLimits) || clDeformationLimits.isReleased()) {
                 release(clDeformationLimits);
                 release(clDefStepCount);
-                this.deformationLimits = deformationLimits;
+                deformationLimits = task.getDeformationLimits();
 
                 clDeformationLimits = generateDeformationLimits(deformationLimits);
                 queue.putWriteBuffer(clDeformationLimits, false);
@@ -92,7 +93,7 @@ public class DynamicMemoryManager extends OpenCLMemoryManager {
                 release(clResults);
 
                 maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
-                final long size = facets.size() * maxDeformationCount;
+                final long size = task.getFacets().size() * maxDeformationCount;
                 if (size <= 0 || size >= Integer.MAX_VALUE) {
                     throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
                 }

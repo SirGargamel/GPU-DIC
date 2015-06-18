@@ -10,6 +10,7 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.data.task.FullTask;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,27 +24,32 @@ public abstract class AbstractTaskSplitter implements Iterator<ComputationTask> 
     protected final List<Facet> facets;
     protected final List<double[]> deformationLimits;
 
-    public AbstractTaskSplitter(final Image image1, final Image image2, final List<Facet> facets, final List<double[]> deformationLimits) {
-        this.image1 = image1;
-        this.image2 = image2;
-        this.facets = facets;
-        this.deformationLimits = deformationLimits;
+    public AbstractTaskSplitter(final FullTask task) {
+        this.image1 = task.getImageA();
+        this.image2 = task.getImageB();
+        this.facets = task.getFacets();
+        this.deformationLimits = task.getDeformationLimits();
     }
 
-    public static AbstractTaskSplitter prepareSplitter(final Image image1, final Image image2, final List<Facet> facets, final List<double[]> deformationLimits, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
+    public static AbstractTaskSplitter prepareSplitter(final FullTask task, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
+        AbstractTaskSplitter result;
         switch (ts) {
             case NONE:
-                return new NoSplit(image1, image2, facets, deformationLimits);
+                result = new NoSplit(task);
+                break;
             case STATIC:
-                return new StaticSplit(image1, image2, facets, deformationLimits, taskSplitValue);
+                result = new StaticSplit(task, taskSplitValue);
+                break;
             case DYNAMIC:
-                return new OpenCLSplitter(image1, image2, facets, deformationLimits);
+                result = new OpenCLSplitter(task);
+                break;
             default:
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of task splitting - " + ts);
         }
+        return result;
     }
 
-    public abstract void signalTaskSizeTooBig();    
+    public abstract void signalTaskSizeTooBig();
 
     public abstract boolean isSplitterReady();
 

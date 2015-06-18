@@ -10,19 +10,19 @@ import com.jogamp.opencl.CLException;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.AbstractTaskSplitter;
+import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
-import cz.tul.dic.engine.opencl.memory.OpenCLMemoryManager;
+import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -34,7 +34,7 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class TaskSolver extends Observable {
 
-    final OpenCLMemoryManager memManager;
+    final AbstractOpenCLMemoryManager memManager;
     // dynamic
     KernelType kernelType;
     Interpolation interpolation;
@@ -56,7 +56,7 @@ public abstract class TaskSolver extends Observable {
     }
 
     TaskSolver() {
-        memManager = OpenCLMemoryManager.init();
+        memManager = AbstractOpenCLMemoryManager.init();
 
         kernelType = WorkSizeManager.getBestKernel();
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
@@ -71,9 +71,7 @@ public abstract class TaskSolver extends Observable {
     }
 
     public synchronized List<CorrelationResult> solve(
-            Image image1, Image image2,
-            List<Facet> facets,
-            List<double[]> deformationLimits, DeformationDegree defDegree,
+            final FullTask fullTask, DeformationDegree defDegree,
             int facetSize) throws ComputationException {
         stop = false;
 
@@ -82,32 +80,30 @@ public abstract class TaskSolver extends Observable {
 
         this.facetSize = facetSize;
 
-        final List<CorrelationResult> result = solve(image1, image2, kernel, facets, deformationLimits, defDegree);
-        
+        final List<CorrelationResult> result = solve(kernel, fullTask, defDegree);
+
         kernel.clearMemory();
-        
+
         return result;
     }
 
-    abstract List<CorrelationResult> solve(
-            Image image1, Image image2,
-            final Kernel kernel, List<Facet> facets,
-            List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException;
+    public abstract List<CorrelationResult> solve(
+            final Kernel kernel, 
+            final FullTask fullTask, DeformationDegree defDegree) throws ComputationException;
 
     abstract boolean needsBestResult();
 
-    List<CorrelationResult> computeTask(Image image1, Image image2,
-            final Kernel kernel, List<Facet> facets,
-            List<double[]> deformationLimits, DeformationDegree defDegree) throws ComputationException {
-        final List<CorrelationResult> result = new ArrayList<>(facets.size());
-        for (int i = 0; i < facets.size(); i++) {
+    protected synchronized List<CorrelationResult> computeTask(
+            final Kernel kernel, final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
+        final List<CorrelationResult> result = new ArrayList<>(fullTask.getFacets().size());
+        for (int i = 0; i < fullTask.getFacets().size(); i++) {
             result.add(null);
         }
 
         try {
             kernel.prepareKernel(facetSize, defDegree, interpolation);
 
-            AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);            
+            AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
             boolean finished = false;
             Exception lastEx = null;
             while (ts.isSplitterReady() && !finished) {
@@ -120,21 +116,21 @@ public abstract class TaskSolver extends Observable {
                         }
 
                         ct = ts.next();
-                        ct.setResults(kernel.compute(ct.getImageA(), ct.getImageB(), ct.getFacets(), ct.getDeformationLimits(), needsBestResult()));
+                        ct.setResults(kernel.compute(ct, needsBestResult()));
                         // pick best results for this computation task and discard ct data 
                         if (ct.isSubtask()) {
                             bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
                         } else if (bestSubResult != null) {
                             bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
                             // store result
-                            final int globalFacetIndex = facets.indexOf(ct.getFacets().get(0));
+                            final int globalFacetIndex = fullTask.getFacets().indexOf(ct.getFacets().get(0));
                             if (globalFacetIndex < 0) {
                                 throw new IllegalArgumentException("Local facet not found in global registry.");
                             }
                             result.set(globalFacetIndex, bestSubResult);
                             bestSubResult = null;
                         } else {
-                            pickBestResultsForTask(ct, result, facets);
+                            pickBestResultsForTask(ct, result, fullTask.getFacets());
                         }
                     }
 
@@ -146,7 +142,7 @@ public abstract class TaskSolver extends Observable {
                         if (exC.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
                             Logger.warn(exC);
                             ts.signalTaskSizeTooBig();
-                            ts = AbstractTaskSplitter.prepareSplitter(image1, image2, facets, deformationLimits, taskSplitVariant, taskSplitValue);
+                            ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
                             lastEx = ex;
                         } else {
                             throw ex;

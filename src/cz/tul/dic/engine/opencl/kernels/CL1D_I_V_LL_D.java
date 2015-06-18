@@ -5,7 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.kernels;
 
-import cz.tul.dic.engine.opencl.memory.OpenCLMemoryManager;
+import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
@@ -25,7 +25,7 @@ public class CL1D_I_V_LL_D extends Kernel {
     private final WorkSizeManager wsm;
     private boolean stop;
 
-    public CL1D_I_V_LL_D(final OpenCLMemoryManager memManager) {
+    public CL1D_I_V_LL_D(final AbstractOpenCLMemoryManager memManager) {
         super("CL1D_I_V_LL_D", memManager);
         wsm = new WorkSizeManager(KernelType.CL1D_I_V_LL_D);
     }

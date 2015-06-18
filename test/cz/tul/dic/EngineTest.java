@@ -24,6 +24,7 @@ import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
+import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.generators.facet.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
@@ -353,9 +354,10 @@ public class EngineTest {
         final Map<ROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
-                        tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                        roiFacets,
-                        generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
+                        new FullTask(
+                                tc.getImage(ROUND), tc.getImage(ROUND + 1),
+                                roiFacets,
+                                generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size())),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi)));
         solver.endTask();
@@ -405,9 +407,10 @@ public class EngineTest {
         final Map<ROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
-                        tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                        roiFacets,
-                        generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size()),
+                        new FullTask(
+                                tc.getImage(ROUND), tc.getImage(ROUND + 1),
+                                roiFacets,
+                                generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size())),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getFacetSize(ROUND, roi)));
         solver.endTask();

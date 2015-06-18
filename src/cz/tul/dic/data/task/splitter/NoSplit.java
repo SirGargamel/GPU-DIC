@@ -8,6 +8,7 @@ package cz.tul.dic.data.task.splitter;
 import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.data.task.FullTask;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -15,8 +16,8 @@ public class NoSplit extends AbstractTaskSplitter {
 
     private boolean hasNextElement;
 
-    public NoSplit(final Image image1, final Image image2, final List<Facet> facets, final List<double[]> deformationLimits) {
-        super(image1, image2, facets, deformationLimits);
+    public NoSplit(final FullTask task) {
+        super(task);
         hasNextElement = true;
     }
 
