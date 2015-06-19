@@ -27,10 +27,8 @@ public class FacetGenerator {
 
     static {
         generators = new HashMap<>();
-
-        AbstractFacetGenerator fg = new SimpleFacetGenerator();
-        generators.put(fg.getMode(), fg);
-        fg = new TightFacetGenerator();
+        
+        AbstractFacetGenerator fg = new TightFacetGenerator();
         generators.put(fg.getMode(), fg);
     }
 

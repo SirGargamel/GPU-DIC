@@ -11,7 +11,6 @@ package cz.tul.dic.generators.facet;
  */
 public enum FacetGeneratorMethod {
 
-    CLASSIC,
-    TIGHT
+    TIGHT,;
     
 }

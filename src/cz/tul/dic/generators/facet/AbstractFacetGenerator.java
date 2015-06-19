@@ -22,7 +22,7 @@ public abstract class AbstractFacetGenerator {
     
     public abstract FacetGeneratorMethod getMode();
     
-    protected boolean checkAreaValidity(final double x1, final double y1, final double x2, final double y2, final int width, final int height) {
+    protected boolean checkAreaValidity(final int x1, final int y1, final int x2, final int y2, final int width, final int height) {
         boolean result = true;
         
         result &= x1 >= 0;

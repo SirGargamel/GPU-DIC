@@ -112,8 +112,8 @@ public class SolverTest {
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
         task.setParameter(TaskParameter.FACET_SIZE, 40);
-        task.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
-        task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 0);
+        task.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.TIGHT);
+        task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 40);
         task.setParameter(TaskParameter.SOLVER, solver);
 
         Engine.getInstance().computeTask(task);

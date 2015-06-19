@@ -139,8 +139,8 @@ public class EngineTest {
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.CLASSIC);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.TIGHT);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 11);
         tc.setParameter(TaskParameter.KERNEL, kernel);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
         tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, taskSplit);
