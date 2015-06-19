@@ -135,21 +135,25 @@ public abstract class DisplacementCalculator {
         final double dY = y - intY;
 
         if (data[intX][intY] != null) {
-            for (int dim = 0; dim < INTERPOLATION_DIM; dim++) {
-                result[dim] += data[intX][intY][dim] * (1 - dX) * (1 - dY);
-                if (intX < data.length - 1) {
-                    result[dim] += data[intX + 1][intY][dim] * dX * (1 - dY);
-                    if (intY < data[intX].length - 1) {
-                        result[dim] += data[intX + 1][intY + 1][dim] * dX * dY;
-                    }
-                }
-                if (intY < data[intX].length - 1) {
-                    result[dim] += data[intX][intY + 1][dim] * (1 - dX) * dY;
-                }
-            }
+            calculateValue(result, data, intX, intY, dX, dY);
         }
 
         return result;
+    }
+
+    private static void calculateValue(final double[] result, final double[][][] data, final int intX, final int intY, final double dX, final double dY) {
+        for (int dim = 0; dim < INTERPOLATION_DIM; dim++) {
+            result[dim] += data[intX][intY][dim] * (1 - dX) * (1 - dY);
+            if (intX < data.length - 1) {
+                result[dim] += data[intX + 1][intY][dim] * dX * (1 - dY);
+                if (intY < data[intX].length - 1) {
+                    result[dim] += data[intX + 1][intY + 1][dim] * dX * dY;
+                }
+            }
+            if (intY < data[intX].length - 1) {
+                result[dim] += data[intX][intY + 1][dim] * (1 - dX) * dY;
+            }
+        }
     }
 
 }
