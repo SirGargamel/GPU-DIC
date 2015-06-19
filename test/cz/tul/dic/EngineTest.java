@@ -209,7 +209,7 @@ public class EngineTest {
     private String computeAndCheckTask(final TaskContainer tc, final String fileName) {
         try {
             Engine.getInstance().computeTask(tc);
-        } catch (ComputationException | IOException ex) {
+        } catch (ComputationException ex) {
             return generateDescription(fileName, tc, -1, ex.getLocalizedMessage());
         }
 
