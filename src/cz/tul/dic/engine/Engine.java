@@ -75,7 +75,7 @@ public final class Engine extends Observable implements Observer {
         return INSTANCE;
     }
 
-    public void computeTask(final TaskContainer tc) throws ComputationException, IOException {
+    public void computeTask(final TaskContainer tc) throws ComputationException {
         stopEngine = false;
         setChanged();
         notifyObservers(0);
@@ -86,7 +86,6 @@ public final class Engine extends Observable implements Observer {
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
         final Set<Future<Void>> futures = new HashSet<>();
 
-//        final Set<Hint> hints = tc.getHints();
         int r, nextR, baseR = -1;
         for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             if (stopEngine) {
@@ -106,26 +105,18 @@ public final class Engine extends Observable implements Observer {
                 baseR = r;
             } else {
                 futures.add(exec.submit(new OverlapComputation(tc, baseR, nextR, strain)));
-//                tc.setResult(baseR, nextR, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, nextR, r)));
-//                strain.computeStrain(tc, r, nextR);
-//                strain.computeStrain(tc, baseR, nextR);
             }
 
-            exportRound(tc, r);
+            try {
+                exportRound(tc, r);
+            } catch (IOException ex) {
+                Logger.error(ex, "Round export failed.");
+            }
         }
 
         Stats.getInstance().dumpDeformationsStatisticsUsage();
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
 
-//        if (!hints.contains(Hint.NO_STRAIN)) {
-//            // TODO compute strain after deformations (overlap)
-//            if (stopEngine) {
-//                return;
-//            }
-//            setChanged();
-//            notifyObservers(StrainEstimator.class);
-//            strain.computeStrain(tc);
-//        }
         try {
             setChanged();
             notifyObservers(StrainEstimator.class);
@@ -138,8 +129,16 @@ public final class Engine extends Observable implements Observer {
 
         endTask();
 
-        Exporter.export(tc);
-        TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
+        try {
+            Exporter.export(tc);
+        } catch (IOException ex) {
+            Logger.error(ex, "Task export failed.");
+        }
+        try {
+            TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
+        } catch (IOException ex) {
+            Logger.error(ex, "Task serialization to binary failed.");
+        }
     }
 
     public void computeRound(final TaskContainer task, final int roundFrom, final int roundTo) throws ComputationException {
