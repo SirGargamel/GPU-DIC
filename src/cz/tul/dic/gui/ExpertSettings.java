@@ -53,12 +53,9 @@ public class ExpertSettings implements Initializable {
                         newLimits = new int[]{Integer.parseInt(split[0].trim()), Integer.parseInt(split[1].trim())};
                     }
                 } catch (NumberFormatException | NullPointerException ex) {
-                    newLimits = null;
                 }
                 if (newLimits == null) {
-                    Dialogs.showInfo(
-                            Lang.getString("Warning"),
-                            Lang.getString("IllegalLimitsR"));
+                    signalizeIllegalLimits();
                 }
             }
             tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
@@ -75,14 +72,14 @@ public class ExpertSettings implements Initializable {
             }
             tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimitsD);
 
-            final double newWs = Double.valueOf(textWindowSize.getText());
+            final double newWs = Double.parseDouble(textWindowSize.getText());
             final Object old = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
             if (old != null) {
                 final double oldWs = (double) old;
                 if (Double.compare(newWs, oldWs) != 0) {
                     // recompute
                     tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, newWs);
-                    Task<String> worker = new Task<String>() {
+                    final Task<String> worker = new Task<String>() {
 
                         @Override
                         protected String call() throws Exception {
@@ -109,17 +106,17 @@ public class ExpertSettings implements Initializable {
                         try {
                             final String err = worker.get();
                             if (err != null) {
-                                Platform.runLater(() -> {
-                                    Dialogs.showWarning(
-                                            Lang.getString("error"),
-                                            err);
-                                });
+                                Platform.runLater(()
+                                        -> Dialogs.showWarning(
+                                                Lang.getString("error"),
+                                                err)
+                                );
 
                             }
                         } catch (InterruptedException | ExecutionException ex) {
-                            Platform.runLater(() -> {
-                                Dialogs.showException(ex);
-                            });
+                            Platform.runLater(()
+                                    -> Dialogs.showException(ex)
+                            );
                         }
                     });
                     th.setDaemon(true);
@@ -129,6 +126,12 @@ public class ExpertSettings implements Initializable {
         }
 
         closeWindow();
+    }
+
+    private static void signalizeIllegalLimits() {
+        Dialogs.showInfo(
+                Lang.getString("Warning"),
+                Lang.getString("IllegalLimitsR"));
     }
 
     private void closeWindow() {

@@ -53,13 +53,14 @@ public class ExportEditor implements Initializable {
     private VBox vBox;
 
     /**
-     * Initializes the controller class.
+     * Initializes the controller class. 
      *
      * @param url
      * @param rb
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        // no initialization needed
     }
 
     public void actualizeExports() {
