@@ -7,8 +7,6 @@ package cz.tul.dic.engine.opencl.solvers;
 
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
@@ -19,7 +17,7 @@ public class BruteForce extends AbstractTaskSolver {
     @Override
     public List<CorrelationResult> solve(
             final Kernel kernel, 
-            final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
+            final FullTask fullTask, final DeformationDegree defDegree) throws ComputationException {
         return computeTask(kernel, fullTask, defDegree);
     }
     

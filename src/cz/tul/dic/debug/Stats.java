@@ -7,9 +7,9 @@ package cz.tul.dic.debug;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -116,11 +116,11 @@ public class Stats implements IGPUResultsReceiver {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
             final ValueCounter quality = ValueCounter.createCounter();
-            final Map<ROI, List<CorrelationResult>> results = tc.getResult(round, round + 1).getCorrelations();
+            final Map<AbstractROI, List<CorrelationResult>> results = tc.getResult(round, round + 1).getCorrelations();
             final double resultQuality = (double) tc.getParameter(TaskParameter.RESULT_QUALITY);
 
             int val;
-            for (ROI roi : results.keySet()) {
+            for (AbstractROI roi : results.keySet()) {
                 for (CorrelationResult cr : results.get(roi)) {
                     if (cr != null) {
                         val = (int) (cr.getValue() * 10);
@@ -158,11 +158,11 @@ public class Stats implements IGPUResultsReceiver {
             final double resultQuality = (double) tc.getParameter(TaskParameter.RESULT_QUALITY);
 
             int val;
-            Map<ROI, List<CorrelationResult>> results;
+            Map<AbstractROI, List<CorrelationResult>> results;
             for (Integer round : rounds) {
                 results = tc.getResult(round, round + 1).getCorrelations();
                 if (results != null) {
-                    for (ROI roi : results.keySet()) {
+                    for (AbstractROI roi : results.keySet()) {
                         for (CorrelationResult cr : results.get(roi)) {
                             if (cr != null) {
                                 val = (int) (cr.getValue() * 10);
@@ -196,7 +196,7 @@ public class Stats implements IGPUResultsReceiver {
     public void dumpDeformationsStatisticsPerQuality(final int round) {
         if (get(Types.DEF_QUALITY)) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
-            final Map<ROI, List<CorrelationResult>> results = tc.getResult(round, round + 1).getCorrelations();
+            final Map<AbstractROI, List<CorrelationResult>> results = tc.getResult(round, round + 1).getCorrelations();
 
             for (int i = -10; i < 11; i++) {
                 counters.put(i, ValueCounter.createCounter());
@@ -204,7 +204,7 @@ public class Stats implements IGPUResultsReceiver {
 
             int val;
             ValueCounter counter;
-            for (ROI roi : results.keySet()) {
+            for (AbstractROI roi : results.keySet()) {
                 for (CorrelationResult cr : results.get(roi)) {
                     if (cr != null) {
                         val = (int) (cr.getValue() * 10);
@@ -241,11 +241,11 @@ public class Stats implements IGPUResultsReceiver {
 
             int val;
             ValueCounter counter;
-            Map<ROI, List<CorrelationResult>> results;
+            Map<AbstractROI, List<CorrelationResult>> results;
             for (Integer round : rounds) {
                 results = tc.getResult(round, round + 1).getCorrelations();
                 if (results != null) {
-                    for (ROI roi : results.keySet()) {
+                    for (AbstractROI roi : results.keySet()) {
                         for (CorrelationResult cr : results.get(roi)) {
                             if (cr != null) {
                                 val = (int) (cr.getValue() * 10);
@@ -272,24 +272,24 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     @Override
-    public void dumpGpuResults(final float[] resultData, final List<Facet> facets, final List<double[]> deformationLimits) {
+    public void dumpGpuResults(final float[] resultData, final List<AbstractSubset> subsets, final List<double[]> deformationLimits) {
         if (get(Types.GPU_RESULTS)) {
             final File outFile = new File(NameGenerator.generateGpuResultsDump(tc, gpuBatch++));
             outFile.getParentFile().mkdirs();
             try (BufferedWriter out = new BufferedWriter(new FileWriter(outFile))) {
                 out.newLine();
 
-                final int defCountPerFacet = resultData.length / facets.size();
-                int facetCounter = 0;
-                for (int i = 0; i < facets.size(); i++) {
-                    out.write(facets.get(i).toString());
+                final int defCountPerSubset = resultData.length / subsets.size();
+                int subsetCounter = 0;
+                for (int i = 0; i < subsets.size(); i++) {
+                    out.write(subsets.get(i).toString());
                     out.write(Arrays.toString(deformationLimits.get(i)));
                     out.newLine();
-                    for (int r = facetCounter * defCountPerFacet; r < (facetCounter + 1) * defCountPerFacet; r++) {
+                    for (int r = subsetCounter * defCountPerSubset; r < (subsetCounter + 1) * defCountPerSubset; r++) {
                         out.write(Float.toString(resultData[r]));
                         out.newLine();
                     }
-                    facetCounter++;
+                    subsetCounter++;
                 }
             } catch (IOException ex) {
                 java.util.logging.Logger.getLogger(Stats.class.getName()).log(Level.SEVERE, null, ex);
@@ -308,23 +308,23 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void drawFacetQualityStatistics(final Map<ROI, List<Facet>> allFacets, final int roundFrom, final int roundTo) throws ComputationException {
+    public void drawFacetQualityStatistics(final Map<AbstractROI, List<AbstractSubset>> allSubsets, final int roundFrom, final int roundTo) throws ComputationException {
         if (get(Types.FACET_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
             out.getParentFile().mkdirs();
 
-            final Map<ROI, List<CorrelationResult>> allResults = tc.getResult(roundFrom, roundTo).getCorrelations();
+            final Map<AbstractROI, List<CorrelationResult>> allResults = tc.getResult(roundFrom, roundTo).getCorrelations();
             final Image img = tc.getImage(roundTo);
             final double[][] resultData = Utils.generateNaNarray(img.getWidth(), img.getHeight());
             List<CorrelationResult> results;
-            List<Facet> facets;
+            List<AbstractSubset> subsets;
             double[] center;
             CorrelationResult result;
-            for (ROI roi : allResults.keySet()) {
+            for (AbstractROI roi : allResults.keySet()) {
                 results = allResults.get(roi);
-                facets = allFacets.get(roi);
+                subsets = allSubsets.get(roi);
                 for (int i = 0; i < results.size(); i++) {
-                    center = facets.get(i).getCenter();
+                    center = subsets.get(i).getCenter();
                     result = results.get(i);
                     if (result != null) {
                         resultData[(int) Math.round(center[0])][(int) Math.round(center[1])] = result.getValue();

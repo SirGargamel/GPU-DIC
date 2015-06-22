@@ -8,7 +8,7 @@ package cz.tul.dic.data.task;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportTask;
@@ -41,9 +41,9 @@ public class TaskContainer extends Observable implements Serializable {
     // input data
     private final Object input;
     private final Map<Object, Object> params;
-    private final Container<Set<ROI>> rois;
-    private final Container<Map<ROI, Integer>> facetSizes;
-    private final Container<Map<ROI, double[]>> deformationLimits;
+    private final Container<Set<AbstractROI>> rois;
+    private final Container<Map<AbstractROI, Integer>> subsetSizes;
+    private final Container<Map<AbstractROI, double[]>> deformationLimits;
     private final Set<ExportTask> exports;
     private final Set<Hint> hints;
     // generated data
@@ -55,7 +55,7 @@ public class TaskContainer extends Observable implements Serializable {
     public TaskContainer(final Object input) {
         params = new HashMap<>();
         rois = new Container<>();
-        facetSizes = new Container<>();
+        subsetSizes = new Container<>();
         deformationLimits = new Container<>();
         exports = new HashSet<>();
         results = new CopyOnWriteArrayList<>();
@@ -140,12 +140,12 @@ public class TaskContainer extends Observable implements Serializable {
         return Collections.unmodifiableList(images);
     }
 
-    public Set<ROI> getRois(final int round) {
+    public Set<AbstractROI> getRois(final int round) {
         return rois.getItem(round);
     }
 
-    public void addRoi(final int round, final ROI roi) {
-        Set<ROI> r = rois.getItemPrecise(round);
+    public void addRoi(final int round, final AbstractROI roi) {
+        Set<AbstractROI> r = rois.getItemPrecise(round);
         if (r == null) {
             r = new HashSet<>(1);
             rois.setItem(r, round);
@@ -156,19 +156,19 @@ public class TaskContainer extends Observable implements Serializable {
         notifyObservers();
     }
 
-    public void setROIs(final int round, final Set<ROI> rois) {
+    public void setROIs(final int round, final Set<AbstractROI> rois) {
         this.rois.setItem(rois, round);
 
         setChanged();
         notifyObservers();
     }
 
-    public Map<ROI, Integer> getFacetSizes(final int round) {
-        return facetSizes.getItem(round);
+    public Map<AbstractROI, Integer> getSubsetSizes(final int round) {
+        return subsetSizes.getItem(round);
     }
 
-    public int getFacetSize(final int round, final ROI roi) {
-        final Map<ROI, Integer> m = facetSizes.getItem(round);
+    public int getSubsetSize(final int round, final AbstractROI roi) {
+        final Map<AbstractROI, Integer> m = subsetSizes.getItem(round);
         final int result;
         if (m != null && m.containsKey(roi)) {
             result = m.get(roi);
@@ -178,21 +178,21 @@ public class TaskContainer extends Observable implements Serializable {
         return result;
     }
 
-    public void setFacetSizes(final int round, final Map<ROI, Integer> sizes) {
-        facetSizes.setItem(sizes, round);
+    public void setSubsetSizes(final int round, final Map<AbstractROI, Integer> sizes) {
+        subsetSizes.setItem(sizes, round);
     }
 
-    public void addFacetSize(final int round, final ROI roi, final int facetSize) {
-        Map<ROI, Integer> m = facetSizes.getItemPrecise(round);
+    public void addSubsetSize(final int round, final AbstractROI roi, final int subsetSize) {
+        Map<AbstractROI, Integer> m = subsetSizes.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
-            facetSizes.setItem(m, round);
+            subsetSizes.setItem(m, round);
         }
-        m.put(roi, facetSize);
+        m.put(roi, subsetSize);
     }
 
-    public void setDeformationLimits(final int round, final ROI roi, final double[] limits) {
-        Map<ROI, double[]> m = deformationLimits.getItemPrecise(round);
+    public void setDeformationLimits(final int round, final AbstractROI roi, final double[] limits) {
+        Map<AbstractROI, double[]> m = deformationLimits.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
             deformationLimits.setItem(m, round);
@@ -200,12 +200,12 @@ public class TaskContainer extends Observable implements Serializable {
         m.put(roi, limits);
     }
 
-    public Map<ROI, double[]> getDeformationLimits(final int round) {
+    public Map<AbstractROI, double[]> getDeformationLimits(final int round) {
         return deformationLimits.getItem(round);
     }
 
-    public double[] getDeformationLimits(final int round, final ROI roi) {
-        final Map<ROI, double[]> m = deformationLimits.getItem(round);
+    public double[] getDeformationLimits(final int round, final AbstractROI roi) {
+        final Map<AbstractROI, double[]> m = deformationLimits.getItem(round);
         double[] result = null;
         if (m != null && m.containsKey(roi)) {
             result = m.get(roi);

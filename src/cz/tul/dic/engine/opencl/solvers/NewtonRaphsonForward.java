@@ -17,12 +17,12 @@ import org.apache.commons.math3.linear.RealVector;
 public class NewtonRaphsonForward extends NewtonRaphson {
 
     @Override
-    protected RealVector generateGradient(final float[] resultData, final int facetIndex, final int facetCount, final int[] counts, final double[] deformationLimits) {
+    protected RealVector generateGradient(final float[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[] data = new double[coeffCount];
 
-        final int deformationCount = resultData.length / facetCount;
-        final int resultsBase = facetIndex * deformationCount;
+        final int deformationCount = resultData.length / subsetCount;
+        final int resultsBase = subsetIndex * deformationCount;
         final int[] indices = prepareIndices(counts);
         for (int i = 0; i < coeffCount; i++) {
             // right index
@@ -37,12 +37,12 @@ public class NewtonRaphsonForward extends NewtonRaphson {
     }
 
     @Override
-    protected RealMatrix generateHessianMatrix(final float[] resultData, final int facetIndex, final int facetCount, final int[] counts, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(final float[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final int deformationCount = resultData.length / facetCount;
-        final int resultsBase = facetIndex * deformationCount;
+        final int deformationCount = resultData.length / subsetCount;
+        final int resultsBase = subsetIndex * deformationCount;
         final int[] indices = prepareIndices(counts);
 
         // direct approach with forward difference

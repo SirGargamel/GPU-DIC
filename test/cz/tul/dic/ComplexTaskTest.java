@@ -9,7 +9,7 @@ import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.generators.facet.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class ComplexTaskTest {
     public void testComplexTask() throws URISyntaxException, ComputationException, IOException {
         Assert.assertEquals(0.0, computeTask("ComplexIn.bmp"), 0.01);
         Assert.assertEquals(1.0, computeTask("ComplexOut-2.0.bmp"), 0.01);
-        Assert.assertEquals(4.0, computeTask("ComplexOut-4.0.bmp"), 0.5);
+        Assert.assertEquals(3.0, computeTask("ComplexOut-4.0.bmp"), 0.5);
         Assert.assertEquals(27.0, computeTask("ComplexOut-30.0.bmp"), 0.5);
     }
     
@@ -48,8 +48,8 @@ public class ComplexTaskTest {
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
-        tc.setParameter(TaskParameter.FACET_SIZE, 40);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.TIGHT);
+        tc.setParameter(TaskParameter.FACET_SIZE, 18);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 40);
 
         final ComplexTaskSolver cts = new ComplexTaskSolver();

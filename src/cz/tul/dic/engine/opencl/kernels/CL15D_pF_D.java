@@ -30,29 +30,29 @@ public class CL15D_pF_D extends Kernel {
 
     @Override
     void runKernel(final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
-            final CLBuffer<IntBuffer> facetData,
-            final CLBuffer<FloatBuffer> facetCenters,
+            final CLBuffer<IntBuffer> subsetData,
+            final CLBuffer<FloatBuffer> subsetCenters,
             final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results,
             final int deformationCount, final int imageWidth,
-            final int facetSize, final int facetCount) {
+            final int subsetSize, final int subsetCount) {
         stop = false;
-        final int facetArea = facetSize * facetSize;
-        int lws0 = Kernel.roundUp(calculateLws0base(), facetArea);
+        final int subsetArea = subsetSize * subsetSize;
+        int lws0 = Kernel.roundUp(calculateLws0base(), subsetArea);
         lws0 = Math.min(lws0, getMaxWorkItemSize());
 
         kernelDIC.rewind();
-        kernelDIC.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)
+        kernelDIC.putArgs(imgA, imgB, subsetData, subsetCenters, deformationLimits, defStepCounts, results)
                 .putArg(imageWidth)
                 .putArg(deformationCount)
-                .putArg(facetSize)
-                .putArg(facetCount)
+                .putArg(subsetSize)
+                .putArg(subsetCount)
                 .putArg(0)
                 .putArg(0)
                 .putArg(0);
         kernelDIC.rewind();
         // copy data and execute kernel
-        wsm.setMaxFacetCount(facetCount);
+        wsm.setMaxFacetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
         int globalWorkSize, deformationSubCount;
@@ -60,14 +60,14 @@ public class CL15D_pF_D extends Kernel {
         CLEvent event;
         int currentBaseFacet = 0, currentBaseDeformation;
         int counter = 0;
-        CLEventList eventList = new CLEventList(facetCount);
-        while (currentBaseFacet < facetCount) {
+        CLEventList eventList = new CLEventList(subsetCount);
+        while (currentBaseFacet < subsetCount) {
             currentBaseDeformation = 0;
             kernelDIC.setArg(ARGUMENT_INDEX_F_INDEX, currentBaseFacet);
 
             while (currentBaseDeformation < deformationCount) {
                 if (counter == eventList.capacity()) {
-                    eventList = new CLEventList(facetCount);
+                    eventList = new CLEventList(subsetCount);
                     counter = 0;
                 }
                 if (stop) {

@@ -7,45 +7,45 @@ constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | C
  */
 kernel void CL1D_I_V_LL_MC_D(
     read_only image2d_t imageA, read_only image2d_t imageB, 
-    global read_only int2 * facets, global read_only float2 * facetCenters,
+    global read_only int2 * subsets, global read_only float2 * subsetCenters,
     global read_only float * deformationLimits, global read_only int * deformationCounts,
     global write_only float * result,        
     const int imageWidth, const int deformationCount,
-    const int facetSize, const int facetCount,
+    const int subsetSize, const int subsetCount,
     const int groupCountPerFacet,
-    const int facetSubCount, const int facetBase,
+    const int subsetSubCount, const int subsetBase,
     const int deformationSubCount, const int deformationBase) 
 {        
     //// ID checks    
-    // facet
+    // subset
     const size_t groupId = get_group_id(0);
-    const size_t facetId = (groupId / groupCountPerFacet) + facetBase;
-    if (facetId >= facetBase + facetSubCount || facetId >= facetCount) {
+    const size_t subsetId = (groupId / groupCountPerFacet) + subsetBase;
+    if (subsetId >= subsetBase + subsetSubCount || subsetId >= subsetCount) {
         return;
     }                   
     const size_t localId = get_local_id(0);
     const size_t groupSize = get_local_size(0);    
-    const int facetSize2 = facetSize * facetSize;    
-    // load facet to local memory    
-    local int2 facetLocal[-1*-1];
+    const int subsetSize2 = (2*subsetSize + 1) * (2*subsetSize + 1);    
+    // load subset to local memory    
+    local int2 subsetLocal[(2*-1+1)*(2*-1+1)];
     int index;
-    if (groupSize >= facetSize2) {
-        if (localId < facetSize2) {            
-            facetLocal[localId] = facets[localId*facetCount + facetId];            
+    if (groupSize >= subsetSize2) {
+        if (localId < subsetSize2) {            
+            subsetLocal[localId] = subsets[localId*subsetCount + subsetId];            
         }    
     } else {
-        const int runCount = facetSize2 / groupSize;
+        const int runCount = subsetSize2 / groupSize;
         int id;
         for (int i = 0; i < runCount; i++) {
             id = i*groupSize + localId;
-            index = id*facetCount + facetId; 
-            facetLocal[id] = facets[index];            
+            index = id*subsetCount + subsetId; 
+            subsetLocal[id] = subsets[index];            
         }
-        const int rest = facetSize2 % groupSize;
+        const int rest = subsetSize2 % groupSize;
         if (localId < rest) {
             id = groupSize * runCount + localId;
-            index = id*facetCount + facetId;            
-            facetLocal[id] = facets[index];            
+            index = id*subsetCount + subsetId;            
+            subsetLocal[id] = subsets[index];            
         }
     }        
     barrier(CLK_LOCAL_MEM_FENCE);
@@ -56,36 +56,36 @@ kernel void CL1D_I_V_LL_MC_D(
     }
     float deformation[%DEF_D%];
     %DEF_C%
-    // deform facet
-    float2 deformedFacet[-1*-1];
+    // deform subset
+    float2 deformedFacet[(2*-1+1)*(2*-1+1)];
     float2 coords, def; 
-    for (int i = 0; i < facetSize2; i++) {
-        coords = convert_float2(facetLocal[i]);       
+    for (int i = 0; i < subsetSize2; i++) {
+        coords = convert_float2(subsetLocal[i]);       
 
-        def = coords - facetCenters[facetId];
+        def = coords - subsetCenters[subsetId];
         
         deformedFacet[i] = (float2)(%DEF_X%, %DEF_Y%);
     }
     // compute correlation using ZNCC
-    float deformedI[-1*-1];
-    float facetI[-1*-1];
+    float deformedI[(2*-1+1)*(2*-1+1)];
+    float subsetI[(2*-1+1)*(2*-1+1)];
     float meanF = 0;
     float meanG = 0; 
-    for (int i = 0; i < facetSize2; i++) {
-        facetI[i] = read_imageui(imageA, sampler, facetLocal[i]).x;
-        meanF += facetI[i];
+    for (int i = 0; i < subsetSize2; i++) {
+        subsetI[i] = read_imageui(imageA, sampler, subsetLocal[i]).x;
+        meanF += subsetI[i];
         
         deformedI[i] = interpolate(deformedFacet[i].x, deformedFacet[i].y, imageB);
         meanG += deformedI[i];
     } 
-    meanF /= (float) facetSize2;
-    meanG /= (float) facetSize2;    
+    meanF /= (float) subsetSize2;
+    meanG /= (float) subsetSize2;    
     
     float deltaF = 0;
     float deltaG = 0;   
-    for (int i = 0; i < facetSize2; i++) {                                             
-        facetI[i] -= meanF;
-        deltaF += facetI[i] * facetI[i];
+    for (int i = 0; i < subsetSize2; i++) {                                             
+        subsetI[i] -= meanF;
+        deltaF += subsetI[i] * subsetI[i];
                         
         deformedI[i] -= meanG;
         deltaG += deformedI[i] * deformedI[i];
@@ -93,12 +93,12 @@ kernel void CL1D_I_V_LL_MC_D(
     
     float resultVal = 0;           
     if (deltaF != 0 && deltaG != 0) {
-        for (int i = 0; i < facetSize2; i++) {            
-            resultVal += facetI[i] * deformedI[i];
+        for (int i = 0; i < subsetSize2; i++) {            
+            resultVal += subsetI[i] * deformedI[i];
         }
         resultVal /= sqrt(deltaF) * sqrt(deltaG);  
     }    
     
     //store result    
-    result[facetId * deformationCount + deformationId] = resultVal;    
+    result[subsetId * deformationCount + deformationId] = resultVal;    
 }

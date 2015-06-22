@@ -5,11 +5,8 @@
  */
 package cz.tul.dic.data.task.splitter;
 
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public class NoSplit extends AbstractTaskSplitter {
@@ -32,7 +29,7 @@ public class NoSplit extends AbstractTaskSplitter {
             throw new NoSuchElementException();
         }
         hasNextElement = false;
-        return new ComputationTask(image1, image2, facets, deformationLimits, false);
+        return new ComputationTask(image1, image2, subsets, deformationLimits, false);
     }
 
     @Override

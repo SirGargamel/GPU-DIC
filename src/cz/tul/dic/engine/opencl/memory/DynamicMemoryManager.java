@@ -10,7 +10,7 @@ import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLMemory;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
@@ -22,7 +22,7 @@ import org.pmw.tinylog.Logger;
 public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
 
     private Image imageA, imageB;
-    private List<Facet> facets;
+    private List<AbstractSubset> subsets;
     private List<double[]> deformationLimits;
     private List<int[]> deformationCounts;
 
@@ -61,15 +61,15 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
             }
 
             boolean changedResults = false;
-            if (task.getFacets() != facets || !task.getFacets().equals(facets) || clFacetData.isReleased()) {
+            if (task.getSubsets() != subsets || !task.getSubsets().equals(subsets) || clFacetData.isReleased()) {
                 release(clFacetData);
                 release(clFacetCenters);
-                facets = task.getFacets();
+                subsets = task.getSubsets();
 
-                clFacetData = generateFacetData(facets, kernel.usesMemoryCoalescing());
+                clFacetData = generateFacetData(subsets, kernel.usesMemoryCoalescing());
                 queue.putWriteBuffer(clFacetData, false);
 
-                clFacetCenters = generateFacetCenters(facets);
+                clFacetCenters = generateFacetCenters(subsets);
                 queue.putWriteBuffer(clFacetCenters, false);
 
                 changedResults = true;
@@ -93,7 +93,7 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
                 release(clResults);
 
                 maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
-                final long size = task.getFacets().size() * maxDeformationCount;
+                final long size = task.getSubsets().size() * maxDeformationCount;
                 if (size <= 0 || size >= Integer.MAX_VALUE) {
                     throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
                 }

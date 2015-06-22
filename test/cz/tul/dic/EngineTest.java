@@ -5,10 +5,11 @@
  */
 package cz.tul.dic;
 
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
+import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.Hint;
@@ -25,7 +26,7 @@ import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
-import cz.tul.dic.generators.facet.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -129,7 +130,7 @@ public class EngineTest {
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
 
-        final ROI roi = new RectangleROI(85, 85, 95, 95);
+        final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
@@ -138,8 +139,8 @@ public class EngineTest {
         tc.addHint(Hint.NO_STATS);
 
         tc.setParameter(TaskParameter.IN, input.get(0));
-        tc.setParameter(TaskParameter.FACET_SIZE, 11);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.TIGHT);
+        tc.setParameter(TaskParameter.FACET_SIZE, 5);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 11);
         tc.setParameter(TaskParameter.KERNEL, kernel);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
@@ -191,7 +192,7 @@ public class EngineTest {
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
 
-        final ROI roi = new RectangleROI(85, 85, 95, 95);
+        final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformations);
@@ -200,7 +201,7 @@ public class EngineTest {
         tc.addHint(Hint.NO_STATS);
 
         tc.setParameter(TaskParameter.IN, input.get(0));
-        tc.setParameter(TaskParameter.FACET_SIZE, 11);
+        tc.setParameter(TaskParameter.FACET_SIZE, 5);
         tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
 
         return tc;
@@ -301,7 +302,7 @@ public class EngineTest {
         sb.append("; ");
         sb.append(tc.getParameter(TaskParameter.SOLVER));
         sb.append("; ");
-        final Map<ROI, double[]> limits = tc.getDeformationLimits(0);
+        final Map<AbstractROI, double[]> limits = tc.getDeformationLimits(0);
         if (limits != null && limits.values().iterator().hasNext()) {
             sb.append(Arrays.toString(limits.values().iterator().next()));
         } else {
@@ -327,8 +328,8 @@ public class EngineTest {
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
 
-        final ROI roi = new RectangleROI(85, 85, 95, 95);
-        final int fs = 11;
+        final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
+        final int fs = 5;
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, DEF_FIRST_F);
@@ -343,15 +344,15 @@ public class EngineTest {
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
-        Map<ROI, List<Facet>> facets = new HashMap<>(1);
-        final List<Facet> roiFacets = new ArrayList<>(4);
-        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
-        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
-        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
-        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
-        facets.put(roi, roiFacets);
+        Map<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
+        final List<AbstractSubset> roiFacets = new ArrayList<>(4);
+        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        subsets.put(roi, roiFacets);
 
-        final Map<ROI, List<CorrelationResult>> results = new HashMap<>(1);
+        final Map<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
                         new FullTask(
@@ -359,18 +360,18 @@ public class EngineTest {
                                 roiFacets,
                                 generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size())),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
-                        tc.getFacetSize(ROUND, roi)));
+                        tc.getSubsetSize(ROUND, roi)));
         solver.endTask();
 
-        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, facets, tc, ROUND);
+        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, subsets, tc, ROUND);
         tc.setResult(ROUND, ROUND + 1, new Result(results, displacement));
 
         Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
         Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
     }
 
-    private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
-        return Collections.nCopies(facetCount, limits);
+    private static List<double[]> generateDeformations(final double[] limits, final int subsetCount) {
+        return Collections.nCopies(subsetCount, limits);
     }
 
     @Test
@@ -382,8 +383,8 @@ public class EngineTest {
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
 
-        final ROI roi = new RectangleROI(85, 85, 95, 95);
-        final int fs = 11;
+        final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
+        final int fs = 5;
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, DEF_LARGE);
@@ -398,13 +399,13 @@ public class EngineTest {
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
-        Map<ROI, List<Facet>> facets = new HashMap<>(1);
-        final List<Facet> roiFacets = new ArrayList<>(4);
-        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
-        roiFacets.add(Facet.createFacet(11, roi.getX1(), roi.getY1()));
-        facets.put(roi, roiFacets);
+        Map<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
+        final List<AbstractSubset> roiFacets = new ArrayList<>(4);
+        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        subsets.put(roi, roiFacets);
 
-        final Map<ROI, List<CorrelationResult>> results = new HashMap<>(1);
+        final Map<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
                         new FullTask(
@@ -412,10 +413,10 @@ public class EngineTest {
                                 roiFacets,
                                 generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size())),
                         DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
-                        tc.getFacetSize(ROUND, roi)));
+                        tc.getSubsetSize(ROUND, roi)));
         solver.endTask();
 
-        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, facets, tc, ROUND);
+        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, subsets, tc, ROUND);
         tc.setResult(ROUND, ROUND + 1, new Result(results, displacement));
 
         Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());

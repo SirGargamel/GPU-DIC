@@ -41,13 +41,13 @@ public class KernelSourcePreparator {
     
     public static String prepareKernel(
             final String kernelName,
-            final int facetSize, final DeformationDegree deg,
+            final int subsetSize, final DeformationDegree deg,
             final boolean usesVectorization, final Interpolation interpolation, final boolean usesImage) throws ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         try {
             kp.loadKernel();
-            kp.prepareFacetSize(facetSize);
+            kp.prepareFacetSize(subsetSize);
             kp.prepareDeformations(deg, usesVectorization);
             kp.prepareInterpolation(interpolation, usesImage);
             return kp.kernel;
@@ -67,8 +67,8 @@ public class KernelSourcePreparator {
         }
     }
 
-    private void prepareFacetSize(final int facetSize) {
-        kernel = kernel.replaceAll(REPLACE_FACET_SIZE, Integer.toString(facetSize));
+    private void prepareFacetSize(final int subsetSize) {
+        kernel = kernel.replaceAll(REPLACE_FACET_SIZE, Integer.toString(subsetSize));
     }
 
     private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization) throws ComputationException {
@@ -88,10 +88,10 @@ public class KernelSourcePreparator {
         final StringBuilder sb = new StringBuilder();
         // deformation generation                
         final int defCoeffCount = DeformationUtils.getDeformationCoeffCount(deg);
-        sb.append("const int limitsBase = facetId * ");
+        sb.append("const int limitsBase = subsetId * ");
         sb.append(defCoeffCount * 3);
         sb.append(";\n");
-        sb.append("const int countsBase = facetId * ");
+        sb.append("const int countsBase = subsetId * ");
         sb.append(defCoeffCount + 1);
         sb.append(";\n");
         sb.append("if (deformationId >= deformationCounts[countsBase + ");

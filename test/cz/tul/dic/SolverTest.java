@@ -6,12 +6,12 @@
 package cz.tul.dic;
 
 import cz.tul.dic.data.result.CorrelationResult;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.solvers.Solver;
-import cz.tul.dic.generators.facet.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -111,8 +111,8 @@ public class SolverTest {
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
-        task.setParameter(TaskParameter.FACET_SIZE, 40);
-        task.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.TIGHT);
+        task.setParameter(TaskParameter.FACET_SIZE, 20);
+        task.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.EQUAL);
         task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 40);
         task.setParameter(TaskParameter.SOLVER, solver);
 
@@ -143,7 +143,7 @@ public class SolverTest {
         int counter = 0;
 
         double[] tmp;
-        final Map<ROI, List<CorrelationResult>> results = task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations();
+        final Map<AbstractROI, List<CorrelationResult>> results = task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations();
         for (List<CorrelationResult> l : results.values()) {
             for (CorrelationResult cor : l) {
                 tmp = cor.getDeformation();
@@ -160,14 +160,14 @@ public class SolverTest {
         return result;
     }
 
-    private static void dumpResultsToConsole(final Solver solver, final String file, final double[] limits, final Map<ROI, List<CorrelationResult>> results) {
+    private static void dumpResultsToConsole(final Solver solver, final String file, final double[] limits, final Map<AbstractROI, List<CorrelationResult>> results) {
         final StringBuilder sb = new StringBuilder();
         sb.append(solver);
         sb.append(" -- ");
         sb.append(file);
         sb.append(" -- ");
         sb.append(Arrays.toString(limits));
-        for (Entry<ROI, List<CorrelationResult>> e : results.entrySet()) {
+        for (Entry<AbstractROI, List<CorrelationResult>> e : results.entrySet()) {
             for (CorrelationResult cr : e.getValue()) {
                 sb.append("\n  ");
                 sb.append(cr);

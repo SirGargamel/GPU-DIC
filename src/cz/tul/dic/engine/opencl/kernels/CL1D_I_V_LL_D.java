@@ -32,23 +32,23 @@ public class CL1D_I_V_LL_D extends Kernel {
 
     @Override
     void runKernel(final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
-            final CLBuffer<IntBuffer> facetData,
-            final CLBuffer<FloatBuffer> facetCenters,
+            final CLBuffer<IntBuffer> subsetData,
+            final CLBuffer<FloatBuffer> subsetCenters,
             final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results,
             final int deformationCount, final int imageWidth,
-            final int facetSize, final int facetCount) {
+            final int subsetSize, final int subsetCount) {
         stop = false;
-        final int facetArea = facetSize * facetSize;
-        int lws0 = Kernel.roundUp(calculateLws0base(), facetArea);
+        final int subsetArea = subsetSize * subsetSize;
+        int lws0 = Kernel.roundUp(calculateLws0base(), subsetArea);
         lws0 = Math.min(lws0, getMaxWorkItemSize());
 
         kernelDIC.rewind();
-        kernelDIC.putArgs(imgA, imgB, facetData, facetCenters, deformationLimits, defStepCounts, results)
+        kernelDIC.putArgs(imgA, imgB, subsetData, subsetCenters, deformationLimits, defStepCounts, results)
                 .putArg(imageWidth)
                 .putArg(deformationCount)
-                .putArg(facetSize)
-                .putArg(facetCount)
+                .putArg(subsetSize)
+                .putArg(subsetCount)
                 .putArg(0)
                 .putArg(0)
                 .putArg(0)
@@ -56,31 +56,31 @@ public class CL1D_I_V_LL_D extends Kernel {
                 .putArg(0);
         kernelDIC.rewind();
         // copy data and execute kernel
-        wsm.setMaxFacetCount(facetCount);
+        wsm.setMaxFacetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        int facetGlobalWorkSize, facetSubCount = 1, deformationSubCount;
+        int subsetGlobalWorkSize, subsetSubCount = 1, deformationSubCount;
         long time;
         CLEvent event;
         int currentBaseFacet = 0, currentBaseDeformation;
         int groupCountPerFacet, counter = 0;
-        CLEventList eventList = new CLEventList(facetCount);
-        while (currentBaseFacet < facetCount) {
+        CLEventList eventList = new CLEventList(subsetCount);
+        while (currentBaseFacet < subsetCount) {
             currentBaseDeformation = 0;
 
             while (currentBaseDeformation < deformationCount) {
                 if (counter == eventList.capacity()) {
-                    eventList = new CLEventList(facetCount);
+                    eventList = new CLEventList(subsetCount);
                     counter = 0;
                 }
                 if (stop) {
                     return;
                 }
 
-                facetSubCount = Math.min(wsm.getFacetCount(), facetCount - currentBaseFacet);
+                subsetSubCount = Math.min(wsm.getFacetCount(), subsetCount - currentBaseFacet);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
-                facetGlobalWorkSize = Kernel.roundUp(lws0, deformationSubCount) * facetSubCount;
+                subsetGlobalWorkSize = Kernel.roundUp(lws0, deformationSubCount) * subsetSubCount;
 
                 groupCountPerFacet = deformationSubCount / lws0;
                 if (deformationCount % lws0 > 0) {
@@ -88,22 +88,22 @@ public class CL1D_I_V_LL_D extends Kernel {
                 }
 
                 kernelDIC.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerFacet);
-                kernelDIC.setArg(ARGUMENT_INDEX_F_COUNT, facetSubCount);
+                kernelDIC.setArg(ARGUMENT_INDEX_F_COUNT, subsetSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_F_BASE, currentBaseFacet);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
-                queue.put1DRangeKernel(kernelDIC, 0, facetGlobalWorkSize, lws0, eventList);
+                queue.put1DRangeKernel(kernelDIC, 0, subsetGlobalWorkSize, lws0, eventList);
 
                 queue.putWaitForEvent(eventList, counter, true);
                 event = eventList.getEvent(counter);
                 time = event.getProfilingInfo(CLEvent.ProfilingCommand.END) - event.getProfilingInfo(CLEvent.ProfilingCommand.START);
-                wsm.storeTime(facetSubCount, deformationSubCount, time);
+                wsm.storeTime(subsetSubCount, deformationSubCount, time);
 
                 currentBaseDeformation += deformationSubCount;
                 counter++;
             }
 
-            currentBaseFacet += facetSubCount;
+            currentBaseFacet += subsetSubCount;
         }
 
         eventList.release();

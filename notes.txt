@@ -3,7 +3,7 @@ z:\Programovani\..Java\codeQuality\sonar\sonar-runner-2.4\bin\sonar-runner.bat
 
 
 --- Parameter notes
-- malé facetSize nemají cenu (klidně 20 a více, závisí na kvalitě videa)
+- malé subsetSize nemají cenu (klidně 10 a více, závisí na kvalitě videa)
 - sweep parametr vypadá nejlépe kolem 20, opět vetší hodnoty dávají lepší výsledky
 
 

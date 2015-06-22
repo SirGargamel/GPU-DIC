@@ -3,11 +3,11 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.generators.facet;
+package cz.tul.dic.data.subset.generator;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.subset.AbstractSubset;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +16,9 @@ import java.util.Map;
  *
  * @author Petr Jecmen
  */
-public abstract class AbstractFacetGenerator {
+public abstract class AbstractSubsetGenerator {
 
-    public abstract Map<ROI, List<Facet>> generateFacets(final TaskContainer tc, final int round) throws ComputationException;
+    public abstract Map<AbstractROI, List<AbstractSubset>> generateFacets(final TaskContainer tc, final int round) throws ComputationException;
     
     public abstract FacetGeneratorMethod getMode();
     

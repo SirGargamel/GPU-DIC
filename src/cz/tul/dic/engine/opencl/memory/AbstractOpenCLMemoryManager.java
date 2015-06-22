@@ -14,9 +14,10 @@ import com.jogamp.opencl.CLImageFormat;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLResource;
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Coordinates;
-import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
@@ -92,17 +93,17 @@ public abstract class AbstractOpenCLMemoryManager {
         return result;
     }
 
-    protected CLBuffer<IntBuffer> generateFacetData(final List<Facet> facets, final boolean useMemoryCoalescing) {
-        final int facetSize = facets.get(0).getSize();
-        final int facetArea = facetSize * facetSize;
-        final int dataSize = facetArea * Coordinates.DIMENSION;
-        final int[] completeData = new int[facets.size() * dataSize];
+    protected CLBuffer<IntBuffer> generateFacetData(final List<AbstractSubset> subsets, final boolean useMemoryCoalescing) {
+        final int subsetSize = subsets.get(0).getSize();
+        final int subsetArea = SubsetUtils.computeSubsetCoordCount(subsetSize);
+        final int dataSize = subsetArea * Coordinates.DIMENSION;
+        final int[] completeData = new int[subsets.size() * dataSize];
 
         int pointer = 0;
-        int[] facetData;
-        for (Facet f : facets) {
-            facetData = f.getData();
-            System.arraycopy(facetData, 0, completeData, pointer, dataSize);
+        int[] subsetData;
+        for (AbstractSubset f : subsets) {
+            subsetData = f.getData();
+            System.arraycopy(subsetData, 0, completeData, pointer, dataSize);
             pointer += dataSize;
         }
 
@@ -110,8 +111,8 @@ public abstract class AbstractOpenCLMemoryManager {
         final IntBuffer resultBuffer = result.getBuffer();
         if (useMemoryCoalescing) {
             int index;
-            for (int i = 0; i < facetArea; i++) {
-                for (int f = 0; f < facets.size(); f++) {
+            for (int i = 0; i < subsetArea; i++) {
+                for (int f = 0; f < subsets.size(); f++) {
                     index = f * dataSize + 2 * i;
                     resultBuffer.put(completeData[index]);
                     resultBuffer.put(completeData[index + 1]);
@@ -126,13 +127,13 @@ public abstract class AbstractOpenCLMemoryManager {
         return result;
     }
 
-    protected CLBuffer<FloatBuffer> generateFacetCenters(final List<Facet> facets) {
+    protected CLBuffer<FloatBuffer> generateFacetCenters(final List<AbstractSubset> subsets) {
         final int dataSize = Coordinates.DIMENSION;
-        final float[] data = new float[facets.size() * dataSize];
+        final float[] data = new float[subsets.size() * dataSize];
 
         int pointer = 0;
         double[] centerData;
-        for (Facet f : facets) {
+        for (AbstractSubset f : subsets) {
             centerData = f.getCenter();
             for (int i = 0; i < dataSize; i++) {
                 data[pointer + i] = (float) centerData[i];

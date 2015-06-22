@@ -775,14 +775,14 @@ public class MainWindow implements Initializable {
         DEFAULT(2),
         COARSE(5);
 
-        private final int facetSpacing;
+        private final int subsetSpacing;
 
-        private Scenario(int facetSpacing) {
-            this.facetSpacing = facetSpacing;
+        private Scenario(int subsetSpacing) {
+            this.subsetSpacing = subsetSpacing;
         }
 
         public int getFacetSpacing() {
-            return facetSpacing;
+            return subsetSpacing;
         }
 
     }

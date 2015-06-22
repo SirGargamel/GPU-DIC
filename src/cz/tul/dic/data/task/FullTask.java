@@ -5,7 +5,7 @@
  */
 package cz.tul.dic.data.task;
 
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
 import java.util.List;
 
@@ -17,13 +17,13 @@ public class FullTask {
 
     private final Image imageA;
     private final Image imageB;
-    private final List<Facet> facets;
+    private final List<AbstractSubset> subsets;
     private final List<double[]> deformationLimits;
 
-    public FullTask(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits) {
+    public FullTask(final Image imageA, final Image imageB, final List<AbstractSubset> subsets, final List<double[]> deformationLimits) {
         this.imageA = imageA;
         this.imageB = imageB;
-        this.facets = facets;
+        this.subsets = subsets;
         this.deformationLimits = deformationLimits;
     }
 
@@ -35,12 +35,12 @@ public class FullTask {
         return imageB;
     }
 
-    public List<Facet> getFacets() {
-        return facets;
+    public List<AbstractSubset> getSubsets() {
+        return subsets;
     }
 
     public List<double[]> getDeformationLimits() {
         return deformationLimits;
     }
-    
+
 }

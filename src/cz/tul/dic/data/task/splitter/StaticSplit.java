@@ -7,7 +7,7 @@ package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class StaticSplit extends AbstractTaskSplitter {
     }
 
     private void checkIfHasNext() {
-        hasNextElement = index < facets.size();
+        hasNextElement = index < subsets.size();
     }
 
     @Override
@@ -47,12 +47,12 @@ public class StaticSplit extends AbstractTaskSplitter {
             throw new NoSuchElementException();
         }
 
-        final List<Facet> sublist = new ArrayList<>(split);
-        final int facetCount = facets.size();
+        final List<AbstractSubset> sublist = new ArrayList<>(split);
+        final int subsetCount = subsets.size();
 
         int count = 0;
-        while (count < split && index < facetCount) {
-            sublist.add(facets.get(index));
+        while (count < split && index < subsetCount) {
+            sublist.add(subsets.get(index));
 
             count++;
             index++;

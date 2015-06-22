@@ -7,7 +7,7 @@ package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
@@ -21,13 +21,13 @@ import java.util.List;
 public abstract class AbstractTaskSplitter implements Iterator<ComputationTask> {
 
     protected final Image image1, image2;
-    protected final List<Facet> facets;
+    protected final List<AbstractSubset> subsets;
     protected final List<double[]> deformationLimits;
 
     public AbstractTaskSplitter(final FullTask task) {
         this.image1 = task.getImageA();
         this.image2 = task.getImageB();
-        this.facets = task.getFacets();
+        this.subsets = task.getSubsets();
         this.deformationLimits = task.getDeformationLimits();
     }
 

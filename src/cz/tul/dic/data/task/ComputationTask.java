@@ -5,7 +5,7 @@
  */
 package cz.tul.dic.data.task;
 
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.result.CorrelationResult;
 import java.util.List;
@@ -17,15 +17,15 @@ import java.util.List;
 public class ComputationTask {
 
     private final Image imageA, imageB;
-    private final List<Facet> facets;
+    private final List<AbstractSubset> subsets;
     private final List<double[]> deformationLimits;
     private boolean subtask;
     private List<CorrelationResult> results;
 
-    public ComputationTask(final Image imageA, final Image imageB, final List<Facet> facets, final List<double[]> deformationLimits, final boolean subtask) {
+    public ComputationTask(final Image imageA, final Image imageB, final List<AbstractSubset> subsets, final List<double[]> deformationLimits, final boolean subtask) {
         this.imageA = imageA;
         this.imageB = imageB;
-        this.facets = facets;
+        this.subsets = subsets;
         this.deformationLimits = deformationLimits;
         this.subtask = subtask;
     }
@@ -38,8 +38,8 @@ public class ComputationTask {
         return imageB;
     }
 
-    public List<Facet> getFacets() {
-        return facets;
+    public List<AbstractSubset> getSubsets() {
+        return subsets;
     }
 
     public List<double[]> getDeformationLimits() {
@@ -56,7 +56,7 @@ public class ComputationTask {
 
     public void setSubtask(final boolean subtask) {
         this.subtask = subtask;
-    }        
+    }
 
     public boolean isSubtask() {
         return subtask;

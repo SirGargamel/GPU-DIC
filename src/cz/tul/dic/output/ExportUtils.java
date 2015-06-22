@@ -7,7 +7,7 @@ package cz.tul.dic.output;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.awt.AlphaComposite;
@@ -53,19 +53,19 @@ public final class ExportUtils {
         debugMode = true;
     }
 
-    public static boolean isPointInsideROIs(final int x, final int y, final ROI[] rois, final TaskContainer tc, final int round) {
+    public static boolean isPointInsideROIs(final int x, final int y, final AbstractROI[] rois, final TaskContainer tc, final int round) {
         boolean result = false;
 
         if (rois == null) {
             result = true;
         } else {
-            for (ROI roi : rois) {
+            for (AbstractROI roi : rois) {
                 if (roi == null) {
                     continue;
                 }
 
                 if (roi.isPointInside(x, y)) {
-                    // check facets                
+                    // check subsets                
                     result = true;
                     break;
                 }

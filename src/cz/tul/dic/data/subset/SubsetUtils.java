@@ -3,10 +3,11 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.data;
+package cz.tul.dic.data.subset;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.deformation.DeformationDirection;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -18,7 +19,7 @@ import java.util.Map.Entry;
  *
  * @author Petr Jecmen
  */
-public final class FacetUtils {
+public final class SubsetUtils {
 
     private static final Map<int[], double[]> CACHE;
 
@@ -26,21 +27,21 @@ public final class FacetUtils {
         CACHE = new HashMap<>();
     }
 
-    private FacetUtils() {
+    private SubsetUtils() {
     }
 
-    public static Map<int[], double[]> deformFacet(final Facet facet, final double[] deformation) throws ComputationException {
-        final int[] data = facet.getData();
-        final double[] center = facet.getCenter();
-        final int facetArea = data.length / Coordinates.DIMENSION;
+    public static Map<int[], double[]> deformFacet(final AbstractSubset subset, final double[] deformation) throws ComputationException {
+        final int[] data = subset.getData();
+        final double[] center = subset.getCenter();
+        final int subsetArea = data.length / Coordinates.DIMENSION;
         final DeformationDegree degree = DeformationUtils.getDegreeFromValue(deformation);
 
-        if (CACHE.size() != facetArea) {
-            if (CACHE.size() > facetArea) {
+        if (CACHE.size() != subsetArea) {
+            if (CACHE.size() > subsetArea) {
                 CACHE.clear();
             }
 
-            while (CACHE.size() < facetArea) {
+            while (CACHE.size() < subsetArea) {
                 CACHE.put(new int[Coordinates.DIMENSION], new double[Coordinates.DIMENSION]);
             }
         }
@@ -112,7 +113,7 @@ public final class FacetUtils {
         return result;
     }
 
-    public static boolean isPointInsideFacet(final Facet f, final int x, final int y) {
+    public static boolean isPointInsideFacet(final AbstractSubset f, final int x, final int y) {
         boolean result = false;
 
         final int[] pointData = f.getData();
@@ -126,7 +127,7 @@ public final class FacetUtils {
         return result;
     }
 
-    public static boolean areLinesInsideFacet(final Facet f, final int yStart, final int yEnd) {
+    public static boolean areLinesInsideFacet(final AbstractSubset f, final int yStart, final int yEnd) {
         boolean result = false;
 
         final int[] pointData = f.getData();
@@ -138,5 +139,13 @@ public final class FacetUtils {
         }
 
         return result;
+    }
+
+    public static int computeSubsetCoordCount(final int subsetSize) {
+        return (subsetSize * 2 + 1) * (subsetSize * 2 + 1);
+    }
+    
+    public static int computeSubsetWidth(final int subsetSize) {
+        return (subsetSize * 2 + 1);
     }
 }

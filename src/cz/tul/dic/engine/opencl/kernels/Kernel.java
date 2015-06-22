@@ -85,9 +85,9 @@ public abstract class Kernel {
         return result;
     }
 
-    public void prepareKernel(final int facetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
+    public void prepareKernel(final int subsetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
         try {
-            CLProgram program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, facetSize, deg, usesVectorization(), interpolation, usesImage())).build();
+            CLProgram program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, subsetSize, deg, usesVectorization(), interpolation, usesImage())).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(kernelName);
             clMem.add(kernelDIC);
@@ -122,12 +122,12 @@ public abstract class Kernel {
     }
 
     public List<CorrelationResult> compute(final ComputationTask task, boolean findBest) throws ComputationException {
-        if (task.getFacets().isEmpty()) {
-            Logger.warn("Empty facets for computation.");
+        if (task.getSubsets().isEmpty()) {
+            Logger.warn("Empty subsets for computation.");
             return new ArrayList<>(0);
         }
-        final int facetCount = task.getFacets().size();
-        final int facetSize = task.getFacets().get(0).getSize();
+        final int subsetCount = task.getSubsets().size();
+        final int subsetSize = task.getSubsets().get(0).getSize();
 
         final List<CorrelationResult> result;
         try {
@@ -140,20 +140,20 @@ public abstract class Kernel {
                     memManager.getClDeformationLimits(), memManager.getClDefStepCount(),
                     clResults,
                     maxDeformationCount,
-                    task.getImageA().getWidth(), facetSize, facetCount);
+                    task.getImageA().getWidth(), subsetSize, subsetCount);
             queue.flush();
 
             if (!resultListeners.isEmpty()) {
                 queue.putReadBuffer(clResults, true);
                 final float[] results = readBuffer(clResults.getBuffer());
                 for (IGPUResultsReceiver rr : resultListeners) {
-                    rr.dumpGpuResults(results, task.getFacets(), task.getDeformationLimits());
+                    rr.dumpGpuResults(results, task.getSubsets(), task.getDeformationLimits());
                 }
             }
 
             if (findBest || Stats.getInstance().isGpuDebugEnabled()) {
-                final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, facetCount, (int) maxDeformationCount);
-                final int[] positions = findPos(clResults, facetCount, (int) maxDeformationCount, maxValuesCl);
+                final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, subsetCount, (int) maxDeformationCount);
+                final int[] positions = findPos(clResults, subsetCount, (int) maxDeformationCount, maxValuesCl);
 
                 result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, task.getDeformationLimits());
             } else {
@@ -171,17 +171,18 @@ public abstract class Kernel {
         }
     }
 
-    abstract void runKernel(final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
-            final CLBuffer<IntBuffer> facetData,
-            final CLBuffer<FloatBuffer> facetCenters,
+    abstract void runKernel(
+            final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
+            final CLBuffer<IntBuffer> subsetData,
+            final CLBuffer<FloatBuffer> subsetCenters,
             final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results,
             final int maxDeformationCount, final int imageWidth,
-            final int facetSize, final int facetCount);
+            final int subsetSize, final int subsetCount);
 
-    private CLBuffer<FloatBuffer> findMax(final CLBuffer<FloatBuffer> results, final int facetCount, final int deformationCount) {
+    private CLBuffer<FloatBuffer> findMax(final CLBuffer<FloatBuffer> results, final int subsetCount, final int deformationCount) {
         final int lws0 = getMaxWorkItemSize();
-        final CLBuffer<FloatBuffer> maxVal = context.createFloatBuffer(facetCount, CLMemory.Mem.WRITE_ONLY);
+        final CLBuffer<FloatBuffer> maxVal = context.createFloatBuffer(subsetCount, CLMemory.Mem.WRITE_ONLY);
 
         kernelReduce.rewind();
         kernelReduce.setArg(0, results);
@@ -191,7 +192,7 @@ public abstract class Kernel {
         kernelReduce.setArg(4, 0);
         kernelReduce.rewind();
 
-        for (int i = 0; i < facetCount; i++) {
+        for (int i = 0; i < subsetCount; i++) {
             kernelReduce.setArg(4, i);
             queue.put1DRangeKernel(kernelReduce, 0, lws0, lws0);
         }
@@ -205,9 +206,9 @@ public abstract class Kernel {
         return DeviceManager.getDevice().getMaxWorkItemSizes()[0];
     }
 
-    private int[] findPos(final CLBuffer<FloatBuffer> results, final int facetCount, final int deformationCount, final CLBuffer<FloatBuffer> vals) {
+    private int[] findPos(final CLBuffer<FloatBuffer> results, final int subsetCount, final int deformationCount, final CLBuffer<FloatBuffer> vals) {
         final int lws0 = getMaxWorkItemSize();
-        final CLBuffer<IntBuffer> maxVal = context.createIntBuffer(facetCount, CLMemory.Mem.WRITE_ONLY);
+        final CLBuffer<IntBuffer> maxVal = context.createIntBuffer(subsetCount, CLMemory.Mem.WRITE_ONLY);
 
         kernelFindPos.rewind();
         kernelFindPos.setArg(0, results);
@@ -217,7 +218,7 @@ public abstract class Kernel {
         kernelFindPos.setArg(4, 0);
         kernelFindPos.rewind();
 
-        for (int i = 0; i < facetCount; i++) {
+        for (int i = 0; i < subsetCount; i++) {
             kernelFindPos.setArg(4, i);
             queue.put1DRangeKernel(kernelFindPos, 0, Kernel.roundUp(lws0, deformationCount), lws0);
         }

@@ -7,7 +7,7 @@ package cz.tul.dic.data.roi;
 
 import java.io.Serializable;
 
-public class RectangleROI extends ROI implements Serializable {
+public class RectangleROI extends AbstractROI implements Serializable {
 
     private final double x1, y1, x2, y2;
 

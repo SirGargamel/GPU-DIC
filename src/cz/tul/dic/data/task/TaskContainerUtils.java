@@ -8,20 +8,20 @@ package cz.tul.dic.data.task;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.config.ConfigType;
-import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
-import cz.tul.dic.generators.facet.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
 import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.FileInputStream;
@@ -82,7 +82,7 @@ public final class TaskContainerUtils {
         return tc.getImages().size() - 1;
     }
 
-    public static int getDeformationArrayLength(final TaskContainer tc, final int round, final ROI roi) throws ComputationException {
+    public static int getDeformationArrayLength(final TaskContainer tc, final int round, final AbstractROI roi) throws ComputationException {
         int result;
 
         final double[] limits = tc.getDeformationLimits(round, roi);
@@ -103,7 +103,7 @@ public final class TaskContainerUtils {
         return result;
     }
 
-    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final ROI roi, final double[] deformations) throws ComputationException {
+    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final AbstractROI roi, final double[] deformations) throws ComputationException {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
@@ -165,23 +165,23 @@ public final class TaskContainerUtils {
         } else {
             throw new IllegalArgumentException("Unsupported type of input.");
         }
-        // rois, deformation limits, facetSizes        
-        Set<ROI> rois, prevRoi = null;
-        Map<ROI, Integer> fs, prevFs = null;
-        Map<ROI, double[]> limits, prevLimits = null;
+        // rois, deformation limits, subsetSizes        
+        Set<AbstractROI> rois, prevRoi = null;
+        Map<AbstractROI, Integer> fs, prevFs = null;
+        Map<AbstractROI, double[]> limits, prevLimits = null;
         final StringBuilder sb = new StringBuilder();
         for (int round = 0; round < roundCount; round++) {
             rois = tc.getRois(round);
-            fs = tc.getFacetSizes(round);
+            fs = tc.getSubsetSizes(round);
             limits = tc.getDeformationLimits(round);
             if (rois != prevRoi || fs != prevFs || limits != prevLimits) {
                 sb.setLength(0);
-                for (ROI roi : rois) {
+                for (AbstractROI roi : rois) {
                     sb.append(roi.toString());
                     sb.append(CONFIG_SEPARATOR_ROI);
                     sb.append(toString(tc.getDeformationLimits(round, roi)));
                     sb.append(CONFIG_SEPARATOR_ROI);
-                    sb.append(Integer.toString(tc.getFacetSize(round, roi)));
+                    sb.append(Integer.toString(tc.getSubsetSize(round, roi)));
                     sb.append(CONFIG_SEPARATOR);
                 }
                 if (sb.length() > CONFIG_SEPARATOR.length()) {
@@ -283,7 +283,7 @@ public final class TaskContainerUtils {
         TaskParameter tp;
         int index;
         String[] split;
-        ROI roi;
+        AbstractROI roi;
         for (String key : config.keySet()) {
             value = config.get(key);
             if (key.startsWith(CONFIG_ROIS)) {
@@ -292,13 +292,13 @@ public final class TaskContainerUtils {
                 for (String s : splitPairs) {
                     split = s.split(CONFIG_SEPARATOR_ROI);
                     if (split.length == 3) {
-                        roi = ROI.generateROI(split[0]);
+                        roi = AbstractROI.generateROI(split[0]);
                         result.addRoi(index, roi);
                         if (!split[1].trim().equals(CONFIG_EMPTY)) {
                             result.setDeformationLimits(index, roi, doubleArrayFromString(split[1]));
                         }
                         if (!split[2].trim().equals(CONFIG_EMPTY)) {
-                            result.addFacetSize(index, roi, Integer.decode(split[2]));
+                            result.addSubsetSize(index, roi, Integer.decode(split[2]));
                         }
                     } else {
                         throw new IllegalArgumentException("Illegal roi-limits pair - " + Arrays.toString(split));
@@ -385,11 +385,11 @@ public final class TaskContainerUtils {
         return result;
     }
 
-    public static Set<Facet> getAllFacets(final Map<ROI, List<Facet>> facets) {
-        final Set<Facet> result = new HashSet<>();
+    public static Set<AbstractSubset> getAllFacets(final Map<AbstractROI, List<AbstractSubset>> subsets) {
+        final Set<AbstractSubset> result = new HashSet<>();
 
-        if (facets != null) {
-            for (List<Facet> l : facets.values()) {
+        if (subsets != null) {
+            for (List<AbstractSubset> l : subsets.values()) {
                 if (l != null) {
                     result.addAll(l);
                 }
@@ -399,9 +399,9 @@ public final class TaskContainerUtils {
         return result;
     }
 
-    public static void setUniformFacetSize(final TaskContainer tc, final int round, final int facetSize) {
-        for (ROI roi : tc.getRois(round)) {
-            tc.addFacetSize(round, roi, facetSize);
+    public static void setUniformFacetSize(final TaskContainer tc, final int round, final int subsetSize) {
+        for (AbstractROI roi : tc.getRois(round)) {
+            tc.addSubsetSize(round, roi, subsetSize);
         }
     }
 
@@ -443,7 +443,7 @@ public final class TaskContainerUtils {
         }
         final Object fs = tc.getParameter(TaskParameter.FACET_SIZE);
         if (fs == null) {
-            Logger.warn("Adding default facetSize.");
+            Logger.warn("Adding default subset size.");
             tc.setParameter(TaskParameter.FACET_SIZE, TaskDefaultValues.DEFAULT_FACET_SIZE);
         }
         final Object dorder = tc.getParameter(TaskParameter.DEFORMATION_ORDER);
@@ -467,7 +467,7 @@ public final class TaskContainerUtils {
             tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimits);
         }
         Image img;
-        Set<ROI> rois;
+        Set<AbstractROI> rois;
         for (int round : TaskContainerUtils.getRounds(tc).keySet()) {
             img = tc.getImage(round);
             if (img == null) {
@@ -494,14 +494,14 @@ public final class TaskContainerUtils {
             Logger.warn("Adding default kernel.");
             tc.setParameter(TaskParameter.KERNEL, WorkSizeManager.getBestKernel());
         }
-        final Object facetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
-        if (facetGenMode == null) {
-            Logger.warn("Adding default facet generator.");
+        final Object subsetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
+        if (subsetGenMode == null) {
+            Logger.warn("Adding default subset generator.");
             tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, TaskDefaultValues.DEFAULT_FACET_GENERATOR);
         }
-        final Object facetGenModeParam = tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM);
-        if (facetGenModeParam == null) {
-            Logger.warn("Adding default facet generator.");
+        final Object subsetGenModeParam = tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM);
+        if (subsetGenModeParam == null) {
+            Logger.warn("Adding default subset generator.");
             tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, TaskDefaultValues.DEFAULT_FACET_SPACING);
         }
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);

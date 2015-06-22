@@ -6,7 +6,7 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.data.roi.CircularROI;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import java.net.URL;
@@ -103,10 +103,10 @@ public class InputPresenter extends ScrollPane implements Initializable, ChangeL
     void loadRois() {
         rois.clear();
         final TaskContainer tc = Context.getInstance().getTc();
-        final Set<ROI> taskRois = tc.getRois(imageIndex);
+        final Set<AbstractROI> taskRois = tc.getRois(imageIndex);
         Shape s = null;
         if (taskRois != null) {
-            for (ROI r : taskRois) {
+            for (AbstractROI r : taskRois) {
                 if (r instanceof RectangleROI) {
                     s = new Rectangle(r.getX1(), r.getY1(), r.getWidth(), r.getHeight());
                 } else if (r instanceof CircularROI) {

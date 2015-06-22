@@ -10,8 +10,6 @@ import com.jogamp.opencl.CLImage2d;
 import com.jogamp.opencl.CLMemory;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
@@ -40,9 +38,9 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
             
             release(clFacetData);
             release(clFacetCenters);
-            clFacetData = generateFacetData(task.getFacets(), kernel.usesMemoryCoalescing());
+            clFacetData = generateFacetData(task.getSubsets(), kernel.usesMemoryCoalescing());
             queue.putWriteBuffer(clFacetData, false);
-            clFacetCenters = generateFacetCenters(task.getFacets());
+            clFacetCenters = generateFacetCenters(task.getSubsets());
             queue.putWriteBuffer(clFacetCenters, false);
             
             release(clDeformationLimits);
@@ -55,7 +53,7 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
             
             release(clResults);
             maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
-            final long size = task.getFacets().size() * maxDeformationCount;
+            final long size = task.getSubsets().size() * maxDeformationCount;
             if (size <= 0 || size >= Integer.MAX_VALUE) {
                 throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);
             }

@@ -6,7 +6,8 @@
 package cz.tul.dic.engine.opencl;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
+import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.TaskDefaultValues;
@@ -71,12 +72,12 @@ public final class WorkSizeManager {
                     final double[] limits = new double[]{-49, 50, 0.05, -49, 50, 0.05};
                     deformationLimits.add(limits);
                     deformationLimits.add(limits);
-                    final int fs = 30;
-                    final List<Facet> facets = new ArrayList<>(2);
-                    facets.add(Facet.createFacet(fs, 0, 0));
-                    facets.add(Facet.createFacet(fs, 0, 0));
+                    final int fs = 14;
+                    final List<AbstractSubset> subsets = new ArrayList<>(2);
+                    subsets.add(new SquareSubset2D(fs, 15, 15));
+                    subsets.add(new SquareSubset2D(fs, 15, 15));
                     solver.solve(
-                            new FullTask(img, img, facets, deformationLimits),
+                            new FullTask(img, img, subsets, deformationLimits),
                             DeformationDegree.ZERO,
                             fs);
                 }
@@ -159,14 +160,14 @@ public final class WorkSizeManager {
         final long[] result = new long[]{0, 0, -1};
 
         long time;
-        int facetCount, deformationCount;
+        int subsetCount, deformationCount;
         for (Entry<Integer, Map<Integer, Long>> e : TIME_DATA.get(kernel).entrySet()) {
             for (Entry<Integer, Long> e2 : e.getValue().entrySet()) {
                 time = e2.getValue();
-                facetCount = e.getKey();
+                subsetCount = e.getKey();
                 deformationCount = e2.getKey();
-                if (isPerformanceBetter(time, facetCount, deformationCount, result)) {
-                    result[0] = facetCount;
+                if (isPerformanceBetter(time, subsetCount, deformationCount, result)) {
+                    result[0] = subsetCount;
                     result[1] = deformationCount;
                     result[2] = time;
                 }
@@ -176,9 +177,9 @@ public final class WorkSizeManager {
         return result;
     }
 
-    private static boolean isPerformanceBetter(final long time, final int facetCount, final int deformationCount, final long[] result) {
-        return (time < MAX_TIME) && ((facetCount == result[0] && deformationCount > result[1])
-                || facetCount > result[0]);
+    private static boolean isPerformanceBetter(final long time, final int subsetCount, final int deformationCount, final long[] result) {
+        return (time < MAX_TIME) && ((subsetCount == result[0] && deformationCount > result[1])
+                || subsetCount > result[0]);
     }
 
     private int[] computeNewCount(final int oldMaxF, final int oldMaxD, final long time) {

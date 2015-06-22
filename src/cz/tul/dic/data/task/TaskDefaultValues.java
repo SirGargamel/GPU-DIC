@@ -11,7 +11,7 @@ import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.interpolation.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.generators.facet.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
 
 /**
  *
@@ -28,7 +28,7 @@ public final class TaskDefaultValues {
     public static final double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
         -10.0, 10.0, 0.25, -10, 10, 0.25,
         -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05};
-    public static final FacetGeneratorMethod DEFAULT_FACET_GENERATOR = FacetGeneratorMethod.TIGHT;
+    public static final FacetGeneratorMethod DEFAULT_FACET_GENERATOR = FacetGeneratorMethod.EQUAL;
     public static final int DEFAULT_FACET_SPACING = 1;
     public static final int DEFAULT_FACET_SIZE = 20;
     public static final Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;

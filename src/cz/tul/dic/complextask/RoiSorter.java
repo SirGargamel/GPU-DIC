@@ -5,7 +5,7 @@
  */
 package cz.tul.dic.complextask;
 
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import java.io.Serializable;
 import java.util.Comparator;
 
@@ -13,10 +13,10 @@ import java.util.Comparator;
  *
  * @author Petr Jecmen
  */
-public class RoiSorter implements Comparator<ROI>, Serializable {
+public class RoiSorter implements Comparator<AbstractROI>, Serializable {
 
     @Override
-    public int compare(final ROI o1, final ROI o2) {
+    public int compare(final AbstractROI o1, final AbstractROI o2) {
         final int y11 = o1.getY1();
         final int y12 = o1.getY2();
         final int center1 = (y11 + y12) / 2;

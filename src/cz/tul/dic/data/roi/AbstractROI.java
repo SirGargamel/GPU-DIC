@@ -11,13 +11,13 @@ import java.io.Serializable;
  *
  * @author Petr Jecmen
  */
-public abstract class ROI implements Serializable {
+public abstract class AbstractROI implements Serializable {
 
     protected static final String SEPARATOR = ";";
 
-    public static ROI generateROI(final String data) {
+    public static AbstractROI generateROI(final String data) {
         final String[] split = data.split(SEPARATOR);
-        ROI result;
+        AbstractROI result;
         if (split.length == 4) {
             result = new RectangleROI(Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]), Double.valueOf(split[3]));
         } else if (split.length == 3) {

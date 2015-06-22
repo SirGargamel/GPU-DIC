@@ -7,7 +7,7 @@ package cz.tul.dic.engine.opencl.solvers;
 
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -45,18 +45,18 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     public List<CorrelationResult> solve(
             final Kernel kernel,
             final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
-        final int facetCount = fullTask.getDeformationLimits().size();
+        final int subsetCount = fullTask.getDeformationLimits().size();
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
         final List<CorrelationResult> coarseResults = performInitialResultEstimation(kernel, fullTask);
-        notifyProgress(facetCount, facetCount);
+        notifyProgress(subsetCount, subsetCount);
 
         double[] temp;
-        final List<double[]> limitsList = new ArrayList<>(facetCount);
-        final List<double[]> solutionList = new ArrayList<>(facetCount);
+        final List<double[]> limitsList = new ArrayList<>(subsetCount);
+        final List<double[]> solutionList = new ArrayList<>(subsetCount);
         List<int[]> countsList;
         double[] newLimits, coarseResult, solution;
-        for (int i = 0; i < facetCount; i++) {
+        for (int i = 0; i < subsetCount; i++) {
             coarseResult = coarseResults.get(i).getDeformation();
             temp = fullTask.getDeformationLimits().get(i);
 
@@ -72,7 +72,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         }
         countsList = DeformationUtils.generateDeformationCounts(limitsList);
 
-        final List<Facet> facetsToCompute = new ArrayList<>(fullTask.getFacets());
+        final List<AbstractSubset> subsetsToCompute = new ArrayList<>(fullTask.getSubsets());
         List<CorrelationResult> results = coarseResults;
         RealVector gradient, solutionVec;
         RealMatrix hessianMatrix;
@@ -81,10 +81,10 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         double[] limits;
         int[] counts;
         float increment;
-        Iterator<Facet> it;
-        Facet f;
-        int facetIndexGlobal, facetIndexLocal;
-        final List<Facet> finishedFacets = new LinkedList<>();
+        Iterator<AbstractSubset> it;
+        AbstractSubset f;
+        int subsetIndexGlobal, subsetIndexLocal;
+        final List<AbstractSubset> finishedFacets = new LinkedList<>();
 
         Kernel.registerListener(this);
 
@@ -94,40 +94,40 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
             sb.setLength(0);
             baseIndex = 0;
-            facetIndexLocal = 0;
+            subsetIndexLocal = 0;
             counterFinished = 0;
             finishedFacets.clear();
 
-            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), facetsToCompute, limitsList), defDegree);
+            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, limitsList), defDegree);
 
-            it = facetsToCompute.iterator();
+            it = subsetsToCompute.iterator();
             sb.append("Results for round ").append(i).append(": ");
             while (it.hasNext()) {
                 f = it.next();
-                facetIndexGlobal = fullTask.getFacets().indexOf(f);
-                counts = countsList.get(facetIndexLocal);
+                subsetIndexGlobal = fullTask.getSubsets().indexOf(f);
+                counts = countsList.get(subsetIndexLocal);
 
                 try {
                     // store results with computed quality  
                     resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
-                    newResult = new CorrelationResult(gpuData[resultIndex], solutionList.get(facetIndexLocal));
-                    increment = newResult.getValue() - results.get(facetIndexGlobal).getValue();
-                    sb.append(facetIndexGlobal)
+                    newResult = new CorrelationResult(gpuData[resultIndex], solutionList.get(subsetIndexLocal));
+                    increment = newResult.getValue() - results.get(subsetIndexGlobal).getValue();
+                    sb.append(subsetIndexGlobal)
                             .append(" - ")
-                            .append(results.get(facetIndexGlobal));
-                    results.set(facetIndexGlobal, newResult);
+                            .append(results.get(subsetIndexGlobal));
+                    results.set(subsetIndexGlobal, newResult);
                     if (increment > LIMIT_MIN_GROWTH) {
                         // prepare data for next step
-                        limits = limitsList.get(facetIndexLocal);
-                        gradient = generateGradient(gpuData, facetIndexLocal, facetCount, counts, limits);
-                        hessianMatrix = generateHessianMatrix(gpuData, facetIndexLocal, facetCount, counts, limits);
+                        limits = limitsList.get(subsetIndexLocal);
+                        gradient = generateGradient(gpuData, subsetIndexLocal, subsetCount, counts, limits);
+                        hessianMatrix = generateHessianMatrix(gpuData, subsetIndexLocal, subsetCount, counts, limits);
                         // calculate next step
                         solver = new QRDecomposition(hessianMatrix).getSolver();
                         solutionVec = solver.solve(gradient);
                         // prepare data for next step
                         solution = solutionVec.toArray();
-                        solutionList.set(facetIndexLocal, solution);
-                        limitsList.set(facetIndexLocal, generateLimits(solution, limits));
+                        solutionList.set(subsetIndexLocal, solution);
+                        limitsList.set(subsetIndexLocal, generateLimits(solution, limits));
                     } else if (i > 0) {
                         sb.append(", stop - low quality increment");
                         finishedFacets.add(f);
@@ -140,23 +140,23 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
                 }
 
                 sb.append("; ");
-                facetIndexLocal++;
+                subsetIndexLocal++;
                 baseIndex += counts[coeffCount];
             }
-            for (Facet facet : finishedFacets) {
-                facetIndexLocal = facetsToCompute.indexOf(facet);
-                facetsToCompute.remove(facetIndexLocal);
-                limitsList.remove(facetIndexLocal);
+            for (AbstractSubset subset : finishedFacets) {
+                subsetIndexLocal = subsetsToCompute.indexOf(subset);
+                subsetsToCompute.remove(subsetIndexLocal);
+                limitsList.remove(subsetIndexLocal);
             }
 
             sb.append("\n Stopped ");
             sb.append(counterFinished);
-            sb.append(" facets.");
+            sb.append(" subsets.");
             Logger.trace(sb);
 
-            notifyProgress(facetsToCompute.size(), facetCount);
+            notifyProgress(subsetsToCompute.size(), subsetCount);
 
-            if (facetsToCompute.isEmpty()) {
+            if (subsetsToCompute.isEmpty()) {
                 break;
             }
 
@@ -170,10 +170,10 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     }
 
     List<CorrelationResult> performInitialResultEstimation(final Kernel kernel, final FullTask fullTask) throws ComputationException {
-        final int facetCount = fullTask.getFacets().size();
+        final int subsetCount = fullTask.getSubsets().size();
 
         double[] temp;
-        List<double[]> zeroOrderLimits = new ArrayList<>(facetCount);
+        List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
         List<CorrelationResult> results;
         final StringBuilder sb = new StringBuilder();
 
@@ -189,9 +189,9 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             temp[DeformationLimit.VSTEP] = STEP;
             zeroOrderLimits.add(temp);
         }
-        results = computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getFacets(), zeroOrderLimits), DeformationDegree.ZERO);
+        results = computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), DeformationDegree.ZERO);
         sb.append("Initial results, step [").append(STEP).append("]:");
-        for (int i = 0; i < facetCount; i++) {
+        for (int i = 0; i < subsetCount; i++) {
             sb.append(i)
                     .append(" - ")
                     .append(results.get(i))
@@ -223,12 +223,12 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     }
 
     // central difference
-    protected RealVector generateGradient(float[] resultData, final int facetIndex, final int facetCount, final int[] counts, final double[] deformationLimits) {
+    protected RealVector generateGradient(float[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[] data = new double[coeffCount];
 
-        final int deformationCount = resultData.length / facetCount;
-        final int resultsBase = facetIndex * deformationCount;
+        final int deformationCount = resultData.length / subsetCount;
+        final int resultsBase = subsetIndex * deformationCount;
         final int[] indices = prepareIndices(counts);
         for (int i = 0; i < coeffCount; i++) {
             // right index
@@ -251,12 +251,12 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         return indices;
     }
 
-    protected RealMatrix generateHessianMatrix(float[] resultData, final int facetIndex, final int facetCount, final int[] counts, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(float[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final int deformationCount = resultData.length / facetCount;
-        final int resultsBase = facetIndex * deformationCount;
+        final int deformationCount = resultData.length / subsetCount;
+        final int resultsBase = subsetIndex * deformationCount;
         final int[] indices = prepareIndices(counts);
 
         // upper triangle approach
@@ -298,7 +298,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     }
 
     @Override
-    public void dumpGpuResults(float[] resultData, List<Facet> facets, List<double[]> deformationLimits) {
+    public void dumpGpuResults(float[] resultData, List<AbstractSubset> subsets, List<double[]> deformationLimits) {
         this.gpuData = resultData;
     }
 
@@ -307,10 +307,10 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         return true;
     }
 
-    private void notifyProgress(final int facetsToCompute, final int facetCount) {
-        if (facetCount > 0) {
+    private void notifyProgress(final int subsetToCompute, final int subsetCount) {
+        if (subsetCount > 0) {
             setChanged();
-            notifyObservers(0.5 + 0.5 * ((facetCount - facetsToCompute) / facetCount));
+            notifyObservers(0.5 + 0.5 * ((subsetCount - subsetToCompute) / subsetCount));
         }
     }
 

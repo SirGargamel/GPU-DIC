@@ -6,7 +6,7 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.data.roi.CircularROI;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.roi.RoiType;
 import cz.tul.dic.data.task.TaskContainer;
@@ -61,7 +61,7 @@ public class EditableInputPresenter extends InputPresenter {
         if (roisChanged) {
             final TaskContainer tc = Context.getInstance().getTc();
 
-            final Set<ROI> taskRois;
+            final Set<AbstractROI> taskRois;
             if (!rois.isEmpty()) {
                 taskRois = new HashSet<>();
                 rois.stream().forEach(s -> {

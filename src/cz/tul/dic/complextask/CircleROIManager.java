@@ -10,7 +10,7 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.CircularROI;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
@@ -18,7 +18,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.engine.opencl.solvers.Solver;
-import cz.tul.dic.generators.facet.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,7 +42,7 @@ public class CircleROIManager extends ROIManager {
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.TIGHT);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
         tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
         tc.addHint(Hint.NO_STRAIN);
@@ -52,7 +52,7 @@ public class CircleROIManager extends ROIManager {
 
         final List<CircularROI> cRois = new ArrayList<>(4);
         if (tc.getRois(initialRound) != null) {
-            for (ROI r : tc.getRois(initialRound)) {
+            for (AbstractROI r : tc.getRois(initialRound)) {
                 if (r instanceof CircularROI) {
                     cRois.add((CircularROI) r);
                 } else if (!(r instanceof RectangleROI)) {
@@ -130,7 +130,7 @@ public class CircleROIManager extends ROIManager {
         setROIs(nextRound);
     }
 
-    private double determineROIShift(final int round, final ROI roi) {
+    private double determineROIShift(final int round, final AbstractROI roi) {
         final Analyzer1D analyzer = new Analyzer1D();
         analyzer.setPrecision(PRECISION);
 
@@ -144,7 +144,7 @@ public class CircleROIManager extends ROIManager {
     }
 
     private void setROIs(final int round) {
-        final Set<ROI> rois = new HashSet<>(4);
+        final Set<AbstractROI> rois = new HashSet<>(4);
         rois.add(topLeft);
         rois.add(topRight);
         rois.add(bottomLeft);
@@ -153,9 +153,11 @@ public class CircleROIManager extends ROIManager {
         tc.setROIs(round, rois);
 
         CircularROI cr;
-        for (ROI roi : rois) {
+        double r;
+        for (AbstractROI roi : rois) {
             cr = (CircularROI) roi;
-            tc.addFacetSize(round, roi, Math.max(1, (int) Math.floor(cr.getRadius() * ROOT_TWO)));
+            r = cr.getRadius();
+            tc.addSubsetSize(round, roi, (int) (r / ROOT_TWO));
             tc.setDeformationLimits(round, roi, defLimits);
         }
     }
@@ -168,8 +170,8 @@ public class CircleROIManager extends ROIManager {
         return shiftBottom;
     }
 
-    public Set<ROI> getBottomRois() {
-        final Set<ROI> result = new HashSet<>(2);
+    public Set<AbstractROI> getBottomRois() {
+        final Set<AbstractROI> result = new HashSet<>(2);
         result.add(bottomLeft);
         result.add(bottomRight);
         return result;

@@ -8,9 +8,9 @@ package cz.tul.dic.engine;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -27,7 +27,7 @@ import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.generators.facet.FacetGenerator;
+import cz.tul.dic.data.subset.generator.FacetGenerator;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
@@ -173,11 +173,11 @@ public final class Engine extends Observable implements Observer {
         // prepare data
         setChanged();
         notifyObservers(FacetGenerator.class);
-        final Map<ROI, List<Facet>> facets = FacetGenerator.generateFacets(task, roundFrom);
+        final Map<AbstractROI, List<AbstractSubset>> subsets = FacetGenerator.generateFacets(task, roundFrom);
 
         // compute round                
-        final Map<ROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());
-        for (ROI roi : task.getRois(roundFrom)) {
+        final Map<AbstractROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());
+        for (AbstractROI roi : task.getRois(roundFrom)) {
             if (stopEngine) {
                 return;
             }
@@ -189,15 +189,15 @@ public final class Engine extends Observable implements Observer {
                     solver.solve(
                             new FullTask(
                                     task.getImage(roundFrom), task.getImage(roundTo),
-                                    facets.get(roi),
-                                    generateDeformations(task.getDeformationLimits(roundFrom, roi), facets.get(roi).size())),
+                                    subsets.get(roi),
+                                    generateDeformations(task.getDeformationLimits(roundFrom, roi), subsets.get(roi).size())),
                             DeformationUtils.getDegreeFromLimits(task.getDeformationLimits(roundFrom, roi)),
-                            task.getFacetSize(roundFrom, roi)));
+                            task.getSubsetSize(roundFrom, roi)));
         }
 
         setChanged();
         notifyObservers(DisplacementCalculator.class);
-        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(correlations, facets, task, roundFrom);
+        final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(correlations, subsets, task, roundFrom);
 
         task.setResult(roundFrom, roundTo, new Result(correlations, displacement));
 
@@ -206,7 +206,7 @@ public final class Engine extends Observable implements Observer {
         if (DebugControl.isDebugMode()) {
             Stats.getInstance().dumpDeformationsStatisticsUsage(roundFrom);
             Stats.getInstance().dumpDeformationsStatisticsPerQuality(roundFrom);
-            Stats.getInstance().drawFacetQualityStatistics(facets, roundFrom, roundTo);
+            Stats.getInstance().drawFacetQualityStatistics(subsets, roundFrom, roundTo);
             Stats.getInstance().drawPointResultStatistics(roundFrom, roundTo);
         }
 
@@ -232,8 +232,8 @@ public final class Engine extends Observable implements Observer {
         }
     }
 
-    private static List<double[]> generateDeformations(final double[] limits, final int facetCount) {
-        return Collections.nCopies(facetCount, limits);
+    private static List<double[]> generateDeformations(final double[] limits, final int subsetCount) {
+        return Collections.nCopies(subsetCount, limits);
     }
 
     private void exportRound(final TaskContainer task, final int round) throws IOException, ComputationException {

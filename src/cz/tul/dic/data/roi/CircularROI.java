@@ -7,7 +7,7 @@ package cz.tul.dic.data.roi;
 
 import java.io.Serializable;
 
-public class CircularROI extends ROI implements Serializable {
+public class CircularROI extends AbstractROI implements Serializable {
 
     private final double centerX, centerY, radius;
 
@@ -50,7 +50,7 @@ public class CircularROI extends ROI implements Serializable {
     }
 
     @Override
-    public boolean isAreaInside(double x1, double y1, double x2, double y2) {
+    public boolean isAreaInside(final double x1, final double y1, final double x2, final double y2) {
         final double maxDist2 = radius * radius;
         
         return dist2(x1, y1, centerX, centerY) <= maxDist2
@@ -64,7 +64,7 @@ public class CircularROI extends ROI implements Serializable {
     }
     
     @Override
-    public boolean isPointInside(double x, double y) {
+    public boolean isPointInside(final double x, final double y) {
         return dist2(x, y, centerX, centerY) <= (radius * radius);
     }
 

@@ -10,7 +10,7 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -124,7 +124,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
                 final Image img = rrm.getTc().getImage(r);
                 final double[][][] data;
                 if (!tcR.getRois(r).isEmpty()) {
-                    ROI roi = tcR.getRois(r).iterator().next();
+                    AbstractROI roi = tcR.getRois(r).iterator().next();
                     data = generateZeroResults(img, roi);
                 } else {
                     data = new double[img.getWidth()][img.getHeight()][];
@@ -195,7 +195,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
 
     private boolean checkResultsQuality(final CircleROIManager crm, int round) {
         int countNotGood = 0, count = 0;
-        for (ROI roi : crm.getBottomRois()) {
+        for (AbstractROI roi : crm.getBottomRois()) {
             for (CorrelationResult cr : crm.getTc().getResult(round, round + 1).getCorrelations().get(roi)) {
                 if (cr == null || cr.getValue() < CircleROIManager.LIMIT_RESULT_QUALITY) {
                     countNotGood++;
@@ -207,7 +207,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
         return ratio < LIMIT_COUNT_RATIO;
     }
 
-    private double[][][] generateZeroResults(final Image img, final ROI roi) {
+    private double[][][] generateZeroResults(final Image img, final AbstractROI roi) {
         final double[][][] data = new double[img.getWidth()][img.getHeight()][];
         for (int x = roi.getX1(); x <= roi.getX2(); x++) {
             if (x < 0 || x >= data.length) {

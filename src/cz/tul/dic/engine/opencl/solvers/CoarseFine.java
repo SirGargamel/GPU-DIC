@@ -25,9 +25,9 @@ public class CoarseFine extends AbstractTaskSolver {
     @Override
     public List<CorrelationResult> solve(final Kernel kernel,
             final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
-        final int facetCount = fullTask.getFacets().size();
+        final int subsetCount = fullTask.getSubsets().size();
         final StringBuilder sb = new StringBuilder();
-        List<double[]> zeroOrderLimits = new ArrayList<>(facetCount);
+        List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
         List<CorrelationResult> results;
         double[] temp;
         double step = STEP_INITIAL;
@@ -68,10 +68,10 @@ public class CoarseFine extends AbstractTaskSolver {
         }
         results = computeTask(
                 kernel,
-                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getFacets(), zeroOrderLimits),
+                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits),
                 DeformationDegree.ZERO);
         sb.append("Initial results, step [").append(step).append("]:");
-        for (int i = 0; i < facetCount; i++) {
+        for (int i = 0; i < subsetCount; i++) {
             sb.append(i)
                     .append(" - ")
                     .append(results.get(i))
@@ -93,9 +93,9 @@ public class CoarseFine extends AbstractTaskSolver {
             }
 
             zeroOrderLimits.clear();
-            zeroOrderLimits = new ArrayList<>(facetCount);
+            zeroOrderLimits = new ArrayList<>(subsetCount);
 
-            for (int i = 0; i < facetCount; i++) {
+            for (int i = 0; i < subsetCount; i++) {
                 coarseResult = results.get(i).getDeformation();
                 temp = new double[COUNT_ZERO_ORDER_LIMITS];
 
@@ -110,11 +110,11 @@ public class CoarseFine extends AbstractTaskSolver {
             }
             results = computeTask(
                     kernel,
-                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getFacets(), zeroOrderLimits),
+                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits),
                     DeformationDegree.ZERO);
 
             sb.append("Finer results, step [").append(step).append("]:");
-            for (int i = 0; i < facetCount; i++) {
+            for (int i = 0; i < subsetCount; i++) {
                 sb.append(i)
                         .append(" - ")
                         .append(results.get(i))
@@ -125,9 +125,9 @@ public class CoarseFine extends AbstractTaskSolver {
 
         //higher order search
         if (defDegree != DeformationDegree.ZERO) {
-            final List<double[]> higherOrderLimits = new ArrayList<>(facetCount);
+            final List<double[]> higherOrderLimits = new ArrayList<>(subsetCount);
 
-            for (int i = 0; i < facetCount; i++) {
+            for (int i = 0; i < subsetCount; i++) {
                 coarseResult = results.get(i).getDeformation();
                 temp = fullTask.getDeformationLimits().get(i);
                 l = temp.length;
@@ -146,11 +146,11 @@ public class CoarseFine extends AbstractTaskSolver {
             }
             results = computeTask(
                     kernel,
-                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getFacets(), higherOrderLimits),
+                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), higherOrderLimits),
                     defDegree);
 
             sb.append("Higher order results: ");
-            for (int i = 0; i < facetCount; i++) {
+            for (int i = 0; i < subsetCount; i++) {
                 sb.append(i)
                         .append(" - ")
                         .append(results.get(i))

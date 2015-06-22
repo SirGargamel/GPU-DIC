@@ -9,7 +9,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.roi.CircularROI;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
@@ -34,7 +34,7 @@ public class RectROIManager extends ROIManager {
         super(tc);
         this.crm = crm;
 
-        for (ROI r : tc.getRois(initialRound)) {
+        for (AbstractROI r : tc.getRois(initialRound)) {
             if (r instanceof RectangleROI) {
                 if (rect == null) {
                     rect = (RectangleROI) r;
@@ -58,7 +58,7 @@ public class RectROIManager extends ROIManager {
 
         RectangleROI rect = null;
         final List<CircularROI> cRois = new ArrayList<>(4);
-        for (ROI r : tc.getRois(initialRound)) {
+        for (AbstractROI r : tc.getRois(initialRound)) {
             if (r instanceof CircularROI) {
                 cRois.add((CircularROI) r);
             } else if (r instanceof RectangleROI) {
@@ -96,7 +96,7 @@ public class RectROIManager extends ROIManager {
         sb.append("]");
         Logger.trace(sb);
 
-        final Set<ROI> rois = new HashSet<>(1);
+        final Set<AbstractROI> rois = new HashSet<>(1);
         rois.add(rect);
         tcR.setROIs(initialRound, rois);
 
@@ -107,7 +107,7 @@ public class RectROIManager extends ROIManager {
     }    
 
     private void setRois(final int round) {
-        final Set<ROI> rois = new HashSet<>(1);
+        final Set<AbstractROI> rois = new HashSet<>(1);
         rois.add(rect);
         tc.setROIs(round, rois);
         tc.setDeformationLimits(round, rect, defLimits);

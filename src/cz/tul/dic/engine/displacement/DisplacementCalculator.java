@@ -7,10 +7,10 @@ package cz.tul.dic.engine.displacement;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Coordinates;
-import cz.tul.dic.data.Facet;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
@@ -35,7 +35,7 @@ public abstract class DisplacementCalculator {
         DATA.put(DisplacementCalculation.MAX_WEIGHTED_AVERAGE, new MaxAndWeightedAverage());
     }
 
-    public static DisplacementResult computeDisplacement(final Map<ROI, List<CorrelationResult>> correlationResults, Map<ROI, List<Facet>> facetMap, final TaskContainer tc, final int round) throws ComputationException {
+    public static DisplacementResult computeDisplacement(final Map<AbstractROI, List<CorrelationResult>> correlationResults, Map<AbstractROI, List<AbstractSubset>> allSubsets, final TaskContainer tc, final int round) throws ComputationException {
         final Object o = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "NULL displacement calculation type.");
@@ -44,13 +44,13 @@ public abstract class DisplacementCalculator {
 
         if (DATA.containsKey(type)) {
             Logger.trace("Calculationg displacement for round {0} using {1}.", round, type);
-            return DATA.get(type).buildFinalResults(correlationResults, facetMap, tc, round);
+            return DATA.get(type).buildFinalResults(correlationResults, allSubsets, tc, round);
         } else {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported displacement calculation - " + type.toString());
         }
     }
 
-    abstract DisplacementResult buildFinalResults(final Map<ROI, List<CorrelationResult>> correlationResults, Map<ROI, List<Facet>> facetMap, final TaskContainer tc, final int round) throws ComputationException;
+    abstract DisplacementResult buildFinalResults(final Map<AbstractROI, List<CorrelationResult>> correlationResults, Map<AbstractROI, List<AbstractSubset>> allSubsets, final TaskContainer tc, final int round) throws ComputationException;
 
     public static DisplacementResult computeCumulativeDisplacement(final TaskContainer tc, final int roundFrom, final int roundTo) {
         if (roundFrom >= roundTo) {

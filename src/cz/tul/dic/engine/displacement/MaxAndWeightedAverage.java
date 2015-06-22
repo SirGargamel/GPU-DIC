@@ -7,11 +7,11 @@ package cz.tul.dic.engine.displacement;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Coordinates;
-import cz.tul.dic.data.Facet;
-import cz.tul.dic.data.FacetUtils;
+import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.roi.ROI;
+import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -33,7 +33,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
     private double[][] finalQuality;
 
     @Override
-    public DisplacementResult buildFinalResults(final Map<ROI, List<CorrelationResult>> correlationResults, Map<ROI, List<Facet>> facetMap, final TaskContainer tc, final int round) throws ComputationException {
+    public DisplacementResult buildFinalResults(final Map<AbstractROI, List<CorrelationResult>> correlationResults, Map<AbstractROI, List<AbstractSubset>> allSubsets, final TaskContainer tc, final int round) throws ComputationException {
         final Image img = tc.getImage(round);
         final int width = img.getWidth();
         final int height = img.getHeight();
@@ -52,7 +52,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
             upperBound = Math.min(upperBound, height - 1);
             counters.clear();
 
-            prepareDeformedFacetsToCounters(correlationResults, facetMap, resultQuality, lowerBound, upperBound, counters);
+            prepareDeformedFacetsToCounters(correlationResults, allSubsets, resultQuality, lowerBound, upperBound, counters);
 
             calculateDisplacementFromCounters(counters, tc, round);
         }
@@ -61,24 +61,24 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
     }
 
     private void prepareDeformedFacetsToCounters(
-            final Map<ROI, List<CorrelationResult>> correlationResults, 
-            final Map<ROI, List<Facet>> facetMap, final double resultQuality, 
+            final Map<AbstractROI, List<CorrelationResult>> correlationResults, 
+            final Map<AbstractROI, List<AbstractSubset>> allSubsets, final double resultQuality, 
             final int lowerBound, final int upperBound, 
             final Map<Integer, Map<Integer, Analyzer2D>> counters) throws ComputationException {
-        List<Facet> facets;
+        List<AbstractSubset> susbets;
         List<CorrelationResult> results;
         CorrelationResult cr;
         double[] d;
         double qualitySum;
-        Facet f;
+        AbstractSubset f;
         Map<int[], double[]> deformedFacet;
         int x;
         int y;
-        for (ROI roi : correlationResults.keySet()) {
-            facets = facetMap.get(roi);
+        for (AbstractROI roi : correlationResults.keySet()) {
+            susbets = allSubsets.get(roi);
             results = correlationResults.get(roi);
 
-            for (int i = 0; i < facets.size(); i++) {
+            for (int i = 0; i < susbets.size(); i++) {
                 if (results.get(i) == null) {
                     continue;
                 }
@@ -90,16 +90,16 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                 d = cr.getDeformation();
                 qualitySum = cr.getValue();
 
-                f = facets.get(i);
+                f = susbets.get(i);
                 if (f == null) {
-                    Logger.warn("No facet - {0}", f);
+                    Logger.warn("No subset - {0}", f);
                     continue;
                 }
-                if (!FacetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
+                if (!SubsetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
                     continue;
                 }
 
-                deformedFacet = FacetUtils.deformFacet(f, d);
+                deformedFacet = SubsetUtils.deformFacet(f, d);
                 for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];

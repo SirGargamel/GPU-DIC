@@ -5,7 +5,7 @@
  */
 package cz.tul.dic.debug;
 
-import cz.tul.dic.data.Facet;
+import cz.tul.dic.data.subset.AbstractSubset;
 import java.util.List;
 
 /**
@@ -14,6 +14,6 @@ import java.util.List;
  */
 public interface IGPUResultsReceiver {
     
-    void dumpGpuResults(final float[] resultData, final List<Facet> facets, final List<double[]> deformationLimits);
+    void dumpGpuResults(final float[] resultData, final List<AbstractSubset> subsets, final List<double[]> deformationLimits);
     
 }

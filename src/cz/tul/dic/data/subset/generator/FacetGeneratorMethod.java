@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.generators.facet;
+package cz.tul.dic.data.subset.generator;
 
 /**
  *
@@ -11,6 +11,6 @@ package cz.tul.dic.generators.facet;
  */
 public enum FacetGeneratorMethod {
 
-    TIGHT,;
+    EQUAL,;
     
 }
