@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author Petr Jecmen
  */
-public class Exporter {
+public final class Exporter {
 
     private static final Map<ExportTarget, AbstractExportTarget> targetExporters;
 
@@ -30,6 +30,9 @@ public class Exporter {
         targetExporters.put(ExportTarget.FILE, new ExportTargetFile());
         targetExporters.put(ExportTarget.CSV, new ExportTargetCsv());
         targetExporters.put(ExportTarget.GUI, new ExportTargetGUI());
+    }
+
+    private Exporter() {
     }
 
     public static void export(final TaskContainer tc) throws IOException, ComputationException {

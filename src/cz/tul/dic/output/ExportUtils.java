@@ -53,18 +53,14 @@ public final class ExportUtils {
         debugMode = true;
     }
 
-    public static boolean isPointInsideROIs(final int x, final int y, final AbstractROI[] rois, final TaskContainer tc, final int round) {
+    public static boolean isPointInsideROIs(final int x, final int y, final AbstractROI[] rois) {
         boolean result = false;
 
         if (rois == null) {
             result = true;
         } else {
             for (AbstractROI roi : rois) {
-                if (roi == null) {
-                    continue;
-                }
-
-                if (roi.isPointInside(x, y)) {
+                if (roi != null && roi.isPointInside(x, y)) {
                     // check subsets                
                     result = true;
                     break;
@@ -165,9 +161,7 @@ public final class ExportUtils {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
-
-        final int width = mapData.length;
-        final int height = mapData[0].length;
+        
         final double[] minMax = findMinMax(mapData);
 
         return createImageFromMap(mapData, dir, minMax);

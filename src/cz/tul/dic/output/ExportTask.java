@@ -50,7 +50,7 @@ public final class ExportTask implements Serializable {
         }
 
         Direction dir;
-        if (split[2].equals("null")) {
+        if ("null".equals(split[2])) {
             dir = Direction.D_DY;
         } else {
             dir = Direction.valueOf(split[2]);

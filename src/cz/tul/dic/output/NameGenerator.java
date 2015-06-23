@@ -15,7 +15,7 @@ import java.io.File;
  *
  * @author Petr Ječmen
  */
-public class NameGenerator {
+public final class NameGenerator {
 
     private static final String DELIMITER = "_";
     public static final String EXT_CONFIG = ".config";
@@ -37,36 +37,39 @@ public class NameGenerator {
         debugMode = false;
     }
 
+    private NameGenerator() {
+    }
+
     public static void enableDebugMode() {
         NameGenerator.debugMode = true;
     }
 
     public static String generateBinary(final TaskContainer tc) {
-        return new Generator(tc).name().finalize(EXT_BINARY);
+        return new Generator(tc).name().finalizeName(EXT_BINARY);
     }
 
     public static String generateConfig(final TaskContainer tc) {
-        return new Generator(tc).name().finalize(EXT_CONFIG);
+        return new Generator(tc).name().finalizeName(EXT_CONFIG);
     }
 
     public static String generateCsvShifts(final TaskContainer tc) {
-        return new Generator(tc).name().finalize(EXT_CSV);
+        return new Generator(tc).name().finalizeName(EXT_CSV);
     }
 
     public static String generateMap(final TaskContainer tc, final int round, final Direction dir) {
-        return new Generator(tc).name().time(round).direction(dir).finalize(EXT_MAP);
+        return new Generator(tc).name().time(round).direction(dir).finalizeName(EXT_MAP);
     }
 
     public static String generateSequence(final TaskContainer tc, final Direction dir) {
-        return new Generator(tc).name().direction(dir).finalize(EXT_SEQUENCE);
+        return new Generator(tc).name().direction(dir).finalizeName(EXT_SEQUENCE);
     }
 
     public static String generateCsvPoint(final TaskContainer tc, final int x, final int y) {
-        return new Generator(tc).name().intVal(x).intVal(y).finalize(EXT_CSV);
+        return new Generator(tc).name().intVal(x).intVal(y).finalizeName(EXT_CSV);
     }
 
     public static String generateCsvDoublePoint(final TaskContainer tc, final int x1, final int y1, final int x2, final int y2) {
-        return new Generator(tc).name().intVal(x1).intVal(y1).delimiter().intVal(x2).intVal(y2).finalize(EXT_CSV);
+        return new Generator(tc).name().intVal(x1).intVal(y1).delimiter().intVal(x2).intVal(y2).finalizeName(EXT_CSV);
     }
 
     public static String generateCsvMap(final TaskContainer tc, final int round, final Direction dir) {
@@ -74,31 +77,31 @@ public class NameGenerator {
     }
 
     public static String generateQualityMapFacet(final TaskContainer tc, final int round) {
-        return new Generator(tc).name(TEXT_QUALITY_FACET).time(round).text(TEXT_QUALITY_FACET).finalize(EXT_MAP);
+        return new Generator(tc).name(TEXT_QUALITY_FACET).time(round).text(TEXT_QUALITY_FACET).finalizeName(EXT_MAP);
     }
 
     public static String generateQualityMapPoint(final TaskContainer tc, final int round) {
-        return new Generator(tc).name(TEXT_QUALITY_POINT).time(round).text(TEXT_QUALITY_POINT).finalize(EXT_MAP);
+        return new Generator(tc).name(TEXT_QUALITY_POINT).time(round).text(TEXT_QUALITY_POINT).finalizeName(EXT_MAP);
     }
-    
+
     public static String generateDeformationQualityDump(final TaskContainer tc, final int round) {
-        return new Generator(tc).name(TEXT_QUALITY_DEFORMATION).time(round).text(TEXT_QUALITY_DEFORMATION).finalize(EXT_TXT);
+        return new Generator(tc).name(TEXT_QUALITY_DEFORMATION).time(round).text(TEXT_QUALITY_DEFORMATION).finalizeName(EXT_TXT);
     }
-    
+
     public static String generateDeformationQualityUsageDump(final TaskContainer tc, final int round) {
-        return new Generator(tc).name(TEXT_QUALITY_DEFORMATION).time(round).text(TEXT_QUALITY_DEFORMATION_BOOL).finalize(EXT_TXT);
+        return new Generator(tc).name(TEXT_QUALITY_DEFORMATION).time(round).text(TEXT_QUALITY_DEFORMATION_BOOL).finalizeName(EXT_TXT);
     }
 
     public static String generateRegressionQualityMap(final TaskContainer tc, final int round, final Direction dir) {
-        return new Generator(tc).name(TEXT_QUALITY_REGRESSION).time(round).text(TEXT_QUALITY_REGRESSION).direction(dir).finalize(EXT_MAP);
+        return new Generator(tc).name(TEXT_QUALITY_REGRESSION).time(round).text(TEXT_QUALITY_REGRESSION).direction(dir).finalizeName(EXT_MAP);
     }
 
     public static String generate2DValueHistogram(final TaskContainer tc, final int round, final int x, final int y) {
-        return new Generator(tc).name(TEXT_HISTOGRAM).time(round).text(TEXT_HISTOGRAM).intVal(x).intVal(y).finalize(EXT_CSV);
+        return new Generator(tc).name(TEXT_HISTOGRAM).time(round).text(TEXT_HISTOGRAM).intVal(x).intVal(y).finalizeName(EXT_CSV);
     }
-    
+
     public static String generateGpuResultsDump(final TaskContainer tc, final int batch) {
-        return new Generator(tc).name(TEXT_GPU_RESULTS).text(TEXT_GPU_RESULTS).intVal(batch).finalize(EXT_TXT);
+        return new Generator(tc).name(TEXT_GPU_RESULTS).text(TEXT_GPU_RESULTS).intVal(batch).finalizeName(EXT_TXT);
     }
 
     private static class Generator {
@@ -128,20 +131,20 @@ public class NameGenerator {
             return this;
         }
 
-        public Generator intVal(int round) {
+        public Generator intVal(final int round) {
             sb.append(DELIMITER);
             sb.append(Utils.format(round));
             return this;
         }
 
-        public Generator time(int imageNr) {
+        public Generator time(final int imageNr) {
             sb.append(DELIMITER);
             sb.append(Utils.format(fpsM.getTime(imageNr)));
             sb.append(fpsM.getTickUnit());
             return this;
         }
 
-        public Generator direction(Direction dir) {
+        public Generator direction(final Direction dir) {
             sb.append(DELIMITER);
             sb.append(dir.toString());
             return this;
@@ -158,7 +161,7 @@ public class NameGenerator {
             return this;
         }
 
-        public String finalize(String extension) {
+        public String finalizeName(final String extension) {
             sb.append(DELIMITER);
             sb.append(DELIMITER);
             sb.append(Utils.format((int) tc.getParameter(TaskParameter.FACET_SIZE)));

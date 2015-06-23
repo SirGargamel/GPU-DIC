@@ -13,10 +13,13 @@ import java.io.IOException;
  *
  * @author Petr Ječmen
  */
-public class CsvWriter {
+public final class CsvWriter {
 
     private static final String SEPARATOR_VALUE = ",";
     private static final String SEPARATOR_LINE = "\n";
+
+    private CsvWriter() {
+    }
 
     public static void writeDataToCsv(final File target, final String[][] data) throws IOException {
         try (FileWriter out = new FileWriter(target)) {
