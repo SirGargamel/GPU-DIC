@@ -21,7 +21,7 @@ import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
-import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.util.ArrayList;
 import java.util.List;

@@ -81,24 +81,5 @@ kernel void CL1D_I_V_LL_MC_D(
     meanF /= (float) subsetSize2;
     meanG /= (float) subsetSize2;    
     
-    float deltaF = 0;
-    float deltaG = 0;   
-    for (int i = 0; i < subsetSize2; i++) {                                             
-        subsetI[i] -= meanF;
-        deltaF += subsetI[i] * subsetI[i];
-                        
-        deformedI[i] -= meanG;
-        deltaG += deformedI[i] * deformedI[i];
-    }    
-    
-    float resultVal = 0;           
-    if (deltaF != 0 && deltaG != 0) {
-        for (int i = 0; i < subsetSize2; i++) {            
-            resultVal += subsetI[i] * deformedI[i];
-        }
-        resultVal /= sqrt(deltaF) * sqrt(deltaG);  
-    }    
-    
-    //store result    
-    result[subsetId * deformationCount + deformationId] = resultVal;    
+    %C&S%    
 }

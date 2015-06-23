@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.kernels;
 
+import cz.tul.dic.engine.opencl.kernels.sources.KernelSourcePreparator;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
@@ -24,7 +25,7 @@ import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
-import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.data.Interpolation;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

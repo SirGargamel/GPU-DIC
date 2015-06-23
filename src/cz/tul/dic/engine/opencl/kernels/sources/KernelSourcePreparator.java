@@ -3,16 +3,18 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernels;
+package cz.tul.dic.engine.opencl.kernels.sources;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationDirection;
-import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.pmw.tinylog.Logger;
 
@@ -23,7 +25,9 @@ import org.pmw.tinylog.Logger;
 public class KernelSourcePreparator {
 
     public static final String KERNEL_EXTENSION = ".cl";
+    private static final String REPLACE_EXTENSION = ".source";
     private static final String REPLACE_FACET_SIZE = "-1";
+    private static final String REPLACE_DELTA = "%C&S%";
     private static final String REPLACE_DEFORMATION_X = "%DEF_X%";
     private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";
     private static final String REPLACE_DEFORMATION_DEGREE = "%DEF_D%";
@@ -50,6 +54,7 @@ public class KernelSourcePreparator {
             kp.prepareFacetSize(subsetSize);
             kp.prepareDeformations(deg, usesVectorization);
             kp.prepareInterpolation(interpolation, usesImage);
+            kp.prepareDeltaAndStore();
             return kp.kernel;
         } catch (IOException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
@@ -291,20 +296,34 @@ public class KernelSourcePreparator {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of interpolation.");
         }
         if (usesImage) {
-            resourceName = resourceName.concat("-image.cl");
+            resourceName = resourceName.concat("-image");
         } else {
-            resourceName = resourceName.concat("-array.cl");
+            resourceName = resourceName.concat("-array");
         }
-        try (final BufferedReader br = new BufferedReader(new InputStreamReader(KernelSourcePreparator.class.getResourceAsStream("/cz/tul/dic/engine/opencl/interpolation/".concat(resourceName))))) {
-            final StringBuilder sb = new StringBuilder();
+        resourceName = resourceName.concat(REPLACE_EXTENSION);
+        
+        kernel = kernel.replaceFirst(
+                REPLACE_INTERPOLATION, 
+                loadKernelResource(KernelSourcePreparator.class.getResourceAsStream(resourceName)));
+
+    }
+    
+    private static String loadKernelResource(final InputStream in) {
+        final StringBuilder sb = new StringBuilder();
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(in))) {            
             br.lines().forEachOrdered((String t) -> {
                 sb.append(t);
                 sb.append("\n");
-            });
-            kernel = kernel.replaceFirst(REPLACE_INTERPOLATION, sb.toString());
+            });            
         } catch (Exception ex) {
             Logger.error(ex);
         }
-
+        return sb.toString();
+    }
+    
+    private void prepareDeltaAndStore() {
+        kernel = kernel.replaceAll(
+                REPLACE_DELTA, 
+                loadKernelResource(KernelSourcePreparator.class.getResourceAsStream("computeDeltaAndStore.source")));
     }
 }

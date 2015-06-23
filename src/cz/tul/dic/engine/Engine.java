@@ -20,7 +20,7 @@ import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
-import cz.tul.dic.engine.opencl.interpolation.Interpolation;
+import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.result.DisplacementResult;
