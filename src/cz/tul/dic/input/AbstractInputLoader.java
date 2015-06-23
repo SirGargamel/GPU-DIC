@@ -32,18 +32,16 @@ public abstract class AbstractInputLoader {
 
     public abstract Class getSupporteType();
 
-    void loadUdaFile(final String inputName, final TaskContainer tc) throws IOException {
+    protected void loadUdaFile(final String inputName, final TaskContainer tc) throws IOException {
         final String udaFilename = inputName.substring(0, inputName.lastIndexOf('.')).concat(EXT_UDA);
         final File uda = new File(udaFilename);
 
         int fps = TaskDefaultValues.DEFAULT_FPS;
-        if (!uda.exists() || !uda.canRead()) {
-            Logger.warn("Missing UDA file, using default FPS - {0}", fps);
-        } else {
+        if (udaFileExists(uda)) {
             final List<String> lines = Files.readAllLines(Paths.get(udaFilename));
             for (String s : lines) {
                 if (s.contains(TEXT_SPEED)) {
-                    String val = s.replace(TEXT_SPEED, "").replace(TEXT_FPS, "").replaceAll(TEXT_EXTRA, "").trim();
+                    final String val = s.replace(TEXT_SPEED, "").replace(TEXT_FPS, "").replaceAll(TEXT_EXTRA, "").trim();
                     try {
                         fps = Integer.parseInt(val);
                     } catch (NumberFormatException ex) {
@@ -52,8 +50,14 @@ public abstract class AbstractInputLoader {
                     break;
                 }
             }
+        } else {
+            Logger.warn("Missing UDA file, using default FPS - {0}", fps);
         }
         tc.setParameter(TaskParameter.FPS, fps);
+    }
+
+    private static boolean udaFileExists(final File file) {
+        return file.exists() && file.canRead();
     }
 
 }

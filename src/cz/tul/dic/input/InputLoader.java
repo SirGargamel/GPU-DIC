@@ -19,7 +19,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class InputLoader {
+public final class InputLoader {
 
     private static final Map<Class, AbstractInputLoader> loaders;
 
@@ -31,6 +31,9 @@ public class InputLoader {
 
         il = new ImageLoader();
         loaders.put(il.getSupporteType(), il);
+    }
+
+    private InputLoader() {
     }
 
     public static void loadInput(final TaskContainer tc) throws IOException, ComputationException {
