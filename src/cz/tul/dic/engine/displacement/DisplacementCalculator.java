@@ -17,6 +17,7 @@ import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.result.Result;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.pmw.tinylog.Logger;
@@ -69,9 +70,11 @@ public abstract class DisplacementCalculator {
             final int height = img.getHeight();
             final double[][][] resultData = new double[width][height][];
 
+            final List<double[][][]> resultsCascade = findResultsCascade(tc, roundFrom, roundTo);
+            
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    computeDisplacement(roundFrom, roundTo, tc, resultData, x, y);
+                    computeDisplacement(resultsCascade, resultData, x, y);
                 }
             }
 
@@ -81,44 +84,44 @@ public abstract class DisplacementCalculator {
         return displacement;
     }
 
-    private static void computeDisplacement(int roundFrom, final int roundTo, final TaskContainer tc, final double[][][] resultData, int x, int y) {
-        Result tempResult;
-        double[][][] data;
-        double[] val;
+    private static List<double[][][]> findResultsCascade(final TaskContainer tc, final int roundFrom, final int roundTo) {
+        final List<double[][][]> result = new LinkedList<>();
         int indexFrom = roundFrom;
         int indexTo = roundTo;
-        double posX = x;
-        double posY = y;
+        Result tempResult;
         while (indexFrom != roundTo) {
             do {
                 tempResult = tc.getResult(indexFrom, indexTo);
-
                 if (tempResult != null) {
-                    data = tempResult.getDisplacementResult().getDisplacement();
+                    result.add(tempResult.getDisplacementResult().getDisplacement());
+                    indexFrom = indexTo;
+                    indexTo = roundTo;
                 } else {
-                    data = null;
-                }
-                if (data == null) {
                     indexTo--;
                 }
-            } while (data == null && indexTo >= 0);
-            if (data == null) {
-                break;
-            }
+            } while (indexTo >= 0);
+        }
 
+        return result;
+    }
+    
+    private static void computeDisplacement(final List<double[][][]> resultsCascade, final double[][][] resultData, int x, int y) {
+        double posX = x;
+        double posY = y;
+        
+        double[] val;
+        for (double[][][] data : resultsCascade) {
             val = interpolate(posX, posY, data);
             posX += val[Coordinates.X];
             posY += val[Coordinates.Y];
-
-            indexFrom = indexTo;
-            indexTo = roundTo;
-
+            
             if (posX < 0 || posY < 0 || posX > data.length - 1 || posY > data[0].length - 1) {
                 break;
             }
         }
+        
         resultData[x][y] = new double[]{posX - x, posY - y};
-    }
+    }    
 
     private static double[] interpolate(final double x, final double y, final double[][][] data) {
         if (data.length == 0 || data[0].length == 0) {
