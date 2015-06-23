@@ -311,7 +311,11 @@ public class EngineTest {
         sb.append(" - ");
         sb.append(errorCount);
         sb.append("; ");
-        sb.append(tc.getResult(ROUND, ROUND + 1).getCorrelations());
+        if (tc.getResult(ROUND, ROUND + 1) != null) {
+            sb.append(tc.getResult(ROUND, ROUND + 1).getCorrelations());
+        } else {
+            sb.append("NO RESULTS!");
+        }
         for (String s : extra) {
             sb.append("; ");
             sb.append(s);

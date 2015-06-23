@@ -47,24 +47,8 @@ kernel void CL15D_pF_D(
         deformedFacet[i2] = %DEF_X%;
         deformedFacet[i2 + 1] = %DEF_Y%;
     }
-    // compute correlation using ZNCC
-    float deformedI[(2*-1+1)*(2*-1+1)];
-    float subsetI[(2*-1+1)*(2*-1+1)];
-    float meanF = 0;
-    float meanG = 0; 
-    for (int i = 0; i < subsetSize2; i++) {
-        i2 = i*2;
-        index = baseIndexFacet + i2;
-                
-        // subset is just array of int coords              
-        subsetI[i] = imageA[computeIndex(subsets[index], subsets[index + 1], imageWidth)];
-        meanF += subsetI[i];
-                               
-        deformedI[i] = interpolate(deformedFacet[i2], deformedFacet[i2 + 1], imageB, imageWidth);
-        meanG += deformedI[i];
-    } 
-    meanF /= (float) subsetSize2;
-    meanG /= (float) subsetSize2;
+    
+    %CORR%
     
     %C&S%
 }

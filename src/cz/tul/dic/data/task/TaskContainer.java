@@ -240,7 +240,11 @@ public class TaskContainer extends Observable implements Serializable {
     public Result getResult(final int roundFrom, final int roundTo) {
         final Result result;
         if (roundFrom + 1 == roundTo) {
-            result = results.get(roundTo);
+            if (roundTo < results.size()) {
+                result = results.get(roundTo);
+            } else {
+                result = null;
+            }
         } else if (cumulativeResults.containsKey(roundFrom)) {
             result = cumulativeResults.get(roundFrom).get(roundTo);
         } else {
@@ -305,7 +309,7 @@ public class TaskContainer extends Observable implements Serializable {
                 if (img != null) {
                     images.add(Image.createImage(img));
                 } else {
-                    Logger.error("Error loading images nr." + i);                    
+                    Logger.error("Error loading images nr." + i);
                 }
             }
         } catch (IOException ex) {

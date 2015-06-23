@@ -66,20 +66,8 @@ kernel void CL1D_I_V_LL_MC_D(
         
         deformedFacet[i] = (float2)(%DEF_X%, %DEF_Y%);
     }
-    // compute correlation using ZNCC
-    float deformedI[(2*-1+1)*(2*-1+1)];
-    float subsetI[(2*-1+1)*(2*-1+1)];
-    float meanF = 0;
-    float meanG = 0; 
-    for (int i = 0; i < subsetSize2; i++) {
-        subsetI[i] = read_imageui(imageA, sampler, subsetLocal[i]).x;
-        meanF += subsetI[i];
-        
-        deformedI[i] = interpolate(deformedFacet[i].x, deformedFacet[i].y, imageB);
-        meanG += deformedI[i];
-    } 
-    meanF /= (float) subsetSize2;
-    meanG /= (float) subsetSize2;    
+    
+    %CORR%    
     
     %C&S%    
 }

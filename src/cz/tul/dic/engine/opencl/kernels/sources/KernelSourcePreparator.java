@@ -25,6 +25,7 @@ import org.pmw.tinylog.Logger;
 public class KernelSourcePreparator {
 
     public static final String KERNEL_EXTENSION = ".cl";
+    private static final String REPLACE_CORRELATION = "%CORR%";
     private static final String REPLACE_EXTENSION = ".source";
     private static final String REPLACE_FACET_SIZE = "-1";
     private static final String REPLACE_DELTA = "%C&S%";
@@ -42,7 +43,7 @@ public class KernelSourcePreparator {
     private KernelSourcePreparator(final String kernelName) {
         this.kernelName = kernelName;
     }
-    
+
     public static String prepareKernel(
             final String kernelName,
             final int subsetSize, final DeformationDegree deg,
@@ -50,16 +51,17 @@ public class KernelSourcePreparator {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         try {
-            kp.loadKernel();
+            kp.loadKernel();                        
+            kp.prepareCorrelation(usesVectorization);
+            kp.prepareDeltaAndStore();
             kp.prepareFacetSize(subsetSize);
             kp.prepareDeformations(deg, usesVectorization);
             kp.prepareInterpolation(interpolation, usesImage);
-            kp.prepareDeltaAndStore();
             return kp.kernel;
         } catch (IOException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
-    }    
+    }
 
     private void loadKernel() throws IOException {
         try (BufferedReader bin = new BufferedReader(new InputStreamReader(Kernel.class.getResourceAsStream(kernelName.concat(KERNEL_EXTENSION))))) {
@@ -281,7 +283,7 @@ public class KernelSourcePreparator {
                 throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation");
         }
         kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(DeformationUtils.getDeformationCoeffCount(deg)));
-    }    
+    }
 
     private void prepareInterpolation(final Interpolation interpolation, final boolean usesImage) throws ComputationException {
         String resourceName = "interpolate-";
@@ -301,29 +303,43 @@ public class KernelSourcePreparator {
             resourceName = resourceName.concat("-array");
         }
         resourceName = resourceName.concat(REPLACE_EXTENSION);
-        
-        kernel = kernel.replaceFirst(
-                REPLACE_INTERPOLATION, 
+
+        kernel = kernel.replaceAll(
+                REPLACE_INTERPOLATION,
                 loadKernelResource(KernelSourcePreparator.class.getResourceAsStream(resourceName)));
 
     }
-    
+
     private static String loadKernelResource(final InputStream in) {
         final StringBuilder sb = new StringBuilder();
-        try (final BufferedReader br = new BufferedReader(new InputStreamReader(in))) {            
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
             br.lines().forEachOrdered((String t) -> {
                 sb.append(t);
                 sb.append("\n");
-            });            
+            });
         } catch (Exception ex) {
             Logger.error(ex);
         }
         return sb.toString();
     }
-    
+
+    private void prepareCorrelation(boolean usesVectorization) {
+        String resourceName = "correlate-";
+        if (usesVectorization) {
+            resourceName = resourceName.concat("vec");
+        } else {
+            resourceName = resourceName.concat("2D");
+        }
+        resourceName = resourceName.concat(REPLACE_EXTENSION);
+
+        kernel = kernel.replaceAll(
+                REPLACE_CORRELATION,
+                loadKernelResource(KernelSourcePreparator.class.getResourceAsStream(resourceName)));
+    }
+
     private void prepareDeltaAndStore() {
         kernel = kernel.replaceAll(
-                REPLACE_DELTA, 
+                REPLACE_DELTA,
                 loadKernelResource(KernelSourcePreparator.class.getResourceAsStream("computeDeltaAndStore.source")));
     }
 }
