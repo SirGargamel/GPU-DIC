@@ -17,7 +17,7 @@ import org.apache.commons.math3.linear.RealVector;
 public class NewtonRaphsonForward extends NewtonRaphson {
 
     @Override
-    protected RealVector generateGradient(final float[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
+    protected RealVector generateGradient(final double[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[] data = new double[coeffCount];
 
@@ -37,7 +37,7 @@ public class NewtonRaphsonForward extends NewtonRaphson {
     }
 
     @Override
-    protected RealMatrix generateHessianMatrix(final float[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(final double[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[][] data = new double[coeffCount][coeffCount];
 

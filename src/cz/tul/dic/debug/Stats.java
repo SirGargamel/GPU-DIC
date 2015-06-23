@@ -272,7 +272,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     @Override
-    public void dumpGpuResults(final float[] resultData, final List<AbstractSubset> subsets, final List<double[]> deformationLimits) {
+    public void dumpGpuResults(final double[] resultData, final List<AbstractSubset> subsets, final List<double[]> deformationLimits) {
         if (get(Types.GPU_RESULTS)) {
             final File outFile = new File(NameGenerator.generateGpuResultsDump(tc, gpuBatch++));
             outFile.getParentFile().mkdirs();
@@ -286,7 +286,7 @@ public class Stats implements IGPUResultsReceiver {
                     out.write(Arrays.toString(deformationLimits.get(i)));
                     out.newLine();
                     for (int r = subsetCounter * defCountPerSubset; r < (subsetCounter + 1) * defCountPerSubset; r++) {
-                        out.write(Float.toString(resultData[r]));
+                        out.write(Double.toString(resultData[r]));
                         out.newLine();
                     }
                     subsetCounter++;

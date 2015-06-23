@@ -14,15 +14,15 @@ import java.util.Arrays;
  */
 public class CorrelationResult implements Serializable {
 
-    private final float value;
+    private final double value;
     private final double[] deformation;
 
-    public CorrelationResult(final float value, final double[] deformation) {
+    public CorrelationResult(final double value, final double[] deformation) {
         this.value = value;
         this.deformation = deformation;
     }
     
-    public float getValue() {
+    public double getValue() {
         return value;
     }
 

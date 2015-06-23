@@ -145,7 +145,7 @@ public abstract class Kernel {
 
             if (!resultListeners.isEmpty()) {
                 queue.putReadBuffer(clResults, true);
-                final float[] results = readBuffer(clResults.getBuffer());
+                final double[] results = readResultBuffer(clResults.getBuffer());
                 for (IGPUResultsReceiver rr : resultListeners) {
                     rr.dumpGpuResults(results, task.getSubsets(), task.getDeformationLimits());
                 }
@@ -292,6 +292,16 @@ public abstract class Kernel {
             result[i] = buffer.get(i);
         }
         buffer.rewind();
+        return result;
+    }
+    
+    private double[] readResultBuffer(final FloatBuffer resultsBuffer) {
+        resultsBuffer.rewind();
+        final double[] result = new double[resultsBuffer.remaining()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = resultsBuffer.get(i);
+        }
+        resultsBuffer.rewind();
         return result;
     }
 

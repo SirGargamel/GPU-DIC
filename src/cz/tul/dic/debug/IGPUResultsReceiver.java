@@ -14,6 +14,6 @@ import java.util.List;
  */
 public interface IGPUResultsReceiver {
     
-    void dumpGpuResults(final float[] resultData, final List<AbstractSubset> subsets, final List<double[]> deformationLimits);
+    void dumpGpuResults(final double[] resultData, final List<AbstractSubset> subsets, final List<double[]> deformationLimits);
     
 }

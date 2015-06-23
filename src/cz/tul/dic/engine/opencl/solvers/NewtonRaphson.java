@@ -39,7 +39,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     private static final int LIMITS_ROUNDS = 20;
     private static final double LIMIT_MIN_GROWTH = 0.01;
     private static final double STEP = 1;
-    private float[] gpuData;
+    private double[] gpuData;
 
     @Override
     public List<CorrelationResult> solve(
@@ -80,7 +80,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         CorrelationResult newResult;
         double[] limits;
         int[] counts;
-        float increment;
+        double increment;
         Iterator<AbstractSubset> it;
         AbstractSubset f;
         int subsetIndexGlobal, subsetIndexLocal;
@@ -223,7 +223,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     }
 
     // central difference
-    protected RealVector generateGradient(float[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
+    protected RealVector generateGradient(double[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[] data = new double[coeffCount];
 
@@ -251,7 +251,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         return indices;
     }
 
-    protected RealMatrix generateHessianMatrix(float[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(double[] resultData, final int subsetIndex, final int subsetCount, final int[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[][] data = new double[coeffCount][coeffCount];
 
@@ -298,7 +298,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     }
 
     @Override
-    public void dumpGpuResults(float[] resultData, List<AbstractSubset> subsets, List<double[]> deformationLimits) {
+    public void dumpGpuResults(double[] resultData, List<AbstractSubset> subsets, List<double[]> deformationLimits) {
         this.gpuData = resultData;
     }
 
