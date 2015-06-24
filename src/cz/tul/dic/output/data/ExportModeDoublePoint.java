@@ -59,9 +59,7 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                         results = null;
                 }
 
-                if (results == null || results.length < x1 || results[0].length < y1 || results.length < x2 || results[0].length < y2 || results[x1][y1] == null || results[x2][y2] == null) {
-                    data[round] = 0;
-                } else {
+                if (isResultValid(results, x1, y1, x2, y2)) {
                     switch (dir) {
                         case D_EXX:
                         case D_EYY:
@@ -74,8 +72,10 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                             data[round] = calculateStrain(results, dir, x1, y1, x2, y2);
                             break;
                         default:
-                            // ignore other directions
+                        // ignore other directions
                     }
+                } else {
+                    data[round] = 0;
                 }
             }
         }
@@ -83,9 +83,13 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
         return result;
     }
 
+    private static boolean isResultValid(double[][][] results, final int x1, final int y1, final int x2, final int y2) {
+        return results != null && results.length >= x1 && results[0].length >= y1 && results.length >= x2 && results[0].length >= y2 && results[x1][y1] != null && results[x2][y2] != null;
+    }
+
     private double calculateStrain(final double[][][] displacement, final Direction dir, final int x1, final int y1, final int x2, final int y2) throws ComputationException {
-        final double dx = x2 - x1;
-        final double dy = y2 - y1;
+        final double dx = (double) x2 - x1;
+        final double dy = (double) y2 - y1;
         final double difX = displacement[x2][y2][0] - displacement[x1][y1][0];
         final double difY = displacement[x2][y2][1] - displacement[x1][y1][1];
         final double val;
