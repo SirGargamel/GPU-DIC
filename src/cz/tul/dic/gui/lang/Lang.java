@@ -15,8 +15,7 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public final class Lang {
-
-    private static final String MISSING_RESOURCE = "MISSING";
+    
     private static final ResourceBundle BUNDLE;
 
     static {
@@ -31,15 +30,14 @@ public final class Lang {
     }
 
     public static String getString(final String key, final String... params) {
-        String result;
+        String result = null;
         try {
             result = BUNDLE.getString(key).replaceAll("\\\\n", "\n");
 
             for (int i = 0; i < params.length; i++) {
                 result = result.replaceAll("\\{".concat(Integer.toString(i).concat("\\}")), params[i]);
             }
-        } catch (MissingResourceException ex) {
-            result = MISSING_RESOURCE;
+        } catch (MissingResourceException ex) {            
             Logger.debug(ex);
         }
 
