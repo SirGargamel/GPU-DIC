@@ -41,8 +41,8 @@ public class ComplexTaskTest {
     
     private double computeTask(final String fileOut) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/ComplexIn.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + fileOut).toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/complex/ComplexIn.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/complex/" + fileOut).toURI()).toFile());
         final TaskContainer tc = new TaskContainer(input);        
         InputLoader.loadInput(tc);        
 

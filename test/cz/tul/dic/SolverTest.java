@@ -103,8 +103,8 @@ public class SolverTest {
 
     private static TaskContainer generateAndcomputeTask(final String fileOut, final Solver solver, final double[] defLimits) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(SolverTest.class.getResource("/resources/speckle.bmp").toURI()).toFile());
-        input.add(Paths.get(SolverTest.class.getResource("/resources/" + fileOut).toURI()).toFile());
+        input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
+        input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
         final TaskContainer task = new TaskContainer(input);
         InputLoader.loadInput(task);
 

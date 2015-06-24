@@ -124,8 +124,8 @@ public class EngineTest {
             final TaskSplitMethod taskSplit, final FacetGeneratorMethod fgm,
             final Solver solver) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/" + outFilename + ".bmp").toURI()).toFile());
 
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
@@ -186,8 +186,8 @@ public class EngineTest {
 
     private TaskContainer generateTask(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + outFilename + ".bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/" + outFilename + ".bmp").toURI()).toFile());
 
         final TaskContainer tc = new TaskContainer(input);
         InputLoader.loadInput(tc);
