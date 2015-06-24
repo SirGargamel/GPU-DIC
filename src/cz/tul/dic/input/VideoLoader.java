@@ -60,7 +60,7 @@ public class VideoLoader extends AbstractInputLoader {
         final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(NameGenerator.EXT_CONFIG));
         // check cache
         final List<File> files;
-        Config config = Config.loadConfig(sequenceConfigFile);
+        Config config = new Config().load(sequenceConfigFile);
         if (!isCacheDataValid(input, temp, config)) {
             Logger.trace("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
             // prepare script
@@ -99,7 +99,8 @@ public class VideoLoader extends AbstractInputLoader {
                 config.put(PREFIX_MOD.concat(f.getName()), Long.toString(f.lastModified()));
                 config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
             }
-            Config.saveConfig(config, ConfigType.SEQUENCE, sequenceConfigFile);
+            config.setType(ConfigType.SEQUENCE);
+            config.save(sequenceConfigFile);
         } else {
             files = convertCacheDataToFiles(input, temp, config);
         }
@@ -115,7 +116,7 @@ public class VideoLoader extends AbstractInputLoader {
     private boolean isCacheDataValid(final File source, final File tempFolder, final Config config) {
         boolean result = true;
 
-        if (!tempFolder.isDirectory() || config == null || config.keySet().isEmpty() || !Config.determineType(config).equals(ConfigType.SEQUENCE)) {
+        if (!tempFolder.isDirectory() || config == null || config.keySet().isEmpty() || !config.getType().equals(ConfigType.SEQUENCE)) {
             result = false;
         } else {
             final String baseTempPath = tempFolder.getAbsolutePath().concat(File.separator);

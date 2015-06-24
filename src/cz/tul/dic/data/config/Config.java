@@ -23,41 +23,36 @@ public class Config {
 
     public Config() {
         data = new Properties();
-    }
-    
-    public static Config loadConfig(final File in) throws IOException {
-        final Config result = new Config();
-        result.load(in);
-        return result;
+        data.put(CLASS_ID, ConfigType.TASK.toString());
     }
 
-    public static void saveConfig(final Config config, final ConfigType configType, final File target) throws IOException {
-        config.put(CLASS_ID, configType.toString());
-        config.save(target);
-    }
-
-    public static ConfigType determineType(final Config configFile) {
-        final String configType = configFile.get(CLASS_ID);
+    public ConfigType getType() {
+        final String configType = get(CLASS_ID);
         ConfigType result;
         try {
             result = ConfigType.valueOf(configType);
         } catch (IllegalArgumentException ex) {
             result = ConfigType.TASK;
-            configFile.put(CLASS_ID, ConfigType.TASK.toString());
+            setType(ConfigType.TASK);
         }
         return result;
-    }    
-
-    private void load(final File in) throws IOException {
-        data.load(new FileInputStream(in));
     }
 
-    private void save(final File out) throws IOException {
+    public Config load(final File in) throws IOException {
+        data.load(new FileInputStream(in));
+        return this;
+    }
+
+    public void save(final File out) throws IOException {
         data.store(new FileOutputStream(out), null);
     }
 
     public void put(final String key, final String value) {
         data.put(key, value.trim());
+    }
+
+    public void setType(final ConfigType configType) {
+        put(CLASS_ID, configType.toString());
     }
 
     public Set<String> keySet() {

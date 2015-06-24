@@ -22,6 +22,8 @@ import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
+import cz.tul.dic.engine.displacement.DisplacementCalculation;
+import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,7 +54,7 @@ public final class TaskContainerUtils {
     private static final String CONFIG_SEPARATOR_ROI = "--";
     private static final String CONFIG_PARAMETERS = "PARAM_";
     private static final String CONFIG_ROIS = "ROI_";
-    
+
     private TaskContainerUtils() {
     }
 
@@ -125,7 +127,7 @@ public final class TaskContainerUtils {
             final double[][][] dResults = dResultsC.getDisplacement();
             if (dResults != null) {
                 final int y2 = finalBottomLine(dResults);
-                final int y1 = finalBottomLine(results);                
+                final int y1 = finalBottomLine(results);
                 result = y2 / (double) y1;
             }
         }
@@ -136,7 +138,7 @@ public final class TaskContainerUtils {
     private static int finalBottomLine(final double[][][] data) {
         for (int y = data[0].length - 1; y >= 0; y--) {
             for (int x = 0; x < data.length; x++) {
-                if (data[x][y] != null) {                    
+                if (data[x][y] != null) {
                     return y;
                 }
             }
@@ -211,7 +213,7 @@ public final class TaskContainerUtils {
             i++;
         }
 
-        Config.saveConfig(config, ConfigType.TASK, out);
+        config.save(out);
 
     }
 
@@ -250,16 +252,16 @@ public final class TaskContainerUtils {
     }
 
     public static TaskContainer deserializeTaskFromConfig(final File in) throws ComputationException {
-        final Config config;
+        Config config = new Config();
         try {
-            config = Config.loadConfig(in);
+            config = config.load(in);
         } catch (IOException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
         if (config == null) {
             throw new IllegalArgumentException("Non-existent config.");
         }
-        if (!Config.determineType(config).equals(ConfigType.TASK)) {
+        if (!config.getType().equals(ConfigType.TASK)) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_CONFIG, "Not a task config.");
         }
 
@@ -322,6 +324,12 @@ public final class TaskContainerUtils {
                     case DEFORMATION_ORDER:
                         result.setParameter(tp, DeformationDegree.valueOf(value));
                         break;
+                    case DISPLACEMENT_CALCULATION_METHOD:
+                        result.setParameter(tp, DisplacementCalculation.valueOf(value));
+                        break;
+                    case DISPLACEMENT_CALCULATION_PARAM:
+                        result.setParameter(tp, Integer.valueOf(value));
+                        break;
                     case FACET_SIZE:
                         result.setParameter(tp, Integer.valueOf(value));
                         break;
@@ -334,17 +342,29 @@ public final class TaskContainerUtils {
                     case KERNEL:
                         result.setParameter(tp, KernelType.valueOf(value));
                         break;
+                    case MM_TO_PX_RATIO:
+                        result.setParameter(tp, Double.valueOf(value));
+                        break;
                     case TASK_SPLIT_METHOD:
                         result.setParameter(tp, TaskSplitMethod.valueOf(value));
                         break;
                     case TASK_SPLIT_PARAM:
                         result.setParameter(tp, Integer.valueOf(value));
                         break;
+                    case RESULT_QUALITY:
+                        result.setParameter(tp, Double.valueOf(value));
+                        break;
                     case ROUND_LIMITS:
                         result.setParameter(tp, intArrayFromString(value));
                         break;
                     case SOLVER:
                         result.setParameter(tp, Solver.valueOf(value));
+                        break;
+                    case STRAIN_ESTIMATION_METHOD:
+                        result.setParameter(tp, StrainEstimationMethod.valueOf(value));
+                        break;
+                    case STRAIN_ESTIMATION_PARAM:
+                        result.setParameter(tp, Double.valueOf(value));
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);
@@ -416,7 +436,7 @@ public final class TaskContainerUtils {
     public static TaskContainer deserializeTaskFromBinary(final File source) throws ComputationException {
         TaskContainer result;
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(source))) {
-            result = (TaskContainer) in.readObject();        
+            result = (TaskContainer) in.readObject();
         } catch (IOException | ClassNotFoundException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
@@ -540,6 +560,6 @@ public final class TaskContainerUtils {
             Logger.warn("Adding default solver.");
             tc.setParameter(TaskParameter.SOLVER, TaskDefaultValues.DEFAULT_SOLVER);
         }
-    }    
+    }
 
 }
