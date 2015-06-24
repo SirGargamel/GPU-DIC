@@ -59,51 +59,18 @@ public class VideoLoader extends AbstractInputLoader {
         final File temp = Utils.getTempDir(tc);
         final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(NameGenerator.EXT_CONFIG));
         // check cache
-        final List<File> files;
-        Config config = new Config().load(sequenceConfigFile);
-        if (!isCacheDataValid(input, temp, config)) {
-            Logger.trace("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
-            // prepare script
-            String script = loadScript();
-            script = script.replace(SCRIPT_FILE, input.getAbsolutePath());
-            script = script.replace(SCRIPT_DIR, temp.getAbsolutePath().concat(File.separator).concat(input.getName()));
-            final String scriptPath = temp.getAbsolutePath().concat(File.separator).concat(SCRIPT_NAME);
-            saveScript(script, new File(scriptPath));
-            // launch virtualdub to strip video to images
-            final String[] command = {
-                extendBackslashes(VIRTUAL_DUB.getAbsolutePath()),
-                "/x /s \"" + extendBackslashes(extendBackslashes(scriptPath)) + "\""};
-            try {
-                final Process p = Runtime.getRuntime().exec(command[0].concat(" ").concat(command[1]));
-                int result = p.waitFor();
-                if (result != 0) {
-                    throw new IOException("Video splitting has failed.");
-                }
-            } catch (InterruptedException ex) {
-                throw new IOException("VirtualDub has been interrupted.", ex);
+        List<File> files;
+        try {
+            Config config = new Config().load(sequenceConfigFile);
+            if (!isCacheDataValid(input, temp, config)) {
+                files = loadVideoByVirtualDub(input, temp, sequenceConfigFile);
+            } else {
+                files = convertCacheDataToFiles(input, temp, config);
             }
-            final String inputName = input.getName();
-            files = Arrays.asList(temp.listFiles(new FilenameFilter() {
-
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.startsWith(inputName) && !name.endsWith(NameGenerator.EXT_CONFIG);
-                }
-            }));
-
-            // save config
-            config = new Config();
-            config.put(PREFIX_MOD.concat(input.getName()), Long.toString(input.lastModified()));
-            config.put(PREFIX_SIZE.concat(input.getName()), Long.toString(input.length()));
-            for (File f : files) {
-                config.put(PREFIX_MOD.concat(f.getName()), Long.toString(f.lastModified()));
-                config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
-            }
-            config.setType(ConfigType.SEQUENCE);
-            config.save(sequenceConfigFile);
-        } else {
-            files = convertCacheDataToFiles(input, temp, config);
+        } catch (IOException ex) {
+            files = loadVideoByVirtualDub(input, temp, sequenceConfigFile);
         }
+
         // list of all bmp files inside temp dir with roght name        
         final ImageLoader il = new ImageLoader();
         final List<Image> result = il.loadData(files, tc);
@@ -111,6 +78,48 @@ public class VideoLoader extends AbstractInputLoader {
         loadUdaFile(input.getAbsolutePath(), tc);
 
         return result;
+    }
+
+    private List<File> loadVideoByVirtualDub(File input, final File temp, final File sequenceConfigFile) throws IOException {
+        Logger.trace("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
+        // prepare script
+        String script = loadScript();
+        script = script.replace(SCRIPT_FILE, input.getAbsolutePath());
+        script = script.replace(SCRIPT_DIR, temp.getAbsolutePath().concat(File.separator).concat(input.getName()));
+        final String scriptPath = temp.getAbsolutePath().concat(File.separator).concat(SCRIPT_NAME);
+        saveScript(script, new File(scriptPath));
+        // launch virtualdub to strip video to images
+        final String[] command = {
+            extendBackslashes(VIRTUAL_DUB.getAbsolutePath()),
+            "/x /s \"" + extendBackslashes(extendBackslashes(scriptPath)) + "\""};
+        try {
+            final Process p = Runtime.getRuntime().exec(command[0].concat(" ").concat(command[1]));
+            int result = p.waitFor();
+            if (result != 0) {
+                throw new IOException("Video splitting has failed.");
+            }
+        } catch (InterruptedException ex) {
+            throw new IOException("VirtualDub has been interrupted.", ex);
+        }
+        final String inputName = input.getName();
+        final List<File> files = Arrays.asList(temp.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith(inputName) && !name.endsWith(NameGenerator.EXT_CONFIG);
+            }
+        }));
+        // save config
+        final Config config = new Config();
+        config.put(PREFIX_MOD.concat(input.getName()), Long.toString(input.lastModified()));
+        config.put(PREFIX_SIZE.concat(input.getName()), Long.toString(input.length()));
+        for (File f : files) {
+            config.put(PREFIX_MOD.concat(f.getName()), Long.toString(f.lastModified()));
+            config.put(PREFIX_SIZE.concat(f.getName()), Long.toString(f.length()));
+        }
+        config.setType(ConfigType.SEQUENCE);
+        config.save(sequenceConfigFile);
+        return files;
     }
 
     private boolean isCacheDataValid(final File source, final File tempFolder, final Config config) {

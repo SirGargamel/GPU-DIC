@@ -13,6 +13,7 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportTask;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -40,7 +41,7 @@ public class TaskContainer extends Observable implements Serializable {
 
     // input data
     private final Object input;
-    private final Map<Object, Object> params;
+    private final Map<TaskParameter, Object> params;
     private final Container<Set<AbstractROI>> rois;
     private final Container<Map<AbstractROI, Integer>> subsetSizes;
     private final Container<Map<AbstractROI, double[]>> deformationLimits;
@@ -52,7 +53,7 @@ public class TaskContainer extends Observable implements Serializable {
     private final List<Result> results;
     private final Map<Integer, Map<Integer, Result>> cumulativeResults;
 
-    public TaskContainer(final Object input) {
+    public TaskContainer(final List<File> images) {
         params = new HashMap<>();
         rois = new Container<>();
         subsetSizes = new Container<>();
@@ -62,7 +63,22 @@ public class TaskContainer extends Observable implements Serializable {
         cumulativeResults = new ConcurrentHashMap<>();
         hints = EnumSet.noneOf(Hint.class);
 
-        this.input = input;
+        input = images;
+        params.put(TaskParameter.IN, images.get(0));
+    }
+
+    public TaskContainer(final File video) {        
+        params = new HashMap<>();
+        rois = new Container<>();
+        subsetSizes = new Container<>();
+        deformationLimits = new Container<>();
+        exports = new HashSet<>();
+        results = new CopyOnWriteArrayList<>();
+        cumulativeResults = new ConcurrentHashMap<>();
+        hints = EnumSet.noneOf(Hint.class);
+        
+        input = video;
+        params.put(TaskParameter.IN, video);
     }
 
     public Object getInput() {
@@ -271,7 +287,12 @@ public class TaskContainer extends Observable implements Serializable {
     }
 
     public TaskContainer cloneInputTask() {
-        final TaskContainer result = new TaskContainer(input);
+        final TaskContainer result;
+        if (input instanceof File) {
+            result = new TaskContainer((File) input);
+        } else {
+            result = new TaskContainer((List<File>) input);
+        }
         result.images = images;
         result.params.putAll(params);
         result.exports.addAll(exports);
