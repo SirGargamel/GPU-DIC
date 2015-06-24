@@ -5,8 +5,6 @@
  */
 package cz.tul.dic;
 
-import cz.tul.dic.data.roi.AbstractROI;
-import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.input.InputLoader;
