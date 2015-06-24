@@ -82,40 +82,7 @@ public final class TaskContainerUtils {
 
     public static int getMaxRoundCount(final TaskContainer tc) {
         return tc.getImages().size() - 1;
-    }
-
-    public static int getDeformationArrayLength(final TaskContainer tc, final int round, final AbstractROI roi) throws ComputationException {
-        int result;
-
-        final double[] limits = tc.getDeformationLimits(round, roi);
-        switch (limits.length) {
-            case 6:
-                result = 2;
-                break;
-            case 18:
-                result = 6;
-                break;
-            case 36:
-                result = 12;
-                break;
-            default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal deformation parameters set.");
-        }
-
-        return result;
-    }
-
-    public static double[] extractDeformation(final TaskContainer tc, final int index, final int round, final AbstractROI roi, final double[] deformations) throws ComputationException {
-        if (index < 0) {
-            throw new IllegalArgumentException("Negative index not allowed.");
-        }
-
-        final int deformationArrayLength = getDeformationArrayLength(tc, round, roi);
-        final double[] result = new double[deformationArrayLength];
-        System.arraycopy(deformations, deformationArrayLength * index, result, 0, deformationArrayLength);
-
-        return result;
-    }
+    }    
 
     public static double getStretchFactor(final TaskContainer tc, final int endImageIndex) throws ComputationException {
         final int startImageIndex = getFirstRound(tc);
@@ -403,27 +370,7 @@ public final class TaskContainerUtils {
             }
         }
         return result;
-    }
-
-    public static Set<AbstractSubset> getAllFacets(final Map<AbstractROI, List<AbstractSubset>> subsets) {
-        final Set<AbstractSubset> result = new HashSet<>();
-
-        if (subsets != null) {
-            for (List<AbstractSubset> l : subsets.values()) {
-                if (l != null) {
-                    result.addAll(l);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    public static void setUniformFacetSize(final TaskContainer tc, final int round, final int subsetSize) {
-        for (AbstractROI roi : tc.getRois(round)) {
-            tc.addSubsetSize(round, roi, subsetSize);
-        }
-    }
+    }        
 
     public static void serializeTaskToBinary(final TaskContainer tc, final File target) throws IOException {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
