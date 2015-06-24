@@ -6,7 +6,6 @@
 package cz.tul.dic;
 
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +30,7 @@ public class InputTest {
         inputs.add(Paths.get(getClass().getResource("/resources/input/image.avi00002.bmp").toURI()).toFile());
         inputs.add(Paths.get(getClass().getResource("/resources/input/image.avi00003.bmp").toURI()).toFile());
         inputs.add(Paths.get(getClass().getResource("/resources/input/image.avi00004.bmp").toURI()).toFile());
-        final TaskContainer task = new TaskContainer(inputs);
-        task.setParameter(TaskParameter.IN, inputs.get(0));
+        final TaskContainer task = new TaskContainer(inputs);        
         InputLoader.loadInput(task);
         assertEquals(5, task.getImages().size());
         
