@@ -231,7 +231,7 @@ public abstract class Kernel {
         return result;
     }
 
-    private List<CorrelationResult> createResults(final float[] values, final int[] positions, final List<double[]> deformationLimits) {
+    private List<CorrelationResult> createResults(final float[] values, final int[] positions, final List<double[]> deformationLimits) throws ComputationException {
         if (values.length != positions.length) {
             throw new IllegalArgumentException("Array lengths mismatch.");
         }
