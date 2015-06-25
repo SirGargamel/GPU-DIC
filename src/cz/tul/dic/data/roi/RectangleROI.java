@@ -11,7 +11,7 @@ public class RectangleROI extends AbstractROI implements Serializable {
 
     private final double x1, y1, x2, y2;
 
-    public RectangleROI(double x1, double y1, double x2, double y2) {
+    public RectangleROI(final double x1, final double y1, final double x2, final double y2) {
         super();
 
         this.x1 = Math.min(x1, x2);
@@ -64,7 +64,7 @@ public class RectangleROI extends AbstractROI implements Serializable {
     }
 
     @Override
-    public boolean isAreaInside(double x1, double y1, double x2, double y2) {
+    public boolean isAreaInside(final double x1, final double y1, final double x2, final double y2) {
         return Math.min(x1, x2) >= this.x1
                 && Math.min(y1, y2) >= this.y1
                 && Math.max(x1, x2) <= this.x2
@@ -72,7 +72,7 @@ public class RectangleROI extends AbstractROI implements Serializable {
     }
 
     @Override
-    public boolean isPointInside(double x, double y) {
+    public boolean isPointInside(final double x, final double y) {
         return x >= this.x1
                 && y >= this.y1
                 && x <= this.x2

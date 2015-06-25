@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.gui;
 
-import cz.tul.dic.data.roi.RoiType;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.gui.lang.Lang;
 import java.net.URL;

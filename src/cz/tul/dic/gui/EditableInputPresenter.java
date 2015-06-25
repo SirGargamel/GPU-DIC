@@ -8,7 +8,6 @@ package cz.tul.dic.gui;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
-import cz.tul.dic.data.roi.RoiType;
 import cz.tul.dic.data.task.TaskContainer;
 import java.net.URL;
 import java.util.HashSet;

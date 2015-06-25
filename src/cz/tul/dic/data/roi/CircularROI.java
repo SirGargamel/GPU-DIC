@@ -11,7 +11,7 @@ public class CircularROI extends AbstractROI implements Serializable {
 
     private final double centerX, centerY, radius;
 
-    public CircularROI(double centerX, double centerY, double radius) {
+    public CircularROI(final double centerX, final double centerY, final double radius) {
         super();
 
         this.centerX = centerX;

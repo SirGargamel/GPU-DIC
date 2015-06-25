@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.data.roi;
+package cz.tul.dic.gui;
 
 /**
  *
