@@ -14,6 +14,7 @@ import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -31,10 +32,10 @@ public class StrainEstimatorTest {
     private static final double DELTA = 0.001;
 
     @Test
-    public void testEstimatorNull() throws URISyntaxException, ComputationException {
+    public void testEstimatorNull() throws URISyntaxException, ComputationException, IOException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        final TaskContainer tc = new TaskContainer(input);
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final StrainEstimationMethod method = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, method);
@@ -67,16 +68,16 @@ public class StrainEstimatorTest {
     }
 
     @Test
-    public void testEstimatorZeroStrain() throws URISyntaxException, ComputationException {
+    public void testEstimatorZeroStrain() throws URISyntaxException, ComputationException, IOException {
         testStatic("out_0_0.bmp", 0, 0);
         testStatic("out_5_0.bmp", 5, 0);
     }
 
-    private void testStatic(final String fileOut, final double dX, final double dY) throws ComputationException, URISyntaxException {
+    private void testStatic(final String fileOut, final double dX, final double dY) throws ComputationException, URISyntaxException, IOException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + fileOut).toURI()).toFile());
-        final TaskContainer tc = new TaskContainer(input);
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/" + fileOut).toURI()).toFile());
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final StrainEstimationMethod method = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, method);
@@ -108,11 +109,11 @@ public class StrainEstimatorTest {
     }
 
     @Test
-    public void testEstimatorNonZeroXxYy() throws URISyntaxException, ComputationException {
+    public void testEstimatorNonZeroXxYy() throws URISyntaxException, ComputationException, IOException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        final TaskContainer tc = new TaskContainer(input);
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final StrainEstimationMethod method = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, method);
@@ -141,11 +142,11 @@ public class StrainEstimatorTest {
     }
 
     @Test
-    public void testEstimatorNonZeroXy() throws URISyntaxException, ComputationException {
+    public void testEstimatorNonZeroXy() throws URISyntaxException, ComputationException, IOException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        final TaskContainer tc = new TaskContainer(input);
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final StrainEstimationMethod method = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
         tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, method);

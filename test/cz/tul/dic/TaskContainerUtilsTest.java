@@ -7,7 +7,6 @@ package cz.tul.dic;
 
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -36,16 +35,15 @@ public class TaskContainerUtilsTest {
         inputs.add(Paths.get(getClass().getResource("/resources/input/image.avi00002.bmp").toURI()).toFile());
         inputs.add(Paths.get(getClass().getResource("/resources/input/image.avi00003.bmp").toURI()).toFile());
         inputs.add(Paths.get(getClass().getResource("/resources/input/image.avi00004.bmp").toURI()).toFile());
-        final TaskContainer task = new TaskContainer(inputs);
-        InputLoader.loadInput(task);
+        final TaskContainer task = TaskContainer.initTaskContainer(inputs);
         TaskContainerUtils.checkTaskValidity(task);
         assertEquals(0, (int) TaskContainerUtils.getFirstRound(task));
         assertEquals(4, (int) TaskContainerUtils.getMaxRoundCount(task));
         assertEquals(4, TaskContainerUtils.getRounds(task).size());
 
-        final File testFile = testFolder.newFile();
+        final File testFile = testFolder.newFile("test.task");
         TaskContainerUtils.serializeTaskToBinary(task, testFile);
-        final TaskContainer task2 = TaskContainerUtils.deserializeTaskFromBinary(testFile);
+        final TaskContainer task2 = TaskContainer.initTaskContainer(testFile);
     }
 
 }

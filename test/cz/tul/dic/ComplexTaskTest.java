@@ -10,7 +10,6 @@ import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
-import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -38,13 +37,12 @@ public class ComplexTaskTest {
         Assert.assertEquals(3.0, computeTask("ComplexOut-4.0.bmp"), 0.5);
         Assert.assertEquals(27.0, computeTask("ComplexOut-30.0.bmp"), 0.5);
     }
-    
+
     private double computeTask(final String fileOut) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/complex/ComplexIn.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/complex/" + fileOut).toURI()).toFile());
-        final TaskContainer tc = new TaskContainer(input);        
-        InputLoader.loadInput(tc);        
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
@@ -69,7 +67,7 @@ public class ComplexTaskTest {
         cts.solveComplexTask(tc);
 
         Assert.assertNotNull(cts.getBottomShifts());
-        Assert.assertSame(cts.getBottomShifts().size(), 1);        
+        Assert.assertSame(cts.getBottomShifts().size(), 1);
         return cts.getBottomShifts().get(0);
     }
 }

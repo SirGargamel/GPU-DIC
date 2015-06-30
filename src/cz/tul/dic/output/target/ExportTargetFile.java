@@ -134,7 +134,7 @@ public class ExportTargetFile extends AbstractExportTarget {
         final String fullName = out.getName();
 
         final String name = fullName.substring(0, fullName.lastIndexOf("."));
-        final File temp = Utils.getTempDir(tc);
+        final File temp = Utils.getTempDir(out);
 
         double[] minMax = null;
         if (Double.isNaN(limits[0])) {

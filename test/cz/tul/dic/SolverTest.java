@@ -12,7 +12,6 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
-import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -105,8 +104,7 @@ public class SolverTest {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
-        final TaskContainer task = new TaskContainer(input);
-        InputLoader.loadInput(task);
+        final TaskContainer task = TaskContainer.initTaskContainer(input);        
 
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});

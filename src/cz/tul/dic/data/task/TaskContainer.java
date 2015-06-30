@@ -10,8 +10,8 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.result.Result;
-import cz.tul.dic.input.InputLoader;
 import cz.tul.dic.output.ExportTask;
+import cz.tul.dic.data.task.loaders.InputLoader;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ import org.pmw.tinylog.Logger;
 public class TaskContainer extends Observable implements Serializable {
 
     // input data
-    private final Object input;
+    private final List<File> input;
     private final Map<TaskParameter, Object> params;
     private final Container<Set<AbstractROI>> rois;
     private final Container<Map<AbstractROI, Integer>> subsetSizes;
@@ -66,22 +66,12 @@ public class TaskContainer extends Observable implements Serializable {
         input = images;
         params.put(TaskParameter.IN, images.get(0));
     }
-
-    public TaskContainer(final File video) {        
-        params = new HashMap<>();
-        rois = new Container<>();
-        subsetSizes = new Container<>();
-        deformationLimits = new Container<>();
-        exports = new HashSet<>();
-        results = new CopyOnWriteArrayList<>();
-        cumulativeResults = new ConcurrentHashMap<>();
-        hints = EnumSet.noneOf(Hint.class);
-        
-        input = video;
-        params.put(TaskParameter.IN, video);
+    
+    public static TaskContainer initTaskContainer(final Object in) throws ComputationException, IOException {
+        return InputLoader.loadInput(in);
     }
 
-    public Object getInput() {
+    public List<File> getInput() {
         return input;
     }
 
@@ -115,16 +105,6 @@ public class TaskContainer extends Observable implements Serializable {
         return hints;
     }
 
-    private void prepareImages() {
-        try {
-            images = new LinkedList<>();
-            InputLoader.loadInput(this);
-        } catch (IOException | ComputationException ex) {
-            Logger.error("Error loading input files");
-            Logger.trace(ex);
-        }
-    }
-
     public void addImage(final Image image) {
         if (images == null) {
             images = new LinkedList<>();
@@ -135,10 +115,6 @@ public class TaskContainer extends Observable implements Serializable {
     }
 
     public Image getImage(final int round) {
-        if (images == null) {
-            prepareImages();
-        }
-
         int counter = -1;
         Image img = null;
         for (int i = 0; i < images.size(); i++) {
@@ -287,12 +263,7 @@ public class TaskContainer extends Observable implements Serializable {
     }
 
     public TaskContainer cloneInputTask() {
-        final TaskContainer result;
-        if (input instanceof File) {
-            result = new TaskContainer((File) input);
-        } else {
-            result = new TaskContainer((List<File>) input);
-        }
+        final TaskContainer result = new TaskContainer(input);
         result.images = images;
         result.params.putAll(params);
         result.exports.addAll(exports);

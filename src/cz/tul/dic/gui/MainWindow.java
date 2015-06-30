@@ -14,7 +14,7 @@ import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.gui.lang.Lang;
-import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.data.task.loaders.InputLoader;
 import cz.tul.dic.output.NameGenerator;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -163,7 +163,6 @@ public class MainWindow implements Initializable {
             protected String call() throws Exception {
                 String result = null;
                 boolean error = false;
-                final boolean needsInputLoad;
 
                 updateProgress(0, 4);
                 final File in = fileList.get(0);
@@ -173,16 +172,12 @@ public class MainWindow implements Initializable {
                     updateProgress(1, 4);
                     switch (ext) {
                         case "avi":
-                            Context.getInstance().setTc(new TaskContainer(in));
-                            needsInputLoad = true;
-                            break;
                         case "config":
-                            Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(in));
-                            needsInputLoad = true;
+                            Context.getInstance().setTc(TaskContainer.initTaskContainer(in));
                             break;
                         case "task":
                             try {
-                                Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromBinary(in));
+                                Context.getInstance().setTc(TaskContainer.initTaskContainer(in));
                                 Platform.runLater(() -> {
                                     adjustResultButtons(false);
                                 });
@@ -191,17 +186,14 @@ public class MainWindow implements Initializable {
                                 result = Lang.getString("wrongBin");
                                 Logger.error(ex);
                             }
-                            needsInputLoad = false;
                             break;
                         default:
                             error = true;
-                            needsInputLoad = false;
                             result = Lang.getString("wrongIn");
                     }
                 } else {
                     updateProgress(1, 4);
-                    Context.getInstance().setTc(new TaskContainer(fileList));
-                    needsInputLoad = true;
+                    Context.getInstance().setTc(TaskContainer.initTaskContainer(fileList));
                 }
                 updateProgress(2, 4);
                 if (cancel) {
@@ -210,51 +202,43 @@ public class MainWindow implements Initializable {
                 }
 
                 if (!error) {
-                    try {
-                        final TaskContainer tc = Context.getInstance().getTc();
-                        tc.setParameter(TaskParameter.IN, in);
-                        tc.addObserver(imagePane);
-                        if (needsInputLoad) {
-                            InputLoader.loadInput(tc);
-                        }
-                        updateProgress(3, 4);
-                        if (cancel) {
-                            handleCancel();
-                            return result;
-                        }
-
-                        Platform.runLater(() -> {
-                            final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
-                            stage.setTitle(Lang.getString("Title") + " - " + in.getName());
-                            if (imagePane != null && imagePane.getScene() != null) {
-                                adjustConfigButtons(false);
-                                adjustImageButtons(false);
-                                textIndex.textProperty().setValue("0");
-                                imagePane.displayImage();
-
-                                double size;
-                                size = Math.max(
-                                        tc.getImage(0).getWidth() + boxRight.getWidth() + EXTRA_WIDTH,
-                                        boxBottom.getMinWidth() + EXTRA_WIDTH);
-                                size = Math.max(
-                                        size,
-                                        boxImage.getMinWidth() + boxRight.getWidth() + EXTRA_WIDTH);
-                                imagePane.getScene().getWindow().setWidth(size);
-                                size = Math.max(
-                                        tc.getImage(0).getHeight() + boxImage.getHeight() + boxBottom.getHeight() + EXTRA_HEIGHT,
-                                        boxRight.getPrefHeight());
-                                imagePane.getScene().getWindow().setHeight(size);
-
-                                final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
-                                if (o != null) {
-                                    textFs.setText(o.toString());
-                                }
-                            }
-                        });
-                    } catch (IOException ex) {
-                        result = Lang.getString("IO", ex.getLocalizedMessage());
-                        Logger.error(ex);
+                    final TaskContainer tc = Context.getInstance().getTc();
+                    tc.setParameter(TaskParameter.IN, in);
+                    tc.addObserver(imagePane);
+                    updateProgress(3, 4);
+                    if (cancel) {
+                        handleCancel();
+                        return result;
                     }
+
+                    Platform.runLater(() -> {
+                        final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
+                        stage.setTitle(Lang.getString("Title") + " - " + in.getName());
+                        if (imagePane != null && imagePane.getScene() != null) {
+                            adjustConfigButtons(false);
+                            adjustImageButtons(false);
+                            textIndex.textProperty().setValue("0");
+                            imagePane.displayImage();
+
+                            double size;
+                            size = Math.max(
+                                    tc.getImage(0).getWidth() + boxRight.getWidth() + EXTRA_WIDTH,
+                                    boxBottom.getMinWidth() + EXTRA_WIDTH);
+                            size = Math.max(
+                                    size,
+                                    boxImage.getMinWidth() + boxRight.getWidth() + EXTRA_WIDTH);
+                            imagePane.getScene().getWindow().setWidth(size);
+                            size = Math.max(
+                                    tc.getImage(0).getHeight() + boxImage.getHeight() + boxBottom.getHeight() + EXTRA_HEIGHT,
+                                    boxRight.getPrefHeight());
+                            imagePane.getScene().getWindow().setHeight(size);
+
+                            final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
+                            if (o != null) {
+                                textFs.setText(o.toString());
+                            }
+                        }
+                    });
                 }
                 updateProgress(4, 4);
 
@@ -418,7 +402,7 @@ public class MainWindow implements Initializable {
         } catch (IOException e) {
             Logger.error("Error loading ROI dialog from JAR.\n{0}", e);
         }
-    }    
+    }
 
     @FXML
     private void handleButtonActionExport(ActionEvent event) {

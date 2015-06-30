@@ -46,8 +46,7 @@ public final class Utils {
     private Utils() {
     }
 
-    public static File getTempDir(final TaskContainer tc) {
-        final File in = (File) (tc.getParameter(TaskParameter.IN));
+    public static File getTempDir(final File in) {        
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         ensureDirectoryExistence(temp);

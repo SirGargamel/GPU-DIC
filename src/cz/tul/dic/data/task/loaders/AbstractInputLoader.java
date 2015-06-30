@@ -3,9 +3,10 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.input;
+package cz.tul.dic.data.task.loaders;
 
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
@@ -28,9 +29,24 @@ public abstract class AbstractInputLoader {
     private static final String TEXT_FPS = "fps";
     private static final String TEXT_EXTRA = "[=]";
 
-    public abstract List<Image> loadData(final Object in, final TaskContainer tc) throws IOException, ComputationException;
+    public abstract TaskContainer loadTask(final Object in) throws IOException, ComputationException;
 
-    public abstract Class getSupporteType();
+    public abstract boolean canLoad(final Object in);
+
+    protected void loadImages(final TaskContainer task, final File inputSource) throws ComputationException, IOException {
+        final List<File> data = task.getInput();
+        Image img;
+        for (File image : data) {
+            if (!image.exists()) {
+                image = new File(inputSource.getParent().concat(File.separator).concat(image.getName()));
+                if (!image.exists()) {
+                    throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Input file " + image.toString() + " not found.");
+                }
+            }
+            img = Image.loadImageFromDisk(image);
+            task.addImage(img);
+        }
+    }
 
     protected void loadUdaFile(final String inputName, final TaskContainer tc) throws IOException {
         final String udaFilename = inputName.substring(0, inputName.lastIndexOf('.')).concat(EXT_UDA);

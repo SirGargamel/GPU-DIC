@@ -11,7 +11,6 @@ import cz.tul.dic.data.config.ConfigType;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
@@ -39,7 +38,7 @@ public class ConfigTest {
 
     @Test
     public void testConfigPersistence() throws IOException {
-        final File testFile = testFolder.newFile();
+        final File testFile = testFolder.newFile("test.config");
 
         final Config config = new Config();
         config.put("testValue1", "0");
@@ -56,8 +55,7 @@ public class ConfigTest {
         final Config configTask = new Config().load(Paths.get(getClass().getResource("/resources/config/task.config").toURI()).toFile());
         Assert.assertEquals(ConfigType.TASK, configTask.getType());
 
-        final TaskContainer task = TaskContainerUtils.deserializeTaskFromConfig(Paths.get(getClass().getResource("/resources/config/task.config").toURI()).toFile());
-        Assert.assertEquals(new File("D:/temp/6203652m/6203652m.avi"), task.getInput());
+        final TaskContainer task = TaskContainer.initTaskContainer(Paths.get(getClass().getResource("/resources/config/task.config").toURI()).toFile());
         Assert.assertEquals(24, task.getExports().size());
 
         Assert.assertEquals(new File("D:/temp/.test spacing/6203652m/6203652m.avi.config__15_02_15.task"), task.getParameter(TaskParameter.IN));

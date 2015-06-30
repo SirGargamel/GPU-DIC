@@ -27,7 +27,6 @@ import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
-import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -127,8 +126,7 @@ public class EngineTest {
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/engine/" + outFilename + ".bmp").toURI()).toFile());
 
-        final TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
 
@@ -189,8 +187,7 @@ public class EngineTest {
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/engine/" + outFilename + ".bmp").toURI()).toFile());
 
-        final TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
 
@@ -326,11 +323,10 @@ public class EngineTest {
     @Test
     public void testEngineMultiFacet() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
 
-        final TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
         final int fs = 5;
@@ -381,11 +377,10 @@ public class EngineTest {
     @Test
     public void testEngineMultiFacetLarge() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
 
-        final TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
         final int fs = 5;

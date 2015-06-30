@@ -18,7 +18,6 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.subset.generator.FacetGenerator;
 import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
-import cz.tul.dic.input.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -52,11 +51,10 @@ public class DisplacementCalculatorTest {
 
     private DisplacementResult prepareAndComputeDisplacement(final CorrelationResult deformation) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
 
-        TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
+        TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         AbstractROI roi = new RectangleROI(10, 10, 20, 20);
 
@@ -94,13 +92,12 @@ public class DisplacementCalculatorTest {
     @Test
     public void testCumulativeResultCounter() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(4);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        final TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
         tc.setParameter(TaskParameter.IN, input.get(0));
         TaskContainerUtils.checkTaskValidity(tc);
 

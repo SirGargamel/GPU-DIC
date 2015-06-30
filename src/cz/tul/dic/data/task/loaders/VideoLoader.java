@@ -3,16 +3,14 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.input;
+package cz.tul.dic.data.task.loaders;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.config.ConfigType;
-import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,10 +25,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import org.pmw.tinylog.Logger;
 
 public class VideoLoader extends AbstractInputLoader {
 
+    private static final String SUPPORTED_TYPES = "avi";
     private static final String PREFIX_SIZE = "SIZE_";
     private static final String PREFIX_MOD = "MOD_";
     private static final String SCRIPT_NAME = "scriptVideoSplit.vcf";
@@ -39,7 +39,7 @@ public class VideoLoader extends AbstractInputLoader {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    public List<Image> loadData(Object in, TaskContainer tc) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in) throws IOException, ComputationException {
         if (!(in instanceof File)) {
             throw new IllegalArgumentException("VideoLoader needs a single file as input.");
         }
@@ -49,14 +49,10 @@ public class VideoLoader extends AbstractInputLoader {
 
         File input = (File) in;
         if (!input.exists()) {
-            final File inputSource = (File) tc.getParameter(TaskParameter.IN);
-            input = new File(inputSource.getParent().concat(File.separator).concat(input.getName()));
-            if (!input.exists()) {
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Input file " + in.toString() + " not found.");
-            }
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Input file " + in.toString() + " not found.");
         }
 
-        final File temp = Utils.getTempDir(tc);
+        final File temp = Utils.getTempDir(input);
         final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(NameGenerator.EXT_CONFIG));
         // check cache
         List<File> files;
@@ -73,9 +69,8 @@ public class VideoLoader extends AbstractInputLoader {
 
         // list of all bmp files inside temp dir with roght name        
         final ImageLoader il = new ImageLoader();
-        final List<Image> result = il.loadData(files, tc);
-
-        loadUdaFile(input.getAbsolutePath(), tc);
+        final TaskContainer result = il.loadTask(files);
+        loadUdaFile(input.getAbsolutePath(), result);
 
         return result;
     }
@@ -227,8 +222,14 @@ public class VideoLoader extends AbstractInputLoader {
     }
 
     @Override
-    public Class getSupporteType() {
-        return File.class;
+    public boolean canLoad(Object in) {
+        boolean result = false;
+        if (in instanceof File) {
+            final File input = (File) in;
+            final String ext = input.getName().substring(input.getName().lastIndexOf('.') + 1).toLowerCase(Locale.getDefault());
+            result = SUPPORTED_TYPES.contains(ext);
+        }
+        return result;
     }
 
 }

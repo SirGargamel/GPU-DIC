@@ -16,7 +16,7 @@ import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
-import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.data.task.loaders.InputLoader;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Application;
@@ -136,7 +137,8 @@ public class DicMain extends Application {
         Stats.getInstance();
 
         if (parameters.contains(DEBUG_COMPUTE)) {
-            performComputationTest();
+//            performComputationTest();
+            performPreprocessingTest();
         }
 
         boolean validLicense = Utils.checkLicense(LICENSE);
@@ -214,7 +216,7 @@ public class DicMain extends Application {
         for (int size = fs1; size <= fs2; size += 5) {
             for (String s : FILES_TO_DEBUG) {
                 try {
-                    Context.getInstance().setTc(TaskContainerUtils.deserializeTaskFromConfig(new File(s)));
+                    Context.getInstance().setTc(InputLoader.loadInput(new File(s)));
                     task = Context.getInstance().getTc();
                     if ((int) task.getParameter(TaskParameter.FACET_SIZE) < size) {
                         System.out.println("STOPPING --- " + task.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
@@ -325,6 +327,76 @@ public class DicMain extends Application {
         task.addExport(ExportTask.generateSequenceExport(Direction.DX, ExportTarget.CSV, new File(NameGenerator.generateSequence(task, Direction.DX)), null));
         task.addExport(ExportTask.generateVideoExport(Direction.DX, new File(NameGenerator.generateSequence(task, Direction.DX))));
         Exporter.export(task);
+    }
+
+    private static void performPreprocessingTest() throws ComputationException, IOException {
+        final String pathBase = "z:\\TUL\\DIC\\DIC_Preprocess\\";
+
+        final List<String> configs = new ArrayList<>();
+        configs.add("6107544m.avi00015.bmp.config");
+//        configs.add("6203652m.avi00014.bmp.config");
+//        configs.add("7202845m.avi00004.bmp.config");
+//        configs.add("9112502m.avi00016.bmp.config");
+//        configs.add("Sample3 Reference.tif.config");
+//        configs.add("Sample7-Reference Image.tif.config");
+//        configs.add("trs2_b8_00.tif.config");
+//        configs.add("trxy_s2_00.tif.config");
+
+        final List<String> filters = new ArrayList<>();
+//        filters.add("bilateral");
+//        filters.add("clahe");
+//        filters.add("histogram");
+//        filters.add("lucyRichardson");
+        filters.add("median");
+//        filters.add("orig");
+//        filters.add("wiener");
+
+        TaskContainer task;
+        for (String in : configs) {
+            for (String filter : filters) {
+                for (int size = 5; size <= 15; size += 2) {
+                    task = InputLoader.loadInput(new File(pathBase.concat(in)));
+                    task.setParameter(TaskParameter.FACET_SIZE, size);                    
+                    task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 2 * size);
+                    findAllConfigurationsAndCompute(task, filter);
+                }
+            }
+        }
+    }
+
+    private static void findAllConfigurationsAndCompute(final TaskContainer task, final String filter) throws ComputationException, IOException {
+        final List<File> input = (List<File>) task.getInput();
+
+        final File imageA = input.get(0);
+        final File filterDir = new File(imageA.getParent().concat(File.separator).concat(filter));
+        final String imageAname = imageA.getName(); 
+        final int indexA = imageAname.lastIndexOf('.');
+        final String imageAtitle = imageAname.substring(0, indexA);
+        final String imageAext = imageAname.substring(indexA);
+        final File[] imagesA = filterDir.listFiles((File dir, String name) -> name.startsWith(imageAtitle) && name.endsWith(imageAext));
+
+        final File imageB = input.get(1);
+        final String imageBname = imageB.getName();
+        final int indexB = imageAname.lastIndexOf('.');
+        final String imageBtitle = imageBname.substring(0, indexB);
+        final String imageBext = imageBname.substring(indexB);
+        final File[] imagesB = filterDir.listFiles((File dir, String name) -> name.startsWith(imageBtitle) && name.endsWith(imageBext));
+
+        TaskContainer newTask;
+        List<File> inputs;
+
+        for (int i = 0; i < imagesA.length; i++) {
+            newTask = task.cloneInputTask();
+            inputs = (List<File>) newTask.getInput();
+            inputs.clear();
+            inputs.add(imagesA[i]);
+            inputs.add(imagesB[i]);
+            
+            newTask.setParameter(TaskParameter.IN, imagesA[i]);
+            InputLoader.loadInput(newTask);
+            
+            Engine.getInstance().computeTask(newTask);
+        }
     }
 
     /**

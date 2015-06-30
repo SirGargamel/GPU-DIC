@@ -12,7 +12,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.subset.generator.FacetGenerator;
 import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
-import cz.tul.dic.input.InputLoader;
+import cz.tul.dic.data.task.loaders.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -58,11 +58,10 @@ public class FacetGeneratorTest {
 
     private TaskContainer prepareTask(final AbstractROI roi, final int subsetSize, FacetGeneratorMethod mode, final int spacing) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
 
-        TaskContainer tc = new TaskContainer(input);
-        InputLoader.loadInput(tc);
+        TaskContainer tc = TaskContainer.initTaskContainer(input);        
 
         tc.addRoi(ROUND, roi);
 
