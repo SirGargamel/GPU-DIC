@@ -629,7 +629,7 @@ public class MainWindow implements Initializable {
             }
         });
 
-        textFs.setText(Integer.toString(TaskDefaultValues.DEFAULT_FACET_SIZE));
+        textFs.setText(Integer.toString(TaskDefaultValues.DEFAULT_SUBSET_SIZE));
 
         imagePane.initialize(url, rb);
         imagePane.assignImageIndexTextField(textIndex.textProperty());

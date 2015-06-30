@@ -411,12 +411,12 @@ public final class TaskContainerUtils {
         final Object fs = tc.getParameter(TaskParameter.FACET_SIZE);
         if (fs == null) {
             Logger.warn("Adding default subset size.");
-            tc.setParameter(TaskParameter.FACET_SIZE, TaskDefaultValues.DEFAULT_FACET_SIZE);
+            tc.setParameter(TaskParameter.FACET_SIZE, TaskDefaultValues.DEFAULT_SUBSET_SIZE);
         }
         final Object dorder = tc.getParameter(TaskParameter.DEFORMATION_ORDER);
         if (dorder == null) {
             Logger.warn("Adding default deformation order.");
-            tc.setParameter(TaskParameter.DEFORMATION_ORDER, TaskDefaultValues.DEFAULT_DEFORMATION_DEGREE);
+            tc.setParameter(TaskParameter.DEFORMATION_ORDER, TaskDefaultValues.DEFAULT_DEFORMATION_ORDER);
         }
         final Object dl = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
         if (dl == null) {
@@ -469,7 +469,7 @@ public final class TaskContainerUtils {
         final Object subsetGenModeParam = tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM);
         if (subsetGenModeParam == null) {
             Logger.warn("Adding default subset generator.");
-            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, TaskDefaultValues.DEFAULT_FACET_SPACING);
+            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, TaskDefaultValues.DEFAULT_SUBSET_SPACING);
         }
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
         if (interpolation == null) {

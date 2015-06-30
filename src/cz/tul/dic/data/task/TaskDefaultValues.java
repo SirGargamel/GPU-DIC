@@ -23,14 +23,14 @@ public final class TaskDefaultValues {
     public static final DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION_METHOD = DisplacementCalculation.MAX_WEIGHTED_AVERAGE;
     public static final int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     public static final int DEFAULT_FPS = 5000;
-    public static final DeformationDegree DEFAULT_DEFORMATION_DEGREE = DeformationDegree.FIRST;
+    public static final DeformationDegree DEFAULT_DEFORMATION_ORDER = DeformationDegree.FIRST;
     public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-10.0, 10.0, 0.25, -10, 10, 0.25};
     public static final double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
         -10.0, 10.0, 0.25, -10, 10, 0.25,
         -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05};
     public static final FacetGeneratorMethod DEFAULT_FACET_GENERATOR = FacetGeneratorMethod.EQUAL;
-    public static final int DEFAULT_FACET_SPACING = 1;
-    public static final int DEFAULT_FACET_SIZE = 20;
+    public static final int DEFAULT_SUBSET_SPACING = 1;
+    public static final int DEFAULT_SUBSET_SIZE = 10;
     public static final Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;
     public static final double DEFAULT_MM_TO_PX_RATIO = 1;    
     public static final double DEFAULT_RESULT_QUALITY = 0.5;
