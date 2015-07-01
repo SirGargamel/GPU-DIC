@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -39,7 +38,7 @@ import org.pmw.tinylog.Logger;
  */
 public class TaskContainer extends Observable implements Serializable {
 
-    // input data
+    // input data    
     private final List<File> input;
     private final Map<TaskParameter, Object> params;
     private final Container<Set<AbstractROI>> rois;
@@ -53,22 +52,47 @@ public class TaskContainer extends Observable implements Serializable {
     private final List<Result> results;
     private final Map<Integer, Map<Integer, Result>> cumulativeResults;
 
-    public TaskContainer(final List<File> images) {
+    public TaskContainer() {
         params = new HashMap<>();
         rois = new Container<>();
         subsetSizes = new Container<>();
         deformationLimits = new Container<>();
         exports = new HashSet<>();
+        
         results = new CopyOnWriteArrayList<>();
         cumulativeResults = new ConcurrentHashMap<>();
         hints = EnumSet.noneOf(Hint.class);
 
-        input = images;
-        params.put(TaskParameter.IN, images.get(0));
+        input = new ArrayList<>();
+        images = new ArrayList<>();
     }
-    
+
+    public TaskContainer(final TaskContainer task) {
+        params = new HashMap<>(task.params);
+        rois = new Container<>(task.rois);
+        subsetSizes = new Container<>(task.subsetSizes);
+        deformationLimits = new Container<>(task.deformationLimits);
+        exports = new HashSet<>(task.exports);
+        
+        results = new CopyOnWriteArrayList<>(task.results);
+        cumulativeResults = new ConcurrentHashMap<>(task.cumulativeResults);
+        hints = EnumSet.copyOf(task.hints);
+
+        input = new ArrayList<>(task.input);
+        images = new ArrayList<>(task.images);
+    }
+
     public static TaskContainer initTaskContainer(final Object in) throws ComputationException, IOException {
-        return InputLoader.loadInput(in);
+        final TaskContainer result = new TaskContainer();
+        return InputLoader.loadInput(in, result);
+    }
+
+    public void setInput(final List<File> input, final List<Image> images) {
+        this.input.clear();
+        this.images.clear();
+
+        this.input.addAll(input);
+        this.images.addAll(images);
     }
 
     public List<File> getInput() {
@@ -103,15 +127,6 @@ public class TaskContainer extends Observable implements Serializable {
 
     public Set<Hint> getHints() {
         return hints;
-    }
-
-    public void addImage(final Image image) {
-        if (images == null) {
-            images = new LinkedList<>();
-        }
-
-        images.add(image);
-        results.add(null);
     }
 
     public Image getImage(final int round) {
@@ -260,15 +275,6 @@ public class TaskContainer extends Observable implements Serializable {
         for (int i = 0; i < TaskContainerUtils.getMaxRoundCount(this); i++) {
             results.add(null);
         }
-    }
-
-    public TaskContainer cloneInputTask() {
-        final TaskContainer result = new TaskContainer(input);
-        result.images = images;
-        result.params.putAll(params);
-        result.exports.addAll(exports);
-
-        return result;
     }
 
     @Override

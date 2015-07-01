@@ -87,7 +87,7 @@ public class CircleROIManager extends ROIManager {
     }
     
     public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) throws ComputationException {
-        final TaskContainer tcC = tc.cloneInputTask();
+        final TaskContainer tcC = new TaskContainer(tc);
 
         tcC.setROIs(initialRound, tc.getRois(initialRound));
 

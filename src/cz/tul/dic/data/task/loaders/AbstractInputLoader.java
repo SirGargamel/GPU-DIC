@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
@@ -29,23 +30,31 @@ public abstract class AbstractInputLoader {
     private static final String TEXT_FPS = "fps";
     private static final String TEXT_EXTRA = "[=]";
 
-    public abstract TaskContainer loadTask(final Object in) throws IOException, ComputationException;
+    public abstract TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException;
 
     public abstract boolean canLoad(final Object in);
 
-    protected void loadImages(final TaskContainer task, final File inputSource) throws ComputationException, IOException {
-        final List<File> data = task.getInput();
-        Image img;
-        for (File image : data) {
+    protected void loadImages(final TaskContainer task, final List<File> inputs) throws ComputationException, IOException {
+        final List<Image> images = new ArrayList<>(inputs.size());
+        final Object in = task.getParameter(TaskParameter.IN);
+        final File inputSource;
+        if (in != null) {
+            inputSource = (File) in;
+        } else {
+            inputSource = inputs.get(0);
+            task.setParameter(TaskParameter.IN, inputSource);
+        }
+        for (File image : inputs) {
             if (!image.exists()) {
                 image = new File(inputSource.getParent().concat(File.separator).concat(image.getName()));
                 if (!image.exists()) {
                     throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Input file " + image.toString() + " not found.");
                 }
             }
-            img = Image.loadImageFromDisk(image);
-            task.addImage(img);
+
+            images.add(Image.loadImageFromDisk(image));
         }
+        task.setInput(inputs, images);
     }
 
     protected void loadUdaFile(final String inputName, final TaskContainer tc) throws IOException {

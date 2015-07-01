@@ -11,6 +11,7 @@ import cz.tul.dic.Utils;
 import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.config.ConfigType;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,7 +40,7 @@ public class VideoLoader extends AbstractInputLoader {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    public TaskContainer loadTask(final Object in) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException {
         if (!(in instanceof File)) {
             throw new IllegalArgumentException("VideoLoader needs a single file as input.");
         }
@@ -69,7 +70,8 @@ public class VideoLoader extends AbstractInputLoader {
 
         // list of all bmp files inside temp dir with roght name        
         final ImageLoader il = new ImageLoader();
-        final TaskContainer result = il.loadTask(files);
+        task.setParameter(TaskParameter.IN, in);
+        final TaskContainer result = il.loadTask(files, task);
         loadUdaFile(input.getAbsolutePath(), result);
 
         return result;

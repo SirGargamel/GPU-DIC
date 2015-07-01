@@ -216,7 +216,7 @@ public class DicMain extends Application {
         for (int size = fs1; size <= fs2; size += 5) {
             for (String s : FILES_TO_DEBUG) {
                 try {
-                    Context.getInstance().setTc(InputLoader.loadInput(new File(s)));
+                    Context.getInstance().setTc(TaskContainer.initTaskContainer(new File(s)));
                     task = Context.getInstance().getTc();
                     if ((int) task.getParameter(TaskParameter.FACET_SIZE) < size) {
                         System.out.println("STOPPING --- " + task.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
@@ -226,8 +226,7 @@ public class DicMain extends Application {
                     task.setParameter(TaskParameter.FACET_SIZE, size);
                     task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, size / 2);
 //                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
-//                    tc.setParameter(TaskParameter.SOLVER, Solver.CoarseFine);
-                    InputLoader.loadInput(task);
+//                    tc.setParameter(TaskParameter.SOLVER, Solver.CoarseFine);                    
 
 //                    TaskContainerUtils.serializeTaskToConfig(task, new File("D:\\test.config"));
 //                    final TaskContainer test = TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\test.config"));
@@ -334,7 +333,7 @@ public class DicMain extends Application {
 
         final List<String> configs = new ArrayList<>();
         configs.add("6107544m.avi00015.bmp.config");
-//        configs.add("6203652m.avi00014.bmp.config");
+        configs.add("6203652m.avi00014.bmp.config");
 //        configs.add("7202845m.avi00004.bmp.config");
 //        configs.add("9112502m.avi00016.bmp.config");
 //        configs.add("Sample3 Reference.tif.config");
@@ -343,20 +342,20 @@ public class DicMain extends Application {
 //        configs.add("trxy_s2_00.tif.config");
 
         final List<String> filters = new ArrayList<>();
-//        filters.add("bilateral");
-//        filters.add("clahe");
-//        filters.add("histogram");
-//        filters.add("lucyRichardson");
+        filters.add("bilateral");
+        filters.add("clahe");
+        filters.add("histogram");
+        filters.add("lucyRichardson");
         filters.add("median");
-//        filters.add("orig");
-//        filters.add("wiener");
+        filters.add("orig");
+        filters.add("wiener");
 
         TaskContainer task;
         for (String in : configs) {
             for (String filter : filters) {
                 for (int size = 5; size <= 15; size += 2) {
-                    task = InputLoader.loadInput(new File(pathBase.concat(in)));
-                    task.setParameter(TaskParameter.FACET_SIZE, size);                    
+                    task = TaskContainer.initTaskContainer(new File(pathBase.concat(in)));
+                    task.setParameter(TaskParameter.FACET_SIZE, size);
                     task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 2 * size);
                     findAllConfigurationsAndCompute(task, filter);
                 }
@@ -369,7 +368,7 @@ public class DicMain extends Application {
 
         final File imageA = input.get(0);
         final File filterDir = new File(imageA.getParent().concat(File.separator).concat(filter));
-        final String imageAname = imageA.getName(); 
+        final String imageAname = imageA.getName();
         final int indexA = imageAname.lastIndexOf('.');
         final String imageAtitle = imageAname.substring(0, indexA);
         final String imageAext = imageAname.substring(indexA);
@@ -386,15 +385,15 @@ public class DicMain extends Application {
         List<File> inputs;
 
         for (int i = 0; i < imagesA.length; i++) {
-            newTask = task.cloneInputTask();
+            newTask = new TaskContainer(task);
             inputs = (List<File>) newTask.getInput();
             inputs.clear();
             inputs.add(imagesA[i]);
             inputs.add(imagesB[i]);
-            
+
             newTask.setParameter(TaskParameter.IN, imagesA[i]);
-            InputLoader.loadInput(newTask);
-            
+            InputLoader.loadInput(newTask, newTask);
+
             Engine.getInstance().computeTask(newTask);
         }
     }

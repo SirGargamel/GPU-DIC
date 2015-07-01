@@ -41,7 +41,7 @@ public class ConfigLoader extends AbstractInputLoader {
     public static final String CONFIG_ROIS = "ROI_";
 
     @Override
-    public TaskContainer loadTask(final Object in) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException {
         if (!(in instanceof File)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
         }
@@ -58,9 +58,9 @@ public class ConfigLoader extends AbstractInputLoader {
         if (!config.getType().equals(ConfigType.TASK)) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_CONFIG, "Not a task config.");
         }
-
-        final TaskContainer result;
+        
         // input
+        task.setParameter(TaskParameter.IN, in);
         final String input = config.get(CONFIG_INPUT);
         if (input.contains(CONFIG_SEPARATOR_ARRAY)) {
             // list of images
@@ -68,12 +68,12 @@ public class ConfigLoader extends AbstractInputLoader {
             final List<File> l = new ArrayList<>(split.length);
             for (String s : split) {
                 l.add(new File(s));
-            }
-            result = new TaskContainer(l);
+            }            
+            loadImages(task, l);
         } else {
             // video file
-            VideoLoader vl = new VideoLoader();
-            result = vl.loadTask(new File(input));
+            final VideoLoader vl = new VideoLoader();
+            vl.loadTask(new File(input), task);
         }
         // rois, exports, parameters        
         String value;
@@ -90,12 +90,12 @@ public class ConfigLoader extends AbstractInputLoader {
                     split = s.split(CONFIG_SEPARATOR_ROI);
                     if (split.length == 3) {
                         roi = AbstractROI.generateROI(split[0]);
-                        result.addRoi(index, roi);
+                        task.addRoi(index, roi);
                         if (!split[1].trim().equals(CONFIG_EMPTY)) {
-                            result.setDeformationLimits(index, roi, doubleArrayFromString(split[1]));
+                            task.setDeformationLimits(index, roi, doubleArrayFromString(split[1]));
                         }
                         if (!split[2].trim().equals(CONFIG_EMPTY)) {
-                            result.addSubsetSize(index, roi, Integer.decode(split[2]));
+                            task.addSubsetSize(index, roi, Integer.decode(split[2]));
                         }
                     } else {
                         throw new IllegalArgumentException("Illegal roi-limits pair - " + Arrays.toString(split));
@@ -105,71 +105,71 @@ public class ConfigLoader extends AbstractInputLoader {
                 tp = TaskParameter.valueOf(key.replaceFirst(CONFIG_PARAMETERS, ""));
                 switch (tp) {
                     case IN:
-                        result.setParameter(tp, new File(value));
+                        task.setParameter(tp, new File(value));
                         break;
                     case FACET_GENERATOR_METHOD:
-                        result.setParameter(tp, FacetGeneratorMethod.valueOf(value));
+                        task.setParameter(tp, FacetGeneratorMethod.valueOf(value));
                         break;
                     case FACET_GENERATOR_PARAM:
-                        result.setParameter(tp, Integer.valueOf(value));
+                        task.setParameter(tp, Integer.valueOf(value));
                         break;
                     case DEFORMATION_LIMITS:
-                        result.setParameter(tp, doubleArrayFromString(value));
+                        task.setParameter(tp, doubleArrayFromString(value));
                         break;
                     case DEFORMATION_ORDER:
-                        result.setParameter(tp, DeformationDegree.valueOf(value));
+                        task.setParameter(tp, DeformationDegree.valueOf(value));
                         break;
                     case DISPLACEMENT_CALCULATION_METHOD:
-                        result.setParameter(tp, DisplacementCalculation.valueOf(value));
+                        task.setParameter(tp, DisplacementCalculation.valueOf(value));
                         break;
                     case DISPLACEMENT_CALCULATION_PARAM:
-                        result.setParameter(tp, Integer.valueOf(value));
+                        task.setParameter(tp, Integer.valueOf(value));
                         break;
                     case FACET_SIZE:
-                        result.setParameter(tp, Integer.valueOf(value));
+                        task.setParameter(tp, Integer.valueOf(value));
                         break;
                     case FPS:
-                        result.setParameter(tp, Integer.valueOf(value));
+                        task.setParameter(tp, Integer.valueOf(value));
                         break;
                     case INTERPOLATION:
-                        result.setParameter(tp, Interpolation.valueOf(value));
+                        task.setParameter(tp, Interpolation.valueOf(value));
                         break;
                     case KERNEL:
-                        result.setParameter(tp, KernelType.valueOf(value));
+                        task.setParameter(tp, KernelType.valueOf(value));
                         break;
                     case MM_TO_PX_RATIO:
-                        result.setParameter(tp, Double.valueOf(value));
+                        task.setParameter(tp, Double.valueOf(value));
                         break;
                     case TASK_SPLIT_METHOD:
-                        result.setParameter(tp, TaskSplitMethod.valueOf(value));
+                        task.setParameter(tp, TaskSplitMethod.valueOf(value));
                         break;
                     case TASK_SPLIT_PARAM:
-                        result.setParameter(tp, Integer.valueOf(value));
+                        task.setParameter(tp, Integer.valueOf(value));
                         break;
                     case RESULT_QUALITY:
-                        result.setParameter(tp, Double.valueOf(value));
+                        task.setParameter(tp, Double.valueOf(value));
                         break;
                     case ROUND_LIMITS:
-                        result.setParameter(tp, intArrayFromString(value));
+                        task.setParameter(tp, intArrayFromString(value));
                         break;
                     case SOLVER:
-                        result.setParameter(tp, Solver.valueOf(value));
+                        task.setParameter(tp, Solver.valueOf(value));
                         break;
                     case STRAIN_ESTIMATION_METHOD:
-                        result.setParameter(tp, StrainEstimationMethod.valueOf(value));
+                        task.setParameter(tp, StrainEstimationMethod.valueOf(value));
                         break;
                     case STRAIN_ESTIMATION_PARAM:
-                        result.setParameter(tp, Double.valueOf(value));
+                        task.setParameter(tp, Double.valueOf(value));
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported task parameter - " + tp);
                 }
             } else if (key.startsWith(CONFIG_EXPORTS)) {
-                result.addExport(ExportTask.generateExportTask(value));
+                task.addExport(ExportTask.generateExportTask(value));
             }
         }
 
-        return result;
+        return task;
     }
     
     private static double[] doubleArrayFromString(final String data) {

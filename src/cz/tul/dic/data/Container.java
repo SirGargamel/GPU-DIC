@@ -7,6 +7,7 @@ package cz.tul.dic.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -20,7 +21,11 @@ public final class Container<T> implements Serializable {
 
     public Container() {
         data = new ArrayList<>();
-    }    
+    }
+
+    public Container(Container<T> container) {
+        data = new LinkedList<>(container.data);
+    }
 
     public void setItem(final T item, final int position) {
         while (position >= data.size()) {
@@ -56,7 +61,7 @@ public final class Container<T> implements Serializable {
             return data.get(position);
         }
     }
-    
+
     public void clear() {
         data.clear();
     }

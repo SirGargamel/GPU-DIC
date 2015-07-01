@@ -17,7 +17,7 @@ import javax.imageio.ImageIO;
 public class ImageLoader extends AbstractInputLoader {
 
     @Override
-    public TaskContainer loadTask(final Object in) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException {
         if (!(in instanceof List<?>)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
         }
@@ -27,9 +27,8 @@ public class ImageLoader extends AbstractInputLoader {
         if (data.isEmpty()) {
             throw new IllegalArgumentException("No images.");
         }
-
-        final TaskContainer task = new TaskContainer(data);
-        loadImages(task, data.get(0));
+        
+        loadImages(task, data);
         loadUdaFile(data.get(0).getAbsolutePath(), task);
 
         return task;

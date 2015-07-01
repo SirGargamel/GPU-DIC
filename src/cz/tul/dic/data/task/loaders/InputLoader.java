@@ -26,12 +26,13 @@ public final class InputLoader {
         loaders.add(new VideoLoader());
         loaders.add(new ConfigLoader());
         loaders.add(new BinaryLoader());
+        loaders.add(new TaskContainerLoader());
     }
 
     private InputLoader() {
     }
 
-    public static TaskContainer loadInput(final Object in) throws IOException, ComputationException {
+    public static TaskContainer loadInput(final Object in, final TaskContainer task) throws IOException, ComputationException {
         AbstractInputLoader loader = null;
         for (AbstractInputLoader ail : loaders) {
             if (ail.canLoad(in)) {
@@ -43,7 +44,7 @@ public final class InputLoader {
         TaskContainer result = null;
         if (loader != null) {
             try {
-                result = loader.loadTask(in);
+                result = loader.loadTask(in, task);
             } catch (ComputationException ex) {
                 if (ex.getExceptionCause().equals(ComputationExceptionCause.ILLEGAL_TASK_DATA)) {
                     if (result != null && result.getImages().isEmpty()) {
