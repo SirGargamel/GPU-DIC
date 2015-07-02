@@ -334,12 +334,12 @@ public class DicMain extends Application {
         final List<String> configs = new ArrayList<>();
         configs.add("6107544m.avi00015.bmp.config");
         configs.add("6203652m.avi00014.bmp.config");
-//        configs.add("7202845m.avi00004.bmp.config");
-//        configs.add("9112502m.avi00016.bmp.config");
-//        configs.add("Sample3 Reference.tif.config");
-//        configs.add("Sample7-Reference Image.tif.config");
-//        configs.add("trs2_b8_00.tif.config");
-//        configs.add("trxy_s2_00.tif.config");
+        configs.add("7202845m.avi00004.bmp.config");
+        configs.add("9112502m.avi00016.bmp.config");
+        configs.add("Sample3 Reference.bmp.config");
+        configs.add("Sample7-Reference Image.bmp.config");
+        configs.add("trs2_b8_00.bmp.config");
+        configs.add("trxy_s2_00.bmp.config");
 
         final List<String> filters = new ArrayList<>();
         filters.add("bilateral");
@@ -352,11 +352,19 @@ public class DicMain extends Application {
 
         TaskContainer task;
         for (String in : configs) {
+            task = TaskContainer.initTaskContainer(new File(pathBase.concat(in)));
+
             for (String filter : filters) {
                 for (int size = 5; size <= 15; size += 2) {
-                    task = TaskContainer.initTaskContainer(new File(pathBase.concat(in)));
                     task.setParameter(TaskParameter.FACET_SIZE, size);
-                    task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 2 * size);
+
+                    final int roiWidth;
+                    if (task.getRois(0) != null) {
+                        roiWidth = task.getRois(0).iterator().next().getWidth();
+                    } else {
+                        roiWidth = task.getImage(0).getWidth();
+                    }
+                    task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, Math.max(roiWidth / 10, 2 * size));
                     findAllConfigurationsAndCompute(task, filter);
                 }
             }
@@ -364,7 +372,7 @@ public class DicMain extends Application {
     }
 
     private static void findAllConfigurationsAndCompute(final TaskContainer task, final String filter) throws ComputationException, IOException {
-        final List<File> input = (List<File>) task.getInput();
+        final List<File> input = task.getInput();
 
         final File imageA = input.get(0);
         final File filterDir = new File(imageA.getParent().concat(File.separator).concat(filter));
@@ -376,25 +384,29 @@ public class DicMain extends Application {
 
         final File imageB = input.get(1);
         final String imageBname = imageB.getName();
-        final int indexB = imageAname.lastIndexOf('.');
+        final int indexB = imageBname.lastIndexOf('.');
         final String imageBtitle = imageBname.substring(0, indexB);
         final String imageBext = imageBname.substring(indexB);
         final File[] imagesB = filterDir.listFiles((File dir, String name) -> name.startsWith(imageBtitle) && name.endsWith(imageBext));
 
-        TaskContainer newTask;
+        TaskContainer newTask = null;
         List<File> inputs;
-
         for (int i = 0; i < imagesA.length; i++) {
-            newTask = new TaskContainer(task);
-            inputs = (List<File>) newTask.getInput();
-            inputs.clear();
-            inputs.add(imagesA[i]);
-            inputs.add(imagesB[i]);
+            try {
+                newTask = new TaskContainer(task);
+                inputs = (List<File>) newTask.getInput();
+                inputs.clear();
+                inputs.add(imagesA[i]);
+                inputs.add(imagesB[i]);
 
-            newTask.setParameter(TaskParameter.IN, imagesA[i]);
-            InputLoader.loadInput(newTask, newTask);
+                newTask.setParameter(TaskParameter.IN, imagesA[i]);
+                InputLoader.loadInput(newTask, newTask);
 
-            Engine.getInstance().computeTask(newTask);
+                Engine.getInstance().computeTask(newTask);
+            } catch (Exception ex) {
+                Logger.error(ex);
+                System.out.println(newTask);
+            }
         }
     }
 
