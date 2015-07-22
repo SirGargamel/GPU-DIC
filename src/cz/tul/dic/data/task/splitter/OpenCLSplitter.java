@@ -98,7 +98,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
             final int rest = subsets.size() - subsetIndex;
 
             int taskSize = rest;
-            final List<int[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
+            final List<long[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
             final long deformaiontCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
             while (taskSize > 1 && !isMemOk(deformaiontCount, taskSize, subsetSize, deformationLimitsArraySize)) {
                 taskSize *= COEFF_LIMIT_ADJUST;
@@ -109,9 +109,9 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
                 sublist.add(subsets.get(subsetIndex));
 
                 final double[] oldLimits = deformationLimits.get(subsetIndex);
-                final int[] stepCounts = DeformationUtils.generateDeformationCounts(oldLimits);
+                final long[] stepCounts = DeformationUtils.generateDeformationCounts(oldLimits);
                 final int minIndex = findMinIndexBiggerThanZero(stepCounts);
-                final int newStepCount = stepCounts[minIndex] / 2 - 1;
+                final long newStepCount = stepCounts[minIndex] / 2 - 1;
                 final double midPoint = oldLimits[minIndex * 3] + newStepCount * oldLimits[minIndex * 3 + 2];
 
                 double[] newLimits = new double[deformationLimitsArraySize];
@@ -176,8 +176,9 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         return ct;
     }
 
-    private int findMinIndexBiggerThanZero(final int[] counts) {
-        int min = Integer.MAX_VALUE, minPos = 0;
+    private int findMinIndexBiggerThanZero(final long[] counts) {
+        long min = Long.MAX_VALUE;
+        int minPos = 0;
         for (int i = 0; i < counts.length; i++) {
             if (counts[i] < min && counts[i] > 1) {
                 min = counts[i];

@@ -13,6 +13,7 @@ import com.jogamp.opencl.CLMemory;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 
 public class CL15D_pF_D extends Kernel {
 
@@ -32,13 +33,13 @@ public class CL15D_pF_D extends Kernel {
     void runKernel(final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
             final CLBuffer<IntBuffer> subsetData,
             final CLBuffer<FloatBuffer> subsetCenters,
-            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
+            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<LongBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results,
-            final int deformationCount, final int imageWidth,
+            final long deformationCount, final int imageWidth,
             final int subsetSize, final int subsetCount) {
         stop = false;
         final int subsetArea = subsetSize * subsetSize;
-        int lws0 = Kernel.roundUp(calculateLws0base(), subsetArea);
+        long lws0 = Kernel.roundUp(calculateLws0base(), subsetArea);
         lws0 = Math.min(lws0, getMaxWorkItemSize());
 
         kernelDIC.rewind();
@@ -48,14 +49,14 @@ public class CL15D_pF_D extends Kernel {
                 .putArg(subsetSize)
                 .putArg(subsetCount)
                 .putArg(0)
-                .putArg(0)
+                .putArg(0l)
                 .putArg(0);
         kernelDIC.rewind();
         // copy data and execute kernel
         wsm.setMaxFacetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        int globalWorkSize, deformationSubCount;
+        long globalWorkSize, deformationSubCount;
         long time;
         CLEvent event;
         int currentBaseFacet = 0, currentBaseDeformation;

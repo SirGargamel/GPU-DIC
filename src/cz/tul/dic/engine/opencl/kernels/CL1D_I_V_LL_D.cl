@@ -8,13 +8,13 @@ constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | C
 kernel void CL1D_I_V_LL_D(
     read_only image2d_t imageA, read_only image2d_t imageB, 
     global read_only int2 * subsets, global read_only float2 * subsetCenters,
-    global read_only float * deformationLimits, global read_only int * deformationCounts,
+    global read_only float * deformationLimits, global read_only long * deformationCounts,
     global write_only float * result,        
-    const int imageWidth, const int deformationCount,
+    const int imageWidth, const long deformationCount,
     const int subsetSize, const int subsetCount,
-    const int groupCountPerFacet,
-    const int subsetSubCount, const int subsetBase,
-    const int deformationSubCount, const int deformationBase) 
+    const long groupCountPerFacet,
+    const long subsetSubCount, const long subsetBase,
+    const long deformationSubCount, const long deformationBase) 
 {        
     //// ID checks    
     // subset

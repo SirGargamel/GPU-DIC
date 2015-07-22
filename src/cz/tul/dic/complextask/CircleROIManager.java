@@ -186,7 +186,7 @@ public class CircleROIManager extends ROIManager {
         defLimits = new double[oldLimits.length];
         System.arraycopy(oldLimits, 0, defLimits, 0, oldLimits.length);
 
-        final int[] stepCounts = DeformationUtils.generateDeformationCounts(defLimits);
+        final long[] stepCounts = DeformationUtils.generateDeformationCounts(defLimits);
         double mod = stepCounts[0] / 4 * defLimits[2];
         defLimits[0] -= mod;
         defLimits[1] += mod;

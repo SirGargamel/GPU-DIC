@@ -10,12 +10,12 @@ inline int computeIndex(const float x, const float y, const int width) {
 kernel void CL15D_pF_D(
     global read_only int * imageA, global read_only int * imageB, 
     global read_only int * subsets, global read_only float * subsetCenters,
-    global read_only float * deformationLimits, global read_only int * deformationCounts,
+    global read_only float * deformationLimits, global read_only long * deformationCounts,
     global write_only float * result,    
-    const int imageWidth, const int deformationCount,
+    const int imageWidth, const long deformationCount,
     const int subsetSize, const int subsetCount,
     const int subsetId,
-    const int deformationSubCount, const int deformationBase)
+    const long deformationSubCount, const int deformationBase)
 {
     // id checks       
     const size_t deformationId = deformationBase + get_global_id(0);    

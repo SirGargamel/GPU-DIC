@@ -24,7 +24,7 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
     private Image imageA, imageB;
     private List<AbstractSubset> subsets;
     private List<double[]> deformationLimits;
-    private List<int[]> deformationCounts;
+    private List<long[]> deformationCounts;
 
     @Override
     public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {

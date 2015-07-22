@@ -10,13 +10,13 @@ inline int computeIndex(const float x, const float y, const int width) {
 kernel void CL2D_Int_D(
     global read_only int * imageA, global read_only int * imageB, 
     global read_only int * subsets, global read_only float * subsetCenters,
-    global read_only float * deformationLimits, global read_only int * deformationCounts,
+    global read_only float * deformationLimits, global read_only long * deformationCounts,
     global write_only float * result,    
-    const int imageWidth, const int deformationCount,
+    const int imageWidth, const long deformationCount,
     const int subsetSize, const int subsetCount,
-    const int groupCountPerFacet,
-    const int subsetSubCount, const int subsetBase,
-    const int deformationSubCount, const int deformationBase) 
+    const long groupCountPerFacet,
+    const long subsetSubCount, const long subsetBase,
+    const long deformationSubCount, const long deformationBase) 
 {        
     // id checks    
     const size_t subsetId = subsetBase + get_global_id(0);

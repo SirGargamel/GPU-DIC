@@ -106,20 +106,20 @@ public class DeformationUtilsTest {
 
     @Test
     public void testMaxDefCount() {
-        final List<int[]> counts = new LinkedList<>();
-        counts.add(new int[]{1});
+        final List<long[]> counts = new LinkedList<>();
+        counts.add(new long[]{1});
         assertEquals(1, DeformationUtils.findMaxDeformationCount(counts));
 
-        counts.add(new int[]{2, 2, 4});
+        counts.add(new long[]{2, 2, 4});
         assertEquals(4, DeformationUtils.findMaxDeformationCount(counts));
 
-        counts.add(new int[]{2, 2, 4});
+        counts.add(new long[]{2, 2, 4});
         assertEquals(4, DeformationUtils.findMaxDeformationCount(counts));
 
-        counts.add(new int[]{2, 1, 25, 50});
+        counts.add(new long[]{2, 1, 25, 50});
         assertEquals(50, DeformationUtils.findMaxDeformationCount(counts));
 
-        counts.add(new int[]{5, 5});
+        counts.add(new long[]{5, 5});
         assertEquals(50, DeformationUtils.findMaxDeformationCount(counts));
     }
 
@@ -129,21 +129,21 @@ public class DeformationUtilsTest {
 
         double[] limits = new double[]{-1, 1, 1, -1, 1, 1};
         deformationLimits.add(limits);
-        int[] counts = DeformationUtils.generateDeformationCounts(limits);
+        long[] counts = DeformationUtils.generateDeformationCounts(limits);
         assertEquals(3, counts.length);
-        assertArrayEquals(new int[]{3, 3, 9}, counts);
+        assertArrayEquals(new long[]{3, 3, 9}, counts);
 
         limits = new double[]{-1, 1, 1, 1, 1, 0};
         deformationLimits.add(limits);
         counts = DeformationUtils.generateDeformationCounts(limits);
         assertEquals(3, counts.length);
-        assertArrayEquals(new int[]{3, 1, 3}, counts);
+        assertArrayEquals(new long[]{3, 1, 3}, counts);
 
         limits = new double[]{-1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1};
         deformationLimits.add(limits);
         counts = DeformationUtils.generateDeformationCounts(limits);
         assertEquals(7, counts.length);
-        assertArrayEquals(new int[]{3, 3, 3, 3, 3, 3, 729}, counts);
+        assertArrayEquals(new long[]{3, 3, 3, 3, 3, 3, 729}, counts);
 
         limits = new double[]{
             -1, 1, 1, -1, -1, 0, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1,
@@ -151,23 +151,23 @@ public class DeformationUtilsTest {
         deformationLimits.add(limits);
         counts = DeformationUtils.generateDeformationCounts(limits);
         assertEquals(13, counts.length);
-        assertArrayEquals(new int[]{3, 1, 3, 3, 3, 3, 1, 3, 3, 3, 3, 3, 59049}, counts);
+        assertArrayEquals(new long[]{3, 1, 3, 3, 3, 3, 1, 3, 3, 3, 3, 3, 59049}, counts);
 
-        final List<int[]> countsList = DeformationUtils.generateDeformationCounts(deformationLimits);
+        final List<long[]> countsList = DeformationUtils.generateDeformationCounts(deformationLimits);
         assertEquals(3, countsList.get(0).length);
-        assertArrayEquals(new int[]{3, 3, 9}, countsList.get(0));
+        assertArrayEquals(new long[]{3, 3, 9}, countsList.get(0));
         assertEquals(3, countsList.get(1).length);
-        assertArrayEquals(new int[]{3, 1, 3}, countsList.get(1));
+        assertArrayEquals(new long[]{3, 1, 3}, countsList.get(1));
         assertEquals(7, countsList.get(2).length);
-        assertArrayEquals(new int[]{3, 3, 3, 3, 3, 3, 729}, countsList.get(2));
+        assertArrayEquals(new long[]{3, 3, 3, 3, 3, 3, 729}, countsList.get(2));
         assertEquals(13, countsList.get(3).length);
-        assertArrayEquals(new int[]{3, 1, 3, 3, 3, 3, 1, 3, 3, 3, 3, 3, 59049}, countsList.get(3));
+        assertArrayEquals(new long[]{3, 1, 3, 3, 3, 3, 1, 3, 3, 3, 3, 3, 59049}, countsList.get(3));
     }
 
     @Test
     public void testExtractDeformation() throws ComputationException {
         double[] limits = new double[]{-1, 1, 1, -1, 1, 1};
-        int[] counts = DeformationUtils.generateDeformationCounts(limits);
+        long[] counts = DeformationUtils.generateDeformationCounts(limits);
 
         double[] deformation = DeformationUtils.extractDeformation(0, limits, counts);
         assertArrayEquals(new double[]{-1, -1}, deformation, 0.001);

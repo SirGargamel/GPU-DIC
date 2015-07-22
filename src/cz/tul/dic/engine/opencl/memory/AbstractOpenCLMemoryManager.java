@@ -17,12 +17,14 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,13 +37,13 @@ public abstract class AbstractOpenCLMemoryManager {
 
     private static final AbstractOpenCLMemoryManager INSTANCE;    
     private static final CLImageFormat IMAGE_FORMAT;    
-    protected int maxDeformationCount;
+    protected long maxDeformationCount;
     // OpenCL entities
     protected CLMemory<IntBuffer> clImageA, clImageB;
     protected CLBuffer<IntBuffer> clFacetData;
     protected CLBuffer<FloatBuffer> clFacetCenters;
     protected CLBuffer<FloatBuffer> clDeformationLimits;
-    protected CLBuffer<IntBuffer> clDefStepCount;
+    protected CLBuffer<LongBuffer> clDefStepCount;
     protected CLBuffer<FloatBuffer> clResults;
     // OpenCL context        
     protected CLCommandQueue queue;
@@ -66,6 +68,7 @@ public abstract class AbstractOpenCLMemoryManager {
         lock.lock();
         context = DeviceManager.getContext();
         queue = DeviceManager.getQueue();
+        maxDeformationCount = DeformationUtils.findMaxDeformationCount(DeformationUtils.generateDeformationCounts(task.getDeformationLimits()));
         assignDataToGPU(task, kernel);
     }
 
@@ -162,11 +165,11 @@ public abstract class AbstractOpenCLMemoryManager {
         return result;
     }
 
-    protected CLBuffer<IntBuffer> generateDeformationStepCounts(final List<int[]> counts) {
-        final CLBuffer<IntBuffer> result = context.createIntBuffer(counts.size() * counts.get(0).length, CLMemory.Mem.READ_ONLY);
-        final IntBuffer buffer = result.getBuffer();
-        for (int[] iA : counts) {
-            for (int i : iA) {
+    protected CLBuffer<LongBuffer> generateDeformationStepCounts(final List<long[]> counts) {
+        final CLBuffer<LongBuffer> result = context.createLongBuffer(counts.size() * counts.get(0).length, CLMemory.Mem.READ_ONLY);
+        final LongBuffer buffer = result.getBuffer();
+        for (long[] iA : counts) {
+            for (long i : iA) {
                 buffer.put(i);
             }
         }
@@ -210,7 +213,7 @@ public abstract class AbstractOpenCLMemoryManager {
         return clDeformationLimits;
     }
 
-    public CLBuffer<IntBuffer> getClDefStepCount() {
+    public CLBuffer<LongBuffer> getClDefStepCount() {
         return clDefStepCount;
     }
 
@@ -218,7 +221,7 @@ public abstract class AbstractOpenCLMemoryManager {
         return clResults;
     }
 
-    public int getMaxDeformationCount() {
+    public long getMaxDeformationCount() {
         return maxDeformationCount;
     }
 

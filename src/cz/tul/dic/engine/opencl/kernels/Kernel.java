@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -134,7 +135,7 @@ public abstract class Kernel {
         try {
             memManager.assignData(task, this);
             final CLBuffer<FloatBuffer> clResults = memManager.getClResults();
-            final int maxDeformationCount = memManager.getMaxDeformationCount();
+            final long maxDeformationCount = memManager.getMaxDeformationCount();
 
             runKernel(memManager.getClImageA(), memManager.getClImageB(),
                     memManager.getClFacetData(), memManager.getClFacetCenters(),
@@ -176,9 +177,9 @@ public abstract class Kernel {
             final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
             final CLBuffer<IntBuffer> subsetData,
             final CLBuffer<FloatBuffer> subsetCenters,
-            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
+            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<LongBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results,
-            final int maxDeformationCount, final int imageWidth,
+            final long maxDeformationCount, final int imageWidth,
             final int subsetSize, final int subsetCount);
 
     private CLBuffer<FloatBuffer> findMax(final CLBuffer<FloatBuffer> results, final int subsetCount, final int deformationCount) {
@@ -239,7 +240,7 @@ public abstract class Kernel {
         final List<CorrelationResult> result = new ArrayList<>(values.length);
 
         double[] limits;
-        int[] counts;
+        long[] counts;
         for (int f = 0; f < deformationLimits.size(); f++) {
 
             limits = deformationLimits.get(f);
@@ -313,9 +314,9 @@ public abstract class Kernel {
 
     public abstract void stopComputation();
 
-    static int roundUp(int groupSize, int globalSize) {
-        int r = globalSize % groupSize;
-        int result;
+    static long roundUp(long groupSize, long globalSize) {
+        long r = globalSize % groupSize;
+        long result;
         if (r == 0) {
             result = globalSize;
         } else {

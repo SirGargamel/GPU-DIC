@@ -13,6 +13,7 @@ import com.jogamp.opencl.CLMemory;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 
 public class CL2D_Int_D extends Kernel {
 
@@ -35,15 +36,15 @@ public class CL2D_Int_D extends Kernel {
     void runKernel(final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
             final CLBuffer<IntBuffer> subsetData,
             final CLBuffer<FloatBuffer> subsetCenters,
-            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<IntBuffer> defStepCounts,
+            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<LongBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results,
-            final int deformationCount, final int imageWidth,
+            final long deformationCount, final int imageWidth,
             final int subsetSize, final int subsetCount) {
         stop = false;
         final int subsetArea = subsetSize * subsetSize;
 
         final int lws0 = calculateLws0();
-        int lws1 = Kernel.roundUp(calculateLws1Base(), subsetArea);
+        long lws1 = Kernel.roundUp(calculateLws1Base(), subsetArea);
         lws1 = Math.min(lws1, getMaxWorkItemSize());
 
         kernelDIC.rewind();
@@ -52,21 +53,22 @@ public class CL2D_Int_D extends Kernel {
                 .putArg(deformationCount)
                 .putArg(subsetSize)
                 .putArg(subsetCount)
-                .putArg(0)
-                .putArg(0)
-                .putArg(0)
-                .putArg(0)
-                .putArg(0);
+                .putArg(0l)
+                .putArg(0l)
+                .putArg(0l)
+                .putArg(0l)
+                .putArg(0l);
         kernelDIC.rewind();
         // copy data and execute kernel
         wsm.setMaxFacetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        int subsetGlobalWorkSize, deformationGlobalWorkSize, subsetSubCount = 1, deformationSubCount;
+        long subsetGlobalWorkSize, deformationGlobalWorkSize, subsetSubCount = 1;
+        long deformationSubCount;
         long time;
         CLEvent event;
-        int currentBaseFacet = 0, currentBaseDeformation;
-        int groupCountPerFacet, counter = 0;
+        long currentBaseFacet = 0, currentBaseDeformation, groupCountPerFacet;
+        int counter = 0;
         CLEventList eventList = new CLEventList(subsetCount);
         while (currentBaseFacet < subsetCount) {
             currentBaseDeformation = 0;

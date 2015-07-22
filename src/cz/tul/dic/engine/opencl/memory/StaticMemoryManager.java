@@ -47,7 +47,7 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
             release(clDefStepCount);
             clDeformationLimits = generateDeformationLimits(task.getDeformationLimits());
             queue.putWriteBuffer(clDeformationLimits, false);
-            final List<int[]> deformationCounts = DeformationUtils.generateDeformationCounts(task.getDeformationLimits());
+            final List<long[]> deformationCounts = DeformationUtils.generateDeformationCounts(task.getDeformationLimits());
             clDefStepCount = generateDeformationStepCounts(deformationCounts);
             queue.putWriteBuffer(clDefStepCount, false);
             

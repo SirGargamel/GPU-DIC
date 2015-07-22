@@ -41,9 +41,9 @@ public final class WorkSizeManager {
     private static final double GROWTH_FACTOR_A = 0.75;
     private static final double GROWTH_FACTOR_B = 1.25;
     private static final KernelType BEST_KERNEL;
-    private static final Map<KernelType, Map<Integer, Map<Integer, Long>>> TIME_DATA;
+    private static final Map<KernelType, Map<Long, Map<Long, Long>>> TIME_DATA;
     private final KernelType kernel;
-    private int workSizeF, workSizeD, maxF, maxD;
+    private long workSizeF, workSizeD, maxF, maxD;    
 
     static {
         final String os = System.getProperty("os.name").toLowerCase();
@@ -92,8 +92,8 @@ public final class WorkSizeManager {
         double bestPerformance = Double.NEGATIVE_INFINITY;
         KernelType bestKernel = null;
         for (KernelType kt : KernelType.values()) {
-            for (Entry<Integer, Map<Integer, Long>> e : TIME_DATA.get(kt).entrySet()) {
-                for (Entry<Integer, Long> e2 : e.getValue().entrySet()) {
+            for (Entry<Long, Map<Long, Long>> e : TIME_DATA.get(kt).entrySet()) {
+                for (Entry<Long, Long> e2 : e.getValue().entrySet()) {
                     performance = (e.getKey() * e2.getKey()) / (double) e2.getValue();
                     if (performance > bestPerformance) {
                         bestPerformance = performance;
@@ -115,11 +115,11 @@ public final class WorkSizeManager {
         return BEST_KERNEL;
     }
 
-    public int getFacetCount() {
+    public long getFacetCount() {
         return workSizeF;
     }
 
-    public int getDeformationCount() {
+    public long getDeformationCount() {
         return workSizeD;
     }
 
@@ -127,7 +127,7 @@ public final class WorkSizeManager {
         this.maxF = max;
     }
 
-    public void setMaxDeformationCount(final int max) {
+    public void setMaxDeformationCount(final long max) {
         this.maxD = max;
     }
 
@@ -136,8 +136,8 @@ public final class WorkSizeManager {
         workSizeD = INITIAL_WORK_SIZE_D;
     }
 
-    public void storeTime(final int workSizeF, final int workSizeD, final long time) {
-        Map<Integer, Long> m = TIME_DATA.get(kernel).get(workSizeF);
+    public void storeTime(final long workSizeF, final long workSizeD, final long time) {
+        Map<Long, Long> m = TIME_DATA.get(kernel).get(workSizeF);
         if (m == null) {
             m = new TreeMap<>();
             TIME_DATA.get(kernel).put(workSizeF, m);
@@ -150,7 +150,7 @@ public final class WorkSizeManager {
     private void computeNextWorkSize() {
         if (!TIME_DATA.get(kernel).isEmpty()) {
             final long[] max = findMaxTimeValue();
-            final int[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
+            final long[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
             workSizeF = newMax[0];
             workSizeD = newMax[1];
         }
@@ -160,9 +160,9 @@ public final class WorkSizeManager {
         final long[] result = new long[]{0, 0, -1};
 
         long time;
-        int subsetCount, deformationCount;
-        for (Entry<Integer, Map<Integer, Long>> e : TIME_DATA.get(kernel).entrySet()) {
-            for (Entry<Integer, Long> e2 : e.getValue().entrySet()) {
+        long subsetCount, deformationCount;
+        for (Entry<Long, Map<Long, Long>> e : TIME_DATA.get(kernel).entrySet()) {
+            for (Entry<Long, Long> e2 : e.getValue().entrySet()) {
                 time = e2.getValue();
                 subsetCount = e.getKey();
                 deformationCount = e2.getKey();
@@ -177,13 +177,13 @@ public final class WorkSizeManager {
         return result;
     }
 
-    private static boolean isPerformanceBetter(final long time, final int subsetCount, final int deformationCount, final long[] result) {
+    private static boolean isPerformanceBetter(final long time, final long subsetCount, final long deformationCount, final long[] result) {
         return (time < MAX_TIME) && ((subsetCount == result[0] && deformationCount > result[1])
                 || subsetCount > result[0]);
     }
 
-    private int[] computeNewCount(final int oldMaxF, final int oldMaxD, final long time) {
-        final int[] result = new int[]{oldMaxF, oldMaxD};
+    private long[] computeNewCount(final int oldMaxF, final int oldMaxD, final long time) {
+        final long[] result = new long[]{oldMaxF, oldMaxD};
         if (oldMaxD < maxD) {
             result[1] = adjustValue(time, MAX_TIME, oldMaxD, maxD);
         } else {
@@ -193,10 +193,10 @@ public final class WorkSizeManager {
         return result;
     }
 
-    private int adjustValue(final long currentTime, final long maxTime, final int value, final int maxValue) {
+    private long adjustValue(final long currentTime, final long maxTime, final long value, final long maxValue) {
         final double ratio = currentTime / (double) maxTime;
 
-        final int result;
+        final long result;
         if (ratio < GROWTH_LIMIT_A) {
             result = (int) Math.floor(value / ratio * GROWTH_FACTOR_A);
         } else if (ratio < GROWTH_LIMIT_B) {

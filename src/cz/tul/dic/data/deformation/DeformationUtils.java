@@ -63,25 +63,25 @@ public final class DeformationUtils {
         return result;
     }    
 
-    public static int findMaxDeformationCount(final List<int[]> counts) {
-        double max = 0;
-        for (int[] iA : counts) {
+    public static long findMaxDeformationCount(final List<long[]> counts) {
+        long max = 0;
+        for (long[] iA : counts) {
             max = Math.max(max, iA[iA.length - 1]);
         }
-        return (int) max;
+        return max;
     }            
 
-    public static List<int[]> generateDeformationCounts(final List<double[]> deformationLimits) {
-        final List<int[]> result = new ArrayList<>(deformationLimits.size());
+    public static List<long[]> generateDeformationCounts(final List<double[]> deformationLimits) {
+        final List<long[]> result = new ArrayList<>(deformationLimits.size());
         for (double[] limits : deformationLimits) {
             result.add(generateDeformationCounts(limits));
         }
         return result;
     }
 
-    public static int[] generateDeformationCounts(final double[] deformationLimits) {
+    public static long[] generateDeformationCounts(final double[] deformationLimits) {
         final int l = deformationLimits.length / 3;
-        final int[] counts = new int[l + 1];
+        final long[] counts = new long[l + 1];
 
         int total = 1;
         for (int i = 0; i < l; i++) {
@@ -92,7 +92,7 @@ public final class DeformationUtils {
         return counts;
     }
     
-    public static double[] extractDeformation(final int index, final double[] deformationLimits, final int[] deformationCounts) throws ComputationException {
+    public static double[] extractDeformation(final int index, final double[] deformationLimits, final long[] deformationCounts) throws ComputationException {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
