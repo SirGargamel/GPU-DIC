@@ -227,11 +227,6 @@ public final class TaskContainerUtils {
             Logger.warn("Adding default subset size.");
             tc.setParameter(TaskParameter.FACET_SIZE, TaskDefaultValues.DEFAULT_SUBSET_SIZE);
         }
-        final Object dorder = tc.getParameter(TaskParameter.DEFORMATION_ORDER);
-        if (dorder == null) {
-            Logger.warn("Adding default deformation order.");
-            tc.setParameter(TaskParameter.DEFORMATION_ORDER, TaskDefaultValues.DEFAULT_DEFORMATION_ORDER);
-        }
         final Object dl = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
         if (dl == null) {
             Logger.warn("Adding default deformation limits.");
@@ -239,13 +234,14 @@ public final class TaskContainerUtils {
                 tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO);
             } else {
                 tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
+                tc.setParameter(TaskParameter.DEFORMATION_ORDER, TaskDefaultValues.DEFAULT_DEFORMATION_ORDER);
             }
         } else {
-            final DeformationDegree deg = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_ORDER);
-            final double[] limits = (double[]) dl;
-            final double[] newLimits = new double[DeformationUtils.getDeformationLimitsArrayLength(deg)];
-            System.arraycopy(limits, 0, newLimits, 0, Math.min(limits.length, newLimits.length));
-            tc.setParameter(TaskParameter.DEFORMATION_LIMITS, newLimits);
+            final DeformationDegree limitsDegree = DeformationUtils.getDegreeFromLimits((double[]) dl);
+            final DeformationDegree taskDegree = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_ORDER);
+            if (taskDegree != limitsDegree) {
+                tc.setParameter(TaskParameter.DEFORMATION_ORDER, limitsDegree);
+            }
         }
         Image img;
         Set<AbstractROI> rois;
