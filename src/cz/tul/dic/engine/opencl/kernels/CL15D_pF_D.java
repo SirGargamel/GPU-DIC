@@ -49,7 +49,7 @@ public class CL15D_pF_D extends Kernel {
                 .putArg(subsetSize)
                 .putArg(subsetCount)
                 .putArg(0)
-                .putArg(0l)
+                .putArg(0L)
                 .putArg(0);
         kernelDIC.rewind();
         // copy data and execute kernel

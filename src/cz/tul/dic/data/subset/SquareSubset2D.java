@@ -20,7 +20,7 @@ public final class SquareSubset2D extends AbstractSubset {
         super(center, size, generateData(center, size));
     }
 
-    private static int[] generateData(final double[] center, final int size) throws IllegalArgumentException {
+    private static int[] generateData(final double[] center, final int size) {
         if (center == null || center.length < 2) {
             throw new IllegalArgumentException("Illegal center data - " + Arrays.toString(center));
         }

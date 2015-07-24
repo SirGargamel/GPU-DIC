@@ -49,6 +49,7 @@ import org.pmw.tinylog.Logger;
 public class ExportEditor implements Initializable {
 
     private static final String SPLIT = ";";
+    private static final String EXPORT = "Export";
     @FXML
     private VBox vBox;
 
@@ -146,7 +147,7 @@ public class ExportEditor implements Initializable {
         final ButtonType sequence = new ButtonType(Lang.getString("TypeSequence"));
         final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
         final Alert dlg = new Alert(Alert.AlertType.CONFIRMATION, null, map, point, sequence, cancel);
-        dlg.setTitle(Lang.getString("Export"));
+        dlg.setTitle(Lang.getString(EXPORT));
         dlg.setHeaderText(Lang.getString("ChooseDataType"));
         dlg.showAndWait().ifPresent((ButtonType t) -> {
             final TaskContainer tc = Context.getInstance().getTc();
@@ -156,7 +157,7 @@ public class ExportEditor implements Initializable {
                     final ButtonType img = new ButtonType(Lang.getString("TypeImage"));
                     final ButtonType csv = new ButtonType(Lang.getString("TypeCsv"));                    
                     final Alert dlg2 = new Alert(Alert.AlertType.CONFIRMATION, null, img, csv, cancel);
-                    dlg2.setTitle(Lang.getString("Export"));
+                    dlg2.setTitle(Lang.getString(EXPORT));
                     dlg2.setHeaderText(Lang.getString("ChooseDataType"));
                     dlg2.showAndWait().ifPresent((ButtonType t2) -> {
                         if (t2 == img) {
@@ -168,7 +169,7 @@ public class ExportEditor implements Initializable {
                 }
             } else if (t == point) {
                 final TextInputDialog dlg2 = new TextInputDialog("0; 0");
-                dlg2.setTitle(Lang.getString("Export"));
+                dlg2.setTitle(Lang.getString(EXPORT));
                 dlg2.setContentText(Lang.getString("ChooseCoords"));
                 dlg2.showAndWait().ifPresent((String t1) -> {
                     final String[] split = t1.split(SPLIT);
@@ -184,12 +185,12 @@ public class ExportEditor implements Initializable {
             }
         });
         actualizeExports();
-    }
+    }    
 
     private Direction pickDirection() {
         final ChoiceDialog<Direction> dlg = new ChoiceDialog<>(Direction.DABS, Direction.values());
         dlg.setHeaderText(Lang.getString("ChooseDirection"));
-        dlg.setTitle(Lang.getString("Export"));
+        dlg.setTitle(Lang.getString(EXPORT));
         return dlg.showAndWait().orElse(null);
     }
 

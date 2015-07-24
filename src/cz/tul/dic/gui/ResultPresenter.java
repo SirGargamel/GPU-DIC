@@ -65,6 +65,8 @@ import org.pmw.tinylog.Logger;
 public class ResultPresenter implements Initializable {
 
     private static final String SEPARATOR = " [";
+    private static final String CANCEL = "Cancel";
+    private static final String CHOOSE_DATA_TYPE = "ChooseDataType";
     private static final int PREF_SIZE_W_BASE = 30;
     private static final int PREF_SIZE_W_M = 5;
     private static final int PREF_SIZE_H = 30;
@@ -196,10 +198,10 @@ public class ResultPresenter implements Initializable {
         final TaskContainer tc = Context.getInstance().getTc();
         final ButtonType map = new ButtonType(Lang.getString("TypeMap"));
         final ButtonType sequence = new ButtonType(Lang.getString("TypeSequence"));
-        final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        final ButtonType cancel = new ButtonType(Lang.getString(CANCEL), ButtonBar.ButtonData.CANCEL_CLOSE);
         final Alert dlg = new Alert(AlertType.CONFIRMATION, null, map, sequence, cancel);
         dlg.setTitle(Lang.getString("Save"));
-        dlg.setHeaderText(Lang.getString("ChooseDataType"));
+        dlg.setHeaderText(Lang.getString(CHOOSE_DATA_TYPE));
         final Optional<ButtonType> result = dlg.showAndWait();
         final ButtonType button = result.get();
         try {
@@ -238,7 +240,7 @@ public class ResultPresenter implements Initializable {
     }
 
     private double[] getLimits() {
-        final double[] result = new double[]{Double.NaN, Double.NaN};                
+        final double[] result = new double[]{Double.NaN, Double.NaN};
         try {
             final String min = textMin.getText().replaceAll(",", ".");
             result[0] = Double.valueOf(min);
@@ -282,10 +284,10 @@ public class ResultPresenter implements Initializable {
     private ExportTarget determineTarget() {
         final ButtonType img = new ButtonType(Lang.getString("TypeImage"));
         final ButtonType csv = new ButtonType(Lang.getString("TypeCsv"));
-        final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        final ButtonType cancel = new ButtonType(Lang.getString(CANCEL), ButtonBar.ButtonData.CANCEL_CLOSE);
         final Alert dlg = new Alert(AlertType.CONFIRMATION, null, img, csv, cancel);
         dlg.setTitle(Lang.getString("Save"));
-        dlg.setHeaderText(Lang.getString("ChooseDataType"));
+        dlg.setHeaderText(Lang.getString(CHOOSE_DATA_TYPE));
         final ObjectProperty<ExportTarget> result = new SimpleObjectProperty<>(null);
         dlg.showAndWait().ifPresent((ButtonType t) -> {
             if (t == img) {
@@ -301,10 +303,10 @@ public class ResultPresenter implements Initializable {
         final ButtonType avi = new ButtonType(Lang.getString("TypeAvi"));
         final ButtonType img = new ButtonType(Lang.getString("TypeImage"));
         final ButtonType csv = new ButtonType(Lang.getString("TypeCsv"));
-        final ButtonType cancel = new ButtonType(Lang.getString("Cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        final ButtonType cancel = new ButtonType(Lang.getString(CANCEL), ButtonBar.ButtonData.CANCEL_CLOSE);
         final Alert dlg = new Alert(AlertType.CONFIRMATION, null, avi, img, csv, cancel);
         dlg.setTitle(Lang.getString("Save"));
-        dlg.setHeaderText(Lang.getString("ChooseDataType"));
+        dlg.setHeaderText(Lang.getString(CHOOSE_DATA_TYPE));
         final ObjectProperty<ExportTask> result = new SimpleObjectProperty<>(null);
         dlg.showAndWait().ifPresent((ButtonType t) -> {
             if (t == img) {
@@ -492,7 +494,7 @@ public class ResultPresenter implements Initializable {
         final Scene scene = image.getParent().getScene();
         final Stage mainStage = (Stage) scene.getWindow();
         mainStage.setOnCloseRequest((WindowEvent event) -> {
-            charts.keySet().stream().forEach((s) -> {
+            charts.keySet().stream().forEach(s -> {
                 s.close();
             });
             charts.clear();
@@ -613,7 +615,6 @@ public class ResultPresenter implements Initializable {
         public void displayData(final Direction dir) throws ComputationException {
             final double tickUnit = fpsM.getTickLength();
 
-            // TODO
             switch (dir) {
                 case DABS:
                 case R_DABS:

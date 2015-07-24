@@ -53,11 +53,11 @@ public class CL2D_Int_D extends Kernel {
                 .putArg(deformationCount)
                 .putArg(subsetSize)
                 .putArg(subsetCount)
-                .putArg(0l)
-                .putArg(0l)
-                .putArg(0l)
-                .putArg(0l)
-                .putArg(0l);
+                .putArg(0L)
+                .putArg(0L)
+                .putArg(0L)
+                .putArg(0L)
+                .putArg(0L);
         kernelDIC.rewind();
         // copy data and execute kernel
         wsm.setMaxFacetCount(subsetCount);

@@ -54,14 +54,14 @@ public abstract class AbstractOpenCLMemoryManager {
         DeviceManager.clearMemory();
         INSTANCE = new StaticMemoryManager();
         IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
+    }        
+
+    protected AbstractOpenCLMemoryManager() {
+        lock = new ReentrantLock();
     }
     
     public static AbstractOpenCLMemoryManager init() {
         return INSTANCE;
-    }
-
-    protected AbstractOpenCLMemoryManager() {
-        lock = new ReentrantLock();
     }
 
     public void assignData(final ComputationTask task, final Kernel kernel) throws ComputationException {

@@ -8,7 +8,6 @@ package cz.tul.dic.output;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.roi.AbstractROI;
-import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.awt.AlphaComposite;
 import java.awt.Color;

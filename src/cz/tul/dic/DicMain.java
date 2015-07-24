@@ -394,7 +394,7 @@ public class DicMain extends Application {
         for (int i = 0; i < imagesA.length; i++) {
             try {
                 newTask = new TaskContainer(task);
-                inputs = (List<File>) newTask.getInput();
+                inputs = newTask.getInput();
                 inputs.clear();
                 inputs.add(imagesA[i]);
                 inputs.add(imagesB[i]);

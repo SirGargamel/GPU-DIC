@@ -14,7 +14,6 @@ import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.gui.lang.Lang;
-import cz.tul.dic.data.task.loaders.InputLoader;
 import cz.tul.dic.output.NameGenerator;
 import java.awt.image.BufferedImage;
 import java.io.File;
