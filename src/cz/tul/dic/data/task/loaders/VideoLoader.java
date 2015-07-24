@@ -56,25 +56,30 @@ public class VideoLoader extends AbstractInputLoader {
         final File temp = Utils.getTempDir(input);
         final File sequenceConfigFile = new File(temp.getAbsolutePath().concat(File.separator).concat(input.getName()).concat(NameGenerator.EXT_CONFIG));
         // check cache
-        List<File> files;
+        final List<File> files;
         try {
-            Config config = new Config().load(sequenceConfigFile);
-            if (!isCacheDataValid(input, temp, config)) {
-                files = loadVideoByVirtualDub(input, temp, sequenceConfigFile);
+            if (sequenceConfigFile.exists()) {
+                final Config config = new Config().load(sequenceConfigFile);
+                if (!isCacheDataValid(input, temp, config)) {
+                    files = loadVideoByVirtualDub(input, temp, sequenceConfigFile);
+                } else {
+                    files = convertCacheDataToFiles(input, temp, config);
+                }
             } else {
-                files = convertCacheDataToFiles(input, temp, config);
+                files = loadVideoByVirtualDub(input, temp, sequenceConfigFile);
             }
+
+            // list of all bmp files inside temp dir with roght name        
+            final ImageLoader il = new ImageLoader();
+            task.setParameter(TaskParameter.IN, in);
+            final TaskContainer result = il.loadTask(files, task);
+            loadUdaFile(input.getAbsolutePath(), result);
+
+            return result;
         } catch (IOException ex) {
-            files = loadVideoByVirtualDub(input, temp, sequenceConfigFile);
+            Logger.error(ex, "Error loading sequence config file.");
+            return null;
         }
-
-        // list of all bmp files inside temp dir with roght name        
-        final ImageLoader il = new ImageLoader();
-        task.setParameter(TaskParameter.IN, in);
-        final TaskContainer result = il.loadTask(files, task);
-        loadUdaFile(input.getAbsolutePath(), result);
-
-        return result;
     }
 
     private List<File> loadVideoByVirtualDub(File input, final File temp, final File sequenceConfigFile) throws IOException {
