@@ -14,6 +14,7 @@ import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -59,7 +60,7 @@ public final class WorkSizeManager {
 
         Logger.debug("Initializing best kernel.");
 
-        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(TaskDefaultValues.DEFAULT_SOLVER);
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.COARSE_FINE);
         solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
         solver.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
 

@@ -5,6 +5,7 @@
  */
 package cz.tul.dic;
 
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
@@ -34,8 +35,8 @@ import org.junit.Test;
 public class SolverTest {
 
     private static final int BASE_ROUND = 0;
-    private static final int COEFF_COUNT = 6;
     private static final double MAX_STEP_DIF = 1;
+    private static final double LIMIT_QUALITY_GOOD = 0.99;
     private static final double[] LIMITS_0 = new double[]{
         -4, 12, 0.5, -2, 8, 0.5};
     private static final double[] LIMITS_0_EXTENDED = new double[]{
@@ -65,6 +66,7 @@ public class SolverTest {
         int counter = 0;
         String msg;
         TaskContainer task;
+//        Solver solver = Solver.NEWTON_RHAPSON;
         for (Solver solver : Solver.values()) {
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
                 task = generateAndcomputeTask(e.getKey(), solver, LIMITS_0);
@@ -104,7 +106,7 @@ public class SolverTest {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
-        final TaskContainer task = TaskContainer.initTaskContainer(input);        
+        final TaskContainer task = TaskContainer.initTaskContainer(input);
 
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
@@ -119,13 +121,14 @@ public class SolverTest {
         return task;
     }
 
-    private static String checkResult(final double[] expected, final TaskContainer task) {
+    private static String checkResult(final double[] expected, final TaskContainer task) throws ComputationException {
         final double[] actual = condenseResults(task);
         final double[] limits = (double[]) task.getParameter(TaskParameter.DEFORMATION_LIMITS);
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(DeformationUtils.getDegreeFromLimits(limits));
 
         String result = null;
         double maxDif;
-        for (int dim = 0; dim < COEFF_COUNT; dim++) {
+        for (int dim = 0; dim < coeffCount; dim++) {
             maxDif = MAX_STEP_DIF * limits[dim * 3 + 2];
             if (Math.abs(expected[dim] - actual[dim]) > maxDif) {
                 result = generateMessage(expected, actual, task);
@@ -133,11 +136,29 @@ public class SolverTest {
             }
         }
 
+        if (result != null) {
+            boolean closeEnough = true;
+            final Map<AbstractROI, List<CorrelationResult>> results = task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations();
+            for (List<CorrelationResult> l : results.values()) {
+                for (CorrelationResult cor : l) {
+                    if (cor.getValue() < LIMIT_QUALITY_GOOD) {
+                        closeEnough = false;
+                    }
+                }
+            }
+            if (closeEnough) {
+                System.out.println("CLOSE ENOUGH - " + result.substring(1));
+                result = null;
+            }
+        }
+
         return result;
     }
 
-    private static double[] condenseResults(final TaskContainer task) {
-        final double[] result = new double[COEFF_COUNT];
+    private static double[] condenseResults(final TaskContainer task) throws ComputationException {
+        final double[] limits = (double[]) task.getParameter(TaskParameter.DEFORMATION_LIMITS);
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(DeformationUtils.getDegreeFromLimits(limits));
+        final double[] result = new double[coeffCount];
         int counter = 0;
 
         double[] tmp;
@@ -145,13 +166,13 @@ public class SolverTest {
         for (List<CorrelationResult> l : results.values()) {
             for (CorrelationResult cor : l) {
                 tmp = cor.getDeformation();
-                for (int i = 0; i < COEFF_COUNT; i++) {
+                for (int i = 0; i < coeffCount; i++) {
                     result[i] += tmp[i];
                 }
                 counter++;
             }
         }
-        for (int i = 0; i < COEFF_COUNT; i++) {
+        for (int i = 0; i < coeffCount; i++) {
             result[i] /= (double) counter;
         }
 

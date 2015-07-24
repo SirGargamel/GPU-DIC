@@ -329,7 +329,7 @@ public class DicMain extends Application {
     }
 
     private static void performPreprocessingTest() throws ComputationException, IOException {
-        final String pathBase = "z:\\TUL\\DIC\\DIC_Preprocess\\";
+        final String pathBase = "e:\\DIC_Preprocess\\";
 
         final List<String> configs = new ArrayList<>();
         configs.add("6107544m.avi00015.bmp.config");

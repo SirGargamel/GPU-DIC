@@ -17,8 +17,9 @@ import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DecompositionSolver;
@@ -37,157 +38,68 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final int COUNT_STEP = 5;
     private static final int LIMITS_ROUNDS = 20;
-    private static final double LIMIT_MIN_GROWTH = 0.01;
+    private static final double LIMIT_MIN_GROWTH = 0.001;
+    private static final double LIMIT_DONE = 1 - LIMIT_MIN_GROWTH;
     private static final double STEP_INITIAL = 1;
-    private static final double STEP_FIRST = 0.1;
-    private static final double STEP_SECOND = 0.01;
+    private static final double STEP_FIRST = 0.01;
+    private static final double STEP_SECOND = 0.001;
+    private FullTask fullTask;
+    private Map<AbstractSubset, CorrelationResult> results;
+    private Map<AbstractSubset, double[]> limits;
+    private Map<AbstractSubset, long[]> limitsCounts;
     private double[] gpuData;
 
     @Override
     public List<CorrelationResult> solve(
             final Kernel kernel,
-            final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
-        final int subsetCount = fullTask.getDeformationLimits().size();
+            final FullTask fullTask, final DeformationDegree defDegree) throws ComputationException {
+        this.fullTask = fullTask;
+        final List<AbstractSubset> subsets = fullTask.getSubsets();
+        final int subsetCount = subsets.size();
+
+        results = new LinkedHashMap<>(subsetCount);
+        limits = new LinkedHashMap<>(subsetCount);
+        limitsCounts = new LinkedHashMap<>(subsetCount);
+
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
         // estimate initial solution by direct search
-        final List<CorrelationResult> coarseResults = performInitialResultEstimation(kernel, fullTask);
+        performInitialResultEstimation(kernel, coeffCount);
         notifyProgress(subsetCount, subsetCount);
 
-        // prepare limits data for NR solver
-        double[] temp;
-        final List<double[]> limitsList = new ArrayList<>(subsetCount);
-        final List<double[]> solutionList = new ArrayList<>(subsetCount);
-        List<long[]> countsList;
-        double[] newLimits, coarseResult, solution;
-        for (int i = 0; i < subsetCount; i++) {
-            coarseResult = coarseResults.get(i).getDeformation();
-            temp = fullTask.getDeformationLimits().get(i);
+        // prepare data for NR solver        
+        prepareLimitsForNR(coeffCount);
 
-            newLimits = new double[coeffCount * 3];
-            System.arraycopy(temp, 0, newLimits, 0, Math.min(temp.length, newLimits.length));
-            for (int j = 0; j < coeffCount; j++) {
-                newLimits[j * 3 + 2] = STEP_FIRST;
-            }
-
-            solution = Arrays.copyOf(coarseResult, coeffCount);
-            solutionList.add(solution);
-            limitsList.add(generateLimits(solution, newLimits));
-        }
-        countsList = DeformationUtils.generateDeformationCounts(limitsList);
-
-        final List<AbstractSubset> subsetsToCompute = new ArrayList<>(fullTask.getSubsets());
-        List<CorrelationResult> results = coarseResults;
-        RealVector gradient, solutionVec;
-        RealMatrix hessianMatrix;
-        DecompositionSolver solver;
-        CorrelationResult newResult;
-        double[] limits;
-        long[] counts;
-        double increment;
-        Iterator<AbstractSubset> it;
-        AbstractSubset f;
-        int subsetIndexGlobal, subsetIndexLocal;
-        final List<AbstractSubset> finishedFacets = new LinkedList<>();
-
+        // initial data for NR solver
         Kernel.registerListener(this);
+        final List<AbstractSubset> subsetsToCompute = new ArrayList<>(fullTask.getSubsets());
+        final List<double[]> localLimits = new ArrayList<>(limits.values());
+        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits), defDegree);
 
-        final StringBuilder sb = new StringBuilder();
-        final long time = System.nanoTime();
-        int baseIndex, resultIndex, counterFinished;
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
-            sb.setLength(0);
-            baseIndex = 0;
-            subsetIndexLocal = 0;
-            counterFinished = 0;
-            finishedFacets.clear();
+            makeStep(subsetsToCompute, defDegree);
 
-            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, limitsList), defDegree);
-
-            it = subsetsToCompute.iterator();
-            sb.append("Results for round ").append(i).append(": ");
-            while (it.hasNext()) {
-                f = it.next();
-                subsetIndexGlobal = fullTask.getSubsets().indexOf(f);
-                counts = countsList.get(subsetIndexLocal);
-
-                try {
-                    // store results with computed quality  
-                    resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
-                    newResult = new CorrelationResult(gpuData[resultIndex], solutionList.get(subsetIndexLocal));
-                    increment = computeError(results.get(subsetIndexGlobal).getValue(), newResult.getValue());
-                    sb.append(subsetIndexGlobal)
-                            .append(" - ")
-                            .append(results.get(subsetIndexGlobal));
-                    results.set(subsetIndexGlobal, newResult);
-                    limits = limitsList.get(subsetIndexLocal);
-                    if (increment > LIMIT_MIN_GROWTH) {
-                        // prepare data for next step                        
-                        gradient = generateGradient(gpuData, subsetIndexLocal, subsetCount, counts, limits);
-                        hessianMatrix = generateHessianMatrix(gpuData, subsetIndexLocal, subsetCount, counts, limits);
-                        // calculate next step
-                        solver = new QRDecomposition(hessianMatrix).getSolver();
-                        solutionVec = solver.solve(gradient);
-                        // prepare data for next step
-                        solution = solutionVec.toArray();
-                        solutionList.set(subsetIndexLocal, solution);
-                        limitsList.set(subsetIndexLocal, generateLimits(solution, limits));
-                    } else if (i > 0) {
-                        if (limits[2] > STEP_SECOND) {
-                            for (int j = 0; j < coeffCount; j++) {
-                                limits[j * 3 + 2] = STEP_SECOND;
-                            }
-                            limitsList.set(subsetIndexLocal, generateLimits(solutionList.get(subsetIndexLocal), limits));
-                            sb.append(", increasing precision to ")
-                                    .append(STEP_SECOND);
-                        } else {
-                            finishedFacets.add(f);
-                            counterFinished++;
-                            sb.append(", stop - low quality increment");
-                        }
-                    }
-                } catch (SingularMatrixException ex) {
-                    finishedFacets.add(f);
-                    counterFinished++;
-                    sb.append(", stop - singular hessian matrix");
-                }
-
-                sb.append("; ");
-                subsetIndexLocal++;
-                baseIndex += counts[coeffCount];
-            }
-            for (AbstractSubset subset : finishedFacets) {
-                subsetIndexLocal = subsetsToCompute.indexOf(subset);
-                subsetsToCompute.remove(subsetIndexLocal);
-                limitsList.remove(subsetIndexLocal);
-            }
-
-            sb.append("\n Stopped ");
-            sb.append(counterFinished);
-            sb.append(" subsets.");
-            Logger.trace(sb);
+            Logger.debug("Results for round {0}:", i);
+            extractResults(subsetsToCompute, coeffCount);
 
             notifyProgress(subsetsToCompute.size(), subsetCount);
 
             if (subsetsToCompute.isEmpty()) {
                 break;
             }
-
-            countsList = DeformationUtils.generateDeformationCounts(limitsList);
         }
-        Logger.trace("Round time: " + ((System.nanoTime() - time) / 1_000_000) + "ms.");
 
         Kernel.deregisterListener(this);
 
-        return results;
+        return new ArrayList<>(results.values());
     }
 
-    private List<CorrelationResult> performInitialResultEstimation(final Kernel kernel, final FullTask fullTask) throws ComputationException {
-        final int subsetCount = fullTask.getSubsets().size();
+    private void performInitialResultEstimation(final Kernel kernel, final int coeffCount) throws ComputationException {
+        final List<AbstractSubset> subsets = fullTask.getSubsets();
+        final int subsetCount = subsets.size();
 
         double[] temp;
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
-        List<CorrelationResult> results;
         final StringBuilder sb = new StringBuilder();
 
         // initial pixel step        
@@ -202,28 +114,148 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             temp[DeformationLimit.VSTEP] = STEP_INITIAL;
             zeroOrderLimits.add(temp);
         }
-        results = computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), DeformationDegree.ZERO);
+        final List<CorrelationResult> localResults = computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), DeformationDegree.ZERO);
         sb.append("Initial results, step [").append(STEP_INITIAL).append("]:");
+        CorrelationResult paddedResult;
         for (int i = 0; i < subsetCount; i++) {
+            paddedResult = new CorrelationResult(localResults.get(i).getValue(), Arrays.copyOf(localResults.get(i).getDeformation(), coeffCount));
+            results.put(subsets.get(i), paddedResult);
+
             sb.append(i)
                     .append(" - ")
-                    .append(results.get(i))
+                    .append(localResults.get(i))
                     .append("; ");
         }
-
-        return results;
+        Logger.debug(sb);
     }
 
-    protected static double[] generateLimits(final double[] solution, final double[] oldLimits) {
+    private void prepareLimitsForNR(final int coeffCount) {
+        final List<AbstractSubset> subsets = fullTask.getSubsets();
+
+        double[] newLimits;
+        for (AbstractSubset subset : subsets) {
+            newLimits = generateLimits(results.get(subset).getDeformation(), coeffCount, STEP_FIRST);
+            limits.put(subset, newLimits);
+            limitsCounts.put(subset, DeformationUtils.generateDeformationCounts(newLimits));
+        }
+    }
+
+    private static double[] generateLimits(final double[] solution, final int coeffCount, final double step) {
         final int halfStep = COUNT_STEP / 2;
-        final double[] newLimits = Arrays.copyOf(oldLimits, oldLimits.length);
-        double step;
-        for (int i = 0; i < solution.length; i++) {
-            step = oldLimits[i * 3 + 2];
+        final double[] newLimits = new double[coeffCount * 3];
+        for (int i = 0; i < coeffCount; i++) {
             newLimits[i * 3] = solution[i] - halfStep * step;
             newLimits[i * 3 + 1] = solution[i] + halfStep * step;
+            newLimits[i * 3 + 2] = step;
         }
         return newLimits;
+    }
+
+    /**
+     * Make one step using NewtonRaphson solver. Solution is found by solving
+     * equation H(x(k)) * [x(k+1) - x(k)] = -G(x(k)).
+     *
+     * @param subsetsToCompute
+     * @param defDegree
+     * @throws ComputationException
+     */
+    private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree) throws ComputationException {
+        AbstractSubset as = null;
+        RealVector negativeGradient, solutionVec;
+        RealMatrix hessianMatrix;
+        DecompositionSolver solver;
+        double[] solution;
+
+        int subsetIndexLocal = 0;
+
+        final List<double[]> localLimits = new ArrayList<>(subsetsToCompute.size());
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
+
+        final int deformationCount = gpuData.length / subsetsToCompute.size();
+        final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
+        while (it.hasNext()) {
+            try {
+                as = it.next();
+                // prepare data for computation
+                negativeGradient = generateNegativeGradient(gpuData, subsetIndexLocal, deformationCount, limitsCounts.get(as), limits.get(as));
+                hessianMatrix = generateHessianMatrix(gpuData, subsetIndexLocal, deformationCount, limitsCounts.get(as), limits.get(as));
+                // calculate next step
+                solver = new QRDecomposition(hessianMatrix).getSolver();
+                solutionVec = solver.solve(negativeGradient);
+                solutionVec.add(new ArrayRealVector(results.get(as).getDeformation()));
+                // prepare data for next step
+                solution = solutionVec.toArray();
+                localLimits.add(generateLimits(solution, coeffCount, limits.get(as)[DeformationLimit.USTEP]));
+            } catch (SingularMatrixException ex) {
+                it.remove();
+                Logger.debug("{0} stop - singular hessian matrix.", as);
+            } finally {
+                subsetIndexLocal++;
+            }
+        }
+
+        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits), defDegree);
+    }
+
+    private void extractResults(final List<AbstractSubset> subsetsToCompute, final int coeffCount) {
+        AbstractSubset as;
+        long[] counts;
+        double[] currentLimits, newLimits;
+        CorrelationResult currentResult, newResult;
+        int resultIndex;
+        double newCorrelationValue, improvement;
+
+        int baseIndex = 0;
+
+        final StringBuilder sb = new StringBuilder();
+        final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
+        while (it.hasNext()) {
+            as = it.next();
+            counts = limitsCounts.get(as);
+            currentResult = results.get(as);
+            currentLimits = limits.get(as);
+            // check quality of new result
+            resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
+            newCorrelationValue = gpuData[resultIndex];
+            newResult = new CorrelationResult(newCorrelationValue, extractSolutionFromLimits(currentLimits));
+            improvement = computeImprovement(currentResult.getValue(), newCorrelationValue);
+            sb.append(as)
+                    .append(" -  from ")
+                    .append(currentResult)
+                    .append(" to ")
+                    .append(newResult);
+            if (improvement > LIMIT_MIN_GROWTH) {
+                results.put(as, newResult);
+                if (newCorrelationValue >= LIMIT_DONE) {
+                    it.remove();
+                    sb.append(", stop - quality good enough");
+                }
+            } else {
+                if (currentLimits[2] > STEP_SECOND) {
+                    newLimits = generateLimits(currentResult.getDeformation(), coeffCount, STEP_SECOND);
+                    limits.put(as, newLimits);
+                    limitsCounts.put(as, DeformationUtils.generateDeformationCounts(newLimits));
+                    sb.append(", increasing precision to ")
+                            .append(STEP_SECOND);
+                } else {
+                    it.remove();
+                    sb.append(", stop - low quality increment");
+                }
+            }
+
+            sb.append("; ");
+            baseIndex += counts[coeffCount];
+        }
+
+        Logger.debug(sb);
+    }
+
+    private static double[] extractSolutionFromLimits(final double[] limits) {
+        final double[] result = new double[limits.length / 3];
+        for (int i = 0; i < limits.length / 3; i++) {
+            result[i] = (limits[i * 3] + limits[i * 3 + 1]) / 2.0;
+        }
+        return result;
     }
 
     protected static int generateIndex(final long[] counts, final int[] indices) {
@@ -235,17 +267,16 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         return result;
     }
 
-    private double computeError(final double oldResult, final double newResult) {
-        return (oldResult - newResult) / oldResult;
+    private double computeImprovement(final double oldResult, final double newResult) {
+        return newResult - oldResult;
     }
 
     // central difference
-    protected RealVector generateGradient(double[] resultData, final int subsetIndex, final int subsetCount, final long[] counts, final double[] deformationLimits) {
+    protected RealVector generateNegativeGradient(double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[] data = new double[coeffCount];
 
-        final int deformationCount = resultData.length / subsetCount;
-        final int resultsBase = subsetIndex * deformationCount;
+        final int resultsBase = (int) (subsetIndex * deformationCount);
         final int[] indices = prepareIndices(counts);
         for (int i = 0; i < coeffCount; i++) {
             // right index
@@ -255,6 +286,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             indices[i] -= 2;
             data[i] -= resultData[resultsBase + generateIndex(counts, indices)];
             data[i] /= 2 * deformationLimits[i * 3 + 2];
+            data[i] *= -1;
             indices[i]++;
         }
         return new ArrayRealVector(data);
@@ -268,12 +300,11 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         return indices;
     }
 
-    protected RealMatrix generateHessianMatrix(double[] resultData, final int subsetIndex, final int subsetCount, final long[] counts, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final int deformationCount = resultData.length / subsetCount;
-        final int resultsBase = subsetIndex * deformationCount;
+        final int resultsBase = (int) (subsetIndex * deformationCount);
         final int[] indices = prepareIndices(counts);
 
         // upper triangle approach
@@ -330,5 +361,4 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             notifyObservers(0.5 + 0.5 * ((subsetCount - subsetToCompute) / subsetCount));
         }
     }
-
 }

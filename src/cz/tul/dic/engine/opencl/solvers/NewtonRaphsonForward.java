@@ -17,12 +17,11 @@ import org.apache.commons.math3.linear.RealVector;
 public class NewtonRaphsonForward extends NewtonRaphson {
 
     @Override
-    protected RealVector generateGradient(final double[] resultData, final int subsetIndex, final int subsetCount, final long[] counts, final double[] deformationLimits) {
+    protected RealVector generateNegativeGradient(final double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[] data = new double[coeffCount];
 
-        final int deformationCount = resultData.length / subsetCount;
-        final int resultsBase = subsetIndex * deformationCount;
+        final int resultsBase = (int) (subsetIndex * deformationCount);
         final int[] indices = prepareIndices(counts);
         for (int i = 0; i < coeffCount; i++) {
             // right index
@@ -32,19 +31,18 @@ public class NewtonRaphsonForward extends NewtonRaphson {
             indices[i]--;
             data[i] -= resultData[resultsBase + generateIndex(counts, indices)];
             data[i] /= deformationLimits[i * 3 + 2];
+            data[i] *= -1;
         }
         return new ArrayRealVector(data);
     }
 
     @Override
-    protected RealMatrix generateHessianMatrix(final double[] resultData, final int subsetIndex, final int subsetCount, final long[] counts, final double[] deformationLimits) {
+    protected RealMatrix generateHessianMatrix(final double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final int deformationCount = resultData.length / subsetCount;
-        final int resultsBase = subsetIndex * deformationCount;
+        final int resultsBase = (int) (subsetIndex * deformationCount);
         final int[] indices = prepareIndices(counts);
-
         // direct approach with forward difference
         double subResultA, subResultB;
         for (int i = 0; i < coeffCount; i++) {
