@@ -83,9 +83,9 @@ public final class DeformationUtils {
         final int l = deformationLimits.length / 3;
         final long[] counts = new long[l + 1];
 
-        int total = 1;
+        long total = 1;
         for (int i = 0; i < l; i++) {
-            counts[i] = (int) Math.round((deformationLimits[i * 3 + 1] - deformationLimits[i * 3]) / deformationLimits[i * 3 + 2]) + 1;
+            counts[i] = Math.round((deformationLimits[i * 3 + 1] - deformationLimits[i * 3]) / deformationLimits[i * 3 + 2]) + 1;
             total *= counts[i];
         }
         counts[l] = total;
