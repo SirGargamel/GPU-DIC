@@ -358,7 +358,7 @@ public class DicMain extends Application {
                 for (int size = 5; size <= 15; size += 2) {
                     task.setParameter(TaskParameter.FACET_SIZE, size);
 
-                    final int roiWidth;
+                    final double roiWidth;
                     if (task.getRois(0) != null) {
                         roiWidth = task.getRois(0).iterator().next().getWidth();
                     } else {

@@ -21,33 +21,33 @@ public class RectangleROI extends AbstractROI implements Serializable {
     }
 
     @Override
-    public int getX1() {
-        return (int) Math.floor(x1);
+    public double getX1() {
+        return x1;
     }
 
     @Override
-    public int getY1() {
-        return (int) Math.floor(y1);
+    public double getY1() {
+        return y1;
     }
 
     @Override
-    public int getX2() {
-        return (int) Math.ceil(x2);
+    public double getX2() {
+        return x2;
     }
 
     @Override
-    public int getY2() {
-        return (int) Math.ceil(y2);
+    public double getY2() {
+        return y2;
     }
 
     @Override
-    public int getWidth() {
-        return (int) Math.ceil(x2 - x1 + 1);
+    public double getWidth() {
+        return x2 - x1;
     }
 
     @Override
-    public int getHeight() {
-        return (int) Math.ceil(y2 - y1 + 1);
+    public double getHeight() {
+        return y2 - y1;
     }
 
     @Override

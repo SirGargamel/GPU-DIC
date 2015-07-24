@@ -17,23 +17,23 @@ public class RoiSorter implements Comparator<AbstractROI>, Serializable {
 
     @Override
     public int compare(final AbstractROI o1, final AbstractROI o2) {
-        final int y11 = o1.getY1();
-        final int y12 = o1.getY2();
-        final int center1 = (y11 + y12) / 2;
-        final int y21 = o2.getY1();
-        final int y22 = o2.getY2();
+        final double y11 = o1.getY1();
+        final double y12 = o1.getY2();
+        final double center1 = (y11 + y12) / 2;
+        final double y21 = o2.getY1();
+        final double y22 = o2.getY2();
 
         final int result;
         if (areROIsAreVerticallyAligned(y11, y21, y12, y22, center1)) {
-            result = Integer.compare(o1.getX1(), o2.getX1());
+            result = Double.compare(o1.getX1(), o2.getX1());
         } else {
-            result = Integer.compare(y11, y21);
+            result = Double.compare(y11, y21);
         }
 
         return result;
     }
 
-    private static boolean areROIsAreVerticallyAligned(final int y11, final int y21, final int y12, final int y22, final int center1) {
+    private static boolean areROIsAreVerticallyAligned(final double y11, final double y21, final double y12, final double y22, final double center1) {
         return (y11 >= y21 && y11 <= y22)
                 || (y12 >= y21 && y12 <= y22)
                 || (y11 <= y21 && y21 >= y22)

@@ -28,17 +28,17 @@ public abstract class AbstractROI implements Serializable {
         return result;
     }
 
-    public abstract int getX1();
+    public abstract double getX1();
 
-    public abstract int getY1();
+    public abstract double getY1();
 
-    public abstract int getX2();
+    public abstract double getX2();
 
-    public abstract int getY2();
+    public abstract double getY2();
 
-    public abstract int getWidth();
+    public abstract double getWidth();
 
-    public abstract int getHeight();
+    public abstract double getHeight();
 
     public abstract boolean isAreaInside(double x1, double y1, double x2, double y2);
     

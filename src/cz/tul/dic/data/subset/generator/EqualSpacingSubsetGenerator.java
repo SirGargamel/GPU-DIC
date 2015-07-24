@@ -40,7 +40,8 @@ public class EqualSpacingSubsetGenerator extends AbstractSubsetGenerator {
         final Map<AbstractROI, List<AbstractSubset>> result = new HashMap<>(rois.size());
 
         List<AbstractSubset> subsets;
-        int roiW, roiH, wCount, hCount, subsetSize, centerX, centerY;
+        int wCount, hCount, subsetSize;
+        double centerX, centerY, roiW, roiH;
         for (AbstractROI roi : rois) {
             subsets = new ArrayList<>();
 
@@ -56,7 +57,7 @@ public class EqualSpacingSubsetGenerator extends AbstractSubsetGenerator {
                     wCount = 0;
                 }
             } else {
-                wCount = (roiW - 2 * subsetSize) / (spacing);
+                wCount = (int) ((roiW - 2 * subsetSize) / spacing);
             }
             if ((roiH - 2 * subsetSize) < spacing) {
                 if ((roiH - 2 * subsetSize) > 0) {
@@ -65,7 +66,7 @@ public class EqualSpacingSubsetGenerator extends AbstractSubsetGenerator {
                     hCount = 0;
                 }
             } else {
-                hCount = (roiH - 2 * subsetSize) / (spacing);
+                hCount = (int) ((roiH - 2 * subsetSize) / (spacing));
             }
 
             for (int y = 0; y < hCount; y++) {

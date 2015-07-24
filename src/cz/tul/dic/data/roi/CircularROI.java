@@ -20,33 +20,33 @@ public class CircularROI extends AbstractROI implements Serializable {
     }
 
     @Override
-    public int getX1() {
-        return (int) Math.floor(centerX - radius);
+    public double getX1() {
+        return centerX - radius;
     }
 
     @Override
-    public int getY1() {
-        return (int) Math.floor(centerY - radius);
+    public double getY1() {
+        return centerY - radius;
     }
 
     @Override
-    public int getX2() {
-        return (int) Math.ceil(centerX + radius);
+    public double getX2() {
+        return centerX + radius;
     }
 
     @Override
-    public int getY2() {
-        return (int) Math.ceil(centerY + radius);
+    public double getY2() {
+        return centerY + radius;
     }
 
     @Override
-    public int getWidth() {
-        return (int) Math.ceil(2 * radius);
+    public double getWidth() {
+        return 2 * radius;
     }
 
     @Override
-    public int getHeight() {
-        return (int) Math.ceil(2 * radius);
+    public double getHeight() {
+        return 2 * radius;
     }
 
     @Override

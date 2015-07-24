@@ -209,11 +209,11 @@ public class ComplexTaskSolver extends Observable implements Observer {
 
     private double[][][] generateZeroResults(final Image img, final AbstractROI roi) {
         final double[][][] data = new double[img.getWidth()][img.getHeight()][];
-        for (int x = roi.getX1(); x <= roi.getX2(); x++) {
+        for (int x = (int) roi.getX1(); x <= roi.getX2(); x++) {
             if (x < 0 || x >= data.length) {
                 continue;
             }
-            for (int y = roi.getY1(); y <= roi.getY2(); y++) {
+            for (int y = (int) roi.getY1(); y <= roi.getY2(); y++) {
                 if (y < 0 || y >= data[x].length) {
                     continue;
                 }

@@ -72,10 +72,10 @@ public class RectROIManager extends ROIManager {
         Collections.sort(cRois, new RoiSorter());
 
         if (rect == null) {
-            int xLeft = Math.min(cRois.get(0).getX2(), cRois.get(2).getX2());
-            int yTop = Math.min(cRois.get(0).getY1(), cRois.get(1).getY1());
-            int xRight = Math.min(cRois.get(1).getX1(), cRois.get(3).getX1());
-            int yBottom = Math.min(cRois.get(2).getY2(), cRois.get(3).getY2());
+            final double xLeft = Math.min(cRois.get(0).getX2(), cRois.get(2).getX2());
+            final double yTop = Math.min(cRois.get(0).getY1(), cRois.get(1).getY1());
+            final double xRight = Math.min(cRois.get(1).getX1(), cRois.get(3).getX1());
+            final double yBottom = Math.min(cRois.get(2).getY2(), cRois.get(3).getY2());
 
             rect = new RectangleROI(
                     xLeft + GAP,
