@@ -146,6 +146,6 @@ public final class SubsetUtils {
     }
     
     public static int computeSubsetWidth(final int subsetSize) {
-        return (subsetSize * 2 + 1);
+        return subsetSize * 2 + 1;
     }
 }
