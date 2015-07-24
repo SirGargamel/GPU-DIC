@@ -153,7 +153,8 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
 
     /**
      * Make one step using NewtonRaphson solver. Solution is found by solving
-     * equation H(x(k)) * [x(k+1) - x(k)] = -G(x(k)).
+     * equation H(x(k)) * [x(k+1) - x(k)] = -G(x(k)). We find solution for
+     * [x(k+1) - x(k)] and then add x(k).
      *
      * @param subsetsToCompute
      * @param defDegree
