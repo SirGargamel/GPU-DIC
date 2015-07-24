@@ -24,9 +24,7 @@ public class RoiSorter implements Comparator<AbstractROI>, Serializable {
         final int y22 = o2.getY2();
 
         final int result;
-        if ((y11 >= y21 && y11 <= y22) 
-                || (y12 >= y21 && y12 <= y22) 
-                || (center1 >= y21 && center1 <= y22)) {
+        if (areROIsAreVerticallyAligned(y11, y21, y12, y22, center1)) {
             result = Integer.compare(o1.getX1(), o2.getX1());
         } else {
             result = Integer.compare(y11, y21);
@@ -35,4 +33,10 @@ public class RoiSorter implements Comparator<AbstractROI>, Serializable {
         return result;
     }
 
+    private static boolean areROIsAreVerticallyAligned(final int y11, final int y21, final int y12, final int y22, final int center1) {
+        return (y11 >= y21 && y11 <= y22)
+                || (y12 >= y21 && y12 <= y22)
+                || (y11 <= y21 && y21 >= y22)
+                || (center1 >= y21 && center1 <= y22);
+    }
 }
