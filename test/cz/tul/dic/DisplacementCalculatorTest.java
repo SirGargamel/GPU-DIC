@@ -16,8 +16,8 @@ import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.data.subset.generator.FacetGenerator;
-import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
+import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -62,7 +62,7 @@ public class DisplacementCalculatorTest {
         tc.setDeformationLimits(ROUND, roi, deformation.getDeformation());
 
         tc.setParameter(TaskParameter.FACET_SIZE, 11);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 11);
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DisplacementCalculation.MAX_WEIGHTED_AVERAGE);
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);
@@ -73,7 +73,7 @@ public class DisplacementCalculatorTest {
         final Map<AbstractROI, List<CorrelationResult>> resultMap = new HashMap<>(1);
         resultMap.put(roi, results);
 
-        return DisplacementCalculator.computeDisplacement(resultMap, FacetGenerator.generateFacets(tc, ROUND), tc, ROUND);
+        return DisplacementCalculator.computeDisplacement(resultMap, SubsetGenerator.generateSubsets(tc, ROUND), tc, ROUND);
     }
 
     private void checkResults(final DisplacementResult result, final double dx, final double dy) {

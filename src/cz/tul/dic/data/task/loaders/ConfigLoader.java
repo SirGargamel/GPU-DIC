@@ -12,7 +12,7 @@ import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.config.ConfigType;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.roi.AbstractROI;
-import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -108,7 +108,7 @@ public class ConfigLoader extends AbstractInputLoader {
                         task.setParameter(tp, new File(value));
                         break;
                     case FACET_GENERATOR_METHOD:
-                        task.setParameter(tp, FacetGeneratorMethod.valueOf(value));
+                        task.setParameter(tp, SubsetGeneratorMethod.valueOf(value));
                         break;
                     case FACET_GENERATOR_PARAM:
                         task.setParameter(tp, Integer.valueOf(value));

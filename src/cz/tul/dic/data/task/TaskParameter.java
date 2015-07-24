@@ -12,7 +12,7 @@ import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
 import java.io.File;
 
 /**
@@ -22,7 +22,7 @@ import java.io.File;
 public enum TaskParameter {
 
     IN(File.class),
-    FACET_GENERATOR_METHOD(FacetGeneratorMethod.class),
+    FACET_GENERATOR_METHOD(SubsetGeneratorMethod.class),
     FACET_GENERATOR_PARAM(Integer.class),
     FACET_SIZE(Integer.class),
     FPS(Integer.class),

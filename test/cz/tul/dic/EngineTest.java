@@ -26,7 +26,7 @@ import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
-import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -83,7 +83,7 @@ public class EngineTest {
         final Solver slvr = Solver.BRUTE_FORCE;
         for (Interpolation i : Interpolation.values()) {
             for (TaskSplitMethod ts : TaskSplitMethod.values()) {
-                for (FacetGeneratorMethod fgm : FacetGeneratorMethod.values()) {
+                for (SubsetGeneratorMethod fgm : SubsetGeneratorMethod.values()) {
                     for (KernelType kt : KernelType.values()) {
                         for (String s : DEF_ZERO_FILES) {
                             tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm, slvr);
@@ -120,7 +120,7 @@ public class EngineTest {
     private TaskContainer generateTask(
             final String outFilename, final double[] deformations,
             final KernelType kernel, final Interpolation interpolation,
-            final TaskSplitMethod taskSplit, final FacetGeneratorMethod fgm,
+            final TaskSplitMethod taskSplit, final SubsetGeneratorMethod fgm,
             final Solver solver) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
@@ -138,7 +138,7 @@ public class EngineTest {
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.FACET_SIZE, 5);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 11);
         tc.setParameter(TaskParameter.KERNEL, kernel);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);

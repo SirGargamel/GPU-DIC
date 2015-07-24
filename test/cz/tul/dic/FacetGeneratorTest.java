@@ -10,8 +10,8 @@ import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.data.subset.generator.FacetGenerator;
-import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
+import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
 import cz.tul.dic.data.task.loaders.InputLoader;
 import java.io.File;
 import java.io.IOException;
@@ -35,28 +35,28 @@ public class FacetGeneratorTest {
 
     @Test
     public void testEqual() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareTask(ROI_FULL, 14, FacetGeneratorMethod.EQUAL, 1);
-        Map<AbstractROI, List<AbstractSubset>> data = FacetGenerator.generateFacets(tc, ROUND);
+        TaskContainer tc = prepareTask(ROI_FULL, 14, SubsetGeneratorMethod.EQUAL, 1);
+        Map<AbstractROI, List<AbstractSubset>> data = SubsetGenerator.generateSubsets(tc, ROUND);
         Assert.assertEquals(1, data.get(ROI_FULL).size());
 
-        tc = prepareTask(ROI_FULL, 13, FacetGeneratorMethod.EQUAL, 1);
-        data = FacetGenerator.generateFacets(tc, ROUND);
+        tc = prepareTask(ROI_FULL, 13, SubsetGeneratorMethod.EQUAL, 1);
+        data = SubsetGenerator.generateSubsets(tc, ROUND);
         Assert.assertEquals(9, data.get(ROI_FULL).size());
 
-        tc = prepareTask(ROI_FULL, 9, FacetGeneratorMethod.EQUAL, 1);
-        data = FacetGenerator.generateFacets(tc, ROUND);
+        tc = prepareTask(ROI_FULL, 9, SubsetGeneratorMethod.EQUAL, 1);
+        data = SubsetGenerator.generateSubsets(tc, ROUND);
         Assert.assertEquals(121, data.get(ROI_FULL).size());
 
-        tc = prepareTask(ROI_FULL, 8, FacetGeneratorMethod.EQUAL, 2);
-        data = FacetGenerator.generateFacets(tc, ROUND);
+        tc = prepareTask(ROI_FULL, 8, SubsetGeneratorMethod.EQUAL, 2);
+        data = SubsetGenerator.generateSubsets(tc, ROUND);
         Assert.assertEquals(36, data.get(ROI_FULL).size());
 
-        tc = prepareTask(ROI_CENTER, 6, FacetGeneratorMethod.EQUAL, 1);
-        data = FacetGenerator.generateFacets(tc, ROUND);
+        tc = prepareTask(ROI_CENTER, 6, SubsetGeneratorMethod.EQUAL, 1);
+        data = SubsetGenerator.generateSubsets(tc, ROUND);
         Assert.assertEquals(0, data.get(ROI_CENTER).size());
     }
 
-    private TaskContainer prepareTask(final AbstractROI roi, final int subsetSize, FacetGeneratorMethod mode, final int spacing) throws IOException, URISyntaxException, ComputationException {
+    private TaskContainer prepareTask(final AbstractROI roi, final int subsetSize, SubsetGeneratorMethod mode, final int spacing) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());

@@ -21,20 +21,23 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class FacetGenerator {
+public class SubsetGenerator {
 
-    private static final Map<FacetGeneratorMethod, AbstractSubsetGenerator> generators;
+    private static final Map<SubsetGeneratorMethod, AbstractSubsetGenerator> generators;
 
     static {
         generators = new HashMap<>();
-        
+
         AbstractSubsetGenerator fg = new EqualSpacingSubsetGenerator();
         generators.put(fg.getMode(), fg);
     }
 
-    public static Map<AbstractROI, List<AbstractSubset>> generateFacets(final TaskContainer tc, final int round) throws ComputationException {
-        final FacetGeneratorMethod mode = (FacetGeneratorMethod) tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
-        if (generators.containsKey(mode)) {            
+    private SubsetGenerator() {
+    }
+
+    public static Map<AbstractROI, List<AbstractSubset>> generateSubsets(final TaskContainer tc, final int round) throws ComputationException {
+        final SubsetGeneratorMethod mode = (SubsetGeneratorMethod) tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
+        if (generators.containsKey(mode)) {
             final Map<AbstractROI, List<AbstractSubset>> result = generators.get(mode).generateFacets(tc, round);
             final StringBuilder sb = new StringBuilder();
             for (Entry<AbstractROI, List<AbstractSubset>> e : result.entrySet()) {

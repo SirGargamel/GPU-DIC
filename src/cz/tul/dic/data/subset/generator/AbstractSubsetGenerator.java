@@ -20,7 +20,7 @@ public abstract class AbstractSubsetGenerator {
 
     public abstract Map<AbstractROI, List<AbstractSubset>> generateFacets(final TaskContainer tc, final int round) throws ComputationException;
     
-    public abstract FacetGeneratorMethod getMode();
+    public abstract SubsetGeneratorMethod getMode();
     
     protected boolean checkAreaValidity(final double x1, final double y1, final double x2, final double y2, final double width, final double height) {
         boolean result = true;

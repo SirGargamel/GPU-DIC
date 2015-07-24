@@ -94,8 +94,8 @@ public class EqualSpacingSubsetGenerator extends AbstractSubsetGenerator {
     }
 
     @Override
-    public FacetGeneratorMethod getMode() {
-        return FacetGeneratorMethod.EQUAL;
+    public SubsetGeneratorMethod getMode() {
+        return SubsetGeneratorMethod.EQUAL;
     }
 
 }

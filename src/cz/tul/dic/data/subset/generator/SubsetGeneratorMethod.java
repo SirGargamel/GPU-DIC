@@ -9,7 +9,7 @@ package cz.tul.dic.data.subset.generator;
  *
  * @author Petr Jecmen
  */
-public enum FacetGeneratorMethod {
+public enum SubsetGeneratorMethod {
 
     EQUAL,;
     

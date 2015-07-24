@@ -27,7 +27,7 @@ import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.data.subset.generator.FacetGenerator;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
@@ -172,8 +172,8 @@ public final class Engine extends Observable implements Observer {
 
         // prepare data
         setChanged();
-        notifyObservers(FacetGenerator.class);
-        final Map<AbstractROI, List<AbstractSubset>> subsets = FacetGenerator.generateFacets(task, roundFrom);
+        notifyObservers(SubsetGenerator.class);
+        final Map<AbstractROI, List<AbstractSubset>> subsets = SubsetGenerator.generateSubsets(task, roundFrom);
 
         // compute round                
         final Map<AbstractROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());

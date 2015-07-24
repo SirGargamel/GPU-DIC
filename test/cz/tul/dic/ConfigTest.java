@@ -9,7 +9,7 @@ import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.config.ConfigType;
 import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -59,7 +59,7 @@ public class ConfigTest {
         Assert.assertEquals(24, task.getExports().size());
 
         Assert.assertEquals(new File("D:/temp/.test spacing/6203652m/6203652m.avi.config__15_02_15.task"), task.getParameter(TaskParameter.IN));
-        Assert.assertEquals(FacetGeneratorMethod.EQUAL, task.getParameter(TaskParameter.FACET_GENERATOR_METHOD));
+        Assert.assertEquals(SubsetGeneratorMethod.EQUAL, task.getParameter(TaskParameter.FACET_GENERATOR_METHOD));
         Assert.assertEquals(2, (int) task.getParameter(TaskParameter.FACET_GENERATOR_PARAM));
         Assert.assertEquals(15, (int) task.getParameter(TaskParameter.FACET_SIZE));
         Assert.assertEquals(5000, (int) task.getParameter(TaskParameter.FPS));

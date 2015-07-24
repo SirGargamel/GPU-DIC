@@ -18,7 +18,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.engine.opencl.solvers.Solver;
-import cz.tul.dic.data.subset.generator.FacetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,7 +42,7 @@ public class CircleROIManager extends ROIManager {
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, FacetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
         tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
         tc.addHint(Hint.NO_STRAIN);
