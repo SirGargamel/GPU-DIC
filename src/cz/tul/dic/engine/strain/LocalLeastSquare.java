@@ -111,7 +111,7 @@ public class LocalLeastSquare extends StrainEstimator {
         final int height = data[x].length;
         for (int i = x - radius; i <= x + radius; i++) {
             for (int j = y - radius; j <= y + radius; j++) {
-                if (i >= 0 && j >= 0 && i < width && j < height && data[i][j] != null) {
+                if (areIndexesValid(i, j, width, height, data)) {
                     xU.add(new double[]{1, i - x, j - y});
                     yU.add(data[i][j][0]);
                     xV.add(new double[]{1, i - x, j - y});
@@ -157,6 +157,10 @@ public class LocalLeastSquare extends StrainEstimator {
         }
 
         return result;
+    }
+
+    private static boolean areIndexesValid(int i, int j, final int width, final int height, final double[][][] data) {
+        return i >= 0 && j >= 0 && i < width && j < height && data[i][j] != null;
     }
 
     private static double[] computeStrains(final double[] coeffs) {
