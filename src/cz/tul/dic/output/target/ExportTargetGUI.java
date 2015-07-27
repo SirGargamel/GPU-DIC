@@ -4,7 +4,6 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.data.IExportMode;
 import java.awt.image.BufferedImage;
@@ -46,7 +45,7 @@ public class ExportTargetGUI extends AbstractExportTarget {
             overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction, minMax));
         }
         final Context context = (Context) targetParam;
-        context.storeMapExport(overlay, position, ExportMode.MAP, direction);
+        context.storeMapExport(overlay, position, direction);
     }    
 
     @Override

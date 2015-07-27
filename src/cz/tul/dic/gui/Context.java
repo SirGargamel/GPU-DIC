@@ -99,7 +99,7 @@ public class Context {
         return result;
     }
 
-    public void storeMapExport(final Object data, final int round, final ExportMode mode, final Direction dir) {
+    public void storeMapExport(final Object data, final int round, final Direction dir) {
         if (!(data instanceof BufferedImage)) {
             throw new IllegalArgumentException(ILLEGAL_TYPE_OF_DATA + data.getClass());
         }
@@ -129,13 +129,11 @@ public class Context {
 
     private static String generateKey(int... vals) {
         final StringBuilder sb = new StringBuilder();
-        {
-            for (int i : vals) {
-                sb.append(i);
-                sb.append(SEPARATOR);
-            }
-            return sb.toString();
+        for (int i : vals) {
+            sb.append(i);
+            sb.append(SEPARATOR);
         }
+        return sb.toString();
     }
 
     public void setLimits(final double[] limits) {
