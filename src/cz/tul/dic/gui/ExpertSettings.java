@@ -45,18 +45,23 @@ public class ExpertSettings implements Initializable {
         final TaskContainer tc = Context.getInstance().getTc();
         if (tc != null) {
             String limits = textRoundLimits.getText();
-            int[] newLimits = null;
+            int[] newLimits;
             if (!limits.isEmpty()) {
                 try {
                     final String[] split = limits.trim().split(ROUND_SPLITTER);
                     if (split.length == 2) {
                         newLimits = new int[]{Integer.parseInt(split[0].trim()), Integer.parseInt(split[1].trim())};
+                    } else {
+                        newLimits = null;
                     }
                 } catch (NumberFormatException | NullPointerException ex) {
+                    newLimits = null;
                 }
                 if (newLimits == null) {
                     signalizeIllegalLimits();
                 }
+            } else {
+                newLimits = null;
             }
             tc.setParameter(TaskParameter.ROUND_LIMITS, newLimits);
 
