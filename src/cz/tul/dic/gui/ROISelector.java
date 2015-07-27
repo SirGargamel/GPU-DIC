@@ -14,7 +14,6 @@ import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -30,8 +29,8 @@ import javafx.util.StringConverter;
 
 public class ROISelector implements Initializable {
 
-    private static final int EXTRA_WIDTH = 125;
-    private static final int EXTRA_HEIGHT = 75;
+    private static final double EXTRA_WIDTH = 125;
+    private static final double EXTRA_HEIGHT = 75;
     @FXML
     private EditableInputPresenter imagePane;
     @FXML
@@ -74,27 +73,23 @@ public class ROISelector implements Initializable {
     @FXML
     private void init(MouseEvent event) {
         if (!displayed) {
-            Stage s = (Stage) imagePane.getScene().getWindow();
+            final Stage s = (Stage) imagePane.getScene().getWindow();
             s.setResizable(false);
             imagePane.displayImage();
             displayed = true;
             resize();
         }
         Context.getInstance().getTc().addObserver(imagePane);
-        imagePane.getScene().getWindow().setOnCloseRequest(new EventHandler<WindowEvent>() {
-
-            @Override
-            public void handle(WindowEvent event) {
-                imagePane.saveRois();
-            }
-        });
+        imagePane.getScene().getWindow().setOnCloseRequest((WindowEvent event1) -> 
+            imagePane.saveRois()
+        );
 
         event.consume();
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        ObservableList<RoiType> comboBoxData = FXCollections.observableArrayList();
+        final ObservableList<RoiType> comboBoxData = FXCollections.observableArrayList();
         comboBoxData.addAll(RoiType.values());
         choiceRoi.setItems(comboBoxData);
         choiceRoi.getSelectionModel().select(RoiType.CIRCLE);
