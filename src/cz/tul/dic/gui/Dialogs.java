@@ -39,7 +39,7 @@ public class Dialogs {
 
     private Dialogs() {
     }
-    
+
     public static void showWarning(final String title, final String text) {
         showDialog(Alert.AlertType.WARNING, title, text);
     }
@@ -106,9 +106,8 @@ public class Dialogs {
         dlg.initStyle(StageStyle.UTILITY);
         dlg.setTitle(Lang.getString("Wait"));
         dlg.setHeaderText(text.concat("\n").concat(Lang.getString("EscCancel")));
-        final EventHandler<DialogEvent> handler = (DialogEvent event) -> {
-            worker.cancel();
-        };
+        final EventHandler<DialogEvent> handler = (DialogEvent event)
+                -> worker.cancel();
         dlg.setOnCloseRequest(handler);
         dlg.show();
     }
@@ -145,12 +144,12 @@ public class Dialogs {
         }
 
         private void assignListeners(final Worker worker) {
-            worker.progressProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-                progress.progressProperty().set((double) newValue);
-            });
-            worker.messageProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-                message.textProperty().set(newValue);
-            });
+            worker.progressProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+                    -> progress.progressProperty().set((double) newValue)
+            );
+            worker.messageProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue)
+                    -> message.textProperty().set(newValue)
+            );
             worker.runningProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                 if (!newValue) {
                     hideDialog();
@@ -162,6 +161,6 @@ public class Dialogs {
             hide();
             close();
         }
-    }    
+    }
 
 }
