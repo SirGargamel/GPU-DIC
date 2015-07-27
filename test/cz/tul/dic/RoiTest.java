@@ -35,13 +35,13 @@ public class RoiTest {
         assertFalse(POINT_SHOULD_BE_OUTSIDE, roi.isPointInside(-1, 9));
         assertFalse(POINT_SHOULD_BE_OUTSIDE, roi.isPointInside(1, 11));
 
-        assertEquals("Width should be 12.", 13, roi.getWidth());
-        assertEquals("Width should be 10.", 11, roi.getHeight());
+        assertEquals("Width should be 12.", 13, roi.getWidth(), 0.01);
+        assertEquals("Width should be 10.", 11, roi.getHeight(), 0.01);
 
-        assertEquals(COORD_VALUE_MISMATCH, 0, roi.getX1());
-        assertEquals(COORD_VALUE_MISMATCH, 0, roi.getY1());
-        assertEquals(COORD_VALUE_MISMATCH, 12, roi.getX2());
-        assertEquals(COORD_VALUE_MISMATCH, 10, roi.getY2());
+        assertEquals(COORD_VALUE_MISMATCH, 0, roi.getX1(), 0.01);
+        assertEquals(COORD_VALUE_MISMATCH, 0, roi.getY1(), 0.01);
+        assertEquals(COORD_VALUE_MISMATCH, 12, roi.getX2(), 0.01);
+        assertEquals(COORD_VALUE_MISMATCH, 10, roi.getY2(), 0.01);
     }
 
     @Test
@@ -58,13 +58,13 @@ public class RoiTest {
         assertFalse(POINT_SHOULD_BE_OUTSIDE, roi.isPointInside(-1, 9));
         assertFalse(POINT_SHOULD_BE_OUTSIDE, roi.isPointInside(1, 12));
 
-        assertEquals("Width should be 10.", 10, roi.getWidth());
-        assertEquals("Width should be 10.", 10, roi.getHeight());
+        assertEquals("Width should be 10.", 10, roi.getWidth(), 0.01);
+        assertEquals("Width should be 10.", 10, roi.getHeight(), 0.01);
 
-        assertEquals(COORD_VALUE_MISMATCH, 0, roi.getX1());
-        assertEquals(COORD_VALUE_MISMATCH, 1, roi.getY1());
-        assertEquals(COORD_VALUE_MISMATCH, 10, roi.getX2());
-        assertEquals(COORD_VALUE_MISMATCH, 11, roi.getY2());
+        assertEquals(COORD_VALUE_MISMATCH, 0, roi.getX1(), 0.01);
+        assertEquals(COORD_VALUE_MISMATCH, 1, roi.getY1(), 0.01);
+        assertEquals(COORD_VALUE_MISMATCH, 10, roi.getX2(), 0.01);
+        assertEquals(COORD_VALUE_MISMATCH, 11, roi.getY2(), 0.01);
     }
 
 }

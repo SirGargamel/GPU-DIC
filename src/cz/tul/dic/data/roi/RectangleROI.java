@@ -42,12 +42,12 @@ public class RectangleROI extends AbstractROI implements Serializable {
 
     @Override
     public double getWidth() {
-        return x2 - x1;
+        return x2 - x1 + 1;
     }
 
     @Override
     public double getHeight() {
-        return y2 - y1;
+        return y2 - y1 + 1;
     }
 
     @Override
