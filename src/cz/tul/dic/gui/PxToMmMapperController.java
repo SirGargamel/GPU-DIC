@@ -68,15 +68,15 @@ public class PxToMmMapperController implements Initializable {
             line.setStroke(new Color(0, 1, 0, 1));
             anchor.getChildren().add(line);            
         });
-        image.setOnMouseDragged((MouseEvent event) -> {
-            line.setEndX(event.getSceneX());
-        });
+        image.setOnMouseDragged((MouseEvent event) -> 
+            line.setEndX(event.getSceneX())
+        );
     }
 
     @FXML
     private void handleButtonActionOk(ActionEvent event) {
         if (line != null && !textSize.getText().isEmpty()) {
-            final double mmSize = Double.valueOf(textSize.getText());
+            final double mmSize = Double.parseDouble(textSize.getText());
             final double pxSize = Math.abs(line.getEndX() - line.getStartX());
             final double ratio = pxSize / mmSize;
             Context.getInstance().getTc().setParameter(TaskParameter.MM_TO_PX_RATIO, ratio);
