@@ -155,113 +155,7 @@ public class MainWindow implements Initializable {
     }
 
     private Task loadInput(List<File> fileList) {
-        final Task<String> worker = new Task<String>() {
-            private boolean cancel = false;
-
-            @Override
-            protected String call() throws Exception {
-                String result = null;
-                boolean error = false;
-
-                updateProgress(0, 4);
-                final File in = fileList.get(0);
-                if (fileList.size() == 1) {
-                    final String name = in.getName();
-                    final String ext = name.substring(name.lastIndexOf(".") + 1);
-                    updateProgress(1, 4);
-                    switch (ext) {
-                        case "avi":
-                        case "config":
-                            Context.getInstance().setTc(TaskContainer.initTaskContainer(in));
-                            break;
-                        case "task":
-                            try {
-                                Context.getInstance().setTc(TaskContainer.initTaskContainer(in));
-                                Platform.runLater(() -> {
-                                    adjustResultButtons(false);
-                                });
-                            } catch (ComputationException ex) {
-                                error = true;
-                                result = Lang.getString("wrongBin");
-                                Logger.error(ex);
-                            }
-                            break;
-                        default:
-                            error = true;
-                            result = Lang.getString("wrongIn");
-                    }
-                } else {
-                    updateProgress(1, 4);
-                    Context.getInstance().setTc(TaskContainer.initTaskContainer(fileList));
-                }
-                updateProgress(2, 4);
-                if (cancel) {
-                    handleCancel();
-                    return result;
-                }
-
-                if (!error) {
-                    final TaskContainer tc = Context.getInstance().getTc();
-                    tc.setParameter(TaskParameter.IN, in);
-                    tc.addObserver(imagePane);
-                    updateProgress(3, 4);
-                    if (cancel) {
-                        handleCancel();
-                        return result;
-                    }
-
-                    Platform.runLater(() -> {
-                        final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
-                        stage.setTitle(Lang.getString("Title") + " - " + in.getName());
-                        if (imagePane != null && imagePane.getScene() != null) {
-                            adjustConfigButtons(false);
-                            adjustImageButtons(false);
-                            textIndex.textProperty().setValue("0");
-                            imagePane.displayImage();
-
-                            double size;
-                            size = Math.max(
-                                    tc.getImage(0).getWidth() + boxRight.getWidth() + EXTRA_WIDTH,
-                                    boxBottom.getMinWidth() + EXTRA_WIDTH);
-                            size = Math.max(
-                                    size,
-                                    boxImage.getMinWidth() + boxRight.getWidth() + EXTRA_WIDTH);
-                            imagePane.getScene().getWindow().setWidth(size);
-                            size = Math.max(
-                                    tc.getImage(0).getHeight() + boxImage.getHeight() + boxBottom.getHeight() + EXTRA_HEIGHT,
-                                    boxRight.getPrefHeight());
-                            imagePane.getScene().getWindow().setHeight(size);
-
-                            final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
-                            if (o != null) {
-                                textFs.setText(o.toString());
-                            }
-                        }
-                    });
-                }
-                updateProgress(4, 4);
-
-                return result;
-            }
-
-            @Override
-            protected void cancelled() {
-                super.cancelled();
-
-                cancel = true;
-            }
-
-            private void handleCancel() {
-                adjustResultButtons(true);
-                adjustConfigButtons(true);
-                adjustImageButtons(true);
-
-                Context.getInstance().setTc(null);
-
-                final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
-                stage.setTitle(Lang.getString("Title"));
-            }
-        };
+        final Task<String> worker = new InputLoader(fileList);
 
         Dialogs.showProgress(worker, Lang.getString("LoadingData"));
 
@@ -273,17 +167,17 @@ public class MainWindow implements Initializable {
             try {
                 final String err = worker.get();
                 if (err != null) {
-                    Platform.runLater(() -> {
-                        Dialogs.showWarning(
-                                Lang.getString("error"),
-                                err);
-                    });
+                    Platform.runLater(()
+                            -> Dialogs.showWarning(
+                                    Lang.getString("error"),
+                                    err)
+                    );
 
                 }
             } catch (InterruptedException | ExecutionException ex) {
-                Platform.runLater(() -> {
-                    Dialogs.showException(ex);
-                });
+                Platform.runLater(()
+                        -> Dialogs.showException(ex)
+                );
                 Logger.error(ex);
             } catch (CancellationException ex) {
             }
@@ -296,7 +190,7 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionSave(ActionEvent event) throws IOException {
-        saveFacetSize();
+        saveSubsetSize();
 
         final ButtonType config = new ButtonType(Lang.getString("TypeConfig"));
         final ButtonType binary = new ButtonType(Lang.getString("TypeBinary"));
@@ -344,7 +238,7 @@ public class MainWindow implements Initializable {
         try {
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
-                saveFacetSize();
+                saveSubsetSize();
                 TaskContainerUtils.checkTaskValidity(tc);
                 ComplexTaskSolver cts = new ComplexTaskSolver();
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
@@ -358,23 +252,23 @@ public class MainWindow implements Initializable {
                     try {
                         final Exception err = worker.get();
                         if (err != null) {
-                            Platform.runLater(() -> {
-                                Dialogs.showWarning(
-                                        Lang.getString("Exception"),
-                                        err.getLocalizedMessage());
-                            });
+                            Platform.runLater(()
+                                    -> Dialogs.showWarning(
+                                            Lang.getString("Exception"),
+                                            err.getLocalizedMessage())
+                            );
                             Logger.error(err);
                         } else {
-                            Platform.runLater(() -> {
-                                buttonResults.setDisable(false);
-                            });
+                            Platform.runLater(()
+                                    -> buttonResults.setDisable(false)
+                            );
                         }
                     } catch (InterruptedException | ExecutionException ex) {
                         Logger.error(ex);
                     } catch (CancellationException ex) {
-                        Platform.runLater(() -> {
-                            buttonResults.setDisable(false);
-                        });
+                        Platform.runLater(()
+                                -> buttonResults.setDisable(false)
+                        );
                     }
                 });
                 th.setDaemon(true);
@@ -406,7 +300,7 @@ public class MainWindow implements Initializable {
     @FXML
     private void handleButtonActionExport(ActionEvent event) {
         try {
-            saveFacetSize();
+            saveSubsetSize();
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExportEditor.fxml"));
             loader.setResources(Lang.getBundle());
@@ -535,7 +429,7 @@ public class MainWindow implements Initializable {
         if (!"0123456789".contains(keyEvent.getCharacter())) {
             keyEvent.consume();
         } else {
-            saveFacetSize();
+            saveSubsetSize();
         }
     }
 
@@ -551,7 +445,7 @@ public class MainWindow implements Initializable {
         }
     }
 
-    private void saveFacetSize() {
+    private void saveSubsetSize() {
         final String text = textFs.getText();
         if (!text.isEmpty()) {
             final int fs = Integer.parseInt(text);
@@ -768,5 +662,119 @@ public class MainWindow implements Initializable {
             return subsetSpacing;
         }
 
+    }
+
+    private class InputLoader extends Task<String> {
+
+        private final List<File> fileList;
+
+        public InputLoader(List<File> fileList) {
+            this.fileList = fileList;
+        }
+        private boolean cancel = false;
+
+        @Override
+        protected String call() throws Exception {
+            String result = null;
+            boolean error = false;
+
+            updateProgress(0, 4);
+            final File in = fileList.get(0);
+            if (fileList.size() == 1) {
+                final String name = in.getName();
+                final String ext = name.substring(name.lastIndexOf(".") + 1);
+                updateProgress(1, 4);
+                switch (ext) {
+                    case "avi":
+                    case "config":
+                        Context.getInstance().setTc(TaskContainer.initTaskContainer(in));
+                        break;
+                    case "task":
+                        try {
+                            Context.getInstance().setTc(TaskContainer.initTaskContainer(in));
+                            Platform.runLater(() -> {
+                                adjustResultButtons(false);
+                            });
+                        } catch (ComputationException ex) {
+                            error = true;
+                            result = Lang.getString("wrongBin");
+                            Logger.error(ex);
+                        }
+                        break;
+                    default:
+                        error = true;
+                        result = Lang.getString("wrongIn");
+                }
+            } else {
+                updateProgress(1, 4);
+                Context.getInstance().setTc(TaskContainer.initTaskContainer(fileList));
+            }
+            updateProgress(2, 4);
+            if (cancel) {
+                handleCancel();
+                return result;
+            }
+
+            if (!error) {
+                final TaskContainer tc = Context.getInstance().getTc();
+                tc.setParameter(TaskParameter.IN, in);
+                tc.addObserver(imagePane);
+                updateProgress(3, 4);
+                if (cancel) {
+                    handleCancel();
+                    return result;
+                }
+
+                Platform.runLater(() -> {
+                    final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
+                    stage.setTitle(Lang.getString("Title") + " - " + in.getName());
+                    if (imagePane != null && imagePane.getScene() != null) {
+                        adjustConfigButtons(false);
+                        adjustImageButtons(false);
+                        textIndex.textProperty().setValue("0");
+                        imagePane.displayImage();
+
+                        double size;
+                        size = Math.max(
+                                tc.getImage(0).getWidth() + boxRight.getWidth() + EXTRA_WIDTH,
+                                boxBottom.getMinWidth() + EXTRA_WIDTH);
+                        size = Math.max(
+                                size,
+                                boxImage.getMinWidth() + boxRight.getWidth() + EXTRA_WIDTH);
+                        imagePane.getScene().getWindow().setWidth(size);
+                        size = Math.max(
+                                tc.getImage(0).getHeight() + boxImage.getHeight() + boxBottom.getHeight() + EXTRA_HEIGHT,
+                                boxRight.getPrefHeight());
+                        imagePane.getScene().getWindow().setHeight(size);
+
+                        final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
+                        if (o != null) {
+                            textFs.setText(o.toString());
+                        }
+                    }
+                });
+            }
+            updateProgress(4, 4);
+
+            return result;
+        }
+
+        @Override
+        protected void cancelled() {
+            super.cancelled();
+
+            cancel = true;
+        }
+
+        private void handleCancel() {
+            adjustResultButtons(true);
+            adjustConfigButtons(true);
+            adjustImageButtons(true);
+
+            Context.getInstance().setTc(null);
+
+            final Stage stage = (Stage) MainWindow.this.buttonROI.getScene().getWindow();
+            stage.setTitle(Lang.getString("Title"));
+        }
     }
 }
