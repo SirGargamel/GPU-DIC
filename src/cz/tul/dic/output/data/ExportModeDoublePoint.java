@@ -59,7 +59,7 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                         results = null;
                 }
 
-                if (isResultValid(results, x1, y1, x2, y2)) {
+                if (isResultValid(results, x1, y1) && isResultValid(results, x2, y2)) {
                     switch (dir) {
                         case D_EXX:
                         case D_EYY:
@@ -83,8 +83,8 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
         return result;
     }
 
-    private static boolean isResultValid(double[][][] results, final int x1, final int y1, final int x2, final int y2) {
-        return results != null && results.length >= x1 && results[0].length >= y1 && results.length >= x2 && results[0].length >= y2 && results[x1][y1] != null && results[x2][y2] != null;
+    private static boolean isResultValid(double[][][] results, final int x, final int y) {
+        return results != null && results.length >= x && results[0].length >= y && results[x][y] != null;
     }
 
     private double calculateStrain(final double[][][] displacement, final Direction dir, final int x1, final int y1, final int x2, final int y2) throws ComputationException {
