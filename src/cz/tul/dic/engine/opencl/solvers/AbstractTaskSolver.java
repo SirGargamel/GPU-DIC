@@ -103,68 +103,72 @@ public abstract class AbstractTaskSolver extends Observable {
         try {
             kernel.prepareKernel(subsetSize, defDegree, interpolation);
 
-            AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
-            boolean finished = false;
-            Exception lastEx = null;
-            while (ts.isSplitterReady() && !finished) {
-                try {
-                    ComputationTask ct;
-                    CorrelationResult bestSubResult = null;
-                    while (ts.hasNext()) {
-                        if (stop) {
-                            return result;
-                        }
+            final AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
 
-                        ct = ts.next();
-                        ct.setResults(kernel.compute(ct, needsBestResult()));
-                        // pick best results for this computation task and discard ct data 
-                        if (ct.isSubtask()) {
-                            bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
-                        } else if (bestSubResult != null) {
-                            bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
-                            // store result
-                            final int globalFacetIndex = fullTask.getSubsets().indexOf(ct.getSubsets().get(0));
-                            if (globalFacetIndex < 0) {
-                                throw new IllegalArgumentException("Local subset not found in global registry.");
-                            }
-                            result.set(globalFacetIndex, bestSubResult);
-                            bestSubResult = null;
-                        } else {
-                            pickBestResultsForTask(ct, result, fullTask.getSubsets());
-                        }
-                    }
-
-                    finished = true;
-                } catch (ComputationException ex) {
-                    memManager.clearMemory();
-                    if (ex instanceof ComputationException) {
-                        if (ex.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
-                            Logger.warn(ex);
-                            ts.signalTaskSizeTooBig();
-                            ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
-                            lastEx = ex;
-                        } else {
-                            throw ex;
-                        }
-                    } else {
-                        throw ex;
-                    }
-                }
+            if (stop) {
+                return result;
             }
 
-            if (!finished && lastEx != null) {
-                memManager.clearMemory();
-                throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx);
-            }
+            computeSubtasks(ts, result, kernel, fullTask);
         } catch (CLException ex) {
             memManager.clearMemory();
             Logger.debug(ex);
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);
         }
 
-        Logger.trace("Found solution for {0} subsets.", result.size());
+        if (!stop) {
+            Logger.trace("Found solution for {0} subsets.", result.size());
+        }
 
         return result;
+    }
+
+    private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> result, final Kernel kernel, final FullTask fullTask) throws ComputationException, IllegalArgumentException {
+        Exception lastEx = null;
+        boolean finished = false;
+        while (ts.isSplitterReady() && !finished) {
+            try {
+                ComputationTask ct;
+                CorrelationResult bestSubResult = null;
+                while (ts.hasNext()) {
+                    if (stop) {
+                        return;
+                    }
+                    ct = ts.next();
+                    ct.setResults(kernel.compute(ct, needsBestResult()));
+                    // pick best results for this computation task and discard ct data
+                    if (ct.isSubtask()) {
+                        bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
+                    } else if (bestSubResult != null) {
+                        bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
+                        // store result
+                        final int globalFacetIndex = fullTask.getSubsets().indexOf(ct.getSubsets().get(0));
+                        if (globalFacetIndex < 0) {
+                            throw new IllegalArgumentException("Local subset not found in global registry.");
+                        }
+                        result.set(globalFacetIndex, bestSubResult);
+                        bestSubResult = null;
+                    } else {
+                        pickBestResultsForTask(ct, result, fullTask.getSubsets());
+                    }
+                }
+                finished = true;
+            } catch (ComputationException ex) {
+                memManager.clearMemory();
+                if (ex.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
+                    Logger.warn(ex);
+                    ts.signalTaskSizeTooBig();
+                    ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
+                    lastEx = ex;
+                } else {
+                    throw ex;
+                }
+            }
+        }
+        if (!finished && lastEx != null) {
+            memManager.clearMemory();
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx);
+        }
     }
 
     private CorrelationResult pickBetterResult(final CorrelationResult r1, final CorrelationResult r2) {
