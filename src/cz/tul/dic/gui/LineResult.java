@@ -37,10 +37,11 @@ public class LineResult implements Initializable {
      * @param rb
      */
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize(final URL url, final ResourceBundle rb) {
+        // no init required
     }
 
-    public void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
+    public void handleButtonActionSave(final ActionEvent event) throws IOException, ComputationException {
         final Object[] data = (Object[]) chart.getUserData();
         if (data.length == 3) {
             final TaskContainer tc = (TaskContainer) data[0];
