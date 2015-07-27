@@ -97,15 +97,15 @@ public class EditableInputPresenter extends InputPresenter {
     public void initialize(URL url, ResourceBundle rb) {
         super.initialize(url, rb);
 
-        setOnMousePressed((MouseEvent t) -> {
-            onMousePressed(t);
-        });
-        setOnMouseReleased((MouseEvent t) -> {
-            onMouseRelease(t);
-        });
-        image.setOnMouseDragged((MouseEvent event) -> {
-            onMouseDrag(event);
-        });
+        setOnMousePressed((MouseEvent t)
+                -> onMousePressed(t)
+        );
+        setOnMouseReleased((MouseEvent t)
+                -> onMouseRelease(t)
+        );
+        image.setOnMouseDragged((MouseEvent event)
+                -> onMouseDrag(event)
+        );
     }
 
     private void onMousePressed(MouseEvent event) {
