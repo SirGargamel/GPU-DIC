@@ -337,17 +337,29 @@ public class DicMain extends Application {
         configs.add("7202845m.avi00004.bmp.config");
         configs.add("9112502m.avi00016.bmp.config");
         configs.add("Sample3 Reference.bmp.config");
+        configs.add("Sample3 Reference__0.00.bmp.config");
+        configs.add("Sample3 Reference__0.01.bmp.config");
+        configs.add("Sample3 Reference__0.05.bmp.config");
         configs.add("Sample7-Reference Image.bmp.config");
+        configs.add("Sample7-Reference Image__0.00.bmp.config");
+        configs.add("Sample7-Reference Image__0.01.bmp.config");
+        configs.add("Sample7-Reference Image__0.05.bmp.config");
         configs.add("trs2_b8_00.bmp.config");
+        configs.add("trs2_b8_00__0.00.bmp.config");
+        configs.add("trs2_b8_00__0.01.bmp.config");
+        configs.add("trs2_b8_00__0.05.bmp.config");
         configs.add("trxy_s2_00.bmp.config");
+        configs.add("trxy_s2_00__0.00.bmp.config");
+        configs.add("trxy_s2_00__0.01.bmp.config");
+        configs.add("trxy_s2_00__0.05.bmp.config");
 
         final List<String> filters = new ArrayList<>();
-        filters.add("bilateral");
-        filters.add("clahe");
-        filters.add("histogram");
-        filters.add("lucyRichardson");
-        filters.add("median");
         filters.add("orig");
+        filters.add("histogram");
+        filters.add("median");
+        filters.add("bilateral");
+        filters.add("clahe");        
+        filters.add("lucyRichardson");                
         filters.add("wiener");
 
         TaskContainer task;
@@ -364,7 +376,7 @@ public class DicMain extends Application {
                     } else {
                         roiWidth = task.getImage(0).getWidth();
                     }
-                    task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, Math.max(roiWidth / 10, 2 * size));
+                    task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, Math.max((int) roiWidth / 10, 2 * size));
                     findAllConfigurationsAndCompute(task, filter);
                 }
             }
