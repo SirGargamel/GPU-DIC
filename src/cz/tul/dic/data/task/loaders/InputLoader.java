@@ -32,7 +32,7 @@ public final class InputLoader {
     private InputLoader() {
     }
 
-    public static TaskContainer loadInput(final Object in, final TaskContainer task) throws IOException, ComputationException {
+    public static TaskContainer loadInput(final Object in, TaskContainer task) throws IOException, ComputationException {
         AbstractInputLoader loader = null;
         for (AbstractInputLoader ail : loaders) {
             if (ail.canLoad(in)) {
@@ -40,8 +40,12 @@ public final class InputLoader {
                 break;
             }
         }
+        
+        if (task == null) {
+            task = new TaskContainer();
+        }
 
-        TaskContainer result = null;
+        TaskContainer result = null;        
         if (loader != null) {
             try {
                 result = loader.loadTask(in, task);
