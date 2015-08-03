@@ -60,7 +60,7 @@ public abstract class AbstractOpenCLMemoryManager {
         lock = new ReentrantLock();
     }
     
-    public static AbstractOpenCLMemoryManager init() {
+    public static AbstractOpenCLMemoryManager getInstance() {
         return INSTANCE;
     }
 

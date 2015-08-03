@@ -45,7 +45,7 @@ public abstract class AbstractTaskSolver extends Observable {
     boolean stop;
 
     protected AbstractTaskSolver() {
-        memManager = AbstractOpenCLMemoryManager.init();
+        memManager = AbstractOpenCLMemoryManager.getInstance();
 
         kernelType = WorkSizeManager.getBestKernel();
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
@@ -74,7 +74,7 @@ public abstract class AbstractTaskSolver extends Observable {
             final FullTask fullTask, int subsetSize) throws ComputationException {
         stop = false;
 
-        kernel = Kernel.createKernel(kernelType, memManager);
+        kernel = Kernel.createInstance(kernelType, memManager);
         Logger.trace("Kernel prepared - {0}", kernel);
 
         this.subsetSize = subsetSize;

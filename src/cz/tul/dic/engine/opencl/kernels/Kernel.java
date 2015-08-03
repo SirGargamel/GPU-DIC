@@ -34,6 +34,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,7 +71,7 @@ public abstract class Kernel {
         context = DeviceManager.getContext();
     }
 
-    public static Kernel createKernel(final KernelType kernelType, final AbstractOpenCLMemoryManager memManager) {
+    public static Kernel createInstance(final KernelType kernelType, final AbstractOpenCLMemoryManager memManager) {
         Kernel result;
         try {
             final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));
@@ -126,7 +127,7 @@ public abstract class Kernel {
     public List<CorrelationResult> compute(final ComputationTask task, boolean findBest) throws ComputationException {
         if (task.getSubsets().isEmpty()) {
             Logger.warn("Empty subsets for computation.");
-            return new ArrayList<>(0);
+            return Collections.EMPTY_LIST;
         }
         final int subsetCount = task.getSubsets().size();
         final int subsetSize = task.getSubsets().get(0).getSize();
