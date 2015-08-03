@@ -42,8 +42,8 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     private static final double LIMIT_MIN_GROWTH = 0.001;
     private static final double LIMIT_DONE = 1 - LIMIT_MIN_GROWTH;
     private static final double STEP_INITIAL = 0.1;
-    private static final double STEP_FIRST = 0.01;
-    private static final double STEP_SECOND = 0.001;
+    private static final double STEP_FIRST = 0.001;
+    private static final double STEP_SECOND = 0.0001;
     private FullTask fullTask;
     private Map<AbstractSubset, CorrelationResult> results;
     private Map<AbstractSubset, double[]> limits;
