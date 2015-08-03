@@ -131,7 +131,7 @@ public class SolverTest {
         for (int dim = 0; dim < coeffCount; dim++) {
             maxDif = MAX_STEP_DIF * limits[dim * 3 + 2];
             if (Math.abs(expected[dim] - actual[dim]) > maxDif) {
-                result = generateMessage(expected, actual, task);
+                result = generateMessage(expected, task);
                 break;
             }
         }
@@ -147,7 +147,7 @@ public class SolverTest {
                 }
             }
             if (closeEnough) {
-                System.out.println("CLOSE ENOUGH - " + result.substring(1));
+                System.out.print("CLOSE ENOUGH - ");
                 result = null;
             }
         }
@@ -195,12 +195,10 @@ public class SolverTest {
         System.out.println(sb);
     }
 
-    private static String generateMessage(final double[] expected, final double[] actual, final TaskContainer task) {
+    private static String generateMessage(final double[] expected, final TaskContainer task) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("\nExpected ");
-        sb.append(Arrays.toString(expected));
-        sb.append(", was ");
-        sb.append(Arrays.toString(actual));
+        sb.append("\n");
+        sb.append(Arrays.toString(expected));        
 
         sb.append("; Solver: ");
         sb.append(task.getParameter(TaskParameter.SOLVER));
