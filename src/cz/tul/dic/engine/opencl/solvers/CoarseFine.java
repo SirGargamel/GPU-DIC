@@ -31,6 +31,7 @@ public class CoarseFine extends AbstractTaskSolver {
         if (fullTask.getSubsets().isEmpty()) {
             return Collections.EMPTY_LIST;
         }
+        
         final int subsetCount = fullTask.getSubsets().size();
         final StringBuilder sb = new StringBuilder();
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
@@ -38,28 +39,8 @@ public class CoarseFine extends AbstractTaskSolver {
         double[] temp;
         double step = STEP_INITIAL;
 
-        double minStep = 1;
-        for (double[] dA : fullTask.getDeformationLimits()) {
-            minStep = Math.min(minStep, Math.min(dA[DeformationLimit.USTEP], dA[DeformationLimit.VSTEP]));
-        }
-        int roundCount = 1;
-        double tempStep = step;
-        do {
-            tempStep /= 10.0;
-            if (tempStep < minStep) {
-                if (Double.compare(tempStep * 10, minStep) == 0) {
-                    break;
-                } else {
-                    tempStep = minStep;
-                }
-            }
-            roundCount++;
-        } while (tempStep > STEP_MINIMAL);
         
-        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
-        if (defDegree != DeformationDegree.ZERO) {
-            roundCount++;
-        }
+        final int roundCount= coumputeRoundCount(fullTask);               
 
         // initial pixel step
         int round = 0;
@@ -87,19 +68,19 @@ public class CoarseFine extends AbstractTaskSolver {
         signalizeRoundComplete(++round, roundCount);
 
         //sub-pixel stepping
+        final double minimalStep = findMinimalStep(fullTask);
         double[] coarseResult, newLimits;
         int l;
         do {
             step /= 10.0;
-            if (step < minStep) {
-                if (Double.compare(tempStep * 10, minStep) == 0) {
+            if (step < minimalStep) {
+                if (Double.compare(step * 10, minimalStep) == 0) {
                     break;
                 } else {
-                    step = minStep;
+                    step = minimalStep;
                 }
             }
-
-            zeroOrderLimits.clear();
+            
             zeroOrderLimits = new ArrayList<>(subsetCount);
 
             for (int i = 0; i < subsetCount; i++) {
@@ -130,6 +111,7 @@ public class CoarseFine extends AbstractTaskSolver {
         } while (step > STEP_MINIMAL);
 
         //higher order search
+        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         if (defDegree != DeformationDegree.ZERO) {
             final List<double[]> higherOrderLimits = new ArrayList<>(subsetCount);
 
@@ -166,6 +148,39 @@ public class CoarseFine extends AbstractTaskSolver {
         Logger.trace(sb);
 
         return results;
+    }
+    
+    private int coumputeRoundCount(final FullTask fullTask) throws ComputationException {
+        final double minimalStep = findMinimalStep(fullTask);
+        
+        int roundCount = 1;
+        double tempStep = STEP_INITIAL;
+        do {
+            tempStep /= 10.0;
+            if (tempStep < minimalStep) {
+                if (Double.compare(tempStep * 10, minimalStep) == 0) {
+                    // break only when tempSeto is at least 10 times smaller
+                    // handles limits such as 0.25 etc.
+                    break;
+                }
+            }
+            roundCount++;
+        } while (tempStep > STEP_MINIMAL);
+        
+        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
+        if (defDegree != DeformationDegree.ZERO) {
+            roundCount++;
+        }
+        
+        return roundCount;
+    }
+    
+    private double findMinimalStep(final FullTask fullTask) {
+        double minimalStep = 1;
+        for (double[] dA : fullTask.getDeformationLimits()) {
+            minimalStep = Math.min(minimalStep, Math.min(dA[DeformationLimit.USTEP], dA[DeformationLimit.VSTEP]));
+        }
+        return minimalStep;
     }
 
     private void signalizeRoundComplete(final int round, final int roundCount) {
