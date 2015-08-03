@@ -71,8 +71,7 @@ public abstract class AbstractTaskSolver extends Observable {
     }
 
     public synchronized List<CorrelationResult> solve(
-            final FullTask fullTask, DeformationDegree defDegree,
-            int subsetSize) throws ComputationException {
+            final FullTask fullTask, int subsetSize) throws ComputationException {
         stop = false;
 
         kernel = Kernel.createKernel(kernelType, memManager);
@@ -80,7 +79,7 @@ public abstract class AbstractTaskSolver extends Observable {
 
         this.subsetSize = subsetSize;
 
-        final List<CorrelationResult> result = solve(kernel, fullTask, defDegree);
+        final List<CorrelationResult> result = solve(kernel, fullTask);
 
         kernel.clearMemory();
 
@@ -89,7 +88,7 @@ public abstract class AbstractTaskSolver extends Observable {
 
     public abstract List<CorrelationResult> solve(
             final Kernel kernel,
-            final FullTask fullTask, DeformationDegree defDegree) throws ComputationException;
+            final FullTask fullTask) throws ComputationException;
 
     protected abstract boolean needsBestResult();
 

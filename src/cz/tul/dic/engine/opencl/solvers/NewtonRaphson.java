@@ -16,6 +16,7 @@ import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,15 +53,19 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     @Override
     public List<CorrelationResult> solve(
             final Kernel kernel,
-            final FullTask fullTask, final DeformationDegree defDegree) throws ComputationException {
+            final FullTask fullTask) throws ComputationException {
+        if (fullTask.getSubsets().isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
         this.fullTask = fullTask;
         final List<AbstractSubset> subsets = fullTask.getSubsets();
-        final int subsetCount = subsets.size();
+        final int subsetCount = subsets.size();        
 
         results = new LinkedHashMap<>(subsetCount);
         limits = new LinkedHashMap<>(subsetCount);
         limitsCounts = new LinkedHashMap<>(subsetCount);
 
+        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
         // estimate initial solution by direct search

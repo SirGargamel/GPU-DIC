@@ -8,7 +8,6 @@ package cz.tul.dic;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.result.DisplacementResult;
@@ -359,7 +358,6 @@ public class EngineTest {
                                 tc.getImage(ROUND), tc.getImage(ROUND + 1),
                                 roiFacets,
                                 generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size())),
-                        DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getSubsetSize(ROUND, roi)));
         solver.endTask();
 
@@ -411,7 +409,6 @@ public class EngineTest {
                                 tc.getImage(ROUND), tc.getImage(ROUND + 1),
                                 roiFacets,
                                 generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size())),
-                        DeformationUtils.getDegreeFromLimits(tc.getDeformationLimits(ROUND, roi)),
                         tc.getSubsetSize(ROUND, roi)));
         solver.endTask();
 

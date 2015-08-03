@@ -9,7 +9,6 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
@@ -44,7 +43,7 @@ public final class WorkSizeManager {
     private static final KernelType BEST_KERNEL;
     private static final Map<KernelType, Map<Long, Map<Long, Long>>> TIME_DATA;
     private final KernelType kernel;
-    private long workSizeF, workSizeD, maxF, maxD;    
+    private long workSizeF, workSizeD, maxF, maxD;
 
     static {
         final String os = System.getProperty("os.name").toLowerCase();
@@ -79,7 +78,6 @@ public final class WorkSizeManager {
                     subsets.add(new SquareSubset2D(fs, 15, 15));
                     solver.solve(
                             new FullTask(img, img, subsets, deformationLimits),
-                            DeformationDegree.ZERO,
                             fs);
                 }
             }

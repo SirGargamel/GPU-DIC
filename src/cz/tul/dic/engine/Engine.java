@@ -9,7 +9,6 @@ import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.subset.AbstractSubset;
-import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
@@ -191,7 +190,6 @@ public final class Engine extends Observable implements Observer {
                                     task.getImage(roundFrom), task.getImage(roundTo),
                                     subsets.get(roi),
                                     generateDeformations(task.getDeformationLimits(roundFrom, roi), subsets.get(roi).size())),
-                            DeformationUtils.getDegreeFromLimits(task.getDeformationLimits(roundFrom, roi)),
                             task.getSubsetSize(roundFrom, roi)));
         }
 

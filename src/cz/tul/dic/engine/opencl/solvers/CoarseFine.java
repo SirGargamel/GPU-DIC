@@ -10,9 +10,11 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationLimit;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
@@ -23,8 +25,12 @@ public class CoarseFine extends AbstractTaskSolver {
     private static final double STEP_MINIMAL = 0.01;
 
     @Override
-    public List<CorrelationResult> solve(final Kernel kernel,
-            final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
+    public List<CorrelationResult> solve(
+            final Kernel kernel,
+            final FullTask fullTask) throws ComputationException {
+        if (fullTask.getSubsets().isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
         final int subsetCount = fullTask.getSubsets().size();
         final StringBuilder sb = new StringBuilder();
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
@@ -49,6 +55,8 @@ public class CoarseFine extends AbstractTaskSolver {
             }
             roundCount++;
         } while (tempStep > STEP_MINIMAL);
+        
+        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         if (defDegree != DeformationDegree.ZERO) {
             roundCount++;
         }
