@@ -41,7 +41,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     private static final int LIMITS_ROUNDS = 20;
     private static final double LIMIT_MIN_GROWTH = 0.001;
     private static final double LIMIT_DONE = 1 - LIMIT_MIN_GROWTH;
-    private static final double STEP_INITIAL = 1;
+    private static final double STEP_INITIAL = 0.1;
     private static final double STEP_FIRST = 0.01;
     private static final double STEP_SECOND = 0.001;
     private FullTask fullTask;
@@ -59,7 +59,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         }
         this.fullTask = fullTask;
         final List<AbstractSubset> subsets = fullTask.getSubsets();
-        final int subsetCount = subsets.size();        
+        final int subsetCount = subsets.size();
 
         results = new LinkedHashMap<>(subsetCount);
         limits = new LinkedHashMap<>(subsetCount);
@@ -119,7 +119,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             temp[DeformationLimit.VSTEP] = STEP_INITIAL;
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> localResults = computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
+        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE).solve(new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), subsetSize);
         sb.append("Initial results, step [").append(STEP_INITIAL).append("]:");
         CorrelationResult paddedResult;
         for (int i = 0; i < subsetCount; i++) {
