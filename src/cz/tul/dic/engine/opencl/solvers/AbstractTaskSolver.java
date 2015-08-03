@@ -94,10 +94,12 @@ public abstract class AbstractTaskSolver extends Observable {
     abstract boolean needsBestResult();
 
     protected synchronized List<CorrelationResult> computeTask(
-            final Kernel kernel, final FullTask fullTask, DeformationDegree defDegree) throws ComputationException {
+            final Kernel kernel, final FullTask fullTask) throws ComputationException {
         final List<CorrelationResult> result = new ArrayList<>(fullTask.getSubsets().size());
+        DeformationDegree defDegree = null;
         for (int i = 0; i < fullTask.getSubsets().size(); i++) {
             result.add(null);
+            defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(i));
         }
 
         try {

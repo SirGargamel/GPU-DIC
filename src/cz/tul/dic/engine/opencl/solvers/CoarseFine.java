@@ -68,8 +68,7 @@ public class CoarseFine extends AbstractTaskSolver {
         }
         results = computeTask(
                 kernel,
-                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits),
-                DeformationDegree.ZERO);
+                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
         sb.append("Initial results, step [").append(step).append("]:");
         for (int i = 0; i < subsetCount; i++) {
             sb.append(i)
@@ -110,8 +109,7 @@ public class CoarseFine extends AbstractTaskSolver {
             }
             results = computeTask(
                     kernel,
-                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits),
-                    DeformationDegree.ZERO);
+                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
 
             sb.append("Finer results, step [").append(step).append("]:");
             for (int i = 0; i < subsetCount; i++) {
@@ -146,8 +144,7 @@ public class CoarseFine extends AbstractTaskSolver {
             }
             results = computeTask(
                     kernel,
-                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), higherOrderLimits),
-                    defDegree);
+                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), higherOrderLimits));
 
             sb.append("Higher order results: ");
             for (int i = 0; i < subsetCount; i++) {

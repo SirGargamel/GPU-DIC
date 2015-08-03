@@ -74,7 +74,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         Kernel.registerListener(this);
         final List<AbstractSubset> subsetsToCompute = new ArrayList<>(fullTask.getSubsets());
         final List<double[]> localLimits = new ArrayList<>(limits.values());
-        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits), defDegree);
+        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
 
         for (int i = 0; i < LIMITS_ROUNDS; i++) {
             makeStep(subsetsToCompute, defDegree);
@@ -114,7 +114,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             temp[DeformationLimit.VSTEP] = STEP_INITIAL;
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> localResults = computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), DeformationDegree.ZERO);
+        final List<CorrelationResult> localResults = computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
         sb.append("Initial results, step [").append(STEP_INITIAL).append("]:");
         CorrelationResult paddedResult;
         for (int i = 0; i < subsetCount; i++) {
@@ -195,7 +195,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             }
         }
 
-        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits), defDegree);
+        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
     }
 
     private void extractResults(final List<AbstractSubset> subsetsToCompute, final int coeffCount) {

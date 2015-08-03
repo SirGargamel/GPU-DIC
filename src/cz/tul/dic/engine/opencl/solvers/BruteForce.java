@@ -18,7 +18,7 @@ public class BruteForce extends AbstractTaskSolver {
     public List<CorrelationResult> solve(
             final Kernel kernel, 
             final FullTask fullTask, final DeformationDegree defDegree) throws ComputationException {
-        return computeTask(kernel, fullTask, defDegree);
+        return computeTask(kernel, fullTask);
     }
     
     @Override
