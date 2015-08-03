@@ -166,7 +166,7 @@ public class CoarseFine extends AbstractTaskSolver {
     }
 
     @Override
-    boolean needsBestResult() {
+    protected boolean needsBestResult() {
         return true;
     }
 

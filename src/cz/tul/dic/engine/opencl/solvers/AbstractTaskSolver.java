@@ -91,7 +91,7 @@ public abstract class AbstractTaskSolver extends Observable {
             final Kernel kernel,
             final FullTask fullTask, DeformationDegree defDegree) throws ComputationException;
 
-    abstract boolean needsBestResult();
+    protected abstract boolean needsBestResult();
 
     protected synchronized List<CorrelationResult> computeTask(
             final Kernel kernel, final FullTask fullTask) throws ComputationException {

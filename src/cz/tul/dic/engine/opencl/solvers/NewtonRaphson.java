@@ -352,7 +352,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     }
 
     @Override
-    boolean needsBestResult() {
+    protected boolean needsBestResult() {
         return true;
     }
 
