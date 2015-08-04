@@ -65,6 +65,7 @@ public class CoarseFine extends AbstractTaskSolver {
                     .append(results.get(i))
                     .append("; ");
         }
+        sb.append("\n");
         signalizeRoundComplete(++round, roundCount);
 
         //sub-pixel stepping
@@ -107,6 +108,7 @@ public class CoarseFine extends AbstractTaskSolver {
                         .append(results.get(i))
                         .append("; ");
             }
+            sb.append("\n");
             signalizeRoundComplete(++round, roundCount);
         } while (step > STEP_MINIMAL);
 
@@ -143,6 +145,7 @@ public class CoarseFine extends AbstractTaskSolver {
                         .append(results.get(i))
                         .append("; ");
             }
+            sb.append("\n");
             signalizeRoundComplete(++round, roundCount);
         }
         Logger.trace(sb);
