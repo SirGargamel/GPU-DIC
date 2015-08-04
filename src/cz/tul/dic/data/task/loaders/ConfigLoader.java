@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import org.pmw.tinylog.Logger;
 
 public class ConfigLoader extends AbstractInputLoader {
 
@@ -58,7 +59,7 @@ public class ConfigLoader extends AbstractInputLoader {
         if (!config.getType().equals(ConfigType.TASK)) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_CONFIG, "Not a task config.");
         }
-        
+
         // input
         task.setParameter(TaskParameter.IN, in);
         final String input = config.get(CONFIG_INPUT);
@@ -68,7 +69,7 @@ public class ConfigLoader extends AbstractInputLoader {
             final List<File> l = new ArrayList<>(split.length);
             for (String s : split) {
                 l.add(new File(s));
-            }            
+            }
             loadImages(task, l);
         } else {
             // video file
@@ -83,95 +84,99 @@ public class ConfigLoader extends AbstractInputLoader {
         AbstractROI roi;
         for (String key : config.keySet()) {
             value = config.get(key);
-            if (key.startsWith(CONFIG_ROIS)) {
-                index = Integer.parseInt(key.replaceFirst(CONFIG_ROIS, ""));
-                final String[] splitPairs = value.split(CONFIG_SEPARATOR);
-                for (String s : splitPairs) {
-                    split = s.split(CONFIG_SEPARATOR_ROI);
-                    if (split.length == 3) {
-                        roi = AbstractROI.generateROI(split[0]);
-                        task.addRoi(index, roi);
-                        if (!split[1].trim().equals(CONFIG_EMPTY)) {
-                            task.setDeformationLimits(index, roi, doubleArrayFromString(split[1]));
+            try {
+                if (key.startsWith(CONFIG_ROIS)) {
+                    index = Integer.parseInt(key.replaceFirst(CONFIG_ROIS, ""));
+                    final String[] splitPairs = value.split(CONFIG_SEPARATOR);
+                    for (String s : splitPairs) {
+                        split = s.split(CONFIG_SEPARATOR_ROI);
+                        if (split.length == 3) {
+                            roi = AbstractROI.generateROI(split[0]);
+                            task.addRoi(index, roi);
+                            if (!split[1].trim().equals(CONFIG_EMPTY)) {
+                                task.setDeformationLimits(index, roi, doubleArrayFromString(split[1]));
+                            }
+                            if (!split[2].trim().equals(CONFIG_EMPTY)) {
+                                task.addSubsetSize(index, roi, Integer.decode(split[2]));
+                            }
+                        } else {
+                            throw new IllegalArgumentException("Illegal roi-limits pair - " + Arrays.toString(split));
                         }
-                        if (!split[2].trim().equals(CONFIG_EMPTY)) {
-                            task.addSubsetSize(index, roi, Integer.decode(split[2]));
-                        }
-                    } else {
-                        throw new IllegalArgumentException("Illegal roi-limits pair - " + Arrays.toString(split));
                     }
+                } else if (key.startsWith(CONFIG_PARAMETERS)) {
+                    tp = TaskParameter.valueOf(key.replaceFirst(CONFIG_PARAMETERS, ""));
+                    switch (tp) {
+                        case IN:
+                            task.setParameter(tp, new File(value));
+                            break;
+                        case FACET_GENERATOR_METHOD:
+                            task.setParameter(tp, SubsetGeneratorMethod.valueOf(value));
+                            break;
+                        case FACET_GENERATOR_PARAM:
+                            task.setParameter(tp, Integer.valueOf(value));
+                            break;
+                        case DEFORMATION_LIMITS:
+                            task.setParameter(tp, doubleArrayFromString(value));
+                            break;
+                        case DEFORMATION_ORDER:
+                            task.setParameter(tp, DeformationDegree.valueOf(value));
+                            break;
+                        case DISPLACEMENT_CALCULATION_METHOD:
+                            task.setParameter(tp, DisplacementCalculation.valueOf(value));
+                            break;
+                        case DISPLACEMENT_CALCULATION_PARAM:
+                            task.setParameter(tp, Integer.valueOf(value));
+                            break;
+                        case FACET_SIZE:
+                            task.setParameter(tp, Integer.valueOf(value));
+                            break;
+                        case FPS:
+                            task.setParameter(tp, Integer.valueOf(value));
+                            break;
+                        case INTERPOLATION:
+                            task.setParameter(tp, Interpolation.valueOf(value));
+                            break;
+                        case KERNEL:
+                            task.setParameter(tp, KernelType.valueOf(value));
+                            break;
+                        case MM_TO_PX_RATIO:
+                            task.setParameter(tp, Double.valueOf(value));
+                            break;
+                        case TASK_SPLIT_METHOD:
+                            task.setParameter(tp, TaskSplitMethod.valueOf(value));
+                            break;
+                        case TASK_SPLIT_PARAM:
+                            task.setParameter(tp, Integer.valueOf(value));
+                            break;
+                        case RESULT_QUALITY:
+                            task.setParameter(tp, Double.valueOf(value));
+                            break;
+                        case ROUND_LIMITS:
+                            task.setParameter(tp, intArrayFromString(value));
+                            break;
+                        case SOLVER:
+                            task.setParameter(tp, Solver.valueOf(value));
+                            break;
+                        case STRAIN_ESTIMATION_METHOD:
+                            task.setParameter(tp, StrainEstimationMethod.valueOf(value));
+                            break;
+                        case STRAIN_ESTIMATION_PARAM:
+                            task.setParameter(tp, Double.valueOf(value));
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unsupported task parameter - " + tp);
+                    }
+                } else if (key.startsWith(CONFIG_EXPORTS)) {
+                    task.addExport(ExportTask.generateExportTask(value));
                 }
-            } else if (key.startsWith(CONFIG_PARAMETERS)) {
-                tp = TaskParameter.valueOf(key.replaceFirst(CONFIG_PARAMETERS, ""));
-                switch (tp) {
-                    case IN:
-                        task.setParameter(tp, new File(value));
-                        break;
-                    case FACET_GENERATOR_METHOD:
-                        task.setParameter(tp, SubsetGeneratorMethod.valueOf(value));
-                        break;
-                    case FACET_GENERATOR_PARAM:
-                        task.setParameter(tp, Integer.valueOf(value));
-                        break;
-                    case DEFORMATION_LIMITS:
-                        task.setParameter(tp, doubleArrayFromString(value));
-                        break;
-                    case DEFORMATION_ORDER:
-                        task.setParameter(tp, DeformationDegree.valueOf(value));
-                        break;
-                    case DISPLACEMENT_CALCULATION_METHOD:
-                        task.setParameter(tp, DisplacementCalculation.valueOf(value));
-                        break;
-                    case DISPLACEMENT_CALCULATION_PARAM:
-                        task.setParameter(tp, Integer.valueOf(value));
-                        break;
-                    case FACET_SIZE:
-                        task.setParameter(tp, Integer.valueOf(value));
-                        break;
-                    case FPS:
-                        task.setParameter(tp, Integer.valueOf(value));
-                        break;
-                    case INTERPOLATION:
-                        task.setParameter(tp, Interpolation.valueOf(value));
-                        break;
-                    case KERNEL:
-                        task.setParameter(tp, KernelType.valueOf(value));
-                        break;
-                    case MM_TO_PX_RATIO:
-                        task.setParameter(tp, Double.valueOf(value));
-                        break;
-                    case TASK_SPLIT_METHOD:
-                        task.setParameter(tp, TaskSplitMethod.valueOf(value));
-                        break;
-                    case TASK_SPLIT_PARAM:
-                        task.setParameter(tp, Integer.valueOf(value));
-                        break;
-                    case RESULT_QUALITY:
-                        task.setParameter(tp, Double.valueOf(value));
-                        break;
-                    case ROUND_LIMITS:
-                        task.setParameter(tp, intArrayFromString(value));
-                        break;
-                    case SOLVER:
-                        task.setParameter(tp, Solver.valueOf(value));
-                        break;
-                    case STRAIN_ESTIMATION_METHOD:
-                        task.setParameter(tp, StrainEstimationMethod.valueOf(value));
-                        break;
-                    case STRAIN_ESTIMATION_PARAM:
-                        task.setParameter(tp, Double.valueOf(value));
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unsupported task parameter - " + tp);
-                }
-            } else if (key.startsWith(CONFIG_EXPORTS)) {
-                task.addExport(ExportTask.generateExportTask(value));
+            } catch (IllegalArgumentException ex) {
+                Logger.error(ex, "Error parsing config file - {0} : {1}", key, value);
             }
         }
 
         return task;
     }
-    
+
     private static double[] doubleArrayFromString(final String data) {
         final double[] result;
         if (data.equals(CONFIG_EMPTY)) {
@@ -198,7 +203,7 @@ public class ConfigLoader extends AbstractInputLoader {
             }
         }
         return result;
-    } 
+    }
 
     @Override
     public boolean canLoad(Object in) {
