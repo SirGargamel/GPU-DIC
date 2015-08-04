@@ -177,7 +177,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         final List<double[]> localLimits = new ArrayList<>(subsetsToCompute.size());
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
-        final int deformationCount = gpuData.length / subsetsToCompute.size();
+        final int deformationCount = computeDeformationCount(defDegree);
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
             try {
@@ -200,7 +200,14 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             }
         }
 
-        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
+        if (!subsetsToCompute.isEmpty()) {
+            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
+        }
+    }
+    
+    private int computeDeformationCount(final DeformationDegree defDegree) {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
+        return (int) Math.pow(COUNT_STEP, coeffCount);
     }
 
     private void extractResults(final List<AbstractSubset> subsetsToCompute, final int coeffCount) {
