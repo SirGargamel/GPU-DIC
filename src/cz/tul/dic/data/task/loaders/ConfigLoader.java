@@ -170,7 +170,8 @@ public class ConfigLoader extends AbstractInputLoader {
                     task.addExport(ExportTask.generateExportTask(value));
                 }
             } catch (IllegalArgumentException ex) {
-                Logger.error(ex, "Error parsing config file - {0} : {1}", key, value);
+                Logger.error("Error parsing config file - {0} : {1}", key, value);
+                Logger.debug(ex);
             }
         }
 
