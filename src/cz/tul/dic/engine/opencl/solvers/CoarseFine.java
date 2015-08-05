@@ -19,11 +19,11 @@ import java.util.List;
 import org.pmw.tinylog.Logger;
 
 public class CoarseFine extends AbstractTaskSolver {
-
+    
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final double STEP_INITIAL = 1;
     private static final double STEP_MINIMAL = 0.01;
-
+    
     @Override
     public List<CorrelationResult> solve(
             final Kernel kernel,
@@ -38,9 +38,8 @@ public class CoarseFine extends AbstractTaskSolver {
         List<CorrelationResult> results;
         double[] temp;
         double step = STEP_INITIAL;
-
         
-        final int roundCount= coumputeRoundCount(fullTask);               
+        final int roundCount = coumputeRoundCount(fullTask);
 
         // initial pixel step
         int round = 0;
@@ -83,24 +82,24 @@ public class CoarseFine extends AbstractTaskSolver {
             }
             
             zeroOrderLimits = new ArrayList<>(subsetCount);
-
+            
             for (int i = 0; i < subsetCount; i++) {
                 coarseResult = results.get(i).getDeformation();
                 temp = new double[COUNT_ZERO_ORDER_LIMITS];
-
+                
                 temp[DeformationLimit.UMIN] = coarseResult[Coordinates.X] - (10 * step);
                 temp[DeformationLimit.UMAX] = coarseResult[Coordinates.X] + (10 * step);
                 temp[DeformationLimit.USTEP] = step;
                 temp[DeformationLimit.VMIN] = coarseResult[Coordinates.Y] - (10 * step);
                 temp[DeformationLimit.VMAX] = coarseResult[Coordinates.Y] + (10 * step);
                 temp[DeformationLimit.VSTEP] = step;
-
+                
                 zeroOrderLimits.add(temp);
             }
             results = computeTask(
                     kernel,
                     new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
-
+            
             sb.append("Finer results, step [").append(step).append("]:");
             for (int i = 0; i < subsetCount; i++) {
                 sb.append(i)
@@ -116,28 +115,28 @@ public class CoarseFine extends AbstractTaskSolver {
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         if (defDegree != DeformationDegree.ZERO) {
             final List<double[]> higherOrderLimits = new ArrayList<>(subsetCount);
-
+            
             for (int i = 0; i < subsetCount; i++) {
                 coarseResult = results.get(i).getDeformation();
                 temp = fullTask.getDeformationLimits().get(i);
                 l = temp.length;
-
+                
                 newLimits = new double[l];
                 System.arraycopy(temp, 0, newLimits, 0, l);
-
+                
                 newLimits[DeformationLimit.UMIN] = coarseResult[Coordinates.X];
                 newLimits[DeformationLimit.UMAX] = coarseResult[Coordinates.X];
                 newLimits[DeformationLimit.USTEP] = 0;
                 newLimits[DeformationLimit.VMIN] = coarseResult[Coordinates.Y];
                 newLimits[DeformationLimit.VMAX] = coarseResult[Coordinates.Y];
                 newLimits[DeformationLimit.VSTEP] = 0;
-
+                
                 higherOrderLimits.add(newLimits);
             }
             results = computeTask(
                     kernel,
                     new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), higherOrderLimits));
-
+            
             sb.append("Higher order results: ");
             for (int i = 0; i < subsetCount; i++) {
                 sb.append(i)
@@ -148,8 +147,9 @@ public class CoarseFine extends AbstractTaskSolver {
             sb.append("\n");
             signalizeRoundComplete(++round, roundCount);
         }
+        sb.setLength(sb.length() - "\n".length());
         Logger.trace(sb);
-
+        
         return results;
     }
     
@@ -185,15 +185,15 @@ public class CoarseFine extends AbstractTaskSolver {
         }
         return minimalStep;
     }
-
+    
     private void signalizeRoundComplete(final int round, final int roundCount) {
         setChanged();
         notifyObservers(1 / (double) roundCount * round);
     }
-
+    
     @Override
     protected boolean needsBestResult() {
         return true;
     }
-
+    
 }
