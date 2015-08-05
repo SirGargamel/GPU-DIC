@@ -69,7 +69,6 @@
                     <children>
                         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleButtonActionInput" text="%Input" /><Button fx:id="buttonRealSize" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleButtonActionRealSize" text="%RealSizeW" />
                         <Button fx:id="buttonROI" layoutX="10.0" layoutY="70.0" maxWidth="1.7976931348623157E308" onAction="#handleButtonActionROI" text="%ROI" />
-                        <Button fx:id="buttonExport" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleButtonActionExport" text="%Exports" />
                         <Button fx:id="buttonExpert" layoutX="130.0" layoutY="70.0" maxWidth="1.7976931348623157E308" onAction="#handleButtonActionExpert" text="%Expert" />
                   <ComboBox fx:id="comboScenario" maxWidth="1.7976931348623157E308" promptText="%Scenario" />
                   <Label text="%DefOrder" />

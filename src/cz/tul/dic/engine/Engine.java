@@ -28,16 +28,13 @@ import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
-import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -105,12 +102,6 @@ public final class Engine extends Observable implements Observer {
             } else {
                 futures.add(exec.submit(new OverlapComputation(tc, baseR, nextR, strain)));
             }
-
-            try {
-                exportRound(tc, r);
-            } catch (IOException ex) {
-                Logger.error(ex, "Round export failed.");
-            }
         }
 
         Stats.getInstance().dumpDeformationsStatisticsUsage();
@@ -127,12 +118,7 @@ public final class Engine extends Observable implements Observer {
         }
 
         endTask();
-
-        try {
-            Exporter.export(tc);
-        } catch (IOException ex) {
-            Logger.error(ex, "Task export failed.");
-        }
+        
         try {
             TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         } catch (IOException ex) {
@@ -232,17 +218,6 @@ public final class Engine extends Observable implements Observer {
 
     private static List<double[]> generateDeformations(final double[] limits, final int subsetCount) {
         return Collections.nCopies(subsetCount, limits);
-    }
-
-    private void exportRound(final TaskContainer task, final int round) throws IOException, ComputationException {
-        final Iterator<ExportTask> it = task.getExports().iterator();
-        ExportTask eTask;
-        while (it.hasNext()) {
-            eTask = it.next();
-            if (eTask.getMode().equals(ExportMode.MAP) && eTask.getDataParams()[0] == round && !isStrainExport(eTask)) {
-                Exporter.export(task, eTask);
-            }
-        }
     }
 
     private boolean isStrainExport(final ExportTask eTask) {

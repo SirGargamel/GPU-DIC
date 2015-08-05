@@ -35,12 +35,6 @@ public final class Exporter {
     private Exporter() {
     }
 
-    public static void export(final TaskContainer tc) throws IOException, ComputationException {
-        for (ExportTask et : tc.getExports()) {
-            export(tc, et);
-        }
-    }
-
     public static void export(final TaskContainer tc, final ExportTask et) throws IOException, ComputationException {
         final ExportTarget target = et.getTarget();
         if (targetExporters.containsKey(target)) {

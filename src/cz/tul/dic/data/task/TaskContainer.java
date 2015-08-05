@@ -10,7 +10,6 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.result.Result;
-import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.data.task.loaders.InputLoader;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -44,7 +43,6 @@ public class TaskContainer extends Observable implements Serializable {
     private final Container<Set<AbstractROI>> rois;
     private final Container<Map<AbstractROI, Integer>> subsetSizes;
     private final Container<Map<AbstractROI, double[]>> deformationLimits;
-    private final Set<ExportTask> exports;
     private final Set<Hint> hints;
     // generated data
     private transient List<Image> images;
@@ -57,8 +55,7 @@ public class TaskContainer extends Observable implements Serializable {
         rois = new Container<>();
         subsetSizes = new Container<>();
         deformationLimits = new Container<>();
-        exports = new HashSet<>();
-        
+
         results = new CopyOnWriteArrayList<>();
         cumulativeResults = new ConcurrentHashMap<>();
         hints = EnumSet.noneOf(Hint.class);
@@ -72,8 +69,7 @@ public class TaskContainer extends Observable implements Serializable {
         rois = new Container<>(task.rois);
         subsetSizes = new Container<>(task.subsetSizes);
         deformationLimits = new Container<>(task.deformationLimits);
-        exports = new HashSet<>(task.exports);
-        
+
         results = new CopyOnWriteArrayList<>(task.results);
         cumulativeResults = new ConcurrentHashMap<>(task.cumulativeResults);
         hints = EnumSet.copyOf(task.hints);
@@ -258,14 +254,6 @@ public class TaskContainer extends Observable implements Serializable {
             result = null;
         }
         return result;
-    }
-
-    public void addExport(final ExportTask et) {
-        exports.add(et);
-    }
-
-    public Set<ExportTask> getExports() {
-        return exports;
     }
 
     public void clearResultData() {

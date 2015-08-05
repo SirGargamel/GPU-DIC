@@ -43,7 +43,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -294,31 +293,6 @@ public class MainWindow implements Initializable {
             stage.showAndWait();
         } catch (IOException e) {
             Logger.error("Error loading ROI dialog from JAR.\n{0}", e);
-        }
-    }
-
-    @FXML
-    private void handleButtonActionExport(ActionEvent event) {
-        try {
-            saveSubsetSize();
-            final FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExportEditor.fxml"));
-            loader.setResources(Lang.getBundle());
-            loader.setBuilderFactory(new JavaFXBuilderFactory());
-            final Parent root = loader.load();
-            final ExportEditor controller = loader.getController();
-            final Stage stage = new Stage();
-            stage.setTitle(Lang.getString("Exports"));
-            stage.setScene(new Scene(root));
-            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream(LOGO)));
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(imagePane.getScene().getWindow());
-            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, (WindowEvent event1) -> {
-                controller.actualizeExports();
-            });
-            stage.showAndWait();
-        } catch (IOException e) {
-            Logger.error("Error loading Export dialog from JAR.\n{0}", e);
         }
     }
 

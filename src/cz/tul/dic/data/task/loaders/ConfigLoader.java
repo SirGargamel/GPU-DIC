@@ -20,7 +20,6 @@ import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ public class ConfigLoader extends AbstractInputLoader {
 
     private static final String SUPPORTED_TYPES = "config";
     public static final String CONFIG_EMPTY = "NONE";
-    public static final String CONFIG_EXPORTS = "EXPORT_";
     public static final String CONFIG_INPUT = "INPUT";
     public static final String CONFIG_SEPARATOR = ";;";
     public static final String CONFIG_SEPARATOR_ARRAY = ";";
@@ -166,8 +164,6 @@ public class ConfigLoader extends AbstractInputLoader {
                         default:
                             throw new IllegalArgumentException("Unsupported task parameter - " + tp);
                     }
-                } else if (key.startsWith(CONFIG_EXPORTS)) {
-                    task.addExport(ExportTask.generateExportTask(value));
                 }
             } catch (IllegalArgumentException ex) {
                 Logger.error("Error parsing config file - {0} : {1}", key, value);

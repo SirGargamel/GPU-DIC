@@ -56,7 +56,6 @@ public class ConfigTest {
         Assert.assertEquals(ConfigType.TASK, configTask.getType());
 
         final TaskContainer task = TaskContainer.initTaskContainer(Paths.get(getClass().getResource("/resources/config/task.config").toURI()).toFile());
-        Assert.assertEquals(24, task.getExports().size());
 
         Assert.assertEquals(new File("D:/temp/.test spacing/6203652m/6203652m.avi.config__15_02_15.task"), task.getParameter(TaskParameter.IN));
         Assert.assertEquals(SubsetGeneratorMethod.EQUAL, task.getParameter(TaskParameter.FACET_GENERATOR_METHOD));

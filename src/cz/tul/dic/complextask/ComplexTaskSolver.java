@@ -24,14 +24,11 @@ import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.ExportTask;
-import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -139,7 +136,6 @@ public class ComplexTaskSolver extends Observable implements Observer {
                 futures.add(Engine.getInstance().getExecutorService().submit(new OverlapComputation(tc, baseR, nextR, strain)));
             }
 
-            exportRound(tc, r);
             bottomShifts.add(crm.getShiftBottom());
         }
 
@@ -161,12 +157,6 @@ public class ComplexTaskSolver extends Observable implements Observer {
             }
         } catch (InterruptedException | ExecutionException | NullPointerException ex) {
             Logger.warn(ex);
-        }
-
-        try {
-            Exporter.export(tc);
-        } catch (IOException ex) {
-            throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
 
         try {
@@ -221,21 +211,6 @@ public class ComplexTaskSolver extends Observable implements Observer {
             }
         }
         return data;
-    }
-
-    private void exportRound(final TaskContainer tc, final int round) throws ComputationException {
-        Iterator<ExportTask> it = tc.getExports().iterator();
-        ExportTask et;
-        while (it.hasNext()) {
-            et = it.next();
-            if (et.getMode().equals(ExportMode.MAP) && et.getDataParams()[0] == round && !isStrainExport(et)) {
-                try {
-                    Exporter.export(tc, et);
-                } catch (IOException ex) {
-                    throw new ComputationException(ComputationExceptionCause.IO, ex);
-                }
-            }
-        }
     }
 
     private boolean isStrainExport(ExportTask et) {

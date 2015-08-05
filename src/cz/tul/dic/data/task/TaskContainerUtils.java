@@ -16,7 +16,6 @@ import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.data.task.loaders.ConfigLoader;
-import cz.tul.dic.output.ExportTask;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -150,12 +149,6 @@ public final class TaskContainerUtils {
             } else if (val != null) {
                 config.put(ConfigLoader.CONFIG_PARAMETERS.concat(tp.name()), val.toString());
             }
-        }
-        // exports
-        int i = 0;
-        for (ExportTask et : tc.getExports()) {
-            config.put(ConfigLoader.CONFIG_EXPORTS.concat(Integer.toString(i)), et.toString());
-            i++;
         }
 
         config.save(out);
