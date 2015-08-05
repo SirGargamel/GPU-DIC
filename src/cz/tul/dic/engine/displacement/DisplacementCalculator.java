@@ -71,9 +71,12 @@ public abstract class DisplacementCalculator {
             final double[][][] resultData = new double[width][height][];
 
             final List<double[][][]> resultsCascade = findResultsCascade(tc, roundFrom, roundTo);
-            
+
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
+                    if (resultData[x][y] == null) {
+                        continue;
+                    }
                     computeDisplacement(resultsCascade, resultData, x, y);
                 }
             }
@@ -104,24 +107,24 @@ public abstract class DisplacementCalculator {
 
         return result;
     }
-    
+
     private static void computeDisplacement(final List<double[][][]> resultsCascade, final double[][][] resultData, int x, int y) {
         double posX = x;
         double posY = y;
-        
+
         double[] val;
         for (double[][][] data : resultsCascade) {
             val = interpolate(posX, posY, data);
             posX += val[Coordinates.X];
             posY += val[Coordinates.Y];
-            
+
             if (posX < 0 || posY < 0 || posX > data.length - 1 || posY > data[0].length - 1) {
                 break;
             }
         }
-        
+
         resultData[x][y] = new double[]{posX - x, posY - y};
-    }    
+    }
 
     private static double[] interpolate(final double x, final double y, final double[][][] data) {
         if (data.length == 0 || data[0].length == 0) {
