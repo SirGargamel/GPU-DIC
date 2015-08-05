@@ -22,9 +22,9 @@ import java.io.File;
 public enum TaskParameter {
 
     IN(File.class),
-    FACET_GENERATOR_METHOD(SubsetGeneratorMethod.class),
-    FACET_GENERATOR_PARAM(Integer.class),
-    FACET_SIZE(Integer.class),
+    SUBSET_GENERATOR_METHOD(SubsetGeneratorMethod.class),
+    SUBSET_GENERATOR_PARAM(Integer.class),
+    SUBSET_SIZE(Integer.class),
     FPS(Integer.class),
     KERNEL(KernelType.class),    
     TASK_SPLIT_METHOD(TaskSplitMethod.class),

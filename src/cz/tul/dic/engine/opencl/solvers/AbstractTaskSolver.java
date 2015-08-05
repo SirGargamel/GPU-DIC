@@ -143,11 +143,11 @@ public abstract class AbstractTaskSolver extends Observable {
                     } else if (bestSubResult != null) {
                         bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
                         // store result
-                        final int globalFacetIndex = fullTask.getSubsets().indexOf(ct.getSubsets().get(0));
-                        if (globalFacetIndex < 0) {
+                        final int globalSubsetIndex = fullTask.getSubsets().indexOf(ct.getSubsets().get(0));
+                        if (globalSubsetIndex < 0) {
                             throw new IllegalArgumentException("Local subset not found in global registry.");
                         }
-                        result.set(globalFacetIndex, bestSubResult);
+                        result.set(globalSubsetIndex, bestSubResult);
                         bestSubResult = null;
                     } else {
                         pickBestResultsForTask(ct, result, fullTask.getSubsets());

@@ -308,9 +308,9 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void drawFacetQualityStatistics(final Map<AbstractROI, List<AbstractSubset>> allSubsets, final int roundFrom, final int roundTo) throws ComputationException {
-        if (get(Types.FACET_QUALITY)) {
-            final File out = new File(NameGenerator.generateQualityMapFacet(tc, roundTo));
+    public void drawSubsetQualityStatistics(final Map<AbstractROI, List<AbstractSubset>> allSubsets, final int roundFrom, final int roundTo) throws ComputationException {
+        if (get(Types.SUBSET_QUALITY)) {
+            final File out = new File(NameGenerator.generateQualityMapSubset(tc, roundTo));
             out.getParentFile().mkdirs();
 
             final Map<AbstractROI, List<CorrelationResult>> allResults = tc.getResult(roundFrom, roundTo).getCorrelations();
@@ -395,7 +395,7 @@ public class Stats implements IGPUResultsReceiver {
         GPU_RESULTS,
         DEF_USAGE,
         DEF_QUALITY,
-        FACET_QUALITY,
+        SUBSET_QUALITY,
         POINT_QUALITY,
         POINT_STATS,
         REGRESSION_QUALITY

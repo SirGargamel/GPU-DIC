@@ -215,10 +215,10 @@ public final class TaskContainerUtils {
         if (roundCount < 1) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No rounds for computation.");
         }
-        final Object fs = tc.getParameter(TaskParameter.FACET_SIZE);
+        final Object fs = tc.getParameter(TaskParameter.SUBSET_SIZE);
         if (fs == null) {
             Logger.info("Adding default subset size.");
-            tc.setParameter(TaskParameter.FACET_SIZE, TaskDefaultValues.DEFAULT_SUBSET_SIZE);
+            tc.setParameter(TaskParameter.SUBSET_SIZE, TaskDefaultValues.DEFAULT_SUBSET_SIZE);
         }
         final Object dl = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
         if (dl == null) {
@@ -264,15 +264,15 @@ public final class TaskContainerUtils {
             Logger.info("Adding default kernel.");
             tc.setParameter(TaskParameter.KERNEL, WorkSizeManager.getBestKernel());
         }
-        final Object subsetGenMode = tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
+        final Object subsetGenMode = tc.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD);
         if (subsetGenMode == null) {
             Logger.info("Adding default subset generator.");
-            tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, TaskDefaultValues.DEFAULT_FACET_GENERATOR);
+            tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, TaskDefaultValues.DEFAULT_SUBSET_GENERATOR);
         }
-        final Object subsetGenModeParam = tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM);
+        final Object subsetGenModeParam = tc.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM);
         if (subsetGenModeParam == null) {
             Logger.info("Adding default subset generator.");
-            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, TaskDefaultValues.DEFAULT_SUBSET_SPACING);
+            tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, TaskDefaultValues.DEFAULT_SUBSET_SPACING);
         }
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
         if (interpolation == null) {

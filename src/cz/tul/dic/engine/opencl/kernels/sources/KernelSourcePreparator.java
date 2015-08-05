@@ -27,7 +27,7 @@ public class KernelSourcePreparator {
     public static final String KERNEL_EXTENSION = ".cl";
     private static final String REPLACE_CORRELATION = "%CORR%";
     private static final String REPLACE_EXTENSION = ".source";
-    private static final String REPLACE_FACET_SIZE = "-1";
+    private static final String REPLACE_SUBSET_SIZE = "-1";
     private static final String REPLACE_DELTA = "%C&S%";
     private static final String REPLACE_DEFORMATION_X = "%DEF_X%";
     private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";
@@ -54,7 +54,7 @@ public class KernelSourcePreparator {
             kp.loadKernel();                        
             kp.prepareCorrelation(usesVectorization);
             kp.prepareDeltaAndStore();
-            kp.prepareFacetSize(subsetSize);
+            kp.prepareSubsetSize(subsetSize);
             kp.prepareDeformations(deg, usesVectorization);
             kp.prepareInterpolation(interpolation, usesImage);
             return kp.kernel;
@@ -74,8 +74,8 @@ public class KernelSourcePreparator {
         }
     }
 
-    private void prepareFacetSize(final int subsetSize) {
-        kernel = kernel.replaceAll(REPLACE_FACET_SIZE, Integer.toString(subsetSize));
+    private void prepareSubsetSize(final int subsetSize) {
+        kernel = kernel.replaceAll(REPLACE_SUBSET_SIZE, Integer.toString(subsetSize));
     }
 
     private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization) throws ComputationException {

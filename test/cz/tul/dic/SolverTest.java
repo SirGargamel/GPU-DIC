@@ -111,9 +111,9 @@ public class SolverTest {
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
-        task.setParameter(TaskParameter.FACET_SIZE, 20);
-        task.setParameter(TaskParameter.FACET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
-        task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 40);
+        task.setParameter(TaskParameter.SUBSET_SIZE, 20);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
         task.setParameter(TaskParameter.SOLVER, solver);
 
         Engine.getInstance().computeTask(task);

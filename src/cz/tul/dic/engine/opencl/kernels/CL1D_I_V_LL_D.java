@@ -57,16 +57,16 @@ public class CL1D_I_V_LL_D extends Kernel {
                 .putArg(0L);
         kernelDIC.rewind();
         // copy data and execute kernel
-        wsm.setMaxFacetCount(subsetCount);
+        wsm.setMaxSubsetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        long subsetGlobalWorkSize, subsetSubCount = 1, deformationSubCount, groupCountPerFacet;
+        long subsetGlobalWorkSize, subsetSubCount = 1, deformationSubCount, groupCountPerSubset;
         long time;
         CLEvent event;
-        long currentBaseFacet = 0, currentBaseDeformation;
+        long currentBaseSubset = 0, currentBaseDeformation;
         int counter = 0;
         CLEventList eventList = new CLEventList(subsetCount);
-        while (currentBaseFacet < subsetCount) {
+        while (currentBaseSubset < subsetCount) {
             currentBaseDeformation = 0;
 
             while (currentBaseDeformation < deformationCount) {
@@ -78,19 +78,19 @@ public class CL1D_I_V_LL_D extends Kernel {
                     return;
                 }
 
-                subsetSubCount = Math.min(wsm.getFacetCount(), subsetCount - currentBaseFacet);
+                subsetSubCount = Math.min(wsm.getSubsetCount(), subsetCount - currentBaseSubset);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
                 subsetGlobalWorkSize = Kernel.roundUp(lws0, deformationSubCount) * subsetSubCount;
 
-                groupCountPerFacet = deformationSubCount / lws0;
+                groupCountPerSubset = deformationSubCount / lws0;
                 if (deformationCount % lws0 > 0) {
-                    groupCountPerFacet++;
+                    groupCountPerSubset++;
                 }
 
-                kernelDIC.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerFacet);
+                kernelDIC.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerSubset);
                 kernelDIC.setArg(ARGUMENT_INDEX_F_COUNT, subsetSubCount);
-                kernelDIC.setArg(ARGUMENT_INDEX_F_BASE, currentBaseFacet);
+                kernelDIC.setArg(ARGUMENT_INDEX_F_BASE, currentBaseSubset);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
                 queue.put1DRangeKernel(kernelDIC, 0, subsetGlobalWorkSize, lws0, eventList);
@@ -104,7 +104,7 @@ public class CL1D_I_V_LL_D extends Kernel {
                 counter++;
             }
 
-            currentBaseFacet += subsetSubCount;
+            currentBaseSubset += subsetSubCount;
         }
 
         eventList.release();

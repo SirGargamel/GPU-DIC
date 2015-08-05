@@ -42,8 +42,8 @@ public class CircleROIManager extends ROIManager {
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 1);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 1);
         tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
         tc.addHint(Hint.NO_STRAIN);
         tc.addHint(Hint.NO_CUMULATIVE);

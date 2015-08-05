@@ -44,7 +44,7 @@ public final class SquareSubset2D extends AbstractSubset {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("Facet -- loc : ");
+        sb.append("Subset -- ");
         sb.append(Arrays.toString(getCenter()));
         sb.append(", size : ");
         sb.append(getSize());

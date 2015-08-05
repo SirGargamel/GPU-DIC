@@ -52,7 +52,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
             upperBound = Math.min(upperBound, height - 1);
             counters.clear();
 
-            prepareDeformedFacetsToCounters(correlationResults, allSubsets, resultQuality, lowerBound, upperBound, counters);
+            prepareDeformedSubsetsToCounters(correlationResults, allSubsets, resultQuality, lowerBound, upperBound, counters);
 
             calculateDisplacementFromCounters(counters, tc, round);
         }
@@ -60,7 +60,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
         return new DisplacementResult(finalDisplacement, finalQuality);
     }
 
-    private void prepareDeformedFacetsToCounters(
+    private void prepareDeformedSubsetsToCounters(
             final Map<AbstractROI, List<CorrelationResult>> correlationResults, 
             final Map<AbstractROI, List<AbstractSubset>> allSubsets, final double resultQuality, 
             final int lowerBound, final int upperBound, 
@@ -71,7 +71,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
         double[] d;
         double qualitySum;
         AbstractSubset f;
-        Map<int[], double[]> deformedFacet;
+        Map<int[], double[]> deformedSubset;
         int x;
         int y;
         for (AbstractROI roi : correlationResults.keySet()) {
@@ -95,12 +95,12 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                     Logger.warn("No subset - {0}", f);
                     continue;
                 }
-                if (!SubsetUtils.areLinesInsideFacet(f, lowerBound, upperBound)) {
+                if (!SubsetUtils.areLinesInsideSubset(f, lowerBound, upperBound)) {
                     continue;
                 }
 
-                deformedFacet = SubsetUtils.deformFacet(f, d);
-                for (Map.Entry<int[], double[]> e : deformedFacet.entrySet()) {
+                deformedSubset = SubsetUtils.deformSubset(f, d);
+                for (Map.Entry<int[], double[]> e : deformedSubset.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];
 

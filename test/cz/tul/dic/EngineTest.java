@@ -136,13 +136,13 @@ public class EngineTest {
         tc.addHint(Hint.NO_STATS);
 
         tc.setParameter(TaskParameter.IN, input.get(0));
-        tc.setParameter(TaskParameter.FACET_SIZE, 5);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 11);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, 5);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 11);
         tc.setParameter(TaskParameter.KERNEL, kernel);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
         tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, taskSplit);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, fgm);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, fgm);
         tc.setParameter(TaskParameter.SOLVER, solver);
 
         return tc;
@@ -197,7 +197,7 @@ public class EngineTest {
         tc.addHint(Hint.NO_STATS);
 
         tc.setParameter(TaskParameter.IN, input.get(0));
-        tc.setParameter(TaskParameter.FACET_SIZE, 5);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, 5);
         tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
 
         return tc;
@@ -294,7 +294,7 @@ public class EngineTest {
         sb.append("; ");
         sb.append(tc.getParameter(TaskParameter.TASK_SPLIT_METHOD));
         sb.append("; ");
-        sb.append(tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD));
+        sb.append(tc.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD));
         sb.append("; ");
         sb.append(tc.getParameter(TaskParameter.SOLVER));
         sb.append("; ");
@@ -320,7 +320,7 @@ public class EngineTest {
     }
 
     @Test
-    public void testEngineMultiFacet() throws IOException, URISyntaxException, ComputationException {
+    public void testEngineMultiSubset() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/engine/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
@@ -333,7 +333,7 @@ public class EngineTest {
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, DEF_FIRST_F);
         tc.setParameter(TaskParameter.IN, input.get(0));
-        tc.setParameter(TaskParameter.FACET_SIZE, fs);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
 
         TaskContainerUtils.checkTaskValidity(tc);
 
@@ -344,27 +344,27 @@ public class EngineTest {
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
         Map<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
-        final List<AbstractSubset> roiFacets = new ArrayList<>(4);
-        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        subsets.put(roi, roiFacets);
+        final List<AbstractSubset> roiSubsets = new ArrayList<>(4);
+        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        subsets.put(roi, roiSubsets);
 
         final Map<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
                         new FullTask(
                                 tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                                roiFacets,
-                                generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size())),
+                                roiSubsets,
+                                generateDeformations(tc.getDeformationLimits(ROUND, roi), roiSubsets.size())),
                         tc.getSubsetSize(ROUND, roi)));
         solver.endTask();
 
         final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, subsets, tc, ROUND);
         tc.setResult(ROUND, ROUND + 1, new Result(results, displacement));
 
-        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
+        Assert.assertEquals(roiSubsets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
         Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
     }
 
@@ -373,7 +373,7 @@ public class EngineTest {
     }
 
     @Test
-    public void testEngineMultiFacetLarge() throws IOException, URISyntaxException, ComputationException {
+    public void testEngineMultiSubsetLarge() throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/engine/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
@@ -386,7 +386,7 @@ public class EngineTest {
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, DEF_LARGE);
         tc.setParameter(TaskParameter.IN, input.get(0));
-        tc.setParameter(TaskParameter.FACET_SIZE, fs);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
 
         TaskContainerUtils.checkTaskValidity(tc);
 
@@ -397,25 +397,25 @@ public class EngineTest {
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
         Map<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
-        final List<AbstractSubset> roiFacets = new ArrayList<>(4);
-        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        roiFacets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        subsets.put(roi, roiFacets);
+        final List<AbstractSubset> roiSubsets = new ArrayList<>(4);
+        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        subsets.put(roi, roiSubsets);
 
         final Map<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
                         new FullTask(
                                 tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                                roiFacets,
-                                generateDeformations(tc.getDeformationLimits(ROUND, roi), roiFacets.size())),
+                                roiSubsets,
+                                generateDeformations(tc.getDeformationLimits(ROUND, roi), roiSubsets.size())),
                         tc.getSubsetSize(ROUND, roi)));
         solver.endTask();
 
         final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, subsets, tc, ROUND);
         tc.setResult(ROUND, ROUND + 1, new Result(results, displacement));
 
-        Assert.assertEquals(roiFacets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
+        Assert.assertEquals(roiSubsets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
         Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
 
         final List<CorrelationResult> computedResults = tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi);

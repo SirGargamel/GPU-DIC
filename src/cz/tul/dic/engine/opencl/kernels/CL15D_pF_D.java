@@ -53,18 +53,18 @@ public class CL15D_pF_D extends Kernel {
                 .putArg(0);
         kernelDIC.rewind();
         // copy data and execute kernel
-        wsm.setMaxFacetCount(subsetCount);
+        wsm.setMaxSubsetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
         long globalWorkSize, deformationSubCount;
         long time;
         CLEvent event;
-        int currentBaseFacet = 0, currentBaseDeformation;
+        int currentBaseSubset = 0, currentBaseDeformation;
         int counter = 0;
         CLEventList eventList = new CLEventList(subsetCount);
-        while (currentBaseFacet < subsetCount) {
+        while (currentBaseSubset < subsetCount) {
             currentBaseDeformation = 0;
-            kernelDIC.setArg(ARGUMENT_INDEX_F_INDEX, currentBaseFacet);
+            kernelDIC.setArg(ARGUMENT_INDEX_F_INDEX, currentBaseSubset);
 
             while (currentBaseDeformation < deformationCount) {
                 if (counter == eventList.capacity()) {
@@ -92,7 +92,7 @@ public class CL15D_pF_D extends Kernel {
                 counter++;
             }
 
-            currentBaseFacet += 1;
+            currentBaseSubset += 1;
         }
 
         eventList.release();

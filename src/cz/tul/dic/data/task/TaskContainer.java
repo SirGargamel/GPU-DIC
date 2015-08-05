@@ -176,7 +176,7 @@ public class TaskContainer extends Observable implements Serializable {
         if (m != null && m.containsKey(roi)) {
             result = m.get(roi);
         } else {
-            result = (int) getParameter(TaskParameter.FACET_SIZE);
+            result = (int) getParameter(TaskParameter.SUBSET_SIZE);
         }
         return result;
     }

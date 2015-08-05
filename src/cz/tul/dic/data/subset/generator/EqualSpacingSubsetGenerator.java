@@ -21,8 +21,8 @@ import java.util.Set;
 public class EqualSpacingSubsetGenerator extends AbstractSubsetGenerator {
 
     @Override
-    public Map<AbstractROI, List<AbstractSubset>> generateFacets(TaskContainer tc, int round) throws ComputationException {
-        final Object o = tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM);
+    public Map<AbstractROI, List<AbstractSubset>> generateSubsets(TaskContainer tc, int round) throws ComputationException {
+        final Object o = tc.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No subset generator spacing.");
         }

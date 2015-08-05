@@ -46,9 +46,9 @@ public class ComplexTaskTest {
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
-        tc.setParameter(TaskParameter.FACET_SIZE, 15);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 40);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, 15);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
 
         final ComplexTaskSolver cts = new ComplexTaskSolver();
         assert (!cts.isValidComplexTask(tc));

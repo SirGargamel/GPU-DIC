@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public abstract class AbstractSubsetGenerator {
 
-    public abstract Map<AbstractROI, List<AbstractSubset>> generateFacets(final TaskContainer tc, final int round) throws ComputationException;
+    public abstract Map<AbstractROI, List<AbstractSubset>> generateSubsets(final TaskContainer task, final int round) throws ComputationException;
     
     public abstract SubsetGeneratorMethod getMode();
     

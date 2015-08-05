@@ -36,9 +36,9 @@ public class SubsetGenerator {
     }
 
     public static Map<AbstractROI, List<AbstractSubset>> generateSubsets(final TaskContainer tc, final int round) throws ComputationException {
-        final SubsetGeneratorMethod mode = (SubsetGeneratorMethod) tc.getParameter(TaskParameter.FACET_GENERATOR_METHOD);
+        final SubsetGeneratorMethod mode = (SubsetGeneratorMethod) tc.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD);
         if (generators.containsKey(mode)) {
-            final Map<AbstractROI, List<AbstractSubset>> result = generators.get(mode).generateFacets(tc, round);
+            final Map<AbstractROI, List<AbstractSubset>> result = generators.get(mode).generateSubsets(tc, round);
             final StringBuilder sb = new StringBuilder();
             for (Entry<AbstractROI, List<AbstractSubset>> e : result.entrySet()) {
                 sb.append(e.getKey().toString());

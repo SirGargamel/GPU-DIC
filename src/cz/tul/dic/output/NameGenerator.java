@@ -27,7 +27,7 @@ public final class NameGenerator {
     private static final String TEXT_GPU_RESULTS = "gpuResults";
     private static final String TEXT_QUALITY_DEFORMATION = "deformationQuality";
     private static final String TEXT_QUALITY_DEFORMATION_BOOL = "deformationQualityBool";
-    private static final String TEXT_QUALITY_FACET = "correlationQualityFacet";
+    private static final String TEXT_QUALITY_SUBSET = "correlationQualitySubset";
     private static final String TEXT_QUALITY_POINT = "correlationQualityPoint";
     private static final String TEXT_QUALITY_REGRESSION = "regressionError";
     private static final String TEXT_HISTOGRAM = "histogram";
@@ -76,8 +76,8 @@ public final class NameGenerator {
         return generateMap(tc, round, dir).replace(EXT_MAP, EXT_CSV);
     }
 
-    public static String generateQualityMapFacet(final TaskContainer tc, final int round) {
-        return new Generator(tc).name(TEXT_QUALITY_FACET).time(round).text(TEXT_QUALITY_FACET).finalizeName(EXT_MAP);
+    public static String generateQualityMapSubset(final TaskContainer tc, final int round) {
+        return new Generator(tc).name(TEXT_QUALITY_SUBSET).time(round).text(TEXT_QUALITY_SUBSET).finalizeName(EXT_MAP);
     }
 
     public static String generateQualityMapPoint(final TaskContainer tc, final int round) {
@@ -164,10 +164,10 @@ public final class NameGenerator {
         public String finalizeName(final String extension) {
             sb.append(DELIMITER);
             sb.append(DELIMITER);
-            sb.append(Utils.format((int) tc.getParameter(TaskParameter.FACET_SIZE)));
+            sb.append(Utils.format((int) tc.getParameter(TaskParameter.SUBSET_SIZE)));
             if (debugMode) {
                 sb.append(DELIMITER);
-                sb.append(Utils.format((int) tc.getParameter(TaskParameter.FACET_GENERATOR_PARAM)));
+                sb.append(Utils.format((int) tc.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM)));
                 sb.append(DELIMITER);
                 sb.append(Utils.format((double) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM)));
             }

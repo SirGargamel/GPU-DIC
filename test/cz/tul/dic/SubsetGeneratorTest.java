@@ -27,7 +27,7 @@ import org.junit.Test;
  *
  * @author Petr Ječmen
  */
-public class FacetGeneratorTest {
+public class SubsetGeneratorTest {
 
     private static final int ROUND = 0;
     private static final AbstractROI ROI_FULL = new RectangleROI(0, 0, 28, 28);
@@ -65,9 +65,9 @@ public class FacetGeneratorTest {
 
         tc.addRoi(ROUND, roi);
 
-        tc.setParameter(TaskParameter.FACET_SIZE, subsetSize);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, mode);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, spacing);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, subsetSize);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, mode);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, spacing);
 
         return tc;
     }

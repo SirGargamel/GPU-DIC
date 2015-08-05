@@ -40,8 +40,8 @@ public abstract class AbstractOpenCLMemoryManager {
     protected long maxDeformationCount;
     // OpenCL entities
     protected CLMemory<IntBuffer> clImageA, clImageB;
-    protected CLBuffer<IntBuffer> clFacetData;
-    protected CLBuffer<FloatBuffer> clFacetCenters;
+    protected CLBuffer<IntBuffer> clSubsetData;
+    protected CLBuffer<FloatBuffer> clSubsetCenters;
     protected CLBuffer<FloatBuffer> clDeformationLimits;
     protected CLBuffer<LongBuffer> clDefStepCount;
     protected CLBuffer<FloatBuffer> clResults;
@@ -96,7 +96,7 @@ public abstract class AbstractOpenCLMemoryManager {
         return result;
     }
 
-    protected CLBuffer<IntBuffer> generateFacetData(final List<AbstractSubset> subsets, final boolean useMemoryCoalescing) {
+    protected CLBuffer<IntBuffer> generateSubsetData(final List<AbstractSubset> subsets, final boolean useMemoryCoalescing) {
         final int subsetSize = subsets.get(0).getSize();
         final int subsetArea = SubsetUtils.computeSubsetCoordCount(subsetSize);
         final int dataSize = subsetArea * Coordinates.DIMENSION;
@@ -130,7 +130,7 @@ public abstract class AbstractOpenCLMemoryManager {
         return result;
     }
 
-    protected CLBuffer<FloatBuffer> generateFacetCenters(final List<AbstractSubset> subsets) {
+    protected CLBuffer<FloatBuffer> generateSubsetCenters(final List<AbstractSubset> subsets) {
         final int dataSize = Coordinates.DIMENSION;
         final float[] data = new float[subsets.size() * dataSize];
 
@@ -186,8 +186,8 @@ public abstract class AbstractOpenCLMemoryManager {
     public void clearMemory() {
         release(clDefStepCount);
         release(clDeformationLimits);
-        release(clFacetCenters);
-        release(clFacetData);
+        release(clSubsetCenters);
+        release(clSubsetData);
         release(clImageA);
         release(clImageB);
         release(clResults);
@@ -201,12 +201,12 @@ public abstract class AbstractOpenCLMemoryManager {
         return clImageB;
     }
 
-    public CLBuffer<IntBuffer> getClFacetData() {
-        return clFacetData;
+    public CLBuffer<IntBuffer> getClSubsetData() {
+        return clSubsetData;
     }
 
-    public CLBuffer<FloatBuffer> getClFacetCenters() {
-        return clFacetCenters;
+    public CLBuffer<FloatBuffer> getClSubsetCenters() {
+        return clSubsetCenters;
     }
 
     public CLBuffer<FloatBuffer> getClDeformationLimits() {

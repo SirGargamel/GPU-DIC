@@ -425,7 +425,7 @@ public class MainWindow implements Initializable {
             final int fs = Integer.parseInt(text);
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
-                tc.setParameter(TaskParameter.FACET_SIZE, fs);
+                tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
             }
         }
     }
@@ -437,7 +437,7 @@ public class MainWindow implements Initializable {
         comboScenario.setItems(comboScenarioData);
         comboScenario.valueProperty().addListener((ObservableValue<? extends Scenario> observable, Scenario oldValue, Scenario newValue) -> {
             final TaskContainer tc = Context.getInstance().getTc();
-            tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, newValue.getFacetSpacing());
+            tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, newValue.getSubsetSpacing());
         });
         comboScenario.setConverter(new StringConverter<Scenario>() {
 
@@ -632,7 +632,7 @@ public class MainWindow implements Initializable {
             this.subsetSpacing = subsetSpacing;
         }
 
-        public int getFacetSpacing() {
+        public int getSubsetSpacing() {
             return subsetSpacing;
         }
 
@@ -721,7 +721,7 @@ public class MainWindow implements Initializable {
                                 boxRight.getPrefHeight());
                         imagePane.getScene().getWindow().setHeight(size);
 
-                        final Object o = tc.getParameter(TaskParameter.FACET_SIZE);
+                        final Object o = tc.getParameter(TaskParameter.SUBSET_SIZE);
                         if (o != null) {
                             textFs.setText(o.toString());
                         }

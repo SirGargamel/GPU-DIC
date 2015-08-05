@@ -61,9 +61,9 @@ public class DisplacementCalculatorTest {
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformation.getDeformation());
 
-        tc.setParameter(TaskParameter.FACET_SIZE, 11);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
-        tc.setParameter(TaskParameter.FACET_GENERATOR_PARAM, 11);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, 11);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 11);
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DisplacementCalculation.MAX_WEIGHTED_AVERAGE);
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);
         tc.setParameter(TaskParameter.RESULT_QUALITY, 0.5);

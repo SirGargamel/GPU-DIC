@@ -61,16 +61,16 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
             }
 
             boolean changedResults = false;
-            if (task.getSubsets() != subsets || !task.getSubsets().equals(subsets) || clFacetData.isReleased()) {
-                release(clFacetData);
-                release(clFacetCenters);
+            if (task.getSubsets() != subsets || !task.getSubsets().equals(subsets) || clSubsetData.isReleased()) {
+                release(clSubsetData);
+                release(clSubsetCenters);
                 subsets = task.getSubsets();
 
-                clFacetData = generateFacetData(subsets, kernel.usesMemoryCoalescing());
-                queue.putWriteBuffer(clFacetData, false);
+                clSubsetData = generateSubsetData(subsets, kernel.usesMemoryCoalescing());
+                queue.putWriteBuffer(clSubsetData, false);
 
-                clFacetCenters = generateFacetCenters(subsets);
-                queue.putWriteBuffer(clFacetCenters, false);
+                clSubsetCenters = generateSubsetCenters(subsets);
+                queue.putWriteBuffer(clSubsetCenters, false);
 
                 changedResults = true;
             }

@@ -43,7 +43,7 @@ public final class WorkSizeManager {
     private static final KernelType BEST_KERNEL;
     private static final Map<KernelType, Map<Long, Map<Long, Long>>> TIME_DATA;
     private final KernelType kernel;
-    private long workSizeF, workSizeD, maxF, maxD;
+    private long workSizeS, workSizeD, maxF, maxD;
 
     static {
         final String os = System.getProperty("os.name").toLowerCase();
@@ -114,15 +114,15 @@ public final class WorkSizeManager {
         return BEST_KERNEL;
     }
 
-    public long getFacetCount() {
-        return workSizeF;
+    public long getSubsetCount() {
+        return workSizeS;
     }
 
     public long getDeformationCount() {
         return workSizeD;
     }
 
-    public void setMaxFacetCount(final int max) {
+    public void setMaxSubsetCount(final int max) {
         this.maxF = max;
     }
 
@@ -131,7 +131,7 @@ public final class WorkSizeManager {
     }
 
     public void reset() {
-        workSizeF = INITIAL_WORK_SIZE_F;
+        workSizeS = INITIAL_WORK_SIZE_F;
         workSizeD = INITIAL_WORK_SIZE_D;
     }
 
@@ -150,7 +150,7 @@ public final class WorkSizeManager {
         if (!TIME_DATA.get(kernel).isEmpty()) {
             final long[] max = findMaxTimeValue();
             final long[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
-            workSizeF = newMax[0];
+            workSizeS = newMax[0];
             workSizeD = newMax[1];
         }
     }

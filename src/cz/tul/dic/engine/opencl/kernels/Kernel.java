@@ -139,7 +139,7 @@ public abstract class Kernel {
             final long maxDeformationCount = memManager.getMaxDeformationCount();
 
             runKernel(memManager.getClImageA(), memManager.getClImageB(),
-                    memManager.getClFacetData(), memManager.getClFacetCenters(),
+                    memManager.getClSubsetData(), memManager.getClSubsetCenters(),
                     memManager.getClDeformationLimits(), memManager.getClDefStepCount(),
                     clResults,
                     maxDeformationCount,

@@ -36,12 +36,12 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
                 queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageB, false);
             }
             
-            release(clFacetData);
-            release(clFacetCenters);
-            clFacetData = generateFacetData(task.getSubsets(), kernel.usesMemoryCoalescing());
-            queue.putWriteBuffer(clFacetData, false);
-            clFacetCenters = generateFacetCenters(task.getSubsets());
-            queue.putWriteBuffer(clFacetCenters, false);
+            release(clSubsetData);
+            release(clSubsetCenters);
+            clSubsetData = generateSubsetData(task.getSubsets(), kernel.usesMemoryCoalescing());
+            queue.putWriteBuffer(clSubsetData, false);
+            clSubsetCenters = generateSubsetCenters(task.getSubsets());
+            queue.putWriteBuffer(clSubsetCenters, false);
             
             release(clDeformationLimits);
             release(clDefStepCount);

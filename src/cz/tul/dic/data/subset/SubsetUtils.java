@@ -30,7 +30,7 @@ public final class SubsetUtils {
     private SubsetUtils() {
     }
 
-    public static Map<int[], double[]> deformFacet(final AbstractSubset subset, final double[] deformation) throws ComputationException {
+    public static Map<int[], double[]> deformSubset(final AbstractSubset subset, final double[] deformation) throws ComputationException {
         final int[] data = subset.getData();
         final double[] center = subset.getCenter();
         final int subsetArea = data.length / Coordinates.DIMENSION;
@@ -113,7 +113,7 @@ public final class SubsetUtils {
         return result;
     }
 
-    public static boolean isPointInsideFacet(final AbstractSubset f, final int x, final int y) {
+    public static boolean isPointInsideSubset(final AbstractSubset f, final int x, final int y) {
         boolean result = false;
 
         final int[] pointData = f.getData();
@@ -127,7 +127,7 @@ public final class SubsetUtils {
         return result;
     }
 
-    public static boolean areLinesInsideFacet(final AbstractSubset f, final int yStart, final int yEnd) {
+    public static boolean areLinesInsideSubset(final AbstractSubset f, final int yStart, final int yEnd) {
         boolean result = false;
 
         final int[] pointData = f.getData();

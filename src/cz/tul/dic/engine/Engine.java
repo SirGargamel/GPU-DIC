@@ -190,7 +190,7 @@ public final class Engine extends Observable implements Observer {
         if (DebugControl.isDebugMode()) {
             Stats.getInstance().dumpDeformationsStatisticsUsage(roundFrom);
             Stats.getInstance().dumpDeformationsStatisticsPerQuality(roundFrom);
-            Stats.getInstance().drawFacetQualityStatistics(subsets, roundFrom, roundTo);
+            Stats.getInstance().drawSubsetQualityStatistics(subsets, roundFrom, roundTo);
             Stats.getInstance().drawPointResultStatistics(roundFrom, roundTo);
         }
 

@@ -107,10 +107,10 @@ public class ConfigLoader extends AbstractInputLoader {
                         case IN:
                             task.setParameter(tp, new File(value));
                             break;
-                        case FACET_GENERATOR_METHOD:
+                        case SUBSET_GENERATOR_METHOD:
                             task.setParameter(tp, SubsetGeneratorMethod.valueOf(value));
                             break;
-                        case FACET_GENERATOR_PARAM:
+                        case SUBSET_GENERATOR_PARAM:
                             task.setParameter(tp, Integer.valueOf(value));
                             break;
                         case DEFORMATION_LIMITS:
@@ -125,7 +125,7 @@ public class ConfigLoader extends AbstractInputLoader {
                         case DISPLACEMENT_CALCULATION_PARAM:
                             task.setParameter(tp, Integer.valueOf(value));
                             break;
-                        case FACET_SIZE:
+                        case SUBSET_SIZE:
                             task.setParameter(tp, Integer.valueOf(value));
                             break;
                         case FPS:
