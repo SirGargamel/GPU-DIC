@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.QRDecomposition;
@@ -34,10 +33,9 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Ječmen
  */
-public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsReceiver {
+public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsReceiver {
 
-    private static final int COUNT_ZERO_ORDER_LIMITS = 6;
-    private static final int COUNT_STEP = 5;
+    private static final int COUNT_ZERO_ORDER_LIMITS = 6;    
     private static final int LIMITS_ROUNDS = 20;
     private static final double LIMIT_MIN_GROWTH = 0.001;
     private static final double LIMIT_DONE = 1 - LIMIT_MIN_GROWTH;
@@ -69,7 +67,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
         // estimate initial solution by direct search
-        performInitialResultEstimation(kernel, coeffCount);
+        performInitialResultEstimation(coeffCount);
         notifyProgress(subsetCount, subsetCount);
 
         // prepare data for NR solver        
@@ -98,8 +96,14 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
 
         return new ArrayList<>(results.values());
     }
+    
+    protected abstract int getSetpCountForOneDimension();
+    
+    protected abstract RealVector generateNegativeGradient(double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits);
+    
+    protected abstract RealMatrix generateHessianMatrix(double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits);
 
-    private void performInitialResultEstimation(final Kernel kernel, final int coeffCount) throws ComputationException {
+    private void performInitialResultEstimation(final int coeffCount) throws ComputationException {
         final List<AbstractSubset> subsets = fullTask.getSubsets();
         final int subsetCount = subsets.size();
 
@@ -119,7 +123,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             temp[DeformationLimit.VSTEP] = STEP_INITIAL;
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE).solve(new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), subsetSize);
+        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.COARSE_FINE).solve(new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), subsetSize);
         sb.append("Initial results, step [").append(STEP_INITIAL).append("]:");
         CorrelationResult paddedResult;
         for (int i = 0; i < subsetCount; i++) {
@@ -145,12 +149,12 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
         }
     }
 
-    private static double[] generateLimits(final double[] solution, final int coeffCount, final double step) {
-        final int halfStep = COUNT_STEP / 2;
+    private double[] generateLimits(final double[] solution, final int coeffCount, final double step) {
+        final int halfStepCount = getSetpCountForOneDimension() / 2;
         final double[] newLimits = new double[coeffCount * 3];
         for (int i = 0; i < coeffCount; i++) {
-            newLimits[i * 3] = solution[i] - halfStep * step;
-            newLimits[i * 3 + 1] = solution[i] + halfStep * step;
+            newLimits[i * 3] = solution[i] - halfStepCount * step;
+            newLimits[i * 3 + 1] = solution[i] + halfStepCount * step;
             newLimits[i * 3 + 2] = step;
         }
         return newLimits;
@@ -207,7 +211,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
     
     private int computeDeformationCount(final DeformationDegree defDegree) {
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
-        return (int) Math.pow(COUNT_STEP, coeffCount);
+        return (int) Math.pow(getSetpCountForOneDimension(), coeffCount);
     }
 
     private void extractResults(final List<AbstractSubset> subsetsToCompute, final int coeffCount) {
@@ -282,28 +286,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
 
     private double computeImprovement(final double oldResult, final double newResult) {
         return newResult - oldResult;
-    }
-
-    // central difference
-    protected RealVector generateNegativeGradient(double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits) {
-        final int coeffCount = counts.length - 1;
-        final double[] data = new double[coeffCount];
-
-        final int resultsBase = (int) (subsetIndex * deformationCount);
-        final int[] indices = prepareIndices(counts);
-        for (int i = 0; i < coeffCount; i++) {
-            // right index
-            indices[i]++;
-            data[i] = resultData[resultsBase + generateIndex(counts, indices)];
-            // left index
-            indices[i] -= 2;
-            data[i] -= resultData[resultsBase + generateIndex(counts, indices)];
-            data[i] /= 2 * deformationLimits[i * 3 + 2];
-            data[i] *= -1;
-            indices[i]++;
-        }
-        return new ArrayRealVector(data);
-    }
+    }        
 
     protected static int[] prepareIndices(final long[] counts) {
         final int[] indices = new int[counts.length - 1];
@@ -311,52 +294,7 @@ public class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsRece
             indices[i] = (int) (counts[i] / 2);
         }
         return indices;
-    }
-
-    protected RealMatrix generateHessianMatrix(double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits) {
-        final int coeffCount = counts.length - 1;
-        final double[][] data = new double[coeffCount][coeffCount];
-
-        final int resultsBase = (int) (subsetIndex * deformationCount);
-        final int[] indices = prepareIndices(counts);
-
-        // upper triangle approach
-        double step;
-        for (int i = 0; i < coeffCount; i++) {
-            step = deformationLimits[i * 3 + 2];
-
-            indices[i]++;
-            data[i][i] = resultData[resultsBase + generateIndex(counts, indices)];
-            indices[i] -= 2;
-            data[i][i] += resultData[resultsBase + generateIndex(counts, indices)];
-            indices[i]++;
-            data[i][i] -= 2 * resultData[resultsBase + generateIndex(counts, indices)];
-            data[i][i] /= step * step * 4;
-        }
-        for (int i = 0; i < coeffCount; i++) {
-            for (int j = i + 1; j < coeffCount; j++) {
-                indices[i]++;
-                indices[j]++;
-                data[i][j] = resultData[resultsBase + generateIndex(counts, indices)];
-                indices[i] -= 2;
-                indices[j] -= 2;
-                data[i][j] += resultData[resultsBase + generateIndex(counts, indices)];
-                indices[j] += 2;
-                data[i][j] -= resultData[resultsBase + generateIndex(counts, indices)];
-                indices[i] += 2;
-                indices[j] -= 2;
-                data[i][j] -= resultData[resultsBase + generateIndex(counts, indices)];
-                indices[i]--;
-                indices[j]++;
-
-                data[i][j] /= (deformationLimits[i * 3 + 2] + deformationLimits[j * 3 + 2]) * (deformationLimits[i * 3 + 2] + deformationLimits[j * 3 + 2]);
-                data[i][j] /= 4.0;
-                data[j][i] = data[i][j];
-            }
-        }
-
-        return new Array2DRowRealMatrix(data, false);
-    }
+    }    
 
     @Override
     public void dumpGpuResults(double[] resultData, List<AbstractSubset> subsets, List<double[]> deformationLimits) {

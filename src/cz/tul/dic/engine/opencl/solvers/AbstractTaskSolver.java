@@ -60,7 +60,7 @@ public abstract class AbstractTaskSolver extends Observable {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.warn("Error instantiating class {0}, using default correlation calculator.", type);
             Logger.error(ex);
-            return new NewtonRaphson();
+            return new NewtonRaphsonCentral();
         }
     }
 

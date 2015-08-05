@@ -13,7 +13,7 @@ public enum Solver {
 
     BRUTE_FORCE("BruteForce"),
     COARSE_FINE("CoarseFine"),
-    NEWTON_RHAPSON("NewtonRaphson"),
+    NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral"),
     NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward"),
     ;
     

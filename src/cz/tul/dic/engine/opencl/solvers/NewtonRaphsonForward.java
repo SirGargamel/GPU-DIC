@@ -16,6 +16,8 @@ import org.apache.commons.math3.linear.RealVector;
  */
 public class NewtonRaphsonForward extends NewtonRaphson {
 
+    private static final int COUNT_STEP = 5;
+
     @Override
     protected RealVector generateNegativeGradient(final double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits) {
         final int coeffCount = counts.length - 1;
@@ -67,6 +69,11 @@ public class NewtonRaphsonForward extends NewtonRaphson {
         }
 
         return new Array2DRowRealMatrix(data);
+    }
+
+    @Override
+    protected int getSetpCountForOneDimension() {
+        return COUNT_STEP;
     }
 
 }
