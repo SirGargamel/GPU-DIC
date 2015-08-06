@@ -84,9 +84,7 @@ public class MainWindow implements Initializable {
     @FXML
     private Button buttonROI;
     @FXML
-    private Button buttonExpert;
-    @FXML
-    private Button buttonExport;
+    private Button buttonExpert;    
     @FXML
     private Button buttonPrev;
     @FXML
@@ -526,8 +524,7 @@ public class MainWindow implements Initializable {
     }
 
     private void adjustConfigButtons(final boolean disabled) {
-        buttonExpert.setDisable(disabled);
-        buttonExport.setDisable(disabled);
+        buttonExpert.setDisable(disabled);        
         buttonRealSize.setDisable(disabled);
         buttonROI.setDisable(disabled);
         buttonRun.setDisable(disabled);
