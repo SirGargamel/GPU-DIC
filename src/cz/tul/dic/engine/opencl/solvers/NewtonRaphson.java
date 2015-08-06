@@ -35,18 +35,17 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsReceiver {
 
-    private static final int COUNT_ZERO_ORDER_LIMITS = 6;    
+    private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final int LIMITS_ROUNDS = 20;
     private static final double LIMIT_MIN_GROWTH = 0.001;
     private static final double LIMIT_DONE = 1 - LIMIT_MIN_GROWTH;
     private static final double STEP_INITIAL = 0.1;
     private static final double STEP_FIRST = 0.001;
     private static final double STEP_SECOND = 0.0001;
-    private FullTask fullTask;
-    private Map<AbstractSubset, CorrelationResult> results;
-    private Map<AbstractSubset, double[]> limits;
-    private Map<AbstractSubset, long[]> limitsCounts;
-    private double[] gpuData;
+    protected FullTask fullTask;
+    protected Map<AbstractSubset, CorrelationResult> results;
+    protected Map<AbstractSubset, double[]> limits;
+    protected double[] gpuData;
 
     @Override
     public List<CorrelationResult> solve(
@@ -61,7 +60,6 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
         results = new LinkedHashMap<>(subsetCount);
         limits = new LinkedHashMap<>(subsetCount);
-        limitsCounts = new LinkedHashMap<>(subsetCount);
 
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
@@ -96,12 +94,12 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
         return new ArrayList<>(results.values());
     }
-    
+
     protected abstract int getSetpCountForOneDimension();
-    
-    protected abstract RealVector generateNegativeGradient(double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits);
-    
-    protected abstract RealMatrix generateHessianMatrix(double[] resultData, final int subsetIndex, final long deformationCount, final long[] counts, final double[] deformationLimits);
+
+    protected abstract RealVector generateNegativeGradient(final AbstractSubset subset) throws ComputationException;
+
+    protected abstract RealMatrix generateHessianMatrix(final AbstractSubset subset) throws ComputationException;
 
     private void performInitialResultEstimation(final int coeffCount) throws ComputationException {
         final List<AbstractSubset> subsets = fullTask.getSubsets();
@@ -145,7 +143,6 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         for (AbstractSubset subset : subsets) {
             newLimits = generateLimits(results.get(subset).getDeformation(), coeffCount, STEP_FIRST);
             limits.put(subset, newLimits);
-            limitsCounts.put(subset, DeformationUtils.generateDeformationCounts(newLimits));
         }
     }
 
@@ -176,19 +173,16 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         DecompositionSolver solver;
         double[] solution;
 
-        int subsetIndexLocal = 0;
-
         final List<double[]> localLimits = new ArrayList<>(subsetsToCompute.size());
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
-        final int deformationCount = computeDeformationCount(defDegree);
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
             try {
                 as = it.next();
                 // prepare data for computation
-                negativeGradient = generateNegativeGradient(gpuData, subsetIndexLocal, deformationCount, limitsCounts.get(as), limits.get(as));
-                hessianMatrix = generateHessianMatrix(gpuData, subsetIndexLocal, deformationCount, limitsCounts.get(as), limits.get(as));
+                negativeGradient = generateNegativeGradient(as);
+                hessianMatrix = generateHessianMatrix(as);
                 // calculate next step
                 solver = new QRDecomposition(hessianMatrix).getSolver();
                 solutionVec = solver.solve(negativeGradient);
@@ -199,8 +193,6 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             } catch (SingularMatrixException ex) {
                 it.remove();
                 Logger.debug("{0} stop - singular hessian matrix.", as);
-            } finally {
-                subsetIndexLocal++;
             }
         }
 
@@ -208,19 +200,19 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
         }
     }
-    
-    private int computeDeformationCount(final DeformationDegree defDegree) {
+
+    protected int computeDeformationCount(final DeformationDegree defDegree) {
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
         return (int) Math.pow(getSetpCountForOneDimension(), coeffCount);
     }
 
     private void extractResults(final List<AbstractSubset> subsetsToCompute, final int coeffCount) {
         AbstractSubset as;
-        long[] counts;
         double[] currentLimits, newLimits;
         CorrelationResult currentResult, newResult;
         int resultIndex;
         double newCorrelationValue, improvement;
+        long[] counts;
 
         int baseIndex = 0;
 
@@ -228,9 +220,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
             as = it.next();
-            counts = limitsCounts.get(as);
             currentResult = results.get(as);
             currentLimits = limits.get(as);
+            counts = DeformationUtils.generateDeformationCounts(currentLimits);
             // check quality of new result
             resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
             newCorrelationValue = gpuData[resultIndex];
@@ -251,7 +243,6 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 if (currentLimits[2] > STEP_SECOND) {
                     newLimits = generateLimits(currentResult.getDeformation(), coeffCount, STEP_SECOND);
                     limits.put(as, newLimits);
-                    limitsCounts.put(as, DeformationUtils.generateDeformationCounts(newLimits));
                     sb.append(", increasing precision to ")
                             .append(STEP_SECOND);
                 } else {
@@ -286,7 +277,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
     private double computeImprovement(final double oldResult, final double newResult) {
         return newResult - oldResult;
-    }        
+    }
 
     protected static int[] prepareIndices(final long[] counts) {
         final int[] indices = new int[counts.length - 1];
@@ -294,7 +285,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             indices[i] = (int) (counts[i] / 2);
         }
         return indices;
-    }    
+    }
 
     @Override
     public void dumpGpuResults(double[] resultData, List<AbstractSubset> subsets, List<double[]> deformationLimits) {
