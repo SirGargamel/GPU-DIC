@@ -258,7 +258,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         Logger.debug(sb);
     }
 
-    private static double[] extractSolutionFromLimits(final double[] limits) {
+    protected static double[] extractSolutionFromLimits(final double[] limits) {
         final double[] result = new double[limits.length / 3];
         for (int i = 0; i < limits.length / 3; i++) {
             result[i] = (limits[i * 3] + limits[i * 3 + 1]) / 2.0;

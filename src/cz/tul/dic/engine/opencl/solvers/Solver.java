@@ -15,6 +15,7 @@ public enum Solver {
     COARSE_FINE("CoarseFine"),
     NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral"),
     NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward"),
+    NEWTON_RHAPSON_APPROX("NewtonRaphsonHessianEstimate"),
     ;
     
     private final String className;

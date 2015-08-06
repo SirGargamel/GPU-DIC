@@ -102,7 +102,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                     continue;
                 }
 
-                deformedSubset = deformator.deformSubset(f, d);
+                deformedSubset = deformator.computePixelDeformationValues(f, d);
                 for (Map.Entry<int[], double[]> e : deformedSubset.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];

@@ -61,6 +61,50 @@ public class SubsetDeformator {
             pos[Coordinates.Y] = y;
 
             def = e.getValue();
+            def[Coordinates.X] = newCoords[Coordinates.X];
+            def[Coordinates.Y] = newCoords[Coordinates.Y];
+
+            i++;
+        }
+        
+        return dataCache;
+    }
+    
+    public Map<int[], double[]> computePixelDeformationValues(final AbstractSubset subset, final double[] deformation) throws ComputationException {
+        final int[] data = subset.getData();
+        final double[] center = subset.getCenter();
+        final int subsetArea = data.length / Coordinates.DIMENSION;
+        final DeformationDegree degree = DeformationUtils.getDegreeFromValue(deformation);
+
+        if (dataCache.size() != subsetArea) {
+            if (dataCache.size() > subsetArea) {
+                dataCache.clear();
+            }
+
+            while (dataCache.size() < subsetArea) {
+                dataCache.put(new int[Coordinates.DIMENSION], new double[Coordinates.DIMENSION]);
+            }
+        }
+
+        int x, y, i = 0;
+        double dx, dy;
+        final double[] newCoords = new double[Coordinates.DIMENSION];
+        int[] pos;
+        double[] def;
+        for (Map.Entry<int[], double[]> e : dataCache.entrySet()) {
+            x = data[i * 2];
+            y = data[i * 2 + 1];
+
+            dx = x - center[Coordinates.X];
+            dy = y - center[Coordinates.Y];
+
+            deform(x, y, dx, dy, deformation, newCoords, degree);
+
+            pos = e.getKey();
+            pos[Coordinates.X] = x;
+            pos[Coordinates.Y] = y;
+
+            def = e.getValue();
             def[Coordinates.X] = newCoords[Coordinates.X] - x;
             def[Coordinates.Y] = newCoords[Coordinates.Y] - y;
 

@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 public final class Image extends BufferedImage {
 
     private int[] grayScale;
+    private int[][] grayScale2d;
 
     private Image(final int width, final int height, final int imageType) {
         super(width, height, imageType);
@@ -49,6 +50,7 @@ public final class Image extends BufferedImage {
         final int width = getWidth();
         final int height = getHeight();
         grayScale = new int[width * height];
+        grayScale2d = new int[width][height];
 
         int val, r, g, b;
         for (int y = 0; y < height; y++) {
@@ -59,8 +61,17 @@ public final class Image extends BufferedImage {
                 b = val & 0xff;
                 val = (r + g + b) / 3;
                 grayScale[y * width + x] = val;
+                grayScale2d[x][y] = val;
             }
         }
+    }
+    
+    public int[][] to2DBWArray() {
+        if (grayScale == null) {
+            createBw();
+        }
+
+        return grayScale2d;
     }
 
 }
