@@ -18,6 +18,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.data.result.CorrelationResult;
+import cz.tul.dic.data.subset.SubsetDeformator;
 import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.output.NameGenerator;
 import java.util.HashMap;
@@ -65,6 +66,8 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
             final Map<AbstractROI, List<AbstractSubset>> allSubsets, final double resultQuality, 
             final int lowerBound, final int upperBound, 
             final Map<Integer, Map<Integer, Analyzer2D>> counters) throws ComputationException {
+        final SubsetDeformator deformator = new SubsetDeformator();
+        
         List<AbstractSubset> susbets;
         List<CorrelationResult> results;
         CorrelationResult cr;
@@ -99,7 +102,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                     continue;
                 }
 
-                deformedSubset = SubsetUtils.deformSubset(f, d);
+                deformedSubset = deformator.deformSubset(f, d);
                 for (Map.Entry<int[], double[]> e : deformedSubset.entrySet()) {
                     x = e.getKey()[Coordinates.X];
                     y = e.getKey()[Coordinates.Y];
