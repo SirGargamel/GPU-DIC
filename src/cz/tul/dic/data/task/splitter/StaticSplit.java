@@ -5,8 +5,6 @@
  */
 package cz.tul.dic.data.task.splitter;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
@@ -20,13 +18,13 @@ public class StaticSplit extends AbstractTaskSplitter {
     private boolean hasNextElement;
     private int index;
 
-    public StaticSplit(final FullTask task, final Object taskSplitValue) throws ComputationException {
+    public StaticSplit(final FullTask task, final Object taskSplitValue) {
         super(task);
 
         if (taskSplitValue != null) {
             split = (int) taskSplitValue;
         } else {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Missing split task value for static splitting.");
+            throw new IllegalArgumentException("Missing split task value for static splitting.");
         }
 
         checkIfHasNext();

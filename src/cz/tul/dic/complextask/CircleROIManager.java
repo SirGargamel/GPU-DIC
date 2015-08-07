@@ -30,7 +30,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class CircleROIManager extends ROIManager {
+public class CircleROIManager extends AbstractROIManager {
 
     public static final float LIMIT_RESULT_QUALITY = 0.5f;
     private static final double ROOT_TWO = Math.sqrt(2);

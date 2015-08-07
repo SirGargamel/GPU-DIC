@@ -5,8 +5,6 @@
  */
 package cz.tul.dic.output;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.awt.AlphaComposite;
@@ -24,7 +22,7 @@ import java.text.NumberFormat;
  */
 public final class ExportUtils {
 
-    private static final String UNSUPPORTED_DIRECTION = "Unsupported direction.";
+    private static final String UNSUPPORTED_DIRECTION = "Unsupported direction - ";
     private static final int IMAGE_TYPE = BufferedImage.TYPE_3BYTE_BGR;
     private static final float ALPHA = 0.75f;
     private static final Color COLORBACKGROUND = Color.BLACK;
@@ -70,7 +68,7 @@ public final class ExportUtils {
         return result;
     }
 
-    public static double calculateDisplacement(final double[] def, final Direction dir) throws ComputationException {
+    public static double calculateDisplacement(final double[] def, final Direction dir) {
         double result;
         switch (dir) {
             case DX:
@@ -86,13 +84,13 @@ public final class ExportUtils {
                 result = Math.sqrt(def[0] * def[0] + def[1] * def[1]);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, UNSUPPORTED_DIRECTION);
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + dir);
         }
 
         return result;
     }
 
-    public static double calculateStrain(final double[] results, final Direction dir) throws ComputationException {
+    public static double calculateStrain(final double[] results, final Direction dir) {
         double result;
 
         switch (dir) {
@@ -116,13 +114,13 @@ public final class ExportUtils {
                 result = Math.sqrt(val1 * val1 + val2 * val2 + val3 * val3);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, UNSUPPORTED_DIRECTION);
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + dir);
         }
 
         return result;
     }
 
-    public static double calculateSpeed(final double[] def, final Direction dir, final double time) throws ComputationException {
+    public static double calculateSpeed(final double[] def, final Direction dir, final double time) {
         double result;
         switch (dir) {
             case R_DX:
@@ -135,7 +133,7 @@ public final class ExportUtils {
                 result = Math.sqrt(def[0] * def[0] + def[1] * def[1]) / time;
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + dir);
         }
 
         return result;
@@ -156,7 +154,7 @@ public final class ExportUtils {
         return out;
     }
 
-    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir) throws ComputationException {
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir) {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
@@ -187,7 +185,7 @@ public final class ExportUtils {
         return new double[]{min, max};
     }
 
-    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double[] minMax) throws ComputationException {
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double[] minMax) {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
@@ -219,7 +217,7 @@ public final class ExportUtils {
                 out = new BufferedImage(width, height + BAR_SIZE_HOR, IMAGE_TYPE);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, UNSUPPORTED_DIRECTION);
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + dir);
         }
 
         final Graphics2D g = out.createGraphics();
@@ -255,7 +253,7 @@ public final class ExportUtils {
                 drawHorizontalBar(out, minMax[0], minMax[1]);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, UNSUPPORTED_DIRECTION);
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + dir);
         }
 
         return out;

@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.engine;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
@@ -32,7 +31,7 @@ public class OverlapComputation implements Callable<Void> {
     }
 
     @Override
-    public Void call() throws ComputationException {
+    public Void call() {
         if (r + 1 != nextR) {
             task.setResult(r, nextR, new Result(DisplacementCalculator.computeCumulativeDisplacement(task, r, nextR)));
         }

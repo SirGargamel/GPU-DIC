@@ -8,7 +8,6 @@ package cz.tul.dic.data.task.loaders;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -17,7 +16,7 @@ import javax.imageio.ImageIO;
 public class ImageLoader extends AbstractInputLoader {
 
     @Override
-    public TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in, final TaskContainer task) throws ComputationException {
         if (!(in instanceof List<?>)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
         }

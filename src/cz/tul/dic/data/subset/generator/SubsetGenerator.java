@@ -6,7 +6,6 @@
 package cz.tul.dic.data.subset.generator;
 
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
@@ -49,7 +48,7 @@ public class SubsetGenerator {
             Logger.trace(sb.toString());
             return result;
         } else {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported mode of subset generator - " + mode.toString());
+            throw new IllegalArgumentException("Unsupported mode of subset generator - " + mode);
         }
     }
 

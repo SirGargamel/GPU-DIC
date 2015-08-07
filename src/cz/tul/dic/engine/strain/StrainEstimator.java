@@ -5,8 +5,6 @@
  */
 package cz.tul.dic.engine.strain;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
@@ -35,19 +33,19 @@ public abstract class StrainEstimator extends Observable {
         this.exec = Engine.getInstance().getExecutorService();
     }
     
-    public static StrainEstimator initStrainEstimator(final StrainEstimationMethod type) throws ComputationException {
+    public static StrainEstimator initStrainEstimator(final StrainEstimationMethod type) {
         if (data.containsKey(type)) {
             return data.get(type);
         } else {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported strain estimation - " + type.toString());
+            throw new IllegalArgumentException("Unsupported strain estimation - " + type.toString());
         }
     }    
 
-    public abstract void estimateStrain(final TaskContainer tc, final int roundFrom, int roundTo) throws ComputationException;
+    public abstract void estimateStrain(final TaskContainer tc, final int roundFrom, int roundTo);
 
     public abstract void stop();
 
-    public static void computeStrain(final TaskContainer tc) throws ComputationException {
+    public static void computeStrain(final TaskContainer tc) {
         final int roudZero = TaskContainerUtils.getFirstRound(tc);
         final StrainEstimator estimator = StrainEstimator.initStrainEstimator((StrainEstimationMethod) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {

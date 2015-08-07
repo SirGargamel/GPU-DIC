@@ -5,10 +5,8 @@
  */
 package cz.tul.dic.gui;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.data.ExportMode;
 import cz.tul.dic.output.target.ExportTarget;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -60,7 +58,7 @@ public class Context {
         exportCachePoints.clear();
     }
 
-    public BufferedImage getMapResult(final int round, final Direction dir) throws ComputationException {
+    public BufferedImage getMapResult(final int round, final Direction dir) {
         BufferedImage result = null;
         try {
             Exporter.export(tc, ExportTask.generateMapExport(dir, ExportTarget.GUI, this, round, limits));
@@ -75,7 +73,7 @@ public class Context {
         return result;
     }
 
-    public Map<Direction, double[]> getPointResult(final int x, final int y) throws ComputationException {
+    public Map<Direction, double[]> getPointResult(final int x, final int y) {
         Map<Direction, double[]> result = null;
         try {
             Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.GUI, this, x, y));
@@ -87,7 +85,7 @@ public class Context {
         return result;
     }
 
-    public Map<Direction, double[]> getComparativeStrain(final int x1, final int y1, final int x2, final int y2) throws ComputationException {
+    public Map<Direction, double[]> getComparativeStrain(final int x1, final int y1, final int x2, final int y2) {
         Map<Direction, double[]> result = null;
         try {
             Exporter.export(tc, ExportTask.generateDoublePointExport(ExportTarget.GUI, this, x1, y1, x2, y2));

@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.engine.displacement;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Coordinates;
@@ -34,7 +33,10 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
     private double[][] finalQuality;
 
     @Override
-    public DisplacementResult buildFinalResults(final Map<AbstractROI, List<CorrelationResult>> correlationResults, Map<AbstractROI, List<AbstractSubset>> allSubsets, final TaskContainer tc, final int round) throws ComputationException {
+    public DisplacementResult buildFinalResults(
+            final Map<AbstractROI, List<CorrelationResult>> correlationResults, 
+            final Map<AbstractROI, List<AbstractSubset>> allSubsets, 
+            final TaskContainer tc, final int round) {
         final Image img = tc.getImage(round);
         final int width = img.getWidth();
         final int height = img.getHeight();
@@ -53,7 +55,9 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
             upperBound = Math.min(upperBound, height - 1);
             counters.clear();
 
-            prepareDeformedSubsetsToCounters(correlationResults, allSubsets, resultQuality, lowerBound, upperBound, counters);
+            prepareDeformedSubsetsToCounters(
+                    correlationResults, allSubsets, resultQuality, 
+                    lowerBound, upperBound, counters);
 
             calculateDisplacementFromCounters(counters, tc, round);
         }
@@ -65,7 +69,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
             final Map<AbstractROI, List<CorrelationResult>> correlationResults, 
             final Map<AbstractROI, List<AbstractSubset>> allSubsets, final double resultQuality, 
             final int lowerBound, final int upperBound, 
-            final Map<Integer, Map<Integer, Analyzer2D>> counters) throws ComputationException {
+            final Map<Integer, Map<Integer, Analyzer2D>> counters) {
         final SubsetDeformator deformator = new SubsetDeformator();
         
         List<AbstractSubset> susbets;

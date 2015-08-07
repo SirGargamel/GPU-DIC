@@ -40,7 +40,7 @@ public class ConfigLoader extends AbstractInputLoader {
     public static final String CONFIG_ROIS = "ROI_";
 
     @Override
-    public TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in, final TaskContainer task) throws ComputationException {
         if (!(in instanceof File)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
         }

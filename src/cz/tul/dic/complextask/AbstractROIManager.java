@@ -5,20 +5,19 @@
  */
 package cz.tul.dic.complextask;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 
 /**
  *
  * @author Petr Jecmen
  */
-public abstract class ROIManager {
+public abstract class AbstractROIManager {
     
     protected static final double PRECISION = 0.5;
     protected final TaskContainer tc;
     protected double[] defLimits;
 
-    public ROIManager(TaskContainer tc) throws ComputationException {
+    public AbstractROIManager(final TaskContainer tc) {
         this.tc = tc;
     }        
     

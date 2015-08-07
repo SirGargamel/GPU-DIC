@@ -5,8 +5,6 @@
  */
 package cz.tul.dic.output.data;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -17,7 +15,7 @@ import java.util.Map;
 public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[]>> {
 
     @Override
-    public Map<Direction, double[]> exportData(TaskContainer tc, Direction direction, int[] dataParams) throws ComputationException {
+    public Map<Direction, double[]> exportData(TaskContainer tc, Direction direction, int[] dataParams) {
         if (dataParams == null || dataParams.length < 4) {
             throw new IllegalArgumentException("Not enough input parameters (position [x1, y1, x2, y2] required).");
         }
@@ -87,7 +85,7 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
         return results != null && results.length >= x && results[0].length >= y && results[x][y] != null;
     }
 
-    private double calculateStrain(final double[][][] displacement, final Direction dir, final int x1, final int y1, final int x2, final int y2) throws ComputationException {
+    private double calculateStrain(final double[][][] displacement, final Direction dir, final int x1, final int y1, final int x2, final int y2) {
         final double dx = (double) x2 - x1;
         final double dy = (double) y2 - y1;
         final double difX = displacement[x2][y2][0] - displacement[x1][y1][0];
@@ -116,7 +114,7 @@ public class ExportModeDoublePoint implements IExportMode<Map<Direction, double[
                 val = Math.sqrt(val1 * val1 + val2 * val2 + val3 * val3);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
+                throw new IllegalArgumentException("Unsupported direction - " + dir);
         }
         return val * 100;
     }

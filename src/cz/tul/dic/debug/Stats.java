@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.debug;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
@@ -308,7 +307,7 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void drawSubsetQualityStatistics(final Map<AbstractROI, List<AbstractSubset>> allSubsets, final int roundFrom, final int roundTo) throws ComputationException {
+    public void drawSubsetQualityStatistics(final Map<AbstractROI, List<AbstractSubset>> allSubsets, final int roundFrom, final int roundTo) {
         if (get(Types.SUBSET_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapSubset(tc, roundTo));
             out.getParentFile().mkdirs();
@@ -339,7 +338,7 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void drawPointResultStatistics(final int roundFrom, final int roundTo) throws ComputationException {
+    public void drawPointResultStatistics(final int roundFrom, final int roundTo) {
         if (get(Types.POINT_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
             out.getParentFile().mkdirs();
@@ -372,7 +371,7 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void drawRegressionQualities(final Image img, final double[][][] resultQuality, final String nameA, final String nameB) throws ComputationException {
+    public void drawRegressionQualities(final Image img, final double[][][] resultQuality, final String nameA, final String nameB) {
         if (get(Types.REGRESSION_QUALITY)) {
             final File out = new File(nameA);
             out.getParentFile().mkdirs();

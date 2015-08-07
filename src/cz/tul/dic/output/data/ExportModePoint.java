@@ -5,8 +5,6 @@
  */
 package cz.tul.dic.output.data;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -20,7 +18,7 @@ import java.util.Map;
 public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
 
     @Override
-    public Map<Direction, double[]> exportData(final TaskContainer tc, final Direction direction, final int[] dataParams) throws ComputationException {
+    public Map<Direction, double[]> exportData(final TaskContainer tc, final Direction direction, final int[] dataParams) {
         if (dataParams == null || dataParams.length < 2) {
             throw new IllegalArgumentException("Not enough input parameters (position [x, y] required).");
         }
@@ -77,7 +75,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         results = res == null ? null : res.getStrainResult().getStrain();
                         break;
                     default:
-                        throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction - " + dir);
+                        throw new IllegalArgumentException("Unsupported direction - " + dir);
                 }
 
                 if (results == null || results.length < x || results[0].length < y || results[x][y] == null) {
@@ -108,7 +106,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                             data[round] = ExportUtils.calculateSpeed(results[x][y], dir, time);
                             break;
                         default:
-                            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported direction.");
+                            throw new IllegalArgumentException("Unsupported direction - " + dir);
                     }
 
                     if (dir.isMm()) {

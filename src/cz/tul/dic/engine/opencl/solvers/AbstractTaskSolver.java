@@ -124,7 +124,7 @@ public abstract class AbstractTaskSolver extends Observable {
         return result;
     }
 
-    private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> result, final Kernel kernel, final FullTask fullTask) throws ComputationException, IllegalArgumentException {
+    private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> result, final Kernel kernel, final FullTask fullTask) throws ComputationException {
         Exception lastEx = null;
         boolean finished = false;
         while (ts.isSplitterReady() && !finished) {

@@ -8,7 +8,6 @@ package cz.tul.dic.data.task.loaders;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public final class InputLoader {
     private InputLoader() {
     }
 
-    public static TaskContainer loadInput(final Object in, TaskContainer task) throws IOException, ComputationException {
+    public static TaskContainer loadInput(final Object in, TaskContainer task) throws ComputationException {
         AbstractInputLoader loader = null;
         for (AbstractInputLoader ail : loaders) {
             if (ail.canLoad(in)) {

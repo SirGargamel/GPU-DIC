@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.engine.opencl.solvers;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
@@ -24,7 +23,7 @@ public class NewtonRaphsonForward extends NewtonRaphson {
     private static final int COUNT_STEP = 5;
 
     @Override
-    protected RealVector generateNegativeGradient(final AbstractSubset subset) throws ComputationException {
+    protected RealVector generateNegativeGradient(final AbstractSubset subset) {
         final double[] deformationLimits = limits.get(subset);
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
         final int deformationCount = computeDeformationCount(defDegree);
@@ -50,7 +49,7 @@ public class NewtonRaphsonForward extends NewtonRaphson {
     }
 
     @Override
-    protected RealMatrix generateHessianMatrix(final AbstractSubset subset) throws ComputationException {
+    protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
         final double[] deformationLimits = limits.get(subset);
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
         final int deformationCount = computeDeformationCount(defDegree);

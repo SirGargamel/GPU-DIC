@@ -1,6 +1,5 @@
 package cz.tul.dic.output.target;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
@@ -21,11 +20,11 @@ public class ExportTargetCsv extends AbstractExportTarget {
     private static final String EXTENSION = ".csv";
 
     @Override
-    public void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException, ComputationException {
+    public void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException {
         exportMap(exporter.exportData(tc, direction, dataParams), targetParam, limits);
     }
 
-    private void exportMap(final double[][] data, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    private void exportMap(final double[][] data, final Object targetParam, final double[] limits) throws IOException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
@@ -59,7 +58,7 @@ public class ExportTargetCsv extends AbstractExportTarget {
     }
 
     @Override
-    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException {
         if (!(targetParam instanceof File)) {
             throw new IllegalArgumentException("Illegal type of target parameter - " + targetParam.getClass());
         }
@@ -99,12 +98,12 @@ public class ExportTargetCsv extends AbstractExportTarget {
     }
 
     @Override
-    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException {
         exportPoint(tc, exporter, targetParam, dataParams);
     }
 
     @Override
-    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException {
         final List<double[][]> data = exporter.exportData(tc, direction, null);
 
         final File target = (File) targetParam;
@@ -128,7 +127,7 @@ public class ExportTargetCsv extends AbstractExportTarget {
     }
 
     @Override
-    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 

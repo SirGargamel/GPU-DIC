@@ -30,11 +30,11 @@ public abstract class AbstractInputLoader {
     private static final String TEXT_FPS = "fps";
     private static final String TEXT_EXTRA = "[=]";
 
-    public abstract TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException;
+    public abstract TaskContainer loadTask(final Object in, final TaskContainer task) throws ComputationException;
 
     public abstract boolean canLoad(final Object in);
 
-    protected void loadImages(final TaskContainer task, final List<File> inputs) throws ComputationException, IOException {
+    protected void loadImages(final TaskContainer task, final List<File> inputs) throws ComputationException {
         final List<Image> images = new ArrayList<>(inputs.size());
         final Object in = task.getParameter(TaskParameter.IN);
         final File inputSource;
@@ -51,29 +51,36 @@ public abstract class AbstractInputLoader {
                     throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Input file " + image.toString() + " not found.");
                 }
             }
-
-            images.add(Image.loadImageFromDisk(image));
+            try {
+                images.add(Image.loadImageFromDisk(image));
+            } catch (IOException ex) {
+                throw new ComputationException(ComputationExceptionCause.IO, ex);
+            }
         }
         task.setInput(inputs, images);
     }
 
-    protected void loadUdaFile(final String inputName, final TaskContainer tc) throws IOException {
+    protected void loadUdaFile(final String inputName, final TaskContainer tc) {
         final String udaFilename = inputName.substring(0, inputName.lastIndexOf('.')).concat(EXT_UDA);
         final File uda = new File(udaFilename);
 
         int fps = TaskDefaultValues.DEFAULT_FPS;
         if (udaFileExists(uda)) {
-            final List<String> lines = Files.readAllLines(Paths.get(udaFilename));
-            for (String s : lines) {
-                if (s.contains(TEXT_SPEED)) {
-                    final String val = s.replace(TEXT_SPEED, "").replace(TEXT_FPS, "").replaceAll(TEXT_EXTRA, "").trim();
-                    try {
-                        fps = Integer.parseInt(val);
-                    } catch (NumberFormatException ex) {
-                        Logger.warn("Failed to parse FPS value \"{0}\", using default FPS - ", val, fps);
+            try {
+                final List<String> lines = Files.readAllLines(Paths.get(udaFilename));
+                for (String s : lines) {
+                    if (s.contains(TEXT_SPEED)) {
+                        final String val = s.replace(TEXT_SPEED, "").replace(TEXT_FPS, "").replaceAll(TEXT_EXTRA, "").trim();
+                        try {
+                            fps = Integer.parseInt(val);
+                        } catch (NumberFormatException ex) {
+                            Logger.warn("Failed to parse FPS value \"{0}\", using default FPS - ", val, fps);
+                        }
+                        break;
                     }
-                    break;
                 }
+            } catch (IOException ex) {
+                Logger.warn("Missing UDA file, using default FPS - {0}", fps);
             }
         } else {
             Logger.warn("Missing UDA file, using default FPS - {0}", fps);

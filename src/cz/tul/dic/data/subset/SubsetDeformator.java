@@ -5,8 +5,6 @@
  */
 package cz.tul.dic.data.subset;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationDirection;
@@ -26,7 +24,7 @@ public class SubsetDeformator {
         dataCache = new LinkedHashMap<>();
     }
     
-    public Map<int[], double[]> deformSubset(final AbstractSubset subset, final double[] deformation) throws ComputationException {
+    public Map<int[], double[]> deformSubset(final AbstractSubset subset, final double[] deformation) {
         final int[] data = subset.getData();
         final double[] center = subset.getCenter();
         final int subsetArea = data.length / Coordinates.DIMENSION;
@@ -70,7 +68,7 @@ public class SubsetDeformator {
         return dataCache;
     }
     
-    public Map<int[], double[]> computePixelDeformationValues(final AbstractSubset subset, final double[] deformation) throws ComputationException {
+    public Map<int[], double[]> computePixelDeformationValues(final AbstractSubset subset, final double[] deformation) {
         final int[] data = subset.getData();
         final double[] center = subset.getCenter();
         final int subsetArea = data.length / Coordinates.DIMENSION;
@@ -114,7 +112,7 @@ public class SubsetDeformator {
         return dataCache;
     }
     
-    private static void deform(final int x, final int y, final double dx, final double dy, final double[] deformation, final double[] result, final DeformationDegree degree) throws ComputationException {
+    private static void deform(final int x, final int y, final double dx, final double dy, final double[] deformation, final double[] result, final DeformationDegree degree) {
         result[Coordinates.X] = x;
         result[Coordinates.Y] = y;
         switch (degree) {
@@ -131,7 +129,7 @@ public class SubsetDeformator {
                 addZeroOrderDeformations(result, deformation);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation.");
+                throw new IllegalArgumentException("Unsupported degree of deformation - " + degree);
         }
     }
     

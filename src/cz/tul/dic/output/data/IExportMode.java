@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.output.data;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.Direction;
 
@@ -16,6 +15,6 @@ import cz.tul.dic.output.Direction;
  */
 public interface IExportMode<T> {
 
-    T exportData(final TaskContainer tc, final Direction direction, final int... dataParams) throws ComputationException;    
+    T exportData(final TaskContainer tc, final Direction direction, final int... dataParams);    
 
 }

@@ -40,12 +40,12 @@ public class VideoLoader extends AbstractInputLoader {
     private static final File VIRTUAL_DUB = new File("virtualDub\\VirtualDub.exe");
 
     @Override
-    public TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in, final TaskContainer task) throws ComputationException {
         if (!(in instanceof File)) {
             throw new IllegalArgumentException("VideoLoader needs a single file as input.");
         }
         if (!VIRTUAL_DUB.exists()) {
-            throw new FileNotFoundException("VirtualDub is not available.");
+            throw new ComputationException(ComputationExceptionCause.IO, new FileNotFoundException("VirtualDub is not available."));
         }
 
         File input = (File) in;

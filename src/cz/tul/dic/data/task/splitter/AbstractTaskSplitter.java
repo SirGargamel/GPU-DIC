@@ -5,8 +5,6 @@
  */
 package cz.tul.dic.data.task.splitter;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.ComputationTask;
@@ -31,7 +29,7 @@ public abstract class AbstractTaskSplitter implements Iterator<ComputationTask> 
         this.deformationLimits = task.getDeformationLimits();
     }
 
-    public static AbstractTaskSplitter prepareSplitter(final FullTask task, final TaskSplitMethod ts, final Object taskSplitValue) throws ComputationException {
+    public static AbstractTaskSplitter prepareSplitter(final FullTask task, final TaskSplitMethod ts, final Object taskSplitValue) {
         AbstractTaskSplitter result;
         switch (ts) {
             case NONE:
@@ -44,7 +42,7 @@ public abstract class AbstractTaskSplitter implements Iterator<ComputationTask> 
                 result = new OpenCLSplitter(task);
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of task splitting - " + ts);
+                throw new IllegalArgumentException("Unsupported type of task splitting - " + ts);
         }
         return result;
     }

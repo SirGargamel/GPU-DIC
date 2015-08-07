@@ -1,6 +1,5 @@
 package cz.tul.dic.output.target;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.gui.Context;
 import cz.tul.dic.output.Direction;
@@ -16,7 +15,7 @@ public class ExportTargetGUI extends AbstractExportTarget {
     private static final String NOT_ENOUGH_DATA_PARAMETERS = "Not enough data parameters.";
 
     @Override
-    public void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws ComputationException {
+    public void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) {
         if (dataParams.length < 1) {
             throw new IllegalArgumentException(NOT_ENOUGH_DATA_PARAMETERS);
         }
@@ -49,7 +48,7 @@ public class ExportTargetGUI extends AbstractExportTarget {
     }    
 
     @Override
-    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws ComputationException {
+    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) {
         if (dataParams.length < 2) {
             throw new IllegalArgumentException(NOT_ENOUGH_DATA_PARAMETERS);
         }
@@ -59,7 +58,7 @@ public class ExportTargetGUI extends AbstractExportTarget {
     }
 
     @Override
-    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException, ComputationException {
+    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException {
         if (dataParams.length < 4) {
             throw new IllegalArgumentException(NOT_ENOUGH_DATA_PARAMETERS);
         }
@@ -69,12 +68,12 @@ public class ExportTargetGUI extends AbstractExportTarget {
     }
 
     @Override
-    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 
     @Override
-    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException, ComputationException {
+    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException {
         throw new UnsupportedOperationException("Unsupported mode.");
     }
 

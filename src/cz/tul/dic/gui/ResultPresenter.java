@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.gui;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.ObjectProperty;
@@ -129,24 +127,19 @@ public class ResultPresenter implements Initializable {
     }
 
     private void displayImage() {
-        try {
-            final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
-            if (i != null) {
-                final Image img = SwingFXUtils.toFXImage(i, null);
-                image.setImage(img);
+        final BufferedImage i = Context.getInstance().getMapResult(index, choiceDir.getValue());
+        if (i != null) {
+            final Image img = SwingFXUtils.toFXImage(i, null);
+            image.setImage(img);
 
-                final Scene s = image.getParent().getScene();
-                if (s != null) {
-                    double width = Math.max(MIN_WIDTH, image.getParent().getBoundsInLocal().getWidth() + EXTRA_WIDTH);
-                    s.getWindow().setWidth(width);
-                    s.getWindow().setHeight(image.getParent().getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
-                }
-            } else {
-                image.setImage(null);
+            final Scene s = image.getParent().getScene();
+            if (s != null) {
+                double width = Math.max(MIN_WIDTH, image.getParent().getBoundsInLocal().getWidth() + EXTRA_WIDTH);
+                s.getWindow().setWidth(width);
+                s.getWindow().setHeight(image.getParent().getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
             }
-
-        } catch (ComputationException ex) {
-            Logger.warn(ex);
+        } else {
+            image.setImage(null);
         }
     }
 
@@ -194,7 +187,7 @@ public class ResultPresenter implements Initializable {
     }
 
     @FXML
-    private void handleButtonActionSave(ActionEvent event) throws IOException, ComputationException {
+    private void handleButtonActionSave(ActionEvent event) {
         final TaskContainer tc = Context.getInstance().getTc();
         final ButtonType map = new ButtonType(Lang.getString("TypeMap"));
         final ButtonType sequence = new ButtonType(Lang.getString("TypeSequence"));
@@ -227,7 +220,7 @@ public class ResultPresenter implements Initializable {
                     Exporter.export(tc, determineType(tc));
                 }
             }
-        } catch (IOException | ComputationException ex) {
+        } catch (IOException ex) {
             Logger.warn(ex);
         }
     }
@@ -389,19 +382,14 @@ public class ResultPresenter implements Initializable {
                     });
                     stage.setTitle(ch.buildTitle());
                     stage.setScene(new Scene(root));
-                    stage
-                            .getIcons().add(new javafx.scene.image.Image(MainWindow.class
-                                            .getResourceAsStream("logo.png")));
+                    stage.getIcons().add(
+                            new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
                     stage.show();
 
                     openTwoPointStrainAnalysis(context);
                 }
             } catch (IOException e) {
                 Logger.error("Error loading Results dialog from JAR.\n{0}", e);
-
-            } catch (ComputationException ex) {
-                java.util.logging.Logger.getLogger(ResultPresenter.class
-                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
 
@@ -434,7 +422,7 @@ public class ResultPresenter implements Initializable {
         buttonNext.setGraphic(imgV);
     }
 
-    private void openTwoPointStrainAnalysis(final Context context) throws ComputationException, IOException {
+    private void openTwoPointStrainAnalysis(final Context context) throws IOException {
         SinglePointChartHandler chart1 = null, chart2 = null;
 
         final Iterator<Stage> it = this.charts.keySet().iterator();
@@ -511,13 +499,9 @@ public class ResultPresenter implements Initializable {
             e = it.next();
             s = e.getKey();
             if (s.isShowing()) {
-                try {
-                    ch = e.getValue();
-                    ch.displayData(dir);
-                    s.setTitle(ch.buildTitle());
-                } catch (ComputationException ex) {
-                    Logger.warn(ex, "Error obtaining line data for chart");
-                }
+                ch = e.getValue();
+                ch.displayData(dir);
+                s.setTitle(ch.buildTitle());
             } else {
                 it.remove();
 
@@ -542,7 +526,7 @@ public class ResultPresenter implements Initializable {
         }
 
         @Override
-        public void displayData(final Direction dir) throws ComputationException {
+        public void displayData(final Direction dir) {
             final double tickUnit = fpsM.getTickLength();
             final double[] line = Context.getInstance().getPointResult(x, y).get(dir);
             this.dir = dir;
@@ -612,7 +596,7 @@ public class ResultPresenter implements Initializable {
         }
 
         @Override
-        public void displayData(final Direction dir) throws ComputationException {
+        public void displayData(final Direction dir) {
             final double tickUnit = fpsM.getTickLength();
 
             switch (dir) {
@@ -693,7 +677,7 @@ public class ResultPresenter implements Initializable {
 
     private static interface ChartHandler {
 
-        public void displayData(final Direction dir) throws ComputationException;
+        public void displayData(final Direction dir);
 
         public String buildTitle();
     }

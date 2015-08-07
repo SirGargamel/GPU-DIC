@@ -104,9 +104,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
     protected abstract int getSetpCountForOneDimension();
 
-    protected abstract RealVector generateNegativeGradient(final AbstractSubset subset) throws ComputationException;
+    protected abstract RealVector generateNegativeGradient(final AbstractSubset subset);
 
-    protected abstract RealMatrix generateHessianMatrix(final AbstractSubset subset) throws ComputationException;
+    protected abstract RealMatrix generateHessianMatrix(final AbstractSubset subset);
 
     private void performInitialResultEstimation(final int coeffCount) throws ComputationException {
         final List<AbstractSubset> subsets = fullTask.getSubsets();

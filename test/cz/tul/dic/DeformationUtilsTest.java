@@ -41,7 +41,7 @@ public class DeformationUtilsTest {
         try {
             DeformationUtils.getDegreeFromLimits(limits);
             fail("Should have failed because of empty limits.");
-        } catch (ComputationException ex) {
+        } catch (IllegalArgumentException ex) {
             assert true;
         }
 
@@ -49,7 +49,7 @@ public class DeformationUtilsTest {
         try {
             DeformationUtils.getDegreeFromLimits(limits);
             fail("Should have failed because of illegal count of limits.");
-        } catch (ComputationException ex) {
+        } catch (IllegalArgumentException ex) {
             assert true;
         }
 
@@ -57,7 +57,7 @@ public class DeformationUtilsTest {
         try {
             DeformationUtils.getDegreeFromLimits(limits);
             fail("Should have failed because of illegal count of limits.");
-        } catch (ComputationException ex) {
+        } catch (IllegalArgumentException ex) {
             assert true;
         }
 
@@ -74,7 +74,7 @@ public class DeformationUtilsTest {
         try {
             DeformationUtils.getDegreeFromValue(deformation);
             fail("Should have failed because of empty deformation.");
-        } catch (ComputationException ex) {
+        } catch (IllegalArgumentException ex) {
             assert true;
         }
 
@@ -82,7 +82,7 @@ public class DeformationUtilsTest {
         try {
             DeformationUtils.getDegreeFromValue(deformation);
             fail("Should have failed because of empty deformation.");
-        } catch (ComputationException ex) {
+        } catch (IllegalArgumentException ex) {
             assert true;
         }
 
@@ -90,7 +90,7 @@ public class DeformationUtilsTest {
         try {
             DeformationUtils.getDegreeFromValue(deformation);
             fail("Should have failed because of empty deformation.");
-        } catch (ComputationException ex) {
+        } catch (IllegalArgumentException ex) {
             assert true;
         }
 

@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.gui;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -22,7 +21,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import org.pmw.tinylog.Logger;
 
 /**
  * FXML Controller class
@@ -90,13 +88,8 @@ public class ExpertSettings implements Initializable {
                         protected String call() throws Exception {
                             String result = null;
                             updateProgress(0, 2);
-                            try {
-                                StrainEstimator.computeStrain(tc);
-                                updateProgress(1, 2);
-                            } catch (ComputationException ex) {
-                                result = ex.getLocalizedMessage();
-                                Logger.debug(ex);
-                            }
+                            StrainEstimator.computeStrain(tc);
+                            updateProgress(1, 2);
                             updateProgress(2, 2);
                             return result;
                         }

@@ -78,7 +78,7 @@ public class TaskContainer extends Observable implements Serializable {
         images = new ArrayList<>(task.images);
     }
 
-    public static TaskContainer initTaskContainer(final Object in) throws ComputationException, IOException {
+    public static TaskContainer initTaskContainer(final Object in) throws ComputationException {
         final TaskContainer result = new TaskContainer();
         return InputLoader.loadInput(in, result);
     }

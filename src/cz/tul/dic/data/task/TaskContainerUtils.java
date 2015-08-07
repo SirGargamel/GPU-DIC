@@ -61,7 +61,7 @@ public final class TaskContainerUtils {
         return tc.getImages().size() - 1;
     }
 
-    public static double getStretchFactor(final TaskContainer tc, final int endImageIndex) throws ComputationException {
+    public static double getStretchFactor(final TaskContainer tc, final int endImageIndex) {
         final int startImageIndex = getFirstRound(tc);
         double result = 1.0;
         final DisplacementResult resultsC = tc.getResult(startImageIndex, endImageIndex).getDisplacementResult();

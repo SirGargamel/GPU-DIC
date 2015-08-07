@@ -5,10 +5,8 @@
  */
 package cz.tul.dic.debug;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
 import java.util.HashSet;
@@ -66,7 +64,7 @@ public final class DebugControl {
         }
     }
 
-    public static void performStatisticsDump(final TaskContainer tc) throws ComputationException {
+    public static void performStatisticsDump(final TaskContainer tc) {
         for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
             Stats.getInstance().dumpDeformationsStatisticsUsage(e.getKey());
             Stats.getInstance().dumpDeformationsStatisticsPerQuality(e.getKey());
@@ -75,7 +73,6 @@ public final class DebugControl {
 
         Stats.getInstance().dumpDeformationsStatisticsPerQuality();
         Stats.getInstance().dumpDeformationsStatisticsUsage();
-        StrainEstimator.computeStrain(tc);
     }    
 
 }

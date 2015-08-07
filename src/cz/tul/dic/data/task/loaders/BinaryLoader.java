@@ -19,7 +19,7 @@ public class BinaryLoader extends AbstractInputLoader {
     private static final String SUPPORTED_TYPES = "task";
 
     @Override
-    public TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in, final TaskContainer task) throws ComputationException {
         if (!(in instanceof File)) {
             throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
         }        

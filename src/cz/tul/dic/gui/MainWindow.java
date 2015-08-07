@@ -186,7 +186,7 @@ public class MainWindow implements Initializable {
     }
 
     @FXML
-    private void handleButtonActionSave(ActionEvent event) throws IOException {
+    private void handleButtonActionSave(ActionEvent event) {
         saveSubsetSize();
 
         final ButtonType config = new ButtonType(Lang.getString("TypeConfig"));
@@ -231,7 +231,7 @@ public class MainWindow implements Initializable {
     }
 
     @FXML
-    private void handleButtonActionRun(ActionEvent event) throws IOException, ComputationException {
+    private void handleButtonActionRun(ActionEvent event) throws ComputationException {
         try {
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
@@ -295,7 +295,7 @@ public class MainWindow implements Initializable {
     }
 
     @FXML
-    private void handleButtonActionExpert(ActionEvent event) throws ComputationException, IOException {
+    private void handleButtonActionExpert(ActionEvent event) {
         try {
             final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/ExpertSettings.fxml"), Lang.getBundle());
             final Stage stage = new Stage();

@@ -6,8 +6,6 @@
 package cz.tul.dic.output;
 
 import cz.tul.dic.output.target.ExportTarget;
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.target.AbstractExportTarget;
 import cz.tul.dic.output.target.ExportTargetCsv;
@@ -35,12 +33,12 @@ public final class Exporter {
     private Exporter() {
     }
 
-    public static void export(final TaskContainer tc, final ExportTask et) throws IOException, ComputationException {
+    public static void export(final TaskContainer tc, final ExportTask et) throws IOException {
         final ExportTarget target = et.getTarget();
         if (targetExporters.containsKey(target)) {
             targetExporters.get(target).exportData(et, tc);
         } else {
-            throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported export target - " + et.toString());
+            throw new IllegalArgumentException("Unsupported export target - " + et.toString());
         }
     }
 }

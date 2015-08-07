@@ -5,8 +5,6 @@
  */
 package cz.tul.dic.data.deformation;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.ComputationExceptionCause;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +25,7 @@ public final class DeformationUtils {
         return Math.sqrt(result);
     }
 
-    public static DeformationDegree getDegreeFromLimits(final double[] limits) throws ComputationException {
+    public static DeformationDegree getDegreeFromLimits(final double[] limits) {
         final DeformationDegree result;
         switch (limits.length) {
             case 6:
@@ -40,12 +38,12 @@ public final class DeformationUtils {
                 result = DeformationDegree.SECOND;
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal count of deformation limits - " + limits.length);
+                throw new IllegalArgumentException("Illegal count of deformation limits - " + limits.length);
         }
         return result;
     }
 
-    public static DeformationDegree getDegreeFromValue(final double[] deformation) throws ComputationException {
+    public static DeformationDegree getDegreeFromValue(final double[] deformation) {
         final DeformationDegree result;
         switch (deformation.length) {
             case 2:
@@ -58,7 +56,7 @@ public final class DeformationUtils {
                 result = DeformationDegree.SECOND;
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Illegal count of deformations - " + deformation.length);
+                throw new IllegalArgumentException("Illegal count of deformations - " + deformation.length);
         }
         return result;
     }    
@@ -92,7 +90,7 @@ public final class DeformationUtils {
         return counts;
     }
     
-    public static double[] extractDeformation(final int index, final double[] deformationLimits, final long[] deformationCounts) throws ComputationException {
+    public static double[] extractDeformation(final int index, final double[] deformationLimits, final long[] deformationCounts) {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }

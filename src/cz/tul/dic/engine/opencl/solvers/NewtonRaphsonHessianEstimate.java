@@ -34,7 +34,7 @@ public class NewtonRaphsonHessianEstimate extends NewtonRaphson {
     private static final double DY = DX;
 
     @Override
-    protected RealVector generateNegativeGradient(final AbstractSubset subset) throws ComputationException {
+    protected RealVector generateNegativeGradient(final AbstractSubset subset) {
         final double[] deformationLimits = limits.get(subset);
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
         final int deformationCount = computeDeformationCount(defDegree);
@@ -61,7 +61,7 @@ public class NewtonRaphsonHessianEstimate extends NewtonRaphson {
     }
 
     @Override
-    protected RealMatrix generateHessianMatrix(final AbstractSubset subset) throws ComputationException {
+    protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
         final double[] deformationLimits = limits.get(subset);
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);

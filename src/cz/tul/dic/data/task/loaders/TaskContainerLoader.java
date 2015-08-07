@@ -7,13 +7,12 @@ package cz.tul.dic.data.task.loaders;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class TaskContainerLoader extends AbstractInputLoader {
 
     @Override
-    public TaskContainer loadTask(final Object in, final TaskContainer task) throws IOException, ComputationException {
+    public TaskContainer loadTask(final Object in, final TaskContainer task) throws ComputationException {
         if (!(in instanceof TaskContainer)) {
             throw new IllegalArgumentException("TaskContainerLoader needs a TaskContainer as input.");
         }        

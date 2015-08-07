@@ -78,7 +78,7 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(REPLACE_SUBSET_SIZE, Integer.toString(subsetSize));
     }
 
-    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization) throws ComputationException {
+    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization) {
         final String x, y, dx, dy;
         if (usesVectorization) {
             x = "coords.x";
@@ -280,12 +280,12 @@ public class KernelSourcePreparator {
                 kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported degree of deformation");
+                throw new IllegalArgumentException("Unsupported degree of deformation - " + deg);
         }
         kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(DeformationUtils.getDeformationCoeffCount(deg)));
     }
 
-    private void prepareInterpolation(final Interpolation interpolation, final boolean usesImage) throws ComputationException {
+    private void prepareInterpolation(final Interpolation interpolation, final boolean usesImage) {
         String resourceName = "interpolate-";
         switch (interpolation) {
             case BILINEAR:
@@ -295,7 +295,7 @@ public class KernelSourcePreparator {
                 resourceName = resourceName.concat("bicubic");
                 break;
             default:
-                throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "Unsupported type of interpolation.");
+                throw new IllegalArgumentException("Unsupported type of interpolation - " + interpolation);
         }
         if (usesImage) {
             resourceName = resourceName.concat("-image");

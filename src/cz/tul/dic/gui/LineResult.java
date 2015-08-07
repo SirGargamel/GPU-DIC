@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.gui;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
@@ -41,7 +40,7 @@ public class LineResult implements Initializable {
         // no init required
     }
 
-    public void handleButtonActionSave(final ActionEvent event) throws IOException, ComputationException {
+    public void handleButtonActionSave(final ActionEvent event) throws IOException {
         final Object[] data = (Object[]) chart.getUserData();
         if (data.length == 3) {
             final TaskContainer tc = (TaskContainer) data[0];

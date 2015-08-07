@@ -24,7 +24,7 @@ import org.pmw.tinylog.Logger;
  *
  * @author Petr Jecmen
  */
-public class RectROIManager extends ROIManager {
+public class RectROIManager extends AbstractROIManager {
 
     private static final int GAP = 5;
     private final CircleROIManager crm;

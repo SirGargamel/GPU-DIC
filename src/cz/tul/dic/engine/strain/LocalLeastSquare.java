@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.engine.strain;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -43,7 +42,7 @@ public class LocalLeastSquare extends StrainEstimator {
     }
 
     @Override
-    public void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) throws ComputationException {
+    public void estimateStrain(TaskContainer tc, int roundFrom, int roundTo) {
         stop = false;
         if (roundFrom >= roundTo) {
             throw new IllegalArgumentException("Source round must be lower than target round.");
