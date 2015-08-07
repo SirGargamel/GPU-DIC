@@ -13,14 +13,21 @@ import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.data.task.FullTask;
+import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.QRDecomposition;
@@ -73,7 +80,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
         // initial data for NR solver
         Kernel.registerListener(this);
-        final List<AbstractSubset> subsetsToCompute = new ArrayList<>(fullTask.getSubsets());
+        final List<AbstractSubset> subsetsToCompute = Collections.synchronizedList(new ArrayList<>(subsets));
         final List<double[]> localLimits = new ArrayList<>(limits.values());
         computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
 
@@ -167,32 +174,24 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
      * @throws ComputationException
      */
     private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree) throws ComputationException {
-        AbstractSubset as = null;
-        RealVector negativeGradient, solutionVec;
-        RealMatrix hessianMatrix;
-        DecompositionSolver solver;
-        double[] solution;
-
-        final List<double[]> localLimits = new ArrayList<>(subsetsToCompute.size());
+        final List<double[]> localLimits = Collections.synchronizedList(new ArrayList<>(subsetsToCompute.size()));
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
+
+        final ExecutorService exec = Engine.getInstance().getExecutorService();
+        final Set<Future<AbstractSubset>> steps = new HashSet<>(subsetsToCompute.size());
 
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
+            final AbstractSubset as = it.next();
+            steps.add(exec.submit(new StepMaker(as, localLimits, coeffCount)));
+        }
+
+        for (Future<AbstractSubset> fas : steps) {
             try {
-                as = it.next();
-                // prepare data for computation
-                negativeGradient = generateNegativeGradient(as);
-                hessianMatrix = generateHessianMatrix(as);
-                // calculate next step
-                solver = new QRDecomposition(hessianMatrix).getSolver();
-                solutionVec = solver.solve(negativeGradient);
-                solutionVec.add(new ArrayRealVector(results.get(as).getDeformation()));
-                // prepare data for next step
-                solution = solutionVec.toArray();
-                localLimits.add(generateLimits(solution, coeffCount, limits.get(as)[DeformationLimit.USTEP]));
-            } catch (SingularMatrixException ex) {
-                it.remove();
-                Logger.debug("{0} stop - singular hessian matrix.", as);
+                final AbstractSubset as = fas.get();
+                subsetsToCompute.remove(as);
+            } catch (InterruptedException | ExecutionException ex) {
+                Logger.warn(ex, "Error retrieving result after computing new step.");
             }
         }
 
@@ -301,6 +300,39 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         if (subsetCount > 0) {
             setChanged();
             notifyObservers(0.5 + 0.5 * ((subsetCount - subsetToCompute) / subsetCount));
+        }
+    }
+
+    private class StepMaker implements Callable<AbstractSubset> {
+
+        private final AbstractSubset subset;
+        final List<double[]> localLimits;
+        final int coeffCount;
+
+        public StepMaker(AbstractSubset subset, List<double[]> localLimits, int coeffCount) {
+            this.subset = subset;
+            this.localLimits = localLimits;
+            this.coeffCount = coeffCount;
+        }
+
+        @Override
+        public AbstractSubset call() throws Exception {
+            try {
+                // prepare data for computation
+                final RealVector negativeGradient = generateNegativeGradient(subset);
+                final RealMatrix hessianMatrix = generateHessianMatrix(subset);
+                // calculate next step
+                final DecompositionSolver solver = new QRDecomposition(hessianMatrix).getSolver();
+                final RealVector solutionVec = solver.solve(negativeGradient);
+                solutionVec.add(new ArrayRealVector(results.get(subset).getDeformation()));
+                // prepare data for next step
+                final double[] solution = solutionVec.toArray();
+                localLimits.add(generateLimits(solution, coeffCount, limits.get(subset)[DeformationLimit.USTEP]));
+            } catch (SingularMatrixException ex) {
+                Logger.debug("{0} stop - singular hessian matrix.", subset);
+                return subset;
+            }
+            return null;
         }
     }
 }
