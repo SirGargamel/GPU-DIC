@@ -14,7 +14,7 @@ import java.io.Serializable;
  *
  * @author Petr Jecmen
  */
-public final class ExportTask implements Serializable {
+public final class ExportTask {
 
     private static final String SEPARATOR = ";";
     private final ExportMode mode;
