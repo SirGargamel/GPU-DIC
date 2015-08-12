@@ -158,7 +158,7 @@ public final class ExportUtils {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data.");
         }
-        
+
         final double[] minMax = findMinMax(mapData);
 
         return createImageFromMap(mapData, dir, minMax);
@@ -207,6 +207,12 @@ public final class ExportUtils {
             case EYY:
             case EXY:
             case R_DY:
+            case Q_D:
+            case Q_D_D:
+            case Q_D_EX:
+            case Q_D_EY:
+            case Q_EX:
+            case Q_EY:
                 out = new BufferedImage(width + BAR_SIZE_VERT, height, IMAGE_TYPE);
                 break;
             case D_DX:
@@ -243,6 +249,12 @@ public final class ExportUtils {
             case EYY:
             case EXY:
             case R_DY:
+            case Q_D:
+            case Q_D_D:
+            case Q_D_EX:
+            case Q_D_EY:
+            case Q_EX:
+            case Q_EY:
                 drawVerticalBar(out, minMax[0], minMax[1]);
                 break;
             case D_DX:

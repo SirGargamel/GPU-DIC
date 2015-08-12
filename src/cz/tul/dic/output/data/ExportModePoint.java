@@ -39,7 +39,8 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
         final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
 
         Result res;
-        double[][][] results;
+        double[][][] results3D = null;
+        double[][] results2D = null;
         double[] data;
         for (Direction dir : Direction.values()) {
             data = result.get(dir);
@@ -52,33 +53,57 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                     case R_DY:
                     case R_DABS:
                         res = tc.getResult(round - 1, round);
-                        results = res == null ? null : res.getDisplacementResult().getDisplacement();
+                        results3D = res == null ? null : res.getDisplacementResult().getDisplacement();
                         break;
                     case DX:
                     case DY:
                     case DABS:
                         res = tc.getResult(roundZero, round);
-                        results = res == null ? null : res.getDisplacementResult().getDisplacement();
+                        results3D = res == null ? null : res.getDisplacementResult().getDisplacement();
                         break;
                     case D_EXX:
                     case D_EYY:
                     case D_EXY:
                     case D_EABS:
                         res = tc.getResult(round - 1, round);
-                        results = res == null ? null : res.getStrainResult().getStrain();
+                        results3D = res == null ? null : res.getStrainResult().getStrain();
                         break;
                     case EXX:
                     case EYY:
                     case EXY:
                     case EABS:
                         res = tc.getResult(roundZero, round);
-                        results = res == null ? null : res.getStrainResult().getStrain();
+                        results3D = res == null ? null : res.getStrainResult().getStrain();
+                        break;
+                    case Q_D_D:
+                        res = tc.getResult(round - 1, round);
+                        results2D = res == null ? null : res.getDisplacementResult().getQuality();
+                        break;
+                    case Q_D:
+                        res = tc.getResult(roundZero, round);
+                        results2D = res == null ? null : res.getDisplacementResult().getQuality();
+                        break;
+                    case Q_D_EX:
+                        res = tc.getResult(round - 1, round);
+                        results2D = res == null ? null : res.getStrainResult().getQuality()[0];
+                        break;
+                    case Q_D_EY:
+                        res = tc.getResult(round - 1, round);
+                        results2D = res == null ? null : res.getStrainResult().getQuality()[1];
+                        break;
+                    case Q_EX:
+                        res = tc.getResult(roundZero, round);
+                        results2D = res == null ? null : res.getStrainResult().getQuality()[0];
+                        break;
+                    case Q_EY:
+                        res = tc.getResult(roundZero, round);
+                        results2D = res == null ? null : res.getStrainResult().getQuality()[1];
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported direction - " + dir);
                 }
 
-                if (results == null || results.length < x || results[0].length < y || results[x][y] == null) {
+                if ((results3D == null && results2D == null) || results3D.length < x || results3D[0].length < y || results3D[x][y] == null) {
                     data[round] = 0;
                 } else {
                     switch (dir) {
@@ -88,7 +113,7 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         case DX:
                         case DY:
                         case DABS:
-                            data[round] = ExportUtils.calculateDisplacement(results[x][y], dir);
+                            data[round] = ExportUtils.calculateDisplacement(results3D[x][y], dir);
                             break;
                         case D_EXX:
                         case D_EYY:
@@ -98,12 +123,20 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         case EYY:
                         case EXY:
                         case EABS:
-                            data[round] = ExportUtils.calculateStrain(results[x][y], dir);
+                            data[round] = ExportUtils.calculateStrain(results3D[x][y], dir);
                             break;
                         case R_DX:
                         case R_DY:
                         case R_DABS:
-                            data[round] = ExportUtils.calculateSpeed(results[x][y], dir, time);
+                            data[round] = ExportUtils.calculateSpeed(results3D[x][y], dir, time);
+                            break;
+                        case Q_D_D:
+                        case Q_D:
+                        case Q_D_EX:
+                        case Q_D_EY:
+                        case Q_EX:
+                        case Q_EY:
+                            data[round] = results2D[x][y];
                             break;
                         default:
                             throw new IllegalArgumentException("Unsupported direction - " + dir);
