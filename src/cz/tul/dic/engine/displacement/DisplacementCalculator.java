@@ -67,16 +67,17 @@ public abstract class DisplacementCalculator {
             final int width = img.getWidth();
             final int height = img.getHeight();
             final double[][][] resultData = new double[width][height][];
+            final double[][] resultQuality = new double[width][height];
 
             final List<double[][][]> resultsCascade = findResultsCascade(tc, roundFrom, roundTo);
 
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    computeDisplacement(resultsCascade, resultData, x, y);
+                    computeDisplacement(resultsCascade, resultData, resultQuality, x, y);
                 }
             }
 
-            displacement = new DisplacementResult(resultData, null);
+            displacement = new DisplacementResult(resultData, resultQuality);
         }
 
         return displacement;
@@ -103,15 +104,18 @@ public abstract class DisplacementCalculator {
         return result;
     }
 
-    private static void computeDisplacement(final List<double[][][]> resultsCascade, final double[][][] resultData, int x, int y) {
+    private static void computeDisplacement(final List<double[][][]> resultsCascade, final double[][][] resultData, final double[][] resultQuality, int x, int y) {
         double posX = x;
         double posY = y;
 
         double[] val;
+        double quality = Double.MAX_VALUE;
         boolean found = false;
         for (double[][][] data : resultsCascade) {
             val = interpolate(posX, posY, data);
             if (val != null) {
+                quality = Math.min(quality, interpolate(posX, posY, resultQuality));
+
                 found = true;
                 posX += val[Coordinates.X];
                 posY += val[Coordinates.Y];
@@ -122,6 +126,9 @@ public abstract class DisplacementCalculator {
 
         if (found) {
             resultData[x][y] = new double[]{posX - x, posY - y};
+            resultQuality[x][y] = quality;
+        } else {
+            resultQuality[x][y] = Double.NaN;
         }
     }
 
@@ -155,6 +162,37 @@ public abstract class DisplacementCalculator {
                 result[dim] += data[intX][intY + 1][dim] * (1 - dX) * dY;
             }
         }
+    }
+
+    private static double interpolate(final double x, final double y, final double[][] data) {
+        double result = Double.NaN;
+
+        final int intX = (int) x;
+        final double dX = x - intX;
+        final int intY = (int) y;
+        final double dY = y - intY;
+
+        try {
+            result = calculateValue(data, intX, intY, dX, dY);
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException ex) {
+        }
+
+        return result;
+    }
+
+    private static double calculateValue(final double[][] data, final int intX, final int intY, final double dX, final double dY) {
+        double result = 0;
+        result += data[intX][intY] * (1 - dX) * (1 - dY);
+        if (intX < data.length - 1) {
+            result += data[intX + 1][intY] * dX * (1 - dY);
+            if (intY < data[intX].length - 1) {
+                result += data[intX + 1][intY + 1] * dX * dY;
+            }
+        }
+        if (intY < data[intX].length - 1) {
+            result += data[intX][intY + 1] * (1 - dX) * dY;
+        }
+        return result;
     }
 
 }
