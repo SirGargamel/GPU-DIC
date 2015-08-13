@@ -166,9 +166,9 @@ public class LocalLeastSquare extends StrainEstimator {
     private static double[] computeStrains(final double[] coeffs) {
         final double[] result = new double[3];
 
-        result[StrainResultDirection.E_XX] = coeffs[INDEX_A1] * COEFF_ADJUST;
-        result[StrainResultDirection.E_YY] = coeffs[INDEX_B2] * COEFF_ADJUST;
-        result[StrainResultDirection.E_XY] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]) * COEFF_ADJUST;
+        result[StrainResult.E_XX] = coeffs[INDEX_A1] * COEFF_ADJUST;
+        result[StrainResult.E_YY] = coeffs[INDEX_B2] * COEFF_ADJUST;
+        result[StrainResult.E_XY] = 0.5 * (coeffs[INDEX_B1] + coeffs[INDEX_A2]) * COEFF_ADJUST;
 
         return result;
     }

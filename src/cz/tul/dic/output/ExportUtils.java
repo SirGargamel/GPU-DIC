@@ -5,8 +5,8 @@
  */
 package cz.tul.dic.output;
 
+import cz.tul.dic.data.result.StrainResult;
 import cz.tul.dic.data.roi.AbstractROI;
-import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -96,21 +96,21 @@ public final class ExportUtils {
         switch (dir) {
             case EXX:
             case D_EXX:
-                result = results[StrainResultDirection.E_XX];
+                result = results[StrainResult.E_XX];
                 break;
             case EYY:
             case D_EYY:
-                result = results[StrainResultDirection.E_YY];
+                result = results[StrainResult.E_YY];
                 break;
             case EXY:
             case D_EXY:
-                result = results[StrainResultDirection.E_XY];
+                result = results[StrainResult.E_XY];
                 break;
             case EABS:
             case D_EABS:
-                final double val1 = results[StrainResultDirection.E_XX];
-                final double val2 = results[StrainResultDirection.E_YY];
-                final double val3 = results[StrainResultDirection.E_XY];
+                final double val1 = results[StrainResult.E_XX];
+                final double val2 = results[StrainResult.E_YY];
+                final double val3 = results[StrainResult.E_XY];
                 result = Math.sqrt(val1 * val1 + val2 * val2 + val3 * val3);
                 break;
             default:

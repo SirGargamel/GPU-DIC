@@ -13,6 +13,9 @@ import java.io.Serializable;
  */
 public class StrainResult implements Serializable {
 
+    public static final int E_XX = 0;
+    public static final int E_YY = 1;
+    public static final int E_XY = 2;
     private final double[][][] strain;
     private final double[][] qualityX, qualityY;
 
