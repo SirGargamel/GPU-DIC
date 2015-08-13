@@ -371,14 +371,14 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    public void drawRegressionQualities(final Image img, final double[][][] resultQuality, final String nameA, final String nameB) {
+    public void drawRegressionQualities(final Image img, final double[][] resultQualityU, final double[][] resultQualityV, final String nameA, final String nameB) {
         if (get(Types.REGRESSION_QUALITY)) {
             final File out = new File(nameA);
             out.getParentFile().mkdirs();
 
             try {
-                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[0], Direction.EXX)), "BMP", new File(nameA));
-                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQuality[1], Direction.EYY)), "BMP", new File(nameB));
+                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQualityU, Direction.EXX)), "BMP", new File(nameA));
+                ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQualityV, Direction.EYY)), "BMP", new File(nameB));
             } catch (IOException ex) {
                 Logger.warn(ex);
             }

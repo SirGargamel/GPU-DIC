@@ -14,19 +14,24 @@ import java.io.Serializable;
 public class StrainResult implements Serializable {
 
     private final double[][][] strain;
-    private final double[][][] quality;
+    private final double[][] qualityX, qualityY;
 
-    public StrainResult(final double[][][] strain, final double[][][] quality) {
+    public StrainResult(final double[][][] strain, final double[][] qualityX, final double[][] qualityY) {
         this.strain = strain;
-        this.quality = quality;
+        this.qualityX = qualityX;
+        this.qualityY = qualityY;
     }
 
     public double[][][] getStrain() {
         return strain;
     }
 
-    public double[][][] getQuality() {
-        return quality;
+    public double[][] getQualityX() {
+        return qualityX;
+    }
+
+    public double[][] getQualityY() {
+        return qualityY;
     }
 
 }

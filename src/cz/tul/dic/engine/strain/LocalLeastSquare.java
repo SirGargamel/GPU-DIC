@@ -32,8 +32,8 @@ public class LocalLeastSquare extends StrainEstimator {
     private static final int INDEX_B0 = 3;
     private static final int INDEX_B1 = 4;
     private static final int INDEX_B2 = 5;
-    private static final int INDEX_ERRA = 6;
-    private static final int INDEX_ERRB = 7;
+    private static final int INDEX_ERR_U = 6;
+    private static final int INDEX_ERR_V = 7;
     private static final double COEFF_ADJUST = 100;
     private boolean stop;
     
@@ -72,7 +72,8 @@ public class LocalLeastSquare extends StrainEstimator {
             }
 
             final double[][][] result = new double[width][height][];
-            final double[][][] resultQuality = new double[][][]{Utils.generateNaNarray(width, height), Utils.generateNaNarray(width, height)};
+            final double[][] resultQualityU = Utils.generateNaNarray(width, height);
+            final double[][] resultQualityV = Utils.generateNaNarray(width, height);
             try {
                 final List<Future<ExecutionUnit>> results = exec.invokeAll(l);
 
@@ -80,8 +81,8 @@ public class LocalLeastSquare extends StrainEstimator {
                 for (Future<ExecutionUnit> f : results) {
                     eu = f.get();
                     result[eu.getX()][eu.getY()] = eu.getResult();
-                    resultQuality[0][eu.getX()][eu.getY()] = eu.getErrors()[0];
-                    resultQuality[1][eu.getX()][eu.getY()] = eu.getErrors()[1];
+                    resultQualityU[eu.getX()][eu.getY()] = eu.getErrors()[0];
+                    resultQualityV[eu.getX()][eu.getY()] = eu.getErrors()[1];
                 }
             } catch (InterruptedException | ExecutionException ex) {
                 if (!stop) {
@@ -91,12 +92,12 @@ public class LocalLeastSquare extends StrainEstimator {
 
             if (DebugControl.isDebugMode()) {
                 Stats.getInstance().drawRegressionQualities(
-                        tc.getImage(roundTo), resultQuality,
+                        tc.getImage(roundTo), resultQualityU, resultQualityV,
                         NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.EXX),
                         NameGenerator.generateRegressionQualityMap(tc, roundTo, Direction.EYY));
             }
 
-            tc.setResult(roundFrom, roundTo, new Result(subResult, new StrainResult(result, resultQuality)));
+            tc.setResult(roundFrom, roundTo, new Result(subResult, new StrainResult(result, resultQualityU, resultQualityV)));
         }
     }
 
@@ -135,7 +136,7 @@ public class LocalLeastSquare extends StrainEstimator {
                 regression.newSampleData(dataY, dataX);
                 double[] beta = regression.estimateRegressionParameters();
                 System.arraycopy(beta, 0, result, 0, 3);
-                result[INDEX_ERRA] = regression.estimateRegressionStandardError();
+                result[INDEX_ERR_U] = regression.estimateRegressionStandardError();
 
                 dataY = new double[yV.size()];
                 for (int i = 0; i < dataY.length; i++) {
@@ -146,7 +147,7 @@ public class LocalLeastSquare extends StrainEstimator {
                 regression.newSampleData(dataY, dataX);
                 beta = regression.estimateRegressionParameters();
                 System.arraycopy(beta, 0, result, 3, 3);
-                result[INDEX_ERRB] = regression.estimateRegressionStandardError();
+                result[INDEX_ERR_V] = regression.estimateRegressionStandardError();
             } catch (MathIllegalArgumentException ex) {
                 Logger.debug(ex);
                 // singular matrix, let solution be zeroes
@@ -195,7 +196,7 @@ public class LocalLeastSquare extends StrainEstimator {
             final double[] coeffs = computeCoeffs(data, x, y, (int) Math.ceil(ws / 2.0));
             if (coeffs != null) {
                 result = computeStrains(coeffs);
-                errors = new double[]{coeffs[INDEX_ERRA], coeffs[INDEX_ERRB]};
+                errors = new double[]{coeffs[INDEX_ERR_U], coeffs[INDEX_ERR_V]};
             } else {
                 errors = new double[]{1, 1};
             }

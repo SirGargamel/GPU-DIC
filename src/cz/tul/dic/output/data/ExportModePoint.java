@@ -85,19 +85,19 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         break;
                     case Q_D_EX:
                         res = tc.getResult(round - 1, round);
-                        results2D = res == null ? null : res.getStrainResult().getQuality()[0];
+                        results2D = res == null ? null : res.getStrainResult().getQualityX();
                         break;
                     case Q_D_EY:
                         res = tc.getResult(round - 1, round);
-                        results2D = res == null ? null : res.getStrainResult().getQuality()[1];
+                        results2D = res == null ? null : res.getStrainResult().getQualityY();
                         break;
                     case Q_EX:
                         res = tc.getResult(roundZero, round);
-                        results2D = res == null ? null : res.getStrainResult().getQuality()[0];
+                        results2D = res == null ? null : res.getStrainResult().getQualityX();
                         break;
                     case Q_EY:
                         res = tc.getResult(roundZero, round);
-                        results2D = res == null ? null : res.getStrainResult().getQuality()[1];
+                        results2D = res == null ? null : res.getStrainResult().getQualityY();
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported direction - " + dir);
