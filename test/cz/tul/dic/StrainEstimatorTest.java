@@ -10,9 +10,9 @@ import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.Result;
+import cz.tul.dic.data.result.StrainResult;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.engine.strain.StrainResultDirection;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -101,9 +101,9 @@ public class StrainEstimatorTest {
         for (int x = 0; x < img.getWidth(); x++) {
             for (int y = 0; y < img.getHeight(); y++) {
                 Assert.assertNotNull(strains[x][y]);
-                Assert.assertEquals("Exx", 0.0, strains[x][y][StrainResultDirection.E_XX], DELTA);
-                Assert.assertEquals("Eyy", 0.0, strains[x][y][StrainResultDirection.E_YY], DELTA);
-                Assert.assertEquals("Exy", 0.0, strains[x][y][StrainResultDirection.E_XY], DELTA);
+                Assert.assertEquals("Exx", 0.0, strains[x][y][StrainResult.E_XX], DELTA);
+                Assert.assertEquals("Eyy", 0.0, strains[x][y][StrainResult.E_YY], DELTA);
+                Assert.assertEquals("Exy", 0.0, strains[x][y][StrainResult.E_XY], DELTA);
             }
         }
     }
@@ -134,9 +134,9 @@ public class StrainEstimatorTest {
         for (double[][] strain : strains) {
             for (double[] strain1 : strain) {
                 Assert.assertNotNull(strain1);
-                Assert.assertEquals("Exx", 100.0, strain1[StrainResultDirection.E_XX], DELTA);
-                Assert.assertEquals("Eyy", -50.0, strain1[StrainResultDirection.E_YY], DELTA);
-                Assert.assertEquals("Exy", 0.0, strain1[StrainResultDirection.E_XY], DELTA);
+                Assert.assertEquals("Exx", 100.0, strain1[StrainResult.E_XX], DELTA);
+                Assert.assertEquals("Eyy", -50.0, strain1[StrainResult.E_YY], DELTA);
+                Assert.assertEquals("Exy", 0.0, strain1[StrainResult.E_XY], DELTA);
             }
         }
     }
@@ -167,9 +167,9 @@ public class StrainEstimatorTest {
         for (double[][] strain : strains) {
             for (double[] strain1 : strain) {
                 Assert.assertNotNull(strain1);
-                Assert.assertEquals("Exx", 0.0, strain1[StrainResultDirection.E_XX], DELTA);
-                Assert.assertEquals("Eyy", 0.0, strain1[StrainResultDirection.E_YY], DELTA);
-                Assert.assertEquals("Exy", -75.0, strain1[StrainResultDirection.E_XY], DELTA);
+                Assert.assertEquals("Exx", 0.0, strain1[StrainResult.E_XX], DELTA);
+                Assert.assertEquals("Eyy", 0.0, strain1[StrainResult.E_YY], DELTA);
+                Assert.assertEquals("Exy", -75.0, strain1[StrainResult.E_XY], DELTA);
             }
         }
     }
