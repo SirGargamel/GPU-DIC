@@ -18,6 +18,7 @@ import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -174,7 +175,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
      * @throws ComputationException
      */
     private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree) throws ComputationException {
-        final List<double[]> localLimits = Collections.synchronizedList(new ArrayList<>(subsetsToCompute.size()));
+        
+        final Map<AbstractSubset, double[]> localLimits = new HashMap<>();
+                
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
         final ExecutorService exec = Engine.getInstance().getExecutorService();
@@ -196,7 +199,11 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         }
 
         if (!subsetsToCompute.isEmpty()) {
-            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
+            final List<double[]> localLimitsList = Collections.synchronizedList(new ArrayList<>(subsetsToCompute.size()));
+            for (AbstractSubset subset : subsetsToCompute) {
+                localLimitsList.add(localLimits.get(subset));
+            }
+            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimitsList));
         }
     }
 
@@ -306,10 +313,10 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     private class StepMaker implements Callable<AbstractSubset> {
 
         private final AbstractSubset subset;
-        final List<double[]> localLimits;
+        private final Map<AbstractSubset, double[]> localLimits;
         final int coeffCount;
 
-        public StepMaker(AbstractSubset subset, List<double[]> localLimits, int coeffCount) {
+        public StepMaker(AbstractSubset subset, Map<AbstractSubset, double[]> localLimits, int coeffCount) {
             this.subset = subset;
             this.localLimits = localLimits;
             this.coeffCount = coeffCount;
@@ -327,7 +334,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 solutionVec.add(new ArrayRealVector(results.get(subset).getDeformation()));
                 // prepare data for next step
                 final double[] solution = solutionVec.toArray();
-                localLimits.add(generateLimits(solution, coeffCount, limits.get(subset)[DeformationLimit.USTEP]));
+                localLimits.put(subset, generateLimits(solution, coeffCount, limits.get(subset)[DeformationLimit.USTEP]));
             } catch (SingularMatrixException ex) {
                 Logger.debug("{0} stop - singular hessian matrix.", subset);
                 return subset;
