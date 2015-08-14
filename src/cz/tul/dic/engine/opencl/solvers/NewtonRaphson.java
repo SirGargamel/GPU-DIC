@@ -18,7 +18,6 @@ import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -174,9 +174,8 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
      * @param defDegree
      * @throws ComputationException
      */
-    private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree) throws ComputationException {
-        
-        final Map<AbstractSubset, double[]> localLimits = new HashMap<>();
+    private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree) throws ComputationException {        
+        final Map<AbstractSubset, double[]> localLimits = new ConcurrentHashMap<>();
                 
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
@@ -199,7 +198,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         }
 
         if (!subsetsToCompute.isEmpty()) {
-            final List<double[]> localLimitsList = Collections.synchronizedList(new ArrayList<>(subsetsToCompute.size()));
+            final List<double[]> localLimitsList = new ArrayList<>(subsetsToCompute.size());
             for (AbstractSubset subset : subsetsToCompute) {
                 localLimitsList.add(localLimits.get(subset));
             }
@@ -337,6 +336,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 localLimits.put(subset, generateLimits(solution, coeffCount, limits.get(subset)[DeformationLimit.USTEP]));
             } catch (SingularMatrixException ex) {
                 Logger.debug("{0} stop - singular hessian matrix.", subset);
+                return subset;
+            } catch (Exception ex) {
+                Logger.warn(ex, "{0} stop, exception occured.", subset);
                 return subset;
             }
             return null;
