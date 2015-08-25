@@ -133,7 +133,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         sb.append("Initial results, step [").append(STEP_INITIAL).append("]:");
         CorrelationResult paddedResult;
         for (int i = 0; i < subsetCount; i++) {
-            paddedResult = new CorrelationResult(localResults.get(i).getValue(), Arrays.copyOf(localResults.get(i).getDeformation(), coeffCount));
+            paddedResult = new CorrelationResult(localResults.get(i).getQuality(), Arrays.copyOf(localResults.get(i).getDeformation(), coeffCount));
             results.put(subsets.get(i), paddedResult);
 
             sb.append(i)
@@ -232,7 +232,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
             newCorrelationValue = gpuData[resultIndex];
             newResult = new CorrelationResult(newCorrelationValue, extractSolutionFromLimits(currentLimits));
-            improvement = computeImprovement(currentResult.getValue(), newCorrelationValue);
+            improvement = computeImprovement(currentResult.getQuality(), newCorrelationValue);
             sb.append(as)
                     .append(" -  from ")
                     .append(currentResult)

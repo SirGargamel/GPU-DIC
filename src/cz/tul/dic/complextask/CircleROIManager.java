@@ -135,7 +135,7 @@ public class CircleROIManager extends AbstractROIManager {
         analyzer.setPrecision(PRECISION);
 
         for (CorrelationResult cr : tc.getResult(round, round + 1).getCorrelations().get(roi)) {
-            if (cr != null && cr.getValue() >= LIMIT_RESULT_QUALITY) {
+            if (cr != null && cr.getQuality() >= LIMIT_RESULT_QUALITY) {
                 analyzer.addValue(cr.getDeformation()[Coordinates.Y]);
             }
         }

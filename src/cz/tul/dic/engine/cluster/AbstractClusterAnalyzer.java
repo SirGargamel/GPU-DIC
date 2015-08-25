@@ -5,21 +5,30 @@
  */
 package cz.tul.dic.engine.cluster;
 
+import java.util.List;
+
 /**
  *
  * @author Petr Jecmen
  * @param <T>
  */
-public abstract class ClusterAnalyzer<T> {
+public abstract class AbstractClusterAnalyzer<T> {
 
     private static final double DEFAULT_PRECISION = 0.1;
     protected double precision;
+    protected List<T> values;
 
-    public ClusterAnalyzer() {
+    public AbstractClusterAnalyzer() {
         precision = DEFAULT_PRECISION;
     }
 
-    public abstract void addValue(final T val);
+    public void addValue(final T val) {
+        values.add(val);
+    }
+
+    public List<T> listValues() {
+        return values;
+    }
 
     public void setPrecision(final double precision) {
         this.precision = precision;

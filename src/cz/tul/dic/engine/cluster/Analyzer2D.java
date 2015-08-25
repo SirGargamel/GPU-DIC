@@ -5,30 +5,29 @@
  */
 package cz.tul.dic.engine.cluster;
 
+import cz.tul.dic.engine.cluster.Analyzer2D.Analayzer2DData;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Analyzer2D extends ClusterAnalyzer<double[]> {
+public class Analyzer2D extends AbstractClusterAnalyzer<Analayzer2DData> {
 
     private final Map<Integer, Map<Integer, Integer>> counterVal = new HashMap<>();
     private final Map<Integer, Map<Integer, Double>> counterQ = new HashMap<>();
-    private final List<double[]> values;
 
     public Analyzer2D() {
         values = new LinkedList<>();
     }
 
     @Override
-    public double[] findMajorValue() {
+    public Analayzer2DData findMajorValue() {
         int valX, valY;
         Map<Integer, Integer> mVal;
         Map<Integer, Double> mQ;
-        for (double[] val : values) {
-            valX = (int) Math.round(val[0] / precision);
-            valY = (int) Math.round(val[1] / precision);
+        for (Analayzer2DData val : values) {
+            valX = (int) Math.round(val.getX() / precision);
+            valY = (int) Math.round(val.getY() / precision);
 
             if (counterVal.containsKey(valX)) {
                 mVal = counterVal.get(valX);
@@ -42,10 +41,10 @@ public class Analyzer2D extends ClusterAnalyzer<double[]> {
 
             if (mVal.containsKey(valY)) {
                 mVal.put(valY, mVal.get(valY) + 1);
-                mQ.put(valY, mQ.get(valY) + val[2]);
+                mQ.put(valY, mQ.get(valY) + val.getQuality());
             } else {
                 mVal.put(valY, 1);
-                mQ.put(valY, val[2]);
+                mQ.put(valY, val.getQuality());
             }
         }
 
@@ -65,16 +64,30 @@ public class Analyzer2D extends ClusterAnalyzer<double[]> {
                 }
             }
         }
-        return new double[]{maxDx * precision, maxDy * precision, q};
+        return new Analayzer2DData(maxDx * precision, maxDy * precision, q);
     }
 
-    @Override
-    public void addValue(double[] val) {
-        values.add(new double[]{val[0], val[1], val[2]});
-    }
+    public static class Analayzer2DData {
 
-    public List<double[]> listValues() {
-        return values;
+        private final double x, y, quality;
+
+        public Analayzer2DData(double x, double y, double quality) {
+            this.x = x;
+            this.y = y;
+            this.quality = quality;
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public double getY() {
+            return y;
+        }
+
+        public double getQuality() {
+            return quality;
+        }
     }
 
 }

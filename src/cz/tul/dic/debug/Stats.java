@@ -14,6 +14,7 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer2D;
+import cz.tul.dic.engine.cluster.Analyzer2D.Analayzer2DData;
 import cz.tul.dic.engine.displacement.MaxAndWeightedAverage;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.output.CsvWriter;
@@ -122,9 +123,9 @@ public class Stats implements IGPUResultsReceiver {
             for (AbstractROI roi : results.keySet()) {
                 for (CorrelationResult cr : results.get(roi)) {
                     if (cr != null) {
-                        val = (int) (cr.getValue() * 10);
+                        val = (int) (cr.getQuality() * 10);
                         quality.inc(val / (double) 10);
-                        if (cr.getValue() < resultQuality) {
+                        if (cr.getQuality() < resultQuality) {
                             counterNotGood.inc(cr.getDeformation());
                         } else {
                             counterGood.inc(cr.getDeformation());
@@ -164,9 +165,9 @@ public class Stats implements IGPUResultsReceiver {
                     for (AbstractROI roi : results.keySet()) {
                         for (CorrelationResult cr : results.get(roi)) {
                             if (cr != null) {
-                                val = (int) (cr.getValue() * 10);
+                                val = (int) (cr.getQuality() * 10);
                                 quality.inc(val / (double) 10);
-                                if (cr.getValue() < resultQuality) {
+                                if (cr.getQuality() < resultQuality) {
                                     counterNotGood.inc(cr.getDeformation());
                                 } else {
                                     counterGood.inc(cr.getDeformation());
@@ -206,12 +207,12 @@ public class Stats implements IGPUResultsReceiver {
             for (AbstractROI roi : results.keySet()) {
                 for (CorrelationResult cr : results.get(roi)) {
                     if (cr != null) {
-                        val = (int) (cr.getValue() * 10);
+                        val = (int) (cr.getQuality() * 10);
                         counter = counters.get(val);
                         if (counter != null) {
                             counter.inc(cr.getDeformation());
                         } else {
-                            Logger.warn("Illegal correlation value - {0}", cr.getValue());
+                            Logger.warn("Illegal correlation value - {0}", cr.getQuality());
                         }
                     }
                 }
@@ -247,7 +248,7 @@ public class Stats implements IGPUResultsReceiver {
                     for (AbstractROI roi : results.keySet()) {
                         for (CorrelationResult cr : results.get(roi)) {
                             if (cr != null) {
-                                val = (int) (cr.getValue() * 10);
+                                val = (int) (cr.getQuality() * 10);
                                 counter = counters.get(val);
                                 if (counter != null) {
                                     counter.inc(cr.getDeformation());
@@ -326,7 +327,7 @@ public class Stats implements IGPUResultsReceiver {
                     center = subsets.get(i).getCenter();
                     result = results.get(i);
                     if (result != null) {
-                        resultData[(int) Math.round(center[0])][(int) Math.round(center[1])] = result.getValue();
+                        resultData[(int) Math.round(center[0])][(int) Math.round(center[1])] = result.getQuality();
                     }
                 }
             }
@@ -356,12 +357,12 @@ public class Stats implements IGPUResultsReceiver {
             final File out = new File(name);
             out.getParentFile().mkdirs();
 
-            final List<double[]> vals = counter.listValues();
+            final List<Analayzer2DData> vals = counter.listValues();
             final String[][] values = new String[vals.size()][2];
             final double precision = counter.getPrecision();
             for (int i = 0; i < vals.size(); i++) {
-                values[i][0] = Utils.format(precision * (int) Math.round(vals.get(i)[0] / precision));
-                values[i][1] = Utils.format(precision * (int) Math.round(vals.get(i)[1] / precision));
+                values[i][0] = Utils.format(precision * (int) Math.round(vals.get(i).getX() / precision));
+                values[i][1] = Utils.format(precision * (int) Math.round(vals.get(i).getY() / precision));
             }
             try {
                 CsvWriter.writeDataToCsv(new File(name), values);

@@ -19,6 +19,7 @@ import cz.tul.dic.debug.Stats;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.subset.SubsetDeformator;
 import cz.tul.dic.engine.cluster.Analyzer2D;
+import cz.tul.dic.engine.cluster.Analyzer2D.Analayzer2DData;
 import cz.tul.dic.output.NameGenerator;
 import java.util.HashMap;
 import java.util.List;
@@ -90,12 +91,12 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                     continue;
                 }
                 cr = results.get(i);
-                if (cr.getValue() < resultQuality) {
+                if (cr.getQuality() < resultQuality) {
                     continue;
                 }
 
                 d = cr.getDeformation();
-                qualitySum = cr.getValue();
+                qualitySum = cr.getQuality();
 
                 f = susbets.get(i);
                 if (f == null) {
@@ -112,7 +113,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                     y = e.getKey()[Coordinates.Y];
 
                     if (y >= lowerBound && y <= upperBound) {
-                        getAnalyzer(counters, x, y).addValue(new double[]{e.getValue()[0], e.getValue()[1], qualitySum});
+                        getAnalyzer(counters, x, y).addValue(new Analayzer2DData(e.getValue()[0], e.getValue()[1], qualitySum));
                     }
                 }
             }
@@ -122,13 +123,14 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
     private void calculateDisplacementFromCounters(
             final Map<Integer, Map<Integer, Analyzer2D>> counters, 
             final TaskContainer tc, final int round) {
-        int x;
-        int y;
+        int x,y;
+        double dx, dy;
         Analyzer2D counter;
         double qualitySum;
         double qualitySumWeighed;
-        double[] majorVal, val = new double[2];
+        Analayzer2DData majorVal;
         double maxDist2 = 4 * PRECISION * PRECISION;
+        double quality;
         for (Entry<Integer, Map<Integer, Analyzer2D>> eX : counters.entrySet()) {
             x = eX.getKey();
             for (Entry<Integer, Analyzer2D> eY : eX.getValue().entrySet()) {
@@ -137,21 +139,22 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                 if (counter != null) {
                     majorVal = counter.findMajorValue();
 
-                    val[0] = 0;
-                    val[1] = 0;
+                    dx = 0;
+                    dy = 0;
                     qualitySum = 0;
                     qualitySumWeighed = 0;
-                    for (double[] vals : counter.listValues()) {
+                    for (Analayzer2DData vals : counter.listValues()) {
                         if (dist2(vals, majorVal) <= maxDist2) {
-                            qualitySum += vals[2];
-                            qualitySumWeighed += vals[2] * vals[2];
-                            val[0] += vals[0] * vals[2];
-                            val[1] += vals[1] * vals[2];
+                            quality = vals.getQuality();
+                            qualitySum += quality;
+                            qualitySumWeighed += quality * quality;
+                            dx += vals.getX() * quality;
+                            dy += vals.getY() * quality;
                         }
                     }
 
-                    finalDisplacement[x][y] = new double[]{val[0] / qualitySum, val[1] / qualitySum};
-                    finalQuality[x][y] = qualitySum / qualitySumWeighed;
+                    finalDisplacement[x][y] = new double[]{dx / qualitySum, dy / qualitySum};
+                    finalQuality[x][y] = qualitySumWeighed / qualitySum;
 
                     if (DebugControl.isDebugMode()) {
                         Stats.getInstance().exportPointSubResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, round, x, y));
@@ -177,9 +180,9 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
         return result;
     }
 
-    private static double dist2(final double[] val1, final double[] val2) {
-        double a = val2[0] - val1[0];
-        double b = val2[1] - val1[1];
+    private static double dist2(final Analayzer2DData val1, final Analayzer2DData val2) {
+        double a = val2.getX() - val1.getX();
+        double b = val2.getY() - val1.getY();
         return a * a + b * b;
     }
 

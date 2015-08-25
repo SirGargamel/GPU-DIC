@@ -39,14 +39,14 @@ public class DisplacementCalculatorTest {
 
     @Test
     public void testDisplacementCalculator() throws IOException, URISyntaxException, ComputationException {
-        DisplacementResult result = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{2, 0, 0, 0, 0, 0}));
-        checkResults(result, 2, 0);
+        DisplacementResult result = prepareAndComputeDisplacement(new CorrelationResult(1.0, new double[]{2, 0, 0, 0, 0, 0}));
+        checkResults(result, 2, 0, 1.0);
 
-        result = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{0, 2, 0, 0, 0, 0}));
-        checkResults(result, 0, 2);
+        result = prepareAndComputeDisplacement(new CorrelationResult(0.5, new double[]{0, 2, 0, 0, 0, 0}));
+        checkResults(result, 0, 2, 0.5);
 
-        result = prepareAndComputeDisplacement(new CorrelationResult(1, new double[]{2, -2, 0, 0, 0, 0}));
-        checkResults(result, 2, -2);
+        result = prepareAndComputeDisplacement(new CorrelationResult(0.25, new double[]{2, -2, 0, 0, 0, 0}));
+        checkResults(result, 2, -2, 0.25);
     }
 
     private DisplacementResult prepareAndComputeDisplacement(final CorrelationResult deformation) throws IOException, URISyntaxException, ComputationException {
@@ -54,19 +54,19 @@ public class DisplacementCalculatorTest {
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
 
-        TaskContainer tc = TaskContainer.initTaskContainer(input);
+        final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
-        AbstractROI roi = new RectangleROI(10, 10, 20, 20);
+        final AbstractROI roi = new RectangleROI(10, 10, 20, 20);
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, deformation.getDeformation());
 
-        tc.setParameter(TaskParameter.SUBSET_SIZE, 11);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, 5);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 11);
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, DisplacementCalculation.MAX_WEIGHTED_AVERAGE);
         tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, 2000);
-        tc.setParameter(TaskParameter.RESULT_QUALITY, 0.5);
+        tc.setParameter(TaskParameter.RESULT_QUALITY, 0.25);
 
         final List<CorrelationResult> results = new ArrayList<>(1);
         results.add(deformation);
@@ -76,14 +76,17 @@ public class DisplacementCalculatorTest {
         return DisplacementCalculator.computeDisplacement(resultMap, SubsetGenerator.generateSubsets(tc, ROUND), tc, ROUND);
     }
 
-    private void checkResults(final DisplacementResult result, final double dx, final double dy) {
-        double[][][] results = result.getDisplacement();
-        for (double[][] dAA : results) {
-            for (double[] dA : dAA) {
-                if (dA != null) {
-                    assert (dA.length == 2);
-                    assert (dA[0] == dx);
-                    assert (dA[1] == dy);
+    private void checkResults(final DisplacementResult result, final double dx, final double dy, final double q) {
+        final double[][][] results = result.getDisplacement();
+        final double[][] quality = result.getQuality();
+
+        for (int x = 0; x < results.length; x++) {
+            for (int y = 0; y < results[x].length; y++) {
+                if (results[x][y] != null) {
+                    assert (results[x][y].length == 2);
+                    assert (results[x][y][0] == dx);
+                    assert (results[x][y][1] == dy);
+                    assert (quality[x][y] == q);
                 }
             }
         }
@@ -103,26 +106,40 @@ public class DisplacementCalculatorTest {
 
         final int width = tc.getImage(ROUND).getWidth();
         final int height = tc.getImage(ROUND).getHeight();
-        tc.setResult(0, 1, new Result(new DisplacementResult(prepareArray(width, height, 0), null)));
-        tc.setResult(1, 2, new Result(new DisplacementResult(prepareArray(width, height, 0), null)));
-        tc.setResult(2, 3, new Result(new DisplacementResult(prepareArray(width, height, 1), null)));
-        tc.setResult(3, 4, new Result(new DisplacementResult(prepareArray(width, height, 1), null)));
+        tc.setResult(0, 1, new Result(new DisplacementResult(prepareArray3D(width, height, 0), prepareArray2D(width, height, 1))));
+        tc.setResult(1, 2, new Result(new DisplacementResult(prepareArray3D(width, height, 0), prepareArray2D(width, height, 1))));
+        tc.setResult(2, 3, new Result(new DisplacementResult(prepareArray3D(width, height, 1), prepareArray2D(width, height, 0.5))));
+        tc.setResult(3, 4, new Result(new DisplacementResult(prepareArray3D(width, height, 1), prepareArray2D(width, height, 0.5))));
 
         tc.setResult(0, 2, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 2)));
         tc.setResult(0, 3, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 3)));
         tc.setResult(0, 4, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 4)));
 
-        assert equals(tc.getResult(0, 1).getDisplacementResult().getDisplacement(), prepareArray(width, height, 0), 0);
-        assert equals(tc.getResult(0, 2).getDisplacementResult().getDisplacement(), prepareArray(width, height, 0), 0);
-        assert equals(tc.getResult(0, 3).getDisplacementResult().getDisplacement(), prepareArray(width, height, 1), 0);
-        assert equals(tc.getResult(0, 4).getDisplacementResult().getDisplacement(), prepareArray(width, height, 2), 1);
+        assert equals(tc.getResult(0, 1).getDisplacementResult().getDisplacement(), prepareArray3D(width, height, 0), 0);
+        assert equals(tc.getResult(0, 1).getDisplacementResult().getQuality(), prepareArray2D(width, height, 1), 0);
+        assert equals(tc.getResult(0, 2).getDisplacementResult().getDisplacement(), prepareArray3D(width, height, 0), 0);
+        assert equals(tc.getResult(0, 2).getDisplacementResult().getQuality(), prepareArray2D(width, height, 1), 0);
+        assert equals(tc.getResult(0, 3).getDisplacementResult().getDisplacement(), prepareArray3D(width, height, 1), 0);
+        assert equals(tc.getResult(0, 3).getDisplacementResult().getQuality(), prepareArray2D(width, height, 1.5 / 2.0), 0);
+        assert equals(tc.getResult(0, 4).getDisplacementResult().getDisplacement(), prepareArray3D(width, height, 2), 1);
+        assert equals(tc.getResult(0, 4).getDisplacementResult().getQuality(), prepareArray2D(width, height, 1.25 / 2.0), 1);
     }
 
-    private double[][][] prepareArray(final int width, final int height, final double val) {
+    private double[][][] prepareArray3D(final int width, final int height, final double val) {
         final double[][][] result = new double[width][height][Coordinates.DIMENSION];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 Arrays.fill(result[x][y], val);
+            }
+        }
+        return result;
+    }
+
+    private double[][] prepareArray2D(final int width, final int height, final double val) {
+        final double[][] result = new double[width][height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                result[x][y] = val;
             }
         }
         return result;
@@ -147,6 +164,34 @@ public class DisplacementCalculatorTest {
                                 break loop;
                             }
                         }
+                    }
+                }
+            }
+        } else {
+            result = false;
+        }
+
+        return result;
+    }
+
+    private boolean equals(final double[][] A, final double[][] B, final int gap) {
+        boolean result = true;
+
+        if (A != null && B != null) {
+            loop:
+            for (int x = 0; x < A.length - gap; x++) {
+                for (int y = 0; y < A[x].length - gap; y++) {
+                    if (A[x] == null || B[x] == null) {
+                        if (!(A[x] == null && B[x] == null)) {
+                            result = false;
+                            break loop;
+                        }
+                    } else {
+                        if (A[x][y] != B[x][y]) {
+                            result = false;
+                            break loop;
+                        }
+
                     }
                 }
             }

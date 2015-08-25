@@ -33,7 +33,7 @@ public final class TaskDefaultValues {
     public static final int DEFAULT_SUBSET_SIZE = 10;
     public static final Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;
     public static final double DEFAULT_MM_TO_PX_RATIO = 1;    
-    public static final double DEFAULT_RESULT_QUALITY = 0.5;
+    public static final double DEFAULT_RESULT_QUALITY = 0.25;
     public static final StrainEstimationMethod DEFAULT_STRAIN_ESTIMATION_METHOD = StrainEstimationMethod.LOCAL_LEAST_SQUARES;
     public static final double DEFAULT_STRAIN_ESTIMATION_PARAMETER = 20;
     public static final TaskSplitMethod DEFAULT_TASK_SPLIT_METHOD = TaskSplitMethod.DYNAMIC;

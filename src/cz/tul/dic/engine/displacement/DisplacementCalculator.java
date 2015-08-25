@@ -69,7 +69,7 @@ public abstract class DisplacementCalculator {
             final double[][][] resultData = new double[width][height][];
             final double[][] resultQuality = new double[width][height];
 
-            final List<double[][][]> resultsCascade = findResultsCascade(tc, roundFrom, roundTo);
+            final List<DisplacementResult> resultsCascade = findResultsCascade(tc, roundFrom, roundTo);
 
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
@@ -83,8 +83,8 @@ public abstract class DisplacementCalculator {
         return displacement;
     }
 
-    private static List<double[][][]> findResultsCascade(final TaskContainer tc, final int roundFrom, final int roundTo) {
-        final List<double[][][]> result = new LinkedList<>();
+    private static List<DisplacementResult> findResultsCascade(final TaskContainer tc, final int roundFrom, final int roundTo) {
+        final List<DisplacementResult> result = new LinkedList<>();
         int indexFrom = roundFrom;
         int indexTo = roundTo;
         Result tempResult;
@@ -92,7 +92,7 @@ public abstract class DisplacementCalculator {
             do {
                 tempResult = tc.getResult(indexFrom, indexTo);
                 if (tempResult != null) {
-                    result.add(tempResult.getDisplacementResult().getDisplacement());
+                    result.add(tempResult.getDisplacementResult());
                     indexFrom = indexTo;
                     indexTo = roundTo;
                 } else {
@@ -104,17 +104,19 @@ public abstract class DisplacementCalculator {
         return result;
     }
 
-    private static void computeDisplacement(final List<double[][][]> resultsCascade, final double[][][] resultData, final double[][] resultQuality, int x, int y) {
+    private static void computeDisplacement(final List<DisplacementResult> resultsCascade, final double[][][] resultData, final double[][] resultQuality, int x, int y) {
         double posX = x;
         double posY = y;
 
         double[] val;
-        double quality = Double.MAX_VALUE;
+        double quality = 0;
         boolean found = false;
-        for (double[][][] data : resultsCascade) {
-            val = interpolate(posX, posY, data);
+        int counter = 0;
+        for (DisplacementResult data : resultsCascade) {
+            val = interpolate(posX, posY, data.getDisplacement());
             if (val != null) {
-                quality = Math.min(quality, interpolate(posX, posY, resultQuality));
+                quality += interpolate(posX, posY, data.getQuality());
+                counter++;
 
                 found = true;
                 posX += val[Coordinates.X];
@@ -126,7 +128,7 @@ public abstract class DisplacementCalculator {
 
         if (found) {
             resultData[x][y] = new double[]{posX - x, posY - y};
-            resultQuality[x][y] = quality;
+            resultQuality[x][y] = quality / counter;
         } else {
             resultQuality[x][y] = Double.NaN;
         }

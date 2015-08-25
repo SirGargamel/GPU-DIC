@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Analyzer1D extends ClusterAnalyzer<Double> {
+public class Analyzer1D extends AbstractClusterAnalyzer<Double> {
 
     private final Map<Integer, Integer> counter = new HashMap<>();
 

@@ -176,10 +176,10 @@ public abstract class AbstractTaskSolver extends Observable {
         final CorrelationResult result;
         if (r1 == null) {
             result = r2;
-        } else if (Double.compare(r1.getValue(), r2.getValue()) == 0) {
+        } else if (Double.compare(r1.getQuality(), r2.getQuality()) == 0) {
             result = DeformationUtils.getAbs(r1.getDeformation()) < DeformationUtils.getAbs(r2.getDeformation()) ? r1 : r2;
         } else {
-            result = r1.getValue() > r2.getValue() ? r1 : r2;
+            result = r1.getQuality() > r2.getQuality() ? r1 : r2;
         }
         return result;
     }

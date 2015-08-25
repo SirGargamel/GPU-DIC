@@ -14,16 +14,16 @@ import java.util.Arrays;
  */
 public class CorrelationResult implements Serializable {
 
-    private final double value;
+    private final double quality;
     private final double[] deformation;
 
     public CorrelationResult(final double value, final double[] deformation) {
-        this.value = value;
+        this.quality = value;
         this.deformation = deformation;
     }
     
-    public double getValue() {
-        return value;
+    public double getQuality() {
+        return quality;
     }
 
     public double[] getDeformation() {
@@ -35,7 +35,7 @@ public class CorrelationResult implements Serializable {
         final StringBuilder sb = new StringBuilder();
         sb.append(Arrays.toString(deformation));
         sb.append(": ");
-        sb.append(value);
+        sb.append(quality);
         return sb.toString();
     }
 

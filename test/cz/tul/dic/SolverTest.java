@@ -141,7 +141,7 @@ public class SolverTest {
             final Map<AbstractROI, List<CorrelationResult>> results = task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations();
             for (List<CorrelationResult> l : results.values()) {
                 for (CorrelationResult cor : l) {
-                    if (cor.getValue() < LIMIT_QUALITY_GOOD) {
+                    if (cor.getQuality() < LIMIT_QUALITY_GOOD) {
                         closeEnough = false;
                     }
                 }
