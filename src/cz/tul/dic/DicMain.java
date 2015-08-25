@@ -17,11 +17,7 @@ import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.data.task.loaders.InputLoader;
-import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportTask;
-import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
-import cz.tul.dic.output.target.ExportTarget;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,7 +36,7 @@ import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
 import org.pmw.tinylog.labellers.TimestampLabeller;
-import org.pmw.tinylog.policies.MonthlyPolicy;
+import org.pmw.tinylog.policies.StartupPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
 
@@ -68,30 +64,37 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
         //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
         //////////////////////////////        
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR.small.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR.small.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR.small.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR.small.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR.small.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR.small.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi.NR2.small.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi.NR2.small.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi.NR2.small.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi.NR2.small.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi.NR2.small.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi.NR2.small.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi.CF.small.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi.CF.small.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi.CF.small.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi.CF.small.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi.CF.small.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi.CF.small.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi.BF.small.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi.BF.small.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi.BF.small.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi.BF.small.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi.BF.small.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi.BF.small.config", ////////////////////////////
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NR.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NR.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NR.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NR.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NR.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NR.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NR2.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NR2.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NR2.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NR2.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NR2.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NR2.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRA.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRA.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRA.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRA.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRA.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRA.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__CF.config",
+//        "d:\\temp\\.smallSolverCompare\\6203652m.avi__BF.config",
+//        "d:\\temp\\.smallSolverCompare\\9905121m.avi__BF.config",
+//        "d:\\temp\\.smallSolverCompare\\7202845m.avi__BF.config",
+//        "d:\\temp\\.smallSolverCompare\\6107544m.avi__BF.config",
+//        "d:\\temp\\.smallSolverCompare\\6113599m.avi__BF.config",
+//        "d:\\temp\\.smallSolverCompare\\9112502m.avi__BF.config", 
+////////////////////////////
     //        "d:\\temp\\.solverCompare\\6203652m.avi.NR.config",
     //        "d:\\temp\\.solverCompare\\9905121m.avi.NR.config",
     //        "d:\\temp\\.solverCompare\\7202845m.avi.NR.config",
@@ -137,8 +140,8 @@ public class DicMain extends Application {
         Stats.getInstance();
 
         if (parameters.contains(DEBUG_COMPUTE)) {
-//            performComputationTest();
-            performPreprocessingTest();
+            performComputationTest();
+//            performPreprocessingTest();
         }
 
         boolean validLicense = Utils.checkLicense(LICENSE);
@@ -189,7 +192,7 @@ public class DicMain extends Application {
         Configurator c = Configurator.defaultConfig();
         c.writingThread(true);
         try {
-            c.writer(new MultiWriter(new ConsoleWriter(), new RollingFileWriter("log.txt", 12, new TimestampLabeller("yyyy-MM"), new MonthlyPolicy())));
+            c.writer(new MultiWriter(new ConsoleWriter(), new RollingFileWriter("log.txt", 5, new TimestampLabeller("yy-MM-dd-HH-mm"), new StartupPolicy())));
         } catch (Exception ex) {
             c.writer(new ConsoleWriter());
             Logger.error(ex);
@@ -218,24 +221,19 @@ public class DicMain extends Application {
                 try {
                     Context.getInstance().setTc(TaskContainer.initTaskContainer(new File(s)));
                     task = Context.getInstance().getTc();
-                    if ((int) task.getParameter(TaskParameter.FACET_SIZE) < size) {
-                        System.out.println("STOPPING --- " + task.getParameter(TaskParameter.FACET_SIZE) + " --- " + size + " --- " + s);
+                    if ((int) task.getParameter(TaskParameter.SUBSET_SIZE) < size) {
+                        System.out.println("STOPPING --- " + task.getParameter(TaskParameter.SUBSET_SIZE) + " --- " + size + " --- " + s);
                         break;
                     }
                     task.setParameter(TaskParameter.IN, new File(s));
-                    task.setParameter(TaskParameter.FACET_SIZE, size);
-                    task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, size / 2);
+                    task.setParameter(TaskParameter.SUBSET_SIZE, size);
+                    task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, size / 2);
 //                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
-//                    tc.setParameter(TaskParameter.SOLVER, Solver.CoarseFine);                    
-
-//                    TaskContainerUtils.serializeTaskToConfig(task, new File("D:\\test.config"));
-//                    final TaskContainer test = TaskContainerUtils.deserializeTaskFromConfig(new File("D:\\test.config"));
-//                    InputLoader.loadInput(test);
-                    addExports(task);
+//                    tc.setParameter(TaskParameter.SOLVER, Solver.CoarseFine);                                        
 
                     commenceComputation(task);
 
-                    Exporter.export(task);
+                    exportTask(task);
 //                    commenceComputationDynamic(tc);
 //                    commenceComputationDynamicSpacingSweep(tc, 1, fs2 / 2);
                 } catch (IOException | ComputationException ex) {
@@ -248,8 +246,7 @@ public class DicMain extends Application {
         }
     }
 
-    private static void addExports(final TaskContainer task) {
-        task.getExports().clear();
+    private static void exportTask(final TaskContainer task) {
         for (int r : TaskContainerUtils.getRounds(task).values()) {
 //            // displacements
 //            task.addExport(ExportTask.generateMapExport(Direction.D_DX, ExportTarget.FILE, new File(NameGenerator.generateMap(task, r, Direction.D_DX)), r, null));
@@ -276,7 +273,7 @@ public class DicMain extends Application {
     }
 
     private static void printInfo(final String descr, final TaskContainer task, final long time) {
-        Logger.info("Finished " + descr + ": " + task.getParameter(TaskParameter.FACET_SIZE) + "/" + task.getParameter(TaskParameter.FACET_GENERATOR_PARAM) + "/" + task.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
+        Logger.info("Finished " + descr + ": " + task.getParameter(TaskParameter.SUBSET_SIZE) + "/" + task.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM) + "/" + task.getParameter(TaskParameter.KERNEL) + " in " + (time / 1000000.0) + "ms.");
     }
 
     private static void commenceComputationDynamic(TaskContainer task) throws IOException, ComputationException {
@@ -311,21 +308,9 @@ public class DicMain extends Application {
 
     private static void commenceComputationDynamicSpacingSweep(final TaskContainer task, final int spacingMin, final int spacingMax) throws ComputationException, IOException {
         for (int param = spacingMax; param >= spacingMin; param--) {
-            task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, param);
+            task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, param);
             commenceComputationDynamic(task);
         }
-    }
-
-    private static void textExports(final TaskContainer task) throws IOException, ComputationException {
-        Engine.getInstance().computeTask(task);
-        task.addExport(ExportTask.generateDoublePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvDoublePoint(task, 100, 100, 110, 110)), 100, 100, 110, 110));
-        task.addExport(ExportTask.generateMapExport(Direction.DX, ExportTarget.FILE, new File(NameGenerator.generateMap(task, 1, Direction.DX)), 1, null));
-        task.addExport(ExportTask.generateMapExport(Direction.D_DY, ExportTarget.FILE, new File(NameGenerator.generateMap(task, 2, Direction.D_DY)), 2, null));
-        task.addExport(ExportTask.generatePointExport(ExportTarget.CSV, new File(NameGenerator.generateCsvPoint(task, 100, 100)), 100, 100));
-        task.addExport(ExportTask.generateSequenceExport(Direction.DX, ExportTarget.FILE, new File(NameGenerator.generateSequence(task, Direction.DX)), null));
-        task.addExport(ExportTask.generateSequenceExport(Direction.DX, ExportTarget.CSV, new File(NameGenerator.generateSequence(task, Direction.DX)), null));
-        task.addExport(ExportTask.generateVideoExport(Direction.DX, new File(NameGenerator.generateSequence(task, Direction.DX))));
-        Exporter.export(task);
     }
 
     private static void performPreprocessingTest() throws ComputationException, IOException {
@@ -358,8 +343,8 @@ public class DicMain extends Application {
         filters.add("histogram");
         filters.add("median");
         filters.add("bilateral");
-        filters.add("clahe");        
-        filters.add("lucyRichardson");                
+        filters.add("clahe");
+        filters.add("lucyRichardson");
         filters.add("wiener");
 
         TaskContainer task;
@@ -368,7 +353,7 @@ public class DicMain extends Application {
 
             for (String filter : filters) {
                 for (int size = 5; size <= 15; size += 2) {
-                    task.setParameter(TaskParameter.FACET_SIZE, size);
+                    task.setParameter(TaskParameter.SUBSET_SIZE, size);
 
                     final double roiWidth;
                     if (task.getRois(0) != null) {
@@ -376,7 +361,7 @@ public class DicMain extends Application {
                     } else {
                         roiWidth = task.getImage(0).getWidth();
                     }
-                    task.setParameter(TaskParameter.FACET_GENERATOR_PARAM, Math.max((int) roiWidth / 10, 2 * size));
+                    task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, Math.max((int) roiWidth / 10, 2 * size));
                     findAllConfigurationsAndCompute(task, filter);
                 }
             }
