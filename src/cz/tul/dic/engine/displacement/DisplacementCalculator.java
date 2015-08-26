@@ -111,7 +111,7 @@ public abstract class DisplacementCalculator {
         double[] val;
         double quality = 0;
         boolean found = false;
-        int counter = 0;
+        double counter = 0;
         for (DisplacementResult data : resultsCascade) {
             val = interpolate(posX, posY, data.getDisplacement());
             if (val != null) {
@@ -184,15 +184,28 @@ public abstract class DisplacementCalculator {
 
     private static double calculateValue(final double[][] data, final int intX, final int intY, final double dX, final double dY) {
         double result = 0;
-        result += data[intX][intY] * (1 - dX) * (1 - dY);
+        double val;
+        val = data[intX][intY];
+        if (Double.isFinite(val)) {
+            result += val * (1 - dX) * (1 - dY);
+        }
         if (intX < data.length - 1) {
-            result += data[intX + 1][intY] * dX * (1 - dY);
+            val = data[intX + 1][intY];
+            if (Double.isFinite(val)) {
+                result += val * dX * (1 - dY);
+            }
             if (intY < data[intX].length - 1) {
-                result += data[intX + 1][intY + 1] * dX * dY;
+                val = data[intX + 1][intY + 1];
+                if (Double.isFinite(val)) {
+                    result += val * dX * dY;
+                }
             }
         }
         if (intY < data[intX].length - 1) {
-            result += data[intX][intY + 1] * (1 - dX) * dY;
+            val = data[intX][intY + 1];
+            if (Double.isFinite(val)) {
+                result += val * (1 - dX) * dY;
+            }
         }
         return result;
     }
