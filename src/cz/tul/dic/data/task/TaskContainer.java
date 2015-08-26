@@ -18,12 +18,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -267,7 +269,25 @@ public class TaskContainer extends Observable implements Serializable {
 
     @Override
     public String toString() {
-        return params.toString();
+        final StringBuilder sb = new StringBuilder("{");
+        Object o;
+        for (Entry<TaskParameter, Object> e : params.entrySet()) {
+            sb.append(e.getKey());
+            sb.append("= ");
+
+            o = e.getValue();
+            if (o instanceof int[]) {
+                sb.append(Arrays.toString((int[]) o));
+            } else if (o instanceof double[]) {
+                sb.append(Arrays.toString((double[]) o));
+            } else {
+                sb.append(o);
+            }
+            sb.append("; ");
+        }
+        sb.setLength(sb.length() - "; ".length());
+        sb.append("}");
+        return sb.toString();
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
