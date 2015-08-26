@@ -54,7 +54,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
 
         return result;
     }
-    
+
     private static double[][] extractData(final Direction direction, final TaskContainer tc, final int round, final int roundZero) {
         final double[][] result;
         switch (direction) {
@@ -223,11 +223,13 @@ public class ExportModeMap implements IExportMode<double[][]> {
     }
 
     private double interpolate(final double val1, final double val2, final double ratio) {
-        if (Double.isNaN(val1) || Double.isNaN(val2)) {
-            return Double.NaN;
+        final double result;
+        if (!Double.isFinite(val1) || !Double.isFinite(val2)) {
+            result = Double.NaN;
         } else {
-            return (int) ((val1 * ratio) + (val2 * (1 - ratio)));
+            result = (val1 * ratio) + (val2 * (1 - ratio));
         }
+        return result;
     }
 
 }
