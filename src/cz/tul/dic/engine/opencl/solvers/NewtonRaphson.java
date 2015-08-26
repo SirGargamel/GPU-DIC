@@ -60,7 +60,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             final Kernel kernel,
             final FullTask fullTask) throws ComputationException {
         if (fullTask.getSubsets().isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return new ArrayList<>(0);
         }
         this.fullTask = fullTask;
         final List<AbstractSubset> subsets = fullTask.getSubsets();

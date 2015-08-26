@@ -106,13 +106,12 @@ public class Dialogs {
         dlg.initStyle(StageStyle.UTILITY);
         dlg.setTitle(Lang.getString("Wait"));
         dlg.setHeaderText(text.concat("\n").concat(Lang.getString("EscCancel")));
-        final EventHandler<DialogEvent> handler = (DialogEvent event)
-                -> worker.cancel();
+        final EventHandler<DialogEvent> handler = (DialogEvent event) -> worker.cancel();
         dlg.setOnCloseRequest(handler);
         dlg.show();
     }
 
-    private static final class ProgressDialog extends Dialog {
+    private static final class ProgressDialog extends Dialog<DialogEvent> {
 
         final ProgressBar progress;
         final Label message;

@@ -29,7 +29,7 @@ public class CoarseFine extends AbstractTaskSolver {
             final Kernel kernel,
             final FullTask fullTask) throws ComputationException {
         if (fullTask.getSubsets().isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return new ArrayList<>(0);
         }
         
         final int subsetCount = fullTask.getSubsets().size();

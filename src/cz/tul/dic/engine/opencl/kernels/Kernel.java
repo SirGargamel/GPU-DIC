@@ -127,7 +127,7 @@ public abstract class Kernel {
     public List<CorrelationResult> compute(final ComputationTask task, boolean findBest) throws ComputationException {
         if (task.getSubsets().isEmpty()) {
             Logger.warn("Empty subsets for computation.");
-            return Collections.EMPTY_LIST;
+            return new ArrayList<>(0);
         }
         final int subsetCount = task.getSubsets().size();
         final int subsetSize = task.getSubsets().get(0).getSize();
