@@ -174,9 +174,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
      * @param defDegree
      * @throws ComputationException
      */
-    private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree) throws ComputationException {        
+    private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree) throws ComputationException {
         final Map<AbstractSubset, double[]> localLimits = new ConcurrentHashMap<>();
-                
+
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
 
         final ExecutorService exec = Engine.getInstance().getExecutorService();
@@ -338,7 +338,11 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 Logger.debug("{0} stop - singular hessian matrix.", subset);
                 return subset;
             } catch (Exception ex) {
-                Logger.warn(ex, "{0} stop, exception occured.", subset);
+                if (ex.getStackTrace().length == 0) {
+                    Logger.warn("{0} stop, exception occured - {1}, no stack trace...", subset, ex);
+                } else {
+                    Logger.warn(ex, "{0} stop, exception occured.", subset);
+                }
                 return subset;
             }
             return null;
