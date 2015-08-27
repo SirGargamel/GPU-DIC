@@ -53,19 +53,19 @@ public class CircularROI extends AbstractROI implements Serializable {
     public boolean isAreaInside(final double x1, final double y1, final double x2, final double y2) {
         final double maxDist2 = radius * radius;
         
-        return dist2(x1, y1, centerX, centerY) <= maxDist2
-                && dist2(x1, y2, centerX, centerY) <= maxDist2
-                && dist2(x2, y1, centerX, centerY) <= maxDist2
-                && dist2(x2, y2, centerX, centerY) <= maxDist2;
+        return dist2FromCenter(x1, y1) <= maxDist2
+                && dist2FromCenter(x1, y2) <= maxDist2
+                && dist2FromCenter(x2, y1) <= maxDist2
+                && dist2FromCenter(x2, y2) <= maxDist2;
     }
 
-    private static double dist2(final double x1, final double y1, final double x2, final double y2) {
-        return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+    private double dist2FromCenter(final double x1, final double y1) {
+        return (x1 - centerX) * (x1 - centerX) + (y1 - centerY) * (y1 - centerY);
     }
     
     @Override
     public boolean isPointInside(final double x, final double y) {
-        return dist2(x, y, centerX, centerY) <= (radius * radius);
+        return dist2FromCenter(x, y) <= (radius * radius);
     }
 
     @Override
