@@ -14,8 +14,9 @@ public enum Solver {
     BRUTE_FORCE("BruteForce"),
     COARSE_FINE("CoarseFine"),
     NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral"),
-    NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward"),
-    NEWTON_RHAPSON_APPROX("NewtonRaphsonHessianEstimate"),
+    NEWTON_RHAPSON_CENTRAL_HE("NewtonRaphsonCentralHE"),
+    NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward"),    
+    NEWTON_RHAPSON_FORWARD_HE("NewtonRaphsonForwardHE"),
     ;
     
     private final String className;

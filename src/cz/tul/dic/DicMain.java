@@ -35,7 +35,6 @@ import javafx.stage.Stage;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.LoggingLevel;
-import org.pmw.tinylog.labellers.TimestampLabeller;
 import org.pmw.tinylog.policies.StartupPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
@@ -50,44 +49,50 @@ public class DicMain extends Application {
     private static final String DEBUG_COMPUTE = "-debug";
     private static final String LICENSE_FILE = "license.dat";
     private static final File LICENSE = new File(LICENSE_FILE);
-    private static final String[] FILES_TO_DEBUG = new String[]{
-        //        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\6203652m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
-        //        "d:\\temp\\.test spacing\\6107544m\\6107544m.avi.config",
-        //        "d:\\temp\\.test spacing\\6113599m\\6113599m.avi.config",
-        //        "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
-        //        "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
-        //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
-        //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
-        //////////////////////////////        
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NR.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NR.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NR.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NR.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NR.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NR.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NR2.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NR2.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NR2.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NR2.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NR2.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NR2.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRA.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRA.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRA.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRA.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRA.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRA.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__CF.config", 
+    private static final String[] FILES_TO_DEBUG = new String[]{ //        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
+    //        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
+    //        "d:\\temp\\.test FS vs Quality\\6203652m.avi.config",
+    //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
+    //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
+    //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
+    //        "d:\\temp\\.test spacing\\6107544m\\6107544m.avi.config",
+    //        "d:\\temp\\.test spacing\\6113599m\\6113599m.avi.config",
+    //        "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
+    //        "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
+    //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
+    //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
+    //////////////////////////////
+            "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRC.config",
+            "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRCHE.config",
+            "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRF.config",
+            "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRFHE.config",
+            "d:\\temp\\.smallSolverCompare\\6107544m.avi__CF.config",
+    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRC.config",
+    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRCHE.config",        
+    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRF.config",
+    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRFHE.config",
+    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__CF.config",
+    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRC.config",
+    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRCHE.config",        
+    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRF.config",
+    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRFHE.config",        
+    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__CF.config",        
+    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRC.config",
+    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRCHE.config",        
+    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRF.config",
+    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRFHE.config",        
+    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__CF.config",
+    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRC.config",
+    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRCHE.config",        
+    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRF.config",
+    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRFHE.config",
+    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__CF.config",
+    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRC.config",
+    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRCHE.config",
+    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRF.config",
+    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRFHE.config",
+    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__CF.config", 
+    /////////////
     //        "d:\\temp\\.smallSolverCompare\\6107544m.avi__BF.config",
     //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__BF.config",
     //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__BF.config",    
@@ -214,7 +219,7 @@ public class DicMain extends Application {
 
     private void performComputationTest() {
         final int fs1 = 5; //10
-        final int fs2 = 30; //30        
+        final int fs2 = 5; //30        
         TaskContainer task;
         for (int size = fs1; size <= fs2; size += 5) {
             for (String s : FILES_TO_DEBUG) {

@@ -5,60 +5,28 @@
  */
 package cz.tul.dic.engine.opencl.solvers;
 
-import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetDeformator;
-import static cz.tul.dic.engine.opencl.solvers.NewtonRaphson.generateIndex;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolatingFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolator;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
 
 /**
  *
  * @author Petr Ječmen
  */
-public class NewtonRaphsonHessianEstimate extends NewtonRaphson {
+public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
 
-    private static final int COUNT_STEP = 5;
+    private static final int COUNT_STEP = 3;
     private static final double DX = 0.5;
-    private static final double DY = DX;
-
-    @Override
-    protected RealVector generateNegativeGradient(final AbstractSubset subset) {
-        final double[] deformationLimits = limits.get(subset);
-        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
-        final int deformationCount = computeDeformationCount(defDegree);
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
-        final double[] data = new double[coeffCount];
-
-        final int resultsBase = (int) (fullTask.getSubsets().indexOf(subset) * deformationCount);
-        final int[] indices = new int[coeffCount];
-        Arrays.fill(indices, getSetpCountForOneDimension() / 2);
-        final long[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
-
-        for (int i = 0; i < coeffCount; i++) {
-            // right index
-            indices[i]++;
-            data[i] = gpuData[resultsBase + generateIndex(counts, indices)];
-            // left index
-            indices[i] -= 2;
-            data[i] -= gpuData[resultsBase + generateIndex(counts, indices)];
-            data[i] /= 2 * deformationLimits[i * 3 + 2];
-            data[i] *= -1;
-            indices[i]++;
-        }
-        return new ArrayRealVector(data);
-    }
+    private static final double DY = DX;    
 
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
