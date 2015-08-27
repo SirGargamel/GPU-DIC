@@ -224,7 +224,7 @@ Limity deformací určují, jaké deformace se v obraze předpokládají a tím 
 \newpage
 \section{Konfigurační soubor úlohy}
 \label{sec:config}
-Konfigurační soubor v běžném případě není nutné psát ručně, lze ho vygenerovat v aplikaci po nastavení všeho potřebného, ukázkový soubor lze nalézt v kapitole \ref{sec:configExample}. Soubor je textový, každý parametr je uveden na samostatném řádku. Parametr se skládá z identifikátoru (název velkými písmeny), oddělovače (ten je tvořen dvojnásobnou dvojtečkou - "::") a hodnotou parametru.\\
+Konfigurační soubor v běžném případě není nutné psát ručně, lze ho vygenerovat v aplikaci po nastavení všeho potřebného, ukázkový soubor lze nalézt v kapitole \ref{sec:configExample}. Soubor je textový, každý parametr je uveden na samostatném řádku. Parametr se skládá z identifikátoru (název velkými písmeny), oddělovače (ten je tvořen rovnítkem - "=") a hodnotou parametru.\\
 Povinným parametrem je vstupní soubor. Tím může být buď cesta k video-souboru (cesta musí být absolutní) nebo seznam obrázků ke zpracování, názvy pak musí být odděleny středníkem. Název parametru pro vstupní soubor je pak "INPUT."\\
 Dále je možno stanovit ROI pro jednotlivá kola. Identifikátor je "ROI\textunderscore " a číslo obrázku (např. ROI\textunderscore 0 pro první obrázek). Hodnotou je pak výčet ROI pro dané kolo oddělených dvojitými středníky. ROI se definuje jako posloupnost hodnot (souřadnice ROI -- limity deformací -- velikost facetu) oddělených dvojitou pomlčkou ("--"). Souřadnice ROI mohou být buď souřadnice středu a poloměr (pro kruhový ROI) nebo souřadnice levého horního a pravého spodního bodu (obdélníkový ROI, v pořadí X1;Y1;X2;Y2), jednotlivé hodnoty jsou od sebe odděleny středníkem. Limity deformací se specifikují ve stejném tvaru jako globální limity (viz. kapitola \ref{sec:parameters}), případně lze uvést slovo "NONE", které specifikuje, že se mají použít limity globální. Obdobně se chová velikost facetu, celočíselná hodnota určí velikost, NONE vynutí použití globálního nastavení.\\
 Dále lze v souboru nastavit i parametry enginu. Identifikátor parametru se tvoří jako klíčové slovo "PARAM\textunderscore" následované názvem parametru (např. PARAM\textunderscore SUBSET\textunderscore SIZE), hodnota se pak musí řídit možnostmi hodnot daného parametru (opět viz. kapitola \ref{sec:parameters}). Všechny neuvedené hodnoty budou nahrazeny výchozí hodnotou - nemusí se tedy nutně specifikovat každý parametr, pouze ty, které chceme změnit.\\
@@ -234,21 +234,21 @@ Druhá ukázka pak představuje plnou konfiguraci, ukazuje i definici ROI pro je
 \subsection{Ukázky konfiguračních souborů}
 \label{sec:configExample}
 \begin{lstlisting}[title=Jednoduchý konfigurační soubor pro automatický výpočet]
-INPUT :: D:\temp\7202845m\7202845m.avi
-ROI_0 :: 110.0;88.0;24.20--NONE--NONE;; 203.0;9.0;26.24--NONE--NONE;; 203.0;87.0;28.28--NONE--NONE;; 109.0;12.0;26.24--NONE--NONE
+INPUT = D:\temp\7202845m\7202845m.avi
+ROI_0 = 110.0;88.0;24.20--NONE--NONE;; 203.0;9.0;26.24--NONE--NONE;; 203.0;87.0;28.28--NONE--NONE;; 109.0;12.0;26.24--NONE--NONE
 PARAM_SUBSET_SIZE :: 20
 \end{lstlisting}
 \begin{lstlisting}[title=Plný konfigurační soubor pro automatický výpočet]
-INPUT :: D:\temp\7202845m\7202845m.avi
-ROI_2 ::  100.0;100.0;150.0;150.0---2.0,,2.0,,0.1,,-5.0,,10.0,,0.1--15
-ROI_3 ::  109.0;109.0;159.0;159.0---NONE--NONE
-PARAM_SUBSET_GENERATOR_METHOD :: EQUAL
-PARAM_SUBSET_GENERATOR_PARAM :: 1
-PARAM_SUBSET_SIZE :: 20
-PARAM_KERNEL :: CL_1D_I_V_LL_MC_D
-PARAM_TASK_SPLIT_METHOD :: DYNAMIC
-PARAM_INTERPOLATION :: BICUBIC
-PARAM_ROUND_LIMITS :: 2;4
-PARAM_DEFORMATION_LIMITS :: -1.0;1.0;0.1;-2.0;5.0;0.1
+INPUT = D:\temp\7202845m\7202845m.avi
+ROI_2 =  100.0;100.0;150.0;150.0---2.0,,2.0,,0.1,,-5.0,,10.0,,0.1--15
+ROI_3 =  109.0;109.0;159.0;159.0---NONE--NONE
+PARAM_SUBSET_GENERATOR_METHOD = EQUAL
+PARAM_SUBSET_GENERATOR_PARAM = 1
+PARAM_SUBSET_SIZE = 20
+PARAM_KERNEL = CL_1D_I_V_LL_MC_D
+PARAM_TASK_SPLIT_METHOD = DYNAMIC
+PARAM_INTERPOLATION = BICUBIC
+PARAM_ROUND_LIMITS = 2;4
+PARAM_DEFORMATION_LIMITS = -1.0;1.0;0.1;-2.0;5.0;0.1
 \end{lstlisting}
 \end{document}
