@@ -16,6 +16,8 @@ import cz.tul.dic.data.task.Hint;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
+import cz.tul.dic.data.subset.AbstractSubset;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
 
@@ -35,6 +38,7 @@ public class CircleROIManager extends AbstractROIManager {
     public static final float LIMIT_RESULT_QUALITY = 0.5f;
     private static final double ROOT_TWO = Math.sqrt(2);
     private static final double[] DEFAULT_DEFORMATION_LIMITS = new double[]{-1, 1, 0.5, -5, 10, 0.5};
+    private static final int MIN_SUBSET_COUNT = 3;
     private static final int MAX_SHIFT_DIFFERENCE = 3;
     private CircularROI topLeft, topRight, bottomLeft, bottomRight;
     private double shiftTop, shiftBottom;
@@ -85,14 +89,14 @@ public class CircleROIManager extends AbstractROIManager {
         defLimits = DEFAULT_DEFORMATION_LIMITS;
         setROIs(initialRound);
     }
-    
+
     public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) throws ComputationException {
         final TaskContainer tcC = new TaskContainer(tc);
 
         tcC.setROIs(initialRound, tc.getRois(initialRound));
 
         return new CircleROIManager(tcC, initialRound);
-    }    
+    }
 
     @Override
     public void generateNextRound(int round, int nextRound) {
@@ -134,7 +138,7 @@ public class CircleROIManager extends AbstractROIManager {
         final Analyzer1D analyzer = new Analyzer1D();
         analyzer.setPrecision(PRECISION);
 
-        for (CorrelationResult cr : tc.getResult(round, round + 1).getCorrelations().get(roi)) {
+        for (CorrelationResult cr : task.getResult(round, round + 1).getCorrelations().get(roi)) {
             if (cr != null && cr.getQuality() >= LIMIT_RESULT_QUALITY) {
                 analyzer.addValue(cr.getDeformation()[Coordinates.Y]);
             }
@@ -150,15 +154,35 @@ public class CircleROIManager extends AbstractROIManager {
         rois.add(bottomLeft);
         rois.add(bottomRight);
 
-        tc.setROIs(round, rois);
+        task.setROIs(round, rois);
 
         CircularROI cr;
         double r;
         for (AbstractROI roi : rois) {
             cr = (CircularROI) roi;
             r = cr.getRadius();
-            tc.addSubsetSize(round, roi, (int) (r / ROOT_TWO));
-            tc.setDeformationLimits(round, roi, defLimits);
+            task.addSubsetSize(round, roi, (int) ((r * ROOT_TWO - 1) / 2.0));
+            task.setDeformationLimits(round, roi, defLimits);
+        }
+
+        try {
+            Map<AbstractROI, List<AbstractSubset>> subsets;
+
+            boolean sizeAdjusted;
+            do {
+                subsets = SubsetGenerator.generateSubsets(task, round);
+                sizeAdjusted = false;
+
+                for (AbstractROI roi : rois) {
+                    if (subsets.get(roi).size() < MIN_SUBSET_COUNT) {
+                        task.addSubsetSize(round, roi, task.getSubsetSize(round, roi) - 1);
+                        sizeAdjusted = true;
+                    }
+                }
+            } while (sizeAdjusted);
+
+        } catch (ComputationException ex) {
+            Logger.warn(ex, "Error adjsting subset sizes.");
         }
     }
 

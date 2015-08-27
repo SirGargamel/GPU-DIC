@@ -109,8 +109,8 @@ public class RectROIManager extends AbstractROIManager {
     private void setRois(final int round) {
         final Set<AbstractROI> rois = new HashSet<>(1);
         rois.add(rect);
-        tc.setROIs(round, rois);
-        tc.setDeformationLimits(round, rect, defLimits);
+        task.setROIs(round, rois);
+        task.setDeformationLimits(round, rect, defLimits);
     }
 
     @Override
