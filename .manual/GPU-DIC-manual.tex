@@ -162,7 +162,15 @@ Spuštění výpočtu neobnáší nic zvláštního, stačí pouze kliknout na t
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{results.png}\\Okno s výsledky}
 \end{figure}
-Okno výsledků prezentuje mapy s vypočtenými výsledky. K dispozici jsou čtyři typy výsledků - pole posunutí (D), pole přetvoření (E), rychlost posunutí (rD) a kvalita výsledků (Q). U posunutí a přetvoření jsou dostupné jak kumulativní výsledky, tak diferenciální (ty mají před názvem písmeno "d"). Jednotky zobrazené hodnoty jsou vždy uvedeny u názvu typu (směru dat) v levé spodní části okna. Pro potřeby rychlé vizuální analýzy jsou ve spodní části okna k dispozici limity zobrazených hodnot. Hodnoty mimo zadané limity jsou vykresleny šedou barvou (viz horní část obrázku).\\
+Okno výsledků prezentuje mapy s vypočtenými výsledky. K dispozici jsou následující typy výsledků 
+\begin{description}
+\item[D]{Pole posunutí}
+\item[E]{Pole přetvoření}
+\item[R]{Rychlost posunutí}
+\item[Q]{Kvalita výsledků posunutí}
+\item[O]{Směrodatná odchylka přetvoření}
+\end{description}
+U posunutí a přetvoření jsou dostupné jak kumulativní výsledky, tak diferenciální (ty mají prefix "\textbf{D\textunderscore}" před vlastním názvem). Jednotky zobrazené hodnoty jsou vždy uvedeny u názvu typu (směru dat) v levé spodní části okna. Pro potřeby rychlé vizuální analýzy jsou ve spodní části okna k dispozici limity zobrazených hodnot. Hodnoty mimo zadané limity jsou vykresleny šedou barvou (viz horní část obrázku).\\
 Kromě prohlížení výsledků je také možno výsledky exportovat. K dispozici je export právě zobrazené mapy nebo celé sekvence map. Mapy lze exportovat buď jako obrázek (obdoba obrázku v okně), nebo jako seznam hodnot do souboru CSV. Kromě exportu po jednotlivých mapách lze také vytvořit animaci, která vytvoří video soubor prezentující zvolené výsledky jako video. Názvy výsledných souborů se generují automaticky dle klíče, který lze nalézt v kapitole \ref{sec:names}.
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{resultsPoint.png}\\Výsledky pro bod}
@@ -171,7 +179,7 @@ Kliknutím do obrázku je možno zobrazit vývoj vybrané hodnoty v daném bodě
 \begin{figure}[H]
 \center{\includegraphics[width=0.5\textwidth]{results2Point.png}\\Přetvoření mezi 2 body}
 \end{figure}
-Při otevření alespoň dvou vývojů hodnoty se otevře také okno s analýzou přetvoření mezi dvěma zadanými body. Analýza se zobrazí vždy pro první a poslední poslední zobrazeý průběh (tzn. pro bod, který uživatel označil jako první a pro ten, který aktuálně označil. Chování se samozřejmě mění v závislosti na tom, jak uživatel zavírá okna s průběhy).
+Při otevření alespoň dvou vývojů hodnoty se otevře také okno s analýzou přetvoření mezi dvěma zadanými body. Analýza se zobrazí vždy pro první a poslední poslední zobrazený průběh (tzn. pro bod, který uživatel označil jako první a pro ten, který aktuálně označil. Chování se samozřejmě mění v závislosti na tom, jak uživatel zavírá okna s průběhy).
 \newpage
 \section{Doporučená nastavení}
 \label{sec:goodSettings}
@@ -204,7 +212,7 @@ Po deformaci facetu jsou souřadnice bodů facetu obecně reálná čísla, je t
 Limity kol je možné stanovit k urychlení výpočtu (např. pro vynechání části záznamu, kde již došlo k přetržení vzorku). Hodnoty se zadávají ve formě indexů prvního a posledního snímku (číslováno od 0), čísla se oddělují středníkem.
 \item[RESULT\textunderscore QUALITY] [double]\\
 Deformace se odhaduje na základě míry korelace barev pixelů původního a deformovaného facetu. Čím vyšší je tato hodnota, tím pravděpodobněji se jedná o správný odhad. Maximální hodnotu je pak 1.0, což znamená, že se vstup a výstup se naprosto shodují. Vlivem šumu a diskretizací prostoru možných deformací se ale maximální hodnoty prakticky nikdy nedosáhne, pouze se jí můžeme přiblížit. Často máme pro jeden pixel několik možných výsledků, což umožní částečně eliminovat vliv šumu na výsledek. Tento parametr říká, jak moc kvalitní musí být výsledek, aby byl přijat do skupiny výsledných. Výchozí hodnota je 0.25, což zaručuje vynechání nekvalitních výsledků při zachování dostatečného počtu výsledků pro úspěšný výsledek. 
-\item[SOLVER] [BRUTE\textunderscore FORCE | COARSE\textunderscore FINE\\| \textbf{NEWTON\textunderscore RHAPSON\textunderscore CENTRAL}\\| NEWTON\textunderscore RHAPSON\textunderscore CENTRAL\textunderscore HE\\| NEWTON\textunderscore RHAPSON\textunderscore FORWARD\\| NEWTON\textunderscore RHAPSON\textunderscore FORWARD\textunderscore HE] \\
+\item[SOLVER] [BRUTE\textunderscore FORCE\\| COARSE\textunderscore FINE\\| \textbf{NEWTON\textunderscore RHAPSON\textunderscore CENTRAL}\\| NEWTON\textunderscore RHAPSON\textunderscore CENTRAL\textunderscore HE\\| NEWTON\textunderscore RHAPSON\textunderscore FORWARD\\| NEWTON\textunderscore RHAPSON\textunderscore FORWARD\textunderscore HE] \\
 Řešič použitý pro výpočet. BruteForce je kompletní prohledání všech možností na základě zadaných limitů, jedná se o nejpomalejší a nejnáročnější řešič, zaručuje ale nalezení nejvhodnějšího řešení pro zadané limity. Metoda CoarseFine je schopna urychlit výpočet za pomoci postupného zpřesňování řešení na základě hrubého odhadu. Řešič NewtonRaphson je implementací Newtonovi metody pro hledání maxima / minima zadané funkce. Central varianta používá centrální diferenci, Forward pak dopřednou diferenci. HE pak nepočítá inverzi Hessiánu, ale aproximuje ji za pomoci vlastností obrazu v okolí podoblasti.
 \item[STRAIN\textunderscore ESTIMATION\textunderscore PARAM] [double]\\
 Tento parametr určuje velikost okna při výpočtu pole přetvoření. Tento parametr se zadává v mm, engine si pak velikost v pixelech dopočítá sám za pomoci parametru MM\textunderscore TO\textunderscore PX\textunderscore RATIO.
