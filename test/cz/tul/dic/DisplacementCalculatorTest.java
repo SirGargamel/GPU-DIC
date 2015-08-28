@@ -40,13 +40,13 @@ public class DisplacementCalculatorTest {
     @Test
     public void testDisplacementCalculator() throws IOException, URISyntaxException, ComputationException {
         DisplacementResult result = prepareAndComputeDisplacement(new CorrelationResult(1.0, new double[]{2, 0, 0, 0, 0, 0}));
-        checkResults(result, 2, 0, 1.0);
+        checkResults(result, 2, 0, 100.0);
 
         result = prepareAndComputeDisplacement(new CorrelationResult(0.5, new double[]{0, 2, 0, 0, 0, 0}));
-        checkResults(result, 0, 2, 0.5);
+        checkResults(result, 0, 2, 75.0);
 
         result = prepareAndComputeDisplacement(new CorrelationResult(0.25, new double[]{2, -2, 0, 0, 0, 0}));
-        checkResults(result, 2, -2, 0.25);
+        checkResults(result, 2, -2, 62.5);
     }
 
     private DisplacementResult prepareAndComputeDisplacement(final CorrelationResult deformation) throws IOException, URISyntaxException, ComputationException {
@@ -106,23 +106,23 @@ public class DisplacementCalculatorTest {
 
         final int width = tc.getImage(ROUND).getWidth();
         final int height = tc.getImage(ROUND).getHeight();
-        tc.setResult(0, 1, new Result(new DisplacementResult(prepareArray3D(width, height, 0), prepareArray2D(width, height, 1))));
-        tc.setResult(1, 2, new Result(new DisplacementResult(prepareArray3D(width, height, 0), prepareArray2D(width, height, 1))));
-        tc.setResult(2, 3, new Result(new DisplacementResult(prepareArray3D(width, height, 1), prepareArray2D(width, height, 0.5))));
-        tc.setResult(3, 4, new Result(new DisplacementResult(prepareArray3D(width, height, 1), prepareArray2D(width, height, 0.5))));
+        tc.setResult(0, 1, new Result(new DisplacementResult(prepareArray3D(width, height, 0), prepareArray2D(width, height, 100))));
+        tc.setResult(1, 2, new Result(new DisplacementResult(prepareArray3D(width, height, 0), prepareArray2D(width, height, 100))));
+        tc.setResult(2, 3, new Result(new DisplacementResult(prepareArray3D(width, height, 1), prepareArray2D(width, height, 50))));
+        tc.setResult(3, 4, new Result(new DisplacementResult(prepareArray3D(width, height, 1), prepareArray2D(width, height, 50))));
 
         tc.setResult(0, 2, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 2)));
         tc.setResult(0, 3, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 3)));
         tc.setResult(0, 4, new Result(DisplacementCalculator.computeCumulativeDisplacement(tc, 0, 4)));
 
         assert equals(tc.getResult(0, 1).getDisplacementResult().getDisplacement(), prepareArray3D(width, height, 0), 0);
-        assert equals(tc.getResult(0, 1).getDisplacementResult().getQuality(), prepareArray2D(width, height, 1), 0);
+        assert equals(tc.getResult(0, 1).getDisplacementResult().getQuality(), prepareArray2D(width, height, 100.0), 0);
         assert equals(tc.getResult(0, 2).getDisplacementResult().getDisplacement(), prepareArray3D(width, height, 0), 0);
-        assert equals(tc.getResult(0, 2).getDisplacementResult().getQuality(), prepareArray2D(width, height, 1), 0);
+        assert equals(tc.getResult(0, 2).getDisplacementResult().getQuality(), prepareArray2D(width, height, 100.0), 0);
         assert equals(tc.getResult(0, 3).getDisplacementResult().getDisplacement(), prepareArray3D(width, height, 1), 0);
-        assert equals(tc.getResult(0, 3).getDisplacementResult().getQuality(), prepareArray2D(width, height, 1.5 / 2.0), 0);
+        assert equals(tc.getResult(0, 3).getDisplacementResult().getQuality(), prepareArray2D(width, height, 150 / 2.0), 0);
         assert equals(tc.getResult(0, 4).getDisplacementResult().getDisplacement(), prepareArray3D(width, height, 2), 1);
-        assert equals(tc.getResult(0, 4).getDisplacementResult().getQuality(), prepareArray2D(width, height, 1.25 / 2.0), 1);
+        assert equals(tc.getResult(0, 4).getDisplacementResult().getQuality(), prepareArray2D(width, height, 125 / 2.0), 1);
     }
 
     private double[][][] prepareArray3D(final int width, final int height, final double val) {
