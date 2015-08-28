@@ -36,7 +36,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
                 final int height = result[0].length;
                 final double[][] stretchedResult = new double[width][height];
                 double newY;
-                for (int y = 0; y < height - 1; y++) {
+                for (int y = 0; y < height; y++) {
                     newY = y / stretchFactor;
                     if (newY > height - 1) {
                         continue;
