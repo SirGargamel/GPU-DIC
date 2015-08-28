@@ -154,7 +154,8 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                     }
 
                     finalDisplacement[x][y] = new double[]{dx / qualitySum, dy / qualitySum};
-                    finalQuality[x][y] = qualitySumWeighed / qualitySum;
+                    // normalize ZNCC quality result to percent [-1; 1] -> [0; 100]
+                    finalQuality[x][y] = 100 * ((qualitySumWeighed / qualitySum) + 1 / 2.0);
 
                     if (DebugControl.isDebugMode()) {
                         Stats.getInstance().exportPointSubResultsStatistics(counter, NameGenerator.generate2DValueHistogram(tc, round, x, y));
