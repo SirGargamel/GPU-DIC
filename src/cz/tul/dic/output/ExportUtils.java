@@ -168,7 +168,7 @@ public final class ExportUtils {
         double max = Double.NEGATIVE_INFINITY, min = Double.POSITIVE_INFINITY;
         for (double[] da : data) {
             for (double d : da) {
-                if (!Double.isNaN(d)) {
+                if (Double.isFinite(d)) {
                     if (d > max) {
                         max = d;
                     }
