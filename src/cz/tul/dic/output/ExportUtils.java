@@ -187,7 +187,7 @@ public final class ExportUtils {
 
     public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double[] minMax) {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
-            throw new IllegalArgumentException("Illegal map data.");
+            throw new IllegalArgumentException("Illegal map data .");
         }
 
         final int width = mapData.length;
@@ -209,10 +209,10 @@ public final class ExportUtils {
             case R_DY:
             case Q_D:
             case Q_D_D:
-            case Q_D_EX:
-            case Q_D_EY:
-            case Q_EX:
-            case Q_EY:
+            case O_D_EX:
+            case O_D_EY:
+            case O_EX:
+            case O_EY:
                 out = new BufferedImage(width + BAR_SIZE_VERT, height, IMAGE_TYPE);
                 break;
             case D_DX:
@@ -242,6 +242,14 @@ public final class ExportUtils {
             case D_EABS:
             case EABS:
             case R_DABS:
+            case Q_D:
+            case Q_D_D:
+            case O_D_EX:
+            case O_D_EY:
+            case O_EX:
+            case O_EY:
+                drawVerticalBarAbsoluteValues(out, minMax[0], minMax[1]);
+                break;
             case D_DY:
             case DY:
             case D_EYY:
@@ -249,12 +257,6 @@ public final class ExportUtils {
             case EYY:
             case EXY:
             case R_DY:
-            case Q_D:
-            case Q_D_D:
-            case Q_D_EX:
-            case Q_D_EY:
-            case Q_EX:
-            case Q_EY:
                 drawVerticalBar(out, minMax[0], minMax[1]);
                 break;
             case D_DX:
@@ -304,6 +306,35 @@ public final class ExportUtils {
     }
 
     private static void drawVerticalBar(final BufferedImage image, final double min, final double max) {
+        final int height = image.getHeight();
+
+        final Graphics2D g = image.createGraphics();
+        final FontMetrics metrics = g.getFontMetrics(g.getFont());
+
+        final int x = image.getWidth() - 1 - BAR_SIZE_VERT;
+        final double middle = (max + min) / 2.0;
+        final double quarter = (max - middle) / 2.0;
+
+        final int width = image.getWidth();
+        // positive part           
+        for (int y = 0; y < height; y++) {
+            g.setColor(new Color(deformationToRGB(y, 0, height - 1)));
+            g.drawRect(x, y, BAR_SIZE_VERT, 1);
+        }
+
+        g.setColor(COLOR_TEXT);
+        if (height > LIMIT_HEIGHT) {
+            g.drawString(NF.format(middle - quarter), width - BAR_SIZE_VERT, height / 4);
+            g.drawString(NF.format(middle + quarter), width - BAR_SIZE_VERT, height / 4 * 3);
+        }
+        g.drawString(NF.format(middle), width - BAR_SIZE_VERT, height / 2 + metrics.getHeight() / 3);
+        g.drawString(NF.format(max), width - BAR_SIZE_VERT, height - 2);
+        g.drawString(NF.format(min), width - BAR_SIZE_VERT, metrics.getHeight() / 3 * 2);
+
+        g.dispose();
+    }
+
+    private static void drawVerticalBarAbsoluteValues(final BufferedImage image, final double min, final double max) {
         final int height = image.getHeight();
 
         final Graphics2D g = image.createGraphics();

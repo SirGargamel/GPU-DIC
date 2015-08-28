@@ -85,10 +85,10 @@ public class ExportModeMap implements IExportMode<double[][]> {
                 break;
             case Q_D:
             case Q_D_D:
-            case Q_EX:
-            case Q_EY:
-            case Q_D_EX:
-            case Q_D_EY:
+            case O_EX:
+            case O_EY:
+            case O_D_EX:
+            case O_D_EY:
                 result = extractQualityResult(direction, tc, round, roundZero);
                 break;
             default:
@@ -200,19 +200,19 @@ public class ExportModeMap implements IExportMode<double[][]> {
                 res = tc.getResult(roundZero, round);
                 results = res == null ? null : res.getDisplacementResult().getQuality();
                 break;
-            case Q_D_EX:
+            case O_D_EX:
                 res = tc.getResult(round - 1, round);
                 results = res == null ? null : res.getStrainResult().getQualityX();
                 break;
-            case Q_D_EY:
+            case O_D_EY:
                 res = tc.getResult(round - 1, round);
                 results = res == null ? null : res.getStrainResult().getQualityY();
                 break;
-            case Q_EX:
+            case O_EX:
                 res = tc.getResult(roundZero, round);
                 results = res == null ? null : res.getStrainResult().getQualityX();
                 break;
-            case Q_EY:
+            case O_EY:
                 res = tc.getResult(roundZero, round);
                 results = res == null ? null : res.getStrainResult().getQualityY();
                 break;

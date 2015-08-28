@@ -83,19 +83,19 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                         res = tc.getResult(roundZero, round);
                         results2D = res == null ? null : res.getDisplacementResult().getQuality();
                         break;
-                    case Q_D_EX:
+                    case O_D_EX:
                         res = tc.getResult(round - 1, round);
                         results2D = res == null ? null : res.getStrainResult().getQualityX();
                         break;
-                    case Q_D_EY:
+                    case O_D_EY:
                         res = tc.getResult(round - 1, round);
                         results2D = res == null ? null : res.getStrainResult().getQualityY();
                         break;
-                    case Q_EX:
+                    case O_EX:
                         res = tc.getResult(roundZero, round);
                         results2D = res == null ? null : res.getStrainResult().getQualityX();
                         break;
-                    case Q_EY:
+                    case O_EY:
                         res = tc.getResult(roundZero, round);
                         results2D = res == null ? null : res.getStrainResult().getQualityY();
                         break;
@@ -132,10 +132,10 @@ public class ExportModePoint implements IExportMode<Map<Direction, double[]>> {
                             break;
                         case Q_D_D:
                         case Q_D:
-                        case Q_D_EX:
-                        case Q_D_EY:
-                        case Q_EX:
-                        case Q_EY:
+                        case O_D_EX:
+                        case O_D_EY:
+                        case O_EX:
+                        case O_EY:
                             data[round] = results2D[x][y];
                             break;
                         default:
