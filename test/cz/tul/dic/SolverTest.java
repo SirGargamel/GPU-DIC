@@ -166,7 +166,7 @@ public class SolverTest {
         for (List<CorrelationResult> l : results.values()) {
             for (CorrelationResult cor : l) {
                 tmp = cor.getDeformation();
-                for (int i = 0; i < coeffCount; i++) {
+                for (int i = 0; i < Math.min(coeffCount, tmp.length); i++) {
                     result[i] += tmp[i];
                 }
                 counter++;
