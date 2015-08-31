@@ -9,6 +9,7 @@ import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.io.File;
 
 /**
@@ -106,23 +107,23 @@ public final class NameGenerator {
 
     private static class Generator {
 
-        private final TaskContainer tc;
+        private final TaskContainer task;
         private final StringBuilder sb;
         private final FpsManager fpsM;
 
-        public Generator(TaskContainer tc) {
-            this.tc = tc;
+        public Generator(TaskContainer task) {
+            this.task = task;
             sb = new StringBuilder();
-            fpsM = new FpsManager(tc);
+            fpsM = new FpsManager(task);
         }
 
         public Generator name() {
-            sb.append(tc.getParameter(TaskParameter.IN).toString());
+            sb.append(task.getParameter(TaskParameter.IN).toString());
             return this;
         }
 
         public Generator name(final String dirName) {
-            final File in = (File) tc.getParameter(TaskParameter.IN);
+            final File in = (File) task.getParameter(TaskParameter.IN);
             sb.append(in.getParent());
             sb.append(File.separator);
             sb.append(dirName);
@@ -164,12 +165,15 @@ public final class NameGenerator {
         public String finalizeName(final String extension) {
             sb.append(DELIMITER);
             sb.append(DELIMITER);
-            sb.append(Utils.format((int) tc.getParameter(TaskParameter.SUBSET_SIZE)));
+            sb.append(Utils.format((int) task.getParameter(TaskParameter.SUBSET_SIZE)));
             if (debugMode) {
                 sb.append(DELIMITER);
-                sb.append(Utils.format((int) tc.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM)));
+                sb.append(Utils.format((int) task.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM)));
                 sb.append(DELIMITER);
-                sb.append(Utils.format((double) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM)));
+                sb.append(Utils.format((double) task.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM)));
+                sb.append(DELIMITER);
+                final Solver solver  = (Solver) task.getParameter(TaskParameter.SOLVER);
+                sb.append(solver.getAbbreviation());
             }
             sb.append(extension);
             return sb.toString();
