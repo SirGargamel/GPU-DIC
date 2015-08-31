@@ -24,9 +24,9 @@ public final class TaskDefaultValues {
     public static final int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     public static final int DEFAULT_FPS = 5000;
     public static final DeformationDegree DEFAULT_DEFORMATION_ORDER = DeformationDegree.FIRST;
-    public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-10.0, 10.0, 0.25, -10, 10, 0.25};
+    public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-10.0, 10.0, 0.01, -10, 10, 0.01};
     public static final double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
-        -10.0, 10.0, 0.25, -10, 10, 0.25,
+        -10.0, 10.0, 0.01, -10, 10, 0.01,
         -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05};
     public static final SubsetGeneratorMethod DEFAULT_SUBSET_GENERATOR = SubsetGeneratorMethod.EQUAL;
     public static final int DEFAULT_SUBSET_SPACING = 1;
