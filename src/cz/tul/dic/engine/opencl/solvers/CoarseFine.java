@@ -14,7 +14,6 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
@@ -69,7 +68,7 @@ public class CoarseFine extends AbstractTaskSolver {
 
         //sub-pixel stepping
         final double minimalStep = findMinimalStep(fullTask);
-        double[] coarseResult, newLimits;
+        double[] coarseResult;
         int l;
         do {
             step /= 10.0;
@@ -110,44 +109,11 @@ public class CoarseFine extends AbstractTaskSolver {
             sb.append("\n");
             signalizeRoundComplete(++round, roundCount);
         } while (step > STEP_MINIMAL);
-
-        //higher order search
+        
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         if (defDegree != DeformationDegree.ZERO) {
-            final List<double[]> higherOrderLimits = new ArrayList<>(subsetCount);
-            
-            for (int i = 0; i < subsetCount; i++) {
-                coarseResult = results.get(i).getDeformation();
-                temp = fullTask.getDeformationLimits().get(i);
-                l = temp.length;
-                
-                newLimits = new double[l];
-                System.arraycopy(temp, 0, newLimits, 0, l);
-                
-                newLimits[DeformationLimit.UMIN] = coarseResult[Coordinates.X];
-                newLimits[DeformationLimit.UMAX] = coarseResult[Coordinates.X];
-                newLimits[DeformationLimit.USTEP] = 0;
-                newLimits[DeformationLimit.VMIN] = coarseResult[Coordinates.Y];
-                newLimits[DeformationLimit.VMAX] = coarseResult[Coordinates.Y];
-                newLimits[DeformationLimit.VSTEP] = 0;
-                
-                higherOrderLimits.add(newLimits);
-            }
-            results = computeTask(
-                    kernel,
-                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), higherOrderLimits));
-            
-            sb.append("Higher order results: ");
-            for (int i = 0; i < subsetCount; i++) {
-                sb.append(i)
-                        .append(" - ")
-                        .append(results.get(i))
-                        .append("; ");
-            }
-            sb.append("\n");
-            signalizeRoundComplete(++round, roundCount);
-        }
-        sb.setLength(sb.length() - "\n".length());
+            Logger.debug("CoarseFine solver does support only zero order deformations.");
+        }        
         Logger.trace(sb);
         
         return results;
