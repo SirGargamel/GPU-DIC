@@ -17,6 +17,7 @@ import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.data.task.loaders.InputLoader;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
@@ -49,49 +50,50 @@ public class DicMain extends Application {
     private static final String DEBUG_COMPUTE = "-debug";
     private static final String LICENSE_FILE = "license.dat";
     private static final File LICENSE = new File(LICENSE_FILE);
-    private static final String[] FILES_TO_DEBUG = new String[]{ //        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
-    //        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
-    //        "d:\\temp\\.test FS vs Quality\\6203652m.avi.config",
-    //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
-    //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
-    //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
-    //        "d:\\temp\\.test spacing\\6107544m\\6107544m.avi.config",
-    //        "d:\\temp\\.test spacing\\6113599m\\6113599m.avi.config",
-    //        "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
-    //        "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
-    //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
-    //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
-    //////////////////////////////
-            "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRC.config",
-            "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRCHE.config",
-            "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRF.config",
-            "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRFHE.config",
-            "d:\\temp\\.smallSolverCompare\\6107544m.avi__CF.config",
-    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRC.config",
-    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRCHE.config",        
-    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRF.config",
-    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRFHE.config",
-    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__CF.config",
-    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRC.config",
-    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRCHE.config",        
-    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRF.config",
-    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRFHE.config",        
-    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__CF.config",        
-    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRC.config",
-    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRCHE.config",        
-    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRF.config",
-    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRFHE.config",        
-    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__CF.config",
-    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRC.config",
-    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRCHE.config",        
-    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRF.config",
-    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRFHE.config",
-    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__CF.config",
-    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRC.config",
-    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRCHE.config",
-    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRF.config",
-    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRFHE.config",
-    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__CF.config", 
+    private static final String[] FILES_TO_DEBUG = new String[]{
+        //        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\6203652m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
+        //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
+        //        "d:\\temp\\.test spacing\\6107544m\\6107544m.avi.config",
+        //        "d:\\temp\\.test spacing\\6113599m\\6113599m.avi.config",
+        //        "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
+        //        "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
+        //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
+        //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
+        //////////////////////////////
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRC.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRCHE.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRF.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRFHE.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRC.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRCHE.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRF.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRFHE.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRC.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRCHE.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRF.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRFHE.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRC.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRCHE.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRF.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRFHE.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRC.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRCHE.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRF.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRFHE.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi__CF.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRC.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRCHE.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRF.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRFHE.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__CF.config", 
     /////////////
     //        "d:\\temp\\.smallSolverCompare\\6107544m.avi__BF.config",
     //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__BF.config",
@@ -145,8 +147,8 @@ public class DicMain extends Application {
         Stats.getInstance();
 
         if (parameters.contains(DEBUG_COMPUTE)) {
-            performComputationTest();
-//            performPreprocessingTest();
+//            performComputationTest();
+            performPreprocessingTest();
         }
 
         boolean validLicense = Utils.checkLicense(LICENSE);
@@ -236,11 +238,11 @@ public class DicMain extends Application {
 //                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
 //                    tc.setParameter(TaskParameter.SOLVER, Solver.CoarseFine);                                        
 
-                    commenceComputation(task);
+//                    commenceComputation(task);                    
+                    commenceComputationDynamic(task);
+//                    commenceComputationDynamicSpacingSweep(tc, 1, fs2 / 2);
 
                     exportTask(task);
-//                    commenceComputationDynamic(tc);
-//                    commenceComputationDynamicSpacingSweep(tc, 1, fs2 / 2);
                 } catch (IOException | ComputationException ex) {
                     Logger.error(ex);
                 } catch (Exception t) {
@@ -321,7 +323,7 @@ public class DicMain extends Application {
     private static void performPreprocessingTest() throws ComputationException, IOException {
         final String pathBase = "e:\\DIC_Preprocess\\";
 
-        final List<String> configs = new ArrayList<>();
+        final List<String> configs = new ArrayList<>(20);
         configs.add("6107544m.avi00015.bmp.config");
         configs.add("6203652m.avi00014.bmp.config");
         configs.add("7202845m.avi00004.bmp.config");
@@ -343,7 +345,7 @@ public class DicMain extends Application {
         configs.add("trxy_s2_00__0.01.bmp.config");
         configs.add("trxy_s2_00__0.05.bmp.config");
 
-        final List<String> filters = new ArrayList<>();
+        final List<String> filters = new ArrayList<>(7);
         filters.add("orig");
         filters.add("histogram");
         filters.add("median");
@@ -352,6 +354,12 @@ public class DicMain extends Application {
         filters.add("lucyRichardson");
         filters.add("wiener");
 
+        final List<Solver> solvers = new ArrayList<>();
+        solvers.add(Solver.COARSE_FINE);
+        solvers.add(Solver.NEWTON_RHAPSON_CENTRAL);
+        solvers.add(Solver.NEWTON_RHAPSON_CENTRAL_HE);
+        solvers.add(Solver.NEWTON_RHAPSON_FORWARD);
+
         TaskContainer task;
         for (String in : configs) {
             task = TaskContainer.initTaskContainer(new File(pathBase.concat(in)));
@@ -359,15 +367,20 @@ public class DicMain extends Application {
             for (String filter : filters) {
                 for (int size = 5; size <= 15; size += 2) {
                     task.setParameter(TaskParameter.SUBSET_SIZE, size);
+                    
+                    for (Solver solver : solvers) {
+                        task.setParameter(TaskParameter.SOLVER, solver);
+                        
 
-                    final double roiWidth;
-                    if (task.getRois(0) != null) {
-                        roiWidth = task.getRois(0).iterator().next().getWidth();
-                    } else {
-                        roiWidth = task.getImage(0).getWidth();
+                        final double roiWidth;
+                        if (task.getRois(0) != null) {
+                            roiWidth = task.getRois(0).iterator().next().getWidth();
+                        } else {
+                            roiWidth = task.getImage(0).getWidth();
+                        }
+                        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, Math.max((int) roiWidth / 10, 2 * size));
+                        findAllConfigurationsAndCompute(task, filter);
                     }
-                    task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, Math.max((int) roiWidth / 10, 2 * size));
-                    findAllConfigurationsAndCompute(task, filter);
                 }
             }
         }
