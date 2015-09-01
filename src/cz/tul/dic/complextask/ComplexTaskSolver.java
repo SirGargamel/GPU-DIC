@@ -23,8 +23,6 @@ import cz.tul.dic.engine.OverlapComputation;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.CsvWriter;
-import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
@@ -211,23 +209,12 @@ public class ComplexTaskSolver extends Observable implements Observer {
             }
         }
         return data;
-    }
-
-    private boolean isStrainExport(ExportTask et) {
-        final Direction dir = et.getDirection();
-        return dir == Direction.EABS || dir == Direction.EXY || dir == Direction.EXX || dir == Direction.EYY;
-    }
+    }    
 
     public boolean isValidComplexTask(final TaskContainer tc) {
-        boolean result = true;
-        try {
-            final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
-            final int baseRound = rounds[0];
-            CircleROIManager.prepareManager(tc, baseRound);
-        } catch (ComputationException ex) {
-            result = false;
-        }
-        return result;
+        final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
+        final int baseRound = rounds[0];
+        return CircleROIManager.prepareManager(tc, baseRound) != null;
     }
 
     public List<Double> getBottomShifts() {

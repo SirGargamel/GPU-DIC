@@ -90,12 +90,20 @@ public class CircleROIManager extends AbstractROIManager {
         setROIs(initialRound);
     }
 
-    public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) throws ComputationException {
+    public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) {
         final TaskContainer tcC = new TaskContainer(tc);
 
         tcC.setROIs(initialRound, tc.getRois(initialRound));
 
-        return new CircleROIManager(tcC, initialRound);
+        CircleROIManager result = null;
+
+        try {
+            result = new CircleROIManager(tcC, initialRound);
+        } catch (ComputationException ex) {
+            Logger.debug(ex, "Error initializing CircleROIManager.");
+        }
+
+        return result;
     }
 
     @Override
