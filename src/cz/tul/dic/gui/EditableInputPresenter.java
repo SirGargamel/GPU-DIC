@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ResourceBundle;
-import java.util.Set;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
@@ -60,7 +59,7 @@ public class EditableInputPresenter extends InputPresenter {
         if (roisChanged) {
             final TaskContainer tc = Context.getInstance().getTc();
 
-            final Set<AbstractROI> taskRois;
+            final HashSet<AbstractROI> taskRois;
             if (!rois.isEmpty()) {
                 taskRois = new HashSet<>();
                 rois.stream().forEach(s -> {

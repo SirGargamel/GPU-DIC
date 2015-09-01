@@ -148,7 +148,7 @@ public class CircleROIManager extends AbstractROIManager {
     }
 
     private void setROIs(final int round) {
-        final Set<AbstractROI> rois = new HashSet<>(4);
+        final HashSet<AbstractROI> rois = new HashSet<>(4);
         rois.add(topLeft);
         rois.add(topRight);
         rois.add(bottomLeft);

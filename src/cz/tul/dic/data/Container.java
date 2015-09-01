@@ -15,7 +15,7 @@ import java.util.List;
  * @author Petr Jecmen
  * @param <T>
  */
-public final class Container<T> implements Serializable {
+public final class Container<T extends Serializable> implements Serializable {
 
     private final List<T> data;
 

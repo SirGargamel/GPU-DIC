@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -96,7 +95,7 @@ public class RectROIManager extends AbstractROIManager {
         sb.append("]");
         Logger.trace(sb);
 
-        final Set<AbstractROI> rois = new HashSet<>(1);
+        final HashSet<AbstractROI> rois = new HashSet<>(1);
         rois.add(rect);
         tcR.setROIs(initialRound, rois);
 
@@ -107,7 +106,7 @@ public class RectROIManager extends AbstractROIManager {
     }    
 
     private void setRois(final int round) {
-        final Set<AbstractROI> rois = new HashSet<>(1);
+        final HashSet<AbstractROI> rois = new HashSet<>(1);
         rois.add(rect);
         task.setROIs(round, rois);
         task.setDeformationLimits(round, rect, defLimits);

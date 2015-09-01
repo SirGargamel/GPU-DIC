@@ -42,9 +42,9 @@ public class TaskContainer extends Observable implements Serializable {
     // input data    
     private final List<File> input;
     private final Map<TaskParameter, Object> params;
-    private final Container<Set<AbstractROI>> rois;
-    private final Container<Map<AbstractROI, Integer>> subsetSizes;
-    private final Container<Map<AbstractROI, double[]>> deformationLimits;
+    private final Container<HashSet<AbstractROI>> rois;
+    private final Container<HashMap<AbstractROI, Integer>> subsetSizes;
+    private final Container<HashMap<AbstractROI, double[]>> deformationLimits;
     private final Set<Hint> hints;
     // generated data
     private transient List<Image> images;
@@ -145,12 +145,12 @@ public class TaskContainer extends Observable implements Serializable {
         return Collections.unmodifiableList(images);
     }
 
-    public Set<AbstractROI> getRois(final int round) {
+    public HashSet<AbstractROI> getRois(final int round) {
         return rois.getItem(round);
     }
 
     public void addRoi(final int round, final AbstractROI roi) {
-        Set<AbstractROI> r = rois.getItemPrecise(round);
+        HashSet<AbstractROI> r = rois.getItemPrecise(round);
         if (r == null) {
             r = new HashSet<>(1);
             rois.setItem(r, round);
@@ -161,7 +161,7 @@ public class TaskContainer extends Observable implements Serializable {
         notifyObservers();
     }
 
-    public void setROIs(final int round, final Set<AbstractROI> rois) {
+    public void setROIs(final int round, final HashSet<AbstractROI> rois) {
         this.rois.setItem(rois, round);
 
         setChanged();
@@ -183,12 +183,12 @@ public class TaskContainer extends Observable implements Serializable {
         return result;
     }
 
-    public void setSubsetSizes(final int round, final Map<AbstractROI, Integer> sizes) {
+    public void setSubsetSizes(final int round, final HashMap<AbstractROI, Integer> sizes) {
         subsetSizes.setItem(sizes, round);
     }
 
     public void addSubsetSize(final int round, final AbstractROI roi, final int subsetSize) {
-        Map<AbstractROI, Integer> m = subsetSizes.getItemPrecise(round);
+        HashMap<AbstractROI, Integer> m = subsetSizes.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
             subsetSizes.setItem(m, round);
@@ -197,7 +197,7 @@ public class TaskContainer extends Observable implements Serializable {
     }
 
     public void setDeformationLimits(final int round, final AbstractROI roi, final double[] limits) {
-        Map<AbstractROI, double[]> m = deformationLimits.getItemPrecise(round);
+        HashMap<AbstractROI, double[]> m = deformationLimits.getItemPrecise(round);
         if (m == null) {
             m = new HashMap<>();
             deformationLimits.setItem(m, round);
