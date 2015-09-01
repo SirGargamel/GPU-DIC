@@ -161,7 +161,7 @@ public final class Engine extends Observable implements Observer {
         final Map<AbstractROI, List<AbstractSubset>> subsets = SubsetGenerator.generateSubsets(task, roundFrom);
 
         // compute round                
-        final Map<AbstractROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());
+        final HashMap<AbstractROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());
         for (AbstractROI roi : task.getRois(roundFrom)) {
             if (stopEngine) {
                 return;

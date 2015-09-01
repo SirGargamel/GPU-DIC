@@ -351,7 +351,7 @@ public class EngineTest {
         roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
         subsets.put(roi, roiSubsets);
 
-        final Map<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
+        final HashMap<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
                         new FullTask(
@@ -402,7 +402,7 @@ public class EngineTest {
         roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
         subsets.put(roi, roiSubsets);
 
-        final Map<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
+        final HashMap<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
                         new FullTask(

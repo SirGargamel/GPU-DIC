@@ -7,6 +7,7 @@ package cz.tul.dic.data.result;
 
 import cz.tul.dic.data.roi.AbstractROI;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,11 +17,11 @@ import java.util.Map;
  */
 public class Result implements Serializable {
 
-    private final Map<AbstractROI, List<CorrelationResult>> correlations;
+    private final HashMap<AbstractROI, List<CorrelationResult>> correlations;
     private final DisplacementResult displacementResult;
     private final StrainResult strainResult;
 
-    public Result(final Map<AbstractROI, List<CorrelationResult>> correlations, final DisplacementResult displacement) {
+    public Result(final HashMap<AbstractROI, List<CorrelationResult>> correlations, final DisplacementResult displacement) {
         this.correlations = correlations;
         this.displacementResult = displacement;
         strainResult = null;
@@ -38,7 +39,7 @@ public class Result implements Serializable {
         this.strainResult = strainResult;
     }
 
-    public Map<AbstractROI, List<CorrelationResult>> getCorrelations() {
+    public HashMap<AbstractROI, List<CorrelationResult>> getCorrelations() {
         return correlations;
     }
 
