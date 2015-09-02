@@ -25,7 +25,7 @@ public class TaskContainerLoader extends AbstractInputLoader {
 
     @Override
     public boolean canLoad(final Object in) {        
-        return (in instanceof TaskContainer);
+        return in instanceof TaskContainer;
     }
 
 }
