@@ -12,7 +12,7 @@ import cz.tul.dic.output.target.ExportTargetCsv;
 import cz.tul.dic.output.target.ExportTargetFile;
 import cz.tul.dic.output.target.ExportTargetGUI;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -24,7 +24,7 @@ public final class Exporter {
     private static final Map<ExportTarget, AbstractExportTarget> targetExporters;
 
     static {
-        targetExporters = new HashMap<>();
+        targetExporters = new EnumMap<>(ExportTarget.class);
         targetExporters.put(ExportTarget.FILE, new ExportTargetFile());
         targetExporters.put(ExportTarget.CSV, new ExportTargetCsv());
         targetExporters.put(ExportTarget.GUI, new ExportTargetGUI());
