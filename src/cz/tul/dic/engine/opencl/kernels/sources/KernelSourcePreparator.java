@@ -51,7 +51,7 @@ public class KernelSourcePreparator {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         try {
-            kp.loadKernel();                        
+            kp.loadKernel();
             kp.prepareCorrelation(usesVectorization);
             kp.prepareDeltaAndStore();
             kp.prepareSubsetSize(subsetSize);
@@ -130,159 +130,171 @@ public class KernelSourcePreparator {
 
         switch (deg) {
             case ZERO:
-                // coeff computation
-                sb.setLength(0);
-                sb.append(x);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.U)
-                        .append("]");
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
-
-                sb.setLength(0);
-                sb.append(y);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.V)
-                        .append("]");
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+                appendZeroOrderDeformation(sb, x, y);
                 break;
             case FIRST:
-                // coeff computation
-                sb.setLength(0);
-                sb.append(x);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.U)
-                        .append("]");
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.UX)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.UY)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dy);
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
-
-                sb.setLength(0);
-                sb.append(y);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.V)
-                        .append("]");
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.VX)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.VY)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dy);
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+                appendFirstOrderDeformation(sb, x, y, dx, dy);
                 break;
             case SECOND:
-                // coeff computation
-                sb.setLength(0);
-                sb.append(x);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.U)
-                        .append("]");
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.UX)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.UY)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dy);
-                sb.append(PLUS);
-                sb.append("0.5 * deformation[")
-                        .append(DeformationDirection.UXX)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(PLUS);
-                sb.append("0.5 * deformation[")
-                        .append(DeformationDirection.UYY)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dy);
-                sb.append(MUL);
-                sb.append(dy);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.UXY)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(MUL);
-                sb.append(dy);
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
-
-                sb.setLength(0);
-                sb.append(y);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.V)
-                        .append("]");
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.VX)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.VY)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dy);
-                sb.append(PLUS);
-                sb.append("0.5 * deformation[")
-                        .append(DeformationDirection.VXX)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(PLUS);
-                sb.append("0.5 * deformation[")
-                        .append(DeformationDirection.VYY)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dy);
-                sb.append(MUL);
-                sb.append(dy);
-                sb.append(PLUS);
-                sb.append(TEXT_DEFORMATION_ARRAY)
-                        .append(DeformationDirection.VXY)
-                        .append("]");
-                sb.append(MUL);
-                sb.append(dx);
-                sb.append(MUL);
-                sb.append(dy);
-                kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+                appendSecondOrderDeformation(sb, x, y, dx, dy);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported degree of deformation - " + deg);
         }
         kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(DeformationUtils.getDeformationCoeffCount(deg)));
+    }
+
+    private void appendZeroOrderDeformation(final StringBuilder sb, final String x, final String y) {
+        // coeff computation
+        sb.setLength(0);
+        sb.append(x);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.U)
+                .append("]");
+        kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
+
+        sb.setLength(0);
+        sb.append(y);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.V)
+                .append("]");
+        kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+    }
+
+    private void appendFirstOrderDeformation(final StringBuilder sb, final String x, final String y, final String dx, final String dy) {
+        // coeff computation
+        sb.setLength(0);
+        sb.append(x);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.U)
+                .append("]");
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.UX)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.UY)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dy);
+        kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
+
+        sb.setLength(0);
+        sb.append(y);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.V)
+                .append("]");
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.VX)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.VY)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dy);
+        kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
+    }
+
+    private void appendSecondOrderDeformation(final StringBuilder sb, final String x, final String y, final String dx, final String dy) {
+        // coeff computation
+        sb.setLength(0);
+        sb.append(x);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.U)
+                .append("]");
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.UX)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.UY)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dy);
+        sb.append(PLUS);
+        sb.append("0.5 * deformation[")
+                .append(DeformationDirection.UXX)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(PLUS);
+        sb.append("0.5 * deformation[")
+                .append(DeformationDirection.UYY)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dy);
+        sb.append(MUL);
+        sb.append(dy);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.UXY)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(MUL);
+        sb.append(dy);
+        kernel = kernel.replaceFirst(REPLACE_DEFORMATION_X, sb.toString());
+
+        sb.setLength(0);
+        sb.append(y);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.V)
+                .append("]");
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.VX)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.VY)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dy);
+        sb.append(PLUS);
+        sb.append("0.5 * deformation[")
+                .append(DeformationDirection.VXX)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(PLUS);
+        sb.append("0.5 * deformation[")
+                .append(DeformationDirection.VYY)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dy);
+        sb.append(MUL);
+        sb.append(dy);
+        sb.append(PLUS);
+        sb.append(TEXT_DEFORMATION_ARRAY)
+                .append(DeformationDirection.VXY)
+                .append("]");
+        sb.append(MUL);
+        sb.append(dx);
+        sb.append(MUL);
+        sb.append(dy);
+        kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
     }
 
     private void prepareInterpolation(final Interpolation interpolation, final boolean usesImage) {
