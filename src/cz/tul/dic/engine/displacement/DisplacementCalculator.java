@@ -14,7 +14,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.result.Result;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +30,7 @@ public abstract class DisplacementCalculator {
     private static final Map<DisplacementCalculation, DisplacementCalculator> DATA;
 
     static {
-        DATA = new HashMap<>();
+        DATA = new EnumMap<>(DisplacementCalculation.class);
         DATA.put(DisplacementCalculation.MAX_WEIGHTED_AVERAGE, new MaxAndWeightedAverage());
     }
 
@@ -177,6 +177,7 @@ public abstract class DisplacementCalculator {
         try {
             result = calculateValue(data, intX, intY, dX, dY);
         } catch (ArrayIndexOutOfBoundsException | NullPointerException ex) {
+            // ignore value
         }
 
         return result;
