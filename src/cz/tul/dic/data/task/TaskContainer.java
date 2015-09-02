@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +54,7 @@ public class TaskContainer extends Observable implements Serializable {
     private final Map<Integer, Map<Integer, Result>> cumulativeResults;
 
     public TaskContainer() {
-        params = new HashMap<>();
+        params = new EnumMap<>(TaskParameter.class);
         rois = new Container<>();
         subsetSizes = new Container<>();
         deformationLimits = new Container<>();
@@ -67,7 +68,7 @@ public class TaskContainer extends Observable implements Serializable {
     }
 
     public TaskContainer(final TaskContainer task) {
-        params = new HashMap<>(task.params);
+        params = new EnumMap<>(task.params);
         rois = new Container<>(task.rois);
         subsetSizes = new Container<>(task.subsetSizes);
         deformationLimits = new Container<>(task.deformationLimits);
