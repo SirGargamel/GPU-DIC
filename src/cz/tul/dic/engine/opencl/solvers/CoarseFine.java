@@ -118,7 +118,7 @@ public class CoarseFine extends AbstractTaskSolver {
         return results;
     }
 
-    private int coumputeRoundCount(final FullTask fullTask) throws ComputationException {
+    private static int coumputeRoundCount(final FullTask fullTask) throws ComputationException {
         final double minimalStep = findMinimalStep(fullTask);
 
         int roundCount = 1;

@@ -66,7 +66,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
         return new DisplacementResult(finalDisplacement, finalQuality);
     }
 
-    private void prepareDeformedSubsetsToCounters(
+    private static void prepareDeformedSubsetsToCounters(
             final Map<AbstractROI, List<CorrelationResult>> correlationResults,
             final Map<AbstractROI, List<AbstractSubset>> allSubsets, final double resultQuality,
             final int lowerBound, final int upperBound,

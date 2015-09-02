@@ -7,11 +7,9 @@ package cz.tul.dic.engine.opencl.kernels;
 
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLMemory;
-import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.List;
 
 /**
  *
