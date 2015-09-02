@@ -9,7 +9,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Observable;
@@ -25,7 +25,7 @@ public abstract class StrainEstimator extends Observable {
     protected final ExecutorService exec;
 
     static {
-        data = new HashMap<>();
+        data = new EnumMap<>(StrainEstimationMethod.class);
         data.put(StrainEstimationMethod.LOCAL_LEAST_SQUARES, new LocalLeastSquare());
     }
 
