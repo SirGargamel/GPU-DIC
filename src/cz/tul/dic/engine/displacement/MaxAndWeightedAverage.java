@@ -35,8 +35,8 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
 
     @Override
     public DisplacementResult buildFinalResults(
-            final Map<AbstractROI, List<CorrelationResult>> correlationResults, 
-            final Map<AbstractROI, List<AbstractSubset>> allSubsets, 
+            final Map<AbstractROI, List<CorrelationResult>> correlationResults,
+            final Map<AbstractROI, List<AbstractSubset>> allSubsets,
             final TaskContainer tc, final int round) {
         final Image img = tc.getImage(round);
         final int width = img.getWidth();
@@ -57,7 +57,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
             counters.clear();
 
             prepareDeformedSubsetsToCounters(
-                    correlationResults, allSubsets, resultQuality, 
+                    correlationResults, allSubsets, resultQuality,
                     lowerBound, upperBound, counters);
 
             calculateDisplacementFromCounters(counters, tc, round);
@@ -67,36 +67,28 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
     }
 
     private void prepareDeformedSubsetsToCounters(
-            final Map<AbstractROI, List<CorrelationResult>> correlationResults, 
-            final Map<AbstractROI, List<AbstractSubset>> allSubsets, final double resultQuality, 
-            final int lowerBound, final int upperBound, 
+            final Map<AbstractROI, List<CorrelationResult>> correlationResults,
+            final Map<AbstractROI, List<AbstractSubset>> allSubsets, final double resultQuality,
+            final int lowerBound, final int upperBound,
             final Map<Integer, Map<Integer, Analyzer2D>> counters) {
         final SubsetDeformator deformator = new SubsetDeformator();
-        
+
         List<AbstractSubset> susbets;
         List<CorrelationResult> results;
         CorrelationResult cr;
-        double[] d;
-        double qualitySum;
         AbstractSubset f;
         Map<int[], double[]> deformedSubset;
         int x;
         int y;
-        for (AbstractROI roi : correlationResults.keySet()) {
-            susbets = allSubsets.get(roi);
-            results = correlationResults.get(roi);
+        for (Entry<AbstractROI, List<CorrelationResult>> e : correlationResults.entrySet()) {
+            susbets = allSubsets.get(e.getKey());
+            results = e.getValue();
 
             for (int i = 0; i < susbets.size(); i++) {
-                if (results.get(i) == null) {
-                    continue;
-                }
                 cr = results.get(i);
-                if (cr.getQuality() < resultQuality) {
+                if (cr == null || cr.getQuality() < resultQuality) {
                     continue;
                 }
-
-                d = cr.getDeformation();
-                qualitySum = cr.getQuality();
 
                 f = susbets.get(i);
                 if (f == null) {
@@ -107,13 +99,13 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
                     continue;
                 }
 
-                deformedSubset = deformator.computePixelDeformationValues(f, d);
-                for (Map.Entry<int[], double[]> e : deformedSubset.entrySet()) {
-                    x = e.getKey()[Coordinates.X];
-                    y = e.getKey()[Coordinates.Y];
+                deformedSubset = deformator.computePixelDeformationValues(f, cr.getDeformation());
+                for (Map.Entry<int[], double[]> e2 : deformedSubset.entrySet()) {
+                    x = e2.getKey()[Coordinates.X];
+                    y = e2.getKey()[Coordinates.Y];
 
                     if (y >= lowerBound && y <= upperBound) {
-                        getAnalyzer(counters, x, y).addValue(new Analayzer2DData(e.getValue()[0], e.getValue()[1], qualitySum));
+                        getAnalyzer(counters, x, y).addValue(new Analayzer2DData(e2.getValue()[0], e2.getValue()[1], cr.getQuality()));
                     }
                 }
             }
@@ -121,9 +113,9 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
     }
 
     private void calculateDisplacementFromCounters(
-            final Map<Integer, Map<Integer, Analyzer2D>> counters, 
+            final Map<Integer, Map<Integer, Analyzer2D>> counters,
             final TaskContainer tc, final int round) {
-        int x,y;
+        int x, y;
         double dx, dy;
         Analyzer2D counter;
         double qualitySum;
