@@ -177,6 +177,7 @@ public class MainWindow implements Initializable {
                 );
                 Logger.error(ex);
             } catch (CancellationException ex) {
+                // don nothing when user cancels
             }
         });
         th.setDaemon(true);

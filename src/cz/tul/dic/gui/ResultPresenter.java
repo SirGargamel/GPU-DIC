@@ -238,11 +238,13 @@ public class ResultPresenter implements Initializable {
             final String min = textMin.getText().replaceAll(",", ".");
             result[0] = Double.valueOf(min);
         } catch (NumberFormatException ex) {
+            // ignore value when user provides illegal data
         }
         try {
             final String max = textMax.getText().replaceAll(",", ".");
             result[1] = Double.valueOf(max);
         } catch (NumberFormatException ex) {
+            // ignore value when user provides illegal data
         }
 
         return result;
@@ -253,7 +255,7 @@ public class ResultPresenter implements Initializable {
         final String rndS = textIndex.getText();
         if (rndS != null && !rndS.isEmpty()) {
             try {
-                final int rnd = Integer.valueOf(rndS);
+                final int rnd = Integer.parseInt(rndS);
 
                 final TaskContainer tc = Context.getInstance().getTc();
                 if (rnd < 0) {
@@ -270,6 +272,7 @@ public class ResultPresenter implements Initializable {
 
                 displayImage();
             } catch (NumberFormatException ex) {
+                // ignore value when user submits illegal data
             }
         }
     }
@@ -482,9 +485,7 @@ public class ResultPresenter implements Initializable {
         final Scene scene = image.getParent().getScene();
         final Stage mainStage = (Stage) scene.getWindow();
         mainStage.setOnCloseRequest((WindowEvent event) -> {
-            charts.keySet().stream().forEach(s -> {
-                s.close();
-            });
+            charts.keySet().stream().forEach(s -> s.close());
             charts.clear();
         });
         displayImage();
@@ -531,7 +532,7 @@ public class ResultPresenter implements Initializable {
             final double[] line = Context.getInstance().getPointResult(x, y).get(dir);
             this.dir = dir;
 
-            final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
+            final double width = PREF_SIZE_W_BASE + line.length * (double) PREF_SIZE_W_M;
             chart.setPrefSize(width, PREF_SIZE_H);
 
             chart.getData().clear();
@@ -627,7 +628,7 @@ public class ResultPresenter implements Initializable {
 
             final double[] line = Context.getInstance().getComparativeStrain(x1, y1, x2, y2).get(this.dir);
 
-            final double width = PREF_SIZE_W_BASE + line.length * PREF_SIZE_W_M;
+            final double width = PREF_SIZE_W_BASE + line.length * (double) PREF_SIZE_W_M;
             chart.setPrefSize(width, PREF_SIZE_H);
 
             chart.getData().clear();

@@ -104,7 +104,7 @@ public class Context {
 
         Map<Direction, BufferedImage> m = exportCacheImages.get(round);
         if (m == null) {
-            m = new HashMap<>();
+            m = new EnumMap<>(Direction.class);
             exportCacheImages.put(round, m);
         }
 
