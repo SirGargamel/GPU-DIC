@@ -390,7 +390,7 @@ public class Stats implements IGPUResultsReceiver {
         return DebugControl.isDebugMode() && Stats.getInstance().get(Types.GPU_RESULTS);
     }
 
-    public static enum Types {
+    public enum Types {
 
         GPU_RESULTS,
         DEF_USAGE,
