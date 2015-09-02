@@ -161,7 +161,7 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
         private static final List<HessianApproximationFunction> functions;
         private final AbstractSubset subset;
         private final BivariateFunction interpolation;
-        private final HessianApproximationFunction approximation;
+        private final HessianApproximationFunction matrixApproxFunction;
 
         static {
             functions = new ArrayList<>(6);
@@ -210,11 +210,11 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
         public Approximation(final AbstractSubset subset, final BivariateFunction interpolation, final int i) {
             this.subset = subset;
             this.interpolation = interpolation;
-            approximation = functions.get(i);
+            matrixApproxFunction = functions.get(i);
         }
 
         public double calculateValue(final double x, final double y) {
-            return approximation.calculateValue(x, y, subset, interpolation);
+            return matrixApproxFunction.calculateValue(x, y, subset, interpolation);
         }
 
         private interface HessianApproximationFunction {

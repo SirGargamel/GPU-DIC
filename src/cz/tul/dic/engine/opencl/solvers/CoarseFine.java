@@ -18,11 +18,11 @@ import java.util.List;
 import org.pmw.tinylog.Logger;
 
 public class CoarseFine extends AbstractTaskSolver {
-    
+
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final double STEP_INITIAL = 1;
     private static final double STEP_MINIMAL = 0.01;
-    
+
     @Override
     public List<CorrelationResult> solve(
             final Kernel kernel,
@@ -30,14 +30,14 @@ public class CoarseFine extends AbstractTaskSolver {
         if (fullTask.getSubsets().isEmpty()) {
             return new ArrayList<>(0);
         }
-        
+
         final int subsetCount = fullTask.getSubsets().size();
         final StringBuilder sb = new StringBuilder();
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
         List<CorrelationResult> results;
         double[] temp;
         double step = STEP_INITIAL;
-        
+
         final int roundCount = coumputeRoundCount(fullTask);
 
         // initial pixel step
@@ -69,7 +69,6 @@ public class CoarseFine extends AbstractTaskSolver {
         //sub-pixel stepping
         final double minimalStep = findMinimalStep(fullTask);
         double[] coarseResult;
-        int l;
         do {
             step /= 10.0;
             if (step < minimalStep) {
@@ -79,26 +78,26 @@ public class CoarseFine extends AbstractTaskSolver {
                     step = minimalStep;
                 }
             }
-            
+
             zeroOrderLimits = new ArrayList<>(subsetCount);
-            
+
             for (int i = 0; i < subsetCount; i++) {
                 coarseResult = results.get(i).getDeformation();
                 temp = new double[COUNT_ZERO_ORDER_LIMITS];
-                
+
                 temp[DeformationLimit.UMIN] = coarseResult[Coordinates.X] - (10 * step);
                 temp[DeformationLimit.UMAX] = coarseResult[Coordinates.X] + (10 * step);
                 temp[DeformationLimit.USTEP] = step;
                 temp[DeformationLimit.VMIN] = coarseResult[Coordinates.Y] - (10 * step);
                 temp[DeformationLimit.VMAX] = coarseResult[Coordinates.Y] + (10 * step);
                 temp[DeformationLimit.VSTEP] = step;
-                
+
                 zeroOrderLimits.add(temp);
             }
             results = computeTask(
                     kernel,
                     new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
-            
+
             sb.append("Finer results, step [").append(step).append("]:");
             for (int i = 0; i < subsetCount; i++) {
                 sb.append(i)
@@ -109,41 +108,39 @@ public class CoarseFine extends AbstractTaskSolver {
             sb.append("\n");
             signalizeRoundComplete(++round, roundCount);
         } while (step > STEP_MINIMAL);
-        
+
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         if (defDegree != DeformationDegree.ZERO) {
             Logger.debug("CoarseFine solver does support only zero order deformations.");
-        }        
+        }
         Logger.trace(sb);
-        
+
         return results;
     }
-    
+
     private int coumputeRoundCount(final FullTask fullTask) throws ComputationException {
         final double minimalStep = findMinimalStep(fullTask);
-        
+
         int roundCount = 1;
         double tempStep = STEP_INITIAL;
         do {
             tempStep /= 10.0;
-            if (tempStep < minimalStep) {
-                if (Double.compare(tempStep * 10, minimalStep) == 0) {
-                    // break only when tempSeto is at least 10 times smaller
-                    // handles limits such as 0.25 etc.
-                    break;
-                }
+            if (tempStep < minimalStep && Double.compare(tempStep * 10, minimalStep) == 0) {
+                // break only when tempSeto is at least 10 times smaller
+                // handles limits such as 0.25 etc.
+                break;
             }
             roundCount++;
         } while (tempStep > STEP_MINIMAL);
-        
+
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         if (defDegree != DeformationDegree.ZERO) {
             roundCount++;
         }
-        
+
         return roundCount;
     }
-    
+
     private static double findMinimalStep(final FullTask fullTask) {
         double minimalStep = 1;
         for (double[] dA : fullTask.getDeformationLimits()) {
@@ -151,15 +148,15 @@ public class CoarseFine extends AbstractTaskSolver {
         }
         return minimalStep;
     }
-    
+
     private void signalizeRoundComplete(final int round, final int roundCount) {
         setChanged();
         notifyObservers(1 / (double) roundCount * round);
     }
-    
+
     @Override
     protected boolean needsBestResult() {
         return true;
     }
-    
+
 }
