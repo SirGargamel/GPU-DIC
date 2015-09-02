@@ -148,14 +148,14 @@ public final class WorkSizeManager {
 
     private void computeNextWorkSize() {
         if (!TIME_DATA.get(kernel).isEmpty()) {
-            final long[] max = findMaxTimeValue();
+            final long[] max = findMaxTimeValue(kernel);
             final long[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
             workSizeS = newMax[0];
             workSizeD = newMax[1];
         }
     }
 
-    private long[] findMaxTimeValue() {
+    private static long[] findMaxTimeValue(final KernelType kernel) {
         final long[] result = new long[]{0, 0, -1};
 
         long time;
@@ -192,7 +192,7 @@ public final class WorkSizeManager {
         return result;
     }
 
-    private long adjustValue(final long currentTime, final long maxTime, final long value, final long maxValue) {
+    private static long adjustValue(final long currentTime, final long maxTime, final long value, final long maxValue) {
         final double ratio = currentTime / (double) maxTime;
 
         final long result;

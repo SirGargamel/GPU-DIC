@@ -165,7 +165,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
         }
     }
 
-    private Analyzer2D getAnalyzer(final Map<Integer, Map<Integer, Analyzer2D>> maps, final int x, final int y) {
+    private static Analyzer2D getAnalyzer(final Map<Integer, Map<Integer, Analyzer2D>> maps, final int x, final int y) {
         Map<Integer, Analyzer2D> m = maps.get(x);
         if (m == null) {
             m = new HashMap<>(1);
