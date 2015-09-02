@@ -10,7 +10,7 @@ import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,7 +25,7 @@ public class SubsetGenerator {
     private static final Map<SubsetGeneratorMethod, AbstractSubsetGenerator> generators;
 
     static {
-        generators = new HashMap<>();
+        generators = new EnumMap<>(SubsetGeneratorMethod.class);
 
         AbstractSubsetGenerator fg = new EqualSpacingSubsetGenerator();
         generators.put(fg.getMode(), fg);
