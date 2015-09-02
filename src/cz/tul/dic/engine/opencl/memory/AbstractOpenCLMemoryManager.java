@@ -22,6 +22,7 @@ import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
+import cz.tul.dic.engine.opencl.kernels.OpenCLDataPackage;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -35,8 +36,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class AbstractOpenCLMemoryManager {
 
-    private static final AbstractOpenCLMemoryManager INSTANCE;    
-    private static final CLImageFormat IMAGE_FORMAT;    
+    private static final AbstractOpenCLMemoryManager INSTANCE;
+    private static final CLImageFormat IMAGE_FORMAT;
     protected long maxDeformationCount;
     // OpenCL entities
     protected CLMemory<IntBuffer> clImageA, clImageB;
@@ -47,19 +48,19 @@ public abstract class AbstractOpenCLMemoryManager {
     protected CLBuffer<FloatBuffer> clResults;
     // OpenCL context        
     protected CLCommandQueue queue;
-    protected CLContext context;    
+    protected CLContext context;
     private final Lock lock;
 
     static {
         DeviceManager.clearMemory();
         INSTANCE = new StaticMemoryManager();
         IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
-    }        
+    }
 
     protected AbstractOpenCLMemoryManager() {
         lock = new ReentrantLock();
     }
-    
+
     public static AbstractOpenCLMemoryManager getInstance() {
         return INSTANCE;
     }
@@ -78,7 +79,7 @@ public abstract class AbstractOpenCLMemoryManager {
         lock.unlock();
     }
 
-    protected CLImage2d<IntBuffer> generateImage2d(final Image image) {        
+    protected CLImage2d<IntBuffer> generateImage2d(final Image image) {
         return context.createImage2d(
                 Buffers.newDirectIntBuffer(image.toBWArray()),
                 image.getWidth(), image.getHeight(),
@@ -193,32 +194,12 @@ public abstract class AbstractOpenCLMemoryManager {
         release(clResults);
     }
 
-    public CLMemory<IntBuffer> getClImageA() {
-        return clImageA;
-    }
-
-    public CLMemory<IntBuffer> getClImageB() {
-        return clImageB;
-    }
-
-    public CLBuffer<IntBuffer> getClSubsetData() {
-        return clSubsetData;
-    }
-
-    public CLBuffer<FloatBuffer> getClSubsetCenters() {
-        return clSubsetCenters;
-    }
-
-    public CLBuffer<FloatBuffer> getClDeformationLimits() {
-        return clDeformationLimits;
-    }
-
-    public CLBuffer<LongBuffer> getClDefStepCount() {
-        return clDefStepCount;
-    }
-
-    public CLBuffer<FloatBuffer> getClResults() {
-        return clResults;
+    public OpenCLDataPackage getData() {
+        return new OpenCLDataPackage(
+                clImageA, clImageB,
+                clSubsetData, clSubsetCenters,
+                clDeformationLimits, clDefStepCount,
+                clResults);
     }
 
     public long getMaxDeformationCount() {

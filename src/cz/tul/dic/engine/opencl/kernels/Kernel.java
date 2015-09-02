@@ -32,7 +32,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -134,18 +133,16 @@ public abstract class Kernel {
         final List<CorrelationResult> result;
         try {
             memManager.assignData(task, this);
-            final CLBuffer<FloatBuffer> clResults = memManager.getClResults();
+            final OpenCLDataPackage clData = memManager.getData();            
             final long maxDeformationCount = memManager.getMaxDeformationCount();
 
-            runKernel(memManager.getClImageA(), memManager.getClImageB(),
-                    memManager.getClSubsetData(), memManager.getClSubsetCenters(),
-                    memManager.getClDeformationLimits(), memManager.getClDefStepCount(),
-                    clResults,
+            runKernel(clData,
                     maxDeformationCount,
                     task.getImageA().getWidth(), subsetSize, subsetCount);
             queue.flush();
 
             if (!resultListeners.isEmpty()) {
+                final CLBuffer<FloatBuffer> clResults = clData.getResults();
                 queue.putReadBuffer(clResults, true);
                 final double[] results = readResultBuffer(clResults.getBuffer());
                 for (IGPUResultsReceiver rr : resultListeners) {
@@ -154,6 +151,7 @@ public abstract class Kernel {
             }
 
             if (findBest || Stats.getInstance().isGpuDebugEnabled()) {
+                final CLBuffer<FloatBuffer> clResults = clData.getResults();
                 final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, subsetCount, (int) maxDeformationCount);
                 final int[] positions = findPos(clResults, subsetCount, (int) maxDeformationCount, maxValuesCl);
 
@@ -173,12 +171,8 @@ public abstract class Kernel {
         }
     }
 
-    abstract void runKernel(
-            final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
-            final CLBuffer<IntBuffer> subsetData,
-            final CLBuffer<FloatBuffer> subsetCenters,
-            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<LongBuffer> defStepCounts,
-            final CLBuffer<FloatBuffer> results,
+    public abstract void runKernel(
+            final OpenCLDataPackage data,
             final long maxDeformationCount, final int imageWidth,
             final int subsetSize, final int subsetCount);
 
@@ -296,7 +290,7 @@ public abstract class Kernel {
         buffer.rewind();
         return result;
     }
-    
+
     private static double[] readResultBuffer(final FloatBuffer resultsBuffer) {
         resultsBuffer.rewind();
         final double[] result = new double[resultsBuffer.remaining()];

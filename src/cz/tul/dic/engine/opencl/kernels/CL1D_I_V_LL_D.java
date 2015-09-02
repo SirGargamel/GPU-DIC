@@ -6,14 +6,9 @@
 package cz.tul.dic.engine.opencl.kernels;
 
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
-import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
-import com.jogamp.opencl.CLMemory;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
 
 public class CL1D_I_V_LL_D extends Kernel {
 
@@ -32,11 +27,7 @@ public class CL1D_I_V_LL_D extends Kernel {
     }
 
     @Override
-    void runKernel(final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
-            final CLBuffer<IntBuffer> subsetData,
-            final CLBuffer<FloatBuffer> subsetCenters,
-            final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<LongBuffer> defStepCounts,
-            final CLBuffer<FloatBuffer> results,
+    public void runKernel(final OpenCLDataPackage data,
             final long deformationCount, final int imageWidth,
             final int subsetSize, final int subsetCount) {
         stop = false;
@@ -45,7 +36,7 @@ public class CL1D_I_V_LL_D extends Kernel {
         lws0 = Math.min(lws0, getMaxWorkItemSize());
 
         kernelDIC.rewind();
-        kernelDIC.putArgs(imgA, imgB, subsetData, subsetCenters, deformationLimits, defStepCounts, results)
+        kernelDIC.putArgs(data.getMemoryObjects())
                 .putArg(imageWidth)
                 .putArg(deformationCount)
                 .putArg(subsetSize)
