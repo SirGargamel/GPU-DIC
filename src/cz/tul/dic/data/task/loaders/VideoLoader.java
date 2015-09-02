@@ -82,7 +82,7 @@ public class VideoLoader extends AbstractInputLoader {
         }
     }
 
-    private List<File> loadVideoByVirtualDub(File input, final File temp, final File sequenceConfigFile) throws IOException {
+    private static List<File> loadVideoByVirtualDub(File input, final File temp, final File sequenceConfigFile) throws IOException {
         Logger.trace("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
         // prepare script
         String script = loadScript();
@@ -124,7 +124,7 @@ public class VideoLoader extends AbstractInputLoader {
         return files;
     }
 
-    private boolean isCacheDataValid(final File source, final File tempFolder, final Config config) {
+    private static boolean isCacheDataValid(final File source, final File tempFolder, final Config config) {
         boolean result = true;
 
         if (!tempFolder.isDirectory() || config == null || config.keySet().isEmpty() || !config.getType().equals(ConfigType.SEQUENCE)) {
@@ -186,7 +186,7 @@ public class VideoLoader extends AbstractInputLoader {
         return result;
     }
 
-    private List<File> convertCacheDataToFiles(final File source, final File tempFolder, final Config config) {
+    private static List<File> convertCacheDataToFiles(final File source, final File tempFolder, final Config config) {
         final String baseTempPath = tempFolder.getAbsolutePath().concat(File.separator);
         File tempFile;
         final List<File> result = new LinkedList<>();
@@ -206,7 +206,7 @@ public class VideoLoader extends AbstractInputLoader {
         return result;
     }
 
-    private String loadScript() throws IOException {
+    private static String loadScript() throws IOException {
         InputStream in = VideoLoader.class.getResourceAsStream(SCRIPT_NAME);
         StringBuilder sb = new StringBuilder();
         try (BufferedReader bin = new BufferedReader(new InputStreamReader(in))) {
@@ -218,13 +218,13 @@ public class VideoLoader extends AbstractInputLoader {
         return sb.toString();
     }
 
-    private void saveScript(final String script, final File target) throws IOException {
+    private static void saveScript(final String script, final File target) throws IOException {
         try (FileWriter out = new FileWriter(target)) {
             out.write(extendBackslashes(script));
         }
     }
 
-    private String extendBackslashes(final String in) {
+    private static String extendBackslashes(final String in) {
         return in.replaceAll("\\\\", "\\\\\\\\");
     }
 
