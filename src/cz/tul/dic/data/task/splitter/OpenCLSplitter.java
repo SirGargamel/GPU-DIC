@@ -25,14 +25,14 @@ import org.pmw.tinylog.Logger;
  */
 public class OpenCLSplitter extends AbstractTaskSplitter {
 
-    private static int COUNTER = 0;
+    private static int instanceCounter = 0;
     private static final long SIZE_INT = 4;
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
     private static final double COEFF_LIMIT_ADJUST = 0.75;
     private static final long COEFF_MEM_LIMIT_MAX = 6;
     private static final long COEFF_MEM_LIMIT_INIT = COEFF_MEM_LIMIT_MAX - 1;
-    private static AtomicLong COEFF_MEM_LIMIT = new AtomicLong(COEFF_MEM_LIMIT_INIT);
+    private static AtomicLong coeffMemLimit = new AtomicLong(COEFF_MEM_LIMIT_INIT);
     private final int subsetSize, splitterId;
     private final List<OpenCLSplitter> subSplitters;
     private final boolean subSplitter;
@@ -56,10 +56,10 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
             hasNextElement = false;
         }
 
-        splitterId = COUNTER++;
-        if (COEFF_MEM_LIMIT.get() < COEFF_MEM_LIMIT_INIT) {
-            COEFF_MEM_LIMIT.incrementAndGet();
-            Logger.debug("Increasing task size to {0} / {1}.", COEFF_MEM_LIMIT, COEFF_MEM_LIMIT_MAX);
+        splitterId = instanceCounter++;
+        if (coeffMemLimit.get() < COEFF_MEM_LIMIT_INIT) {
+            coeffMemLimit.incrementAndGet();
+            Logger.debug("Increasing task size to {0} / {1}.", coeffMemLimit, COEFF_MEM_LIMIT_MAX);
         }
     }
 
@@ -177,7 +177,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         return ct;
     }
 
-    private int findMinIndexBiggerThanZero(final long[] counts) {
+    private static int findMinIndexBiggerThanZero(final long[] counts) {
         long min = Long.MAX_VALUE;
         int minPos = 0;
         for (int i = 0; i < counts.length; i++) {
@@ -199,8 +199,8 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         final long resultSize = resultCount * SIZE_FLOAT;
         final long fullSize = imageSize + deformationsSize + reserve + subsetDataSize + subsetCentersSize + resultSize;
 
-        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize() / COEFF_MEM_LIMIT_MAX * COEFF_MEM_LIMIT.get();
-        final long maxMem = DeviceManager.getDevice().getGlobalMemSize() / COEFF_MEM_LIMIT_MAX * COEFF_MEM_LIMIT.get();
+        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize() / COEFF_MEM_LIMIT_MAX * coeffMemLimit.get();
+        final long maxMem = DeviceManager.getDevice().getGlobalMemSize() / COEFF_MEM_LIMIT_MAX * coeffMemLimit.get();
         boolean result = fullSize >= 0 && fullSize <= maxMem;
         result &= resultCount <= Integer.MAX_VALUE;
         result &= subsetCount <= Integer.MAX_VALUE;
@@ -215,13 +215,13 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
 
     @Override
     public void signalTaskSizeTooBig() {
-        COEFF_MEM_LIMIT.decrementAndGet();
-        Logger.debug("Lowering task size to {0} / {1}.", COEFF_MEM_LIMIT, COEFF_MEM_LIMIT_MAX);
+        coeffMemLimit.decrementAndGet();
+        Logger.debug("Lowering task size to {0} / {1}.", coeffMemLimit, COEFF_MEM_LIMIT_MAX);
     }
 
     @Override
     public boolean isSplitterReady() {
-        return COEFF_MEM_LIMIT.get() > 0;
+        return coeffMemLimit.get() > 0;
     }
 
 }
