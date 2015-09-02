@@ -638,12 +638,12 @@ public class MainWindow implements Initializable {
     private class InputLoader extends Task<String> {
 
         private final List<File> fileList;
+        private boolean cancel = false;
 
         public InputLoader(List<File> fileList) {
             this.fileList = fileList;
         }
-        private boolean cancel = false;
-
+        
         @Override
         protected String call() throws Exception {
             String result = null;
