@@ -34,7 +34,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -205,7 +204,7 @@ public abstract class Kernel {
         return maxVal;
     }
 
-    protected int getMaxWorkItemSize() {
+    protected static int getMaxWorkItemSize() {
         return DeviceManager.getDevice().getMaxWorkItemSizes()[0];
     }
 
@@ -233,7 +232,7 @@ public abstract class Kernel {
         return result;
     }
 
-    private List<CorrelationResult> createResults(final float[] values, final int[] positions, final List<double[]> deformationLimits) {
+    private static List<CorrelationResult> createResults(final float[] values, final int[] positions, final List<double[]> deformationLimits) {
         if (values.length != positions.length) {
             throw new IllegalArgumentException("Array lengths mismatch.");
         }
@@ -269,7 +268,7 @@ public abstract class Kernel {
         clearMem(clMem);
     }
 
-    private void clearMem(final Set<CLResource> mems) {
+    private static void clearMem(final Set<CLResource> mems) {
         for (CLResource mem : mems) {
             if (mem != null && !mem.isReleased()) {
                 mem.release();
@@ -278,7 +277,7 @@ public abstract class Kernel {
         mems.clear();
     }
 
-    private float[] readBuffer(final FloatBuffer buffer) {
+    private static float[] readBuffer(final FloatBuffer buffer) {
         buffer.rewind();
         final float[] result = new float[buffer.remaining()];
         for (int i = 0; i < result.length; i++) {
@@ -288,7 +287,7 @@ public abstract class Kernel {
         return result;
     }
 
-    private int[] readBuffer(final IntBuffer buffer) {
+    private static int[] readBuffer(final IntBuffer buffer) {
         buffer.rewind();
         final int[] result = new int[buffer.remaining()];
         for (int i = 0; i < result.length; i++) {
@@ -298,7 +297,7 @@ public abstract class Kernel {
         return result;
     }
     
-    private double[] readResultBuffer(final FloatBuffer resultsBuffer) {
+    private static double[] readResultBuffer(final FloatBuffer resultsBuffer) {
         resultsBuffer.rewind();
         final double[] result = new double[resultsBuffer.remaining()];
         for (int i = 0; i < result.length; i++) {

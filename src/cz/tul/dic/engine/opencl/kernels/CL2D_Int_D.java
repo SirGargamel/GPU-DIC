@@ -115,11 +115,11 @@ public class CL2D_Int_D extends Kernel {
         eventList.release();
     }
 
-    private int calculateLws1Base() {
+    private static int calculateLws1Base() {
         return LWS1_BASE;
     }
 
-    private int calculateLws0() {
+    private static int calculateLws0() {
         return LWS0_BASE;
     }
 

@@ -110,7 +110,7 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
         eventList.release();
     }
 
-    private int calculateLws0base() {
+    private static int calculateLws0base() {
         return LWS0_BASE;
     }
 
