@@ -46,36 +46,38 @@ public class ComplexTaskSolver extends Observable implements Observer {
     private static final double LIMIT_COUNT_RATIO = 0.5;
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
+    private final TaskContainer task;
     private StrainEstimator strain;
     private boolean stop;
 
-    public ComplexTaskSolver() {
+    public ComplexTaskSolver(final TaskContainer task) {
+        this.task = task;
         bottomShifts = new LinkedList<>();
     }
 
-    public void solveComplexTask(final TaskContainer tc) throws ComputationException {
+    public void solveComplexTask() throws ComputationException {
         stop = false;
         Engine.getInstance().addObserver(this);
 
-        TaskContainerUtils.checkTaskValidity(tc);
-        tc.clearResultData();
+        TaskContainerUtils.checkTaskValidity(task);
+        task.clearResultData();
         bottomShifts.clear();
 
-        strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
+        strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
 
-        final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
+        final int[] rounds = (int[]) task.getParameter(TaskParameter.ROUND_LIMITS);
         final int baseRound = rounds[0];
 
         setChanged();
         notifyObservers(baseRound);
-        final CircleROIManager crm = CircleROIManager.prepareManager(tc, baseRound);
-        final RectROIManager rrm = RectROIManager.prepareManager(tc, crm, baseRound);
+        final CircleROIManager crm = CircleROIManager.prepareManager(task, baseRound);
+        final RectROIManager rrm = RectROIManager.prepareManager(task, crm, baseRound);
         final TaskContainer tcR = rrm.getTc();
         final Set<Future<Void>> futures = new HashSet<>();
 
         int r, nextR, baseR = -1, repeat;
         boolean good;
-        for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
+        for (Entry<Integer, Integer> e : TaskContainerUtils.getRounds(task).entrySet()) {
             if (stop) {
                 return;
             }
@@ -127,11 +129,11 @@ public class ComplexTaskSolver extends Observable implements Observer {
                 tcR.setResult(r, nextR, new Result(new DisplacementResult(data, null)));
             }
 
-            tc.setResult(r, nextR, tcR.getResult(r, nextR));
+            task.setResult(r, nextR, tcR.getResult(r, nextR));
             if (baseR == -1) {
                 baseR = r;
             } else {
-                futures.add(Engine.getInstance().getExecutorService().submit(new OverlapComputation(tc, baseR, nextR, strain)));
+                futures.add(Engine.getInstance().getExecutorService().submit(new OverlapComputation(task, baseR, nextR, strain)));
             }
 
             bottomShifts.add(crm.getShiftBottom());
@@ -158,13 +160,13 @@ public class ComplexTaskSolver extends Observable implements Observer {
         }
 
         try {
-            TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
+            TaskContainerUtils.serializeTaskToBinary(task, new File(NameGenerator.generateBinary(task)));
         } catch (IOException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
 
-        final FpsManager fpsM = new FpsManager(tc);
-        final double pxToMm = 1 / (double) tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
+        final FpsManager fpsM = new FpsManager(task);
+        final double pxToMm = 1 / (double) task.getParameter(TaskParameter.MM_TO_PX_RATIO);
         final String[][] out = new String[bottomShifts.size() + 1][2];
         out[0][0] = fpsM.buildTimeDescription();
         out[0][1] = "dY [mm]";
@@ -173,7 +175,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
             out[i + 1][1] = Utils.format(bottomShifts.get(i) * pxToMm);
         }
         try {
-            CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(tc)), out);
+            CsvWriter.writeDataToCsv(new File(NameGenerator.generateCsvShifts(task)), out);
         } catch (IOException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
@@ -181,7 +183,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
         Engine.getInstance().deleteObserver(this);
     }
 
-    private boolean checkResultsQuality(final CircleROIManager crm, int round) {
+    private static boolean checkResultsQuality(final CircleROIManager crm, int round) {
         int countNotGood = 0, count = 0;
         for (AbstractROI roi : crm.getBottomRois()) {
             for (CorrelationResult cr : crm.getTc().getResult(round, round + 1).getCorrelations().get(roi)) {
@@ -195,7 +197,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
         return ratio < LIMIT_COUNT_RATIO;
     }
 
-    private double[][][] generateZeroResults(final Image img, final AbstractROI roi) {
+    private static double[][][] generateZeroResults(final Image img, final AbstractROI roi) {
         final double[][][] data = new double[img.getWidth()][img.getHeight()][];
         for (int x = (int) roi.getX1(); x <= roi.getX2(); x++) {
             if (x < 0 || x >= data.length) {
@@ -211,10 +213,10 @@ public class ComplexTaskSolver extends Observable implements Observer {
         return data;
     }    
 
-    public boolean isValidComplexTask(final TaskContainer tc) {
-        final int[] rounds = (int[]) tc.getParameter(TaskParameter.ROUND_LIMITS);
+    public boolean isValidComplexTask() {
+        final int[] rounds = (int[]) task.getParameter(TaskParameter.ROUND_LIMITS);
         final int baseRound = rounds[0];
-        return CircleROIManager.prepareManager(tc, baseRound) != null;
+        return CircleROIManager.prepareManager(task, baseRound) != null;
     }
 
     public List<Double> getBottomShifts() {

@@ -50,8 +50,8 @@ public class ComplexTaskTest {
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
 
-        final ComplexTaskSolver cts = new ComplexTaskSolver();
-        assert (!cts.isValidComplexTask(tc));
+        final ComplexTaskSolver cts = new ComplexTaskSolver(tc);
+        assert (!cts.isValidComplexTask());
 
         final CircularROI cRoi1 = new CircularROI(46, 16, 19);
         final CircularROI cRoi2 = new CircularROI(125, 14, 19);
@@ -62,9 +62,9 @@ public class ComplexTaskTest {
         tc.addRoi(BASE_ROUND, cRoi3);
         tc.addRoi(BASE_ROUND, cRoi4);
 
-        assert (cts.isValidComplexTask(tc));
+        assert (cts.isValidComplexTask());
 
-        cts.solveComplexTask(tc);
+        cts.solveComplexTask();
 
         Assert.assertNotNull(cts.getBottomShifts());
         Assert.assertSame(cts.getBottomShifts().size(), 1);

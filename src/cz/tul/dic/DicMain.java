@@ -46,6 +46,7 @@ import org.pmw.tinylog.writers.RollingFileWriter;
  */
 public class DicMain extends Application {
 
+    private static final boolean DEBUG_COMPUTE_PREPROCESSING = true;
     private static final String DEBUG_SMALL = "-d";
     private static final String DEBUG_COMPUTE = "-debug";
     private static final String LICENSE_FILE = "license.dat";
@@ -147,8 +148,11 @@ public class DicMain extends Application {
         Stats.getInstance();
 
         if (parameters.contains(DEBUG_COMPUTE)) {
-//            performComputationTest();
-            performPreprocessingTest();
+            if (DEBUG_COMPUTE_PREPROCESSING) {
+                performPreprocessingTest();
+            } else {
+                performComputationTest();
+            }
         }
 
         boolean validLicense = Utils.checkLicense(LICENSE);
@@ -195,7 +199,7 @@ public class DicMain extends Application {
         }
     }
 
-    private void configureTinyLog(final boolean debug) throws IOException {
+    private static void configureTinyLog(final boolean debug) throws IOException {
         Configurator c = Configurator.defaultConfig();
         c.writingThread(true);
         try {
@@ -219,9 +223,9 @@ public class DicMain extends Application {
 
     }
 
-    private void performComputationTest() {
+    private static void performComputationTest() {
         final int fs1 = 5; //10
-        final int fs2 = 5; //30        
+        final int fs2 = 30; //30        
         TaskContainer task;
         for (int size = fs1; size <= fs2; size += 5) {
             for (String s : FILES_TO_DEBUG) {
@@ -287,8 +291,8 @@ public class DicMain extends Application {
         TaskContainerUtils.checkTaskValidity(task);
 
         long time = System.nanoTime();
-        final ComplexTaskSolver cts = new ComplexTaskSolver();
-        cts.solveComplexTask(task);
+        final ComplexTaskSolver cts = new ComplexTaskSolver(task);
+        cts.solveComplexTask();
         time = System.nanoTime() - time;
         printInfo("dynamic task", task, time);
     }
@@ -367,10 +371,9 @@ public class DicMain extends Application {
             for (String filter : filters) {
                 for (int size = 5; size <= 15; size += 2) {
                     task.setParameter(TaskParameter.SUBSET_SIZE, size);
-                    
+
                     for (Solver solver : solvers) {
                         task.setParameter(TaskParameter.SOLVER, solver);
-                        
 
                         final double roiWidth;
                         if (task.getRois(0) != null) {

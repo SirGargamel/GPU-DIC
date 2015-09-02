@@ -237,7 +237,7 @@ public class MainWindow implements Initializable {
             if (tc != null) {
                 saveSubsetSize();
                 TaskContainerUtils.checkTaskValidity(tc);
-                ComplexTaskSolver cts = new ComplexTaskSolver();
+                ComplexTaskSolver cts = new ComplexTaskSolver(tc);
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
                 Dialogs.showProgress(worker, Lang.getString("Computing"));
 
@@ -561,9 +561,9 @@ public class MainWindow implements Initializable {
         protected Exception call() throws Exception {
             Exception result = null;
             try {
-                if (cts.isValidComplexTask(tc)) {
+                if (cts.isValidComplexTask()) {
                     cts.addObserver(this);
-                    cts.solveComplexTask(tc);
+                    cts.solveComplexTask();
                 } else {
                     Engine.getInstance().addObserver(this);
                     Engine.getInstance().computeTask(tc);
