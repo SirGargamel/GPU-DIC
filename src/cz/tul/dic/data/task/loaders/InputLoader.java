@@ -40,14 +40,17 @@ public final class InputLoader {
             }
         }
         
+        final TaskContainer innerTask;
         if (task == null) {
-            task = new TaskContainer();
+            innerTask = new TaskContainer();
+        } else {
+            innerTask = task;
         }
 
         TaskContainer result = null;        
         if (loader != null) {
             try {
-                result = loader.loadTask(in, task);
+                result = loader.loadTask(in, innerTask);
             } catch (ComputationException ex) {
                 if (ex.getExceptionCause().equals(ComputationExceptionCause.ILLEGAL_TASK_DATA)) {
                     if (result != null && result.getImages().isEmpty()) {
