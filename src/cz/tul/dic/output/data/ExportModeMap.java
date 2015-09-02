@@ -15,6 +15,8 @@ import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
 
 public class ExportModeMap implements IExportMode<double[][]> {
+    
+    private static final String UNSUPPORTED_DIRECTION = "Unsupported direction - ";
 
     @Override
     public double[][] exportData(final TaskContainer tc, final Direction direction, final int[] dataParams) {
@@ -92,11 +94,11 @@ public class ExportModeMap implements IExportMode<double[][]> {
                 result = extractQualityResult(direction, tc, round, roundZero);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported direction - " + direction);
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + direction);
         }
 
         return result;
-    }
+    }    
 
     private static double[][][] extractDataResult(final Direction direction, final TaskContainer tc, final int round, final int roundZero) {
         Result res;
@@ -132,7 +134,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
                 results = res == null ? null : res.getStrainResult().getStrain();
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported direction - " + direction);
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + direction);
         }
         return results;
     }
@@ -177,7 +179,7 @@ public class ExportModeMap implements IExportMode<double[][]> {
                         result[x][y] = ExportUtils.calculateSpeed(results[x][y], direction, time);
                         break;
                     default:
-                        throw new IllegalArgumentException("Unsupported direction - " + direction);
+                        throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + direction);
                 }
 
                 if (direction.isMm()) {
@@ -217,12 +219,12 @@ public class ExportModeMap implements IExportMode<double[][]> {
                 results = res == null ? null : res.getStrainResult().getQualityY();
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported direction - " + direction);
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + direction);
         }
         return results;
     }
 
-    private double interpolate(final double val1, final double val2, final double ratio) {
+    private static double interpolate(final double val1, final double val2, final double ratio) {
         final double result;
         if (!Double.isFinite(val1) || !Double.isFinite(val2)) {
             result = Double.NaN;

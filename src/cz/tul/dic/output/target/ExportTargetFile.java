@@ -195,7 +195,7 @@ public class ExportTargetFile extends AbstractExportTarget {
         Utils.deleteTempDir(tc);
     }
 
-    private double[] findMinMax(final List<double[][]> data) {
+    private static double[] findMinMax(final List<double[][]> data) {
         double max = Double.NEGATIVE_INFINITY, min = Double.POSITIVE_INFINITY;
         for (double[][] daa : data) {
             if (daa != null) {
@@ -220,7 +220,7 @@ public class ExportTargetFile extends AbstractExportTarget {
         return new double[]{min, max};
     }
 
-    private String loadScript() throws IOException {
+    private static String loadScript() throws IOException {
         InputStream in = ExportTargetFile.class
                 .getResourceAsStream(SCRIPT_NAME);
         StringBuilder sb = new StringBuilder();
@@ -234,13 +234,13 @@ public class ExportTargetFile extends AbstractExportTarget {
         return sb.toString();
     }
 
-    private void saveScript(final String script, final File target) throws IOException {
+    private static void saveScript(final String script, final File target) throws IOException {
         try (FileWriter out = new FileWriter(target)) {
             out.write(extendBackslashes(script));
         }
     }
 
-    private String extendBackslashes(final String in) {
+    private static String extendBackslashes(final String in) {
         return in.replaceAll("\\\\", "\\\\\\\\");
     }
 
