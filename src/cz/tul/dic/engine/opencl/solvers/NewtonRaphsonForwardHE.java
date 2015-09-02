@@ -70,7 +70,7 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
         return -2 / sum;
     }
 
-    private boolean coordsValid(final double[] coords, final int width, final int height) {
+    private static boolean coordsValid(final double[] coords, final int width, final int height) {
         return coords[0] >= 0 && coords[1] >= 0 && coords[0] < width && coords[1] < height;
     }
 

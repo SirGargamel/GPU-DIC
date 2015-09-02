@@ -280,7 +280,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         return result;
     }
 
-    private double computeImprovement(final double oldResult, final double newResult) {
+    private static double computeImprovement(final double oldResult, final double newResult) {
         return newResult - oldResult;
     }
 

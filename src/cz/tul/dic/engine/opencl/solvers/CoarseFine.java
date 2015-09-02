@@ -144,7 +144,7 @@ public class CoarseFine extends AbstractTaskSolver {
         return roundCount;
     }
     
-    private double findMinimalStep(final FullTask fullTask) {
+    private static double findMinimalStep(final FullTask fullTask) {
         double minimalStep = 1;
         for (double[] dA : fullTask.getDeformationLimits()) {
             minimalStep = Math.min(minimalStep, Math.min(dA[DeformationLimit.USTEP], dA[DeformationLimit.VSTEP]));

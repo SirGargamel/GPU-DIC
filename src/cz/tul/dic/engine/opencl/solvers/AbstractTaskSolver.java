@@ -172,7 +172,7 @@ public abstract class AbstractTaskSolver extends Observable {
         }
     }
 
-    private CorrelationResult pickBetterResult(final CorrelationResult r1, final CorrelationResult r2) {
+    private static CorrelationResult pickBetterResult(final CorrelationResult r1, final CorrelationResult r2) {
         final CorrelationResult result;
         if (r1 == null) {
             result = r2;
@@ -184,7 +184,7 @@ public abstract class AbstractTaskSolver extends Observable {
         return result;
     }
 
-    private void pickBestResultsForTask(final ComputationTask task, final List<CorrelationResult> bestResults, final List<AbstractSubset> globalSubsets) throws ComputationException {
+    private static void pickBestResultsForTask(final ComputationTask task, final List<CorrelationResult> bestResults, final List<AbstractSubset> globalSubsets) throws ComputationException {
         final List<AbstractSubset> localSubsets = task.getSubsets();
         final int subsetCount = localSubsets.size();
 

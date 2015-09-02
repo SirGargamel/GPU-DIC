@@ -31,7 +31,7 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
         final double[] data = new double[coeffCount];
 
-        final int resultsBase = (int) (fullTask.getSubsets().indexOf(subset) * deformationCount);
+        final int resultsBase = (fullTask.getSubsets().indexOf(subset) * deformationCount);
         final int[] indices = new int[coeffCount];
         Arrays.fill(indices, getSetpCountForOneDimension() / 2);
         final long[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
@@ -58,7 +58,7 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final int resultsBase = (int) (fullTask.getSubsets().indexOf(subset) * deformationCount);
+        final int resultsBase = (fullTask.getSubsets().indexOf(subset) * deformationCount);
         final int[] indices = new int[coeffCount];
         Arrays.fill(indices, getSetpCountForOneDimension() / 2);
         final long[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
