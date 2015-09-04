@@ -27,8 +27,6 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.output.Direction;
-import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
 import java.io.IOException;
@@ -218,12 +216,7 @@ public final class Engine extends Observable implements Observer {
 
     private static List<double[]> generateDeformations(final double[] limits, final int subsetCount) {
         return Collections.nCopies(subsetCount, limits);
-    }
-
-    private boolean isStrainExport(final ExportTask eTask) {
-        final Direction dir = eTask.getDirection();
-        return dir == Direction.EABS || dir == Direction.EXY || dir == Direction.EXX || dir == Direction.EYY;
-    }
+    }    
 
     public void stop() {
         stopEngine = true;
