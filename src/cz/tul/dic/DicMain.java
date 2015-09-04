@@ -381,7 +381,7 @@ public class DicMain extends Application {
                         } else {
                             roiWidth = task.getImage(0).getWidth();
                         }
-                        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, Math.max((int) roiWidth / 10, 2 * size));
+                        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, Math.max((int) roiWidth / 5, 2 * size));
                         findAllConfigurationsAndCompute(task, filter);
                     }
                 }
