@@ -16,6 +16,7 @@ import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.data.task.loaders.ConfigLoader;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -190,7 +191,7 @@ public final class TaskContainerUtils {
     }
 
     public static void serializeTaskToBinary(final TaskContainer tc, final File target) throws IOException {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(target))) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(target)))) {
             out.writeObject(tc);
             out.flush();
             out.reset();

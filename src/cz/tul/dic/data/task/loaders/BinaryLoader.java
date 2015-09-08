@@ -8,6 +8,7 @@ package cz.tul.dic.data.task.loaders;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.task.TaskContainer;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class BinaryLoader extends AbstractInputLoader {
 
         final File input = (File) in;
         TaskContainer result;
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(input))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(input)))) {
             result = (TaskContainer) ois.readObject();
         } catch (IOException | ClassNotFoundException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
