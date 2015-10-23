@@ -24,7 +24,7 @@ public final class Image extends BufferedImage {
     private byte[] grayScale;
     private byte[][] grayScale2d;
     private byte[] filtered;
-    
+
     static {
         OpenCVHandler.loadLibrary();
     }
@@ -85,9 +85,12 @@ public final class Image extends BufferedImage {
         return grayScale2d;
     }
 
-    public void filter(final int filterSize) {
+    public void filter(int filterSize) {
         final byte[] bw = toBWArray();
-        if (filterSize != -1) {
+        if (filterSize > 0) {
+            if (filterSize % 2 == 0) {
+                filterSize++;
+            }
             final Mat in = new Mat(getWidth(), getHeight(), CvType.CV_8U);
             in.put(0, 0, bw);
             final Mat out = new Mat();
