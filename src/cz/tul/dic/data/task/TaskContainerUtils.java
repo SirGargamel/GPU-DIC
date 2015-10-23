@@ -311,6 +311,11 @@ public final class TaskContainerUtils {
             Logger.info("Adding default solver.");
             tc.setParameter(TaskParameter.SOLVER, TaskDefaultValues.DEFAULT_SOLVER);
         }
+        final Object filterSize = tc.getParameter(TaskParameter.FILTER_KERNEL_SIZE);
+        if (filterSize == null) {
+            Logger.info("Adding default filter size.");
+            tc.setParameter(TaskParameter.FILTER_KERNEL_SIZE, TaskDefaultValues.DEFAULT_FILTER_KERNEL_SIZE);
+        }
     }
 
 }

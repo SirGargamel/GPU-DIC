@@ -23,6 +23,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.OpenCLDataPackage;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -40,7 +41,7 @@ public abstract class AbstractOpenCLMemoryManager {
     private static final CLImageFormat IMAGE_FORMAT;
     protected long maxDeformationCount;
     // OpenCL entities
-    protected CLMemory<IntBuffer> clImageA, clImageB;
+    protected CLMemory<ByteBuffer> clImageA, clImageB;
     protected CLBuffer<IntBuffer> clSubsetData;
     protected CLBuffer<FloatBuffer> clSubsetCenters;
     protected CLBuffer<FloatBuffer> clDeformationLimits;
@@ -54,7 +55,7 @@ public abstract class AbstractOpenCLMemoryManager {
     static {
         DeviceManager.clearMemory();
         INSTANCE = new StaticMemoryManager();
-        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelType.UNSIGNED_INT8);
+        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
     }
 
     protected AbstractOpenCLMemoryManager() {
@@ -79,19 +80,19 @@ public abstract class AbstractOpenCLMemoryManager {
         lock.unlock();
     }
 
-    protected CLImage2d<IntBuffer> generateImage2d(final Image image) {
+    protected CLImage2d<ByteBuffer> generateImage2d(final Image image) {
         return context.createImage2d(
-                Buffers.newDirectIntBuffer(image.toBWArray()),
+                Buffers.newDirectByteBuffer(image.toFiltered()),
                 image.getWidth(), image.getHeight(),
                 IMAGE_FORMAT, CLMemory.Mem.READ_ONLY);
     }
 
-    protected CLBuffer<IntBuffer> generateImageArray(final Image image) {
-        final int[] data = image.toBWArray();
-        final CLBuffer<IntBuffer> result = context.createIntBuffer(data.length, CLMemory.Mem.READ_ONLY);
-        final IntBuffer buffer = result.getBuffer();
-        for (int i : data) {
-            buffer.put(i);
+    protected CLBuffer<ByteBuffer> generateImageArray(final Image image) {
+        final byte[] data = image.toBWArray();
+        final CLBuffer<ByteBuffer> result = context.createByteBuffer(data.length, CLMemory.Mem.READ_ONLY);
+        final ByteBuffer buffer = result.getBuffer();
+        for (byte b : data) {
+            buffer.put(b);
         }
         buffer.rewind();
         return result;

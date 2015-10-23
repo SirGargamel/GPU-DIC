@@ -7,6 +7,7 @@ package cz.tul.dic.engine.opencl.kernels;
 
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLMemory;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -17,8 +18,8 @@ import java.nio.LongBuffer;
  */
 public class OpenCLDataPackage {
 
-    private final CLMemory<IntBuffer> imgA;
-    private final CLMemory<IntBuffer> imgB;
+    private final CLMemory<ByteBuffer> imgA;
+    private final CLMemory<ByteBuffer> imgB;
     private final CLBuffer<IntBuffer> subsetData;
     private final CLBuffer<FloatBuffer> subsetCenters;
     private final CLBuffer<FloatBuffer> deformationLimits;
@@ -26,7 +27,7 @@ public class OpenCLDataPackage {
     private final CLBuffer<FloatBuffer> results;
 
     public OpenCLDataPackage(
-            final CLMemory<IntBuffer> imgA, final CLMemory<IntBuffer> imgB,
+            final CLMemory<ByteBuffer> imgA, final CLMemory<ByteBuffer> imgB,
             final CLBuffer<IntBuffer> subsetData, final CLBuffer<FloatBuffer> subsetCenters,
             final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<LongBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results) {
@@ -39,11 +40,11 @@ public class OpenCLDataPackage {
         this.results = results;
     }
 
-    public CLMemory<IntBuffer> getImgA() {
+    public CLMemory<ByteBuffer> getImgA() {
         return imgA;
     }
 
-    public CLMemory<IntBuffer> getImgB() {
+    public CLMemory<ByteBuffer> getImgB() {
         return imgB;
     }
 

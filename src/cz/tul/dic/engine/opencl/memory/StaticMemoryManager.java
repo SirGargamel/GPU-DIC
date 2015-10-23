@@ -13,7 +13,7 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
@@ -26,14 +26,14 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
             release(clImageB);
             if (kernel.usesImage()) {
                 clImageA = generateImage2d(task.getImageA());
-                queue.putWriteImage((CLImage2d<IntBuffer>) clImageA, false);
+                queue.putWriteImage((CLImage2d<?>) clImageA, false);
                 clImageB = generateImage2d(task.getImageB());
-                queue.putWriteImage((CLImage2d<IntBuffer>) clImageB, false);
+                queue.putWriteImage((CLImage2d<?>) clImageB, false);
             } else {
                 clImageA = generateImageArray(task.getImageA());
-                queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageA, false);
+                queue.putWriteBuffer((CLBuffer<?>) clImageA, false);
                 clImageB = generateImageArray(task.getImageB());
-                queue.putWriteBuffer((CLBuffer<IntBuffer>) clImageB, false);
+                queue.putWriteBuffer((CLBuffer<?>) clImageB, false);
             }
             
             release(clSubsetData);

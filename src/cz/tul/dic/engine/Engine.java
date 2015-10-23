@@ -8,6 +8,7 @@ package cz.tul.dic.engine;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.data.Image;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.Hint;
@@ -116,7 +117,7 @@ public final class Engine extends Observable implements Observer {
         }
 
         endTask();
-        
+
         try {
             TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         } catch (IOException ex) {
@@ -153,6 +154,12 @@ public final class Engine extends Observable implements Observer {
 
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
 
+        final int filterSize = (int) task.getParameter(TaskParameter.FILTER_KERNEL_SIZE);
+        final Image in = task.getImage(roundFrom);        
+        in.filter(filterSize);
+        final Image out = task.getImage(roundTo);
+        out.filter(filterSize);
+
         // prepare data
         setChanged();
         notifyObservers(SubsetGenerator.class);
@@ -171,7 +178,7 @@ public final class Engine extends Observable implements Observer {
                     roi,
                     solver.solve(
                             new FullTask(
-                                    task.getImage(roundFrom), task.getImage(roundTo),
+                                    in, out,
                                     subsets.get(roi),
                                     generateDeformations(task.getDeformationLimits(roundFrom, roi), subsets.get(roi).size())),
                             task.getSubsetSize(roundFrom, roi)));
@@ -216,7 +223,7 @@ public final class Engine extends Observable implements Observer {
 
     private static List<double[]> generateDeformations(final double[] limits, final int subsetCount) {
         return Collections.nCopies(subsetCount, limits);
-    }    
+    }
 
     public void stop() {
         stopEngine = true;

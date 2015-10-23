@@ -38,7 +38,7 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
         final double[] deformation = extractSolutionFromLimits(deformationLimits);
         final SubsetDeformator deformator = new SubsetDeformator();
 
-        final int[][] image = fullTask.getImageB().to2DBWArray();
+        final byte[][] image = fullTask.getImageB().to2DBWArray();
         final Map<int[], double[]> deformedSubset = deformator.deformSubset(subset, deformation);
         final PiecewiseBicubicSplineInterpolatingFunction interpolationFunction = prepareInterpolator(deformedSubset, image);
         final double firstSum = computeFirstSum(deformedSubset, interpolationFunction);
@@ -75,7 +75,7 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
     }
 
     private PiecewiseBicubicSplineInterpolatingFunction prepareInterpolator(
-            final Map<int[], double[]> deformedSubset, final int[][] image) {
+            final Map<int[], double[]> deformedSubset, final byte[][] image) {
         int leftX = Integer.MAX_VALUE;
         int topY = Integer.MAX_VALUE;
         int rightX = 0;

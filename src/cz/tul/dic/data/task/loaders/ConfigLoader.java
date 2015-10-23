@@ -128,6 +128,9 @@ public class ConfigLoader extends AbstractInputLoader {
                         case SUBSET_SIZE:
                             task.setParameter(tp, Integer.valueOf(value));
                             break;
+                        case FILTER_KERNEL_SIZE:
+                            task.setParameter(tp, Integer.valueOf(value));
+                            break;
                         case FPS:
                             task.setParameter(tp, Integer.valueOf(value));
                             break;

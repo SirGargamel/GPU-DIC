@@ -5,10 +5,15 @@
  */
 package cz.tul.dic.data;
 
+import cz.tul.dic.OpenCVHandler;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 /**
  *
@@ -16,13 +21,18 @@ import javax.imageio.ImageIO;
  */
 public final class Image extends BufferedImage {
 
-    private int[] grayScale;
-    private int[][] grayScale2d;
+    private byte[] grayScale;
+    private byte[][] grayScale2d;
+    private byte[] filtered;
+    
+    static {
+        OpenCVHandler.loadLibrary();
+    }
 
     private Image(final int width, final int height, final int imageType) {
         super(width, height, imageType);
-    }    
-    
+    }
+
     public static Image loadImageFromDisk(final File in) throws IOException {
         if (!in.exists() || !in.isFile()) {
             throw new IllegalArgumentException("Illegal input file.");
@@ -36,42 +46,62 @@ public final class Image extends BufferedImage {
         result.getGraphics().drawImage(img, 0, 0, null);
 
         return result;
-    }    
+    }
 
-    public int[] toBWArray() {
+    public byte[] toBWArray() {
         if (grayScale == null) {
             createBw();
         }
 
         return grayScale;
     }
-    
+
     private void createBw() {
         final int width = getWidth();
         final int height = getHeight();
-        grayScale = new int[width * height];
-        grayScale2d = new int[width][height];
+        grayScale = new byte[width * height];
+        grayScale2d = new byte[width][height];
 
-        int val, r, g, b;
+        int val;
+        byte r, g, b, newVal;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 val = getRGB(x, y);
-                r = (val & 0xff0000) >> 16;
-                g = (val & 0xff00) >> 8;
-                b = val & 0xff;
-                val = (r + g + b) / 3;
-                grayScale[y * width + x] = val;
-                grayScale2d[x][y] = val;
+                r = (byte) ((val & 0xff0000) >> 16);
+                g = (byte) ((val & 0xff00) >> 8);
+                b = (byte) (val & 0xff);
+                newVal = (byte) ((r + g + b) / 3);
+                grayScale[y * width + x] = newVal;
+                grayScale2d[x][y] = newVal;
             }
         }
     }
-    
-    public int[][] to2DBWArray() {
+
+    public byte[][] to2DBWArray() {
         if (grayScale == null) {
             createBw();
         }
 
         return grayScale2d;
+    }
+
+    public void filter(final int filterSize) {
+        final byte[] bw = toBWArray();
+        if (filterSize != -1) {
+            final Mat in = new Mat(getWidth(), getHeight(), CvType.CV_8U);
+            in.put(0, 0, bw);
+            final Mat out = new Mat();
+            Imgproc.GaussianBlur(in, out, new Size(filterSize, filterSize), 0, 0);
+            filtered = new byte[bw.length];
+            out.get(0, 0, filtered);
+        } else {
+            filtered = bw;
+        }
+    }
+
+    public byte[] toFiltered() {
+        final byte[] result = filtered == null ? toBWArray() : filtered;
+        return result;
     }
 
 }

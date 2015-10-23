@@ -25,21 +25,22 @@ public enum TaskParameter {
     SUBSET_GENERATOR_METHOD(SubsetGeneratorMethod.class),
     SUBSET_GENERATOR_PARAM(Integer.class),
     SUBSET_SIZE(Integer.class),
+    FILTER_KERNEL_SIZE(Integer.class),
     FPS(Integer.class),
-    KERNEL(KernelType.class),    
+    KERNEL(KernelType.class),
     TASK_SPLIT_METHOD(TaskSplitMethod.class),
     TASK_SPLIT_PARAM(Integer.class),
     INTERPOLATION(Interpolation.class),
-    MM_TO_PX_RATIO(Double.class),    
+    MM_TO_PX_RATIO(Double.class),
     ROUND_LIMITS(int[].class),
     DISPLACEMENT_CALCULATION_METHOD(DisplacementCalculation.class),
     DISPLACEMENT_CALCULATION_PARAM(Integer.class),
     RESULT_QUALITY(Double.class),
     STRAIN_ESTIMATION_METHOD(StrainEstimationMethod.class),
-    STRAIN_ESTIMATION_PARAM(Double.class),    
+    STRAIN_ESTIMATION_PARAM(Double.class),
     DEFORMATION_LIMITS(double[].class),
     DEFORMATION_ORDER(DeformationDegree.class),
-    SOLVER(Solver.class);    
+    SOLVER(Solver.class);
 
     private final Class type;
 
