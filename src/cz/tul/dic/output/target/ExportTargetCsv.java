@@ -109,7 +109,7 @@ public class ExportTargetCsv extends AbstractExportTarget {
         final File target = (File) targetParam;
         final String path = target.getAbsolutePath();
         final String subTarget = path.substring(0, path.lastIndexOf('.'));
-        
+
         final FpsManager fpsM = new FpsManager(tc);
         final int posCount = ((int) Math.log10(fpsM.getTime(data.size() - 1))) + 1;
         final StringBuilder sb = new StringBuilder();
@@ -125,10 +125,4 @@ public class ExportTargetCsv extends AbstractExportTarget {
             exportMap(data.get(i), new File(subTarget + "-" + nf.format(fpsM.getTime(i)) + fpsM.getTickUnit() + EXTENSION), limits);
         }
     }
-
-    @Override
-    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException {
-        throw new UnsupportedOperationException("Unsupported mode.");
-    }
-
 }

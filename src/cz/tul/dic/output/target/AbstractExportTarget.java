@@ -20,15 +20,15 @@ import java.util.Map;
  */
 public abstract class AbstractExportTarget {
 
-    private static final Map<ExportMode, IExportMode> dataExporters;
+    private static final Map<ExportMode, IExportMode> EXPORTERS;
 
     static {
-        dataExporters = new HashMap<>();
-        dataExporters.put(ExportMode.MAP, new ExportModeMap());
-        dataExporters.put(ExportMode.POINT, new ExportModePoint());
-        dataExporters.put(ExportMode.DOUBLE_POINT, new ExportModeDoublePoint());
-        dataExporters.put(ExportMode.SEQUENCE, new ExportModeSequence());
-        dataExporters.put(ExportMode.VIDEO, new ExportModeSequence());
+        EXPORTERS = new HashMap<>();
+        EXPORTERS.put(ExportMode.MAP, new ExportModeMap());
+        EXPORTERS.put(ExportMode.POINT, new ExportModePoint());
+        EXPORTERS.put(ExportMode.DOUBLE_POINT, new ExportModeDoublePoint());
+        EXPORTERS.put(ExportMode.SEQUENCE, new ExportModeSequence());
+        EXPORTERS.put(ExportMode.VIDEO, new ExportModeSequence());
     }
 
     public void exportData(final ExportTask et, final TaskContainer tc) throws IOException {
@@ -54,19 +54,29 @@ public abstract class AbstractExportTarget {
         }
     }
 
-    public abstract void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException;
+    public void exportMap(final TaskContainer tc, final IExportMode<double[][]> exporter, final Direction direction, final Object targetParam, final int[] dataParams, final double[] limits) throws IOException {
+        throw new UnsupportedOperationException("Unsupported mode.");
+    }
 
-    public abstract void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException;
+    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException {
+        throw new UnsupportedOperationException("Unsupported mode.");
+    }
 
-    public abstract void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException;
+    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException {
+        throw new UnsupportedOperationException("Unsupported mode.");
+    }
 
-    public abstract void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam, double[] limits) throws IOException;
+    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, Object targetParam, double[] limits) throws IOException {
+        throw new UnsupportedOperationException("Unsupported mode.");
+    }
 
-    public abstract void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, final Object targetParams, double[] limits) throws IOException;           
+    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, Direction direction, final Object targetParams, double[] limits) throws IOException {
+        throw new UnsupportedOperationException("Unsupported mode.");
+    }           
 
     @SuppressWarnings("unchecked")
     private static <T> IExportMode<T> getExporter(final ExportMode em) {
-        return dataExporters.get(em);
+        return EXPORTERS.get(em);
     }
 
 }

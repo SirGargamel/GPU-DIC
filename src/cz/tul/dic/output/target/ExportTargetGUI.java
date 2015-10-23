@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ExportTargetGUI extends AbstractExportTarget {
-    
+
     private static final String NOT_ENOUGH_DATA_PARAMETERS = "Not enough data parameters.";
 
     @Override
@@ -45,7 +45,7 @@ public class ExportTargetGUI extends AbstractExportTarget {
         }
         final Context context = (Context) targetParam;
         context.storeMapExport(overlay, position, direction);
-    }    
+    }
 
     @Override
     public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) {
@@ -66,15 +66,4 @@ public class ExportTargetGUI extends AbstractExportTarget {
         final Context context = (Context) targetParam;
         context.storePointExport(data, dataParams[0], dataParams[1], dataParams[2], dataParams[3]);
     }
-
-    @Override
-    public void exportSequence(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException {
-        throw new UnsupportedOperationException("Unsupported mode.");
-    }
-
-    @Override
-    public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParam, final double[] limits) throws IOException {
-        throw new UnsupportedOperationException("Unsupported mode.");
-    }
-
 }

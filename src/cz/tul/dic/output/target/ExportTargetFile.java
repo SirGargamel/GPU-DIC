@@ -243,15 +243,4 @@ public class ExportTargetFile extends AbstractExportTarget {
     private static String extendBackslashes(final String in) {
         return in.replaceAll("\\\\", "\\\\\\\\");
     }
-
-    @Override
-    public void exportPoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException {
-        throw new UnsupportedOperationException("Unsupported mode.");
-    }
-
-    @Override
-    public void exportDoublePoint(final TaskContainer tc, final IExportMode<Map<Direction, double[]>> exporter, final Object targetParam, final int[] dataParams) throws IOException {
-        throw new UnsupportedOperationException("Unsupported mode.");
-    }
-
 }
