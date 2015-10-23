@@ -198,7 +198,7 @@ public class EngineTest {
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.SUBSET_SIZE, 5);
-        tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
+        tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);        
 
         return tc;
     }
