@@ -8,7 +8,7 @@ inline int computeIndex(const float x, const float y, const int width) {
  * @author Petr Jecmen, Technical University of Liberec
  */
 kernel void CL15D_pF_D(
-    global read_only int * imageA, global read_only int * imageB, 
+    global read_only char * imageA, global read_only char * imageB, 
     global read_only int * subsets, global read_only float * subsetCenters,
     global read_only float * deformationLimits, global read_only long * deformationCounts,
     global write_only float * result,    
