@@ -82,8 +82,8 @@ public final class WorkSizeManager {
                 }
             }
         } catch (ComputationException ex) {
-            Logger.warn("Failed to initialize work sizes.");
             Logger.debug(ex);
+            throw new RuntimeException("Error initializing OpenCL.", ex);
         }
         solver.endTask();
         // find best performing kernel        
