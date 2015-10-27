@@ -113,6 +113,11 @@ public class CL2D_Int_D extends Kernel {
     private static int calculateLws0() {
         return LWS0_BASE;
     }
+    
+    @Override
+    public boolean is2D() {
+        return true;
+    }
 
     @Override
     public void stopComputation() {

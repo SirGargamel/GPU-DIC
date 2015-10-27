@@ -24,6 +24,7 @@ import org.pmw.tinylog.Logger;
 public class KernelSourcePreparator {
 
     public static final String KERNEL_EXTENSION = ".cl";
+    private static final String REPLACE_INIT = "%INIT%";
     private static final String REPLACE_CORRELATION = "%CORR%";
     private static final String REPLACE_EXTENSION = ".source";
     private static final String REPLACE_SUBSET_SIZE = "%SS%";
@@ -47,14 +48,15 @@ public class KernelSourcePreparator {
     public static String prepareKernel(
             final String kernelName,
             final int subsetSize, final DeformationDegree deg,
-            final boolean usesVectorization, final Interpolation interpolation,
-            final boolean usesImage, final boolean usesLocalMemory) throws ComputationException {
+            final boolean is2D, final boolean usesVectorization, final Interpolation interpolation,
+            final boolean usesImage, final boolean usesLocalMemory, final boolean usesMemoryCoalescing) throws ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         try {
             kp.loadKernel();
+            kp.prepareInit(is2D, usesLocalMemory, usesLocalMemory);
             kp.prepareCorrelation(usesVectorization);
-            kp.prepareDeltaAndStore();            
+            kp.prepareDeltaAndStore();
             kp.prepareDeformations(deg, usesVectorization, usesLocalMemory);
             kp.prepareInterpolation(interpolation, usesImage);
             kp.prepareSubsetSize(subsetSize);
@@ -75,11 +77,25 @@ public class KernelSourcePreparator {
         }
     }
 
-    private void prepareSubsetSize(final int subsetSize) {
-        kernel = kernel.replaceAll(REPLACE_SUBSET_SIZE, Integer.toString(subsetSize));
+    private void prepareInit(final boolean is2D, final boolean usesLocalMemory, final boolean usesMemoryCoalescing) {
+        String resourceName = "init-";
+        if (is2D) {
+            resourceName = resourceName.concat("2D-");
+        } else {
+            resourceName = resourceName.concat("1D-");
+        }
+        if (usesLocalMemory) {
+            resourceName = resourceName.concat("local");
+        } else {
+            resourceName = resourceName.concat("global");
+        }
+        if (usesMemoryCoalescing) {
+            resourceName = resourceName.concat("-MC");
+        }
+        kernel = kernel.replaceAll(REPLACE_INIT, loadKernelResource(resourceName));
     }
 
-    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization, final boolean usesLocalMemory) {        
+    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization, final boolean usesLocalMemory) {
         final StringBuilder sb = new StringBuilder();
         String resourceName = "deformation-coeffs-";
         switch (deg) {
@@ -94,18 +110,18 @@ public class KernelSourcePreparator {
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported degree of deformation - " + deg);
-        }        
+        }
         sb.append(loadKernelResource(resourceName));
-        kernel = kernel.replaceAll(REPLACE_DEFORMATION_COMPUTATION, sb.toString());        
+        kernel = kernel.replaceAll(REPLACE_DEFORMATION_COMPUTATION, sb.toString());
 
         resourceName = "deformation-compute-";
         if (usesLocalMemory) {
             resourceName = resourceName.concat("local");
         } else {
             resourceName = resourceName.concat("global");
-        }        
+        }
         kernel = kernel.replaceAll(REPLACE_DEFORMATION, loadKernelResource(resourceName));
-        
+
         final String x, y, dx, dy;
         if (usesVectorization) {
             x = "coords.x";
@@ -131,7 +147,7 @@ public class KernelSourcePreparator {
             default:
                 throw new IllegalArgumentException("Unsupported degree of deformation - " + deg);
         }
-        
+
         kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(DeformationUtils.getDeformationCoeffCount(deg)));
     }
 
@@ -304,7 +320,7 @@ public class KernelSourcePreparator {
             resourceName = resourceName.concat("-image");
         } else {
             resourceName = resourceName.concat("-array");
-        }        
+        }
 
         kernel = kernel.replaceAll(
                 REPLACE_INTERPOLATION,
@@ -333,7 +349,7 @@ public class KernelSourcePreparator {
             resourceName = resourceName.concat("vec");
         } else {
             resourceName = resourceName.concat("noVec");
-        }        
+        }
 
         kernel = kernel.replaceAll(
                 REPLACE_CORRELATION,
@@ -344,5 +360,9 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(
                 REPLACE_DELTA,
                 loadKernelResource("computeDeltaAndStore.source"));
+    }
+
+    private void prepareSubsetSize(final int subsetSize) {
+        kernel = kernel.replaceAll(REPLACE_SUBSET_SIZE, Integer.toString(subsetSize));
     }
 }

@@ -13,13 +13,9 @@ kernel void CL15D_pF_D(
     const int subsetId,
     const long deformationSubCount, const int deformationBase)
 {
-    // id checks       
-    const size_t deformationId = deformationBase + get_global_id(0);    
-    if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
-        return;
-    }
-    // prepare coeffs
-    float deformation[%DEF_D%];
+    // id checks, memory init    
+    %INIT%        
+    // prepare coeffs    
     %DEF_C%    
     // deform subset
     %DEF%

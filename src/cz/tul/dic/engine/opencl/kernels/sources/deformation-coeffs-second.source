@@ -1,3 +1,4 @@
+float deformation[%DEF_D%];
 const int limitsBase = subsetId * 36;
 const int countsBase = subsetId * 13;
 if (deformationId >= deformationCounts[countsBase + 12]) { return; }

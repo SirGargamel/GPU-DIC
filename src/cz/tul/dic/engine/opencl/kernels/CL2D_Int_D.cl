@@ -14,17 +14,9 @@ kernel void CL2D_Int_D(
     const long subsetSubCount, const long subsetBase,
     const long deformationSubCount, const long deformationBase) 
 {        
-    // id checks    
-    const size_t subsetId = subsetBase + get_global_id(0);
-    if (subsetId >= subsetBase + subsetSubCount || subsetId >= subsetCount) {
-        return;
-    } 
-    const size_t deformationId = deformationBase + get_global_id(1);
-    if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
-        return;
-    }
-    // prepare coeffs
-    float deformation[%DEF_D%];
+    // id checks, memory init    
+    %INIT%
+    // prepare coeffs    
     %DEF_C%    
     // deform subset
     %DEF%

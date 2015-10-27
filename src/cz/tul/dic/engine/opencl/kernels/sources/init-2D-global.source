@@ -1,0 +1,8 @@
+	const size_t subsetId = subsetBase + get_global_id(0);
+    if (subsetId >= subsetBase + subsetSubCount || subsetId >= subsetCount) {
+        return;
+    } 
+    const size_t deformationId = deformationBase + get_global_id(1);
+    if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
+		return;
+	}

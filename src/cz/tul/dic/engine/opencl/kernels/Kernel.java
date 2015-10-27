@@ -90,8 +90,8 @@ public abstract class Kernel {
         try {
             CLProgram program = context.createProgram(
                     KernelSourcePreparator.prepareKernel(
-                            kernelName, subsetSize, deg, usesVectorization(),
-                            interpolation, usesImage(), usesLocalMemory())).build();
+                            kernelName, subsetSize, deg, is2D(), usesVectorization(),
+                            interpolation, usesImage(), usesLocalMemory(), usesMemoryCoalescing())).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(kernelName);
             clMem.add(kernelDIC);
@@ -262,6 +262,10 @@ public abstract class Kernel {
     }
 
     public boolean usesLocalMemory() {
+        return false;
+    }
+
+    public boolean is2D() {
         return false;
     }
 
