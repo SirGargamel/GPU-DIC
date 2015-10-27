@@ -94,8 +94,7 @@ public class DicMain extends Application {
         "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRCHE.config",
         "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRF.config",
         "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRFHE.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__CF.config", 
-    /////////////
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi__CF.config", /////////////
     //        "d:\\temp\\.smallSolverCompare\\6107544m.avi__BF.config",
     //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__BF.config",
     //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__BF.config",    
@@ -325,29 +324,18 @@ public class DicMain extends Application {
     }
 
     private static void performPreprocessingTest() throws ComputationException, IOException {
-        final String pathBase = "e:\\DIC_Preprocess\\";
+        final String pathBase = "d:\\Tul\\DIC_Preprocess\\";
 
         final List<String> configs = new ArrayList<>(20);
-        configs.add("6107544m.avi00015.bmp.config");
-        configs.add("6203652m.avi00014.bmp.config");
-        configs.add("7202845m.avi00004.bmp.config");
-        configs.add("9112502m.avi00016.bmp.config");
-        configs.add("Sample3 Reference.bmp.config");
-        configs.add("Sample3 Reference__0.00.bmp.config");
-        configs.add("Sample3 Reference__0.01.bmp.config");
-        configs.add("Sample3 Reference__0.05.bmp.config");
+//        configs.add("6107544m.avi00015.bmp.config");
+//        configs.add("6203652m.avi00014.bmp.config");
+//        configs.add("7202845m.avi00004.bmp.config");
+//        configs.add("9112502m.avi00016.bmp.config");
+//        configs.add("Sample3 Reference.bmp.config");
+//        configs.add("Sample4 Reference.bmp.config");
         configs.add("Sample7-Reference Image.bmp.config");
-        configs.add("Sample7-Reference Image__0.00.bmp.config");
-        configs.add("Sample7-Reference Image__0.01.bmp.config");
-        configs.add("Sample7-Reference Image__0.05.bmp.config");
-        configs.add("trs2_b8_00.bmp.config");
-        configs.add("trs2_b8_00__0.00.bmp.config");
-        configs.add("trs2_b8_00__0.01.bmp.config");
-        configs.add("trs2_b8_00__0.05.bmp.config");
-        configs.add("trxy_s2_00.bmp.config");
-        configs.add("trxy_s2_00__0.00.bmp.config");
-        configs.add("trxy_s2_00__0.01.bmp.config");
-        configs.add("trxy_s2_00__0.05.bmp.config");
+//        configs.add("trs2_b8_00.bmp.config");
+//        configs.add("trxy_s2_00.bmp.config");
 
         final List<String> filters = new ArrayList<>(7);
         filters.add("orig");
@@ -357,19 +345,20 @@ public class DicMain extends Application {
         filters.add("clahe");
         filters.add("lucyRichardson");
         filters.add("wiener");
+        filters.add("gaussian");
+        filters.add("binomial");
 
         final List<Solver> solvers = new ArrayList<>();
         solvers.add(Solver.COARSE_FINE);
         solvers.add(Solver.NEWTON_RHAPSON_CENTRAL);
-        solvers.add(Solver.NEWTON_RHAPSON_CENTRAL_HE);
-        solvers.add(Solver.NEWTON_RHAPSON_FORWARD);
+//        solvers.add(Solver.NEWTON_RHAPSON_CENTRAL_HE);
 
         TaskContainer task;
         for (String in : configs) {
             task = TaskContainer.initTaskContainer(new File(pathBase.concat(in)));
 
             for (String filter : filters) {
-                for (int size = 5; size <= 15; size += 2) {
+                for (int size = 5; size <= 15; size += 5) {
                     task.setParameter(TaskParameter.SUBSET_SIZE, size);
 
                     for (Solver solver : solvers) {
@@ -421,9 +410,9 @@ public class DicMain extends Application {
                 InputLoader.loadInput(newTask, newTask);
 
                 Engine.getInstance().computeTask(newTask);
+                Logger.info("Computed {0}", imagesA[i].getAbsolutePath());
             } catch (Exception ex) {
-                Logger.error(ex);
-                System.out.println(newTask);
+                Logger.error(ex, "{0}", newTask);
             }
         }
     }
