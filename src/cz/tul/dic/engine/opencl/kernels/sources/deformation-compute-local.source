@@ -1,0 +1,9 @@
+float2 deformedFacet[(2*%SS%+1)*(2*%SS%+1)];
+float2 coords, def; 
+for (int i = 0; i < subsetSize2; i++) {
+    coords = convert_float2(subsetLocal[i]);       
+
+    def = coords - subsetCenters[subsetId];
+     
+    deformedFacet[i] = (float2)(%DEF_X%, %DEF_Y%);
+}

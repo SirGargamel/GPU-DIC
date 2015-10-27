@@ -1,7 +1,3 @@
-inline int computeIndex(const float x, const float y, const int width) {
-    return (int)((y * width) + x);
-}
-
 %INT%
 
 /**
@@ -21,34 +17,14 @@ kernel void CL15D_pF_D(
     const size_t deformationId = deformationBase + get_global_id(0);    
     if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
         return;
-    }        
-    float deformation[%DEF_D%];
-    %DEF_C%
-    // index computation
-    const int subsetSize2 = (2*subsetSize + 1) * (2*subsetSize + 1);
-    const int subsetCoordCount = subsetSize2 * 2;
-    const int baseIndexFacet = subsetId * subsetCoordCount;         
-    const int baseIndexFacetCenter = subsetId * 2; 
-    const int baseIndexDeformation = deformationId * 6;
-    // deform subset    
-    float deformedFacet[(2*-1+1)*(2*-1+1)*2];    
-    int index, i2, x, y;
-    float dx, dy;
-    for (int i = 0; i < subsetSize2; i++) {
-        i2 = i*2;
-        index = baseIndexFacet + i2;        
-        
-        x = subsets[index];
-        y = subsets[index+1];                
-
-        dx = x - subsetCenters[baseIndexFacetCenter];
-        dy = y - subsetCenters[baseIndexFacetCenter + 1]; 
-        
-        deformedFacet[i2] = %DEF_X%;
-        deformedFacet[i2 + 1] = %DEF_Y%;
     }
-    
+    // prepare coeffs
+    float deformation[%DEF_D%];
+    %DEF_C%    
+    // deform subset
+    %DEF%
+    // compute correlation
     %CORR%
-    
+    // compute delta and store result
     %C&S%
 }

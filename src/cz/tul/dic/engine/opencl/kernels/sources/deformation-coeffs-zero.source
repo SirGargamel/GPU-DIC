@@ -1,0 +1,10 @@
+const int limitsBase = subsetId * 6;
+const int countsBase = subsetId * 3;
+if (deformationId >= deformationCounts[countsBase + 2]) { return; }
+int counter = deformationId;
+deformation[0] = counter % deformationCounts[countsBase + 0];
+counter = counter / deformationCounts[countsBase + 0];
+deformation[1] = counter % deformationCounts[countsBase + 1];
+counter = counter / deformationCounts[countsBase + 1];
+deformation[0] = deformationLimits[limitsBase + 0] + deformation[0] * deformationLimits[limitsBase + 2];
+deformation[1] = deformationLimits[limitsBase + 3] + deformation[1] * deformationLimits[limitsBase + 5];

@@ -1,5 +1,3 @@
-constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
-
 %INT%
 
 /**
@@ -27,7 +25,7 @@ kernel void CL1D_I_V_LL_D(
     const size_t groupSize = get_local_size(0);        
     const int subsetSize2 = (2*subsetSize + 1) * (2*subsetSize + 1);    
     // load subset to local memory   
-    local int2 subsetLocal[(2*-1+1)*(2*-1+1)];
+    local int2 subsetLocal[(2*%SS%+1)*(2*%SS%+1)];
     const int baseIndexFacet = subsetId * subsetSize2;        
     if (groupSize >= subsetSize2) {
         if (localId < subsetSize2) {
@@ -51,21 +49,14 @@ kernel void CL1D_I_V_LL_D(
     const int deformationId = groupSubId * groupSize + localId + deformationBase;
     if (deformationId >= deformationBase + deformationSubCount || deformationId >= deformationCount) {
         return;
-    }   
-    float deformation[%DEF_D%];
-    %DEF_C%
-    // deform subset    
-    float2 deformedFacet[(2*-1+1)*(2*-1+1)];
-    float2 coords, def; 
-    for (int i = 0; i < subsetSize2; i++) {
-        coords = convert_float2(subsetLocal[i]);       
-
-        def = coords - subsetCenters[subsetId];
-        
-        deformedFacet[i] = (float2)(%DEF_X%, %DEF_Y%);
     }
-    
+    // prepare coeffs
+    float deformation[%DEF_D%];
+    %DEF_C%    
+    // deform subset
+    %DEF%
+    // compute correlation
     %CORR%
-    
+    // compute delta and store result
     %C&S%
 }

@@ -88,7 +88,10 @@ public abstract class Kernel {
 
     public void prepareKernel(final int subsetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
         try {
-            CLProgram program = context.createProgram(KernelSourcePreparator.prepareKernel(kernelName, subsetSize, deg, usesVectorization(), interpolation, usesImage())).build();
+            CLProgram program = context.createProgram(
+                    KernelSourcePreparator.prepareKernel(
+                            kernelName, subsetSize, deg, usesVectorization(),
+                            interpolation, usesImage(), usesLocalMemory())).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(kernelName);
             clMem.add(kernelDIC);
@@ -133,7 +136,7 @@ public abstract class Kernel {
         final List<CorrelationResult> result;
         try {
             memManager.assignData(task, this);
-            final OpenCLDataPackage clData = memManager.getData();            
+            final OpenCLDataPackage clData = memManager.getData();
             final long maxDeformationCount = memManager.getMaxDeformationCount();
 
             runKernel(clData,
@@ -255,6 +258,10 @@ public abstract class Kernel {
     }
 
     public boolean usesImage() {
+        return false;
+    }
+
+    public boolean usesLocalMemory() {
         return false;
     }
 

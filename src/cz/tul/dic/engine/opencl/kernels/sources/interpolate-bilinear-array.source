@@ -1,3 +1,7 @@
+inline int computeIndex(const float x, const float y, const int width) {
+    return (int)((y * width) + x);
+}
+
 inline int interpolate(const float x, const float y, global read_only char * image, const int imageWidth) {
     const float ix = floor(x);
     const float dx = x - ix;

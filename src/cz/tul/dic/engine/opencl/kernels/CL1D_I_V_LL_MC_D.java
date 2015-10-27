@@ -119,6 +119,11 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     public boolean usesImage() {
         return true;
     }
+    
+    @Override
+    public boolean usesLocalMemory() {
+        return true;
+    }
 
     @Override
     public void stopComputation() {

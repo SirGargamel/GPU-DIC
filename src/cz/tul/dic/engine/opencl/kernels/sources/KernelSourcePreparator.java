@@ -14,7 +14,6 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.pmw.tinylog.Logger;
 
@@ -27,8 +26,9 @@ public class KernelSourcePreparator {
     public static final String KERNEL_EXTENSION = ".cl";
     private static final String REPLACE_CORRELATION = "%CORR%";
     private static final String REPLACE_EXTENSION = ".source";
-    private static final String REPLACE_SUBSET_SIZE = "-1";
+    private static final String REPLACE_SUBSET_SIZE = "%SS%";
     private static final String REPLACE_DELTA = "%C&S%";
+    private static final String REPLACE_DEFORMATION = "%DEF%";
     private static final String REPLACE_DEFORMATION_X = "%DEF_X%";
     private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";
     private static final String REPLACE_DEFORMATION_DEGREE = "%DEF_D%";
@@ -47,16 +47,17 @@ public class KernelSourcePreparator {
     public static String prepareKernel(
             final String kernelName,
             final int subsetSize, final DeformationDegree deg,
-            final boolean usesVectorization, final Interpolation interpolation, final boolean usesImage) throws ComputationException {
+            final boolean usesVectorization, final Interpolation interpolation,
+            final boolean usesImage, final boolean usesLocalMemory) throws ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         try {
             kp.loadKernel();
             kp.prepareCorrelation(usesVectorization);
-            kp.prepareDeltaAndStore();
-            kp.prepareSubsetSize(subsetSize);
-            kp.prepareDeformations(deg, usesVectorization);
+            kp.prepareDeltaAndStore();            
+            kp.prepareDeformations(deg, usesVectorization, usesLocalMemory);
             kp.prepareInterpolation(interpolation, usesImage);
+            kp.prepareSubsetSize(subsetSize);
             return kp.kernel;
         } catch (IOException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
@@ -78,7 +79,33 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(REPLACE_SUBSET_SIZE, Integer.toString(subsetSize));
     }
 
-    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization) {
+    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization, final boolean usesLocalMemory) {        
+        final StringBuilder sb = new StringBuilder();
+        String resourceName = "deformation-coeffs-";
+        switch (deg) {
+            case ZERO:
+                resourceName = resourceName.concat("zero");
+                break;
+            case FIRST:
+                resourceName = resourceName.concat("first");
+                break;
+            case SECOND:
+                resourceName = resourceName.concat("second");
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported degree of deformation - " + deg);
+        }        
+        sb.append(loadKernelResource(resourceName));
+        kernel = kernel.replaceAll(REPLACE_DEFORMATION_COMPUTATION, sb.toString());        
+
+        resourceName = "deformation-compute-";
+        if (usesLocalMemory) {
+            resourceName = resourceName.concat("local");
+        } else {
+            resourceName = resourceName.concat("global");
+        }        
+        kernel = kernel.replaceAll(REPLACE_DEFORMATION, loadKernelResource(resourceName));
+        
         final String x, y, dx, dy;
         if (usesVectorization) {
             x = "coords.x";
@@ -91,62 +118,26 @@ public class KernelSourcePreparator {
             dx = "dx";
             dy = "dy";
         }
-
-        final StringBuilder sb = new StringBuilder();
-        // deformation generation                
-        final int defCoeffCount = DeformationUtils.getDeformationCoeffCount(deg);
-        sb.append("const int limitsBase = subsetId * ");
-        sb.append(defCoeffCount * 3);
-        sb.append(";\n");
-        sb.append("const int countsBase = subsetId * ");
-        sb.append(defCoeffCount + 1);
-        sb.append(";\n");
-        sb.append("if (deformationId >= deformationCounts[countsBase + ");
-        sb.append(defCoeffCount);
-        sb.append("]) { return; }\n");
-        sb.append("int counter = deformationId;\n");
-        for (int i = 0; i < defCoeffCount; i++) {
-            sb.append(TEXT_DEFORMATION_ARRAY);
-            sb.append(i);
-            sb.append("] = counter % deformationCounts[countsBase + ");
-            sb.append(i);
-            sb.append("];\n");
-            sb.append("counter = counter / deformationCounts[countsBase + ");
-            sb.append(i);
-            sb.append("];\n");
-        }
-        for (int i = 0; i < defCoeffCount; i++) {
-            sb.append(TEXT_DEFORMATION_ARRAY);
-            sb.append(i);
-            sb.append("] = deformationLimits[limitsBase + ");
-            sb.append(i * 3);
-            sb.append("] + deformation[");
-            sb.append(i);
-            sb.append("] * deformationLimits[limitsBase + ");
-            sb.append(i * 3 + 2);
-            sb.append("];\n");
-        }
-        kernel = kernel.replaceAll(REPLACE_DEFORMATION_COMPUTATION, sb.toString());
-
         switch (deg) {
             case ZERO:
-                appendZeroOrderDeformation(sb, x, y);
+                appendZeroOrderDeformation(x, y);
                 break;
             case FIRST:
-                appendFirstOrderDeformation(sb, x, y, dx, dy);
+                appendFirstOrderDeformation(x, y, dx, dy);
                 break;
             case SECOND:
-                appendSecondOrderDeformation(sb, x, y, dx, dy);
+                appendSecondOrderDeformation(x, y, dx, dy);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported degree of deformation - " + deg);
         }
+        
         kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEGREE, Integer.toString(DeformationUtils.getDeformationCoeffCount(deg)));
     }
 
-    private void appendZeroOrderDeformation(final StringBuilder sb, final String x, final String y) {
+    private void appendZeroOrderDeformation(final String x, final String y) {
         // coeff computation
-        sb.setLength(0);
+        final StringBuilder sb = new StringBuilder();
         sb.append(x);
         sb.append(PLUS);
         sb.append(TEXT_DEFORMATION_ARRAY)
@@ -163,9 +154,9 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
     }
 
-    private void appendFirstOrderDeformation(final StringBuilder sb, final String x, final String y, final String dx, final String dy) {
+    private void appendFirstOrderDeformation(final String x, final String y, final String dx, final String dy) {
         // coeff computation
-        sb.setLength(0);
+        final StringBuilder sb = new StringBuilder();
         sb.append(x);
         sb.append(PLUS);
         sb.append(TEXT_DEFORMATION_ARRAY)
@@ -206,9 +197,9 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
     }
 
-    private void appendSecondOrderDeformation(final StringBuilder sb, final String x, final String y, final String dx, final String dy) {
+    private void appendSecondOrderDeformation(final String x, final String y, final String dx, final String dy) {
         // coeff computation
-        sb.setLength(0);
+        final StringBuilder sb = new StringBuilder();
         sb.append(x);
         sb.append(PLUS);
         sb.append(TEXT_DEFORMATION_ARRAY)
@@ -313,18 +304,19 @@ public class KernelSourcePreparator {
             resourceName = resourceName.concat("-image");
         } else {
             resourceName = resourceName.concat("-array");
-        }
-        resourceName = resourceName.concat(REPLACE_EXTENSION);
+        }        
 
         kernel = kernel.replaceAll(
                 REPLACE_INTERPOLATION,
-                loadKernelResource(KernelSourcePreparator.class.getResourceAsStream(resourceName)));
-
+                loadKernelResource(resourceName));
     }
 
-    private static String loadKernelResource(final InputStream in) {
+    private static String loadKernelResource(String resourceName) {
+        if (!resourceName.endsWith(REPLACE_EXTENSION)) {
+            resourceName = resourceName.concat(REPLACE_EXTENSION);
+        }
         final StringBuilder sb = new StringBuilder();
-        try (final BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(KernelSourcePreparator.class.getResourceAsStream(resourceName)))) {
             br.lines().forEachOrdered((String t) -> {
                 sb.append(t);
                 sb.append("\n");
@@ -340,18 +332,17 @@ public class KernelSourcePreparator {
         if (usesVectorization) {
             resourceName = resourceName.concat("vec");
         } else {
-            resourceName = resourceName.concat("2D");
-        }
-        resourceName = resourceName.concat(REPLACE_EXTENSION);
+            resourceName = resourceName.concat("noVec");
+        }        
 
         kernel = kernel.replaceAll(
                 REPLACE_CORRELATION,
-                loadKernelResource(KernelSourcePreparator.class.getResourceAsStream(resourceName)));
+                loadKernelResource(resourceName));
     }
 
     private void prepareDeltaAndStore() {
         kernel = kernel.replaceAll(
                 REPLACE_DELTA,
-                loadKernelResource(KernelSourcePreparator.class.getResourceAsStream("computeDeltaAndStore.source")));
+                loadKernelResource("computeDeltaAndStore.source"));
     }
 }
