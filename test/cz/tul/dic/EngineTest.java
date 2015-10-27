@@ -144,6 +144,7 @@ public class EngineTest {
         tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, taskSplit);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, fgm);
         tc.setParameter(TaskParameter.SOLVER, solver);
+        tc.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
 
         return tc;
     }
@@ -199,6 +200,7 @@ public class EngineTest {
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.SUBSET_SIZE, 5);
         tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
+        tc.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
 
         return tc;
     }

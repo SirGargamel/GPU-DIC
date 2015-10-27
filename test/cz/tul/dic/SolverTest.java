@@ -115,6 +115,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
         task.setParameter(TaskParameter.SOLVER, solver);
+        task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
 
         Engine.getInstance().computeTask(task);
 
