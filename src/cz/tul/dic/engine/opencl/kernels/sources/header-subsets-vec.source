@@ -1,0 +1,1 @@
+	global read_only int2 * subsets, global read_only float2 * subsetCenters,

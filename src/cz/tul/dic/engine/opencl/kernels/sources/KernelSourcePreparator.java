@@ -23,8 +23,7 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelSourcePreparator {
 
-    public static final String KERNEL_EXTENSION = ".cl";
-    private static final String REPLACE_INIT = "%INIT%";
+    private static final String KERNEL_BASE_FILE = "kernel-base";
     private static final String REPLACE_CORRELATION = "%CORR%";
     private static final String REPLACE_EXTENSION = ".source";
     private static final String REPLACE_SUBSET_SIZE = "%SS%";
@@ -34,6 +33,8 @@ public class KernelSourcePreparator {
     private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";
     private static final String REPLACE_DEFORMATION_DEGREE = "%DEF_D%";
     private static final String REPLACE_DEFORMATION_COMPUTATION = "%DEF_C%";
+    private static final String REPLACE_HEADER = "%HEAD%";
+    private static final String REPLACE_INIT = "%INIT%";
     private static final String REPLACE_INTERPOLATION = "%INT%";
     private static final String TEXT_DEFORMATION_ARRAY = "deformation[";
     private static final String PLUS = " + ";
@@ -49,16 +50,18 @@ public class KernelSourcePreparator {
             final String kernelName,
             final int subsetSize, final DeformationDegree deg,
             final boolean is2D, final boolean usesVectorization, final Interpolation interpolation,
-            final boolean usesImage, final boolean usesLocalMemory, final boolean usesMemoryCoalescing) throws ComputationException {
+            final boolean usesImage, final boolean usesLocalMemory, final boolean usesMemoryCoalescing,
+            final boolean subsetsGroupped) throws ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
 
         try {
             kp.loadKernel();
+            kp.prepareInterpolation(interpolation, usesImage);
+            kp.prepareFunctionHeader(usesImage, usesVectorization, subsetsGroupped);
             kp.prepareInit(is2D, usesLocalMemory, usesLocalMemory);
             kp.prepareCorrelation(usesVectorization);
             kp.prepareDeltaAndStore();
             kp.prepareDeformations(deg, usesVectorization, usesLocalMemory);
-            kp.prepareInterpolation(interpolation, usesImage);
             kp.prepareSubsetSize(subsetSize);
             return kp.kernel;
         } catch (IOException ex) {
@@ -67,14 +70,55 @@ public class KernelSourcePreparator {
     }
 
     private void loadKernel() throws IOException {
-        try (BufferedReader bin = new BufferedReader(new InputStreamReader(Kernel.class.getResourceAsStream(kernelName.concat(KERNEL_EXTENSION))))) {
-            final StringBuilder sb = new StringBuilder();
-            while (bin.ready()) {
-                sb.append(bin.readLine());
-                sb.append("\n");
-            }
-            kernel = sb.toString();
+        kernel = loadKernelResource(KERNEL_BASE_FILE);
+    }
+
+    private void prepareInterpolation(final Interpolation interpolation, final boolean usesImage) {
+        String resourceName = "interpolate-";
+        switch (interpolation) {
+            case BILINEAR:
+                resourceName = resourceName.concat("bilinear");
+                break;
+            case BICUBIC:
+                resourceName = resourceName.concat("bicubic");
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported type of interpolation - " + interpolation);
         }
+        if (usesImage) {
+            resourceName = resourceName.concat("-image");
+        } else {
+            resourceName = resourceName.concat("-array");
+        }
+
+        kernel = kernel.replaceAll(
+                REPLACE_INTERPOLATION,
+                loadKernelResource(resourceName));
+    }
+
+    private void prepareFunctionHeader(final boolean usesImage, final boolean usesVectorization, final boolean subsetsGroupped) {
+        final StringBuilder sb = new StringBuilder();
+        String resourceName = "header-image-";
+        if (usesImage) {
+            resourceName = resourceName.concat("2Dt");
+        } else {
+            resourceName = resourceName.concat("array");
+        }
+        sb.append(loadKernelResource(resourceName));
+        resourceName = "header-subsets";
+        if (usesVectorization) {
+            resourceName = resourceName.concat("-vec");
+        }
+        sb.append(loadKernelResource(resourceName));
+        resourceName = "header-end";
+        sb.append(loadKernelResource(resourceName));
+        if (subsetsGroupped) {
+            resourceName = resourceName.concat("-subsets-groupped");
+        } else {
+            resourceName = resourceName.concat("-subsets-alone");
+        }
+        sb.append(loadKernelResource(resourceName));
+        kernel = kernel.replaceAll(REPLACE_HEADER, sb.toString());
     }
 
     private void prepareInit(final boolean is2D, final boolean usesLocalMemory, final boolean usesMemoryCoalescing) {
@@ -302,29 +346,6 @@ public class KernelSourcePreparator {
         sb.append(MUL);
         sb.append(dy);
         kernel = kernel.replaceFirst(REPLACE_DEFORMATION_Y, sb.toString());
-    }
-
-    private void prepareInterpolation(final Interpolation interpolation, final boolean usesImage) {
-        String resourceName = "interpolate-";
-        switch (interpolation) {
-            case BILINEAR:
-                resourceName = resourceName.concat("bilinear");
-                break;
-            case BICUBIC:
-                resourceName = resourceName.concat("bicubic");
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported type of interpolation - " + interpolation);
-        }
-        if (usesImage) {
-            resourceName = resourceName.concat("-image");
-        } else {
-            resourceName = resourceName.concat("-array");
-        }
-
-        kernel = kernel.replaceAll(
-                REPLACE_INTERPOLATION,
-                loadKernelResource(resourceName));
     }
 
     private static String loadKernelResource(String resourceName) {

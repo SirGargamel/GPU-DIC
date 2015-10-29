@@ -12,9 +12,9 @@ import cz.tul.dic.engine.opencl.WorkSizeManager;
 
 public class CL15D_pF_D extends Kernel {
 
-    private static final int ARGUMENT_INDEX_F_INDEX = 11;
-    private static final int ARGUMENT_INDEX_D_COUNT = 12;
-    private static final int ARGUMENT_INDEX_D_BASE = 13;
+    private static final int ARGUMENT_INDEX_D_COUNT = 11;
+    private static final int ARGUMENT_INDEX_D_BASE = 12;
+    private static final int ARGUMENT_INDEX_S_INDEX = 13;
     private static final int LWS0_BASE = 32;
     private final WorkSizeManager wsm;
     private boolean stop;
@@ -39,7 +39,7 @@ public class CL15D_pF_D extends Kernel {
                 .putArg(deformationCount)
                 .putArg(subsetSize)
                 .putArg(subsetCount)
-                .putArg(0)
+                .putArg(0L)
                 .putArg(0L)
                 .putArg(0);
         kernelDIC.rewind();
@@ -47,15 +47,15 @@ public class CL15D_pF_D extends Kernel {
         wsm.setMaxSubsetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        long globalWorkSize, deformationSubCount;
+        long globalWorkSize, deformationSubCount, currentBaseDeformation;
         long time;
         CLEvent event;
-        int currentBaseSubset = 0, currentBaseDeformation;
+        int currentBaseSubset = 0;
         int counter = 0;
         CLEventList eventList = new CLEventList(subsetCount);
         while (currentBaseSubset < subsetCount) {
             currentBaseDeformation = 0;
-            kernelDIC.setArg(ARGUMENT_INDEX_F_INDEX, currentBaseSubset);
+            kernelDIC.setArg(ARGUMENT_INDEX_S_INDEX, currentBaseSubset);
 
             while (currentBaseDeformation < deformationCount) {
                 if (counter == eventList.capacity()) {

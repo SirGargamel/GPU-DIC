@@ -12,11 +12,11 @@ import cz.tul.dic.engine.opencl.WorkSizeManager;
 
 public class CL1D_I_V_LL_MC_D extends Kernel {
 
-    private static final int ARGUMENT_INDEX_G_COUNT = 11;
-    private static final int ARGUMENT_INDEX_F_COUNT = 12;
-    private static final int ARGUMENT_INDEX_F_BASE = 13;
-    private static final int ARGUMENT_INDEX_D_COUNT = 14;
-    private static final int ARGUMENT_INDEX_D_BASE = 15;
+    private static final int ARGUMENT_INDEX_D_COUNT = 11;
+    private static final int ARGUMENT_INDEX_D_BASE = 12;
+    private static final int ARGUMENT_INDEX_G_COUNT = 13;
+    private static final int ARGUMENT_INDEX_S_COUNT = 14;
+    private static final int ARGUMENT_INDEX_S_BASE = 15;
     private static final int LWS0_BASE = 32;
     private final WorkSizeManager wsm;
     private boolean stop;
@@ -80,8 +80,8 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
                 }
 
                 kernelDIC.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerSubset);
-                kernelDIC.setArg(ARGUMENT_INDEX_F_COUNT, subsetSubCount);
-                kernelDIC.setArg(ARGUMENT_INDEX_F_BASE, currentBaseSubset);
+                kernelDIC.setArg(ARGUMENT_INDEX_S_COUNT, subsetSubCount);
+                kernelDIC.setArg(ARGUMENT_INDEX_S_BASE, currentBaseSubset);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
                 queue.put1DRangeKernel(kernelDIC, 0, subsetGlobalWorkSize, lws0, eventList);
@@ -119,9 +119,14 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     public boolean usesImage() {
         return true;
     }
-    
+
     @Override
     public boolean usesLocalMemory() {
+        return true;
+    }
+    
+    @Override
+    public boolean subsetsGroupped() {
         return true;
     }
 

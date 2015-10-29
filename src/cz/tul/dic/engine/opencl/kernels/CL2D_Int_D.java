@@ -12,11 +12,11 @@ import cz.tul.dic.engine.opencl.WorkSizeManager;
 
 public class CL2D_Int_D extends Kernel {
 
-    private static final int ARGUMENT_INDEX_G_COUNT = 11;
-    private static final int ARGUMENT_INDEX_F_COUNT = 12;
-    private static final int ARGUMENT_INDEX_F_BASE = 13;
-    private static final int ARGUMENT_INDEX_D_COUNT = 14;
-    private static final int ARGUMENT_INDEX_D_BASE = 15;
+    private static final int ARGUMENT_INDEX_D_COUNT = 11;
+    private static final int ARGUMENT_INDEX_D_BASE = 12;
+    private static final int ARGUMENT_INDEX_G_COUNT = 13;
+    private static final int ARGUMENT_INDEX_S_COUNT = 14;
+    private static final int ARGUMENT_INDEX_S_BASE = 15;    
     private static final int LWS0_BASE = 1;
     private static final int LWS1_BASE = 64;
     private final WorkSizeManager wsm;
@@ -85,8 +85,8 @@ public class CL2D_Int_D extends Kernel {
                 }
 
                 kernelDIC.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerSubset);
-                kernelDIC.setArg(ARGUMENT_INDEX_F_COUNT, subsetSubCount);
-                kernelDIC.setArg(ARGUMENT_INDEX_F_BASE, currentBaseSubset);
+                kernelDIC.setArg(ARGUMENT_INDEX_S_COUNT, subsetSubCount);
+                kernelDIC.setArg(ARGUMENT_INDEX_S_BASE, currentBaseSubset);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
                 queue.put2DRangeKernel(kernelDIC, 0, 0, subsetGlobalWorkSize, deformationGlobalWorkSize, lws0, lws1, eventList);
@@ -116,6 +116,11 @@ public class CL2D_Int_D extends Kernel {
     
     @Override
     public boolean is2D() {
+        return true;
+    }
+    
+    @Override
+    public boolean subsetsGroupped() {
         return true;
     }
 

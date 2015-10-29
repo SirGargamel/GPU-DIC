@@ -1,0 +1,19 @@
+%INT%
+
+/**
+ * @author Petr Jecmen, Technical University of Liberec
+ */
+kernel void DIC(
+    %HEAD%)
+{
+    // id checks, memory init    
+    %INIT%        
+    // prepare coeffs    
+    %DEF_C%    
+    // deform subset
+    %DEF%
+    // compute correlation
+    %CORR%
+    // compute delta and store result
+    %C&S%
+}

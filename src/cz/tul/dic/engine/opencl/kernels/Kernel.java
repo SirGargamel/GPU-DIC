@@ -46,8 +46,10 @@ import org.pmw.tinylog.Logger;
 public abstract class Kernel {
 
     private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
+    private static final String KERNEL_EXTENSION = ".cl";
     private static final String KERNEL_REDUCE = "reduce";
     private static final String KERNEL_FIND_POS = "findPos";
+    private static final String KERNEL_DIC_NAME = "DIC";
     private static final List<IGPUResultsReceiver> resultListeners;
     protected final CLContext context;
     protected final CLCommandQueue queue;
@@ -91,12 +93,12 @@ public abstract class Kernel {
             CLProgram program = context.createProgram(
                     KernelSourcePreparator.prepareKernel(
                             kernelName, subsetSize, deg, is2D(), usesVectorization(),
-                            interpolation, usesImage(), usesLocalMemory(), usesMemoryCoalescing())).build();
+                            interpolation, usesImage(), usesLocalMemory(), usesMemoryCoalescing(), subsetsGroupped())).build();
             clMem.add(program);
-            kernelDIC = program.createCLKernel(kernelName);
+            kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
             clMem.add(kernelDIC);
 
-            try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(KERNEL_REDUCE.concat(KernelSourcePreparator.KERNEL_EXTENSION))))) {
+            try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(KERNEL_REDUCE.concat(KERNEL_EXTENSION))))) {
                 final StringBuilder sb = new StringBuilder();
                 while (bin.ready()) {
                     sb.append(bin.readLine());
@@ -108,7 +110,7 @@ public abstract class Kernel {
                 clMem.add(kernelReduce);
             }
 
-            try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(KERNEL_FIND_POS.concat(KernelSourcePreparator.KERNEL_EXTENSION))))) {
+            try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(KERNEL_FIND_POS.concat(KERNEL_EXTENSION))))) {
                 final StringBuilder sb = new StringBuilder();
                 while (bin.ready()) {
                     sb.append(bin.readLine());
@@ -266,6 +268,10 @@ public abstract class Kernel {
     }
 
     public boolean is2D() {
+        return false;
+    }
+    
+    public boolean subsetsGroupped() {
         return false;
     }
 
