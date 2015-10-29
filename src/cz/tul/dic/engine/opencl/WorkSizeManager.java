@@ -42,10 +42,13 @@ public final class WorkSizeManager {
     private static final double GROWTH_FACTOR_B = 1.25;
     private static final KernelType BEST_KERNEL;
     private static final Map<KernelType, Map<Long, Map<Long, Long>>> TIME_DATA;
+    private static boolean inited;
     private final KernelType kernel;
     private long workSizeS, workSizeD, maxF, maxD;
 
     static {
+        inited = false;
+        
         final String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
             MAX_TIME = MAX_TIME_WIN * MAX_TIME_BASE;
@@ -103,6 +106,8 @@ public final class WorkSizeManager {
         }
         BEST_KERNEL = bestKernel;
         Logger.debug("{0} selected as best kernel.", BEST_KERNEL);
+        
+        inited = true;
     }
 
     public WorkSizeManager(final KernelType kernel) {
@@ -112,6 +117,10 @@ public final class WorkSizeManager {
 
     public static KernelType getBestKernel() {
         return BEST_KERNEL;
+    }
+
+    public static boolean isInited() {
+        return inited;
     }
 
     public long getSubsetCount() {

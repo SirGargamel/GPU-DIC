@@ -12,8 +12,8 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import java.nio.ByteBuffer;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
@@ -62,6 +62,11 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
             Logger.debug(e);
             throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
         }
+    }
+
+    @Override
+    public void assignTask(TaskContainer task) {
+        // do nothing, data are copied right before computation
     }
 
 }

@@ -26,6 +26,7 @@ import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
+import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -338,6 +339,8 @@ public class EngineTest {
         tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
 
         TaskContainerUtils.checkTaskValidity(tc);
+        
+        AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
@@ -391,6 +394,8 @@ public class EngineTest {
         tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
 
         TaskContainerUtils.checkTaskValidity(tc);
+        
+        AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));

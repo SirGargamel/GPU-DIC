@@ -20,6 +20,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.engine.opencl.kernels.OpenCLDataPackage;
@@ -54,7 +55,7 @@ public abstract class AbstractOpenCLMemoryManager {
 
     static {
         DeviceManager.clearMemory();
-        INSTANCE = new StaticMemoryManager();
+        INSTANCE = new PrefetchingMemoryManager();
         IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
     }
 
@@ -75,6 +76,8 @@ public abstract class AbstractOpenCLMemoryManager {
     }
 
     public abstract void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException;
+
+    public abstract void assignTask(final TaskContainer task);
 
     public void unlockData() {
         lock.unlock();
