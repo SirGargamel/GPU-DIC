@@ -79,7 +79,12 @@ public abstract class AbstractTaskSolver extends Observable {
 
         this.subsetSize = subsetSize;
 
+        long time = System.nanoTime();
+
         final List<CorrelationResult> result = solve(kernel, fullTask);
+
+        time = System.nanoTime() - time;
+        Logger.trace("Task [{0}] computed in {1}ms using {2}.", fullTask, time / 1_000_000, getClass().getSimpleName());
 
         kernel.clearMemory();
 

@@ -7,6 +7,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import java.util.List;
 
 /**
@@ -41,6 +42,40 @@ public class FullTask {
 
     public List<double[]> getDeformationLimits() {
         return deformationLimits;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(subsets.size());
+        sb.append(" subsets; ");
+
+        final List<long[]> counts = DeformationUtils.generateDeformationCounts(deformationLimits);
+        long[] arr = counts.get(0);
+        long count = arr[arr.length - 1];
+        boolean equal = true;
+        for (int i = 1; i < counts.size(); i++) {
+            arr = counts.get(i);
+            if (arr[arr.length - 1] != count) {
+                equal = false;
+                break;
+            }
+        }
+        if (equal) {
+            sb.append(count);
+            sb.append(" deformations each");
+        } else {
+            sb.append("[");
+            for (long[] l : counts) {
+                sb.append(l[l.length - 1]);
+                sb.append(",");
+            }
+            sb.setLength(sb.length() - ",".length());
+            sb.append("] deformations");
+        }
+
+        return sb.toString();
     }
 
 }
