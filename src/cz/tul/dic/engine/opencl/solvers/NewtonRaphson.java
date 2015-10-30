@@ -44,9 +44,9 @@ import org.pmw.tinylog.Logger;
 public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPUResultsReceiver {
 
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
-    private static final int LIMITS_ROUNDS = 20;
-    private static final double LIMIT_MIN_GROWTH = 0.001;
-    private static final double LIMIT_DONE = 1 - LIMIT_MIN_GROWTH;
+    private static final int LIMITS_ITERATIONS = 10;
+    private static final double LIMIT_MIN_IMPROVEMENT = 0.01;
+    private static final double LIMIT_Q_DONE = 1 - LIMIT_MIN_IMPROVEMENT;
     private static final double STEP_INITIAL = 0.1;
     private static final double STEP_FIRST = 0.001;
     private static final double STEP_SECOND = 0.0001;
@@ -85,7 +85,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         final List<double[]> localLimits = new ArrayList<>(limits.values());
         computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
 
-        for (int i = 0; i < LIMITS_ROUNDS; i++) {
+        for (int i = 0; i < LIMITS_ITERATIONS; i++) {
             makeStep(subsetsToCompute, defDegree);
 
             Logger.debug("Results for round {0}:", i);
@@ -213,10 +213,10 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
     private void extractResults(final List<AbstractSubset> subsetsToCompute, final int coeffCount) {
         AbstractSubset as;
-        double[] currentLimits, newLimits;
+        double[] currentLimits;
         CorrelationResult currentResult, newResult;
         int resultIndex;
-        double newCorrelationValue, improvement;
+        double newCorrelationValue;
         long[] counts;
 
         int baseIndex = 0;
@@ -232,43 +232,17 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
             newCorrelationValue = gpuData[resultIndex];
             newResult = new CorrelationResult(newCorrelationValue, extractSolutionFromLimits(currentLimits));
-            improvement = computeImprovement(currentResult.getQuality(), newCorrelationValue);
             sb.append(as)
                     .append(" -  from ")
                     .append(currentResult)
                     .append(" to ")
                     .append(newResult);
-            if (improvement > LIMIT_MIN_GROWTH) {
-                results.put(as, newResult);
-                if (newCorrelationValue >= LIMIT_DONE) {
-                    it.remove();
-                    sb.append(", stop - quality good enough");
-                }
-            } else {
-                if (currentLimits[2] > STEP_SECOND) {
-                    newLimits = generateLimits(currentResult.getDeformation(), coeffCount, STEP_SECOND);
-                    limits.put(as, newLimits);
-                    sb.append(", increasing precision to ")
-                            .append(STEP_SECOND);
-                } else {
-                    it.remove();
-                    sb.append(", stop - low quality increment");
-                }
-            }
-
+            checkStep(as, currentResult, newResult, it, sb, currentLimits, coeffCount);
             sb.append("; ");
             baseIndex += counts[coeffCount];
         }
 
         Logger.debug(sb);
-    }
-
-    protected static double[] extractSolutionFromLimits(final double[] limits) {
-        final double[] result = new double[limits.length / 3];
-        for (int i = 0; i < limits.length / 3; i++) {
-            result[i] = (limits[i * 3] + limits[i * 3 + 1]) / 2.0;
-        }
-        return result;
     }
 
     protected static int generateIndex(final long[] counts, final int[] indices) {
@@ -280,16 +254,58 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         return result;
     }
 
-    private static double computeImprovement(final double oldResult, final double newResult) {
-        return newResult - oldResult;
-    }
-
     protected static int[] prepareIndices(final long[] counts) {
         final int[] indices = new int[counts.length - 1];
         for (int i = 0; i < indices.length; i++) {
             indices[i] = (int) (counts[i] / 2);
         }
         return indices;
+    }
+
+    protected static double[] extractSolutionFromLimits(final double[] limits) {
+        final double[] result = new double[limits.length / 3];
+        for (int i = 0; i < limits.length / 3; i++) {
+            result[i] = (limits[i * 3] + limits[i * 3 + 1]) / 2.0;
+        }
+        return result;
+    }
+
+    private void checkStep(
+            final AbstractSubset as,
+            final CorrelationResult currentResult, final CorrelationResult newResult,
+            final Iterator<AbstractSubset> it, final StringBuilder sb,
+            final double[] currentLimits, final int coeffCount) {
+        if (newResult.getQuality() >= LIMIT_Q_DONE) {
+            results.put(as, newResult);
+            it.remove();
+            sb.append(", stop - quality good enough");
+        } else {
+            final double improvement = computeImprovement(currentResult.getDeformation(), newResult.getDeformation());
+            if (improvement > LIMIT_MIN_IMPROVEMENT) {
+                results.put(as, newResult);
+            } else if (currentLimits[2] > STEP_SECOND) {
+                double[] newLimits = generateLimits(currentResult.getDeformation(), coeffCount, STEP_SECOND);
+                limits.put(as, newLimits);
+                sb.append(", increasing precision to ")
+                        .append(STEP_SECOND);
+            } else {
+                it.remove();
+                sb.append(", stop - low quality increment");
+            }
+        }
+    }    
+
+    private static double computeImprovement(final double[] oldResult, final double[] newResult) {
+        double sum = 0, impr;
+        for (int i = 0; i < oldResult.length; i++) {
+            impr = computeImprovement(oldResult[i], newResult[i]);
+            sum += impr * impr;
+        }
+        return Math.sqrt(sum);
+    }
+    
+    private static double computeImprovement(final double oldResult, final double newResult) {
+        return (newResult - oldResult) / newResult;
     }
 
     @Override
