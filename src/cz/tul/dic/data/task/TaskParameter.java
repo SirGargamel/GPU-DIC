@@ -9,10 +9,10 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.data.Interpolation;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import java.io.File;
 
 /**
@@ -27,7 +27,7 @@ public enum TaskParameter {
     SUBSET_SIZE(Integer.class),
     FILTER_KERNEL_SIZE(Integer.class),
     FPS(Integer.class),
-    KERNEL(KernelType.class),
+    KERNEL(KernelInfo.class),
     TASK_SPLIT_METHOD(TaskSplitMethod.class),
     TASK_SPLIT_PARAM(Integer.class),
     INTERPOLATION(Interpolation.class),

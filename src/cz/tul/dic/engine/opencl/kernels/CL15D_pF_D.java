@@ -15,13 +15,11 @@ public class CL15D_pF_D extends Kernel {
     private static final int ARGUMENT_INDEX_D_COUNT = 11;
     private static final int ARGUMENT_INDEX_D_BASE = 12;
     private static final int ARGUMENT_INDEX_S_INDEX = 13;
-    private static final int LWS0_BASE = 32;
-    private final WorkSizeManager wsm;
+    private static final int LWS0_BASE = 32;    
     private boolean stop;
 
-    public CL15D_pF_D(final AbstractOpenCLMemoryManager memManager) {
-        super("CL15D_pF_D", memManager);
-        wsm = new WorkSizeManager(KernelType.CL15D_pF_D);
+    public CL15D_pF_D(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+        super(kernelInfo, memManager, wsm);
     }
 
     @Override

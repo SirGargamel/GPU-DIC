@@ -5,24 +5,11 @@
  */
 package cz.tul.dic.engine.opencl;
 
-import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.subset.AbstractSubset;
-import cz.tul.dic.data.subset.SquareSubset2D;
-import cz.tul.dic.data.Image;
-import cz.tul.dic.data.task.TaskDefaultValues;
-import cz.tul.dic.data.task.FullTask;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
-import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
-import cz.tul.dic.engine.opencl.solvers.Solver;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.EnumMap;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -40,87 +27,24 @@ public final class WorkSizeManager {
     private static final double GROWTH_LIMIT_B = 0.75;
     private static final double GROWTH_FACTOR_A = 0.75;
     private static final double GROWTH_FACTOR_B = 1.25;
-    private static final KernelType BEST_KERNEL;
-    private static final Map<KernelType, Map<Long, Map<Long, Long>>> TIME_DATA;
-    private static boolean inited;
-    private final KernelType kernel;
+    private static final Map<KernelInfo, Map<Long, Map<Long, Long>>> TIME_DATA;
+    private final KernelInfo kernel;
     private long workSizeS, workSizeD, maxF, maxD;
 
     static {
-        inited = false;
-        
         final String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
             MAX_TIME = MAX_TIME_WIN * MAX_TIME_BASE;
         } else {
             MAX_TIME = MAX_TIME_LIN * MAX_TIME_BASE;
         }
-        TIME_DATA = new EnumMap<>(KernelType.class);
-        for (KernelType kt : KernelType.values()) {
-            TIME_DATA.put(kt, new HashMap<>());
-        }
 
-        Logger.debug("Initializing best kernel.");
-
-        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.COARSE_FINE);
-        solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
-        solver.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
-
-        try {
-            for (KernelType kt : KernelType.values()) {
-                if (kt.isSafeToUse()) {
-                    solver.setKernel(kt);
-                    final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
-                    final List<double[]> deformationLimits = new ArrayList<>(2);
-                    final double[] limits = new double[]{-49, 50, 0.05, -49, 50, 0.05};
-                    deformationLimits.add(limits);
-                    deformationLimits.add(limits);
-                    final int fs = 14;
-                    final List<AbstractSubset> subsets = new ArrayList<>(2);
-                    subsets.add(new SquareSubset2D(fs, 15, 15));
-                    subsets.add(new SquareSubset2D(fs, 15, 15));
-                    solver.solve(
-                            new FullTask(img, img, subsets, deformationLimits),
-                            fs);
-                }
-            }
-        } catch (ComputationException ex) {
-            Logger.debug(ex);
-            throw new RuntimeException("Error initializing OpenCL.", ex);
-        }
-        solver.endTask();
-        // find best performing kernel        
-        double performance;
-        double bestPerformance = Double.NEGATIVE_INFINITY;
-        KernelType bestKernel = null;
-        for (KernelType kt : KernelType.values()) {
-            for (Entry<Long, Map<Long, Long>> e : TIME_DATA.get(kt).entrySet()) {
-                for (Entry<Long, Long> e2 : e.getValue().entrySet()) {
-                    performance = (e.getKey() * e2.getKey()) / (double) e2.getValue();
-                    if (performance > bestPerformance) {
-                        bestPerformance = performance;
-                        bestKernel = kt;
-                    }
-                }
-            }
-        }
-        BEST_KERNEL = bestKernel;
-        Logger.debug("{0} selected as best kernel.", BEST_KERNEL);
-        
-        inited = true;
+        TIME_DATA = new HashMap<>();
     }
 
-    public WorkSizeManager(final KernelType kernel) {
+    public WorkSizeManager(final KernelInfo kernel) {
         this.kernel = kernel;
         reset();
-    }
-
-    public static KernelType getBestKernel() {
-        return BEST_KERNEL;
-    }
-
-    public static boolean isInited() {
-        return inited;
     }
 
     public long getSubsetCount() {
@@ -145,13 +69,19 @@ public final class WorkSizeManager {
     }
 
     public void storeTime(final long workSizeF, final long workSizeD, final long time) {
-        Map<Long, Long> m = TIME_DATA.get(kernel).get(workSizeF);
+        Map<Long, Map<Long, Long>> m = TIME_DATA.get(kernel);
         if (m == null) {
             m = new TreeMap<>();
-            TIME_DATA.get(kernel).put(workSizeF, m);
+            TIME_DATA.put(kernel, m);
         }
 
-        m.put(workSizeD, time);
+        Map<Long, Long> m2 = m.get(workSizeF);
+        if (m2 == null) {
+            m2 = new TreeMap<>();
+            m.put(workSizeF, m2);
+        }
+
+        m2.put(workSizeD, time);
         computeNextWorkSize();
     }
 
@@ -164,7 +94,7 @@ public final class WorkSizeManager {
         }
     }
 
-    private static long[] findMaxTimeValue(final KernelType kernel) {
+    private static long[] findMaxTimeValue(final KernelInfo kernel) {
         final long[] result = new long[]{0, 0, -1};
 
         long time;
@@ -214,5 +144,9 @@ public final class WorkSizeManager {
         }
 
         return Math.min(result, maxValue);
+    }
+
+    public static Map<KernelInfo, Map<Long, Map<Long, Long>>> getTimeData() {
+        return TIME_DATA;
     }
 }

@@ -18,12 +18,10 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     private static final int ARGUMENT_INDEX_S_COUNT = 14;
     private static final int ARGUMENT_INDEX_S_BASE = 15;
     private static final int LWS0_BASE = 32;
-    private final WorkSizeManager wsm;
     private boolean stop;
 
-    public CL1D_I_V_LL_MC_D(final AbstractOpenCLMemoryManager memManager) {
-        super("CL1D_I_V_LL_MC_D", memManager);
-        wsm = new WorkSizeManager(KernelType.CL1D_I_V_LL_MC_D);
+    public CL1D_I_V_LL_MC_D(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+        super(kernelInfo, memManager, wsm);
     }
 
     @Override
@@ -116,15 +114,10 @@ public class CL1D_I_V_LL_MC_D extends Kernel {
     }
 
     @Override
-    public boolean usesImage() {
-        return true;
-    }
-
-    @Override
     public boolean usesLocalMemory() {
         return true;
     }
-    
+
     @Override
     public boolean subsetsGroupped() {
         return true;

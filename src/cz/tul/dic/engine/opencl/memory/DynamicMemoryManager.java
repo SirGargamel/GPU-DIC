@@ -36,7 +36,7 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
                 if (task.getImageA() == imageB) {
                     clImageA = clImageB;
                 } else {
-                    if (kernel.usesImage()) {
+                    if (kernel.getKernelInfo().usesImage()) {
                         clImageA = generateImage2d(imageA);
                         queue.putWriteImage((CLImage2d<?>) clImageA, false);
                     } else {
@@ -51,7 +51,7 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
                 }
                 imageB = task.getImageB();
 
-                if (kernel.usesImage()) {
+                if (kernel.getKernelInfo().usesImage()) {
                     clImageB = generateImage2d(imageB);
                     queue.putWriteImage((CLImage2d<?>) clImageB, false);
                 } else {

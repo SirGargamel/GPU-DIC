@@ -16,9 +16,9 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +42,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
     @Override
     public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {
         try {
-            if (WorkSizeManager.isInited()) {
+            if (KernelManager.isInited()) {
                 if (!inited) {
                     init(this.task);
                 }
@@ -52,7 +52,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
             } else {
                 release(clImageA);
                 release(clImageB);
-                if (kernel.usesImage()) {
+                if (kernel.getKernelInfo().usesImage()) {
                     clImageA = generateImage2d(task.getImageA());
                     queue.putWriteImage((CLImage2d<?>) clImageA, false);
                     clImageB = generateImage2d(task.getImageB());
@@ -117,7 +117,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
         }
         imageBuffer.clear();
 
-        if (WorkSizeManager.isInited()) {
+        if (KernelManager.isInited()) {
             init(task);
         } else {
             inited = false;
@@ -125,10 +125,10 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
         this.task = task;
     }
 
-    private void init(TaskContainer task) {
-        final KernelType kt = (KernelType) task.getParameter(TaskParameter.KERNEL);
+    private void init(final TaskContainer task) {
+        final KernelInfo kt = (KernelInfo) task.getParameter(TaskParameter.KERNEL);
         final Kernel k = Kernel.createInstance(kt, this);
-        if (k.usesImage()) {
+        if (k.getKernelInfo().usesImage()) {
             generateImagesAsImage2Dt(task.getImages());
         } else {
             generateImagesAsArray(task.getImages());

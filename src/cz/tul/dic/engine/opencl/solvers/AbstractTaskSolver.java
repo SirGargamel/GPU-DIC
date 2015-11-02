@@ -18,10 +18,10 @@ import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.data.task.splitter.AbstractTaskSplitter;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
-import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.data.Interpolation;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public abstract class AbstractTaskSolver extends Observable {
 
     final AbstractOpenCLMemoryManager memManager;
     // dynamic
-    KernelType kernelType;
+    KernelInfo kernelType;
     Interpolation interpolation;
     TaskSplitMethod taskSplitVariant;
     Kernel kernel;
@@ -47,7 +47,7 @@ public abstract class AbstractTaskSolver extends Observable {
     protected AbstractTaskSolver() {
         memManager = AbstractOpenCLMemoryManager.getInstance();
 
-        kernelType = WorkSizeManager.getBestKernel();
+        kernelType = KernelManager.getBestKernel();
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
         taskSplitVariant = TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD;
         taskSplitValue = null;
@@ -210,7 +210,7 @@ public abstract class AbstractTaskSolver extends Observable {
         }
     }
 
-    public void setKernel(KernelType kernel) {
+    public void setKernel(KernelInfo kernel) {
         this.kernelType = kernel;
     }
 

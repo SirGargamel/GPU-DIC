@@ -11,7 +11,6 @@ import cz.tul.dic.data.deformation.DeformationDirection;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,27 +38,24 @@ public class KernelSourcePreparator {
     private static final String TEXT_DEFORMATION_ARRAY = "deformation[";
     private static final String PLUS = " + ";
     private static final String MUL = " * ";
-    private final String kernelName;
     private String kernel;
 
-    private KernelSourcePreparator(final String kernelName) {
-        this.kernelName = kernelName;
+    private KernelSourcePreparator() {
     }
 
     public static String prepareKernel(
-            final String kernelName,
             final int subsetSize, final DeformationDegree deg,
             final boolean is2D, final boolean usesVectorization, final Interpolation interpolation,
             final boolean usesImage, final boolean usesLocalMemory, final boolean usesMemoryCoalescing,
             final boolean subsetsGroupped) throws ComputationException {
-        final KernelSourcePreparator kp = new KernelSourcePreparator(kernelName);
+        final KernelSourcePreparator kp = new KernelSourcePreparator();
 
         try {
             kp.loadKernel();
             kp.prepareInterpolation(interpolation, usesImage);
             kp.prepareFunctionHeader(usesImage, usesVectorization, subsetsGroupped);
-            kp.prepareInit(is2D, usesLocalMemory, usesLocalMemory);
-            kp.prepareCorrelation(usesVectorization);
+            kp.prepareInit(is2D, usesLocalMemory, usesMemoryCoalescing);
+            kp.prepareCorrelation(usesVectorization, usesImage);
             kp.prepareDeltaAndStore();
             kp.prepareDeformations(deg, usesVectorization, usesLocalMemory);
             kp.prepareSubsetSize(subsetSize);
@@ -364,12 +360,17 @@ public class KernelSourcePreparator {
         return sb.toString();
     }
 
-    private void prepareCorrelation(boolean usesVectorization) {
+    private void prepareCorrelation(boolean usesVectorization, final boolean usesImage) {
         String resourceName = "correlate-";
         if (usesVectorization) {
-            resourceName = resourceName.concat("vec");
+            resourceName = resourceName.concat("vec-");
         } else {
-            resourceName = resourceName.concat("noVec");
+            resourceName = resourceName.concat("noVec-");
+        }
+        if (usesImage) {
+            resourceName = resourceName.concat("image");
+        } else {
+            resourceName = resourceName.concat("array");
         }
 
         kernel = kernel.replaceAll(

@@ -17,7 +17,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import java.io.File;
@@ -138,7 +138,7 @@ public class ConfigLoader extends AbstractInputLoader {
                             task.setParameter(tp, Interpolation.valueOf(value));
                             break;
                         case KERNEL:
-                            task.setParameter(tp, KernelType.valueOf(value));
+                            task.setParameter(tp, KernelInfo.fromConfig(value));
                             break;
                         case MM_TO_PX_RATIO:
                             task.setParameter(tp, Double.valueOf(value));

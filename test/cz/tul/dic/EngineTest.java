@@ -26,6 +26,8 @@ import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.io.File;
 import java.io.IOException;
@@ -81,30 +83,31 @@ public class EngineTest {
         Set<String> errors = new LinkedHashSet<>();
         int counter = 0;
         final Solver slvr = Solver.BRUTE_FORCE;
+        final List<KernelInfo> infos = KernelManager.generateKernelInfos();
         for (Interpolation i : Interpolation.values()) {
             for (TaskSplitMethod ts : TaskSplitMethod.values()) {
                 for (SubsetGeneratorMethod fgm : SubsetGeneratorMethod.values()) {
-                    for (KernelType kt : KernelType.values()) {
+                    for (KernelInfo ki : infos) {
                         for (String s : DEF_ZERO_FILES) {
-                            tc = generateTask(s, DEF_ZERO, kt, i, ts, fgm, slvr);
+                            tc = generateTask(s, DEF_ZERO, ki, i, ts, fgm, slvr);
                             errors.add(computeAndCheckTask(tc, s));
                             counter++;
-                            tc = generateTask(s, DEF_ZERO_F, kt, i, ts, fgm, slvr);
+                            tc = generateTask(s, DEF_ZERO_F, ki, i, ts, fgm, slvr);
                             errors.add(computeAndCheckTask(tc, s));
                             counter++;
                         }
 
                         for (String s : DEF_FIRST_FILES) {
-                            tc = generateTask(s, DEF_FIRST, kt, i, ts, fgm, slvr);
+                            tc = generateTask(s, DEF_FIRST, ki, i, ts, fgm, slvr);
                             errors.add(computeAndCheckTask(tc, s));
                             counter++;
-                            tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
+                            tc = generateTask(s, DEF_FIRST_F, ki, i, ts, fgm, slvr);
                             errors.add(computeAndCheckTask(tc, s));
                             counter++;
                         }
 
                         for (String s : DEF_ZERO_FIRST_FILES) {
-                            tc = generateTask(s, DEF_FIRST_F, kt, i, ts, fgm, slvr);
+                            tc = generateTask(s, DEF_FIRST_F, ki, i, ts, fgm, slvr);
                             errors.add(computeAndCheckTask(tc, s));
                             counter++;
                         }
@@ -119,7 +122,7 @@ public class EngineTest {
 
     private TaskContainer generateTask(
             final String outFilename, final double[] deformations,
-            final KernelType kernel, final Interpolation interpolation,
+            final KernelInfo kernelInfo, final Interpolation interpolation,
             final TaskSplitMethod taskSplit, final SubsetGeneratorMethod fgm,
             final Solver solver) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
@@ -140,7 +143,7 @@ public class EngineTest {
         tc.setParameter(TaskParameter.SUBSET_SIZE, 5);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 11);
-        tc.setParameter(TaskParameter.KERNEL, kernel);
+        tc.setParameter(TaskParameter.KERNEL, kernelInfo);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);
         tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, taskSplit);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, fgm);
@@ -343,7 +346,7 @@ public class EngineTest {
         AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
-        solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
+        solver.setKernel((KernelInfo) tc.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
@@ -398,7 +401,7 @@ public class EngineTest {
         AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
-        solver.setKernel((KernelType) tc.getParameter(TaskParameter.KERNEL));
+        solver.setKernel((KernelInfo) tc.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));

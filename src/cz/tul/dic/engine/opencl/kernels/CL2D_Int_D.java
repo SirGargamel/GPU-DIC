@@ -16,15 +16,13 @@ public class CL2D_Int_D extends Kernel {
     private static final int ARGUMENT_INDEX_D_BASE = 12;
     private static final int ARGUMENT_INDEX_G_COUNT = 13;
     private static final int ARGUMENT_INDEX_S_COUNT = 14;
-    private static final int ARGUMENT_INDEX_S_BASE = 15;    
+    private static final int ARGUMENT_INDEX_S_BASE = 15;
     private static final int LWS0_BASE = 1;
     private static final int LWS1_BASE = 64;
-    private final WorkSizeManager wsm;
     private boolean stop;
 
-    public CL2D_Int_D(final AbstractOpenCLMemoryManager memManager) {
-        super("CL2D_Int_D", memManager);
-        wsm = new WorkSizeManager(KernelType.CL2D_Int_D);
+    public CL2D_Int_D(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+        super(kernelInfo, memManager, wsm);
     }
 
     @Override
@@ -113,12 +111,12 @@ public class CL2D_Int_D extends Kernel {
     private static int calculateLws0() {
         return LWS0_BASE;
     }
-    
+
     @Override
     public boolean is2D() {
         return true;
     }
-    
+
     @Override
     public boolean subsetsGroupped() {
         return true;

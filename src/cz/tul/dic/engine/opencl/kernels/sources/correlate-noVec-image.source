@@ -1,0 +1,16 @@
+float deformedI[(2*%SS%+1)*(2*%SS%+1)];
+float subsetI[(2*%SS%+1)*(2*%SS%+1)];
+float meanF = 0;
+float meanG = 0; 
+for (int i = 0; i < subsetSize2; i++) {
+    i2 = i*2;
+    index = baseIndexFacet + i2;               
+	
+	subsetI[i] = read_imageui(imageA, sampler, (float2)(subsets[index], subsets[index + 1])).x;
+    meanF += subsetI[i];
+   
+    deformedI[i] = interpolate(deformedFacet[i2], deformedFacet[i2 + 1], imageB);
+    meanG += deformedI[i];
+} 
+meanF /= (float) subsetSize2;
+meanG /= (float) subsetSize2;

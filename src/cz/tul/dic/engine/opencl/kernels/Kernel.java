@@ -50,41 +50,49 @@ public abstract class Kernel {
     private static final String KERNEL_REDUCE = "reduce";
     private static final String KERNEL_FIND_POS = "findPos";
     private static final String KERNEL_DIC_NAME = "DIC";
-    private static final List<IGPUResultsReceiver> resultListeners;
+    private static final List<IGPUResultsReceiver> LISTENERS;
     protected final CLContext context;
     protected final CLCommandQueue queue;
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
-    private final String kernelName;
+    protected final WorkSizeManager wsm;
+    private final KernelInfo kernelInfo;
     private final Set<CLResource> clMem;
-    private final AbstractOpenCLMemoryManager memManager;
+    private final AbstractOpenCLMemoryManager memManager;    
 
     static {
-        resultListeners = new LinkedList<>();
+        LISTENERS = new LinkedList<>();
     }
 
-    protected Kernel(String kernelName, final AbstractOpenCLMemoryManager memManager) {
-        this.kernelName = kernelName;
+    protected Kernel(final KernelInfo info, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+        this.kernelInfo = info;
         clMem = new HashSet<>();
+        
         this.memManager = memManager;
+        this.wsm = wsm;
 
         queue = DeviceManager.getQueue();
         context = DeviceManager.getContext();
     }
 
-    public static Kernel createInstance(final KernelType kernelType, final AbstractOpenCLMemoryManager memManager) {
+    public static Kernel createInstance(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager) {
+        final WorkSizeManager wsm = new WorkSizeManager(kernelInfo);
         Kernel result;
         try {
-            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));
-            result = (Kernel) cls.getConstructor(AbstractOpenCLMemoryManager.class).newInstance(memManager);
+            final KernelType kernelType = kernelInfo.getType();
+            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));            
+            result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(kernelInfo, memManager, wsm);
 
             if (!kernelType.isSafeToUse()) {
                 Logger.warn("Kernel \"{0}\" is not safe to use, results might be inprecise !!!.", kernelType);
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.warn("Error instantiating class {0}, using default kernel.", kernelType);
+            Logger.warn("Error instantiating class {0}, using default kernel.", kernelInfo);
             Logger.error(ex);
-            result = new CL1D_I_V_LL_MC_D(memManager);
+            result = new CL1D_I_V_LL_MC_D(kernelInfo, memManager, wsm);
         }
+        
+        
+        
         return result;
     }
 
@@ -92,8 +100,8 @@ public abstract class Kernel {
         try {
             CLProgram program = context.createProgram(
                     KernelSourcePreparator.prepareKernel(
-                            kernelName, subsetSize, deg, is2D(), usesVectorization(),
-                            interpolation, usesImage(), usesLocalMemory(), usesMemoryCoalescing(), subsetsGroupped())).build();
+                            subsetSize, deg, is2D(), usesVectorization(),
+                            interpolation, kernelInfo.usesImage(), usesLocalMemory(), usesMemoryCoalescing(), subsetsGroupped())).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
             clMem.add(kernelDIC);
@@ -146,11 +154,11 @@ public abstract class Kernel {
                     task.getImageA().getWidth(), subsetSize, subsetCount);
             queue.flush();
 
-            if (!resultListeners.isEmpty()) {
+            if (!LISTENERS.isEmpty()) {
                 final CLBuffer<FloatBuffer> clResults = clData.getResults();
                 queue.putReadBuffer(clResults, true);
                 final double[] results = readResultBuffer(clResults.getBuffer());
-                for (IGPUResultsReceiver rr : resultListeners) {
+                for (IGPUResultsReceiver rr : LISTENERS) {
                     rr.dumpGpuResults(results, task.getSubsets(), task.getDeformationLimits());
                 }
             }
@@ -257,11 +265,7 @@ public abstract class Kernel {
 
     public boolean usesVectorization() {
         return false;
-    }
-
-    public boolean usesImage() {
-        return false;
-    }
+    }    
 
     public boolean usesLocalMemory() {
         return false;
@@ -320,7 +324,7 @@ public abstract class Kernel {
 
     @Override
     public String toString() {
-        return kernelName;
+        return kernelInfo.toString();
     }
 
     public abstract void stopComputation();
@@ -337,13 +341,17 @@ public abstract class Kernel {
     }
 
     public static void registerListener(final IGPUResultsReceiver listener) {
-        resultListeners.add(listener);
+        LISTENERS.add(listener);
         Logger.debug("Registering {0} for GPU results.", listener);
     }
 
     public static void deregisterListener(final IGPUResultsReceiver listener) {
-        resultListeners.remove(listener);
+        LISTENERS.remove(listener);
         Logger.debug("Deregistering {0} for GPU results.", listener);
+    }
+
+    public KernelInfo getKernelInfo() {
+        return kernelInfo;
     }
 
 }

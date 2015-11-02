@@ -19,7 +19,6 @@ import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.CorrelationResult;
@@ -28,6 +27,7 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;
@@ -149,7 +149,7 @@ public final class Engine extends Observable implements Observer {
         // prepare correlation calculator
         solver = AbstractTaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
         solver.addObserver(this);
-        solver.setKernel((KernelType) task.getParameter(TaskParameter.KERNEL));
+        solver.setKernel((KernelInfo) task.getParameter(TaskParameter.KERNEL));
         solver.setInterpolation((Interpolation) task.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) task.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = task.getParameter(TaskParameter.TASK_SPLIT_PARAM);

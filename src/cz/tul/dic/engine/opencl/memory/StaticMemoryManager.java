@@ -24,7 +24,7 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
         try {
             release(clImageA);
             release(clImageB);
-            if (kernel.usesImage()) {
+            if (kernel.getKernelInfo().usesImage()) {
                 clImageA = generateImage2d(task.getImageA());
                 queue.putWriteImage((CLImage2d<?>) clImageA, false);
                 clImageB = generateImage2d(task.getImageB());

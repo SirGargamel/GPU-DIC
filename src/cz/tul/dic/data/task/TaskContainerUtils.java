@@ -14,8 +14,8 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
-import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.data.task.loaders.ConfigLoader;
+import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -263,7 +263,7 @@ public final class TaskContainerUtils {
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
         if (kernel == null) {
             Logger.info("Adding default kernel.");
-            tc.setParameter(TaskParameter.KERNEL, WorkSizeManager.getBestKernel());
+            tc.setParameter(TaskParameter.KERNEL, KernelManager.getBestKernel());
         }
         final Object subsetGenMode = tc.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD);
         if (subsetGenMode == null) {
