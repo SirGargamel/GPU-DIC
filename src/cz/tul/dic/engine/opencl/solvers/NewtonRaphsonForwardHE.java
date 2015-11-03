@@ -9,14 +9,18 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetDeformator;
+import static cz.tul.dic.engine.opencl.solvers.NewtonRaphson.generateIndex;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolatingFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolator;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 
 /**
  *
@@ -26,7 +30,7 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
 
     private static final int COUNT_STEP = 3;
     private static final double DX = 0.5;
-    private static final double DY = DX;    
+    private static final double DY = DX;
 
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
@@ -132,7 +136,7 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
             final PiecewiseBicubicSplineInterpolatingFunction interpolation) {
         final Approximation approximationI = new Approximation(subset, interpolation, i);
         final Approximation approximationJ = new Approximation(subset, interpolation, j);
-        
+
         final int imageWidth = fullTask.getImageB().getWidth();
         final int imageHeight = fullTask.getImageB().getHeight();
 

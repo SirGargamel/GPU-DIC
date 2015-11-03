@@ -54,6 +54,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     protected Map<AbstractSubset, CorrelationResult> results;
     protected Map<AbstractSubset, double[]> limits;
     protected double[] gpuData;
+    protected List<AbstractSubset> subsetsToCompute;
 
     @Override
     public List<CorrelationResult> solve(
@@ -81,7 +82,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
         // initial data for NR solver
         Kernel.registerListener(this);
-        final List<AbstractSubset> subsetsToCompute = Collections.synchronizedList(new ArrayList<>(subsets));
+        subsetsToCompute = Collections.synchronizedList(new ArrayList<>(subsets));
         final List<double[]> localLimits = new ArrayList<>(limits.values());
         computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
 
@@ -155,10 +156,15 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     }
 
     private double[] generateLimits(final double[] solution, final int coeffCount, final double step) {
-        final int halfStepCount = getSetpCountForOneDimension() / 2;
+        final int stepCount = getSetpCountForOneDimension();
+        final boolean even = stepCount % 2 == 0;
+        final int halfStepCount = stepCount / 2;
         final double[] newLimits = new double[coeffCount * 3];
         for (int i = 0; i < coeffCount; i++) {
             newLimits[i * 3] = solution[i] - halfStepCount * step;
+            if (even) {
+                newLimits[i * 3] += step;
+            }
             newLimits[i * 3 + 1] = solution[i] + halfStepCount * step;
             newLimits[i * 3 + 2] = step;
         }
@@ -202,7 +208,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             for (AbstractSubset subset : subsetsToCompute) {
                 localLimitsList.add(localLimits.get(subset));
             }
-            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimitsList));
+            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimitsList));            
         }
     }
 
@@ -293,7 +299,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 sb.append(", stop - low quality increment");
             }
         }
-    }    
+    }
 
     private static double computeImprovement(final double[] oldResult, final double[] newResult) {
         double sum = 0, impr;
@@ -303,7 +309,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         }
         return Math.sqrt(sum);
     }
-    
+
     private static double computeImprovement(final double oldResult, final double newResult) {
         return (newResult - oldResult) / newResult;
     }
@@ -348,7 +354,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 final RealVector solutionVec = solver.solve(negativeGradient);
                 solutionVec.add(new ArrayRealVector(results.get(subset).getDeformation()));
                 // prepare data for next step
-                final double[] solution = solutionVec.toArray();
+                final double[] solution = solutionVec.toArray();                
                 localLimits.put(subset, generateLimits(solution, coeffCount, limits.get(subset)[DeformationLimit.USTEP]));
             } catch (SingularMatrixException ex) {
                 Logger.debug("{0} stop - singular hessian matrix.", subset);

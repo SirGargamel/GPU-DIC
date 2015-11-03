@@ -20,9 +20,10 @@ import org.apache.commons.math3.linear.RealVector;
  */
 public class NewtonRaphsonCentral extends NewtonRaphson {
 
-    private static final int COUNT_STEP = 5;
+    private static final int COUNT_STEP = 3;
 
     // central difference
+    // dF / dx = (F(x + h) - F(x - h)) / 2h
     @Override
     protected RealVector generateNegativeGradient(final AbstractSubset subset) {
         final double[] deformationLimits = limits.get(subset);
@@ -31,9 +32,10 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
         final double[] data = new double[coeffCount];
 
-        final int resultsBase = (fullTask.getSubsets().indexOf(subset) * deformationCount);
+        final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
+        final int midPoint = getSetpCountForOneDimension() / 2;
         final int[] indices = new int[coeffCount];
-        Arrays.fill(indices, getSetpCountForOneDimension() / 2);
+        Arrays.fill(indices, midPoint);
         final long[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
 
         for (int i = 0; i < coeffCount; i++) {
@@ -43,14 +45,17 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
             // left index
             indices[i] -= 2;
             data[i] -= gpuData[resultsBase + generateIndex(counts, indices)];
+            indices[i] = midPoint;
+
             data[i] /= 2 * deformationLimits[i * 3 + 2];
             data[i] *= -1;
-            indices[i]++;
         }
+
         return new ArrayRealVector(data);
     }
 
     @Override
+    // d^2 F / dx1 dx2 = (F(x1 + h, x2 + h) - F(x1 + h, x2 - h) - F(x1 - h, x2 + h) + F(x1 - h, x2 - h)) / (2h)^2
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
         final double[] deformationLimits = limits.get(subset);
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
@@ -60,22 +65,23 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
 
         final int resultsBase = (fullTask.getSubsets().indexOf(subset) * deformationCount);
         final int[] indices = new int[coeffCount];
-        Arrays.fill(indices, getSetpCountForOneDimension() / 2);
+        final int midPoint = getSetpCountForOneDimension() / 2;
+        Arrays.fill(indices, midPoint);
         final long[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
 
-        // upper triangle approach
         double step;
         for (int i = 0; i < coeffCount; i++) {
-            step = deformationLimits[i * 3 + 2];
-
             indices[i]++;
             data[i][i] = gpuData[resultsBase + generateIndex(counts, indices)];
             indices[i] -= 2;
             data[i][i] += gpuData[resultsBase + generateIndex(counts, indices)];
-            indices[i]++;
+            indices[i] = midPoint;
             data[i][i] -= 2 * gpuData[resultsBase + generateIndex(counts, indices)];
-            data[i][i] /= step * step * 4;
+
+            step = deformationLimits[i * 3 + 2];
+            data[i][i] /= step * step;
         }
+
         for (int i = 0; i < coeffCount; i++) {
             for (int j = i + 1; j < coeffCount; j++) {
                 indices[i]++;
@@ -89,11 +95,10 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
                 indices[i] += 2;
                 indices[j] -= 2;
                 data[i][j] -= gpuData[resultsBase + generateIndex(counts, indices)];
-                indices[i]--;
-                indices[j]++;
+                indices[i] = midPoint;
+                indices[j] = midPoint;
 
                 data[i][j] /= (deformationLimits[i * 3 + 2] + deformationLimits[j * 3 + 2]) * (deformationLimits[i * 3 + 2] + deformationLimits[j * 3 + 2]);
-                data[i][j] /= 4.0;
                 data[j][i] = data[i][j];
             }
         }
