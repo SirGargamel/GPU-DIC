@@ -17,6 +17,7 @@ public enum Solver {
     NEWTON_RHAPSON_CENTRAL_HE("NewtonRaphsonCentralHE", "NRCH"),
     NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward", "NRF"),    
     NEWTON_RHAPSON_FORWARD_HE("NewtonRaphsonForwardHE", "NRFH"),
+    SPGD("SPGD", "SPGD"),
     ;
     
     private final String className, abbreviation;
