@@ -28,10 +28,38 @@ import org.apache.commons.math3.linear.RealVector;
  */
 public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
 
-    private static final int COUNT_STEP = 3;
+    private static final int COUNT_STEP = 2;
     private static final double DX = 0.5;
     private static final double DY = DX;
 
+    @Override
+    protected RealVector generateNegativeGradient(final AbstractSubset subset) {
+        final double[] deformationLimits = limits.get(subset);
+        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
+        final int deformationCount = computeDeformationCount(defDegree);
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
+        final double[] data = new double[coeffCount];
+
+        final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
+        final int midPoint = 0;
+        final int[] indices = new int[coeffCount];
+        Arrays.fill(indices, midPoint);
+        final long[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
+
+        for (int i = 0; i < coeffCount; i++) {
+            // right index
+            indices[i]++;
+            data[i] = gpuData[resultsBase + generateIndex(counts, indices)];
+            // left index
+            indices[i]--;
+            data[i] -= gpuData[resultsBase + generateIndex(counts, indices)];
+            
+            data[i] /= deformationLimits[i * 3 + 2];
+            data[i] *= -1;
+        }        
+        return new ArrayRealVector(data);
+    }
+    
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
         final double[] deformationLimits = limits.get(subset);
@@ -153,6 +181,15 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
         }
 
         return sum;
+    }
+    
+    @Override
+    protected double[] extractSolutionFromLimits(final double[] limits) {
+        final double[] result = new double[limits.length / 3];
+        for (int i = 0; i < limits.length / 3; i++) {
+            result[i] = limits[i * 3];
+        }
+        return result;
     }
 
     @Override
