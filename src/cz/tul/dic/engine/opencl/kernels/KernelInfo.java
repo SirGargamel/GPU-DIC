@@ -25,7 +25,7 @@ public class KernelInfo implements Serializable {
     
     public static KernelInfo fromConfig(final String configString) {
         final String[] vals = configString.split(SEPARATOR);
-        return new KernelInfo(KernelType.valueOf(vals[0]), Boolean.getBoolean(vals[1]));
+        return new KernelInfo(KernelType.valueOf(vals[0]), Boolean.valueOf(vals[1]));
     }
 
     public KernelType getType() {
