@@ -20,8 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
-import org.pmw.tinylog.LoggingLevel;
 
 /**
  *
@@ -89,10 +89,10 @@ public final class Utils {
         }
     }
 
-    public static boolean isLevelLogged(final LoggingLevel testedLevel) {
-        final LoggingLevel currentLevel = Logger.getLoggingLevel();
+    public static boolean isLevelLogged(final Level testedLevel) {
+        final Level currentLevel = Logger.getLevel();
         int indexTestedLevel = 0, indexCurrentLevel = 1;
-        final LoggingLevel[] levels = LoggingLevel.values();
+        final Level[] levels = Level.values();
         for (int l = 0; l < levels.length; l++) {
             if (levels[l].equals(testedLevel)) {
                 indexTestedLevel = l;

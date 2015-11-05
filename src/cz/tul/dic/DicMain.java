@@ -35,7 +35,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
-import org.pmw.tinylog.LoggingLevel;
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.policies.StartupPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
@@ -208,9 +208,9 @@ public class DicMain extends Application {
             Logger.error(ex);
         }
         if (debug) {
-            c.level(LoggingLevel.TRACE);
+            c.level(Level.TRACE);
         } else {
-            c.level(LoggingLevel.INFO);
+            c.level(Level.INFO);
         }
         c.activate();
 
@@ -219,7 +219,6 @@ public class DicMain extends Application {
         } else {
             Logger.info("----- Starting APP -----");
         }
-
     }
 
     private static void performComputationTest() {

@@ -5,32 +5,54 @@
  */
 package cz.tul.dic;
 
-import org.pmw.tinylog.LoggingLevel;
-import org.pmw.tinylog.writers.LoggingWriter;
+import java.util.Set;
+import org.pmw.tinylog.Configuration;
+import org.pmw.tinylog.LogEntry;
+import org.pmw.tinylog.writers.LogEntryValue;
+import org.pmw.tinylog.writers.Writer;
 
 /**
  *
  * @author Petr Ječmen
  */
-public class MultiWriter implements LoggingWriter {
+public class MultiWriter implements Writer {
 
-    private final LoggingWriter[] writers;
+    private final Writer[] writers;
 
-    public MultiWriter(LoggingWriter... writers) {
+    public MultiWriter(Writer... writers) {
         this.writers = writers;
     }
 
     @Override
-    public void write(LoggingLevel level, String logEntry) {
-        for (LoggingWriter writer : writers) {
-            writer.write(level, logEntry);
+    public Set<LogEntryValue> getRequiredLogEntryValues() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void init(Configuration configuration) throws Exception {
+        for (Writer writer : writers) {
+            writer.init(configuration);
         }
     }
 
     @Override
-    public void init() {
-        for (LoggingWriter lw : writers) {
-            lw.init();
+    public void write(LogEntry logEntry) throws Exception {
+        for (Writer writer : writers) {
+            writer.write(logEntry);
+        }
+    }
+
+    @Override
+    public void flush() throws Exception {
+        for (Writer writer : writers) {
+            writer.flush();
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        for (Writer writer : writers) {
+            writer.close();
         }
     }
 }
