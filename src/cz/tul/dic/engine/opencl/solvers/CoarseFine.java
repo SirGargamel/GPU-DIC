@@ -11,6 +11,7 @@ import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
@@ -31,8 +32,8 @@ public class CoarseFine extends AbstractTaskSolver {
             return new ArrayList<>(0);
         }
 
-        final int subsetCount = fullTask.getSubsets().size();
-        final StringBuilder sb = new StringBuilder();
+        final List<AbstractSubset> subsets = fullTask.getSubsets();
+        final int subsetCount = subsets.size();
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
         List<CorrelationResult> results;
         double[] temp;
@@ -56,14 +57,9 @@ public class CoarseFine extends AbstractTaskSolver {
         results = computeTask(
                 kernel,
                 new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
-        sb.append("Initial results, step [").append(step).append("]:");
         for (int i = 0; i < subsetCount; i++) {
-            sb.append(i)
-                    .append(" - ")
-                    .append(results.get(i))
-                    .append("; ");
+            addSubsetResult(subsets.get(i), results.get(i));
         }
-        sb.append("\n");
         signalizeRoundComplete(++round, roundCount);
 
         //sub-pixel stepping
@@ -97,23 +93,17 @@ public class CoarseFine extends AbstractTaskSolver {
             results = computeTask(
                     kernel,
                     new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
-
-            sb.append("Finer results, step [").append(step).append("]:");
+            
             for (int i = 0; i < subsetCount; i++) {
-                sb.append(i)
-                        .append(" - ")
-                        .append(results.get(i))
-                        .append("; ");
-            }
-            sb.append("\n");
+                addSubsetResult(subsets.get(i), results.get(i));
+            }            
             signalizeRoundComplete(++round, roundCount);
         } while (step > STEP_MINIMAL);
 
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         if (defDegree != DeformationDegree.ZERO) {
             Logger.debug("CoarseFine solver does support only zero order deformations.");
-        }
-        Logger.trace(sb);
+        }        
 
         return results;
     }

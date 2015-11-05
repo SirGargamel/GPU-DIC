@@ -88,8 +88,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
         for (int i = 0; i < LIMITS_ITERATIONS; i++) {
             makeStep(subsetsToCompute, defDegree);
-
-            Logger.debug("Results for round {0}:", i);
+            
             extractResults(subsetsToCompute, coeffCount);
 
             notifyProgress(subsetsToCompute.size(), subsetCount);
@@ -116,7 +115,6 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
         double[] temp;
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
-        final StringBuilder sb = new StringBuilder();
 
         // initial pixel step        
         for (double[] dA : fullTask.getDeformationLimits()) {
@@ -131,18 +129,12 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             zeroOrderLimits.add(temp);
         }
         final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.COARSE_FINE).solve(new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), subsetSize);
-        sb.append("Initial results, step [").append(STEP_INITIAL).append("]:");
         CorrelationResult paddedResult;
         for (int i = 0; i < subsetCount; i++) {
             paddedResult = new CorrelationResult(localResults.get(i).getQuality(), Arrays.copyOf(localResults.get(i).getDeformation(), coeffCount));
             results.put(subsets.get(i), paddedResult);
-
-            sb.append(i)
-                    .append(" - ")
-                    .append(localResults.get(i))
-                    .append("; ");
+            addSubsetResult(fullTask.getSubsets().get(i), localResults.get(i));
         }
-        Logger.debug(sb);
     }
 
     private void prepareLimitsForNR(final int coeffCount) {
@@ -208,7 +200,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             for (AbstractSubset subset : subsetsToCompute) {
                 localLimitsList.add(localLimits.get(subset));
             }
-            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimitsList));            
+            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimitsList));
         }
     }
 
@@ -227,7 +219,6 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
         int baseIndex = 0;
 
-        final StringBuilder sb = new StringBuilder();
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
             as = it.next();
@@ -238,17 +229,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
             newCorrelationValue = gpuData[resultIndex];
             newResult = new CorrelationResult(newCorrelationValue, extractSolutionFromLimits(currentLimits));
-            sb.append(as)
-                    .append(" -  from ")
-                    .append(currentResult)
-                    .append(" to ")
-                    .append(newResult);
-            checkStep(as, currentResult, newResult, it, sb, currentLimits, coeffCount);
-            sb.append("; ");
+            checkStep(as, currentResult, newResult, it, currentLimits, coeffCount);
             baseIndex += counts[coeffCount];
         }
-
-        Logger.debug(sb);
     }
 
     protected static int generateIndex(final long[] counts, final int[] indices) {
@@ -279,24 +262,24 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     private void checkStep(
             final AbstractSubset as,
             final CorrelationResult currentResult, final CorrelationResult newResult,
-            final Iterator<AbstractSubset> it, final StringBuilder sb,
+            final Iterator<AbstractSubset> it,
             final double[] currentLimits, final int coeffCount) {
         if (newResult.getQuality() >= LIMIT_Q_DONE) {
             results.put(as, newResult);
             it.remove();
-            sb.append(", stop - quality good enough");
+            addSubsetResult(as, newResult);
+            addSubsetTerminationInfo(as, "Good quality");
         } else {
             final double improvement = computeImprovement(currentResult.getDeformation(), newResult.getDeformation());
             if (improvement > LIMIT_MIN_IMPROVEMENT) {
                 results.put(as, newResult);
+                addSubsetResult(as, newResult);
             } else if (currentLimits[2] > STEP_SECOND) {
                 double[] newLimits = generateLimits(currentResult.getDeformation(), coeffCount, STEP_SECOND);
                 limits.put(as, newLimits);
-                sb.append(", increasing precision to ")
-                        .append(STEP_SECOND);
             } else {
                 it.remove();
-                sb.append(", stop - low quality increment");
+                addSubsetTerminationInfo(as, "Low quality increment");
             }
         }
     }
@@ -354,10 +337,10 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 final RealVector solutionVec = solver.solve(negativeGradient);
                 solutionVec.add(new ArrayRealVector(results.get(subset).getDeformation()));
                 // prepare data for next step
-                final double[] solution = solutionVec.toArray();                
+                final double[] solution = solutionVec.toArray();
                 localLimits.put(subset, generateLimits(solution, coeffCount, limits.get(subset)[DeformationLimit.USTEP]));
-            } catch (SingularMatrixException ex) {
-                Logger.debug("{0} stop - singular hessian matrix.", subset);
+            } catch (SingularMatrixException ex) {                
+                addSubsetTerminationInfo(subset, "Singular hessian matrix");
                 return subset;
             } catch (Exception ex) {
                 if (ex.getStackTrace().length == 0) {
@@ -365,6 +348,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 } else {
                     Logger.warn(ex, "{0} stop, exception occured.", subset);
                 }
+                addSubsetTerminationInfo(subset, "StepMaker exception - " + ex);
                 return subset;
             }
             return null;

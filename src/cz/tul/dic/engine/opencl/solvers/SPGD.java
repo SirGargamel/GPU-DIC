@@ -79,8 +79,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
             prepareLimits(defDegree);
 
             makeStep(subsetsToCompute, defDegree);
-
-            Logger.debug("Results for round {0}:", i);
+            
             extractResults(subsetsToCompute, coeffCount);
 
             notifyProgress(subsetsToCompute.size(), subsetCount);
@@ -101,7 +100,6 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
 
         double[] temp;
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
-        final StringBuilder sb = new StringBuilder();
 
         // initial pixel step        
         for (double[] dA : fullTask.getDeformationLimits()) {
@@ -116,18 +114,12 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
             zeroOrderLimits.add(temp);
         }
         final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.COARSE_FINE).solve(new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), subsetSize);
-        sb.append("Initial results, step [").append(STEP_INITIAL).append("]:");
         CorrelationResult paddedResult;
         for (int i = 0; i < subsetCount; i++) {
             paddedResult = new CorrelationResult(localResults.get(i).getQuality(), Arrays.copyOf(localResults.get(i).getDeformation(), coeffCount));
             results.put(subsets.get(i), paddedResult);
-
-            sb.append(i)
-                    .append(" - ")
-                    .append(localResults.get(i))
-                    .append("; ");
+            addSubsetResult(fullTask.getSubsets().get(i), localResults.get(i));
         }
-        Logger.debug(sb);
     }
 
     public double[] generatePertubation(final DeformationDegree degree) {
@@ -220,7 +212,6 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
 
         int baseIndex = 0;
 
-        final StringBuilder sb = new StringBuilder();
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
             as = it.next();
@@ -231,17 +222,9 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
             resultIndex = baseIndex + generateIndex(counts, prepareIndices(counts));
             newCorrelationValue = gpuData[resultIndex];
             newResult = new CorrelationResult(newCorrelationValue, extractSolutionFromLimits(currentLimits));
-            sb.append(as)
-                    .append(" -  from ")
-                    .append(currentResult)
-                    .append(" to ")
-                    .append(newResult);
-            checkStep(as, newResult, it, sb);
-            sb.append("; ");
+            checkStep(as, newResult, it);
             baseIndex += counts[coeffCount];
         }
-
-        Logger.debug(sb);
     }
 
     private static int generateIndex(final long[] counts, final int[] indices) {
@@ -272,11 +255,12 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
     private void checkStep(
             final AbstractSubset as,
             final CorrelationResult newResult,
-            final Iterator<AbstractSubset> it, final StringBuilder sb) {
+            final Iterator<AbstractSubset> it) {
         results.put(as, newResult);
+        addSubsetResult(as, newResult);
         if (newResult.getQuality() >= LIMIT_Q_DONE) {
             it.remove();
-            sb.append(", stop - quality good enough");
+            addSubsetTerminationInfo(as, "Good quality");
         }
     }
 
@@ -305,7 +289,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         private final Map<AbstractSubset, double[]> localLimits;
         private final DeformationDegree degree;
 
-        public StepMaker(final AbstractSubset subset,final  Map<AbstractSubset, double[]> localLimits, final DeformationDegree degree) {
+        public StepMaker(final AbstractSubset subset, final Map<AbstractSubset, double[]> localLimits, final DeformationDegree degree) {
             this.subset = subset;
             this.localLimits = localLimits;
             this.degree = degree;
@@ -320,9 +304,9 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
                 final double correlationPlus = gpuData[resultsBase];
                 final double correlationMinus = gpuData[resultsBase + 1];
                 final double correlationDiff = correlationMinus - correlationPlus;
-                
+
                 if (Math.abs(correlationDiff) < LIMIT_Q_DIFF) {
-                    Logger.debug("{0} stop, low correlation diff.", subset);
+                    addSubsetTerminationInfo(subset, "Low correlation diff");
                     return subset;
                 }
 
@@ -352,6 +336,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
                 } else {
                     Logger.warn(ex, "{0} stop, exception occured.", subset);
                 }
+                addSubsetTerminationInfo(subset, "StepMaker exception - " + ex);
                 return subset;
             }
             return null;

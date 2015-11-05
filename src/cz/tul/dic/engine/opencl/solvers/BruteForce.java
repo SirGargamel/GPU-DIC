@@ -7,6 +7,7 @@ package cz.tul.dic.engine.opencl.solvers;
 
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.List;
@@ -15,11 +16,18 @@ public class BruteForce extends AbstractTaskSolver {
 
     @Override
     public List<CorrelationResult> solve(
-            final Kernel kernel, 
+            final Kernel kernel,
             final FullTask fullTask) throws ComputationException {
-        return computeTask(kernel, fullTask);
+        final List<CorrelationResult> results = computeTask(kernel, fullTask);
+
+        final List<AbstractSubset> subsets = fullTask.getSubsets();
+        for (int i = 0; i < subsets.size(); i++) {
+            addSubsetResult(subsets.get(i), results.get(i));
+        }
+
+        return results;
     }
-    
+
     @Override
     protected boolean needsBestResult() {
         return true;

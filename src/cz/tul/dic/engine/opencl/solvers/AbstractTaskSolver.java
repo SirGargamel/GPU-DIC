@@ -24,7 +24,9 @@ import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import org.pmw.tinylog.Logger;
 
@@ -43,6 +45,8 @@ public abstract class AbstractTaskSolver extends Observable {
     int subsetSize;
     Object taskSplitValue;
     boolean stop;
+    // logging
+    private final Map<AbstractSubset, ComputationInfo> computationInfo;
 
     protected AbstractTaskSolver() {
         memManager = AbstractOpenCLMemoryManager.getInstance();
@@ -51,6 +55,8 @@ public abstract class AbstractTaskSolver extends Observable {
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
         taskSplitVariant = TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD;
         taskSplitValue = null;
+
+        computationInfo = new HashMap<>();
     }
 
     public static AbstractTaskSolver initSolver(final Solver type) {
@@ -73,6 +79,7 @@ public abstract class AbstractTaskSolver extends Observable {
     public synchronized List<CorrelationResult> solve(
             final FullTask fullTask, int subsetSize) throws ComputationException {
         stop = false;
+        computationInfo.clear();
 
         kernel = Kernel.createInstance(kernelType, memManager);
         Logger.trace("Kernel prepared - {0}", kernel);
@@ -84,7 +91,8 @@ public abstract class AbstractTaskSolver extends Observable {
         final List<CorrelationResult> result = solve(kernel, fullTask);
 
         time = System.nanoTime() - time;
-        Logger.trace("Task [{0}] computed in {1}ms using {2}.", fullTask, time / 1_000_000, getClass().getSimpleName());
+        Logger.debug("Task [{0}] computed in {1}ms using {2}.", fullTask, time / 1_000_000, getClass().getSimpleName());
+        Logger.debug(dumpComputationInfo());
 
         kernel.clearMemory();
 
@@ -230,6 +238,32 @@ public abstract class AbstractTaskSolver extends Observable {
         }
         endTask();
         Logger.debug("Stopping correlation counter.");
+    }
+
+    protected void addSubsetResult(final AbstractSubset subset, final CorrelationResult result) {
+        getInfo(subset).addResult(result);
+    }
+
+    private ComputationInfo getInfo(final AbstractSubset subset) {
+        ComputationInfo result = computationInfo.get(subset);
+        if (result == null) {
+            result = new ComputationInfo(subset);
+            computationInfo.put(subset, result);
+        }
+        return result;
+    }
+
+    protected void addSubsetTerminationInfo(final AbstractSubset subset, final String info) {
+        getInfo(subset).setTerminationInfo(info);
+    }
+
+    private String dumpComputationInfo() {
+        final StringBuilder sb = new StringBuilder("Subset computation results:\n");
+        for (ComputationInfo ci : computationInfo.values()) {
+            sb.append(ci).append("\n");
+        }
+        sb.setLength(Math.max(0, sb.length() - "\n".length()));
+        return sb.toString();
     }
 
 }

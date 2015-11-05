@@ -27,6 +27,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
+import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.LoggingLevel;
 
 /**
  *
@@ -62,6 +64,8 @@ public class SolverTest {
 
     @Test
     public void testSolvers() throws IOException, URISyntaxException, ComputationException {
+        Configurator.currentConfig().level(LoggingLevel.TRACE).activate();
+        
         final Set<String> errors = new LinkedHashSet<>();
         int counter = 0;
         String msg;
