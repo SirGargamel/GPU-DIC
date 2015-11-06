@@ -5,6 +5,7 @@
  */
 package cz.tul.dic;
 
+import java.util.HashSet;
 import java.util.Set;
 import org.pmw.tinylog.Configuration;
 import org.pmw.tinylog.LogEntry;
@@ -25,7 +26,11 @@ public class MultiWriter implements Writer {
 
     @Override
     public Set<LogEntryValue> getRequiredLogEntryValues() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final Set<LogEntryValue> result = new HashSet<>();
+        for (Writer w : writers) {
+            result.addAll(w.getRequiredLogEntryValues());
+        }
+        return result;
     }
 
     @Override
