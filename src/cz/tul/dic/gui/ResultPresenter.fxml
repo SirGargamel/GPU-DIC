@@ -22,7 +22,7 @@
             <center>
             <BorderPane>
                <center>
-                          <ImageView fx:id="image" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
+                          <ImageView fx:id="image" nodeOrientation="INHERIT" onMouseMoved="#handleMouseOverImage" pickOnBounds="true" preserveRatio="true">
                      <cursor>
                         <Cursor fx:constant="CROSSHAIR" />
                      </cursor>

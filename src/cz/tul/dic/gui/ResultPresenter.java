@@ -49,11 +49,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
@@ -91,6 +93,7 @@ public class ResultPresenter implements Initializable {
     private int index;
     private Timeline timeLine;
     private final Map<Stage, ChartHandler> charts;
+    private Tooltip tooltip;
 
     public ResultPresenter() {
         charts = new LinkedHashMap<>();
@@ -277,6 +280,13 @@ public class ResultPresenter implements Initializable {
         }
     }
 
+    @FXML
+    private void handleMouseOverImage(MouseEvent event) {
+        final double x = event.getX();
+        final double y = event.getY();
+        tooltip.setText(x + ", " + y);
+    }
+
     private ExportTarget determineTarget() {
         final ButtonType img = new ButtonType(Lang.getString("TypeImage"));
         final ButtonType csv = new ButtonType(Lang.getString("TypeCsv"));
@@ -345,7 +355,8 @@ public class ResultPresenter implements Initializable {
 
         choiceDir.getSelectionModel().selectFirst();
 
-        image.setPreserveRatio(true);
+        tooltip = new Tooltip();
+        Tooltip.install(image, tooltip);
 
         image.setOnMouseClicked((MouseEvent t) -> {
             try {
@@ -475,7 +486,7 @@ public class ResultPresenter implements Initializable {
                 stage.setScene(new Scene(root));
                 stage
                         .getIcons().add(new javafx.scene.image.Image(MainWindow.class
-                                        .getResourceAsStream("logo.png")));
+                                .getResourceAsStream("logo.png")));
                 stage.show();
             }
         }
