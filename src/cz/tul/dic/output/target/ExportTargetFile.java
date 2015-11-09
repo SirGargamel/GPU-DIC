@@ -113,11 +113,11 @@ public class ExportTargetFile extends AbstractExportTarget {
         if (data != null) {
             overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(data, direction, limits[0], limits[1]));
         } else {
-            overlay = background;
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(ExportUtils.generateNanArray(background.getWidth(), background.getHeight()), direction, 0, 0));
         }
 
         ImageIO.write(overlay, "BMP", target);
-    }
+    }    
 
     @Override
     public void exportVideo(final TaskContainer tc, final IExportMode<List<double[][]>> exporter, final Direction direction, final Object targetParams, final double[] limits) throws IOException {
@@ -163,7 +163,7 @@ public class ExportTargetFile extends AbstractExportTarget {
             if (map != null) {
                 overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(map, direction, limits[0], limits[1]));
             } else {
-                overlay = background;
+                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(ExportUtils.generateNanArray(background.getWidth(), background.getHeight()), direction, 0, 0));
             }
 
             ImageIO.write(overlay, "BMP", target);

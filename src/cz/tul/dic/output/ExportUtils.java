@@ -18,6 +18,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 
 /**
  *
@@ -400,6 +401,14 @@ public final class ExportUtils {
         g.drawString(val, halfWidth - metrics.stringWidth(val) / 2, tY);
 
         g.dispose();
+    }
+    
+    public static double[][] generateNanArray(final int width, final int height) {
+        final double[][] result = new double[width][height];
+        for (double[] dA : result) {
+            Arrays.fill(dA, Double.NaN);
+        }
+        return result;
     }
 
 }

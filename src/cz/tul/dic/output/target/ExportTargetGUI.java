@@ -24,8 +24,8 @@ public class ExportTargetGUI extends AbstractExportTarget {
         final int position = dataParams[0];
         final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay;
-        if (data == null) {
-            overlay = background;
+        if (data == null) {            
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(ExportUtils.generateNanArray(background.getWidth(), background.getHeight()), direction, 0, 0));
         } else {
             final double[] minMax;
             if (Double.isNaN(limits[0]) || Double.isNaN(limits[1])) {
