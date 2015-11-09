@@ -83,10 +83,10 @@ public abstract class Kernel {
             result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(kernelInfo, memManager, wsm);
 
             if (!kernelType.isSafeToUse()) {
-                Logger.warn("Kernel \"{0}\" is not safe to use, results might be inprecise !!!.", kernelType);
+                Logger.warn("Kernel \"{}\" is not safe to use, results might be inprecise !!!.", kernelType);
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.warn("Error instantiating class {0}, using default kernel.", kernelInfo);
+            Logger.warn("Error instantiating class {}, using default kernel.", kernelInfo);
             Logger.error(ex);
             result = new CL1D_I_V_LL_MC_D(kernelInfo, memManager, wsm);
         }
@@ -342,12 +342,12 @@ public abstract class Kernel {
 
     public static void registerListener(final IGPUResultsReceiver listener) {
         LISTENERS.add(listener);
-        Logger.debug("Registering {0} for GPU results.", listener);
+        Logger.trace("Registering {} for GPU results.", listener);
     }
 
     public static void deregisterListener(final IGPUResultsReceiver listener) {
         LISTENERS.remove(listener);
-        Logger.debug("Deregistering {0} for GPU results.", listener);
+        Logger.trace("Deregistering {} for GPU results.", listener);
     }
 
     public KernelInfo getKernelInfo() {

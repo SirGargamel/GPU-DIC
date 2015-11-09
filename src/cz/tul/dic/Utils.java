@@ -31,7 +31,6 @@ public final class Utils {
 
     private static final String TEMP_DIR_NAME = "temp";
     private static final Map<TaskContainer, List<File>> tempFiles;
-
     private static final NumberFormat nfDouble, nfInt;
 
     static {
@@ -68,17 +67,17 @@ public final class Utils {
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         if (temp.exists()) {
-            Logger.trace("Deleting files inside temp folder {0}.", temp.getAbsolutePath());
+            Logger.trace("Deleting files inside temp folder {}.", temp.getAbsolutePath());
 
             List<File> list = tempFiles.get(tc);
             for (File f : list) {
                 if (!f.delete()) {
-                    Logger.warn("Error deleting " + f.getAbsolutePath());
+                    Logger.warn("Error deleting {}", f.getAbsolutePath());
                 }
             }
             list.clear();
             if (temp.listFiles().length == 0 && !temp.delete()) {
-                Logger.warn("Error deleting " + temp.getAbsolutePath());
+                Logger.warn("Error deleting {}", temp.getAbsolutePath());
             }
         }
     }

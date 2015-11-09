@@ -59,7 +59,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         splitterId = instanceCounter++;
         if (coeffMemLimit.get() < COEFF_MEM_LIMIT_INIT) {
             coeffMemLimit.incrementAndGet();
-            Logger.debug("Increasing task size to {0} / {1}.", coeffMemLimit, COEFF_MEM_LIMIT_MAX);
+            Logger.debug("Increasing task size to {} / {}.", coeffMemLimit, COEFF_MEM_LIMIT_MAX);
         }
     }
 
@@ -118,7 +118,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
                 double[] newLimits = new double[deformationLimitsArraySize];
                 System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
                 newLimits[minIndex * 3 + 1] = midPoint;
-                Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
+                Logger.trace("{} - {}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
                 checkedDeformations = new ArrayList<>(1);
                 checkedDeformations.add(newLimits);
                 subSplitters.add(new OpenCLSplitter(new FullTask(image1, image2, sublist, checkedDeformations), true));
@@ -126,15 +126,15 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
                 newLimits = new double[deformationLimitsArraySize];
                 System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
                 newLimits[minIndex * 3] = midPoint + oldLimits[minIndex * 3 + 2];
-                Logger.trace("{0} - {1}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
+                Logger.trace("{} - {}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
                 checkedDeformations = new ArrayList<>(1);
                 checkedDeformations.add(newLimits);
                 subSplitters.add(new OpenCLSplitter(new FullTask(image1, image2, sublist, checkedDeformations), true));
 
                 if (subSplitter) {
-                    Logger.warn("Too many deformations in subtask, {0} generating subsplitters - {1}, {2}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);
+                    Logger.warn("Too many deformations in subtask, {} generating subsplitters - {}, {}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);
                 } else {
-                    Logger.warn("Too many deformations in task, {0} generating subsplitters - {1}, {2}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);
+                    Logger.warn("Too many deformations in task, {} generating subsplitters - {}, {}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);
                 }
                 ct = subSplitters.get(0).next();
             } else {
@@ -158,9 +158,9 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         if (ct == null) {
             ct = new ComputationTask(image1, image2, sublist, checkedDeformations, subSplitter);
             if (subSplitter) {
-                Logger.trace("{0} computing subtask {1}", splitterId, Arrays.toString(ct.getDeformationLimits().get(0)));
+                Logger.trace("{} computing subtask {}", splitterId, Arrays.toString(ct.getDeformationLimits().get(0)));
             } else if (sublist != null) {
-                Logger.trace("{0} computing task with {1} subsets.", splitterId, sublist.size());
+                Logger.trace("{} computing task with {} subsets.", splitterId, sublist.size());
             } else {
                 Logger.error("NULL subset sublist !!!");
             }
@@ -216,7 +216,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
     @Override
     public void signalTaskSizeTooBig() {
         coeffMemLimit.decrementAndGet();
-        Logger.debug("Lowering task size to {0} / {1}.", coeffMemLimit, COEFF_MEM_LIMIT_MAX);
+        Logger.debug("Lowering task size to {} / {}.", coeffMemLimit, COEFF_MEM_LIMIT_MAX);
     }
 
     @Override

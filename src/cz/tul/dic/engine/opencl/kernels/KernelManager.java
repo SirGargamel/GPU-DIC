@@ -67,7 +67,7 @@ public class KernelManager {
             }
         }
         BEST_KERNEL = bestKernel;
-        Logger.debug("{0} selected as best kernel.", BEST_KERNEL);
+        Logger.debug("{} selected as best kernel.", BEST_KERNEL);
 
         inited = true;
     }

@@ -133,7 +133,7 @@ public final class Engine extends Observable implements Observer {
 
         final long time = System.currentTimeMillis();
 
-        Logger.trace("Computing round {0}:{1} - {2}.", roundFrom, roundTo, task);
+        Logger.trace("Computing round {}:{} - {}.", roundFrom, roundTo, task);
         final Set<Hint> hints = task.getHints();
         if (hints.contains(Hint.NO_STATS)) {
             DebugControl.pauseDebugMode();
@@ -210,7 +210,7 @@ public final class Engine extends Observable implements Observer {
             Logger.warn(ex);
         }
 
-        Logger.debug("Computed round {0}:{1}.", roundFrom, roundTo);
+        Logger.debug("Computed round {}:{}.", roundFrom, roundTo);
 
         setChanged();
         notifyObservers(System.currentTimeMillis() - time);

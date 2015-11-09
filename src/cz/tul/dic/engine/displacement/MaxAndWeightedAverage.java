@@ -92,7 +92,7 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
 
                 f = susbets.get(i);
                 if (f == null) {
-                    Logger.warn("No subset - {0}", f);
+                    Logger.warn("No subset - {}", f);
                     continue;
                 }
                 if (!SubsetUtils.areLinesInsideSubset(f, lowerBound, upperBound)) {

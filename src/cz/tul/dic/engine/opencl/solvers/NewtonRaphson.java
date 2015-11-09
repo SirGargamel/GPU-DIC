@@ -344,9 +344,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 return subset;
             } catch (Exception ex) {
                 if (ex.getStackTrace().length == 0) {
-                    Logger.warn("{0} stop, exception occured - {1}, no stack trace...", subset, ex);
+                    Logger.warn("{} stop, exception occured - {}, no stack trace...", subset, ex);
                 } else {
-                    Logger.warn(ex, "{0} stop, exception occured.", subset);
+                    Logger.warn(ex, "{} stop, exception occured.", subset);
                 }
                 addSubsetTerminationInfo(subset, "StepMaker exception - " + ex);
                 return subset;

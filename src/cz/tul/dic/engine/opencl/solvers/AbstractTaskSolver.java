@@ -64,7 +64,7 @@ public abstract class AbstractTaskSolver extends Observable {
             final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.solvers.".concat(type.getClassName()));
             return (AbstractTaskSolver) cls.newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            Logger.warn("Error instantiating class {0}, using default correlation calculator.", type);
+            Logger.warn("Error instantiating class {}, using default correlation calculator.", type);
             Logger.error(ex);
             return new NewtonRaphsonCentral();
         }
@@ -82,7 +82,7 @@ public abstract class AbstractTaskSolver extends Observable {
         computationInfo.clear();
 
         kernel = Kernel.createInstance(kernelType, memManager);
-        Logger.trace("Kernel prepared - {0}", kernel);
+        Logger.trace("Kernel prepared - {}", kernel);
 
         this.subsetSize = subsetSize;
 
@@ -91,7 +91,7 @@ public abstract class AbstractTaskSolver extends Observable {
         final List<CorrelationResult> result = solve(kernel, fullTask);
 
         time = System.nanoTime() - time;
-        Logger.debug("Task [{0}] computed in {1}ms using {2}.", fullTask, time / 1_000_000, getClass().getSimpleName());
+        Logger.debug("Task [{}] computed in {}ms using {}.", fullTask, time / 1_000_000, getClass().getSimpleName());
         Logger.debug(dumpComputationInfo());
 
         kernel.clearMemory();
@@ -131,7 +131,7 @@ public abstract class AbstractTaskSolver extends Observable {
         }
 
         if (!stop) {
-            Logger.trace("Found solution for {0} subsets.", result.size());
+            Logger.trace("Found solution for {} subsets.", result.size());
         }
 
         return result;

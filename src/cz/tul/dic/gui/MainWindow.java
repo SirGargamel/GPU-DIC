@@ -291,7 +291,7 @@ public class MainWindow implements Initializable {
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading ROI dialog from JAR.\n{0}", e);
+            Logger.error("Error loading ROI dialog from JAR.\n{}", e);
         }
     }
 
@@ -307,7 +307,7 @@ public class MainWindow implements Initializable {
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading Expert settings dialog from JAR.\n{0}", e);
+            Logger.error("Error loading Expert settings dialog from JAR.\n{}", e);
         }
     }
 
@@ -329,7 +329,7 @@ public class MainWindow implements Initializable {
             });
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading Results dialog from JAR.\n{0}", e);
+            Logger.error("Error loading Results dialog from JAR.\n{}", e);
         }
     }
 
@@ -353,7 +353,7 @@ public class MainWindow implements Initializable {
             }
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading PxToMmMapper dialog from JAR.\n{0}", e);
+            Logger.error("Error loading PxToMmMapper dialog from JAR.\n{}", e);
         }
     }
 

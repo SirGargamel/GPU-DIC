@@ -212,7 +212,7 @@ public class Stats implements IGPUResultsReceiver {
                         if (counter != null) {
                             counter.inc(cr.getDeformation());
                         } else {
-                            Logger.warn("Illegal correlation value - {0}", cr.getQuality());
+                            Logger.warn("Illegal correlation value - {}", cr.getQuality());
                         }
                     }
                 }

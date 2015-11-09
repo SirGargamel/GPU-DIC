@@ -114,7 +114,7 @@ public class CircleROIManager extends AbstractROIManager {
         final double shift1 = determineROIShift(round, topRight);
         final double shift2 = determineROIShift(round, bottomLeft);
         final double shift3 = determineROIShift(round, bottomRight);
-        Logger.trace("Detected jaw shifts - TOP : {0}; {1}; BOTTOM : {2}, {3}", shift0, shift1, shift2, shift3);
+        Logger.trace("Detected jaw shifts - TOP : {}; {}; BOTTOM : {}, {}", shift0, shift1, shift2, shift3);
         //// check if left equals right
         if (Math.abs(shift2 - shift3) > MAX_SHIFT_DIFFERENCE) {
             Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat("-LOWER- ").concat(Double.toString(shift2)).concat(" vs ".concat(Double.toString(shift3))));

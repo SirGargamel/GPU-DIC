@@ -46,7 +46,7 @@ import org.pmw.tinylog.writers.RollingFileWriter;
  */
 public class DicMain extends Application {
 
-    private static final boolean DEBUG_COMPUTE_PREPROCESSING = true;
+    private static final boolean DEBUG_COMPUTE_PREPROCESSING = false;
     private static final String DEBUG_SMALL = "-d";
     private static final String DEBUG_COMPUTE = "-debug";
     private static final String LICENSE_FILE = "license.dat";
@@ -409,9 +409,9 @@ public class DicMain extends Application {
                 InputLoader.loadInput(newTask, newTask);
 
                 Engine.getInstance().computeTask(newTask);
-                Logger.info("Computed {0}", imagesA[i].getAbsolutePath());
+                Logger.info("Computed {}", imagesA[i].getAbsolutePath());
             } catch (Exception ex) {
-                Logger.error(ex, "{0}", newTask);
+                Logger.error(ex, "{}", newTask);
             }
         }
     }

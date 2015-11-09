@@ -67,14 +67,14 @@ public abstract class ColorMap {
                             Integer.valueOf(split[3].trim()).byteValue()};
                         result.put(iVal, color);
                     } catch (NumberFormatException ex) {
-                        Logger.warn(ex, "Illegal values in color map file - {0}", line);
+                        Logger.warn(ex, "Illegal values in color map file - {}", line);
                     }
                 } else {
-                    Logger.warn("Illegal line in color map file - {0}", line);
+                    Logger.warn("Illegal line in color map file - {}", line);
                 }
             }
         } catch (IOException ex) {
-            Logger.error(ex, "Error loading color map file {0}", colorMapType);
+            Logger.error(ex, "Error loading color map file {}", colorMapType);
         }
         return result;
     }

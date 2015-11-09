@@ -71,7 +71,7 @@ public class ExportTargetFile extends AbstractExportTarget {
 
         for (int i = 0; i < data.size(); i++) {
             if (data.get(i) != null) {
-                exportMap(data.get(i), direction, new File(subTarget + "-" + nf.format(fpsM.getTime(i)) + fpsM.getTickUnit() + EXTENSION), new int[]{i}, tc, minMax);
+                exportMap(data.get(i), direction, new File(subTarget + "-" + nf.format(fpsM.getTime(i)) + fpsM.getTickUnit() + EXTENSION), new int[]{}, tc, minMax);
             }
         }
     }

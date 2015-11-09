@@ -210,7 +210,7 @@ public class ResultPresenter implements Initializable {
                             Exporter.export(tc, ExportTask.generateMapExport(choiceDir.getValue(), eTarget, new File(NameGenerator.generateCsvMap(tc, index, choiceDir.getValue())), index, getLimits()));
                             break;
                         default:
-                            Logger.warn("Illegal target - {0}", eTarget);
+                            Logger.warn("Illegal target - {}", eTarget);
                             break;
                     }
                 }
@@ -392,7 +392,7 @@ public class ResultPresenter implements Initializable {
                     openTwoPointStrainAnalysis(context);
                 }
             } catch (IOException e) {
-                Logger.error("Error loading Results dialog from JAR.\n{0}", e);
+                Logger.error("Error loading Results dialog from JAR.\n{}", e);
             }
         });
 

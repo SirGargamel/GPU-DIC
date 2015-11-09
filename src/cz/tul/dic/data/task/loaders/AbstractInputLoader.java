@@ -74,16 +74,16 @@ public abstract class AbstractInputLoader {
                         try {
                             fps = Integer.parseInt(val);
                         } catch (NumberFormatException ex) {
-                            Logger.warn("Failed to parse FPS value \"{0}\", using default FPS - ", val, fps);
+                            Logger.warn("Failed to parse FPS value \"{}\", using default FPS - ", val, fps);
                         }
                         break;
                     }
                 }
             } catch (IOException ex) {
-                Logger.warn("Missing UDA file, using default FPS - {0}", fps);
+                Logger.warn("Missing UDA file, using default FPS - {}", fps);
             }
         } else {
-            Logger.warn("Missing UDA file, using default FPS - {0}", fps);
+            Logger.warn("Missing UDA file, using default FPS - {}", fps);
         }
         tc.setParameter(TaskParameter.FPS, fps);
     }

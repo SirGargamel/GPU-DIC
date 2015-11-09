@@ -42,7 +42,7 @@ public abstract class DisplacementCalculator {
         final DisplacementCalculation type = (DisplacementCalculation) o;
 
         if (DATA.containsKey(type)) {
-            Logger.trace("Calculationg displacement for round {0} using {1}.", round, type);
+            Logger.trace("Calculationg displacement for round {} using {}.", round, type);
             return DATA.get(type).buildFinalResults(correlationResults, allSubsets, tc, round);
         } else {
             throw new IllegalArgumentException("Unsupported displacement calculation - " + type.toString());

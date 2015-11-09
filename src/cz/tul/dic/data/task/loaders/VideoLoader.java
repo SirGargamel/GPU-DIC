@@ -83,7 +83,7 @@ public class VideoLoader extends AbstractInputLoader {
     }
 
     private static List<File> loadVideoByVirtualDub(File input, final File temp, final File sequenceConfigFile) throws IOException {
-        Logger.trace("Cache data for file {0} invalid, using VirtualDub.", input.getAbsolutePath());
+        Logger.trace("Cache data for file {} invalid, using VirtualDub.", input.getAbsolutePath());
         // prepare script
         String script = loadScript();
         script = script.replace(SCRIPT_FILE, input.getAbsolutePath());
@@ -202,7 +202,7 @@ public class VideoLoader extends AbstractInputLoader {
                 }
             }
         }
-        Logger.trace("Found valid cache data for file {0}, importing {1} images.", source.getAbsolutePath(), result.size());
+        Logger.trace("Found valid cache data for file {}, importing {} images.", source.getAbsolutePath(), result.size());
         return result;
     }
 
