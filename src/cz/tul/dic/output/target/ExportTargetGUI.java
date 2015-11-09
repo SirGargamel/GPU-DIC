@@ -7,7 +7,6 @@ import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.data.IExportMode;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 public class ExportTargetGUI extends AbstractExportTarget {
@@ -41,7 +40,7 @@ public class ExportTargetGUI extends AbstractExportTarget {
                 minMax = new double[]{limits[0], limits[1]};
             }
 
-            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction, minMax));
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap((double[][]) data, direction, minMax[0], minMax[1]));
         }
         final Context context = (Context) targetParam;
         context.storeMapExport(overlay, position, direction);

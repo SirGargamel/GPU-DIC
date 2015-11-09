@@ -23,7 +23,6 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import javax.imageio.ImageIO;
 
 /**
@@ -112,7 +111,7 @@ public class ExportTargetFile extends AbstractExportTarget {
         final BufferedImage background = tc.getImage(position);
         final BufferedImage overlay;
         if (data != null) {
-            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(data, direction, limits));
+            overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(data, direction, limits[0], limits[1]));
         } else {
             overlay = background;
         }
@@ -162,7 +161,7 @@ public class ExportTargetFile extends AbstractExportTarget {
             final BufferedImage overlay;
             map = data.get(i);
             if (map != null) {
-                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(map, direction, limits));
+                overlay = ExportUtils.overlayImage(background, ExportUtils.createImageFromMap(map, direction, limits[0], limits[1]));
             } else {
                 overlay = background;
             }

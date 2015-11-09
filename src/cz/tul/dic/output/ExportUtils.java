@@ -7,6 +7,9 @@ package cz.tul.dic.output;
 
 import cz.tul.dic.data.result.StrainResult;
 import cz.tul.dic.data.roi.AbstractROI;
+import cz.tul.dic.output.color.AbsoluteColorMap;
+import cz.tul.dic.output.color.ColorMap;
+import cz.tul.dic.output.color.GeneralColorMap;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -30,13 +33,9 @@ public final class ExportUtils {
     private static final int BAR_SIZE_VERT = 30;
     private static final int BAR_SIZE_HOR = 15;
     private static final NumberFormat NF = new DecimalFormat("0.0#");
-    private static final double COLOR_CENTER = 75 / 360.0;
-    private static final double COLOR_GAP = 5 / 360.0;
-    private static final double COLOR_RANGE_POS = 160 / 360.0;
-    private static final double COLOR_RANGE_NEG = 75 / 360.0;
     private static final int LIMIT_WIDTH = 180;
     private static final int LIMIT_HEIGHT = 180;
-    private static final int COLOR_NAN = Color.MAGENTA.getRGB();
+    private static final ColorMap.Type COLOR_MAP_TYPE = ColorMap.Type.CoolWarm;
     private static boolean debugMode;
 
     static {
@@ -161,7 +160,7 @@ public final class ExportUtils {
 
         final double[] minMax = findMinMax(mapData);
 
-        return createImageFromMap(mapData, dir, minMax);
+        return createImageFromMap(mapData, dir, minMax[0], minMax[1]);
     }
 
     public static double[] findMinMax(final double[][] data) {
@@ -185,7 +184,7 @@ public final class ExportUtils {
         return new double[]{min, max};
     }
 
-    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double[] minMax) {
+    public static BufferedImage createImageFromMap(final double[][] mapData, final Direction dir, final double min, final double max) {
         if (mapData == null || mapData.length == 0 || mapData[0].length == 0) {
             throw new IllegalArgumentException("Illegal map data .");
         }
@@ -193,6 +192,40 @@ public final class ExportUtils {
         final int width = mapData.length;
         final int height = mapData[0].length;
         final BufferedImage out;
+
+        final ColorMap colorMap;
+        switch (dir) {
+            case D_DABS:
+            case DABS:
+            case D_EABS:
+            case EABS:
+            case R_DABS:
+            case Q_D:
+            case Q_D_D:
+            case O_D_EX:
+            case O_D_EY:
+            case O_EX:
+            case O_EY:
+                colorMap = new AbsoluteColorMap(COLOR_MAP_TYPE, max);
+                break;
+            case D_DX:
+            case DX:
+            case D_DY:
+            case DY:
+            case D_EXX:
+            case EXX:
+            case D_EYY:
+            case EYY:
+            case D_EXY:
+            case EXY:
+            case R_DX:
+            case R_DY:
+                colorMap = new GeneralColorMap(COLOR_MAP_TYPE, min, max);
+                break;
+            default:
+                throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + dir);
+        }
+        colorMap.enableDebugMode(debugMode);
 
         switch (dir) {
             case D_DABS:
@@ -232,7 +265,7 @@ public final class ExportUtils {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                out.setRGB(x, y, deformationToRGB(mapData[x][y], minMax[0], minMax[1]));
+                out.setRGB(x, y, colorMap.getRGBColor(mapData[x][y]));
             }
         }
 
@@ -248,7 +281,7 @@ public final class ExportUtils {
             case O_D_EY:
             case O_EX:
             case O_EY:
-                drawVerticalBarAbsoluteValues(out, minMax[0], minMax[1]);
+                drawVerticalBarAbsoluteValues(out, min, max);
                 break;
             case D_DY:
             case DY:
@@ -257,52 +290,20 @@ public final class ExportUtils {
             case EYY:
             case EXY:
             case R_DY:
-                drawVerticalBar(out, minMax[0], minMax[1]);
+                drawVerticalBar(out, min, max);
                 break;
             case D_DX:
             case DX:
             case D_EXX:
             case EXX:
             case R_DX:
-                drawHorizontalBar(out, minMax[0], minMax[1]);
+                drawHorizontalBar(out, min, max);
                 break;
             default:
                 throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + dir);
         }
 
         return out;
-    }
-
-    private static int deformationToRGB(final double val, final double min, final double max) {
-        final int result;
-        if (Double.isNaN(val)) {
-            if (debugMode) {
-                result = COLOR_NAN;
-            } else {
-                result = Color.HSBtoRGB(0, 1, 0);
-            }
-        } else {
-            float h, s = 1, b = 1;
-            double fract;
-            final double midlle = (max + min) / 2.0;
-            final double half = max - midlle;
-            if (val >= min && val <= max) {
-                if (val < midlle) {
-                    fract = -(val - midlle) / half;
-                    h = (float) (fract * COLOR_RANGE_POS + COLOR_CENTER + COLOR_GAP);
-                } else {
-                    fract = (val - midlle) / half;
-                    h = (float) (COLOR_CENTER - COLOR_GAP - (fract * COLOR_RANGE_NEG));
-                }
-            } else {
-                h = 1;
-                s = 0;
-                b = 0.5f;
-            }
-
-            result = Color.HSBtoRGB(h, s, b);
-        }
-        return result;
     }
 
     private static void drawVerticalBar(final BufferedImage image, final double min, final double max) {
@@ -315,10 +316,12 @@ public final class ExportUtils {
         final double middle = (max + min) / 2.0;
         final double quarter = (max - middle) / 2.0;
 
+        final ColorMap colorMap = new GeneralColorMap(COLOR_MAP_TYPE, 0, height - 1);
+
         final int width = image.getWidth();
         // positive part           
         for (int y = 0; y < height; y++) {
-            g.setColor(new Color(deformationToRGB(y, 0, height - 1)));
+            g.setColor(new Color(colorMap.getRGBColor(y)));
             g.drawRect(x, y, BAR_SIZE_VERT, 1);
         }
 
@@ -335,6 +338,7 @@ public final class ExportUtils {
     }
 
     private static void drawVerticalBarAbsoluteValues(final BufferedImage image, final double min, final double max) {
+        final int width = image.getWidth();
         final int height = image.getHeight();
 
         final Graphics2D g = image.createGraphics();
@@ -344,10 +348,10 @@ public final class ExportUtils {
         final double middle = (max + min) / 2.0;
         final double quarter = (max - middle) / 2.0;
 
-        final int width = image.getWidth();
+        final ColorMap colorMap = new AbsoluteColorMap(COLOR_MAP_TYPE, height - 1);
         // positive part           
         for (int y = 0; y < height; y++) {
-            g.setColor(new Color(deformationToRGB(height - 1 - y, 0, height - 1)));
+            g.setColor(new Color(colorMap.getRGBColor(height - 1 - y)));
             g.drawRect(x, y, BAR_SIZE_VERT, 1);
         }
 
@@ -377,8 +381,10 @@ public final class ExportUtils {
         final double middle = (max + min) / 2.0;
         final double quarter = (max - middle) / 2.0;
 
+        final ColorMap colorMap = new GeneralColorMap(COLOR_MAP_TYPE, 0, width - 1);
+
         for (int x = 0; x < width; x++) {
-            g.setColor(new Color(deformationToRGB(width - x - 1, 0, width - 1)));
+            g.setColor(new Color(colorMap.getRGBColor(width - x - 1)));
             g.drawRect(width - 1 - x, y, 1, BAR_SIZE_HOR);
         }
 
