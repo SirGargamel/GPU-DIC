@@ -134,9 +134,9 @@ public class ResultPresenter implements Initializable {
 
             final Scene s = image.getParent().getScene();
             if (s != null) {
-                double width = Math.max(MIN_WIDTH, image.getParent().getBoundsInLocal().getWidth() + EXTRA_WIDTH);
+                double width = Math.max(MIN_WIDTH, img.getWidth() + EXTRA_WIDTH);
                 s.getWindow().setWidth(width);
-                s.getWindow().setHeight(image.getParent().getBoundsInLocal().getHeight() + EXTRA_HEIGHT);
+                s.getWindow().setHeight(img.getHeight() + EXTRA_HEIGHT);
             }
         } else {
             image.setImage(null);
