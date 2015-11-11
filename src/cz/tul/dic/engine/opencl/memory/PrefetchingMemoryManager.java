@@ -17,7 +17,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import cz.tul.dic.engine.opencl.kernels.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -52,16 +52,21 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
             } else {
                 release(clImageA);
                 release(clImageB);
-                if (kernel.getKernelInfo().usesImage()) {
-                    clImageA = generateImage2d(task.getImageA());
-                    queue.putWriteImage((CLImage2d<?>) clImageA, false);
-                    clImageB = generateImage2d(task.getImageB());
-                    queue.putWriteImage((CLImage2d<?>) clImageB, false);
-                } else {
-                    clImageA = generateImageArray(task.getImageA());
-                    queue.putWriteBuffer((CLBuffer<?>) clImageA, false);
-                    clImageB = generateImageArray(task.getImageB());
-                    queue.putWriteBuffer((CLBuffer<?>) clImageB, false);
+                switch (kernel.getKernelInfo().getInput()) {
+                    case IMAGE:
+                        clImageA = generateImage2d(task.getImageA());
+                        queue.putWriteImage((CLImage2d<?>) clImageA, false);
+                        clImageB = generateImage2d(task.getImageB());
+                        queue.putWriteImage((CLImage2d<?>) clImageB, false);
+                        break;
+                    case ARRAY:
+                        clImageA = generateImageArray(task.getImageA());
+                        queue.putWriteBuffer((CLBuffer<?>) clImageA, false);
+                        clImageB = generateImageArray(task.getImageB());
+                        queue.putWriteBuffer((CLBuffer<?>) clImageB, false);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported type of input - " + kernel.getKernelInfo().getInput());
                 }
             }
 
@@ -128,11 +133,17 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
     private void init(final TaskContainer task) {
         final KernelInfo kt = (KernelInfo) task.getParameter(TaskParameter.KERNEL);
         final Kernel k = Kernel.createInstance(kt, this);
-        if (k.getKernelInfo().usesImage()) {
-            generateImagesAsImage2Dt(task.getImages());
-        } else {
-            generateImagesAsArray(task.getImages());
+        switch (k.getKernelInfo().getInput()) {
+            case IMAGE:
+                generateImagesAsImage2Dt(task.getImages());
+                break;
+            case ARRAY:
+                generateImagesAsArray(task.getImages());
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported type of input - " + k.getKernelInfo().getInput());
         }
+
         inited = true;
     }
 

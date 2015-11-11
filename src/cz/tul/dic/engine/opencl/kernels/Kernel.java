@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.kernels;
 
+import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.engine.opencl.kernels.sources.KernelSourcePreparator;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
@@ -57,16 +58,16 @@ public abstract class Kernel {
     protected final WorkSizeManager wsm;
     private final KernelInfo kernelInfo;
     private final Set<CLResource> clMem;
-    private final AbstractOpenCLMemoryManager memManager;    
+    private final AbstractOpenCLMemoryManager memManager;
 
     static {
         LISTENERS = new LinkedList<>();
     }
 
     protected Kernel(final KernelInfo info, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
-        this.kernelInfo = info;
+        this.kernelInfo = KernelManager.getBestKernel(info);
         clMem = new HashSet<>();
-        
+
         this.memManager = memManager;
         this.wsm = wsm;
 
@@ -78,30 +79,48 @@ public abstract class Kernel {
         final WorkSizeManager wsm = new WorkSizeManager(kernelInfo);
         Kernel result;
         try {
-            final KernelType kernelType = kernelInfo.getType();
-            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));            
+            final KernelInfo.Type kernelType = kernelInfo.getType();
+            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));
             result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(kernelInfo, memManager, wsm);
-
-            if (!kernelType.isSafeToUse()) {
-                Logger.warn("Kernel \"{}\" is not safe to use, results might be inprecise !!!.", kernelType);
-            }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.warn("Error instantiating class {}, using default kernel.", kernelInfo);
+            Logger.warn("Error instantiating kernel with kernel info [{}], using default kernel.", kernelInfo);
             Logger.error(ex);
             result = new CL1D_I_V_LL_MC_D(kernelInfo, memManager, wsm);
         }
-        
-        
-        
+
         return result;
     }
 
     public void prepareKernel(final int subsetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
         try {
+            final boolean usesZncc;
+            switch (kernelInfo.getCorrelation()) {
+                case ZNCC:
+                    usesZncc = true;
+                    break;
+                case ZNSSD:
+                    usesZncc = false;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported type of kernel - " + kernelInfo.getCorrelation());
+            }
+            
+            final boolean usesImage;
+            switch (kernelInfo.getInput()) {
+                case IMAGE:
+                    usesImage = true;
+                    break;
+                case ARRAY:
+                    usesImage = false;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported type of input - " + kernelInfo.getInput());
+            }
+
             CLProgram program = context.createProgram(
                     KernelSourcePreparator.prepareKernel(
                             subsetSize, deg, is2D(), usesVectorization(),
-                            interpolation, kernelInfo.usesImage(), usesLocalMemory(), usesMemoryCoalescing(), subsetsGroupped(), kernelInfo.usesZNCC())).build();
+                            interpolation, usesImage, usesLocalMemory(), usesMemoryCoalescing(), subsetsGroupped(), usesZncc)).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
             clMem.add(kernelDIC);
@@ -265,7 +284,7 @@ public abstract class Kernel {
 
     public boolean usesVectorization() {
         return false;
-    }    
+    }
 
     public boolean usesLocalMemory() {
         return false;
@@ -274,7 +293,7 @@ public abstract class Kernel {
     public boolean is2D() {
         return false;
     }
-    
+
     public boolean subsetsGroupped() {
         return false;
     }

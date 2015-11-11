@@ -36,12 +36,17 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
                 if (task.getImageA() == imageB) {
                     clImageA = clImageB;
                 } else {
-                    if (kernel.getKernelInfo().usesImage()) {
-                        clImageA = generateImage2d(imageA);
-                        queue.putWriteImage((CLImage2d<?>) clImageA, false);
-                    } else {
-                        clImageA = generateImageArray(imageA);
-                        queue.putWriteBuffer((CLBuffer<?>) clImageA, false);
+                    switch (kernel.getKernelInfo().getInput()) {
+                        case IMAGE:
+                            clImageA = generateImage2d(task.getImageA());
+                            queue.putWriteImage((CLImage2d<?>) clImageA, false);
+                            break;
+                        case ARRAY:
+                            clImageA = generateImageArray(task.getImageA());
+                            queue.putWriteBuffer((CLBuffer<?>) clImageA, false);
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unsupported type of input - " + kernel.getKernelInfo().getInput());
                     }
                 }
             }
@@ -51,12 +56,17 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
                 }
                 imageB = task.getImageB();
 
-                if (kernel.getKernelInfo().usesImage()) {
-                    clImageB = generateImage2d(imageB);
-                    queue.putWriteImage((CLImage2d<?>) clImageB, false);
-                } else {
-                    clImageB = generateImageArray(imageB);
-                    queue.putWriteBuffer((CLBuffer<?>) clImageB, false);
+                switch (kernel.getKernelInfo().getInput()) {
+                    case IMAGE:
+                        clImageB = generateImage2d(task.getImageB());
+                        queue.putWriteImage((CLImage2d<?>) clImageB, false);
+                        break;
+                    case ARRAY:
+                        clImageB = generateImageArray(task.getImageB());
+                        queue.putWriteBuffer((CLBuffer<?>) clImageB, false);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported type of input - " + kernel.getKernelInfo().getInput());
                 }
             }
 
@@ -104,7 +114,7 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
             throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
         }
     }
-    
+
     @Override
     public void assignTask(TaskContainer task) {
         // do nothing, data are copied right before computation or reused from previous one 

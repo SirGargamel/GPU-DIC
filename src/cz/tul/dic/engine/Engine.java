@@ -27,7 +27,7 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.engine.opencl.kernels.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import cz.tul.dic.output.NameGenerator;
 import java.io.File;

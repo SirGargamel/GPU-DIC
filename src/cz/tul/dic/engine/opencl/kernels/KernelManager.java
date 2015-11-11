@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.kernels;
 
+import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.subset.AbstractSubset;
@@ -12,10 +13,12 @@ import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
+import cz.tul.dic.engine.opencl.kernels.info.KernelInfo.Type;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.pmw.tinylog.Logger;
@@ -26,7 +29,7 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelManager {
 
-    private static final KernelInfo BEST_KERNEL;
+    private static final KernelInfo DEFAULT_KERNEL;
     private static boolean inited;
 
     static {
@@ -39,37 +42,16 @@ public class KernelManager {
         solver.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
 
         try {
-            for (KernelType kt : KernelType.values()) {
-                if (kt.isSafeToUse()) {
-                    testKernelInfo(solver, new KernelInfo(kt, true, true));
-                    testKernelInfo(solver, new KernelInfo(kt, false, true));
-                    testKernelInfo(solver, new KernelInfo(kt, true, false));
-                    testKernelInfo(solver, new KernelInfo(kt, false, false));
-                }
+            for (KernelInfo ki : generateKernelInfos()) {
+                testKernelInfo(solver, ki);
             }
         } catch (ComputationException ex) {
             Logger.debug(ex);
             throw new RuntimeException("Error initializing OpenCL.", ex);
         }
         solver.endTask();
-        // find best performing kernel        
-        final Map<KernelInfo, Map<Long, Map<Long, Long>>> TIME_DATA = WorkSizeManager.getTimeData();
-        double performance;
-        double bestPerformance = Double.NEGATIVE_INFINITY;
-        KernelInfo bestKernel = null;
-        for (KernelInfo ki : TIME_DATA.keySet()) {
-            for (Map.Entry<Long, Map<Long, Long>> e : TIME_DATA.get(ki).entrySet()) {
-                for (Map.Entry<Long, Long> e2 : e.getValue().entrySet()) {
-                    performance = (e.getKey() * e2.getKey()) / (double) e2.getValue();
-                    if (performance > bestPerformance) {
-                        bestPerformance = performance;
-                        bestKernel = ki;
-                    }
-                }
-            }
-        }
-        BEST_KERNEL = bestKernel;
-        Logger.debug("{} selected as best kernel.", BEST_KERNEL);
+        DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST);
+        Logger.debug("{} selected as best kernel.", DEFAULT_KERNEL);
 
         inited = true;
     }
@@ -90,21 +72,97 @@ public class KernelManager {
                 fs);
     }
 
+    public static KernelInfo getBestKernel(final KernelInfo kernelInfo) {
+        final List<KernelInfo> infos = generatePossibleInfos(kernelInfo);
+        if (infos.size() == 1) {
+            return infos.get(0);
+        }
+
+        // find best performing kernel        
+        final Map<KernelInfo, Map<Long, Map<Long, Long>>> TIME_DATA = WorkSizeManager.getTimeData();
+        double performance;
+        double bestPerformance = Double.NEGATIVE_INFINITY;
+        KernelInfo bestKernel = null;
+        for (KernelInfo ki : infos) {
+            for (Map.Entry<Long, Map<Long, Long>> e : TIME_DATA.get(ki).entrySet()) {
+                for (Map.Entry<Long, Long> e2 : e.getValue().entrySet()) {
+                    performance = (e.getKey() * e2.getKey()) / (double) e2.getValue();
+                    if (performance > bestPerformance) {
+                        bestPerformance = performance;
+                        bestKernel = ki;
+                    }
+                }
+            }
+        }
+        return bestKernel;
+    }
+
     public static List<KernelInfo> generateKernelInfos() {
         final ArrayList<KernelInfo> result = new ArrayList<>();
 
-        for (KernelType kt : KernelType.values()) {
-            result.add(new KernelInfo(kt, true, true));
-            result.add(new KernelInfo(kt, false, true));
-            result.add(new KernelInfo(kt, true, false));
-            result.add(new KernelInfo(kt, false, false));
+        for (KernelInfo.Type kt : KernelInfo.Type.values()) {
+            if (kt == KernelInfo.Type.BEST) {
+                continue;
+            }
+
+            for (KernelInfo.Input in : KernelInfo.Input.values()) {
+                if (in == KernelInfo.Input.BEST) {
+                    continue;
+                }
+
+                for (KernelInfo.Correlation cor : KernelInfo.Correlation.values()) {
+                    if (cor == KernelInfo.Correlation.BEST) {
+                        continue;
+                    }
+
+                    result.add(new KernelInfo(kt, in, cor));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static List<KernelInfo> generatePossibleInfos(final KernelInfo kernelInfo) {
+        final ArrayList<KernelInfo> result = new ArrayList<>();
+
+        final List<Type> kernels = new ArrayList<>();
+        if (kernelInfo.getType() == Type.BEST) {
+            kernels.addAll(Arrays.asList(Type.values()));
+            kernels.remove(Type.BEST);
+        } else {
+            kernels.add(kernelInfo.getType());
+        }
+        
+        final List<KernelInfo.Input> inputs = new ArrayList<>();
+        if (kernelInfo.getInput() == KernelInfo.Input.BEST) {
+            inputs.addAll(Arrays.asList(KernelInfo.Input.values()));
+            inputs.remove(KernelInfo.Input.BEST);
+        } else {
+            inputs.add(kernelInfo.getInput());
+        }
+        
+        final List<KernelInfo.Correlation> correlations = new ArrayList<>();
+        if (kernelInfo.getCorrelation()== KernelInfo.Correlation.BEST) {
+            correlations.addAll(Arrays.asList(KernelInfo.Correlation.values()));
+            correlations.remove(KernelInfo.Correlation.BEST);
+        } else {
+            correlations.add(kernelInfo.getCorrelation());
+        }
+
+        for (Type kt : kernels) {
+            for (KernelInfo.Input in : inputs) {
+                for (KernelInfo.Correlation cor : correlations) {
+                    result.add(new KernelInfo(kt, in, cor));
+                }
+            }
         }
 
         return result;
     }
 
     public static KernelInfo getBestKernel() {
-        return BEST_KERNEL;
+        return DEFAULT_KERNEL;
     }
 
     public static boolean isInited() {

@@ -14,8 +14,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
-import cz.tul.dic.engine.opencl.kernels.KernelInfo;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
+import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import java.io.File;
@@ -63,7 +62,7 @@ public class ConfigTest {
         Assert.assertEquals(2, (int) task.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM));
         Assert.assertEquals(15, (int) task.getParameter(TaskParameter.SUBSET_SIZE));
         Assert.assertEquals(5000, (int) task.getParameter(TaskParameter.FPS));
-        Assert.assertEquals(new KernelInfo(KernelType.CL1D_I_V_LL_MC_D, true, true), task.getParameter(TaskParameter.KERNEL));
+        Assert.assertEquals(new KernelInfo(KernelInfo.Type.CL1D_I_V_LL_MC_D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST), task.getParameter(TaskParameter.KERNEL));
         Assert.assertEquals(TaskSplitMethod.DYNAMIC, task.getParameter(TaskParameter.TASK_SPLIT_METHOD));
         Assert.assertEquals(1000, (int) task.getParameter(TaskParameter.TASK_SPLIT_PARAM));
         Assert.assertEquals(Interpolation.BICUBIC, task.getParameter(TaskParameter.INTERPOLATION));

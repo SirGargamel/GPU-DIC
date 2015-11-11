@@ -20,13 +20,12 @@ import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
-import cz.tul.dic.engine.opencl.kernels.KernelType;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
-import cz.tul.dic.engine.opencl.kernels.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.io.File;
@@ -276,14 +275,8 @@ public class EngineTest {
             }
         }
 
-        if (errorCount > 0) {
-            final KernelInfo kt = (KernelInfo) tc.getParameter(TaskParameter.KERNEL);
-            if (kt.getType().isSafeToUse()) {
-                return generateDescription(fileName, tc, errorCount);
-            } else {
-                System.out.println(" !!! Failed task, but kernel is not safe to use - " + generateDescription(fileName, tc, errorCount));
-                return null;
-            }
+        if (errorCount > 0) {            
+            return generateDescription(fileName, tc, errorCount);
         } else {
             return null;
         }
@@ -342,7 +335,7 @@ public class EngineTest {
         tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
 
         TaskContainerUtils.checkTaskValidity(tc);
-        
+
         AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
@@ -397,7 +390,7 @@ public class EngineTest {
         tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
 
         TaskContainerUtils.checkTaskValidity(tc);
-        
+
         AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);

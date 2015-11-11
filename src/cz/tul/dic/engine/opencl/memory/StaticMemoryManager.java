@@ -24,25 +24,30 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
         try {
             release(clImageA);
             release(clImageB);
-            if (kernel.getKernelInfo().usesImage()) {
-                clImageA = generateImage2d(task.getImageA());
-                queue.putWriteImage((CLImage2d<?>) clImageA, false);
-                clImageB = generateImage2d(task.getImageB());
-                queue.putWriteImage((CLImage2d<?>) clImageB, false);
-            } else {
-                clImageA = generateImageArray(task.getImageA());
-                queue.putWriteBuffer((CLBuffer<?>) clImageA, false);
-                clImageB = generateImageArray(task.getImageB());
-                queue.putWriteBuffer((CLBuffer<?>) clImageB, false);
+            switch (kernel.getKernelInfo().getInput()) {
+                case IMAGE:
+                    clImageA = generateImage2d(task.getImageA());
+                    queue.putWriteImage((CLImage2d<?>) clImageA, false);
+                    clImageB = generateImage2d(task.getImageB());
+                    queue.putWriteImage((CLImage2d<?>) clImageB, false);
+                    break;
+                case ARRAY:
+                    clImageA = generateImageArray(task.getImageA());
+                    queue.putWriteBuffer((CLBuffer<?>) clImageA, false);
+                    clImageB = generateImageArray(task.getImageB());
+                    queue.putWriteBuffer((CLBuffer<?>) clImageB, false);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported type of input - " + kernel.getKernelInfo().getInput());
             }
-            
+
             release(clSubsetData);
             release(clSubsetCenters);
             clSubsetData = generateSubsetData(task.getSubsets(), kernel.usesMemoryCoalescing());
             queue.putWriteBuffer(clSubsetData, false);
             clSubsetCenters = generateSubsetCenters(task.getSubsets());
             queue.putWriteBuffer(clSubsetCenters, false);
-            
+
             release(clDeformationLimits);
             release(clDefStepCount);
             clDeformationLimits = generateDeformationLimits(task.getDeformationLimits());
@@ -50,7 +55,7 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
             final List<long[]> deformationCounts = DeformationUtils.generateDeformationCounts(task.getDeformationLimits());
             clDefStepCount = generateDeformationStepCounts(deformationCounts);
             queue.putWriteBuffer(clDefStepCount, false);
-            
+
             release(clResults);
             maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
             final long size = task.getSubsets().size() * maxDeformationCount;
