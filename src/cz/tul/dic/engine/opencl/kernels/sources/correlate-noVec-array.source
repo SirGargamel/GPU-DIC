@@ -5,8 +5,7 @@ float meanG = 0;
 for (int i = 0; i < subsetSize2; i++) {
     i2 = i*2;
     index = baseIndexFacet + i2;
-               
-    // subset is just array of int coords              
+
     subsetI[i] = imageA[computeIndex(subsets[index], subsets[index + 1], imageWidth)];
     meanF += subsetI[i];
                              
