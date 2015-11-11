@@ -63,7 +63,7 @@ public class ConfigTest {
         Assert.assertEquals(2, (int) task.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM));
         Assert.assertEquals(15, (int) task.getParameter(TaskParameter.SUBSET_SIZE));
         Assert.assertEquals(5000, (int) task.getParameter(TaskParameter.FPS));
-        Assert.assertEquals(new KernelInfo(KernelType.CL1D_I_V_LL_MC_D, true), task.getParameter(TaskParameter.KERNEL));
+        Assert.assertEquals(new KernelInfo(KernelType.CL1D_I_V_LL_MC_D, true, true), task.getParameter(TaskParameter.KERNEL));
         Assert.assertEquals(TaskSplitMethod.DYNAMIC, task.getParameter(TaskParameter.TASK_SPLIT_METHOD));
         Assert.assertEquals(1000, (int) task.getParameter(TaskParameter.TASK_SPLIT_PARAM));
         Assert.assertEquals(Interpolation.BICUBIC, task.getParameter(TaskParameter.INTERPOLATION));

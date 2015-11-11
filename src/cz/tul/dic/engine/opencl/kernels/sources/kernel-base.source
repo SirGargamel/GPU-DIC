@@ -9,13 +9,13 @@ kernel void DIC(
     // id checks, memory init    
     %INIT%        
     // prepare coeffs    
-    %DEF_C%    
+    %DEF-C%    
     // deform subset
-    %DEF%
+    %DEF-S%
+    // compute mean
+    %CORR-M%
     // compute correlation
-    %CORR%
-    // compute delta
-    %D%
+    %CORR-C%
 	// store result
 	%S%
 }

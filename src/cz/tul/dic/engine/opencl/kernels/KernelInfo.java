@@ -16,16 +16,17 @@ public class KernelInfo implements Serializable {
 
     private static final String SEPARATOR = ";";
     private final KernelType type;
-    private final boolean usesImage;    
+    private final boolean usesImage, usesZNCC;
 
-    public KernelInfo(KernelType type, boolean usesImage) {
+    public KernelInfo(KernelType type, boolean usesImage, final boolean usesZNCC) {
         this.type = type;
         this.usesImage = usesImage;
+        this.usesZNCC = usesZNCC;
     }
-    
+
     public static KernelInfo fromConfig(final String configString) {
         final String[] vals = configString.split(SEPARATOR);
-        return new KernelInfo(KernelType.valueOf(vals[0]), Boolean.valueOf(vals[1]));
+        return new KernelInfo(KernelType.valueOf(vals[0]), Boolean.valueOf(vals[1]), Boolean.valueOf(vals[2]));
     }
 
     public KernelType getType() {
@@ -34,6 +35,10 @@ public class KernelInfo implements Serializable {
 
     public boolean usesImage() {
         return usesImage;
+    }
+
+    public boolean usesZNCC() {
+        return usesZNCC;
     }
 
     @Override
@@ -64,7 +69,7 @@ public class KernelInfo implements Serializable {
 
     @Override
     public String toString() {
-        return type + SEPARATOR + usesImage;
+        return type + SEPARATOR + usesImage + SEPARATOR + usesZNCC;
     }
 
 }

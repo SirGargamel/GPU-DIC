@@ -277,8 +277,8 @@ public class EngineTest {
         }
 
         if (errorCount > 0) {
-            final KernelType kt = (KernelType) tc.getParameter(TaskParameter.KERNEL);
-            if (kt.isSafeToUse()) {
+            final KernelInfo kt = (KernelInfo) tc.getParameter(TaskParameter.KERNEL);
+            if (kt.getType().isSafeToUse()) {
                 return generateDescription(fileName, tc, errorCount);
             } else {
                 System.out.println(" !!! Failed task, but kernel is not safe to use - " + generateDescription(fileName, tc, errorCount));

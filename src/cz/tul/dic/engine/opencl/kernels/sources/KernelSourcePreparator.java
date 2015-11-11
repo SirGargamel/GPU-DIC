@@ -23,15 +23,15 @@ import org.pmw.tinylog.Logger;
 public class KernelSourcePreparator {
 
     private static final String KERNEL_BASE_FILE = "kernel-base";
-    private static final String REPLACE_CORRELATION = "%CORR%";
+    private static final String REPLACE_CORRELATION_COMPUTE = "%CORR-C%";
+    private static final String REPLACE_CORRELATION_MEAN = "%CORR-M%";
     private static final String REPLACE_EXTENSION = ".source";
     private static final String REPLACE_SUBSET_SIZE = "%SS%";
-    private static final String REPLACE_DELTA = "%D%";
-    private static final String REPLACE_DEFORMATION = "%DEF%";
+    private static final String REPLACE_DEFORMATION_DEFORM = "%DEF-S%";
     private static final String REPLACE_DEFORMATION_X = "%DEF_X%";
     private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";
     private static final String REPLACE_DEFORMATION_DEGREE = "%DEF_D%";
-    private static final String REPLACE_DEFORMATION_COMPUTATION = "%DEF_C%";
+    private static final String REPLACE_DEFORMATION_COEFFS = "%DEF-C%";
     private static final String REPLACE_HEADER = "%HEAD%";
     private static final String REPLACE_INIT = "%INIT%";
     private static final String REPLACE_INTERPOLATION = "%INT%";
@@ -48,7 +48,7 @@ public class KernelSourcePreparator {
             final int subsetSize, final DeformationDegree deg,
             final boolean is2D, final boolean usesVectorization, final Interpolation interpolation,
             final boolean usesImage, final boolean usesLocalMemory, final boolean usesMemoryCoalescing,
-            final boolean subsetsGroupped) throws ComputationException {
+            final boolean subsetsGroupped, final boolean usesZNCC) throws ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator();
 
         try {
@@ -56,7 +56,7 @@ public class KernelSourcePreparator {
             kp.prepareInterpolation(interpolation, usesImage);
             kp.prepareFunctionHeader(usesImage, usesVectorization, subsetsGroupped);
             kp.prepareInit(is2D, usesLocalMemory, usesMemoryCoalescing);
-            kp.prepareCorrelation(usesVectorization, usesImage);
+            kp.prepareCorrelation(usesVectorization, usesImage, usesZNCC);
             kp.prepareStore();
             kp.prepareDeformations(deg, usesVectorization, usesLocalMemory);
             kp.prepareSubsetSize(subsetSize);
@@ -153,7 +153,7 @@ public class KernelSourcePreparator {
                 throw new IllegalArgumentException("Unsupported degree of deformation - " + deg);
         }
         sb.append(loadKernelResource(resourceName));
-        kernel = kernel.replaceAll(REPLACE_DEFORMATION_COMPUTATION, sb.toString());
+        kernel = kernel.replaceAll(REPLACE_DEFORMATION_COEFFS, sb.toString());
 
         resourceName = "deformation-compute-";
         if (usesLocalMemory) {
@@ -161,7 +161,7 @@ public class KernelSourcePreparator {
         } else {
             resourceName = resourceName.concat("global");
         }
-        kernel = kernel.replaceAll(REPLACE_DEFORMATION, loadKernelResource(resourceName));
+        kernel = kernel.replaceAll(REPLACE_DEFORMATION_DEFORM, loadKernelResource(resourceName));
 
         final String x, y, dx, dy;
         if (usesVectorization) {
@@ -361,8 +361,8 @@ public class KernelSourcePreparator {
         return sb.toString();
     }
 
-    private void prepareCorrelation(boolean usesVectorization, final boolean usesImage) {
-        String resourceName = "correlate-";
+    private void prepareCorrelation(boolean usesVectorization, final boolean usesImage, final boolean usesZNCC) {
+        String resourceName = "correlate-mean-";
         if (usesVectorization) {
             resourceName = resourceName.concat("vec-");
         } else {
@@ -375,12 +375,18 @@ public class KernelSourcePreparator {
         }
 
         kernel = kernel.replaceAll(
-                REPLACE_CORRELATION,
+                REPLACE_CORRELATION_MEAN,
                 loadKernelResource(resourceName));
-        
-        kernel = kernel.replaceAll(
-                REPLACE_DELTA,
-                loadKernelResource("computeDelta.source"));
+
+        if (usesZNCC) {
+            kernel = kernel.replaceAll(
+                    REPLACE_CORRELATION_COMPUTE,
+                    loadKernelResource("correlate-ZNCC.source"));
+        } else {
+            kernel = kernel.replaceAll(
+                    REPLACE_CORRELATION_COMPUTE,
+                    loadKernelResource("correlate-ZNSSD.source"));
+        }
     }
 
     private void prepareStore() {

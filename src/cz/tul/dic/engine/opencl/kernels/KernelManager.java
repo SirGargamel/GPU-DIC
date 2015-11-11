@@ -41,8 +41,10 @@ public class KernelManager {
         try {
             for (KernelType kt : KernelType.values()) {
                 if (kt.isSafeToUse()) {
-                    testKernelInfo(solver, new KernelInfo(kt, true));
-                    testKernelInfo(solver, new KernelInfo(kt, false));
+                    testKernelInfo(solver, new KernelInfo(kt, true, true));
+                    testKernelInfo(solver, new KernelInfo(kt, false, true));
+                    testKernelInfo(solver, new KernelInfo(kt, true, false));
+                    testKernelInfo(solver, new KernelInfo(kt, false, false));
                 }
             }
         } catch (ComputationException ex) {
@@ -92,8 +94,10 @@ public class KernelManager {
         final ArrayList<KernelInfo> result = new ArrayList<>();
 
         for (KernelType kt : KernelType.values()) {
-            result.add(new KernelInfo(kt, true));
-            result.add(new KernelInfo(kt, false));
+            result.add(new KernelInfo(kt, true, true));
+            result.add(new KernelInfo(kt, false, true));
+            result.add(new KernelInfo(kt, true, false));
+            result.add(new KernelInfo(kt, false, false));
         }
 
         return result;

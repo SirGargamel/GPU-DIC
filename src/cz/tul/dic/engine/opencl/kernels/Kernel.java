@@ -101,7 +101,7 @@ public abstract class Kernel {
             CLProgram program = context.createProgram(
                     KernelSourcePreparator.prepareKernel(
                             subsetSize, deg, is2D(), usesVectorization(),
-                            interpolation, kernelInfo.usesImage(), usesLocalMemory(), usesMemoryCoalescing(), subsetsGroupped())).build();
+                            interpolation, kernelInfo.usesImage(), usesLocalMemory(), usesMemoryCoalescing(), subsetsGroupped(), kernelInfo.usesZNCC())).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
             clMem.add(kernelDIC);

@@ -1,0 +1,23 @@
+float deltaF = 0;
+float deltaG = 0;   
+for (int i = 0; i < subsetSize2; i++) {                                             
+    subsetI[i] -= meanF;
+    deltaF += subsetI[i] * subsetI[i];
+                    
+    deformedI[i] -= meanG;
+    deltaG += deformedI[i] * deformedI[i];
+}    
+    
+float resultVal = 0;           
+float temp;
+if (deltaF != 0 && deltaG != 0) {
+	deltaF = sqrt(deltaF);
+	deltaG = sqrt(deltaG);
+	
+    for (int i = 0; i < subsetSize2; i++) {            
+		temp = (subsetI[i] / deltaF) - (deformedI[i] / deltaG);
+        resultVal +=  temp * temp;
+    }
+	
+	resultVal = 1 - (resultVal / 2.0);
+}
