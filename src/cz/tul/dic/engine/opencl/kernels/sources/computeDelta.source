@@ -14,7 +14,4 @@ if (deltaF != 0 && deltaG != 0) {
         resultVal += subsetI[i] * deformedI[i];
     }
     resultVal /= sqrt(deltaF) * sqrt(deltaG);  
-}    
-
-//store result    
-result[subsetId * deformationCount + deformationId] = resultVal;
+}

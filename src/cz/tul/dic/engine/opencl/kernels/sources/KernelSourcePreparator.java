@@ -26,7 +26,7 @@ public class KernelSourcePreparator {
     private static final String REPLACE_CORRELATION = "%CORR%";
     private static final String REPLACE_EXTENSION = ".source";
     private static final String REPLACE_SUBSET_SIZE = "%SS%";
-    private static final String REPLACE_DELTA = "%C&S%";
+    private static final String REPLACE_DELTA = "%D%";
     private static final String REPLACE_DEFORMATION = "%DEF%";
     private static final String REPLACE_DEFORMATION_X = "%DEF_X%";
     private static final String REPLACE_DEFORMATION_Y = "%DEF_Y%";
@@ -35,6 +35,7 @@ public class KernelSourcePreparator {
     private static final String REPLACE_HEADER = "%HEAD%";
     private static final String REPLACE_INIT = "%INIT%";
     private static final String REPLACE_INTERPOLATION = "%INT%";
+    private static final String REPLACE_STORE = "%S%";
     private static final String TEXT_DEFORMATION_ARRAY = "deformation[";
     private static final String PLUS = " + ";
     private static final String MUL = " * ";
@@ -56,7 +57,7 @@ public class KernelSourcePreparator {
             kp.prepareFunctionHeader(usesImage, usesVectorization, subsetsGroupped);
             kp.prepareInit(is2D, usesLocalMemory, usesMemoryCoalescing);
             kp.prepareCorrelation(usesVectorization, usesImage);
-            kp.prepareDeltaAndStore();
+            kp.prepareStore();
             kp.prepareDeformations(deg, usesVectorization, usesLocalMemory);
             kp.prepareSubsetSize(subsetSize);
             return kp.kernel;
@@ -376,12 +377,16 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(
                 REPLACE_CORRELATION,
                 loadKernelResource(resourceName));
-    }
-
-    private void prepareDeltaAndStore() {
+        
         kernel = kernel.replaceAll(
                 REPLACE_DELTA,
-                loadKernelResource("computeDeltaAndStore.source"));
+                loadKernelResource("computeDelta.source"));
+    }
+
+    private void prepareStore() {
+        kernel = kernel.replaceAll(
+                REPLACE_STORE,
+                loadKernelResource("storeResult.source"));
     }
 
     private void prepareSubsetSize(final int subsetSize) {

@@ -14,6 +14,8 @@ kernel void DIC(
     %DEF%
     // compute correlation
     %CORR%
-    // compute delta and store result
-    %C&S%
+    // compute delta
+    %D%
+	// store result
+	%S%
 }
