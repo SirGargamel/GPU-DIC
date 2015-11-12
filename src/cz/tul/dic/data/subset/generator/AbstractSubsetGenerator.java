@@ -11,16 +11,26 @@ import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
 import java.util.List;
 import java.util.Map;
+import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
 public abstract class AbstractSubsetGenerator {
-
-    public abstract Map<AbstractROI, List<AbstractSubset>> generateSubsets(final TaskContainer task, final int round) throws ComputationException;
     
-    public abstract SubsetGeneratorMethod getMode();
+    public static AbstractSubsetGenerator initGenerator(final SubsetGenerator method) {
+        try {
+            final Class<?> cls = Class.forName("cz.tul.dic.data.subset.generator.".concat(method.getClassName()));
+            return (AbstractSubsetGenerator) cls.newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            Logger.warn("Error instantiating class {}, using default subset generator.", method);
+            Logger.error(ex);
+            return new EqualSpacingSubsetGenerator();
+        }
+    }
+
+    public abstract Map<AbstractROI, List<AbstractSubset>> generateSubsets(final TaskContainer task, final int round) throws ComputationException;       
     
     protected boolean checkAreaValidity(final double x1, final double y1, final double x2, final double y2, final double width, final double height) {
         boolean result = true;

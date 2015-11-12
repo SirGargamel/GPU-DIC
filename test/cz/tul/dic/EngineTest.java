@@ -24,7 +24,7 @@ import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
-import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
@@ -85,7 +85,7 @@ public class EngineTest {
         final List<KernelInfo> infos = KernelManager.generateKernelInfos();
         for (Interpolation i : Interpolation.values()) {
             for (TaskSplitMethod ts : TaskSplitMethod.values()) {
-                for (SubsetGeneratorMethod fgm : SubsetGeneratorMethod.values()) {
+                for (SubsetGenerator fgm : SubsetGenerator.values()) {
                     for (KernelInfo ki : infos) {
                         for (String s : DEF_ZERO_FILES) {
                             tc = generateTask(s, DEF_ZERO, ki, i, ts, fgm, slvr);
@@ -122,7 +122,7 @@ public class EngineTest {
     private TaskContainer generateTask(
             final String outFilename, final double[] deformations,
             final KernelInfo kernelInfo, final Interpolation interpolation,
-            final TaskSplitMethod taskSplit, final SubsetGeneratorMethod fgm,
+            final TaskSplitMethod taskSplit, final SubsetGenerator fgm,
             final Solver solver) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
@@ -140,7 +140,7 @@ public class EngineTest {
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.SUBSET_SIZE, 5);
-        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 11);
         tc.setParameter(TaskParameter.KERNEL, kernelInfo);
         tc.setParameter(TaskParameter.INTERPOLATION, interpolation);

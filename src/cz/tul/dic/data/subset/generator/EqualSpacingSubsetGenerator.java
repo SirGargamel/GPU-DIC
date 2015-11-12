@@ -93,9 +93,4 @@ public class EqualSpacingSubsetGenerator extends AbstractSubsetGenerator {
         return result;
     }
 
-    @Override
-    public SubsetGeneratorMethod getMode() {
-        return SubsetGeneratorMethod.EQUAL;
-    }
-
 }

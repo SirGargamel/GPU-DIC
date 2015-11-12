@@ -8,11 +8,10 @@ package cz.tul.dic;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
+import cz.tul.dic.data.subset.generator.AbstractSubsetGenerator;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
-import cz.tul.dic.data.task.loaders.InputLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -35,28 +34,30 @@ public class SubsetGeneratorTest {
 
     @Test
     public void testEqual() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc = prepareTask(ROI_FULL, 14, SubsetGeneratorMethod.EQUAL, 1);
-        Map<AbstractROI, List<AbstractSubset>> data = SubsetGenerator.generateSubsets(tc, ROUND);
+        TaskContainer tc = prepareTask(ROI_FULL, 14, SubsetGenerator.EQUAL, 1);
+        final AbstractSubsetGenerator generator = AbstractSubsetGenerator.initGenerator((SubsetGenerator) tc.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD));
+        
+        Map<AbstractROI, List<AbstractSubset>> data = generator.generateSubsets(tc, ROUND);
         Assert.assertEquals(1, data.get(ROI_FULL).size());
 
-        tc = prepareTask(ROI_FULL, 13, SubsetGeneratorMethod.EQUAL, 1);
-        data = SubsetGenerator.generateSubsets(tc, ROUND);
+        tc = prepareTask(ROI_FULL, 13, SubsetGenerator.EQUAL, 1);
+        data = generator.generateSubsets(tc, ROUND);
         Assert.assertEquals(9, data.get(ROI_FULL).size());
 
-        tc = prepareTask(ROI_FULL, 9, SubsetGeneratorMethod.EQUAL, 1);
-        data = SubsetGenerator.generateSubsets(tc, ROUND);
+        tc = prepareTask(ROI_FULL, 9, SubsetGenerator.EQUAL, 1);
+        data = generator.generateSubsets(tc, ROUND);
         Assert.assertEquals(121, data.get(ROI_FULL).size());
 
-        tc = prepareTask(ROI_FULL, 8, SubsetGeneratorMethod.EQUAL, 2);
-        data = SubsetGenerator.generateSubsets(tc, ROUND);
+        tc = prepareTask(ROI_FULL, 8, SubsetGenerator.EQUAL, 2);
+        data = generator.generateSubsets(tc, ROUND);
         Assert.assertEquals(36, data.get(ROI_FULL).size());
 
-        tc = prepareTask(ROI_CENTER, 6, SubsetGeneratorMethod.EQUAL, 1);
-        data = SubsetGenerator.generateSubsets(tc, ROUND);
+        tc = prepareTask(ROI_CENTER, 6, SubsetGenerator.EQUAL, 1);
+        data = generator.generateSubsets(tc, ROUND);
         Assert.assertEquals(0, data.get(ROI_CENTER).size());
     }
 
-    private TaskContainer prepareTask(final AbstractROI roi, final int subsetSize, SubsetGeneratorMethod mode, final int spacing) throws IOException, URISyntaxException, ComputationException {
+    private TaskContainer prepareTask(final AbstractROI roi, final int subsetSize, SubsetGenerator mode, final int spacing) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());

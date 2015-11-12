@@ -11,7 +11,7 @@ import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
-import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import java.io.File;
 
@@ -22,7 +22,7 @@ import java.io.File;
 public enum TaskParameter {
 
     IN(File.class),
-    SUBSET_GENERATOR_METHOD(SubsetGeneratorMethod.class),
+    SUBSET_GENERATOR_METHOD(SubsetGenerator.class),
     SUBSET_GENERATOR_PARAM(Integer.class),
     SUBSET_SIZE(Integer.class),
     FILTER_KERNEL_SIZE(Integer.class),

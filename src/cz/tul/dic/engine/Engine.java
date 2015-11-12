@@ -24,6 +24,7 @@ import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.result.Result;
+import cz.tul.dic.data.subset.generator.AbstractSubsetGenerator;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
@@ -166,7 +167,9 @@ public final class Engine extends Observable implements Observer {
         // prepare data
         setChanged();
         notifyObservers(SubsetGenerator.class);
-        final Map<AbstractROI, List<AbstractSubset>> subsets = SubsetGenerator.generateSubsets(task, roundFrom);
+        
+        final AbstractSubsetGenerator generator = AbstractSubsetGenerator.initGenerator((SubsetGenerator) task.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD));
+        final Map<AbstractROI, List<AbstractSubset>> subsets = generator.generateSubsets(task, roundFrom);
 
         // compute round                
         final HashMap<AbstractROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());

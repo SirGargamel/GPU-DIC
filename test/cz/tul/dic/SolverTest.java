@@ -12,7 +12,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.solvers.Solver;
-import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -112,7 +112,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
         task.setParameter(TaskParameter.SUBSET_SIZE, 20);
-        task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);

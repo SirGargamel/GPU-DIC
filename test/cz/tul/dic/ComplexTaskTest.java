@@ -9,7 +9,7 @@ import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.roi.CircularROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -47,7 +47,7 @@ public class ComplexTaskTest {
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         tc.setParameter(TaskParameter.SUBSET_SIZE, 15);
-        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
 
         final ComplexTaskSolver cts = new ComplexTaskSolver(tc);

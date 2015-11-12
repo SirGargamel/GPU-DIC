@@ -17,10 +17,10 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.subset.AbstractSubset;
-import cz.tul.dic.data.subset.generator.SubsetGenerator;
+import cz.tul.dic.data.subset.generator.AbstractSubsetGenerator;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.engine.opencl.solvers.Solver;
-import cz.tul.dic.data.subset.generator.SubsetGeneratorMethod;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,7 +46,7 @@ public class CircleROIManager extends AbstractROIManager {
     private CircleROIManager(TaskContainer tc, final int initialRound) throws ComputationException {
         super(tc);
 
-        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGeneratorMethod.EQUAL);
+        tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 1);
         tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
         tc.addHint(Hint.NO_STRAIN);
@@ -174,11 +174,12 @@ public class CircleROIManager extends AbstractROIManager {
         }
 
         try {
+            final AbstractSubsetGenerator generator = AbstractSubsetGenerator.initGenerator((SubsetGenerator) task.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD));
             Map<AbstractROI, List<AbstractSubset>> subsets;
 
             boolean sizeAdjusted;
             do {
-                subsets = SubsetGenerator.generateSubsets(task, round);
+                subsets = generator.generateSubsets(task, round);
                 sizeAdjusted = false;
 
                 for (AbstractROI roi : rois) {
