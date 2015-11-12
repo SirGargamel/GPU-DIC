@@ -29,12 +29,12 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelManager {
 
-    private static final KernelInfo DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST);
+    private static final KernelInfo DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST);    
     private static boolean inited;
 
     static {
-        inited = false;
-
+        inited = false;        
+        
         Logger.debug("Initializing best kernel.");
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.COARSE_FINE);

@@ -85,7 +85,7 @@ public abstract class Kernel {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.warn("Error instantiating kernel with kernel info [{}], using default kernel.", kernelInfo);
             Logger.error(ex);
-            result = new CL1D_I_V_LL_MC_D(kernelInfo, memManager, wsm);
+            result = new CL1D(kernelInfo, memManager, wsm);
         }
 
         return result;

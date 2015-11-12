@@ -11,7 +11,7 @@ import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 
-public class CL15D_pF_D extends Kernel {
+public class CL15D_pF extends Kernel {
 
     private static final int ARGUMENT_INDEX_D_COUNT = 11;
     private static final int ARGUMENT_INDEX_D_BASE = 12;
@@ -19,7 +19,7 @@ public class CL15D_pF_D extends Kernel {
     private static final int LWS0_BASE = 32;    
     private boolean stop;
 
-    public CL15D_pF_D(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+    public CL15D_pF(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
         super(kernelInfo, memManager, wsm);
     }
 
