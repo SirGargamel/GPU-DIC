@@ -104,7 +104,7 @@ public abstract class Kernel {
                 default:
                     throw new IllegalArgumentException("Unsupported type of kernel - " + kernelInfo.getCorrelation());
             }
-            
+
             final boolean usesImage;
             switch (kernelInfo.getInput()) {
                 case IMAGE:
@@ -117,10 +117,22 @@ public abstract class Kernel {
                     throw new IllegalArgumentException("Unsupported type of input - " + kernelInfo.getInput());
             }
 
+            final boolean usesMemoryCoalescing;
+            switch (kernelInfo.getMemoryCoalescing()) {
+                case YES:
+                    usesMemoryCoalescing = true;
+                    break;
+                case NO:
+                    usesMemoryCoalescing = false;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported type of memory coalescing - " + kernelInfo.getMemoryCoalescing());
+            }
+
             CLProgram program = context.createProgram(
                     KernelSourcePreparator.prepareKernel(
                             subsetSize, deg, is2D(), usesVectorization(),
-                            interpolation, usesImage, usesLocalMemory(), usesMemoryCoalescing(), subsetsGroupped(), usesZncc)).build();
+                            interpolation, usesImage, usesLocalMemory(), usesMemoryCoalescing, subsetsGroupped(), usesZncc)).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
             clMem.add(kernelDIC);
@@ -276,10 +288,6 @@ public abstract class Kernel {
         }
 
         return result;
-    }
-
-    public boolean usesMemoryCoalescing() {
-        return false;
     }
 
     public boolean usesVectorization() {

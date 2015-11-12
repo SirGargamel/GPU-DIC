@@ -76,7 +76,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
                 release(clSubsetCenters);
                 subsets = task.getSubsets();
 
-                clSubsetData = generateSubsetData(subsets, kernel.usesMemoryCoalescing());
+                clSubsetData = generateSubsetData(subsets, kernel.getKernelInfo().getMemoryCoalescing() == KernelInfo.MemoryCoalescing.YES);
                 queue.putWriteBuffer(clSubsetData, false);
 
                 clSubsetCenters = generateSubsetCenters(subsets);

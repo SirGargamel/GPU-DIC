@@ -14,6 +14,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
+import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 
@@ -43,7 +44,7 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
 
             release(clSubsetData);
             release(clSubsetCenters);
-            clSubsetData = generateSubsetData(task.getSubsets(), kernel.usesMemoryCoalescing());
+            clSubsetData = generateSubsetData(task.getSubsets(), kernel.getKernelInfo().getMemoryCoalescing() == KernelInfo.MemoryCoalescing.YES);
             queue.putWriteBuffer(clSubsetData, false);
             clSubsetCenters = generateSubsetCenters(task.getSubsets());
             queue.putWriteBuffer(clSubsetCenters, false);

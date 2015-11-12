@@ -29,7 +29,7 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelManager {
 
-    private static final KernelInfo DEFAULT_KERNEL;
+    private static final KernelInfo DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST);
     private static boolean inited;
 
     static {
@@ -50,8 +50,7 @@ public class KernelManager {
             throw new RuntimeException("Error initializing OpenCL.", ex);
         }
         solver.endTask();
-        DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST);
-        Logger.debug("{} selected as best kernel.", DEFAULT_KERNEL);
+        Logger.debug("Kernel performance assesment completed.");
 
         inited = true;
     }
@@ -115,7 +114,13 @@ public class KernelManager {
                         continue;
                     }
 
-                    result.add(new KernelInfo(kt, in, cor));
+                    for (KernelInfo.MemoryCoalescing mc : KernelInfo.MemoryCoalescing.values()) {
+                        if (mc == KernelInfo.MemoryCoalescing.BEST) {
+                            continue;
+                        }
+
+                        result.add(new KernelInfo(kt, in, cor, mc));
+                    }
                 }
             }
         }
@@ -129,11 +134,11 @@ public class KernelManager {
         final List<Type> kernels = new ArrayList<>();
         if (kernelInfo.getType() == Type.BEST) {
             kernels.addAll(Arrays.asList(Type.values()));
-            kernels.remove(Type.BEST);
+            kernels.remove(KernelInfo.Type.BEST);
         } else {
             kernels.add(kernelInfo.getType());
         }
-        
+
         final List<KernelInfo.Input> inputs = new ArrayList<>();
         if (kernelInfo.getInput() == KernelInfo.Input.BEST) {
             inputs.addAll(Arrays.asList(KernelInfo.Input.values()));
@@ -141,19 +146,29 @@ public class KernelManager {
         } else {
             inputs.add(kernelInfo.getInput());
         }
-        
+
         final List<KernelInfo.Correlation> correlations = new ArrayList<>();
-        if (kernelInfo.getCorrelation()== KernelInfo.Correlation.BEST) {
+        if (kernelInfo.getCorrelation() == KernelInfo.Correlation.BEST) {
             correlations.addAll(Arrays.asList(KernelInfo.Correlation.values()));
             correlations.remove(KernelInfo.Correlation.BEST);
         } else {
             correlations.add(kernelInfo.getCorrelation());
         }
 
+        final List<KernelInfo.MemoryCoalescing> memoryCoalescing = new ArrayList<>();
+        if (kernelInfo.getMemoryCoalescing() == KernelInfo.MemoryCoalescing.BEST) {
+            memoryCoalescing.addAll(Arrays.asList(KernelInfo.MemoryCoalescing.values()));
+            memoryCoalescing.remove(KernelInfo.MemoryCoalescing.BEST);
+        } else {
+            memoryCoalescing.add(kernelInfo.getMemoryCoalescing());
+        }
+
         for (Type kt : kernels) {
             for (KernelInfo.Input in : inputs) {
                 for (KernelInfo.Correlation cor : correlations) {
-                    result.add(new KernelInfo(kt, in, cor));
+                    for (KernelInfo.MemoryCoalescing mc : memoryCoalescing) {
+                        result.add(new KernelInfo(kt, in, cor, mc));
+                    }
                 }
             }
         }
