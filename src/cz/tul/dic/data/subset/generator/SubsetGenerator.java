@@ -11,7 +11,8 @@ package cz.tul.dic.data.subset.generator;
  */
 public enum SubsetGenerator {
 
-    EQUAL("EqualSpacingSubsetGenerator"),;
+    EQUAL("EqualSpacingSubsetGenerator"),
+    DYNAMIC("DynamicSubsetGenerator");
     
     private final String className;
 

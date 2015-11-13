@@ -169,7 +169,7 @@ public final class Engine extends Observable implements Observer {
         notifyObservers(SubsetGenerator.class);
         
         final AbstractSubsetGenerator generator = AbstractSubsetGenerator.initGenerator((SubsetGenerator) task.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD));
-        final Map<AbstractROI, List<AbstractSubset>> subsets = generator.generateSubsets(task, roundFrom);
+        final HashMap<AbstractROI, List<AbstractSubset>> subsets = generator.generateSubsets(task, roundFrom);
 
         // compute round                
         final HashMap<AbstractROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());
@@ -194,7 +194,7 @@ public final class Engine extends Observable implements Observer {
         notifyObservers(DisplacementCalculator.class);
         final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(correlations, subsets, task, roundFrom);
 
-        task.setResult(roundFrom, roundTo, new Result(correlations, displacement));
+        task.setResult(roundFrom, roundTo, new Result(subsets, correlations, displacement));
 
         final Future future = exec.submit(new OverlapComputation(task, roundFrom, roundTo, strain));
 

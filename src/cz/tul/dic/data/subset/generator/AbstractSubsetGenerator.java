@@ -9,8 +9,8 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -28,9 +28,9 @@ public abstract class AbstractSubsetGenerator {
             Logger.error(ex);
             return new EqualSpacingSubsetGenerator();
         }
-    }
-
-    public abstract Map<AbstractROI, List<AbstractSubset>> generateSubsets(final TaskContainer task, final int round) throws ComputationException;       
+    }    
+    
+    public abstract HashMap<AbstractROI, List<AbstractSubset>> generateSubsets(final TaskContainer task, final int round) throws ComputationException;       
     
     protected boolean checkAreaValidity(final double x1, final double y1, final double x2, final double y2, final double width, final double height) {
         boolean result = true;
