@@ -13,15 +13,15 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.roi.AbstractROI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class EqualSpacingSubsetGenerator extends AbstractSubsetGenerator {
 
     @Override
-    public Map<AbstractROI, List<AbstractSubset>> generateSubsets(TaskContainer tc, int round) throws ComputationException {
+    public HashMap<AbstractROI, List<AbstractSubset>> generateSubsets(TaskContainer tc, int round) throws ComputationException {
         final Object o = tc.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM);
         if (o == null) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_TASK_DATA, "No subset generator spacing.");
@@ -37,7 +37,7 @@ public class EqualSpacingSubsetGenerator extends AbstractSubsetGenerator {
 
         // generate centers
         final Set<AbstractROI> rois = tc.getRois(round);
-        final Map<AbstractROI, List<AbstractSubset>> result = new LinkedHashMap<>(rois.size());
+        final HashMap<AbstractROI, List<AbstractSubset>> result = new LinkedHashMap<>(rois.size());
 
         List<AbstractSubset> subsets;
         int wCount, hCount, subsetSize;

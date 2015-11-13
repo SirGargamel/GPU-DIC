@@ -344,7 +344,7 @@ public class EngineTest {
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
-        Map<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
+        HashMap<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
         final List<AbstractSubset> roiSubsets = new ArrayList<>(4);
         roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
         roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
@@ -363,7 +363,7 @@ public class EngineTest {
         solver.endTask();
 
         final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, subsets, tc, ROUND);
-        tc.setResult(ROUND, ROUND + 1, new Result(results, displacement));
+        tc.setResult(ROUND, ROUND + 1, new Result(subsets, results, displacement));
 
         Assert.assertEquals(roiSubsets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
         Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
@@ -399,7 +399,7 @@ public class EngineTest {
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
 
-        Map<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
+        HashMap<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
         final List<AbstractSubset> roiSubsets = new ArrayList<>(4);
         roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
         roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
@@ -416,7 +416,7 @@ public class EngineTest {
         solver.endTask();
 
         final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, subsets, tc, ROUND);
-        tc.setResult(ROUND, ROUND + 1, new Result(results, displacement));
+        tc.setResult(ROUND, ROUND + 1, new Result(subsets, results, displacement));
 
         Assert.assertEquals(roiSubsets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
         Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
