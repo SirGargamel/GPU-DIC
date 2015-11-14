@@ -12,7 +12,7 @@ import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import java.io.File;
 
 /**

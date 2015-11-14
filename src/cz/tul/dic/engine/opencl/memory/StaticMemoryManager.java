@@ -14,7 +14,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import java.util.List;
 import org.pmw.tinylog.Logger;
 

@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.engine.opencl.kernels;
 
-import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;

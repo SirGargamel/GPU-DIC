@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.engine.opencl.kernels;
 
-import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.subset.AbstractSubset;
@@ -13,7 +12,7 @@ import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
-import cz.tul.dic.engine.opencl.kernels.info.KernelInfo.Type;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo.Type;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.awt.image.BufferedImage;

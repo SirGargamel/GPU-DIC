@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernels.info;
+package cz.tul.dic.engine.opencl.kernels;
 
 import java.io.Serializable;
 import java.util.Objects;

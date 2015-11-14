@@ -20,7 +20,7 @@ import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
 import cz.tul.dic.data.Interpolation;
-import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.util.ArrayList;

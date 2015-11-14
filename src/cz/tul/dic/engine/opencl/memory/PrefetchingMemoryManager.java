@@ -17,7 +17,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import java.nio.ByteBuffer;
 import java.util.HashMap;

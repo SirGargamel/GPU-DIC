@@ -5,7 +5,7 @@
  */
 package cz.tul.dic.engine.opencl;
 
-import cz.tul.dic.engine.opencl.kernels.info.KernelInfo;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
