@@ -14,6 +14,8 @@ kernel void DIC(
     %DEF-S%
     // compute mean
     %CORR-M%
+	// compute delta
+    %CORR-D%
     // compute correlation
     %CORR-C%
 	// store result

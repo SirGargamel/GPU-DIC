@@ -24,6 +24,7 @@ public class KernelSourcePreparator {
 
     private static final String KERNEL_BASE_FILE = "kernel-base";
     private static final String REPLACE_CORRELATION_COMPUTE = "%CORR-C%";
+    private static final String REPLACE_CORRELATION_DELTA = "%CORR-D%";
     private static final String REPLACE_CORRELATION_MEAN = "%CORR-M%";
     private static final String REPLACE_EXTENSION = ".source";
     private static final String REPLACE_SUBSET_SIZE = "%SS%";
@@ -377,6 +378,10 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(
                 REPLACE_CORRELATION_MEAN,
                 loadKernelResource(resourceName));
+        
+        kernel = kernel.replaceAll(
+                REPLACE_CORRELATION_DELTA,
+                loadKernelResource("correlate-delta"));
 
         if (usesZNCC) {
             kernel = kernel.replaceAll(
