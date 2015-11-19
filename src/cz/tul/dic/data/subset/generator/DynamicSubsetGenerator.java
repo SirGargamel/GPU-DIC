@@ -13,7 +13,6 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.subset.SquareSubset2D;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -196,8 +195,7 @@ public class DynamicSubsetGenerator extends AbstractSubsetGenerator {
         final double[] centerB = subsetB.getCenter();
         final double dif2 = calculateDist2(
                 displacementResults[(int) Math.round(centerA[0])][(int) Math.round(centerA[1])],
-                displacementResults[(int) Math.round(centerB[0])][(int) Math.round(centerB[1])]);
-        System.out.println(Arrays.toString(centerA) + "; " + Arrays.toString(centerB) + "; " + dif2);
+                displacementResults[(int) Math.round(centerB[0])][(int) Math.round(centerB[1])]);        
         return dif2 > DIF_TRESHOLD_2;
     }
 
