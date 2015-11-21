@@ -25,6 +25,7 @@ public class KernelSourcePreparator {
     private static final String KERNEL_BASE_FILE = "kernel-base";
     private static final String REPLACE_CORRELATION_COMPUTE = "%CORR-C%";
     private static final String REPLACE_CORRELATION_DELTA = "%CORR-D%";
+    private static final String REPLACE_CORRELATION_GAUSS = "%CORR-G%";
     private static final String REPLACE_CORRELATION_MEAN = "%CORR-M%";
     private static final String REPLACE_EXTENSION = ".source";
     private static final String REPLACE_SUBSET_SIZE = "%SS%";
@@ -49,15 +50,15 @@ public class KernelSourcePreparator {
             final int subsetSize, final DeformationDegree deg,
             final boolean is2D, final boolean usesVectorization, final Interpolation interpolation,
             final boolean usesImage, final boolean usesLocalMemory, final boolean usesMemoryCoalescing,
-            final boolean subsetsGroupped, final boolean usesZNCC) throws ComputationException {
+            final boolean subsetsGroupped, final boolean usesZNCC, final boolean usesWeights) throws ComputationException {
         final KernelSourcePreparator kp = new KernelSourcePreparator();
 
         try {
             kp.loadKernel();
             kp.prepareInterpolation(interpolation, usesImage);
-            kp.prepareFunctionHeader(usesImage, usesVectorization, subsetsGroupped);
+            kp.prepareFunctionHeader(usesImage, usesVectorization, subsetsGroupped, usesWeights);
             kp.prepareInit(is2D, usesLocalMemory, usesMemoryCoalescing);
-            kp.prepareCorrelation(usesVectorization, usesImage, usesZNCC);
+            kp.prepareCorrelation(usesVectorization, usesImage, usesZNCC, usesWeights);
             kp.prepareStore();
             kp.prepareDeformations(deg, usesVectorization, usesLocalMemory);
             kp.prepareSubsetSize(subsetSize);
@@ -94,7 +95,7 @@ public class KernelSourcePreparator {
                 loadKernelResource(resourceName));
     }
 
-    private void prepareFunctionHeader(final boolean usesImage, final boolean usesVectorization, final boolean subsetsGroupped) {
+    private void prepareFunctionHeader(final boolean usesImage, final boolean usesVectorization, final boolean subsetsGroupped, final boolean usesWeights) {
         final StringBuilder sb = new StringBuilder();
         String resourceName = "header-image-";
         if (usesImage) {
@@ -116,6 +117,9 @@ public class KernelSourcePreparator {
             resourceName = resourceName.concat("-subsets-alone");
         }
         sb.append(loadKernelResource(resourceName));
+        if (usesWeights) {
+            sb.append(loadKernelResource("header-end-weights"));
+        }
         kernel = kernel.replaceAll(REPLACE_HEADER, sb.toString());
     }
 
@@ -362,7 +366,16 @@ public class KernelSourcePreparator {
         return sb.toString();
     }
 
-    private void prepareCorrelation(boolean usesVectorization, final boolean usesImage, final boolean usesZNCC) {
+    private void prepareCorrelation(boolean usesVectorization, final boolean usesImage, final boolean usesZNCC, final boolean usesWeight) {
+        if (usesWeight) {
+            kernel = kernel.replaceAll(
+                    REPLACE_CORRELATION_GAUSS,
+                    loadKernelResource("correlate-gauss"));
+        } else {
+            kernel = kernel.replaceAll(
+                    REPLACE_CORRELATION_GAUSS, "");
+        }
+
         String resourceName = "correlate-mean-";
         if (usesVectorization) {
             resourceName = resourceName.concat("vec-");
@@ -378,20 +391,27 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(
                 REPLACE_CORRELATION_MEAN,
                 loadKernelResource(resourceName));
-        
+
         kernel = kernel.replaceAll(
                 REPLACE_CORRELATION_DELTA,
                 loadKernelResource("correlate-delta"));
 
+        resourceName = "correlate-";
         if (usesZNCC) {
-            kernel = kernel.replaceAll(
-                    REPLACE_CORRELATION_COMPUTE,
-                    loadKernelResource("correlate-ZNCC.source"));
+            resourceName = resourceName.concat("ZNCC");
+        } else if (usesWeight) {
+            resourceName = resourceName.concat("WZNSSD");
+            if (usesVectorization) {
+                resourceName = resourceName.concat("-vec");
+            } else {
+                resourceName = resourceName.concat("-noVec");
+            }
         } else {
-            kernel = kernel.replaceAll(
-                    REPLACE_CORRELATION_COMPUTE,
-                    loadKernelResource("correlate-ZNSSD.source"));
+            resourceName = resourceName.concat("ZNSSD");
         }
+        kernel = kernel.replaceAll(
+                REPLACE_CORRELATION_COMPUTE,
+                loadKernelResource(resourceName));
     }
 
     private void prepareStore() {

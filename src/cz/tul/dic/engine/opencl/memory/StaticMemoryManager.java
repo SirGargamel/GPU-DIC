@@ -44,10 +44,13 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
 
             release(clSubsetData);
             release(clSubsetCenters);
+            release(clSubsetWeights);
             clSubsetData = generateSubsetData(task.getSubsets(), kernel.getKernelInfo().getMemoryCoalescing() == KernelInfo.MemoryCoalescing.YES);
             queue.putWriteBuffer(clSubsetData, false);
             clSubsetCenters = generateSubsetCenters(task.getSubsets());
             queue.putWriteBuffer(clSubsetCenters, false);
+            clSubsetWeights = generateSubsetWeights(task.getSubsetWeights());
+            queue.putWriteBuffer(clSubsetWeights, false);
 
             release(clDeformationLimits);
             release(clDefStepCount);

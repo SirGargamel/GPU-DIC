@@ -29,25 +29,7 @@ public class NoSplit extends AbstractTaskSplitter {
             throw new NoSuchElementException();
         }
         hasNextElement = false;
-        return new ComputationTask(image1, image2, subsets, deformationLimits, false);
-    }
-
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    /**
-     * Not available since the task size is always maximal.
-     */
-    @Override
-    public void signalTaskSizeTooBig() {
-        throw new UnsupportedOperationException("No task division available.");
-    }
-
-    @Override
-    public boolean isSplitterReady() {
-        return hasNextElement;
+        return new ComputationTask(image1, image2, subsets, subsetWeights, deformationLimits);
     }
 
 }

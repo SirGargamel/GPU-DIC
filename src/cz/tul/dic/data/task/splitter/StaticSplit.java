@@ -45,29 +45,21 @@ public class StaticSplit extends AbstractTaskSplitter {
             throw new NoSuchElementException();
         }
 
-        final List<AbstractSubset> sublist = new ArrayList<>(split);
+        final List<AbstractSubset> sublistS = new ArrayList<>(split);
+        final List<Integer> sublistW = new ArrayList<>(split);
         final int subsetCount = subsets.size();
 
         int count = 0;
         while (count < split && index < subsetCount) {
-            sublist.add(subsets.get(index));
-
+            sublistS.add(subsets.get(index));
+            sublistW.add(subsetWeights.get(index));
+            
             count++;
             index++;
         }
 
         checkIfHasNext();
 
-        return new ComputationTask(image1, image2, sublist, deformationLimits, false);
-    }
-
-    @Override
-    public void signalTaskSizeTooBig() {
-        hasNextElement = false;
-    }
-
-    @Override
-    public boolean isSplitterReady() {
-        return hasNextElement;
+        return new ComputationTask(image1, image2, sublistS, sublistW, deformationLimits);
     }
 }

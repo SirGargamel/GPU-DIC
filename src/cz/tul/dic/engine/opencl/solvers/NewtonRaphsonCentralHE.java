@@ -26,7 +26,7 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
 
     private static final int COUNT_STEP = 3;
     private static final double DX = 0.5;
-    private static final double DY = DX;    
+    private static final double DY = DX;
 
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
@@ -132,7 +132,7 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
             final PiecewiseBicubicSplineInterpolatingFunction interpolation) {
         final Approximation approximationI = new Approximation(subset, interpolation, i);
         final Approximation approximationJ = new Approximation(subset, interpolation, j);
-        
+
         final int imageWidth = fullTask.getImageB().getWidth();
         final int imageHeight = fullTask.getImageB().getHeight();
 
@@ -151,66 +151,39 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
         return sum;
     }
 
-    @Override
-    protected int getSetpCountForOneDimension() {
-        return COUNT_STEP;
-    }
-
     private static class Approximation {
 
-        private static final List<HessianApproximationFunction> functions;
+        private static final List<HessianApproximationFunction> FUNCTIONS;
         private final AbstractSubset subset;
         private final BivariateFunction interpolation;
         private final HessianApproximationFunction matrixApproxFunction;
 
         static {
-            functions = new ArrayList<>(6);
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    return (interpolation.value(x + DX, y) - interpolation.value(x, y)) / DX;
-                }
+            FUNCTIONS = new ArrayList<>(6);
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> (interpolation1.value(x + DX, y) - interpolation1.value(x, y)) / DX);
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> (interpolation1.value(x, y + DY) - interpolation1.value(x, y)) / DY);
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> {
+                final double dif = (interpolation1.value(x + DX, y) - interpolation1.value(x, y)) / DX;
+                return (x - subset1.getCenter()[0]) * dif;
             });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    return (interpolation.value(x, y + DY) - interpolation.value(x, y)) / DY;
-                }
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> {
+                final double dif = (interpolation1.value(x, y + DY) - interpolation1.value(x, y)) / DY;
+                return (y - subset1.getCenter()[1]) * dif;
             });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    final double dif = (interpolation.value(x + DX, y) - interpolation.value(x, y)) / DX;
-                    return (x - subset.getCenter()[0]) * dif;
-                }
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> {
+                final double dif = (interpolation1.value(x + DX, y) - interpolation1.value(x, y)) / DX;
+                return (y - subset1.getCenter()[1]) * dif;
             });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    final double dif = (interpolation.value(x, y + DY) - interpolation.value(x, y)) / DY;
-                    return (y - subset.getCenter()[1]) * dif;
-                }
-            });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    final double dif = (interpolation.value(x + DX, y) - interpolation.value(x, y)) / DX;
-                    return (y - subset.getCenter()[1]) * dif;
-                }
-            });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    final double dif = (interpolation.value(x, y + DY) - interpolation.value(x, y)) / DY;
-                    return (x - subset.getCenter()[0]) * dif;
-                }
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> {
+                final double dif = (interpolation1.value(x, y + DY) - interpolation1.value(x, y)) / DY;
+                return (x - subset1.getCenter()[0]) * dif;
             });
         }
 
         public Approximation(final AbstractSubset subset, final BivariateFunction interpolation, final int i) {
             this.subset = subset;
             this.interpolation = interpolation;
-            matrixApproxFunction = functions.get(i);
+            matrixApproxFunction = FUNCTIONS.get(i);
         }
 
         public double calculateValue(final double x, final double y) {

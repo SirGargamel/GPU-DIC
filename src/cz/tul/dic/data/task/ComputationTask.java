@@ -18,16 +18,16 @@ public class ComputationTask {
 
     private final Image imageA, imageB;
     private final List<AbstractSubset> subsets;
+    private final List<Integer> subsetWeights;
     private final List<double[]> deformationLimits;
-    private boolean subtask;
     private List<CorrelationResult> results;
 
-    public ComputationTask(final Image imageA, final Image imageB, final List<AbstractSubset> subsets, final List<double[]> deformationLimits, final boolean subtask) {
+    public ComputationTask(final Image imageA, final Image imageB, final List<AbstractSubset> subsets, final List<Integer> subsetWeights, final List<double[]> deformationLimits) {
         this.imageA = imageA;
         this.imageB = imageB;
         this.subsets = subsets;
-        this.deformationLimits = deformationLimits;
-        this.subtask = subtask;
+        this.subsetWeights = subsetWeights;
+        this.deformationLimits = deformationLimits;        
     }
 
     public Image getImageA() {
@@ -42,6 +42,10 @@ public class ComputationTask {
         return subsets;
     }
 
+    public List<Integer> getSubsetWeights() {
+        return subsetWeights;
+    }
+
     public List<double[]> getDeformationLimits() {
         return deformationLimits;
     }
@@ -53,13 +57,4 @@ public class ComputationTask {
     public void setResults(final List<CorrelationResult> results) {
         this.results = results;
     }
-
-    public void setSubtask(final boolean subtask) {
-        this.subtask = subtask;
-    }
-
-    public boolean isSubtask() {
-        return subtask;
-    }
-
 }

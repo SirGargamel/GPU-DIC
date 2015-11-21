@@ -19,12 +19,14 @@ public class FullTask {
     private final Image imageA;
     private final Image imageB;
     private final List<AbstractSubset> subsets;
-    private final List<double[]> deformationLimits;
+    private final List<Integer> subsetWeights;
+    private final List<double[]> deformationLimits;    
 
-    public FullTask(final Image imageA, final Image imageB, final List<AbstractSubset> subsets, final List<double[]> deformationLimits) {
+    public FullTask(final Image imageA, final Image imageB, final List<AbstractSubset> subsets, final List<Integer> subsetWeights, final List<double[]> deformationLimits) {
         this.imageA = imageA;
         this.imageB = imageB;
         this.subsets = subsets;
+        this.subsetWeights = subsetWeights;
         this.deformationLimits = deformationLimits;
     }
 
@@ -38,6 +40,10 @@ public class FullTask {
 
     public List<AbstractSubset> getSubsets() {
         return subsets;
+    }
+
+    public List<Integer> getSubsetWeights() {
+        return subsetWeights;
     }
 
     public List<double[]> getDeformationLimits() {

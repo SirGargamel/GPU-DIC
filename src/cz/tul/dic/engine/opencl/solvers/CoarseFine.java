@@ -39,7 +39,8 @@ public class CoarseFine extends AbstractTaskSolver {
         double[] temp;
         double step = STEP_INITIAL;
 
-        final int roundCount = coumputeRoundCount(fullTask);
+        final int roundCount = coumputeRoundCount(fullTask);                
+        final List<Integer> weights = fullTask.getSubsetWeights();        
 
         // initial pixel step
         int round = 0;
@@ -56,7 +57,7 @@ public class CoarseFine extends AbstractTaskSolver {
         }
         results = computeTask(
                 kernel,
-                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
+                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), weights, zeroOrderLimits));
         for (int i = 0; i < subsetCount; i++) {
             addSubsetResult(subsets.get(i), results.get(i));
         }
@@ -92,7 +93,7 @@ public class CoarseFine extends AbstractTaskSolver {
             }
             results = computeTask(
                     kernel,
-                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits));
+                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), weights, zeroOrderLimits));
             
             for (int i = 0; i < subsetCount; i++) {
                 addSubsetResult(subsets.get(i), results.get(i));

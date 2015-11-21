@@ -316,6 +316,16 @@ public final class TaskContainerUtils {
             Logger.info("Adding default filter size.");
             tc.setParameter(TaskParameter.FILTER_KERNEL_SIZE, TaskDefaultValues.DEFAULT_FILTER_KERNEL_SIZE);
         }
+        final Object weight = tc.getParameter(TaskParameter.CORRELATION_WEIGHT);
+        if (weight == null) {
+            Logger.info("Adding default correlation weight.");
+            tc.setParameter(TaskParameter.CORRELATION_WEIGHT, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT);
+        }
+    }
+    
+    public static int computeCorrelationWeight(final int subsetSize, final double correlationWeightCoefficient) {        
+        final int result = (int) Math.round(subsetSize * correlationWeightCoefficient * (3.2));
+        return result;
     }
 
 }

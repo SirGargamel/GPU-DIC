@@ -138,64 +138,26 @@ public abstract class AbstractTaskSolver extends Observable {
     }
 
     private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> result, final Kernel kernel, final FullTask fullTask) throws ComputationException {
-        Exception lastEx = null;
         boolean finished = false;
-        while (ts.isSplitterReady() && !finished) {
+        while (!finished) {
             try {
-                ComputationTask ct;
-                CorrelationResult bestSubResult = null;
+                ComputationTask ct;                
                 while (ts.hasNext()) {
                     if (stop) {
                         return;
                     }
                     ct = ts.next();
                     ct.setResults(kernel.compute(ct, needsBestResult()));
-                    // pick best results for this computation task and discard ct data
-                    if (ct.isSubtask()) {
-                        bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
-                    } else if (bestSubResult != null) {
-                        bestSubResult = pickBetterResult(bestSubResult, ct.getResults().get(0));
-                        // store result
-                        final int globalSubsetIndex = fullTask.getSubsets().indexOf(ct.getSubsets().get(0));
-                        if (globalSubsetIndex < 0) {
-                            throw new IllegalArgumentException("Local subset not found in global registry.");
-                        }
-                        result.set(globalSubsetIndex, bestSubResult);
-                        bestSubResult = null;
-                    } else {
-                        pickBestResultsForTask(ct, result, fullTask.getSubsets());
-                    }
+                    // pick best results for this computation task and discard ct data                   
+                    pickBestResultsForTask(ct, result, fullTask.getSubsets());
                 }
                 finished = true;
             } catch (ComputationException ex) {
                 memManager.clearMemory();
-                if (ex.getExceptionCause().equals(ComputationExceptionCause.MEMORY_ERROR)) {
-                    Logger.warn(ex);
-                    ts.signalTaskSizeTooBig();
-                    ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
-                    lastEx = ex;
-                } else {
-                    throw ex;
-                }
+                throw ex;
             }
         }
-        if (!finished && lastEx != null) {
-            memManager.clearMemory();
-            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, lastEx);
-        }
-    }
-
-    private static CorrelationResult pickBetterResult(final CorrelationResult r1, final CorrelationResult r2) {
-        final CorrelationResult result;
-        if (r1 == null) {
-            result = r2;
-        } else if (Double.compare(r1.getQuality(), r2.getQuality()) == 0) {
-            result = DeformationUtils.getAbs(r1.getDeformation()) < DeformationUtils.getAbs(r2.getDeformation()) ? r1 : r2;
-        } else {
-            result = r1.getQuality() > r2.getQuality() ? r1 : r2;
-        }
-        return result;
-    }
+    }    
 
     private static void pickBestResultsForTask(final ComputationTask task, final List<CorrelationResult> bestResults, final List<AbstractSubset> globalSubsets) throws ComputationException {
         final List<AbstractSubset> localSubsets = task.getSubsets();

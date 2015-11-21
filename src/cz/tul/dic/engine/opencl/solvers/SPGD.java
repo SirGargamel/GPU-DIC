@@ -15,6 +15,7 @@ import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
+import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -35,17 +37,19 @@ import org.pmw.tinylog.Logger;
 public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
 
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
-    private static final double STEP_INITIAL = 0.1;
-    private static final int LIMIT_ITERATIONS = 200;
+    private static final double STEP_INITIAL = .1;
+    private static final int LIMIT_ITERATIONS = 100;
     private static final double LIMIT_Q_DONE = 0.99;
     private static final double LIMIT_Q_DIFF = 0.0001;
     private static final double PERTUBATION_AMPLITUDE_ZERO = 0.25;
     private static final double PERTUBATION_AMPLITUDE_FIRST = 0.025;
     private static final double PERTUBATION_AMPLITUDE_SECOND = 0.0025;
+    private static final int PERTUBATION_AMPLITUDE_WEIGHT = 10;
     private static final double GAIN_SYSTEM = 50;
     private FullTask fullTask;
     private Map<AbstractSubset, CorrelationResult> results;
     private Map<AbstractSubset, double[]> limits;
+    private Map<AbstractSubset, Integer> weights, pertubations;
     private List<AbstractSubset> subsetsToCompute;
     private double[] gpuData;
 
@@ -57,9 +61,12 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         this.fullTask = fullTask;
         final List<AbstractSubset> subsets = fullTask.getSubsets();
         final int subsetCount = subsets.size();
+        final boolean usesWeights = kernel.getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD;
 
         results = new LinkedHashMap<>(subsetCount);
-        limits = new LinkedHashMap<>(subsetCount);
+        limits = new ConcurrentHashMap<>(subsetCount);
+        weights = new ConcurrentHashMap<>(subsetCount);
+        pertubations = new LinkedHashMap<>(subsetCount);
 
         final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
@@ -72,14 +79,17 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         Kernel.registerListener(this);
         subsetsToCompute = Collections.synchronizedList(new ArrayList<>(subsets));
         prepareLimits(defDegree);
+        prepareWeights(usesWeights);
         final List<double[]> localLimits = new ArrayList<>(limits.values());
-        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimits));
+        final List<Integer> localWeights = new ArrayList<>(weights.values());
+        computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localWeights, localLimits));
 
         for (int i = 0; i < LIMIT_ITERATIONS; i++) {
             prepareLimits(defDegree);
+            prepareWeights(usesWeights);
 
-            makeStep(subsetsToCompute, defDegree);
-            
+            makeStep(subsetsToCompute, defDegree, usesWeights);
+
             extractResults(subsetsToCompute, coeffCount);
 
             notifyProgress(subsetsToCompute.size(), subsetCount);
@@ -113,17 +123,43 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
             temp[DeformationLimit.VSTEP] = STEP_INITIAL;
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.COARSE_FINE).solve(new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), zeroOrderLimits), subsetSize);
-        CorrelationResult paddedResult;
+        final List<Integer> taskWeights = fullTask.getSubsetWeights();
         for (int i = 0; i < subsetCount; i++) {
-            paddedResult = new CorrelationResult(localResults.get(i).getQuality(), Arrays.copyOf(localResults.get(i).getDeformation(), coeffCount));
+            weights.put(subsets.get(i), taskWeights.get(i));
+        }
+        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE).solve(
+                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), new ArrayList<>(weights.values()), zeroOrderLimits), subsetSize);
+        CorrelationResult paddedResult, currentResult;
+        for (int i = 0; i < subsetCount; i++) {
+            // set the length of the result to match correlation degree
+            currentResult = localResults.get(i);
+            paddedResult = new CorrelationResult(currentResult.getQuality(), Arrays.copyOf(currentResult.getDeformation(), coeffCount));
             results.put(subsets.get(i), paddedResult);
             addSubsetResult(fullTask.getSubsets().get(i), localResults.get(i));
         }
     }
 
-    public double[] generatePertubation(final DeformationDegree degree) {
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(degree);
+    private void prepareLimits(final DeformationDegree degree) {
+        double[] newLimits;
+        for (AbstractSubset subset : subsetsToCompute) {
+            newLimits = generateLimit(results.get(subset).getDeformation(), generatePertubation(degree));
+            limits.put(subset, newLimits);
+        }
+    }
+    
+    private double[] generateLimit(final double[] solution, final double[] pertubation) {
+        final int coeffCount = solution.length;
+        final double[] newLimits = new double[coeffCount * 3];
+        for (int i = 0; i < coeffCount; i++) {
+            newLimits[i * 3] = solution[i] - pertubation[i];
+            newLimits[i * 3 + 1] = solution[i] + pertubation[i];
+            newLimits[i * 3 + 2] = pertubation[i];
+        }
+        return newLimits;
+    }
+
+    private double[] generatePertubation(final DeformationDegree degree) {
+        int coeffCount = DeformationUtils.getDeformationCoeffCount(degree);
         final Random rnd = new Random();
         double[] result = new double[coeffCount];
         switch (degree) {
@@ -146,24 +182,18 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         return result;
     }
 
-    private void prepareLimits(final DeformationDegree degree) {
-        double[] newLimits;
-        for (AbstractSubset subset : subsetsToCompute) {
-            newLimits = generateLimit(results.get(subset).getDeformation(), generatePertubation(degree));
-            limits.put(subset, newLimits);
+    private void prepareWeights(final boolean usesWeights) {
+        if (usesWeights) {
+            final Random rnd = new Random();
+            int weight, pertubation;
+            for (Entry<AbstractSubset, Integer> e : weights.entrySet()) {
+                pertubation = rnd.nextInt(PERTUBATION_AMPLITUDE_WEIGHT) - (PERTUBATION_AMPLITUDE_WEIGHT / 2);
+                pertubations.put(e.getKey(), pertubation);
+                weight = e.getValue() + pertubation;
+                weights.put(e.getKey(), weight);
+            }
         }
-    }
-
-    private double[] generateLimit(final double[] solution, final double[] pertubation) {
-        final int coeffCount = solution.length;
-        final double[] newLimits = new double[coeffCount * 3];
-        for (int i = 0; i < coeffCount; i++) {
-            newLimits[i * 3] = solution[i] - pertubation[i];
-            newLimits[i * 3 + 1] = solution[i] + pertubation[i];
-            newLimits[i * 3 + 2] = pertubation[i];
-        }
-        return newLimits;
-    }
+    }    
 
     /**
      * Make one step using SPGD solver. TODO...
@@ -172,16 +202,17 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
      * @param defDegree
      * @throws ComputationException
      */
-    private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree) throws ComputationException {
+    private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationDegree defDegree, final boolean usesWeights) throws ComputationException {
         final Map<AbstractSubset, double[]> localLimits = new ConcurrentHashMap<>();
-
+        final Map<AbstractSubset, Integer> localWeights = new ConcurrentHashMap<>();
+        
         final ExecutorService exec = Engine.getInstance().getExecutorService();
         final Set<Future<AbstractSubset>> steps = new HashSet<>(subsetsToCompute.size());
 
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
             final AbstractSubset as = it.next();
-            steps.add(exec.submit(new StepMaker(as, localLimits, defDegree)));
+            steps.add(exec.submit(new StepMaker(as, localWeights, localLimits, defDegree, usesWeights)));
         }
 
         for (Future<AbstractSubset> fas : steps) {
@@ -194,11 +225,13 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         }
 
         if (!subsetsToCompute.isEmpty()) {
-            final List<double[]> localLimitsList = new ArrayList<>(subsetsToCompute.size());
+            final List<double[]> limitsToCompute = new ArrayList<>(subsetsToCompute.size());
+            final List<Integer> weightToCompute = new ArrayList<>(subsetsToCompute.size());
             for (AbstractSubset subset : subsetsToCompute) {
-                localLimitsList.add(localLimits.get(subset));
+                limitsToCompute.add(limits.get(subset));
+                weightToCompute.add(weights.get(subset));
             }
-            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localLimitsList));
+            computeTask(kernel, new FullTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, weightToCompute, limitsToCompute));
         }
     }
 
@@ -215,7 +248,6 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
             as = it.next();
-            currentResult = results.get(as);
             currentLimits = limits.get(as);
             counts = DeformationUtils.generateDeformationCounts(currentLimits);
             // check quality of new result
@@ -223,6 +255,11 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
             newCorrelationValue = gpuData[resultIndex];
             newResult = new CorrelationResult(newCorrelationValue, extractSolutionFromLimits(currentLimits));
             checkStep(as, newResult, it);
+            currentResult = results.get(as);
+            if (newResult.getQuality() > currentResult.getQuality()) {
+
+            }
+
             baseIndex += counts[coeffCount];
         }
     }
@@ -286,13 +323,17 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
     private class StepMaker implements Callable<AbstractSubset> {
 
         private final AbstractSubset subset;
-        private final Map<AbstractSubset, double[]> localLimits;
         private final DeformationDegree degree;
+        private final Map<AbstractSubset, double[]> localLimits;
+        private final Map<AbstractSubset, Integer> localWeights;
+        private final boolean usesWeights;
 
-        public StepMaker(final AbstractSubset subset, final Map<AbstractSubset, double[]> localLimits, final DeformationDegree degree) {
+        public StepMaker(AbstractSubset subset, Map<AbstractSubset, Integer> localWeights, Map<AbstractSubset, double[]> localLimits, final DeformationDegree degree, boolean usesWeights) {
             this.subset = subset;
             this.localLimits = localLimits;
+            this.localWeights = localWeights;            
             this.degree = degree;
+            this.usesWeights = usesWeights;
         }
 
         @Override
@@ -303,33 +344,31 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
                 // prepare data for computation
                 final double correlationPlus = gpuData[resultsBase];
                 final double correlationMinus = gpuData[resultsBase + 1];
-                final double correlationDiff = correlationMinus - correlationPlus;
+                final double dJ = correlationMinus - correlationPlus;
 
-                if (Math.abs(correlationDiff) < LIMIT_Q_DIFF) {
+                if (Math.abs(dJ) < LIMIT_Q_DIFF) {
                     addSubsetTerminationInfo(subset, "Low correlation diff");
                     return subset;
                 }
 
                 final double[] oldResult = results.get(subset).getDeformation();
                 final double[] oldLimits = limits.get(subset);
-
-                final double[] pertubation = new double[oldResult.length];
-                for (int i = 0; i < pertubation.length; i++) {
-                    pertubation[i] = oldLimits[i * 3 + 2];
-                }
-
-                final double[] add = Arrays.copyOf(pertubation, pertubation.length);
-                for (int i = 0; i < add.length; i++) {
-                    add[i] *= GAIN_SYSTEM * correlationDiff;
-                }
-
-                final double[] solution = Arrays.copyOf(oldResult, oldResult.length);
+                final double[] solution = new double[oldResult.length];
                 for (int i = 0; i < solution.length; i++) {
-                    solution[i] += add[i];
+                    // new = old + Gain * Pertubation * dJ
+                    solution[i] = oldResult[i] + (GAIN_SYSTEM * oldLimits[i * 3 + 2] * dJ);
                 }
 
                 // prepare data for next step
                 localLimits.put(subset, generateLimit(solution, generatePertubation(degree)));
+
+                final int oldWeight = weights.get(subset);
+                if (usesWeights) {
+                    final int newWeight = oldWeight + (int) Math.round(GAIN_SYSTEM * pertubations.get(subset) * dJ);
+                    localWeights.put(subset, newWeight);
+                } else {
+                    localWeights.put(subset, oldWeight);
+                }                
             } catch (Exception ex) {
                 if (ex.getStackTrace().length == 0) {
                     Logger.warn("{} stop, exception occured - {}, no stack trace...", subset, ex);

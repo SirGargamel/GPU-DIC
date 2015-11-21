@@ -9,18 +9,14 @@ import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetDeformator;
-import static cz.tul.dic.engine.opencl.solvers.NewtonRaphson.generateIndex;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolatingFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolator;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
 
 /**
  *
@@ -31,35 +27,11 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
     private static final int COUNT_STEP = 2;
     private static final double DX = 0.5;
     private static final double DY = DX;
-
-    @Override
-    protected RealVector generateNegativeGradient(final AbstractSubset subset) {
-        final double[] deformationLimits = limits.get(subset);
-        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
-        final int deformationCount = computeDeformationCount(defDegree);
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
-        final double[] data = new double[coeffCount];
-
-        final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
-        final int midPoint = 0;
-        final int[] indices = new int[coeffCount];
-        Arrays.fill(indices, midPoint);
-        final long[] counts = DeformationUtils.generateDeformationCounts(deformationLimits);
-
-        for (int i = 0; i < coeffCount; i++) {
-            // right index
-            indices[i]++;
-            data[i] = gpuData[resultsBase + generateIndex(counts, indices)];
-            // left index
-            indices[i]--;
-            data[i] -= gpuData[resultsBase + generateIndex(counts, indices)];
-            
-            data[i] /= deformationLimits[i * 3 + 2];
-            data[i] *= -1;
-        }        
-        return new ArrayRealVector(data);
-    }
     
+    public NewtonRaphsonForwardHE() {
+        super(COUNT_STEP);
+    }
+
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
         final double[] deformationLimits = limits.get(subset);
@@ -182,7 +154,7 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
 
         return sum;
     }
-    
+
     @Override
     protected double[] extractSolutionFromLimits(final double[] limits) {
         final double[] result = new double[limits.length / 3];
@@ -192,66 +164,39 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
         return result;
     }
 
-    @Override
-    protected int getSetpCountForOneDimension() {
-        return COUNT_STEP;
-    }
-
     private static class Approximation {
 
-        private static final List<HessianApproximationFunction> functions;
+        private static final List<HessianApproximationFunction> FUNCTIONS;
         private final AbstractSubset subset;
         private final BivariateFunction interpolation;
         private final HessianApproximationFunction matrixApproxFunction;
 
         static {
-            functions = new ArrayList<>(6);
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    return (interpolation.value(x + DX, y) - interpolation.value(x, y)) / DX;
-                }
+            FUNCTIONS = new ArrayList<>(6);
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> (interpolation1.value(x + DX, y) - interpolation1.value(x, y)) / DX);
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> (interpolation1.value(x, y + DY) - interpolation1.value(x, y)) / DY);
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> {
+                final double dif = (interpolation1.value(x + DX, y) - interpolation1.value(x, y)) / DX;
+                return (x - subset1.getCenter()[0]) * dif;
             });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    return (interpolation.value(x, y + DY) - interpolation.value(x, y)) / DY;
-                }
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> {
+                final double dif = (interpolation1.value(x, y + DY) - interpolation1.value(x, y)) / DY;
+                return (y - subset1.getCenter()[1]) * dif;
             });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    final double dif = (interpolation.value(x + DX, y) - interpolation.value(x, y)) / DX;
-                    return (x - subset.getCenter()[0]) * dif;
-                }
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> {
+                final double dif = (interpolation1.value(x + DX, y) - interpolation1.value(x, y)) / DX;
+                return (y - subset1.getCenter()[1]) * dif;
             });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    final double dif = (interpolation.value(x, y + DY) - interpolation.value(x, y)) / DY;
-                    return (y - subset.getCenter()[1]) * dif;
-                }
-            });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    final double dif = (interpolation.value(x + DX, y) - interpolation.value(x, y)) / DX;
-                    return (y - subset.getCenter()[1]) * dif;
-                }
-            });
-            functions.add(new HessianApproximationFunction() {
-                @Override
-                public double calculateValue(double x, double y, AbstractSubset subset, final BivariateFunction interpolation) {
-                    final double dif = (interpolation.value(x, y + DY) - interpolation.value(x, y)) / DY;
-                    return (x - subset.getCenter()[0]) * dif;
-                }
+            FUNCTIONS.add((HessianApproximationFunction) (double x, double y, AbstractSubset subset1, final BivariateFunction interpolation1) -> {
+                final double dif = (interpolation1.value(x, y + DY) - interpolation1.value(x, y)) / DY;
+                return (x - subset1.getCenter()[0]) * dif;
             });
         }
 
         public Approximation(final AbstractSubset subset, final BivariateFunction interpolation, final int i) {
             this.subset = subset;
             this.interpolation = interpolation;
-            matrixApproxFunction = functions.get(i);
+            matrixApproxFunction = FUNCTIONS.get(i);
         }
 
         public double calculateValue(final double x, final double y) {

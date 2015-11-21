@@ -22,6 +22,7 @@ public class OpenCLDataPackage {
     private final CLMemory<ByteBuffer> imgB;
     private final CLBuffer<IntBuffer> subsetData;
     private final CLBuffer<FloatBuffer> subsetCenters;
+    private final CLBuffer<IntBuffer> subsetWeights;
     private final CLBuffer<FloatBuffer> deformationLimits;
     private final CLBuffer<LongBuffer> defStepCounts;
     private final CLBuffer<FloatBuffer> results;
@@ -29,12 +30,14 @@ public class OpenCLDataPackage {
     public OpenCLDataPackage(
             final CLMemory<ByteBuffer> imgA, final CLMemory<ByteBuffer> imgB,
             final CLBuffer<IntBuffer> subsetData, final CLBuffer<FloatBuffer> subsetCenters,
+            final CLBuffer<IntBuffer> subsetWeights,
             final CLBuffer<FloatBuffer> deformationLimits, final CLBuffer<LongBuffer> defStepCounts,
             final CLBuffer<FloatBuffer> results) {
         this.imgA = imgA;
         this.imgB = imgB;
         this.subsetData = subsetData;
         this.subsetCenters = subsetCenters;
+        this.subsetWeights = subsetWeights;
         this.deformationLimits = deformationLimits;
         this.defStepCounts = defStepCounts;
         this.results = results;
@@ -66,6 +69,10 @@ public class OpenCLDataPackage {
 
     public CLBuffer<FloatBuffer> getResults() {
         return results;
+    }
+
+    public CLBuffer<IntBuffer> getWeights() {
+        return subsetWeights;
     }
 
     public CLMemory<?>[] getMemoryObjects() {

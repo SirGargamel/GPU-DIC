@@ -11,21 +11,24 @@ package cz.tul.dic.engine.opencl.solvers;
  */
 public enum Solver {
 
-    BRUTE_FORCE("BruteForce", "BF"),
-    COARSE_FINE("CoarseFine", "CF"),
-    NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral", "NRC"),
-    NEWTON_RHAPSON_CENTRAL_HE("NewtonRaphsonCentralHE", "NRCH"),
-    NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward", "NRF"),    
-    NEWTON_RHAPSON_FORWARD_HE("NewtonRaphsonForwardHE", "NRFH"),
-    SPGD("SPGD", "SPGD"),
+    BRUTE_FORCE("BruteForce", "BF", false, false),
+    COARSE_FINE("CoarseFine", "CF", false, true),
+    NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral", "NRC", true, true),
+    NEWTON_RHAPSON_CENTRAL_HE("NewtonRaphsonCentralHE", "NRCH", true, false),
+    NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward", "NRF", true, true),    
+    NEWTON_RHAPSON_FORWARD_HE("NewtonRaphsonForwardHE", "NRFH", true, false),
+    SPGD("SPGD", "SPGD", true, true),
     ;
     
     private final String className, abbreviation;
+    private final boolean higherOrderDeformation, weighedCorrelation;
 
-    private Solver(final String className, final String abbreviation) {
+    private Solver(String className, String abbreviation, boolean higherOrderDeformation, boolean weighedCorrelation) {
         this.className = className;
         this.abbreviation = abbreviation;
-    }
+        this.higherOrderDeformation = higherOrderDeformation;
+        this.weighedCorrelation = weighedCorrelation;
+    }    
 
     public String getClassName() {
         return className;
@@ -33,6 +36,14 @@ public enum Solver {
     
     public String getAbbreviation() {
         return abbreviation;
+    }
+
+    public boolean supportsHigherOrderDeformation() {
+        return higherOrderDeformation;
+    }
+
+    public boolean supportsWeighedCorrelation() {
+        return weighedCorrelation;
     }
 
 }

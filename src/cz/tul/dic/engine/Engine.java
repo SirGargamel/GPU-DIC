@@ -79,7 +79,7 @@ public final class Engine extends Observable implements Observer {
 
         tc.clearResultData();
         TaskContainerUtils.checkTaskValidity(tc);
-        
+
         AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
 
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
@@ -159,7 +159,7 @@ public final class Engine extends Observable implements Observer {
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
 
         final int filterSize = (int) task.getParameter(TaskParameter.FILTER_KERNEL_SIZE);
-        final Image in = task.getImage(roundFrom);        
+        final Image in = task.getImage(roundFrom);
         in.filter(filterSize);
         final Image out = task.getImage(roundTo);
         out.filter(filterSize);
@@ -167,16 +167,25 @@ public final class Engine extends Observable implements Observer {
         // prepare data
         setChanged();
         notifyObservers(SubsetGenerator.class);
-        
+
         final AbstractSubsetGenerator generator = AbstractSubsetGenerator.initGenerator((SubsetGenerator) task.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD));
         final HashMap<AbstractROI, List<AbstractSubset>> subsets = generator.generateSubsets(task, roundFrom);
 
         // compute round                
         final HashMap<AbstractROI, List<CorrelationResult>> correlations = new HashMap<>(task.getRois(roundFrom).size());
+        List<AbstractSubset> subsetList;
+        List<Integer> subsetWeights;
+        int subsetSize, correlationWeight;
         for (AbstractROI roi : task.getRois(roundFrom)) {
             if (stopEngine) {
                 return;
             }
+
+            subsetList = subsets.get(roi);
+            subsetSize = task.getSubsetSize(roundFrom, roi);
+            correlationWeight = TaskContainerUtils.computeCorrelationWeight(subsetSize, (double) task.getParameter(TaskParameter.CORRELATION_WEIGHT));
+            subsetWeights = Collections.nCopies(subsetList.size(), correlationWeight);
+
             // compute and store result
             setChanged();
             notifyObservers(AbstractTaskSolver.class);
@@ -185,9 +194,9 @@ public final class Engine extends Observable implements Observer {
                     solver.solve(
                             new FullTask(
                                     in, out,
-                                    subsets.get(roi),
+                                    subsetList, subsetWeights,
                                     generateDeformations(task.getDeformationLimits(roundFrom, roi), subsets.get(roi).size())),
-                            task.getSubsetSize(roundFrom, roi)));
+                            subsetSize));
         }
 
         setChanged();

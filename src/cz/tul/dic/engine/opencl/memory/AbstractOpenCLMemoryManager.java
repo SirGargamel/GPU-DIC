@@ -45,6 +45,7 @@ public abstract class AbstractOpenCLMemoryManager {
     protected CLMemory<ByteBuffer> clImageA, clImageB;
     protected CLBuffer<IntBuffer> clSubsetData;
     protected CLBuffer<FloatBuffer> clSubsetCenters;
+    protected CLBuffer<IntBuffer> clSubsetWeights;
     protected CLBuffer<FloatBuffer> clDeformationLimits;
     protected CLBuffer<LongBuffer> clDefStepCount;
     protected CLBuffer<FloatBuffer> clResults;
@@ -68,7 +69,7 @@ public abstract class AbstractOpenCLMemoryManager {
     }
 
     public void assignData(final ComputationTask task, final Kernel kernel) throws ComputationException {
-        lock.lock();
+        lock.lock();                
         context = DeviceManager.getContext();
         queue = DeviceManager.getQueue();
         maxDeformationCount = DeformationUtils.findMaxDeformationCount(DeformationUtils.generateDeformationCounts(task.getDeformationLimits()));
@@ -131,6 +132,16 @@ public abstract class AbstractOpenCLMemoryManager {
                 resultBuffer.put(i);
             }
         }
+        resultBuffer.rewind();
+        return result;
+    }
+
+    protected CLBuffer<IntBuffer> generateSubsetWeights(final List<Integer> weights) {
+        final CLBuffer<IntBuffer> result = context.createIntBuffer(weights.size(), CLMemory.Mem.READ_ONLY);
+        final IntBuffer resultBuffer = result.getBuffer();
+        for (int i : weights) {
+            resultBuffer.put(i);
+        }        
         resultBuffer.rewind();
         return result;
     }
@@ -201,7 +212,7 @@ public abstract class AbstractOpenCLMemoryManager {
     public OpenCLDataPackage getData() {
         return new OpenCLDataPackage(
                 clImageA, clImageB,
-                clSubsetData, clSubsetCenters,
+                clSubsetData, clSubsetCenters, clSubsetWeights,
                 clDeformationLimits, clDefStepCount,
                 clResults);
     }

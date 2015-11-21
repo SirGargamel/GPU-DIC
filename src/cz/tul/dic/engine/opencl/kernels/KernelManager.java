@@ -10,6 +10,7 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.task.FullTask;
+import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.KernelInfo.Type;
@@ -18,6 +19,7 @@ import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.pmw.tinylog.Logger;
@@ -35,7 +37,7 @@ public class KernelManager {
     static {
         inited = false;
 
-        UNSUPPORTED_KERNELS = new ArrayList<>();
+        UNSUPPORTED_KERNELS = new ArrayList<>(2);
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES)));
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES)));
 
@@ -65,13 +67,14 @@ public class KernelManager {
         final double[] limits = new double[]{-49, 50, 0.05, -49, 50, 0.05};
         deformationLimits.add(limits);
         deformationLimits.add(limits);
-        final int fs = 14;
+        final int ss = 10;
         final List<AbstractSubset> subsets = new ArrayList<>(2);
-        subsets.add(new SquareSubset2D(fs, 15, 15));
-        subsets.add(new SquareSubset2D(fs, 15, 15));
+        subsets.add(new SquareSubset2D(ss, 15, 15));
+        subsets.add(new SquareSubset2D(ss, 15, 15));
+        final List<Integer> weights = Collections.nCopies(subsets.size(), TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
         solver.solve(
-                new FullTask(img, img, subsets, deformationLimits),
-                fs);
+                new FullTask(img, img, subsets, weights, deformationLimits),
+                ss);
     }
 
     public static KernelInfo getBestKernel(final KernelInfo kernelInfo) {

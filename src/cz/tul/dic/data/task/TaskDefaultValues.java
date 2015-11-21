@@ -20,6 +20,7 @@ import cz.tul.dic.data.subset.generator.SubsetGenerator;
 public final class TaskDefaultValues {
 
     public static final Solver DEFAULT_SOLVER = Solver.NEWTON_RHAPSON_CENTRAL;
+    public static final double DEFAULT_CORRELATION_WEIGHT = 1.0;
     public static final DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION_METHOD = DisplacementCalculation.MAX_WEIGHTED_AVERAGE;
     public static final int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     public static final int DEFAULT_FILTER_KERNEL_SIZE = 5;

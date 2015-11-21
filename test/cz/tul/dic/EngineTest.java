@@ -25,6 +25,7 @@ import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import cz.tul.dic.engine.opencl.kernels.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
@@ -73,7 +74,7 @@ public class EngineTest {
     private static final String[] DEF_ZERO_FIRST_FILES = new String[]{
         "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};
     private static final double[] DEF_LARGE = new double[]{
-        -5, 5, 0.25, -5, 5, 0.2,
+        -5, 5, 0.5, -5, 5, 0.25,
         -1.0, 1.0, 0.05, -1.0, 1.0, 0.2, -1.0, 1.0, 0.2, -1.0, 1.0, 0.1};
 
     @Test
@@ -327,12 +328,12 @@ public class EngineTest {
         final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
-        final int fs = 5;
+        final int ss = 5;
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, DEF_FIRST_F);
         tc.setParameter(TaskParameter.IN, input.get(0));
-        tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, ss);
 
         TaskContainerUtils.checkTaskValidity(tc);
 
@@ -346,18 +347,20 @@ public class EngineTest {
 
         HashMap<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
         final List<AbstractSubset> roiSubsets = new ArrayList<>(4);
-        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
+        roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
+        roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
+        roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
         subsets.put(roi, roiSubsets);
+                
+        final List<Integer> weights = Collections.nCopies(roiSubsets.size(), TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));        
 
         final HashMap<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
                         new FullTask(
                                 tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                                roiSubsets,
+                                roiSubsets, weights,
                                 generateDeformations(tc.getDeformationLimits(ROUND, roi), roiSubsets.size())),
                         tc.getSubsetSize(ROUND, roi)));
         solver.endTask();
@@ -382,12 +385,12 @@ public class EngineTest {
         final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
         final AbstractROI roi = new RectangleROI(85, 85, 95, 95);
-        final int fs = 5;
+        final int ss = 5;
 
         tc.addRoi(ROUND, roi);
         tc.setDeformationLimits(ROUND, roi, DEF_LARGE);
         tc.setParameter(TaskParameter.IN, input.get(0));
-        tc.setParameter(TaskParameter.SUBSET_SIZE, fs);
+        tc.setParameter(TaskParameter.SUBSET_SIZE, ss);
 
         TaskContainerUtils.checkTaskValidity(tc);
 
@@ -401,16 +404,18 @@ public class EngineTest {
 
         HashMap<AbstractROI, List<AbstractSubset>> subsets = new HashMap<>(1);
         final List<AbstractSubset> roiSubsets = new ArrayList<>(4);
-        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
-        roiSubsets.add(new SquareSubset2D(fs, roi.getX1() + fs, roi.getY1() + fs));
+        roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
+        roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
         subsets.put(roi, roiSubsets);
+        
+        final List<Integer> weights = Collections.nCopies(roiSubsets.size(), TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
 
         final HashMap<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
                 solver.solve(
                         new FullTask(
                                 tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                                roiSubsets,
+                                roiSubsets, weights,
                                 generateDeformations(tc.getDeformationLimits(ROUND, roi), roiSubsets.size())),
                         tc.getSubsetSize(ROUND, roi)));
         solver.endTask();

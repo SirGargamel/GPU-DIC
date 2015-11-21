@@ -5,27 +5,29 @@
  */
 package cz.tul.dic.data.task.splitter;
 
+import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  *
  * @author Petr Ječmen
  */
-public abstract class AbstractTaskSplitter implements Iterator<ComputationTask> {
+public abstract class AbstractTaskSplitter {
 
     protected final Image image1, image2;
     protected final List<AbstractSubset> subsets;
+    protected final List<Integer> subsetWeights;
     protected final List<double[]> deformationLimits;
 
     public AbstractTaskSplitter(final FullTask task) {
         this.image1 = task.getImageA();
         this.image2 = task.getImageB();
         this.subsets = task.getSubsets();
+        this.subsetWeights = task.getSubsetWeights();
         this.deformationLimits = task.getDeformationLimits();
     }
 
@@ -45,10 +47,10 @@ public abstract class AbstractTaskSplitter implements Iterator<ComputationTask> 
                 throw new IllegalArgumentException("Unsupported type of task splitting - " + ts);
         }
         return result;
-    }
-
-    public abstract void signalTaskSizeTooBig();
-
-    public abstract boolean isSplitterReady();
+    }        
+    
+    public abstract boolean hasNext();
+    
+    public abstract ComputationTask next() throws ComputationException;
 
 }

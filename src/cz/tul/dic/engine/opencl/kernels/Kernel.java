@@ -55,7 +55,7 @@ public abstract class Kernel {
     protected final CLCommandQueue queue;
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
     protected final WorkSizeManager wsm;
-    private final KernelInfo kernelInfo;
+    protected final KernelInfo kernelInfo;
     private final Set<CLResource> clMem;
     private final AbstractOpenCLMemoryManager memManager;
 
@@ -74,10 +74,11 @@ public abstract class Kernel {
         context = DeviceManager.getContext();
     }
 
-    public static Kernel createInstance(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager) {
+    public static Kernel createInstance(KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager) {
         final WorkSizeManager wsm = new WorkSizeManager(kernelInfo);
         Kernel result;
         try {
+            kernelInfo = KernelManager.getBestKernel(kernelInfo);
             final KernelInfo.Type kernelType = kernelInfo.getType();
             final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));
             result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(kernelInfo, memManager, wsm);
@@ -92,13 +93,19 @@ public abstract class Kernel {
 
     public void prepareKernel(final int subsetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
         try {
-            final boolean usesZncc;
+            final boolean usesZncc, usesWeight;
             switch (kernelInfo.getCorrelation()) {
                 case ZNCC:
                     usesZncc = true;
+                    usesWeight = false;
                     break;
                 case ZNSSD:
                     usesZncc = false;
+                    usesWeight = false;
+                    break;
+                case WZNSSD:
+                    usesZncc = false;
+                    usesWeight = true;
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported type of kernel - " + kernelInfo.getCorrelation());
@@ -131,7 +138,7 @@ public abstract class Kernel {
             CLProgram program = context.createProgram(
                     KernelSourcePreparator.prepareKernel(
                             subsetSize, deg, is2D(), usesVectorization(),
-                            interpolation, usesImage, usesLocalMemory(), usesMemoryCoalescing, subsetsGroupped(), usesZncc)).build();
+                            interpolation, usesImage, usesLocalMemory(), usesMemoryCoalescing, subsetsGroupped(), usesZncc, usesWeight)).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
             clMem.add(kernelDIC);

@@ -24,6 +24,7 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
 
     private Image imageA, imageB;
     private List<AbstractSubset> subsets;
+    private List<Integer> subsetWeights;
     private List<double[]> deformationLimits;
     private List<long[]> deformationCounts;
 
@@ -84,6 +85,12 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
                 queue.putWriteBuffer(clSubsetCenters, false);
 
                 changedResults = true;
+            }
+            if (task.getSubsetWeights() != subsetWeights || !task.getSubsetWeights().equals(subsetWeights) || clSubsetWeights.isReleased()) {
+                release(clSubsetWeights);
+                subsetWeights = task.getSubsetWeights();
+                clSubsetWeights = generateSubsetWeights(subsetWeights);
+                queue.putWriteBuffer(clSubsetWeights, false);
             }
             if (task.getDeformationLimits() != deformationLimits || !task.getDeformationLimits().equals(deformationLimits) || clDeformationLimits.isReleased()) {
                 release(clDeformationLimits);

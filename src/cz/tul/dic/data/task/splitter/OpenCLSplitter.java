@@ -5,6 +5,8 @@
  */
 package cz.tul.dic.data.task.splitter;
 
+import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.deformation.DeformationUtils;
@@ -12,11 +14,8 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicLong;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -24,42 +23,23 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public class OpenCLSplitter extends AbstractTaskSplitter {
-
-    private static int instanceCounter = 0;
+    
     private static final long SIZE_INT = 4;
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
     private static final double COEFF_LIMIT_ADJUST = 0.75;
-    private static final long COEFF_MEM_LIMIT_MAX = 6;
-    private static final long COEFF_MEM_LIMIT_INIT = COEFF_MEM_LIMIT_MAX - 1;
-    private static AtomicLong coeffMemLimit = new AtomicLong(COEFF_MEM_LIMIT_INIT);
-    private final int subsetSize, splitterId;
-    private final List<OpenCLSplitter> subSplitters;
-    private final boolean subSplitter;
+    private final int subsetSize;
     private boolean hasNextElement;
     private int subsetIndex;
 
     public OpenCLSplitter(final FullTask task) {
-        this(task, false);
-    }
-
-    private OpenCLSplitter(final FullTask task, boolean subSplitter) {
         super(task);
-
-        subSplitters = new LinkedList<>();
-        this.subSplitter = subSplitter;
         if (!subsets.isEmpty()) {
             subsetSize = subsets.get(0).getSize();
             checkIfHasNext();
         } else {
             subsetSize = -1;
             hasNextElement = false;
-        }
-
-        splitterId = instanceCounter++;
-        if (coeffMemLimit.get() < COEFF_MEM_LIMIT_INIT) {
-            coeffMemLimit.incrementAndGet();
-            Logger.debug("Increasing task size to {} / {}.", coeffMemLimit, COEFF_MEM_LIMIT_MAX);
         }
     }
 
@@ -69,124 +49,54 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
     }
 
     private void checkIfHasNext() {
-        hasNextElement = false;
-        while (!subSplitters.isEmpty() && !hasNextElement) {
-            if (subSplitters.get(0).hasNext()) {
-                hasNextElement = true;
-            } else {
-                subSplitters.remove(0);
-            }
-        }
-
-        if (!hasNextElement) {
-            hasNextElement = subsetIndex < subsets.size();
-        }
+        hasNextElement = subsetIndex < subsets.size();
     }
 
     @Override
-    public ComputationTask next() {
+    public ComputationTask next() throws ComputationException {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
 
         final int deformationLimitsArraySize = deformationLimits.get(subsetIndex).length;
-        List<AbstractSubset> sublist = null;
+        List<AbstractSubset> sublistS = null;
+        List<Integer> sublistW = null;
         List<double[]> checkedDeformations = null;
-        ComputationTask ct = null;
-        if (!subSplitters.isEmpty()) {
-            ct = subSplitters.get(0).next();
+        final int rest = subsets.size() - subsetIndex;
+
+        int taskSize = rest;
+        final List<long[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
+        final long deformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
+        while (taskSize > 1 && !isMemOk(deformationCount, taskSize, subsetSize, deformationLimitsArraySize)) {
+            taskSize *= COEFF_LIMIT_ADJUST;
+        }
+
+        if (taskSize == 1 && !isMemOk(deformationCount, taskSize, subsetSize, deformationLimitsArraySize)) {
+            hasNextElement = false;
+            throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Not enough GPU memory, too many deformations.");
         } else {
-            final int rest = subsets.size() - subsetIndex;
+            checkedDeformations = new ArrayList<>(taskSize);
+            sublistS = new ArrayList<>(taskSize);
+            sublistW = new ArrayList<>(taskSize);
+            final int subsetCount = subsets.size();
 
-            int taskSize = rest;
-            final List<long[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
-            final long deformaiontCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
-            while (taskSize > 1 && !isMemOk(deformaiontCount, taskSize, subsetSize, deformationLimitsArraySize)) {
-                taskSize *= COEFF_LIMIT_ADJUST;
-            }
+            int count = 0;
+            while (count < taskSize && subsetIndex < subsetCount) {
+                sublistS.add(subsets.get(subsetIndex));
+                sublistW.add(subsetWeights.get(subsetIndex));
+                checkedDeformations.add(deformationLimits.get(subsetIndex));
 
-            if (taskSize == 1 && !isMemOk(deformaiontCount, taskSize, subsetSize, deformationLimitsArraySize)) {
-                sublist = new ArrayList<>(1);
-                sublist.add(subsets.get(subsetIndex));
-
-                final double[] oldLimits = deformationLimits.get(subsetIndex);
-                final long[] stepCounts = DeformationUtils.generateDeformationCounts(oldLimits);
-                final int minIndex = findMinIndexBiggerThanZero(stepCounts);
-                final long newStepCount = stepCounts[minIndex] / 2 - 1;
-                final double midPoint = oldLimits[minIndex * 3] + newStepCount * oldLimits[minIndex * 3 + 2];
-
-                double[] newLimits = new double[deformationLimitsArraySize];
-                System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
-                newLimits[minIndex * 3 + 1] = midPoint;
-                Logger.trace("{} - {}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
-                checkedDeformations = new ArrayList<>(1);
-                checkedDeformations.add(newLimits);
-                subSplitters.add(new OpenCLSplitter(new FullTask(image1, image2, sublist, checkedDeformations), true));
-
-                newLimits = new double[deformationLimitsArraySize];
-                System.arraycopy(oldLimits, 0, newLimits, 0, deformationLimitsArraySize);
-                newLimits[minIndex * 3] = midPoint + oldLimits[minIndex * 3 + 2];
-                Logger.trace("{} - {}", Arrays.toString(oldLimits), Arrays.toString(newLimits));
-                checkedDeformations = new ArrayList<>(1);
-                checkedDeformations.add(newLimits);
-                subSplitters.add(new OpenCLSplitter(new FullTask(image1, image2, sublist, checkedDeformations), true));
-
-                if (subSplitter) {
-                    Logger.warn("Too many deformations in subtask, {} generating subsplitters - {}, {}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);
-                } else {
-                    Logger.warn("Too many deformations in task, {} generating subsplitters - {}, {}.", splitterId, subSplitters.get(0).splitterId, subSplitters.get(1).splitterId);
-                }
-                ct = subSplitters.get(0).next();
-            } else {
-                checkedDeformations = new ArrayList<>(taskSize);
-                sublist = new ArrayList<>(taskSize);
-                final int subsetCount = subsets.size();
-
-                int count = 0;
-                while (count < taskSize && subsetIndex < subsetCount) {
-                    sublist.add(subsets.get(subsetIndex));
-                    checkedDeformations.add(deformationLimits.get(subsetIndex));
-
-                    count++;
-                    subsetIndex++;
-                }
+                count++;
+                subsetIndex++;
             }
         }
 
         checkIfHasNext();
 
-        if (ct == null) {
-            ct = new ComputationTask(image1, image2, sublist, checkedDeformations, subSplitter);
-            if (subSplitter) {
-                Logger.trace("{} computing subtask {}", splitterId, Arrays.toString(ct.getDeformationLimits().get(0)));
-            } else if (sublist != null) {
-                Logger.trace("{} computing task with {} subsets.", splitterId, sublist.size());
-            } else {
-                Logger.error("NULL subset sublist !!!");
-            }
-        } else {
-            if (subSplitters.isEmpty()) {
-                ct.setSubtask(false);
-                subsetIndex++;
-                checkIfHasNext();
-            } else {
-                ct.setSubtask(true);
-            }
-        }
+        ComputationTask ct = new ComputationTask(image1, image2, sublistS, sublistW, checkedDeformations);
+        Logger.trace("OpenCL splitter computing task with {} subsets.", sublistS.size());
 
         return ct;
-    }
-
-    private static int findMinIndexBiggerThanZero(final long[] counts) {
-        long min = Long.MAX_VALUE;
-        int minPos = 0;
-        for (int i = 0; i < counts.length; i++) {
-            if (counts[i] < min && counts[i] > 1) {
-                min = counts[i];
-                minPos = i;
-            }
-        }
-        return minPos;
     }
 
     private boolean isMemOk(final long deformationCount, final long subsetCount, final long subsetSize, final long deformationLimitsArraySize) {
@@ -195,12 +105,13 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         final long reserve = 32 * SIZE_INT;
         final long subsetDataSize = SubsetUtils.computeSubsetCoordCount((int) subsetSize) * 2 * SIZE_INT * subsetCount;
         final long subsetCentersSize = 2 * SIZE_FLOAT * subsetCount;
+        final long subsetWeightsSize = SIZE_INT * subsetCount;
         final long resultCount = subsetCount * deformationCount;
         final long resultSize = resultCount * SIZE_FLOAT;
-        final long fullSize = imageSize + deformationsSize + reserve + subsetDataSize + subsetCentersSize + resultSize;
+        final long fullSize = imageSize + deformationsSize + reserve + subsetDataSize + subsetCentersSize + subsetWeightsSize + resultSize;
 
-        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize() / COEFF_MEM_LIMIT_MAX * coeffMemLimit.get();
-        final long maxMem = DeviceManager.getDevice().getGlobalMemSize() / COEFF_MEM_LIMIT_MAX * coeffMemLimit.get();
+        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
+        final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
         boolean result = fullSize >= 0 && fullSize <= maxMem;
         result &= resultCount <= Integer.MAX_VALUE;
         result &= subsetCount <= Integer.MAX_VALUE;
@@ -210,18 +121,8 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         result &= deformationsSize >= 0 && deformationsSize <= maxAllocMem;
         result &= subsetDataSize >= 0 && subsetDataSize <= maxAllocMem;
         result &= subsetCentersSize >= 0 && subsetCentersSize <= maxAllocMem;
+        result &= subsetWeightsSize >= 0 && subsetWeightsSize <= maxAllocMem;
         return result;
-    }
-
-    @Override
-    public void signalTaskSizeTooBig() {
-        coeffMemLimit.decrementAndGet();
-        Logger.debug("Lowering task size to {} / {}.", coeffMemLimit, COEFF_MEM_LIMIT_MAX);
-    }
-
-    @Override
-    public boolean isSplitterReady() {
-        return coeffMemLimit.get() > 0;
     }
 
 }

@@ -40,7 +40,8 @@ public enum TaskParameter {
     STRAIN_ESTIMATION_PARAM(Double.class),
     DEFORMATION_LIMITS(double[].class),
     DEFORMATION_ORDER(DeformationDegree.class),
-    SOLVER(Solver.class);
+    SOLVER(Solver.class),
+    CORRELATION_WEIGHT(Double.class);
 
     private final Class type;
 

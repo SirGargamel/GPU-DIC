@@ -29,6 +29,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
 
     private final Map<Image, CLMemory<ByteBuffer>> imageBuffer;
     private List<AbstractSubset> subsets;
+    private List<Integer> subsetWeights;
     private List<double[]> deformationLimits;
     private List<long[]> deformationCounts;
     private boolean inited;
@@ -83,6 +84,12 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
                 queue.putWriteBuffer(clSubsetCenters, false);
 
                 changedResults = true;
+            }
+            if (task.getSubsetWeights() != subsetWeights || !task.getSubsetWeights().equals(subsetWeights) || clSubsetWeights.isReleased()) {
+                release(clSubsetWeights);
+                subsetWeights = task.getSubsetWeights();
+                clSubsetWeights = generateSubsetWeights(subsetWeights);
+                queue.putWriteBuffer(clSubsetWeights, false);
             }
             if (task.getDeformationLimits() != deformationLimits || !task.getDeformationLimits().equals(deformationLimits) || clDeformationLimits.isReleased()) {
                 release(clDeformationLimits);

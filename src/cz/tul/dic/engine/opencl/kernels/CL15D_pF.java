@@ -5,10 +5,12 @@
  */
 package cz.tul.dic.engine.opencl.kernels;
 
+import com.jogamp.opencl.CLBuffer;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
+import java.nio.IntBuffer;
 
 public class CL15D_pF extends Kernel {
 
@@ -40,6 +42,10 @@ public class CL15D_pF extends Kernel {
                 .putArg(0L)
                 .putArg(0L)
                 .putArg(0);
+        final CLBuffer<IntBuffer> weights = data.getWeights();
+        if (kernelInfo.getCorrelation() == KernelInfo.Correlation.WZNSSD) {
+            kernelDIC.putArg(weights);
+        }
         kernelDIC.rewind();
         // copy data and execute kernel
         wsm.setMaxSubsetCount(subsetCount);

@@ -1,0 +1,29 @@
+float resultVal = 0;           
+float sumWg = 0;
+float temp, wGorig, wGdef, centerDefX, centerDefY, centerX, centerY;
+if (deltaF != 0 && deltaG != 0) {
+	deltaF = sqrt(deltaF);
+	deltaG = sqrt(deltaG);
+	
+	const float weight = weights[subsetId];
+	
+	centerX = subsetCenters[subsetId].x;
+	centerY = subsetCenters[subsetId].y;
+		
+	centerDefX = deformedFacet[subsetSize2 / 2].x;
+	centerDefY = deformedFacet[subsetSize2 / 2].y;
+	
+    for (int i = 0; i < subsetSize2; i++) {  		  
+		wGorig = gauss(subsetLocal[i].x - centerX, subsetLocal[i].y - centerY, weight);
+		wGdef = gauss(deformedFacet[i].x - centerDefX, deformedFacet[i].y - centerDefY, weight);
+		temp = ((subsetI[i] / deltaF) * wGorig) - ((deformedI[i] / deltaG) * wGdef);
+        resultVal +=  temp * temp;
+		
+		sumWg += wGdef * wGdef;
+    }
+	if (sumWg != 0) {
+		resultVal /= sumWg;
+	}
+	
+	resultVal = 1 - (resultVal / 2.0);
+}

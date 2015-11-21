@@ -78,6 +78,9 @@ public class KernelInfo implements Serializable {
         if (this.correlation != other.correlation) {
             return false;
         }
+        if (this.memoryCoalescing != other.memoryCoalescing) {
+            return false;
+        }
         return true;
     }
 
@@ -94,7 +97,8 @@ public class KernelInfo implements Serializable {
 
     public enum Correlation {
         ZNCC,
-        ZNSSD,
+        ZNSSD,        
+        WZNSSD,
         BEST
     }
 
