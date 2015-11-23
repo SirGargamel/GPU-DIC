@@ -55,6 +55,7 @@ public abstract class AbstractOpenCLMemoryManager {
     private final Lock lock;
 
     static {
+        DeviceManager.getContext();
         DeviceManager.clearMemory();
         INSTANCE = new PrefetchingMemoryManager();
         IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
@@ -62,6 +63,8 @@ public abstract class AbstractOpenCLMemoryManager {
 
     protected AbstractOpenCLMemoryManager() {
         lock = new ReentrantLock();
+        context = DeviceManager.getContext();
+        queue = DeviceManager.getQueue();
     }
 
     public static AbstractOpenCLMemoryManager getInstance() {

@@ -12,7 +12,6 @@ import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
-import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.engine.opencl.kernels.KernelInfo.Type;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
@@ -22,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -30,6 +31,7 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelManager {
 
+    private static final String PREF_TIME_CREATION = "time.test";
     private static final KernelInfo DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST);
     private static final List<KernelInfo> UNSUPPORTED_KERNELS;
     private static boolean inited;
@@ -41,23 +43,34 @@ public class KernelManager {
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES)));
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES)));
 
-        Logger.debug("Initializing best kernel.");
-        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.COARSE_FINE);
-        solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
-        solver.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
-
-        try {
-            for (KernelInfo ki : generateKernelInfos()) {
-                testKernelInfo(solver, ki);
-            }
-        } catch (ComputationException ex) {
-            Logger.debug(ex);
-            throw new RuntimeException("Error initializing OpenCL.", ex);
+        final long lastCheck = Preferences.userNodeForPackage(KernelManager.class).getLong(PREF_TIME_CREATION, 0);
+        final long current = System.currentTimeMillis();
+        final long diff = current - lastCheck;
+        if (TimeUnit.MILLISECONDS.toDays(diff) == 0) {
+            inited = TimeDataStorage.getInstance().loadTimeDataFromFile();
         }
-        solver.endTask();
-        Logger.debug("Kernel performance assesment completed.");
 
-        inited = true;
+        if (!inited) {
+            Logger.debug("Initializing best kernel.");
+            final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.COARSE_FINE);
+            solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
+            solver.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
+
+            try {
+                for (KernelInfo ki : generateKernelInfos()) {
+                    testKernelInfo(solver, ki);
+                }
+            } catch (ComputationException ex) {
+                Logger.debug(ex);
+                throw new RuntimeException("Error initializing OpenCL.", ex);
+            }
+            solver.endTask();
+            TimeDataStorage.getInstance().storeTimeDataToFile();
+            Preferences.userNodeForPackage(KernelManager.class).putLong(PREF_TIME_CREATION, current);
+            Logger.debug("Kernel performance assesment completed.");
+
+            inited = true;
+        }
     }
 
     private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo) throws ComputationException {
@@ -84,7 +97,7 @@ public class KernelManager {
         }
 
         // find best performing kernel        
-        final Map<KernelInfo, Map<Long, Map<Long, Long>>> TIME_DATA = WorkSizeManager.getTimeData();
+        final Map<KernelInfo, Map<Long, Map<Long, Long>>> TIME_DATA = TimeDataStorage.getInstance().getFullData();
         double performance;
         double bestPerformance = Double.NEGATIVE_INFINITY;
         KernelInfo bestKernel = null;

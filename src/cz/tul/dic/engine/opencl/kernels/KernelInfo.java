@@ -54,6 +54,7 @@ public class KernelInfo implements Serializable {
         hash = 31 * hash + Objects.hashCode(this.type);
         hash = 31 * hash + Objects.hashCode(this.input);
         hash = 31 * hash + Objects.hashCode(this.correlation);
+        hash = 31 * hash + Objects.hashCode(this.memoryCoalescing);
         return hash;
     }
 

@@ -6,10 +6,9 @@
 package cz.tul.dic.engine.opencl;
 
 import cz.tul.dic.engine.opencl.kernels.KernelInfo;
-import java.util.HashMap;
+import cz.tul.dic.engine.opencl.kernels.TimeDataStorage;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 /**
  *
@@ -27,7 +26,6 @@ public final class WorkSizeManager {
     private static final double GROWTH_LIMIT_B = 0.75;
     private static final double GROWTH_FACTOR_A = 0.75;
     private static final double GROWTH_FACTOR_B = 1.25;
-    private static final Map<KernelInfo, Map<Long, Map<Long, Long>>> TIME_DATA;
     private final KernelInfo kernel;
     private long workSizeS, workSizeD, maxF, maxD;
 
@@ -38,8 +36,6 @@ public final class WorkSizeManager {
         } else {
             MAX_TIME = MAX_TIME_LIN * MAX_TIME_BASE;
         }
-
-        TIME_DATA = new HashMap<>();
     }
 
     public WorkSizeManager(final KernelInfo kernel) {
@@ -69,24 +65,12 @@ public final class WorkSizeManager {
     }
 
     public void storeTime(final long workSizeF, final long workSizeD, final long time) {
-        Map<Long, Map<Long, Long>> m = TIME_DATA.get(kernel);
-        if (m == null) {
-            m = new TreeMap<>();
-            TIME_DATA.put(kernel, m);
-        }
-
-        Map<Long, Long> m2 = m.get(workSizeF);
-        if (m2 == null) {
-            m2 = new TreeMap<>();
-            m.put(workSizeF, m2);
-        }
-
-        m2.put(workSizeD, time);
+        TimeDataStorage.getInstance().storeTime(kernel, workSizeF, workSizeD, time);
         computeNextWorkSize();
     }
 
     private void computeNextWorkSize() {
-        if (!TIME_DATA.get(kernel).isEmpty()) {
+        if (!TimeDataStorage.getInstance().getTimeData(kernel).isEmpty()) {
             final long[] max = findMaxTimeValue(kernel);
             final long[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
             workSizeS = newMax[0];
@@ -99,7 +83,7 @@ public final class WorkSizeManager {
 
         long time;
         long subsetCount, deformationCount;
-        for (Entry<Long, Map<Long, Long>> e : TIME_DATA.get(kernel).entrySet()) {
+        for (Entry<Long, Map<Long, Long>> e : TimeDataStorage.getInstance().getTimeData(kernel).entrySet()) {
             for (Entry<Long, Long> e2 : e.getValue().entrySet()) {
                 time = e2.getValue();
                 subsetCount = e.getKey();
@@ -144,9 +128,5 @@ public final class WorkSizeManager {
         }
 
         return Math.min(result, maxValue);
-    }
-
-    public static Map<KernelInfo, Map<Long, Map<Long, Long>>> getTimeData() {
-        return TIME_DATA;
     }
 }

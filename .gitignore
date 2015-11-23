@@ -11,3 +11,4 @@ log*.txt
 /log.txt
 /LicenseManager/
 /license.dat
+/performance.kernel
