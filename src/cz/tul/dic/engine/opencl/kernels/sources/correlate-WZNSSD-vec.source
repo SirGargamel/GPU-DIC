@@ -10,8 +10,8 @@ if (deltaF != 0 && deltaG != 0) {
 	centerX = subsetCenters[subsetId].x;
 	centerY = subsetCenters[subsetId].y;
 		
-	centerDefX = deformedFacet[subsetSize2 / 2].x;
-	centerDefY = deformedFacet[subsetSize2 / 2].y;
+	centerDefX = centerX + deformation[0];
+	centerDefY = centerY + deformation[1];
 	
     for (int i = 0; i < subsetSize2; i++) {  		  
 		wGorig = gauss(subsetLocal[i].x - centerX, subsetLocal[i].y - centerY, weight);

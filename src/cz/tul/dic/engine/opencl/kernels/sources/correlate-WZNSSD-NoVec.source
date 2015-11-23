@@ -10,8 +10,8 @@ if (deltaF != 0 && deltaG != 0) {
 	centerX = subsetCenters[baseIndexFacetCenter];
 	centerY = subsetCenters[baseIndexFacetCenter+1];
 		
-	centerDefX = deformedFacet[subsetSize2];
-	centerDefY = deformedFacet[subsetSize2+1];
+	centerDefX = centerX + deformation[0];
+	centerDefY = centerY + deformation[1];
 	
     for (int i = 0; i < subsetSize2; i++) {  
 		i2 = i*2;
