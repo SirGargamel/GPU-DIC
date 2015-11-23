@@ -147,7 +147,8 @@ public abstract class ColorMap {
 
     public enum Type {
         CoolWarm,
-        Rainbow
+        Rainbow,
+        RedBlue
     }
 
 }
