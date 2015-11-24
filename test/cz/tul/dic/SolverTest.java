@@ -126,6 +126,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
+        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.ZNSSD, KernelInfo.MemoryCoalescing.BEST));
 
         Engine.getInstance().computeTask(task);
 
