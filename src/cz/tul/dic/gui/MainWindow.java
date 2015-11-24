@@ -116,7 +116,7 @@ public class MainWindow implements Initializable {
     @FXML
     private void handleButtonActionInput(ActionEvent event) throws IOException, InterruptedException, ExecutionException, ComputationException {
         final FileChooser fc = new FileChooser();
-        final String lastDir = Preferences.userRoot().get(LAST_DIR, null);
+        final String lastDir = Preferences.userNodeForPackage(this.getClass()).get(LAST_DIR, null);
         if (lastDir != null) {
             File last = new File(lastDir);
             if (!last.isDirectory()) {
@@ -147,7 +147,7 @@ public class MainWindow implements Initializable {
             } else {
                 loadInput(fileList);
             }
-            Preferences.userRoot().put(LAST_DIR, fileList.get(0).getAbsolutePath());
+            Preferences.userNodeForPackage(this.getClass()).put(LAST_DIR, fileList.get(0).getAbsolutePath());
         }
     }
 
