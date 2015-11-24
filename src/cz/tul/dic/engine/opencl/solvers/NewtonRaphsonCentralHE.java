@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.engine.opencl.solvers;
 
-import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetDeformator;
@@ -23,15 +22,13 @@ import org.apache.commons.math3.linear.RealMatrix;
  * @author Petr Ječmen
  */
 public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
-
-    private static final int COUNT_STEP = 3;
+    
     private static final double DX = 0.5;
     private static final double DY = DX;
 
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
-        final double[] deformationLimits = limits.get(subset);
-        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
+        final double[] deformationLimits = limits.get(subset);        
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
         final double[][] data = new double[coeffCount][coeffCount];
 
