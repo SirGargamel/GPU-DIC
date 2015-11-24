@@ -373,22 +373,28 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             result *= counts[i];
             result += indices[i];
         }
-//        if (usesWeights) {
-//            // weight coeff shift
-//            final int mult = indices[l];
-//            result += mult * (gpuData.length / getSetpCountForOneDimension());
-//        }
+        if (usesWeights) {
+            // weight coeff shift
+            final int mult = indices[l];
+            result += mult * (gpuData.length / stepCountForOneDimension);
+        }
         return result;
     }
 
-    protected int getCoeffCount(final AbstractSubset subset) {
-        double[] deformationLimits = limits.get(subset);
-        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(deformationLimits);
+    protected int getCoeffCount() {                
         int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
         if (usesWeights) {
             coeffCount++;
         }
         return coeffCount;
+    }
+    
+    protected int getMidPoint() {
+        int result = this.stepCountForOneDimension / 2;
+        if (stepCountForOneDimension % 2 == 0) {
+            result--;
+        }
+        return result;
     }
 
     protected double[] prepareArrayForSolver(final AbstractSubset subset) {

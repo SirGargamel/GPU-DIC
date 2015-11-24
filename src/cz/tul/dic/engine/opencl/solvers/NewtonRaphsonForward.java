@@ -32,11 +32,11 @@ public class NewtonRaphsonForward extends NewtonRaphson {
     @Override
     protected RealVector generateNegativeGradient(final AbstractSubset subset) {
         final double[] subsetLimits = prepareArrayForSolver(subset);                
-        final int coeffCount = getCoeffCount(subset);        
+        final int coeffCount = getCoeffCount();        
         final double[] data = new double[coeffCount];
 
         final int resultsBase = (subsetsToCompute.indexOf(subset) * computeDeformationCount(defDegree));
-        final int midPoint = COUNT_STEP / 2;
+        final int midPoint = getMidPoint();
         final int[] indices = new int[coeffCount];
         Arrays.fill(indices, midPoint);
         final long[] counts = DeformationUtils.generateDeformationCounts(subsetLimits);
@@ -58,11 +58,11 @@ public class NewtonRaphsonForward extends NewtonRaphson {
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
         final double[] subsetLimits = prepareArrayForSolver(subset);                
-        final int coeffCount = getCoeffCount(subset);
+        final int coeffCount = getCoeffCount();
         final double[][] data = new double[coeffCount][coeffCount];
 
         final int resultsBase = (fullTask.getSubsets().indexOf(subset) * computeDeformationCount(defDegree));
-        final int midPoint = COUNT_STEP / 2;
+        final int midPoint = getMidPoint();
         final int[] indices = new int[coeffCount];
         Arrays.fill(indices, midPoint);
         final long[] counts = DeformationUtils.generateDeformationCounts(subsetLimits);
