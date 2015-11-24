@@ -38,14 +38,14 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
 
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final double STEP_INITIAL = .1;
-    private static final int LIMIT_ITERATIONS = 100;
+    private static final int LIMIT_ITERATIONS = 200;
     private static final double LIMIT_Q_DONE = 0.99;
     private static final double LIMIT_Q_DIFF = 0.0001;
-    private static final double PERTUBATION_AMPLITUDE_ZERO = 0.25;
-    private static final double PERTUBATION_AMPLITUDE_FIRST = 0.025;
-    private static final double PERTUBATION_AMPLITUDE_SECOND = 0.0025;
-    private static final int PERTUBATION_AMPLITUDE_WEIGHT = 10;
-    private static final double GAIN_SYSTEM = 50;
+    private static final double PERTUBATION_AMPLITUDE_ZERO = 0.1;
+    private static final double PERTUBATION_AMPLITUDE_FIRST = 0.01;
+    private static final double PERTUBATION_AMPLITUDE_SECOND = 0.01;
+    private static final int PERTUBATION_AMPLITUDE_WEIGHT = 5;
+    private static final double GAIN_SYSTEM = 100;
     private FullTask fullTask;
     private Map<AbstractSubset, CorrelationResult> results;
     private Map<AbstractSubset, double[]> limits;
