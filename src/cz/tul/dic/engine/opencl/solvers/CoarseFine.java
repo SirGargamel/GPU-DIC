@@ -13,7 +13,6 @@ import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.FullTask;
-import cz.tul.dic.engine.opencl.kernels.Kernel;
 import java.util.ArrayList;
 import java.util.List;
 import org.pmw.tinylog.Logger;
@@ -26,8 +25,8 @@ public class CoarseFine extends AbstractTaskSolver {
 
     @Override
     public List<CorrelationResult> solve(
-            final Kernel kernel,
-            final FullTask fullTask) throws ComputationException {
+            final FullTask fullTask,
+            final boolean usesWeights) throws ComputationException {
         if (fullTask.getSubsets().isEmpty()) {
             return new ArrayList<>(0);
         }

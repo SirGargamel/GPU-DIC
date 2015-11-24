@@ -15,7 +15,6 @@ import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.kernels.Kernel;
-import cz.tul.dic.engine.opencl.kernels.KernelInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,16 +66,15 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     }
 
     @Override
-    public List<CorrelationResult> solve(
-            final Kernel kernel,
-            final FullTask fullTask) throws ComputationException {
+    public List<CorrelationResult> solve(            
+            final FullTask fullTask,
+            final boolean usesWeights) throws ComputationException {
         if (fullTask.getSubsets().isEmpty()) {
             return new ArrayList<>(0);
         }
         this.fullTask = fullTask;
         final List<AbstractSubset> subsets = fullTask.getSubsets();
-        final int subsetCount = subsets.size();
-        usesWeights = kernel.getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD;
+        final int subsetCount = subsets.size();        
 
         results = new LinkedHashMap<>(subsetCount);
         limits = new LinkedHashMap<>(subsetCount);

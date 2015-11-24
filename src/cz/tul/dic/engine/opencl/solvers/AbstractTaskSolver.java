@@ -85,10 +85,11 @@ public abstract class AbstractTaskSolver extends Observable {
         Logger.trace("Kernel prepared - {}", kernel);
 
         this.subsetSize = subsetSize;
+        final boolean usesWeights = kernel.getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD;
 
         long time = System.nanoTime();
 
-        final List<CorrelationResult> result = solve(kernel, fullTask);
+        final List<CorrelationResult> result = solve(fullTask, usesWeights);
 
         time = System.nanoTime() - time;
         Logger.debug("Task [{}] computed in {}ms using {}.", fullTask, time / 1_000_000, getClass().getSimpleName());
@@ -99,9 +100,9 @@ public abstract class AbstractTaskSolver extends Observable {
         return result;
     }
 
-    public abstract List<CorrelationResult> solve(
-            final Kernel kernel,
-            final FullTask fullTask) throws ComputationException;
+    public abstract List<CorrelationResult> solve(            
+            final FullTask fullTask,
+            final boolean usesWeights) throws ComputationException;
 
     protected abstract boolean needsBestResult();
 
