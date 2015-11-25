@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl;
+package cz.tul.dic.engine.opencl.kernel;
 
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.TimeDataStorage;

@@ -23,7 +23,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernel.Kernel;
-import cz.tul.dic.engine.opencl.kernel.OpenCLDataPackage;
+import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;

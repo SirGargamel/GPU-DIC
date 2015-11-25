@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.kernel;
 
+import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import cz.tul.dic.engine.opencl.kernel.sources.KernelSourcePreparator;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
@@ -24,7 +25,6 @@ import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.engine.opencl.WorkSizeManager;
 import cz.tul.dic.data.Interpolation;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -80,7 +80,7 @@ public abstract class Kernel {
         try {
             kernelInfo = KernelManager.getBestKernel(kernelInfo);
             final KernelInfo.Type kernelType = kernelInfo.getType();
-            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernels.".concat(kernelType.toString()));
+            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernel.".concat(kernelType.toString()));
             result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(kernelInfo, memManager, wsm);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.warn("Error instantiating kernel with kernel info [{}], using default kernel.", kernelInfo);
@@ -143,7 +143,7 @@ public abstract class Kernel {
             kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
             clMem.add(kernelDIC);
 
-            try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(KERNEL_REDUCE.concat(KERNEL_EXTENSION))))) {
+            try (BufferedReader bin = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(KERNEL_REDUCE.concat(KERNEL_EXTENSION))))) {
                 final StringBuilder sb = new StringBuilder();
                 while (bin.ready()) {
                     sb.append(bin.readLine());
@@ -155,7 +155,7 @@ public abstract class Kernel {
                 clMem.add(kernelReduce);
             }
 
-            try (BufferedReader bin = new BufferedReader(new InputStreamReader(WorkSizeManager.class.getResourceAsStream(KERNEL_FIND_POS.concat(KERNEL_EXTENSION))))) {
+            try (BufferedReader bin = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(KERNEL_FIND_POS.concat(KERNEL_EXTENSION))))) {
                 final StringBuilder sb = new StringBuilder();
                 while (bin.ready()) {
                     sb.append(bin.readLine());

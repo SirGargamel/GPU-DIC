@@ -5,11 +5,11 @@
  */
 package cz.tul.dic.engine.opencl.kernel;
 
+import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import com.jogamp.opencl.CLBuffer;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
-import cz.tul.dic.engine.opencl.WorkSizeManager;
 import java.nio.IntBuffer;
 
 public class CL2D extends Kernel {
