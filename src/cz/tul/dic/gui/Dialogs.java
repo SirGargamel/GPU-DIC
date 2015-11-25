@@ -28,6 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.pmw.tinylog.Logger;
 
@@ -53,12 +54,14 @@ public class Dialogs {
     }
 
     private static void showDialog(final Alert.AlertType type, final String title, final String text) {
-        final Alert dlg = new Alert(type);
+        final Alert dlg = new Alert(type);        
         dlg.initModality(Modality.APPLICATION_MODAL);
         dlg.initStyle(StageStyle.UTILITY);
         dlg.setHeaderText("");
         dlg.setTitle(title);
         dlg.getDialogPane().setContentText(text);
+        final Stage stage = (Stage) dlg.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
         dlg.showAndWait();
     }
 

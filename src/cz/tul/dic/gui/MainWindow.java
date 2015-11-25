@@ -15,9 +15,12 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.NameGenerator;
+import java.awt.Desktop;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -43,6 +46,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -50,10 +54,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -84,13 +92,11 @@ public class MainWindow implements Initializable {
     @FXML
     private Button buttonROI;
     @FXML
-    private Button buttonExpert;    
+    private Button buttonExpert;
     @FXML
     private Button buttonPrev;
     @FXML
     private Button buttonPlay;
-    @FXML
-    private Button buttonPause;
     @FXML
     private Button buttonNext;
     @FXML
@@ -98,7 +104,7 @@ public class MainWindow implements Initializable {
     @FXML
     private Button buttonResults;
     @FXML
-    private Button buttonSave;
+    private MenuItem buttonSave;
     @FXML
     private InputPresenter imagePane;
     @FXML
@@ -108,10 +114,53 @@ public class MainWindow implements Initializable {
     @FXML
     private VBox boxRight;
     @FXML
-    private HBox boxBottom;
-    @FXML
     private HBox boxImage;
     private Timeline timeLine;
+
+    // Main menu
+    @FXML
+    private void handleButtonActionNew(ActionEvent event) {
+        Context.getInstance().setTc(new TaskContainer());
+        loadCurrentTaskContainerToGUI();
+    }
+
+    @FXML
+    private void handleButtonActionExit(ActionEvent event) {
+        Platform.exit();
+    }
+
+    @FXML
+    private void handleButtonActionAbout(ActionEvent event) {
+        final Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        dialog.setTitle(Lang.getString("About"));
+        dialog.setHeaderText(null);
+
+        final Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream("logo.png")));
+
+        final GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        final String webLink = "https://github.com/SirGargamel/GPU-DIC";
+        final Hyperlink web = new Hyperlink(webLink);
+        web.setOnAction((ActionEvent event1) -> {
+            try {
+                Desktop.getDesktop().browse(new URI(webLink));
+            } catch (IOException | URISyntaxException ex) {
+                Logger.error(ex, "Error opening GitHub link.");
+            }
+        });
+
+        grid.add(new Label(Lang.getString("Author") + ":"), 0, 0);
+        grid.add(new Label("Petr Ječmen, TUL"), 1, 0);
+        grid.add(new Label("WWW:"), 0, 1);
+        grid.add(web, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.show();
+    }
 
     @FXML
     private void handleButtonActionInput(ActionEvent event) throws IOException, InterruptedException, ExecutionException, ComputationException {
@@ -231,6 +280,7 @@ public class MainWindow implements Initializable {
         });
     }
 
+    // Right column
     @FXML
     private void handleButtonActionRun(ActionEvent event) throws ComputationException {
         try {
@@ -364,12 +414,6 @@ public class MainWindow implements Initializable {
         event.consume();
     }
 
-    private void stopVideo() {
-        if (timeLine != null) {
-            timeLine.stop();
-        }
-    }
-
     @FXML
     private void handleButtonActionPrev(ActionEvent event) {
         stopVideo();
@@ -378,7 +422,30 @@ public class MainWindow implements Initializable {
 
     @FXML
     private void handleButtonActionPlay(ActionEvent event) {
-        stopVideo();
+        if (timeLine == null) {
+            playVideo();
+        } else {
+            stopVideo();
+        }
+
+        event.consume();
+    }
+
+    private void stopVideo() {
+        if (timeLine != null) {
+            timeLine.stop();
+            timeLine = null;
+        }
+
+        final Image img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/play_24x32.png"));
+        final ImageView image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonPlay.setGraphic(image);
+    }
+
+    private void playVideo() {
         timeLine = new Timeline(new KeyFrame(Duration.millis(250), (ActionEvent event1) -> {
             if (imagePane.nextImage()) {
                 stopVideo();
@@ -387,14 +454,12 @@ public class MainWindow implements Initializable {
         timeLine.setCycleCount(Timeline.INDEFINITE);
         timeLine.play();
 
-        event.consume();
-    }
-
-    @FXML
-    private void handleButtonActionStop(ActionEvent event) {
-        stopVideo();
-
-        event.consume();
+        final Image img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/pause_24x32.png"));
+        final ImageView image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+        image.setPreserveRatio(true);
+        buttonPlay.setGraphic(image);
     }
 
     @FXML
@@ -491,13 +556,6 @@ public class MainWindow implements Initializable {
         image.setPreserveRatio(true);
         buttonPlay.setGraphic(image);
 
-        img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/pause_24x32.png"));
-        image = new ImageView(img);
-        image.setFitWidth(20);
-        image.setFitHeight(20);
-        image.setPreserveRatio(true);
-        buttonPause.setGraphic(image);
-
         img = new Image(getClass().getClassLoader().getResourceAsStream("cz/tul/dic/gui/resources/arrow_left_32x32.png"));
         image = new ImageView(img);
         image.setFitWidth(20);
@@ -519,13 +577,12 @@ public class MainWindow implements Initializable {
 
     private void adjustImageButtons(final boolean disabled) {
         buttonPlay.setDisable(disabled);
-        buttonPause.setDisable(disabled);
         buttonPrev.setDisable(disabled);
         buttonNext.setDisable(disabled);
     }
 
     private void adjustConfigButtons(final boolean disabled) {
-        buttonExpert.setDisable(disabled);        
+        buttonExpert.setDisable(disabled);
         buttonRealSize.setDisable(disabled);
         buttonROI.setDisable(disabled);
         buttonRun.setDisable(disabled);
@@ -538,6 +595,24 @@ public class MainWindow implements Initializable {
     private void adjustResultButtons(final boolean disabled) {
         buttonResults.setDisable(disabled);
         buttonSave.setDisable(disabled);
+    }
+
+    private void loadCurrentTaskContainerToGUI() {
+        final TaskContainer tc = Context.getInstance().getTc();
+
+        Object o = tc.getParameter(TaskParameter.SUBSET_SIZE);
+        if (o != null) {
+            textFs.setText(o.toString());
+        } else {
+            textFs.setText(Integer.toString(TaskDefaultValues.DEFAULT_SUBSET_SIZE));
+        }
+
+        o = tc.getParameter(TaskParameter.DEFORMATION_ORDER);
+        if (o != null) {
+            comboOrder.setValue(DeformationDegree.valueOf(o.toString()));
+        } else {
+            comboOrder.setValue(TaskDefaultValues.DEFAULT_DEFORMATION_ORDER);
+        }
     }
 
     private static class ComputationObserver extends Task<Exception> implements Observer {
@@ -644,7 +719,7 @@ public class MainWindow implements Initializable {
         public InputLoader(List<File> fileList) {
             this.fileList = fileList;
         }
-        
+
         @Override
         protected String call() throws Exception {
             String result = null;
@@ -709,20 +784,14 @@ public class MainWindow implements Initializable {
                         double size;
                         size = Math.max(
                                 tc.getImage(0).getWidth() + boxRight.getWidth() + EXTRA_WIDTH,
-                                boxBottom.getMinWidth() + EXTRA_WIDTH);
-                        size = Math.max(
-                                size,
                                 boxImage.getMinWidth() + boxRight.getWidth() + EXTRA_WIDTH);
                         imagePane.getScene().getWindow().setWidth(size);
                         size = Math.max(
-                                tc.getImage(0).getHeight() + boxImage.getHeight() + boxBottom.getHeight() + EXTRA_HEIGHT,
+                                tc.getImage(0).getHeight() + boxImage.getHeight() + EXTRA_HEIGHT,
                                 boxRight.getPrefHeight());
                         imagePane.getScene().getWindow().setHeight(size);
 
-                        final Object o = tc.getParameter(TaskParameter.SUBSET_SIZE);
-                        if (o != null) {
-                            textFs.setText(o.toString());
-                        }
+                        loadCurrentTaskContainerToGUI();
                     }
                 });
             }
