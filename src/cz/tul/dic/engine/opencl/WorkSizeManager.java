@@ -5,8 +5,8 @@
  */
 package cz.tul.dic.engine.opencl;
 
-import cz.tul.dic.engine.opencl.kernels.KernelInfo;
-import cz.tul.dic.engine.opencl.kernels.TimeDataStorage;
+import cz.tul.dic.engine.opencl.kernel.KernelInfo;
+import cz.tul.dic.engine.opencl.kernel.TimeDataStorage;
 import java.util.Map;
 import java.util.Map.Entry;
 

@@ -3,9 +3,9 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernels;
+package cz.tul.dic.engine.opencl.kernel;
 
-import cz.tul.dic.engine.opencl.kernels.sources.KernelSourcePreparator;
+import cz.tul.dic.engine.opencl.kernel.sources.KernelSourcePreparator;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;

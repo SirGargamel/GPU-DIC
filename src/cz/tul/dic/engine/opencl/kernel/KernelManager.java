@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernels;
+package cz.tul.dic.engine.opencl.kernel;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
@@ -12,7 +12,7 @@ import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
-import cz.tul.dic.engine.opencl.kernels.KernelInfo.Type;
+import cz.tul.dic.engine.opencl.kernel.KernelInfo.Type;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.awt.image.BufferedImage;

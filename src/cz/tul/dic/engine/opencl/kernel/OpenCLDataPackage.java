@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernels;
+package cz.tul.dic.engine.opencl.kernel;
 
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLMemory;

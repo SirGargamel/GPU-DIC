@@ -15,7 +15,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.loaders.ConfigLoader;
-import cz.tul.dic.engine.opencl.kernels.KernelManager;
+import cz.tul.dic.engine.opencl.kernel.KernelManager;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;

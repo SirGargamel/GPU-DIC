@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernels;
+package cz.tul.dic.engine.opencl.kernel;
 
 import com.jogamp.opencl.CLBuffer;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
@@ -12,18 +12,17 @@ import com.jogamp.opencl.CLEventList;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import java.nio.IntBuffer;
 
-public class CL2D extends Kernel {
+public class CL1D extends Kernel {
 
     private static final int ARGUMENT_INDEX_D_COUNT = 11;
     private static final int ARGUMENT_INDEX_D_BASE = 12;
     private static final int ARGUMENT_INDEX_G_COUNT = 13;
     private static final int ARGUMENT_INDEX_S_COUNT = 14;
     private static final int ARGUMENT_INDEX_S_BASE = 15;
-    private static final int LWS0_BASE = 1;
-    private static final int LWS1_BASE = 64;
+    private static final int LWS0_BASE = 32;
     private boolean stop;
 
-    public CL2D(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+    public CL1D(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
         super(kernelInfo, memManager, wsm);
     }
 
@@ -33,10 +32,8 @@ public class CL2D extends Kernel {
             final int subsetSize, final int subsetCount) {
         stop = false;
         final int subsetArea = subsetSize * subsetSize;
-
-        final int lws0 = calculateLws0();
-        long lws1 = Kernel.roundUp(calculateLws1Base(), subsetArea);
-        lws1 = Math.min(lws1, getMaxWorkItemSize());
+        long lws0 = Kernel.roundUp(calculateLws0base(), subsetArea);
+        lws0 = Math.min(lws0, getMaxWorkItemSize());
 
         kernelDIC.rewind();
         kernelDIC.putArgs(data.getMemoryObjects())
@@ -58,11 +55,10 @@ public class CL2D extends Kernel {
         wsm.setMaxSubsetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        long subsetGlobalWorkSize, deformationGlobalWorkSize, subsetSubCount = 1;
-        long deformationSubCount;
+        long subsetGlobalWorkSize, subsetSubCount = 1, deformationSubCount, groupCountPerSubset;
         long time;
         CLEvent event;
-        long currentBaseSubset = 0, currentBaseDeformation, groupCountPerSubset;
+        long currentBaseSubset = 0, currentBaseDeformation;
         int counter = 0;
         CLEventList eventList = new CLEventList(subsetCount);
         while (currentBaseSubset < subsetCount) {
@@ -80,11 +76,10 @@ public class CL2D extends Kernel {
                 subsetSubCount = Math.min(wsm.getSubsetCount(), subsetCount - currentBaseSubset);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
-                subsetGlobalWorkSize = Kernel.roundUp(lws0, subsetSubCount);
-                deformationGlobalWorkSize = Kernel.roundUp(lws1, deformationSubCount);
+                subsetGlobalWorkSize = Kernel.roundUp(lws0, deformationSubCount) * subsetSubCount;
 
-                groupCountPerSubset = deformationSubCount / lws1;
-                if (deformationCount % lws1 > 0) {
+                groupCountPerSubset = deformationSubCount / lws0;
+                if (deformationCount % lws0 > 0) {
                     groupCountPerSubset++;
                 }
 
@@ -93,7 +88,7 @@ public class CL2D extends Kernel {
                 kernelDIC.setArg(ARGUMENT_INDEX_S_BASE, currentBaseSubset);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
-                queue.put2DRangeKernel(kernelDIC, 0, 0, subsetGlobalWorkSize, deformationGlobalWorkSize, lws0, lws1, eventList);
+                queue.put1DRangeKernel(kernelDIC, 0, subsetGlobalWorkSize, lws0, eventList);
 
                 queue.putWaitForEvent(eventList, counter, true);
                 event = eventList.getEvent(counter);
@@ -110,16 +105,17 @@ public class CL2D extends Kernel {
         eventList.release();
     }
 
-    private static int calculateLws1Base() {
-        return LWS1_BASE;
-    }
-
-    private static int calculateLws0() {
+    private static int calculateLws0base() {
         return LWS0_BASE;
     }
 
     @Override
-    public boolean is2D() {
+    public boolean usesVectorization() {
+        return true;
+    }
+
+    @Override
+    public boolean usesLocalMemory() {
         return true;
     }
 

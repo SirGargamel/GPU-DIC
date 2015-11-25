@@ -14,7 +14,7 @@ import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.opencl.kernels.Kernel;
+import cz.tul.dic.engine.opencl.kernel.Kernel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

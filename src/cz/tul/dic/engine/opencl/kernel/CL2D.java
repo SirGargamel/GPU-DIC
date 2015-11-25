@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernels;
+package cz.tul.dic.engine.opencl.kernel;
 
 import com.jogamp.opencl.CLBuffer;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
@@ -12,15 +12,18 @@ import com.jogamp.opencl.CLEventList;
 import cz.tul.dic.engine.opencl.WorkSizeManager;
 import java.nio.IntBuffer;
 
-public class CL15D_pF extends Kernel {
+public class CL2D extends Kernel {
 
     private static final int ARGUMENT_INDEX_D_COUNT = 11;
     private static final int ARGUMENT_INDEX_D_BASE = 12;
-    private static final int ARGUMENT_INDEX_S_INDEX = 13;
-    private static final int LWS0_BASE = 32;    
+    private static final int ARGUMENT_INDEX_G_COUNT = 13;
+    private static final int ARGUMENT_INDEX_S_COUNT = 14;
+    private static final int ARGUMENT_INDEX_S_BASE = 15;
+    private static final int LWS0_BASE = 1;
+    private static final int LWS1_BASE = 64;
     private boolean stop;
 
-    public CL15D_pF(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+    public CL2D(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
         super(kernelInfo, memManager, wsm);
     }
 
@@ -30,8 +33,10 @@ public class CL15D_pF extends Kernel {
             final int subsetSize, final int subsetCount) {
         stop = false;
         final int subsetArea = subsetSize * subsetSize;
-        long lws0 = Kernel.roundUp(calculateLws0base(), subsetArea);
-        lws0 = Math.min(lws0, getMaxWorkItemSize());
+
+        final int lws0 = calculateLws0();
+        long lws1 = Kernel.roundUp(calculateLws1Base(), subsetArea);
+        lws1 = Math.min(lws1, getMaxWorkItemSize());
 
         kernelDIC.rewind();
         kernelDIC.putArgs(data.getMemoryObjects())
@@ -41,7 +46,9 @@ public class CL15D_pF extends Kernel {
                 .putArg(subsetCount)
                 .putArg(0L)
                 .putArg(0L)
-                .putArg(0);
+                .putArg(0L)
+                .putArg(0L)
+                .putArg(0L);
         final CLBuffer<IntBuffer> weights = data.getWeights();
         if (kernelInfo.getCorrelation() == KernelInfo.Correlation.WZNSSD) {
             kernelDIC.putArg(weights);
@@ -51,15 +58,15 @@ public class CL15D_pF extends Kernel {
         wsm.setMaxSubsetCount(subsetCount);
         wsm.setMaxDeformationCount(deformationCount);
         wsm.reset();
-        long globalWorkSize, deformationSubCount, currentBaseDeformation;
+        long subsetGlobalWorkSize, deformationGlobalWorkSize, subsetSubCount = 1;
+        long deformationSubCount;
         long time;
         CLEvent event;
-        int currentBaseSubset = 0;
+        long currentBaseSubset = 0, currentBaseDeformation, groupCountPerSubset;
         int counter = 0;
         CLEventList eventList = new CLEventList(subsetCount);
         while (currentBaseSubset < subsetCount) {
             currentBaseDeformation = 0;
-            kernelDIC.setArg(ARGUMENT_INDEX_S_INDEX, currentBaseSubset);
 
             while (currentBaseDeformation < deformationCount) {
                 if (counter == eventList.capacity()) {
@@ -70,31 +77,55 @@ public class CL15D_pF extends Kernel {
                     return;
                 }
 
+                subsetSubCount = Math.min(wsm.getSubsetCount(), subsetCount - currentBaseSubset);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
-                globalWorkSize = Kernel.roundUp(lws0, deformationSubCount);
+                subsetGlobalWorkSize = Kernel.roundUp(lws0, subsetSubCount);
+                deformationGlobalWorkSize = Kernel.roundUp(lws1, deformationSubCount);
 
+                groupCountPerSubset = deformationSubCount / lws1;
+                if (deformationCount % lws1 > 0) {
+                    groupCountPerSubset++;
+                }
+
+                kernelDIC.setArg(ARGUMENT_INDEX_G_COUNT, groupCountPerSubset);
+                kernelDIC.setArg(ARGUMENT_INDEX_S_COUNT, subsetSubCount);
+                kernelDIC.setArg(ARGUMENT_INDEX_S_BASE, currentBaseSubset);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);
-                queue.put1DRangeKernel(kernelDIC, 0, globalWorkSize, lws0, eventList);
+                queue.put2DRangeKernel(kernelDIC, 0, 0, subsetGlobalWorkSize, deformationGlobalWorkSize, lws0, lws1, eventList);
 
                 queue.putWaitForEvent(eventList, counter, true);
                 event = eventList.getEvent(counter);
                 time = event.getProfilingInfo(CLEvent.ProfilingCommand.END) - event.getProfilingInfo(CLEvent.ProfilingCommand.START);
-                wsm.storeTime(1, deformationSubCount, time);
+                wsm.storeTime(subsetSubCount, deformationSubCount, time);
 
                 currentBaseDeformation += deformationSubCount;
                 counter++;
             }
 
-            currentBaseSubset += 1;
+            currentBaseSubset += subsetSubCount;
         }
 
         eventList.release();
     }
 
-    private static int calculateLws0base() {
+    private static int calculateLws1Base() {
+        return LWS1_BASE;
+    }
+
+    private static int calculateLws0() {
         return LWS0_BASE;
+    }
+
+    @Override
+    public boolean is2D() {
+        return true;
+    }
+
+    @Override
+    public boolean subsetsGroupped() {
+        return true;
     }
 
     @Override
