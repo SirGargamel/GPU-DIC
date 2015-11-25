@@ -12,6 +12,7 @@ import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.loaders.ConfigLoader;
@@ -65,15 +66,19 @@ public final class TaskContainerUtils {
     public static double getStretchFactor(final TaskContainer tc, final int endImageIndex) {
         final int startImageIndex = getFirstRound(tc);
         double result = 1.0;
-        final DisplacementResult resultsC = tc.getResult(startImageIndex, endImageIndex).getDisplacementResult();
-        final DisplacementResult dResultsC = tc.getResult(endImageIndex - 1, endImageIndex).getDisplacementResult();
+        final Result resultsC = tc.getResult(startImageIndex, endImageIndex);
+        final Result dResultsC = tc.getResult(endImageIndex - 1, endImageIndex);
         if (resultsC != null && dResultsC != null) {
-            final double[][][] results = resultsC.getDisplacement();
-            final double[][][] dResults = dResultsC.getDisplacement();
-            if (dResults != null) {
-                final int y2 = finalBottomLine(dResults);
-                final int y1 = finalBottomLine(results);
-                result = y2 / (double) y1;
+            final DisplacementResult resultsDR = resultsC.getDisplacementResult();
+            final DisplacementResult dResultsDR = dResultsC.getDisplacementResult();
+            if (resultsDR != null && dResultsDR != null) {
+                final double[][][] results = resultsDR.getDisplacement();
+                final double[][][] dResults = dResultsDR.getDisplacement();
+                if (dResults != null) {
+                    final int y2 = finalBottomLine(dResults);
+                    final int y1 = finalBottomLine(results);
+                    result = y2 / (double) y1;
+                }
             }
         }
 
@@ -322,8 +327,8 @@ public final class TaskContainerUtils {
             tc.setParameter(TaskParameter.CORRELATION_WEIGHT, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT);
         }
     }
-    
-    public static int computeCorrelationWeight(final int subsetSize, final double correlationWeightCoefficient) {        
+
+    public static int computeCorrelationWeight(final int subsetSize, final double correlationWeightCoefficient) {
         final int result = (int) Math.round(subsetSize * correlationWeightCoefficient * (3.2));
         return result;
     }
