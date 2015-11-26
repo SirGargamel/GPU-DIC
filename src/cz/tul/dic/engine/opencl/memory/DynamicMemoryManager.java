@@ -27,6 +27,8 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
     private List<Integer> subsetWeights;
     private List<double[]> deformationLimits;
     private List<long[]> deformationCounts;
+    
+    protected DynamicMemoryManager() {}
 
     @Override
     public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {

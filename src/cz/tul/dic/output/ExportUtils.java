@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.output;
 
+import cz.tul.dic.data.AppSettings;
 import cz.tul.dic.data.result.StrainResult;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.output.color.AbsoluteColorMap;
@@ -35,8 +36,7 @@ public final class ExportUtils {
     private static final int BAR_SIZE_HOR = 15;
     private static final NumberFormat NF = new DecimalFormat("0.0#");
     private static final int LIMIT_WIDTH = 180;
-    private static final int LIMIT_HEIGHT = 180;
-    private static final ColorMap.Type COLOR_MAP_TYPE = ColorMap.Type.CoolWarm;
+    private static final int LIMIT_HEIGHT = 180;    
     private static boolean debugMode;
 
     static {
@@ -194,6 +194,7 @@ public final class ExportUtils {
         final int height = mapData[0].length;
         final BufferedImage out;
 
+        final ColorMap.Type colorMapType = AppSettings.getInstance().getColorMapType();
         final ColorMap colorMap;
         switch (dir) {
             case D_DABS:
@@ -207,7 +208,7 @@ public final class ExportUtils {
             case O_D_EY:
             case O_EX:
             case O_EY:
-                colorMap = new AbsoluteColorMap(COLOR_MAP_TYPE, max);
+                colorMap = new AbsoluteColorMap(colorMapType, max);
                 break;
             case D_DX:
             case DX:
@@ -221,7 +222,7 @@ public final class ExportUtils {
             case EXY:
             case R_DX:
             case R_DY:
-                colorMap = new GeneralColorMap(COLOR_MAP_TYPE, min, max);
+                colorMap = new GeneralColorMap(colorMapType, min, max);
                 break;
             default:
                 throw new IllegalArgumentException(UNSUPPORTED_DIRECTION + dir);
@@ -317,7 +318,8 @@ public final class ExportUtils {
         final double middle = (max + min) / 2.0;
         final double quarter = (max - middle) / 2.0;
 
-        final ColorMap colorMap = new GeneralColorMap(COLOR_MAP_TYPE, 0, height - 1);
+        final ColorMap.Type colorMapType = AppSettings.getInstance().getColorMapType();
+        final ColorMap colorMap = new GeneralColorMap(colorMapType, 0, height - 1);
 
         final int width = image.getWidth();
         // positive part           
@@ -349,7 +351,8 @@ public final class ExportUtils {
         final double middle = (max + min) / 2.0;
         final double quarter = (max - middle) / 2.0;
 
-        final ColorMap colorMap = new AbsoluteColorMap(COLOR_MAP_TYPE, height - 1);
+        final ColorMap.Type colorMapType = AppSettings.getInstance().getColorMapType();
+        final ColorMap colorMap = new AbsoluteColorMap(colorMapType, height - 1);
         // positive part           
         for (int y = 0; y < height; y++) {
             g.setColor(new Color(colorMap.getRGBColor(height - 1 - y)));
@@ -382,7 +385,8 @@ public final class ExportUtils {
         final double middle = (max + min) / 2.0;
         final double quarter = (max - middle) / 2.0;
 
-        final ColorMap colorMap = new GeneralColorMap(COLOR_MAP_TYPE, 0, width - 1);
+        final ColorMap.Type colorMapType = AppSettings.getInstance().getColorMapType();
+        final ColorMap colorMap = new GeneralColorMap(colorMapType, 0, width - 1);
 
         for (int x = 0; x < width; x++) {
             g.setColor(new Color(colorMap.getRGBColor(width - x - 1)));

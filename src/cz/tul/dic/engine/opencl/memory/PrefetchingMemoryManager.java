@@ -35,7 +35,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
     private boolean inited;
     private TaskContainer task;
 
-    public PrefetchingMemoryManager() {
+    protected PrefetchingMemoryManager() {
         imageBuffer = new HashMap<>();
         inited = false;
     }

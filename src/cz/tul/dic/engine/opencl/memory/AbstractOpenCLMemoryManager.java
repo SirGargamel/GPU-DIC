@@ -14,6 +14,7 @@ import com.jogamp.opencl.CLImageFormat;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLResource;
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.data.AppSettings;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Image;
@@ -28,7 +29,9 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,8 +41,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class AbstractOpenCLMemoryManager {
 
-    private static final AbstractOpenCLMemoryManager INSTANCE;
-    private static final CLImageFormat IMAGE_FORMAT;
+    private static final CLImageFormat IMAGE_FORMAT;    
+    private static final Map<Type, AbstractOpenCLMemoryManager> INSTANCES;    
     protected long maxDeformationCount;
     // OpenCL entities
     protected CLMemory<ByteBuffer> clImageA, clImageB;
@@ -55,10 +58,15 @@ public abstract class AbstractOpenCLMemoryManager {
     private final Lock lock;
 
     static {
+        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
+        
         DeviceManager.getContext();
         DeviceManager.clearMemory();
-        INSTANCE = new PrefetchingMemoryManager();
-        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
+        
+        INSTANCES = new EnumMap<>(Type.class);
+        INSTANCES.put(Type.STATIC, new StaticMemoryManager());
+        INSTANCES.put(Type.DYNAMIC, new DynamicMemoryManager());
+        INSTANCES.put(Type.PREFETCH, new StaticMemoryManager());
     }
 
     protected AbstractOpenCLMemoryManager() {
@@ -68,7 +76,7 @@ public abstract class AbstractOpenCLMemoryManager {
     }
 
     public static AbstractOpenCLMemoryManager getInstance() {
-        return INSTANCE;
+        return INSTANCES.get(AppSettings.getInstance().getMemManagerType());
     }
 
     public void assignData(final ComputationTask task, final Kernel kernel) throws ComputationException {
@@ -222,6 +230,12 @@ public abstract class AbstractOpenCLMemoryManager {
 
     public long getMaxDeformationCount() {
         return maxDeformationCount;
+    }
+    
+    public enum Type {
+        STATIC,
+        DYNAMIC,
+        PREFETCH
     }
 
 }

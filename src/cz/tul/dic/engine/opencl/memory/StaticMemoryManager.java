@@ -19,6 +19,8 @@ import java.util.List;
 import org.pmw.tinylog.Logger;
 
 public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
+    
+    protected StaticMemoryManager() {}
 
     @Override
     public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {

@@ -279,6 +279,23 @@ public class MainWindow implements Initializable {
             }
         });
     }
+    
+    @FXML
+    private void handleButtonActionSettings(ActionEvent event) {
+        try {
+            final Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("cz/tul/dic/gui/Settings.fxml"), Lang.getBundle());
+            final Stage stage = new Stage();
+            stage.setTitle(Lang.getString("Settings"));
+            stage.setScene(new Scene(root));
+            stage.getIcons().add(new javafx.scene.image.Image(MainWindow.class.getResourceAsStream(LOGO)));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(imagePane.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+        } catch (IOException e) {
+            Logger.error(e, "Error loading Settings dialog from JAR.");
+        }
+    }
 
     // Right column
     @FXML
