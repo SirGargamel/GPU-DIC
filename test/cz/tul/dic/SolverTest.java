@@ -36,16 +36,19 @@ import org.junit.Test;
 public class SolverTest {
 
     private static final int BASE_ROUND = 0;
-    private static final double MAX_STEP_DIF = 1;
+    private static final double MAX_Q_DIF = 0.1;
     private static final double LIMIT_QUALITY_GOOD = 0.99;
     private static final double[] LIMITS_0 = new double[]{
-        -5, 5, 0.01, -5, 5, 0.01};
+        -3, 3, 0.01, -3, 3, 0.01};
     private static final double[] LIMITS_0_EXTENDED = new double[]{
-        -5, 5, 0.01, -5, 5, 0.01,
+        -3, 3, 0.01, -3, 3, 0.01,
         -0, 0, 0, -0, 0, 0, -0, 0, 0, -0, 0, 0};
     private static final double[] LIMITS_1 = new double[]{
-        -5, 5, 0.01, -5, 5, 0.01,
+        -3, 3, 0.01, -3, 3, 0.01,
         -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01};
+    private static final Solver[] SOLVERS 
+            = Solver.values();
+//            = new Solver[] {Solver.COARSE_FINE};
     private final Map<String, double[]> testFiles0, testFilesF;
     private final Map<String, String> testFilesSEM;
 
@@ -75,12 +78,11 @@ public class SolverTest {
         int counter = 0;
         String msg;
         TaskContainer task;
-//        Solver solver = Solver.COARSE_FINE;
-        for (Solver solver : Solver.values()) {
+        for (Solver solver : SOLVERS) {
             if (solver.equals(Solver.BRUTE_FORCE)) {
                 continue;
             }
-            
+
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
                 task = generateAndComputeTask(e.getKey(), solver, LIMITS_0);
                 msg = checkResult(e.getValue(), task);
@@ -149,7 +151,7 @@ public class SolverTest {
         String result = null;
         double maxDif;
         for (int dim = 0; dim < coeffCount; dim++) {
-            maxDif = MAX_STEP_DIF * limits[dim * 3 + 2];
+            maxDif = MAX_Q_DIF * expected[dim];
             if (Math.abs(expected[dim] - actual[dim]) > maxDif) {
                 result = generateMessage(expected, task);
                 break;
@@ -234,8 +236,7 @@ public class SolverTest {
         int counter = 0;
         String msg;
         TaskContainer task;
-//        Solver solver = Solver.SPGD;
-        for (Solver solver : Solver.values()) {
+        for (Solver solver : SOLVERS) {
             if (!solver.supportsWeighedCorrelation()) {
                 continue;
             }
@@ -308,8 +309,7 @@ public class SolverTest {
         int counter = 0;
         String msg;
         TaskContainer task;
-//        Solver solver = Solver.SPGD;
-        for (Solver solver : Solver.values()) {
+        for (Solver solver : SOLVERS) {
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, String> e : testFilesSEM.entrySet()) {
                     task = generateAndComputeTaskSEM(e.getKey(), e.getValue(), solver, LIMITS_1);
