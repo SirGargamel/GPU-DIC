@@ -57,11 +57,11 @@ public abstract class AbstractOpenCLMemoryManager {
     protected CLContext context;
     private final Lock lock;
 
-    static {
-        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
-        
+    static {                
         DeviceManager.getContext();
         DeviceManager.clearMemory();
+        
+        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
         
         INSTANCES = new EnumMap<>(Type.class);
         INSTANCES.put(Type.STATIC, new StaticMemoryManager());
