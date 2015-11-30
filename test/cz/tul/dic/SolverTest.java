@@ -39,12 +39,12 @@ public class SolverTest {
     private static final double MAX_STEP_DIF = 1;
     private static final double LIMIT_QUALITY_GOOD = 0.99;
     private static final double[] LIMITS_0 = new double[]{
-        -4, 12, 0.5, -2, 8, 0.5};
+        -5, 5, 0.01, -5, 5, 0.01};
     private static final double[] LIMITS_0_EXTENDED = new double[]{
-        -4, 8, 0.5, -2, 4, 0.5,
-        -0.01, 0.01, 0.01, -0.01, 0.01, 0.01, -0.01, 0.01, 0.01, -0.01, 0.01, 0.01};
+        -5, 5, 0.01, -5, 5, 0.01,
+        -0, 0, 0, -0, 0, 0, -0, 0, 0, -0, 0, 0};
     private static final double[] LIMITS_1 = new double[]{
-        -2, 2, 0.5, -1, 1, 0.5,
+        -5, 5, 0.01, -5, 5, 0.01,
         -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01};
     private final Map<String, double[]> testFiles0, testFilesF;
     private final Map<String, String> testFilesSEM;
@@ -52,14 +52,18 @@ public class SolverTest {
     public SolverTest() {
         testFiles0 = new HashMap<>(3);
         testFiles0.put("speckle-[0.0, 0.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0, 0, 0, 0});
-        testFiles0.put("speckle-[5.0, 0.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{5, 0, 0, 0, 0, 0});
-        testFiles0.put("speckle-[2.0, 3.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{2, 3, 0, 0, 0, 0});
+        testFiles0.put("speckle-[0.72, 0.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{0.72, 0, 0, 0, 0, 0});
+        testFiles0.put("speckle-[-1.25, 0.85, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{-1.25, 0.85, 0, 0, 0, 0});
 
         testFilesF = new HashMap<>(4);
-        testFilesF.put("speckle-[0.0, 0.0, 0.02, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0.02, 0, 0, 0});
-        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, -0.02, 0.0].bmp", new double[]{0, 0, 0, 0, -0.02, 0});
-        testFilesF.put("speckle-[1.0, 0.0, 0.0, 0.0, 0.0, 0.01].bmp", new double[]{1.0, 0, 0, 0, 0, 0.01});
-        testFilesF.put("speckle-[-1.0, -1.0, 0.0, 0.01, 0.0, 0.0].bmp", new double[]{-1.0, -1.0, 0, 0.01, 0, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.07, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0.07, 0, 0, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.47, 0.0, 0.0].bmp", new double[]{0, 0, 0, 0.47, 0, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, -0.24, 0.0].bmp", new double[]{0, 0, 0, 0, -0.24, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, 0.0, 0.1].bmp", new double[]{0, 0, 0, 0, 0, 0.1});
+        testFilesF.put("speckle-[0.0, 0.0, 0.26, -0.05, 0.0, 0.0].bmp", new double[]{0, 0, 0.26, -0.05, 0, 0.0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, 0.34, -0.19].bmp", new double[]{0, 0, 0, 0, 0.34, -0.19});
+        testFilesF.put("speckle-[-2.42, 0.0, 0.0, 0.0, 0.0, 0.01].bmp", new double[]{-2.42, 0, 0, 0, 0, 0.01});
+        testFilesF.put("speckle-[-1.21, 0.75, 0.0, 0.01, 0.0, 0.0].bmp", new double[]{-1.21, 0.75, 0, 0.01, 0, 0});
 
         testFilesSEM = new HashMap<>(1);
         testFilesSEM.put("SEM-10-in.bmp", "SEM-10-out.bmp");
@@ -73,6 +77,10 @@ public class SolverTest {
         TaskContainer task;
 //        Solver solver = Solver.COARSE_FINE;
         for (Solver solver : Solver.values()) {
+            if (solver.equals(Solver.BRUTE_FORCE)) {
+                continue;
+            }
+            
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
                 task = generateAndComputeTask(e.getKey(), solver, LIMITS_0);
                 msg = checkResult(e.getValue(), task);
