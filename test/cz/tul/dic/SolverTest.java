@@ -35,6 +35,8 @@ import org.junit.Test;
  */
 public class SolverTest {
 
+    private final Map<String, double[]> testFiles0, testFilesF;
+    private final Map<String, String> testFilesSEM;
     private static final int BASE_ROUND = 0;
     private static final double MAX_Q_DIF = 0.1;
     private static final double LIMIT_QUALITY_GOOD = 0.99;
@@ -48,25 +50,24 @@ public class SolverTest {
         -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01};
     private static final Solver[] SOLVERS 
             = Solver.values();
-//            = new Solver[] {Solver.COARSE_FINE};
-    private final Map<String, double[]> testFiles0, testFilesF;
-    private final Map<String, String> testFilesSEM;
+//            = new Solver[] {Solver.COARSE_FINE};    
+    private static final int PARAM_SUBSET_SIZE = 20;
 
     public SolverTest() {
         testFiles0 = new HashMap<>(3);
         testFiles0.put("speckle-[0.0, 0.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0, 0, 0, 0});
         testFiles0.put("speckle-[0.72, 0.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{0.72, 0, 0, 0, 0, 0});
-        testFiles0.put("speckle-[-1.25, 0.85, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{-1.25, 0.85, 0, 0, 0, 0});
+        testFiles0.put("speckle-[-0.25, 0.85, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{-0.25, 0.85, 0, 0, 0, 0});
 
-        testFilesF = new HashMap<>(4);
+        testFilesF = new HashMap<>(8);
         testFilesF.put("speckle-[0.0, 0.0, 0.07, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0.07, 0, 0, 0});
-        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.47, 0.0, 0.0].bmp", new double[]{0, 0, 0, 0.47, 0, 0});
-        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, -0.24, 0.0].bmp", new double[]{0, 0, 0, 0, -0.24, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.05, 0.0, 0.0].bmp", new double[]{0, 0, 0, 0.05, 0, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, -0.04, 0.0].bmp", new double[]{0, 0, 0, 0, -0.04, 0});
         testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, 0.0, 0.1].bmp", new double[]{0, 0, 0, 0, 0, 0.1});
-        testFilesF.put("speckle-[0.0, 0.0, 0.26, -0.05, 0.0, 0.0].bmp", new double[]{0, 0, 0.26, -0.05, 0, 0.0});
-        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, 0.34, -0.19].bmp", new double[]{0, 0, 0, 0, 0.34, -0.19});
-        testFilesF.put("speckle-[-2.42, 0.0, 0.0, 0.0, 0.0, 0.01].bmp", new double[]{-2.42, 0, 0, 0, 0, 0.01});
-        testFilesF.put("speckle-[-1.21, 0.75, 0.0, 0.01, 0.0, 0.0].bmp", new double[]{-1.21, 0.75, 0, 0.01, 0, 0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.02, -0.05, 0.0, 0.0].bmp", new double[]{0, 0, 0.02, -0.05, 0, 0.0});
+        testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, 0.14, -0.09].bmp", new double[]{0, 0, 0, 0, 0.14, -0.09});
+        testFilesF.put("speckle-[0.42, 0.0, 0.0, 0.0, 0.0, 0.01].bmp", new double[]{0.42, 0, 0, 0, 0, 0.01});
+        testFilesF.put("speckle-[-0.21, 0.75, 0.01, 0.0, 0.0, 0.0].bmp", new double[]{-0.21, 0.75, 0.01, 0.0, 0, 0});
 
         testFilesSEM = new HashMap<>(1);
         testFilesSEM.put("SEM-10-in.bmp", "SEM-10-out.bmp");
@@ -131,9 +132,9 @@ public class SolverTest {
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
-        task.setParameter(TaskParameter.SUBSET_SIZE, 10);
+        task.setParameter(TaskParameter.SUBSET_SIZE, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
-        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
         task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.ZNSSD, KernelInfo.MemoryCoalescing.BEST));
@@ -289,9 +290,9 @@ public class SolverTest {
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
-        task.setParameter(TaskParameter.SUBSET_SIZE, 10);
+        task.setParameter(TaskParameter.SUBSET_SIZE, 20);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
-        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
         // weighed correlation weigh too large to show effect
@@ -336,9 +337,9 @@ public class SolverTest {
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
-        task.setParameter(TaskParameter.SUBSET_SIZE, 10);
+        task.setParameter(TaskParameter.SUBSET_SIZE, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
-        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 40);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
 
