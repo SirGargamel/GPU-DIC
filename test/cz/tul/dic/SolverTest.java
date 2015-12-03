@@ -5,6 +5,7 @@
  */
 package cz.tul.dic;
 
+import cz.tul.dic.data.deformation.DeformationDegree;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.roi.AbstractROI;
@@ -38,17 +39,10 @@ public class SolverTest {
     private final Map<String, double[]> testFiles0, testFilesF;
     private final Map<String, String> testFilesSEM;
     private static final int BASE_ROUND = 0;
-    private static final double MAX_Q_DIF = 0.1;
+    private static final double LIMIT_ABS_DIF = 0.1;
     private static final double LIMIT_QUALITY_GOOD = 0.99;
-    private static final double[] LIMITS_0 = new double[]{
-        -3, 3, 0.01, -3, 3, 0.01};
-    private static final double[] LIMITS_0_EXTENDED = new double[]{
-        -3, 3, 0.01, -3, 3, 0.01,
-        -0, 0, 0, -0, 0, 0, -0, 0, 0, -0, 0, 0};
-    private static final double[] LIMITS_1 = new double[]{
-        -3, 3, 0.01, -3, 3, 0.01,
-        -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01, -0.02, 0.02, 0.01};
-    private static final Solver[] SOLVERS 
+    private static final double LIMIT_RATIO_BAD = 0.1;
+    private static final Solver[] SOLVERS
             = Solver.values();
 //            = new Solver[] {Solver.COARSE_FINE};    
     private static final int PARAM_SUBSET_SIZE = 20;
@@ -85,36 +79,24 @@ public class SolverTest {
             }
 
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                task = generateAndComputeTask(e.getKey(), solver, LIMITS_0);
+                task = generateAndComputeTask(e.getKey(), solver, DeformationDegree.ZERO);
                 msg = checkResult(e.getValue(), task);
-                if (msg != null) {
-                    errors.add(msg);
-                    System.out.print("FAILED - ");
-                }
-                dumpResultsToConsole(solver, e.getKey(), LIMITS_0, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
+                errors.add(msg);
                 counter++;
             }
 
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                    task = generateAndComputeTask(e.getKey(), solver, LIMITS_0_EXTENDED);
+                    task = generateAndComputeTask(e.getKey(), solver, DeformationDegree.FIRST);
                     msg = checkResult(e.getValue(), task);
-                    if (msg != null) {
-                        errors.add(msg);
-                        System.out.print("FAILED - ");
-                    }
-                    dumpResultsToConsole(solver, e.getKey(), LIMITS_0_EXTENDED, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
+                    errors.add(msg);
                     counter++;
                 }
 
                 for (Entry<String, double[]> e : testFilesF.entrySet()) {
-                    task = generateAndComputeTask(e.getKey(), solver, LIMITS_1);
+                    task = generateAndComputeTask(e.getKey(), solver, DeformationDegree.FIRST);
                     msg = checkResult(e.getValue(), task);
-                    if (msg != null) {
-                        errors.add(msg);
-                        System.out.print("FAILED - ");
-                    }
-                    dumpResultsToConsole(solver, e.getKey(), LIMITS_1, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
+                    errors.add(msg);
                     counter++;
                 }
             }
@@ -123,7 +105,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTask(final String fileOut, final Solver solver, final double[] defLimits) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTask(final String fileOut, final Solver solver, final DeformationDegree degree) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -131,7 +113,7 @@ public class SolverTest {
 
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
-        task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
+        task.setParameter(TaskParameter.DEFORMATION_ORDER, degree);
         task.setParameter(TaskParameter.SUBSET_SIZE, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
@@ -145,77 +127,87 @@ public class SolverTest {
     }
 
     private static String checkResult(final double[] expected, final TaskContainer task) throws ComputationException {
-        final double[] actual = condenseResults(task);
-        final double[] limits = (double[]) task.getParameter(TaskParameter.DEFORMATION_LIMITS);
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(DeformationUtils.getDegreeFromLimits(limits));
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount((DeformationDegree) task.getParameter(TaskParameter.DEFORMATION_ORDER));
 
-        String result = null;
-        double maxDif;
-        for (int dim = 0; dim < coeffCount; dim++) {
-            maxDif = MAX_Q_DIF * expected[dim];
-            if (Math.abs(expected[dim] - actual[dim]) > maxDif) {
-                result = generateMessage(expected, task);
-                break;
-            }
-        }
-
-        if (result != null) {
-            boolean closeEnough = true;
-            final Map<AbstractROI, List<CorrelationResult>> results = task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations();
-            for (List<CorrelationResult> l : results.values()) {
-                for (CorrelationResult cor : l) {
-                    if (cor.getQuality() < LIMIT_QUALITY_GOOD) {
-                        closeEnough = false;
-                    }
-                }
-            }
-            if (closeEnough) {
-                System.out.print("CLOSE ENOUGH - ");
-                result = null;
-            }
-        }
-
-        return result;
-    }
-
-    private static double[] condenseResults(final TaskContainer task) throws ComputationException {
-        final double[] limits = (double[]) task.getParameter(TaskParameter.DEFORMATION_LIMITS);
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(DeformationUtils.getDegreeFromLimits(limits));
-        final double[] result = new double[coeffCount];
-        int counter = 0;
-
-        double[] tmp;
+        String resultMsg = null;
         final Map<AbstractROI, List<CorrelationResult>> results = task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations();
+        final Set<CorrelationResult> good = new LinkedHashSet<>();
+        final Set<CorrelationResult> close = new LinkedHashSet<>();
+        final Set<CorrelationResult> wrong = new LinkedHashSet<>();
+
+        final double[] maxDif = new double[coeffCount];
+        for (int dim = 0; dim < coeffCount; dim++) {
+            maxDif[dim] = LIMIT_ABS_DIF * expected[dim];
+        }
+
+        double[] actual;
+        boolean goodResult;
         for (List<CorrelationResult> l : results.values()) {
             for (CorrelationResult cor : l) {
-                tmp = cor.getDeformation();
-                for (int i = 0; i < Math.min(coeffCount, tmp.length); i++) {
-                    result[i] += tmp[i];
+                goodResult = true;
+                actual = cor.getDeformation();
+                for (int dim = 0; dim < coeffCount; dim++) {
+                    if (Math.abs(expected[dim] - actual[dim]) > maxDif[dim]) {
+                        if (cor.getQuality() >= LIMIT_QUALITY_GOOD) {
+                            close.add(cor);
+                        } else {
+                            wrong.add(cor);
+                        }
+                        goodResult = false;
+                        break;
+                    }
                 }
-                counter++;
+                if (goodResult) {
+                    good.add(cor);
+                }
             }
         }
-        for (int i = 0; i < coeffCount; i++) {
-            result[i] /= (double) counter;
+
+        final StringBuilder sb = new StringBuilder();
+        if (wrong.size() > 0) {
+            final double badRatio = wrong.size() / (double) (good.size() + close.size() + wrong.size());
+            if (badRatio > LIMIT_RATIO_BAD) {
+                resultMsg = generateMessage(expected, task);
+                sb.append("FAILED - ");
+            }
+        }
+        if (resultMsg == null) {
+            if (!close.isEmpty()) {
+                sb.append("GOOD QUALITY - ");
+            } else {
+                sb.append("FINISHED - ");
+            }
         }
 
-        return result;
-    }
-
-    private static void dumpResultsToConsole(final Solver solver, final String file, final double[] limits, final Map<AbstractROI, List<CorrelationResult>> results) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(solver);
+        sb.append(Arrays.toString(expected));
         sb.append(" -- ");
-        sb.append(file);
+        sb.append(task.getParameter(TaskParameter.DEFORMATION_ORDER));
         sb.append(" -- ");
-        sb.append(Arrays.toString(limits));
-        for (Entry<AbstractROI, List<CorrelationResult>> e : results.entrySet()) {
-            for (CorrelationResult cr : e.getValue()) {
+        sb.append(task.getParameter(TaskParameter.SOLVER));
+        if (!good.isEmpty()) {
+            sb.append("\nGOOD -- ");
+            for (CorrelationResult cr : good) {
+                sb.append("\n  ");
+                sb.append(cr);
+            }
+        }
+        if (!close.isEmpty()) {
+            sb.append("\nCLOSE -- ");
+            for (CorrelationResult cr : close) {
+                sb.append("\n  ");
+                sb.append(cr);
+            }
+        }
+        if (!wrong.isEmpty()) {
+            sb.append("\nWRONG -- ");
+            for (CorrelationResult cr : wrong) {
                 sb.append("\n  ");
                 sb.append(cr);
             }
         }
         System.out.println(sb);
+
+        return resultMsg;
     }
 
     private static String generateMessage(final double[] expected, final TaskContainer task) {
@@ -243,36 +235,24 @@ public class SolverTest {
             }
 
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                task = generateAndComputeTaskWeighed(e.getKey(), solver, LIMITS_0);
+                task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationDegree.ZERO);
                 msg = checkResult(e.getValue(), task);
-                if (msg != null) {
-                    errors.add(msg);
-                    System.out.print("FAILED - ");
-                }
-                dumpResultsToConsole(solver, e.getKey(), LIMITS_0, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
+                errors.add(msg);
                 counter++;
             }
 
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                    task = generateAndComputeTaskWeighed(e.getKey(), solver, LIMITS_0_EXTENDED);
+                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationDegree.FIRST);
                     msg = checkResult(e.getValue(), task);
-                    if (msg != null) {
-                        errors.add(msg);
-                        System.out.print("FAILED - ");
-                    }
-                    dumpResultsToConsole(solver, e.getKey(), LIMITS_0_EXTENDED, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
+                    errors.add(msg);
                     counter++;
                 }
 
                 for (Entry<String, double[]> e : testFilesF.entrySet()) {
-                    task = generateAndComputeTaskWeighed(e.getKey(), solver, LIMITS_1);
+                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationDegree.FIRST);
                     msg = checkResult(e.getValue(), task);
-                    if (msg != null) {
-                        errors.add(msg);
-                        System.out.print("FAILED - ");
-                    }
-                    dumpResultsToConsole(solver, e.getKey(), LIMITS_1, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
+                    errors.add(msg);
                     counter++;
                 }
             }
@@ -281,7 +261,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTaskWeighed(final String fileOut, final Solver solver, final double[] defLimits) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTaskWeighed(final String fileOut, final Solver solver, final DeformationDegree degree) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -289,7 +269,7 @@ public class SolverTest {
 
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
-        task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
+        task.setParameter(TaskParameter.DEFORMATION_ORDER, degree);
         task.setParameter(TaskParameter.SUBSET_SIZE, 20);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
@@ -313,13 +293,9 @@ public class SolverTest {
         for (Solver solver : SOLVERS) {
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, String> e : testFilesSEM.entrySet()) {
-                    task = generateAndComputeTaskSEM(e.getKey(), e.getValue(), solver, LIMITS_1);
+                    task = generateAndComputeTaskSEM(e.getKey(), e.getValue(), solver);
                     msg = checkResultSEM(task);
-                    if (msg != null) {
-                        errors.add(msg);
-                        System.out.print("FAILED - ");
-                    }
-                    dumpResultsToConsole(solver, e.getKey(), LIMITS_1, task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations());
+                    errors.add(msg);
                     counter++;
                 }
             }
@@ -328,7 +304,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTaskSEM(final String fileIn, final String fileOut, final Solver solver, final double[] defLimits) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTaskSEM(final String fileIn, final String fileOut, final Solver solver) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileIn).toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -336,7 +312,6 @@ public class SolverTest {
 
         task.setParameter(TaskParameter.IN, input.get(0));
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
-        task.setParameter(TaskParameter.DEFORMATION_LIMITS, defLimits);
         task.setParameter(TaskParameter.SUBSET_SIZE, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
@@ -349,24 +324,55 @@ public class SolverTest {
     }
 
     private static String checkResultSEM(final TaskContainer task) throws ComputationException {
-        String result;
-        boolean closeEnough = true;
+        String resultMsg = null;
         final Map<AbstractROI, List<CorrelationResult>> results = task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations();
+        final Set<CorrelationResult> good = new LinkedHashSet<>();
+        final Set<CorrelationResult> wrong = new LinkedHashSet<>();
+
         for (List<CorrelationResult> l : results.values()) {
             for (CorrelationResult cor : l) {
-                if (cor.getQuality() < LIMIT_QUALITY_GOOD) {
-                    closeEnough = false;
+                if (cor.getQuality() >= LIMIT_QUALITY_GOOD) {
+                    good.add(cor);
+                } else {
+                    wrong.add(cor);
                 }
             }
         }
-        if (closeEnough) {
-            System.out.print("CLOSE ENOUGH - ");
-            result = null;
-        } else {
-            result = generateMessage(task);
+
+        final StringBuilder sb = new StringBuilder();
+        if (wrong.size() > 0) {
+            final double badRatio = wrong.size() / (double) (good.size() + wrong.size());
+            if (badRatio > LIMIT_RATIO_BAD) {
+                resultMsg = generateMessage(task);
+                sb.append("FAILED - ");
+            }
+        }
+        if (resultMsg == null) {
+            sb.append("FINISHED - ");
         }
 
-        return result;
+        sb.append(task.getParameter(TaskParameter.IN));
+        sb.append(" -- ");
+        sb.append(task.getParameter(TaskParameter.DEFORMATION_ORDER));
+        sb.append(" -- ");
+        sb.append(task.getParameter(TaskParameter.SOLVER));
+        if (!good.isEmpty()) {
+            sb.append("\nGOOD QUALITY -- ");
+            for (CorrelationResult cr : good) {
+                sb.append("\n  ");
+                sb.append(cr);
+            }
+        }
+        if (!wrong.isEmpty()) {
+            sb.append("\nBAD QUALITY -- ");
+            for (CorrelationResult cr : wrong) {
+                sb.append("\n  ");
+                sb.append(cr);
+            }
+        }
+        System.out.println(sb);
+
+        return resultMsg;
     }
 
     private static String generateMessage(final TaskContainer task) {
