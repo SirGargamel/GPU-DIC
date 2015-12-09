@@ -7,7 +7,7 @@ package cz.tul.dic.gui;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.complextask.ComplexTaskSolver;
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
@@ -110,7 +110,7 @@ public class MainWindow implements Initializable {
     @FXML
     private ComboBox<Scenario> comboScenario;
     @FXML
-    private ComboBox<DeformationDegree> comboOrder;
+    private ComboBox<DeformationOrder> comboOrder;
     @FXML
     private VBox boxRight;
     @FXML
@@ -537,26 +537,26 @@ public class MainWindow implements Initializable {
             }
         });
 
-        final ObservableList<DeformationDegree> comboOrderData = FXCollections.observableArrayList();
-        comboOrderData.addAll(DeformationDegree.values());
+        final ObservableList<DeformationOrder> comboOrderData = FXCollections.observableArrayList();
+        comboOrderData.addAll(DeformationOrder.values());
         comboOrder.setItems(comboOrderData);
-        comboOrder.valueProperty().addListener((ObservableValue<? extends DeformationDegree> observable, DeformationDegree oldValue, DeformationDegree newValue) -> {
+        comboOrder.valueProperty().addListener((ObservableValue<? extends DeformationOrder> observable, DeformationOrder oldValue, DeformationOrder newValue) -> {
             final TaskContainer tc = Context.getInstance().getTc();
             tc.setParameter(TaskParameter.DEFORMATION_ORDER, newValue);
         });
-        comboOrder.setConverter(new StringConverter<DeformationDegree>() {
+        comboOrder.setConverter(new StringConverter<DeformationOrder>() {
 
-            private final Map<String, DeformationDegree> data = new HashMap<>(DeformationDegree.values().length);
+            private final Map<String, DeformationOrder> data = new HashMap<>(DeformationOrder.values().length);
 
             @Override
-            public String toString(DeformationDegree object) {
+            public String toString(DeformationOrder object) {
                 final String result = Lang.getString(object.toString());
                 data.put(result, object);
                 return result;
             }
 
             @Override
-            public DeformationDegree fromString(String string) {
+            public DeformationOrder fromString(String string) {
                 return data.get(string);
             }
         });
@@ -626,7 +626,7 @@ public class MainWindow implements Initializable {
 
         o = tc.getParameter(TaskParameter.DEFORMATION_ORDER);
         if (o != null) {
-            comboOrder.setValue(DeformationDegree.valueOf(o.toString()));
+            comboOrder.setValue(DeformationOrder.valueOf(o.toString()));
         } else {
             comboOrder.setValue(TaskDefaultValues.DEFAULT_DEFORMATION_ORDER);
         }

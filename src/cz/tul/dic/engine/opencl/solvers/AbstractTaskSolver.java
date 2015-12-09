@@ -10,8 +10,6 @@ import com.jogamp.opencl.CLException;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.subset.AbstractSubset;
-import cz.tul.dic.data.deformation.DeformationDegree;
-import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
@@ -24,10 +22,13 @@ import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.concurrent.ConcurrentHashMap;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -45,6 +46,13 @@ public abstract class AbstractTaskSolver extends Observable {
     int subsetSize;
     Object taskSplitValue;
     boolean stop;
+    // data storage
+    protected FullTask fullTask;
+    protected Map<AbstractSubset, CorrelationResult> results;
+    protected Map<AbstractSubset, double[]> deformations;
+    protected Map<AbstractSubset, Integer> weights;
+    protected List<AbstractSubset> subsetsToCompute;
+    protected double[] gpuData;
     // logging
     private final Map<AbstractSubset, ComputationInfo> computationInfo;
 
@@ -81,6 +89,19 @@ public abstract class AbstractTaskSolver extends Observable {
         stop = false;
         computationInfo.clear();
 
+        this.fullTask = fullTask;
+
+        final List<AbstractSubset> subsets = fullTask.getSubsets();
+        final int subsetCount = subsets.size();
+        results = new LinkedHashMap<>(subsetCount);
+        deformations = new ConcurrentHashMap<>(subsetCount);
+        subsetsToCompute = Collections.synchronizedList(new ArrayList<>(subsets));
+
+        weights = new ConcurrentHashMap<>(subsetCount);
+        for (int i = 0; i < fullTask.getSubsets().size(); i++) {
+            weights.put(fullTask.getSubsets().get(i), fullTask.getSubsetWeights().get(i));
+        }
+
         kernel = Kernel.createInstance(kernelType, memManager);
         Logger.trace("Kernel prepared - {}", kernel);
 
@@ -100,31 +121,29 @@ public abstract class AbstractTaskSolver extends Observable {
         return result;
     }
 
-    public abstract List<CorrelationResult> solve(            
+    public abstract List<CorrelationResult> solve(
             final FullTask fullTask,
             final boolean usesWeights) throws ComputationException;
 
     protected abstract boolean needsBestResult();
 
     protected synchronized List<CorrelationResult> computeTask(
-            final Kernel kernel, final FullTask fullTask) throws ComputationException {
-        final List<CorrelationResult> result = new ArrayList<>(fullTask.getSubsets().size());
-        DeformationDegree defDegree = null;
-        for (int i = 0; i < fullTask.getSubsets().size(); i++) {
-            result.add(null);
-            defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(i));
+            final Kernel kernel, final ComputationTask computationTask) throws ComputationException {
+        final List<CorrelationResult> results = new ArrayList<>(computationTask.getSubsets().size());
+        for (int i = 0; i < computationTask.getSubsets().size(); i++) {
+            results.add(null);
         }
 
         try {
-            kernel.prepareKernel(subsetSize, defDegree, interpolation);
+            kernel.prepareKernel(subsetSize, computationTask.getOrder(), computationTask.usesLimits(), interpolation);
 
-            final AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(fullTask, taskSplitVariant, taskSplitValue);
+            final AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(computationTask, taskSplitVariant, taskSplitValue);
 
             if (stop) {
-                return result;
+                return results;
             }
 
-            computeSubtasks(ts, result, kernel, fullTask);
+            computeSubtasks(ts, results, kernel, computationTask);
         } catch (CLException ex) {
             memManager.clearMemory();
             Logger.debug(ex);
@@ -132,25 +151,30 @@ public abstract class AbstractTaskSolver extends Observable {
         }
 
         if (!stop) {
-            Logger.trace("Found solution for {} subsets.", result.size());
+            Logger.trace("Found solution for {} subsets.", results.size());
         }
 
-        return result;
+        return results;
     }
 
-    private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> result, final Kernel kernel, final FullTask fullTask) throws ComputationException {
+    private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> results, final Kernel kernel, final ComputationTask fullTask) throws ComputationException {
         boolean finished = false;
         while (!finished) {
             try {
-                ComputationTask ct;                
+                ComputationTask ct;
                 while (ts.hasNext()) {
                     if (stop) {
                         return;
                     }
                     ct = ts.next();
-                    ct.setResults(kernel.compute(ct, needsBestResult()));
-                    // pick best results for this computation task and discard ct data                   
-                    pickBestResultsForTask(ct, result, fullTask.getSubsets());
+                    if (needsBestResult()) {
+                        ct.setResults(kernel.compute(ct, true));
+                        // pick best results for this computation task and discard ct data                   
+                        pickBestResultsForTask(ct, results, fullTask.getSubsets());
+                    } else {
+                        // TODO join gpuData in case of split computation and no best results
+                        kernel.compute(ct, false);
+                    }                    
                 }
                 finished = true;
             } catch (ComputationException ex) {
@@ -158,7 +182,7 @@ public abstract class AbstractTaskSolver extends Observable {
                 throw ex;
             }
         }
-    }    
+    }
 
     private static void pickBestResultsForTask(final ComputationTask task, final List<CorrelationResult> bestResults, final List<AbstractSubset> globalSubsets) throws ComputationException {
         final List<AbstractSubset> localSubsets = task.getSubsets();
@@ -203,7 +227,7 @@ public abstract class AbstractTaskSolver extends Observable {
         Logger.debug("Stopping correlation counter.");
     }
 
-    protected void addSubsetResult(final AbstractSubset subset, final CorrelationResult result) {
+    protected void addSubsetResultInfo(final AbstractSubset subset, final CorrelationResult result) {
         getInfo(subset).addResult(result);
     }
 

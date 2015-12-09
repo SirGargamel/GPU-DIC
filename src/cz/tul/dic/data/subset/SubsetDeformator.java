@@ -6,7 +6,7 @@
 package cz.tul.dic.data.subset;
 
 import cz.tul.dic.data.Coordinates;
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationDirection;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import java.util.LinkedHashMap;
@@ -28,7 +28,7 @@ public class SubsetDeformator {
         final int[] data = subset.getData();
         final double[] center = subset.getCenter();
         final int subsetArea = data.length / Coordinates.DIMENSION;
-        final DeformationDegree degree = DeformationUtils.getDegreeFromValue(deformation);
+        final DeformationOrder degree = DeformationUtils.getDegreeFromValue(deformation);
 
         if (dataCache.size() != subsetArea) {
             if (dataCache.size() > subsetArea) {
@@ -72,7 +72,7 @@ public class SubsetDeformator {
         final int[] data = subset.getData();
         final double[] center = subset.getCenter();
         final int subsetArea = data.length / Coordinates.DIMENSION;
-        final DeformationDegree degree = DeformationUtils.getDegreeFromValue(deformation);
+        final DeformationOrder degree = DeformationUtils.getDegreeFromValue(deformation);
 
         if (dataCache.size() != subsetArea) {
             if (dataCache.size() > subsetArea) {
@@ -112,7 +112,7 @@ public class SubsetDeformator {
         return dataCache;
     }
     
-    private static void deform(final int x, final int y, final double dx, final double dy, final double[] deformation, final double[] result, final DeformationDegree degree) {
+    private static void deform(final int x, final int y, final double dx, final double dy, final double[] deformation, final double[] result, final DeformationOrder degree) {
         result[Coordinates.X] = x;
         result[Coordinates.Y] = y;
         switch (degree) {

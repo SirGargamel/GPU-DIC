@@ -7,7 +7,6 @@ package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.FullTask;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,7 +17,7 @@ public class StaticSplit extends AbstractTaskSplitter {
     private boolean hasNextElement;
     private int index;
 
-    public StaticSplit(final FullTask task, final Object taskSplitValue) {
+    public StaticSplit(final ComputationTask task, final Object taskSplitValue) {
         super(task);
 
         if (taskSplitValue != null) {
@@ -60,6 +59,6 @@ public class StaticSplit extends AbstractTaskSplitter {
 
         checkIfHasNext();
 
-        return new ComputationTask(image1, image2, sublistS, sublistW, deformationLimits);
+        return new ComputationTask(image1, image2, sublistS, sublistW, deformations, order, usesLimits);
     }
 }

@@ -9,7 +9,7 @@ package cz.tul.dic.data.deformation;
  *
  * @author Petr Jecmen
  */
-public enum DeformationDegree {
+public enum DeformationOrder {
 
     ZERO, FIRST, SECOND;
 }

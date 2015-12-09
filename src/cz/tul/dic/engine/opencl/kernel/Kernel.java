@@ -18,7 +18,7 @@ import com.jogamp.opencl.CLProgram;
 import com.jogamp.opencl.CLResource;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.debug.Stats;
@@ -91,7 +91,7 @@ public abstract class Kernel {
         return result;
     }
 
-    public void prepareKernel(final int subsetSize, final DeformationDegree deg, final Interpolation interpolation) throws ComputationException {
+    public void prepareKernel(final int subsetSize, final DeformationOrder deg, final boolean usesLimits, final Interpolation interpolation) throws ComputationException {
         try {
             final boolean usesZncc, usesWeight;
             switch (kernelInfo.getCorrelation()) {
@@ -137,7 +137,8 @@ public abstract class Kernel {
 
             CLProgram program = context.createProgram(
                     KernelSourcePreparator.prepareKernel(
-                            subsetSize, deg, is2D(), usesVectorization(),
+                            subsetSize, deg, usesLimits,
+                            is2D(), usesVectorization(),
                             interpolation, usesImage, usesLocalMemory(), usesMemoryCoalescing, subsetsGroupped(), usesZncc, usesWeight)).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
@@ -196,7 +197,7 @@ public abstract class Kernel {
                 queue.putReadBuffer(clResults, true);
                 final double[] results = readResultBuffer(clResults.getBuffer());
                 for (IGPUResultsReceiver rr : LISTENERS) {
-                    rr.dumpGpuResults(results, task.getSubsets(), task.getDeformationLimits());
+                    rr.dumpGpuResults(results, task.getSubsets(), task.getDeformations());
                 }
             }
 
@@ -205,7 +206,7 @@ public abstract class Kernel {
                 final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, subsetCount, (int) maxDeformationCount);
                 final int[] positions = findPos(clResults, subsetCount, (int) maxDeformationCount, maxValuesCl);
 
-                result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, task.getDeformationLimits());
+                result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, task.getDeformations(), task.getOrder(), task.usesLimits());
             } else {
                 result = null;
             }
@@ -276,21 +277,25 @@ public abstract class Kernel {
         return result;
     }
 
-    private static List<CorrelationResult> createResults(final float[] values, final int[] positions, final List<double[]> deformationLimits) {
+    private static List<CorrelationResult> createResults(final float[] values, final int[] positions, final List<double[]> deformations, final DeformationOrder order, final boolean usesLimits) {
         if (values.length != positions.length) {
             throw new IllegalArgumentException("Array lengths mismatch.");
         }
 
         final List<CorrelationResult> result = new ArrayList<>(values.length);
 
-        double[] limits;
+        double[] deformation;
         long[] counts;
-        for (int f = 0; f < deformationLimits.size(); f++) {
-
-            limits = deformationLimits.get(f);
-            counts = DeformationUtils.generateDeformationCounts(limits);
-
-            result.add(new CorrelationResult(values[f], DeformationUtils.extractDeformation(positions[f], limits, counts)));
+        CorrelationResult cr;
+        for (int i = 0; i < deformations.size(); i++) {
+            deformation = deformations.get(i);
+            if (usesLimits) {
+                counts = DeformationUtils.generateDeformationCounts(deformation);
+                cr = new CorrelationResult(values[i], DeformationUtils.extractDeformationFromLimits(positions[i], deformation, counts));
+            } else {
+                cr = new CorrelationResult(values[i], DeformationUtils.extractDeformationFromValues(positions[i], deformation, order));
+            }
+            result.add(cr);
         }
 
         return result;

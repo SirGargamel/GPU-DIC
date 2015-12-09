@@ -5,7 +5,7 @@
  */
 package cz.tul.dic.data.task;
 
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.data.Interpolation;
@@ -25,7 +25,7 @@ public final class TaskDefaultValues {
     public static final int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;
     public static final int DEFAULT_FILTER_KERNEL_SIZE = 5;
     public static final int DEFAULT_FPS = 5000;
-    public static final DeformationDegree DEFAULT_DEFORMATION_ORDER = DeformationDegree.FIRST;
+    public static final DeformationOrder DEFAULT_DEFORMATION_ORDER = DeformationOrder.FIRST;
     public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-10.0, 10.0, 0.01, -10, 10, 0.01};
     public static final double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
         -10.0, 10.0, 0.01, -10, 10, 0.01,

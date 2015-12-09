@@ -9,6 +9,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetDeformator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.BivariateFunction;
@@ -23,21 +24,15 @@ import org.apache.commons.math3.linear.RealMatrix;
  */
 public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
 
-    private static final int COUNT_STEP = 2;
     private static final double DX = 0.5;
     private static final double DY = DX;
-    
-    public NewtonRaphsonForwardHE() {
-        super(COUNT_STEP);
-    }
 
     @Override
-    protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
-        final double[] deformationLimits = limits.get(subset);        
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
+    protected RealMatrix generateHessianMatrix(final AbstractSubset subset, final double step) {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final double[] deformation = extractSolutionFromLimits(deformationLimits);
+        final double[] deformation = extractDeformation(subset);
         final SubsetDeformator deformator = new SubsetDeformator();
 
         final byte[][] image = fullTask.getImageB().to2DBWArray();
@@ -61,25 +56,32 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
 
         double sum = 0;
         double val;
-        for (double[] coords : deformedSubset.values()) {
-            if (!coordsValid(coords, imageWidth, imageHeight)) {
-                continue;
-            }
+        try {
+            for (double[] coords : deformedSubset.values()) {
+                if (!coordsValid(coords, imageWidth, imageHeight)) {
+                    continue;
+                }
 
-            val = interpolation.value(coords[0], coords[1]);
-            sum += val * val;
+                val = interpolation.value(coords[0], coords[1]);
+                sum += val * val;
+            }
+        } catch (Exception ex) {
+            System.err.println(ex);
         }
         return -2 / sum;
     }
 
     private static boolean coordsValid(final double[] coords, final int width, final int height) {
-        return coords[0] >= 0 && coords[1] >= 0 && coords[0] < width && coords[1] < height;
+        return (coords[0] >= 0)
+                && (coords[1] >= 0)
+                && (coords[0] <= width - 1)
+                && (coords[1] <= height - 1);
     }
 
     private PiecewiseBicubicSplineInterpolatingFunction prepareInterpolator(
             final Map<int[], double[]> deformedSubset, final byte[][] image) {
-        int leftX = Integer.MAX_VALUE;
-        int topY = Integer.MAX_VALUE;
+        int leftX = image.length - 1;
+        int topY = image[0].length - 1;
         int rightX = 0;
         int bottomY = 0;
         for (double[] val : deformedSubset.values()) {
@@ -141,7 +143,7 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
         double sum = 0;
         double valueI, valueJ;
         for (double[] coords : deformedSubset.values()) {
-            if (!coordsValid(coords, imageWidth, imageHeight)) {
+            if (!coordsValid(coords, (int) (imageWidth - DX), (int) (imageHeight - DY))) {
                 continue;
             }
 
@@ -151,15 +153,6 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
         }
 
         return sum;
-    }
-
-    @Override
-    protected double[] extractSolutionFromLimits(final double[] limits) {
-        final double[] result = new double[limits.length / 3];
-        for (int i = 0; i < limits.length / 3; i++) {
-            result[i] = limits[i * 3];
-        }
-        return result;
     }
 
     private static class Approximation {
@@ -198,7 +191,12 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
         }
 
         public double calculateValue(final double x, final double y) {
-            return matrixApproxFunction.calculateValue(x, y, subset, interpolation);
+            try {
+                return matrixApproxFunction.calculateValue(x, y, subset, interpolation);
+            } catch (Exception ex) {
+                System.err.println(ex);
+            }
+            return 0;
         }
 
         private interface HessianApproximationFunction {
@@ -206,5 +204,32 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
             double calculateValue(final double x, final double y, final AbstractSubset subset, final BivariateFunction interpolation);
         }
 
+    }
+
+    @Override
+    protected double[] generateDeformations(double[] solution, double step) {
+        final int coeffCount = solution.length;
+        final List<double[]> resultA = new ArrayList<>();
+        // f(x)
+        resultA.add(Arrays.copyOf(solution, coeffCount));
+        // f(x + h)
+        double[] deformation;
+        for (int i = 0; i < coeffCount; i++) {
+            deformation = Arrays.copyOf(solution, coeffCount);
+            deformation[i] += step;
+            resultA.add(deformation);
+        }
+        // create resulting array
+        final double[] result = new double[coeffCount * resultA.size()];
+        for (int i = 0; i < resultA.size(); i++) {
+            System.arraycopy(resultA.get(i), 0, result, i * coeffCount, coeffCount);
+        }
+        return result;
+    }
+
+    @Override
+    protected int getDeformationCount() {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+        return 1 + coeffCount;
     }
 }

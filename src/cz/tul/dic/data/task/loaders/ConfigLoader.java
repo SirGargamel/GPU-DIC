@@ -10,7 +10,7 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.config.ConfigType;
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.data.task.TaskContainer;
@@ -117,7 +117,7 @@ public class ConfigLoader extends AbstractInputLoader {
                             task.setParameter(tp, doubleArrayFromString(value));
                             break;
                         case DEFORMATION_ORDER:
-                            task.setParameter(tp, DeformationDegree.valueOf(value));
+                            task.setParameter(tp, DeformationOrder.valueOf(value));
                             break;
                         case DISPLACEMENT_CALCULATION_METHOD:
                             task.setParameter(tp, DisplacementCalculation.valueOf(value));

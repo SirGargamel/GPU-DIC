@@ -10,7 +10,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.Image;
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.roi.AbstractROI;
@@ -229,15 +229,15 @@ public final class TaskContainerUtils {
         final Object dl = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
         if (dl == null) {
             Logger.info("Adding default deformation limits.");
-            if (tc.getParameter(TaskParameter.DEFORMATION_ORDER) == DeformationDegree.ZERO) {
+            if (tc.getParameter(TaskParameter.DEFORMATION_ORDER) == DeformationOrder.ZERO) {
                 tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO);
             } else {
                 tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST);
                 tc.setParameter(TaskParameter.DEFORMATION_ORDER, TaskDefaultValues.DEFAULT_DEFORMATION_ORDER);
             }
         } else {
-            final DeformationDegree limitsDegree = DeformationUtils.getDegreeFromLimits((double[]) dl);
-            final DeformationDegree taskDegree = (DeformationDegree) tc.getParameter(TaskParameter.DEFORMATION_ORDER);
+            final DeformationOrder limitsDegree = DeformationUtils.getOrderFromLimits((double[]) dl);
+            final DeformationOrder taskDegree = (DeformationOrder) tc.getParameter(TaskParameter.DEFORMATION_ORDER);
             if (taskDegree != limitsDegree) {
                 tc.setParameter(TaskParameter.DEFORMATION_ORDER, limitsDegree);
             }

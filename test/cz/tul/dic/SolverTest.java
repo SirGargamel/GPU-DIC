@@ -5,7 +5,7 @@
  */
 package cz.tul.dic;
 
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.roi.AbstractROI;
@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class SolverTest {
     private final Map<String, String> testFilesSEM;
     private static final int BASE_ROUND = 0;
     private static final double LIMIT_ABS_DIF = 0.1;
-    private static final double LIMIT_QUALITY_GOOD = 0.99;
+    private static final double LIMIT_QUALITY_GOOD = 0.75;
     private static final double LIMIT_RATIO_BAD = 0.1;
     private static final Solver[] SOLVERS
             = Solver.values();
@@ -48,12 +49,12 @@ public class SolverTest {
     private static final int PARAM_SUBSET_SIZE = 20;
 
     public SolverTest() {
-        testFiles0 = new HashMap<>(3);
+        testFiles0 = new LinkedHashMap<>(3);
         testFiles0.put("speckle-[0.0, 0.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0, 0, 0, 0});
         testFiles0.put("speckle-[0.72, 0.0, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{0.72, 0, 0, 0, 0, 0});
         testFiles0.put("speckle-[-0.25, 0.85, 0.0, 0.0, 0.0, 0.0].bmp", new double[]{-0.25, 0.85, 0, 0, 0, 0});
 
-        testFilesF = new HashMap<>(8);
+        testFilesF = new LinkedHashMap<>(8);
         testFilesF.put("speckle-[0.0, 0.0, 0.07, 0.0, 0.0, 0.0].bmp", new double[]{0, 0, 0.07, 0, 0, 0});
         testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.05, 0.0, 0.0].bmp", new double[]{0, 0, 0, 0.05, 0, 0});
         testFilesF.put("speckle-[0.0, 0.0, 0.0, 0.0, -0.04, 0.0].bmp", new double[]{0, 0, 0, 0, -0.04, 0});
@@ -79,7 +80,7 @@ public class SolverTest {
             }
 
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                task = generateAndComputeTask(e.getKey(), solver, DeformationDegree.ZERO);
+                task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.ZERO);
                 msg = checkResult(e.getValue(), task);
                 errors.add(msg);
                 counter++;
@@ -87,14 +88,14 @@ public class SolverTest {
 
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                    task = generateAndComputeTask(e.getKey(), solver, DeformationDegree.FIRST);
+                    task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.FIRST);
                     msg = checkResult(e.getValue(), task);
                     errors.add(msg);
                     counter++;
                 }
 
                 for (Entry<String, double[]> e : testFilesF.entrySet()) {
-                    task = generateAndComputeTask(e.getKey(), solver, DeformationDegree.FIRST);
+                    task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.FIRST);
                     msg = checkResult(e.getValue(), task);
                     errors.add(msg);
                     counter++;
@@ -105,7 +106,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTask(final String fileOut, final Solver solver, final DeformationDegree degree) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTask(final String fileOut, final Solver solver, final DeformationOrder degree) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -127,7 +128,7 @@ public class SolverTest {
     }
 
     private static String checkResult(final double[] expected, final TaskContainer task) throws ComputationException {
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount((DeformationDegree) task.getParameter(TaskParameter.DEFORMATION_ORDER));
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount((DeformationOrder) task.getParameter(TaskParameter.DEFORMATION_ORDER));
 
         String resultMsg = null;
         final Map<AbstractROI, List<CorrelationResult>> results = task.getResult(BASE_ROUND, BASE_ROUND + 1).getCorrelations();
@@ -235,7 +236,7 @@ public class SolverTest {
             }
 
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationDegree.ZERO);
+                task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.ZERO);
                 msg = checkResult(e.getValue(), task);
                 errors.add(msg);
                 counter++;
@@ -243,14 +244,14 @@ public class SolverTest {
 
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationDegree.FIRST);
+                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.FIRST);
                     msg = checkResult(e.getValue(), task);
                     errors.add(msg);
                     counter++;
                 }
 
                 for (Entry<String, double[]> e : testFilesF.entrySet()) {
-                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationDegree.FIRST);
+                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.FIRST);
                     msg = checkResult(e.getValue(), task);
                     errors.add(msg);
                     counter++;
@@ -261,7 +262,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTaskWeighed(final String fileOut, final Solver solver, final DeformationDegree degree) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTaskWeighed(final String fileOut, final Solver solver, final DeformationOrder degree) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -314,7 +315,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.ROUND_LIMITS, new int[]{0, 1});
         task.setParameter(TaskParameter.SUBSET_SIZE, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
-        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE * 2);
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
 

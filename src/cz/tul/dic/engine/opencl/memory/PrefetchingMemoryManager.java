@@ -91,13 +91,13 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
                 clSubsetWeights = generateSubsetWeights(subsetWeights);
                 queue.putWriteBuffer(clSubsetWeights, false);
             }
-            if (task.getDeformationLimits() != deformationLimits || !task.getDeformationLimits().equals(deformationLimits) || clDeformationLimits.isReleased()) {
-                release(clDeformationLimits);
+            if (task.getDeformations() != deformationLimits || !task.getDeformations().equals(deformationLimits) || clDeformations.isReleased()) {
+                release(clDeformations);
                 release(clDefStepCount);
-                deformationLimits = task.getDeformationLimits();
+                deformationLimits = task.getDeformations();
 
-                clDeformationLimits = generateDeformationLimits(deformationLimits);
-                queue.putWriteBuffer(clDeformationLimits, false);
+                clDeformations = generateDeformationLimits(deformationLimits);
+                queue.putWriteBuffer(clDeformations, false);
 
                 deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
                 clDefStepCount = generateDeformationStepCounts(deformationCounts);
@@ -109,7 +109,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
             if (changedResults || clResults.isReleased()) {
                 release(clResults);
 
-                maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
+                maxDeformationCount = DeformationUtils.findMaxDeformationCount(task.getDeformations(), task.getOrder(), task.usesLimits());
                 final long size = task.getSubsets().size() * maxDeformationCount;
                 if (size <= 0 || size >= Integer.MAX_VALUE) {
                     throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);

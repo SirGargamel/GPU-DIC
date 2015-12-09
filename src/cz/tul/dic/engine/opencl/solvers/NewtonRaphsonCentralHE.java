@@ -14,6 +14,7 @@ import java.util.Map;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolatingFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolator;
+import org.apache.commons.math3.exception.InsufficientDataException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -22,17 +23,16 @@ import org.apache.commons.math3.linear.RealMatrix;
  * @author Petr Ječmen
  */
 public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
-    
+
     private static final double DX = 0.5;
     private static final double DY = DX;
 
     @Override
-    protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
-        final double[] deformationLimits = limits.get(subset);        
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defDegree);
+    protected RealMatrix generateHessianMatrix(final AbstractSubset subset, final double step) {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final double[] deformation = extractSolutionFromLimits(deformationLimits);
+        final double[] deformation = extractDeformation(subset);
         final SubsetDeformator deformator = new SubsetDeformator();
 
         final byte[][] image = fullTask.getImageB().to2DBWArray();
@@ -68,13 +68,16 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
     }
 
     private static boolean coordsValid(final double[] coords, final int width, final int height) {
-        return coords[0] >= 0 && coords[1] >= 0 && coords[0] < width && coords[1] < height;
+        return coords[0] >= 0
+                && coords[1] >= 0
+                && coords[0] <= width - 1
+                && coords[1] <= height - 1;
     }
 
     private PiecewiseBicubicSplineInterpolatingFunction prepareInterpolator(
             final Map<int[], double[]> deformedSubset, final byte[][] image) {
-        int leftX = Integer.MAX_VALUE;
-        int topY = Integer.MAX_VALUE;
+        int leftX = image.length - 1;
+        int topY = image[0].length - 1;
         int rightX = 0;
         int bottomY = 0;
         for (double[] val : deformedSubset.values()) {
@@ -136,7 +139,7 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
         double sum = 0;
         double valueI, valueJ;
         for (double[] coords : deformedSubset.values()) {
-            if (!coordsValid(coords, imageWidth, imageHeight)) {
+            if (!coordsValid(coords, (int) (imageWidth - DX), (int) (imageHeight - DY))) {
                 continue;
             }
 

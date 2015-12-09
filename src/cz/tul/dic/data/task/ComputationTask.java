@@ -7,6 +7,7 @@ package cz.tul.dic.data.task;
 
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.result.CorrelationResult;
 import java.util.List;
 
@@ -19,15 +20,19 @@ public class ComputationTask {
     private final Image imageA, imageB;
     private final List<AbstractSubset> subsets;
     private final List<Integer> subsetWeights;
-    private final List<double[]> deformationLimits;
+    private final List<double[]> deformations;
+    private final boolean usesLimits;
+    private final DeformationOrder order;
     private List<CorrelationResult> results;
 
-    public ComputationTask(final Image imageA, final Image imageB, final List<AbstractSubset> subsets, final List<Integer> subsetWeights, final List<double[]> deformationLimits) {
+    public ComputationTask(final Image imageA, final Image imageB, final List<AbstractSubset> subsets, final List<Integer> subsetWeights, final List<double[]> deformations, final DeformationOrder order, final boolean usesLimits) {
         this.imageA = imageA;
         this.imageB = imageB;
         this.subsets = subsets;
         this.subsetWeights = subsetWeights;
-        this.deformationLimits = deformationLimits;        
+        this.deformations = deformations;
+        this.order = order;
+        this.usesLimits = usesLimits;
     }
 
     public Image getImageA() {
@@ -46,8 +51,16 @@ public class ComputationTask {
         return subsetWeights;
     }
 
-    public List<double[]> getDeformationLimits() {
-        return deformationLimits;
+    public List<double[]> getDeformations() {
+        return deformations;
+    }
+
+    public DeformationOrder getOrder() {
+        return order;
+    }
+
+    public boolean usesLimits() {
+        return usesLimits;
     }
 
     public List<CorrelationResult> getResults() {

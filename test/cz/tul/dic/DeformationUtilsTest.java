@@ -5,7 +5,7 @@
  */
 package cz.tul.dic;
 
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class DeformationUtilsTest {
     public void testGetDegree() throws ComputationException {
         double[] limits = new double[0];
         try {
-            DeformationUtils.getDegreeFromLimits(limits);
+            DeformationUtils.getOrderFromLimits(limits);
             fail("Should have failed because of empty limits.");
         } catch (IllegalArgumentException ex) {
             assert true;
@@ -47,7 +47,7 @@ public class DeformationUtilsTest {
 
         limits = new double[5];
         try {
-            DeformationUtils.getDegreeFromLimits(limits);
+            DeformationUtils.getOrderFromLimits(limits);
             fail("Should have failed because of illegal count of limits.");
         } catch (IllegalArgumentException ex) {
             assert true;
@@ -55,20 +55,20 @@ public class DeformationUtilsTest {
 
         limits = new double[16];
         try {
-            DeformationUtils.getDegreeFromLimits(limits);
+            DeformationUtils.getOrderFromLimits(limits);
             fail("Should have failed because of illegal count of limits.");
         } catch (IllegalArgumentException ex) {
             assert true;
         }
 
         limits = new double[]{0, 0, 0, 0, 0, 0};
-        assertEquals(WRONG_DEGREE, DeformationDegree.ZERO, DeformationUtils.getDegreeFromLimits(limits));
+        assertEquals(WRONG_DEGREE, DeformationOrder.ZERO, DeformationUtils.getOrderFromLimits(limits));
 
         limits = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        assertEquals(WRONG_DEGREE, DeformationDegree.FIRST, DeformationUtils.getDegreeFromLimits(limits));
+        assertEquals(WRONG_DEGREE, DeformationOrder.FIRST, DeformationUtils.getOrderFromLimits(limits));
 
         limits = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        assertEquals(WRONG_DEGREE, DeformationDegree.SECOND, DeformationUtils.getDegreeFromLimits(limits));
+        assertEquals(WRONG_DEGREE, DeformationOrder.SECOND, DeformationUtils.getOrderFromLimits(limits));
 
         double[] deformation = new double[0];
         try {
@@ -95,32 +95,13 @@ public class DeformationUtilsTest {
         }
 
         deformation = new double[]{0, 0};
-        assertEquals(WRONG_DEGREE, DeformationDegree.ZERO, DeformationUtils.getDegreeFromValue(deformation));
+        assertEquals(WRONG_DEGREE, DeformationOrder.ZERO, DeformationUtils.getDegreeFromValue(deformation));
 
         deformation = new double[]{0, 0, 0, 0, 0, 0};
-        assertEquals(WRONG_DEGREE, DeformationDegree.FIRST, DeformationUtils.getDegreeFromValue(deformation));
+        assertEquals(WRONG_DEGREE, DeformationOrder.FIRST, DeformationUtils.getDegreeFromValue(deformation));
 
         deformation = new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        assertEquals(WRONG_DEGREE, DeformationDegree.SECOND, DeformationUtils.getDegreeFromValue(deformation));
-    }
-
-    @Test
-    public void testMaxDefCount() {
-        final List<long[]> counts = new LinkedList<>();
-        counts.add(new long[]{1});
-        assertEquals(1, DeformationUtils.findMaxDeformationCount(counts));
-
-        counts.add(new long[]{2, 2, 4});
-        assertEquals(4, DeformationUtils.findMaxDeformationCount(counts));
-
-        counts.add(new long[]{2, 2, 4});
-        assertEquals(4, DeformationUtils.findMaxDeformationCount(counts));
-
-        counts.add(new long[]{2, 1, 25, 50});
-        assertEquals(50, DeformationUtils.findMaxDeformationCount(counts));
-
-        counts.add(new long[]{5, 5});
-        assertEquals(50, DeformationUtils.findMaxDeformationCount(counts));
+        assertEquals(WRONG_DEGREE, DeformationOrder.SECOND, DeformationUtils.getDegreeFromValue(deformation));
     }
 
     @Test
@@ -169,49 +150,49 @@ public class DeformationUtilsTest {
         double[] limits = new double[]{-1, 1, 1, -1, 1, 1};
         long[] counts = DeformationUtils.generateDeformationCounts(limits);
 
-        double[] deformation = DeformationUtils.extractDeformation(0, limits, counts);
+        double[] deformation = DeformationUtils.extractDeformationFromLimits(0, limits, counts);
         assertArrayEquals(new double[]{-1, -1}, deformation, 0.001);
 
-        deformation = DeformationUtils.extractDeformation(7, limits, counts);
+        deformation = DeformationUtils.extractDeformationFromLimits(7, limits, counts);
         assertArrayEquals(new double[]{0, 1}, deformation, 0.001);
         
-        deformation = DeformationUtils.extractDeformation(8, limits, counts);
+        deformation = DeformationUtils.extractDeformationFromLimits(8, limits, counts);
         assertArrayEquals(new double[]{1, 1}, deformation, 0.001);
 
         limits = new double[]{-1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1};
         counts = DeformationUtils.generateDeformationCounts(limits);
 
-        deformation = DeformationUtils.extractDeformation(0, limits, counts);
+        deformation = DeformationUtils.extractDeformationFromLimits(0, limits, counts);
         assertArrayEquals(new double[]{-1, -1, -1, -1, -1, -1}, deformation, 0.001);
 
-        deformation = DeformationUtils.extractDeformation(20, limits, counts);
+        deformation = DeformationUtils.extractDeformationFromLimits(20, limits, counts);
         assertArrayEquals(new double[]{1, -1, 1, -1, -1, -1}, deformation, 0.001);
         
-        deformation = DeformationUtils.extractDeformation(728, limits, counts);
+        deformation = DeformationUtils.extractDeformationFromLimits(728, limits, counts);
         assertArrayEquals(new double[]{1, 1, 1, 1, 1, 1}, deformation, 0.001);
     }
     
     @Test
     public void testGetDeformationCoeffCount() {
-        DeformationDegree deg = DeformationDegree.ZERO;
+        DeformationOrder deg = DeformationOrder.ZERO;
         assertEquals(2, DeformationUtils.getDeformationCoeffCount(deg));
         
-        deg = DeformationDegree.FIRST;
+        deg = DeformationOrder.FIRST;
         assertEquals(6, DeformationUtils.getDeformationCoeffCount(deg));
         
-        deg = DeformationDegree.SECOND;
+        deg = DeformationOrder.SECOND;
         assertEquals(12, DeformationUtils.getDeformationCoeffCount(deg));
     }
     
     @Test
     public void testGetDeformationLimitsArrayLength() {
-        DeformationDegree deg = DeformationDegree.ZERO;
+        DeformationOrder deg = DeformationOrder.ZERO;
         assertEquals(6, DeformationUtils.getDeformationLimitsArrayLength(deg));
         
-        deg = DeformationDegree.FIRST;
+        deg = DeformationOrder.FIRST;
         assertEquals(18, DeformationUtils.getDeformationLimitsArrayLength(deg));
         
-        deg = DeformationDegree.SECOND;
+        deg = DeformationOrder.SECOND;
         assertEquals(36, DeformationUtils.getDeformationLimitsArrayLength(deg));
     }
 

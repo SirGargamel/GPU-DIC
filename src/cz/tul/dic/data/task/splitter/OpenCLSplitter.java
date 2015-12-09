@@ -11,7 +11,6 @@ import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
     private boolean hasNextElement;
     private int subsetIndex;
 
-    public OpenCLSplitter(final FullTask task) {
+    public OpenCLSplitter(final ComputationTask task) {
         super(task);
         if (!subsets.isEmpty()) {
             subsetSize = subsets.get(0).getSize();
@@ -58,20 +57,19 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
             throw new NoSuchElementException();
         }
 
-        final int deformationLimitsArraySize = deformationLimits.get(subsetIndex).length;
+        final int deformationsArraySize = deformations.get(subsetIndex).length;
         List<AbstractSubset> sublistS = null;
         List<Integer> sublistW = null;
         List<double[]> checkedDeformations = null;
         final int rest = subsets.size() - subsetIndex;
 
-        int taskSize = rest;
-        final List<long[]> deformationCounts = DeformationUtils.generateDeformationCounts(deformationLimits);
-        final long deformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
-        while (taskSize > 1 && !isMemOk(deformationCount, taskSize, subsetSize, deformationLimitsArraySize)) {
+        int taskSize = rest;        
+        final long deformationCount = DeformationUtils.findMaxDeformationCount(deformations, order, usesLimits);
+        while (taskSize > 1 && !isMemOk(deformationCount, taskSize, subsetSize, deformationsArraySize)) {
             taskSize *= COEFF_LIMIT_ADJUST;
         }
 
-        if (taskSize == 1 && !isMemOk(deformationCount, taskSize, subsetSize, deformationLimitsArraySize)) {
+        if (taskSize == 1 && !isMemOk(deformationCount, taskSize, subsetSize, deformationsArraySize)) {
             hasNextElement = false;
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Not enough GPU memory, too many deformations.");
         } else {
@@ -84,7 +82,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
             while (count < taskSize && subsetIndex < subsetCount) {
                 sublistS.add(subsets.get(subsetIndex));
                 sublistW.add(subsetWeights.get(subsetIndex));
-                checkedDeformations.add(deformationLimits.get(subsetIndex));
+                checkedDeformations.add(deformations.get(subsetIndex));
 
                 count++;
                 subsetIndex++;
@@ -93,22 +91,22 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
 
         checkIfHasNext();
 
-        ComputationTask ct = new ComputationTask(image1, image2, sublistS, sublistW, checkedDeformations);
+        ComputationTask ct = new ComputationTask(image1, image2, sublistS, sublistW, checkedDeformations, order, usesLimits);
         Logger.trace("OpenCL splitter computing task with {} subsets.", sublistS.size());
 
         return ct;
     }
 
-    private boolean isMemOk(final long deformationCount, final long subsetCount, final long subsetSize, final long deformationLimitsArraySize) {
+    private boolean isMemOk(final long deformationCount, final long subsetCount, final long subsetSize, final long deformationsArraySize) {
         final long imageSize = image1.getHeight() * image1.getWidth() * SIZE_PIXEL * 2;
-        final long deformationsSize = 2 * deformationLimitsArraySize * subsetCount * SIZE_FLOAT;
+        final long deformationsSize = deformationsArraySize * subsetCount * SIZE_FLOAT;
         final long reserve = 32 * SIZE_INT;
         final long subsetDataSize = SubsetUtils.computeSubsetCoordCount((int) subsetSize) * 2 * SIZE_INT * subsetCount;
         final long subsetCentersSize = 2 * SIZE_FLOAT * subsetCount;
         final long subsetWeightsSize = SIZE_INT * subsetCount;
         final long resultCount = subsetCount * deformationCount;
         final long resultSize = resultCount * SIZE_FLOAT;
-        final long fullSize = imageSize + deformationsSize + reserve + subsetDataSize + subsetCentersSize + subsetWeightsSize + resultSize;
+        final long fullSize = imageSize + deformationsSize + subsetDataSize + subsetCentersSize + subsetWeightsSize + resultSize + reserve;
 
         final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
         final long maxMem = DeviceManager.getDevice().getGlobalMemSize();

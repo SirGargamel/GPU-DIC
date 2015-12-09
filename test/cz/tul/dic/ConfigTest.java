@@ -8,7 +8,7 @@ package cz.tul.dic;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.data.config.Config;
 import cz.tul.dic.data.config.ConfigType;
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
@@ -74,7 +74,7 @@ public class ConfigTest {
         Assert.assertEquals(StrainEstimationMethod.LOCAL_LEAST_SQUARES, task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
         Assert.assertEquals(20.0, (double) task.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM));
         Assert.assertTrue(Arrays.equals(new double[]{-1.5, 1.5, 0.5, -1.0, 1.0, 0.5, -0.25, 0.05, 0.05, -0.4, 0.25, 0.05, -0.25, 0.45, 0.05, -0.25, 0.5, 0.1}, (double[]) task.getParameter(TaskParameter.DEFORMATION_LIMITS)));
-        Assert.assertEquals(DeformationDegree.ZERO, task.getParameter(TaskParameter.DEFORMATION_ORDER));
+        Assert.assertEquals(DeformationOrder.ZERO, task.getParameter(TaskParameter.DEFORMATION_ORDER));
         Assert.assertEquals(Solver.BRUTE_FORCE, task.getParameter(TaskParameter.SOLVER));
 
         final Config configSequence = new Config().load(Paths.get(getClass().getResource("/resources/config/sequence.config").toURI()).toFile());

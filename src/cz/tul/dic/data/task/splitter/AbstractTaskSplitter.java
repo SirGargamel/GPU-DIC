@@ -8,8 +8,8 @@ package cz.tul.dic.data.task.splitter;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.FullTask;
 import java.util.List;
 
 /**
@@ -21,17 +21,21 @@ public abstract class AbstractTaskSplitter {
     protected final Image image1, image2;
     protected final List<AbstractSubset> subsets;
     protected final List<Integer> subsetWeights;
-    protected final List<double[]> deformationLimits;
+    protected final List<double[]> deformations;
+    protected final DeformationOrder order;
+    protected final boolean usesLimits;
 
-    public AbstractTaskSplitter(final FullTask task) {
+    public AbstractTaskSplitter(final ComputationTask task) {
         this.image1 = task.getImageA();
         this.image2 = task.getImageB();
         this.subsets = task.getSubsets();
         this.subsetWeights = task.getSubsetWeights();
-        this.deformationLimits = task.getDeformationLimits();
+        this.deformations = task.getDeformations();
+        this.order = task.getOrder();
+        this.usesLimits = task.usesLimits();
     }
 
-    public static AbstractTaskSplitter prepareSplitter(final FullTask task, final TaskSplitMethod ts, final Object taskSplitValue) {
+    public static AbstractTaskSplitter prepareSplitter(final ComputationTask task, final TaskSplitMethod ts, final Object taskSplitValue) {
         AbstractTaskSplitter result;
         switch (ts) {
             case NONE:

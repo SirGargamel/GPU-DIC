@@ -7,15 +7,16 @@ package cz.tul.dic.engine.opencl.solvers;
 
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
+import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.Coordinates;
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationLimit;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
+import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
 import java.util.ArrayList;
 import java.util.List;
-import org.pmw.tinylog.Logger;
 
 public class CoarseFine extends AbstractTaskSolver {
 
@@ -27,6 +28,11 @@ public class CoarseFine extends AbstractTaskSolver {
     public List<CorrelationResult> solve(
             final FullTask fullTask,
             final boolean usesWeights) throws ComputationException {
+        final DeformationOrder defDegree = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
+        if (defDegree != DeformationOrder.ZERO) {
+            throw new ComputationException(ComputationExceptionCause.ILLEGAL_CONFIG, "CoarseFine solver does not support higher order deformations.");
+        }   
+        
         if (fullTask.getSubsets().isEmpty()) {
             return new ArrayList<>(0);
         }
@@ -34,12 +40,12 @@ public class CoarseFine extends AbstractTaskSolver {
         final List<AbstractSubset> subsets = fullTask.getSubsets();
         final int subsetCount = subsets.size();
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
-        List<CorrelationResult> results;
+        List<CorrelationResult> localResults;
         double[] temp;
         double step = STEP_INITIAL;
 
         final int roundCount = coumputeRoundCount(fullTask);                
-        final List<Integer> weights = fullTask.getSubsetWeights();        
+        final List<Integer> localWeights = fullTask.getSubsetWeights();        
 
         // initial pixel step
         int round = 0;
@@ -54,11 +60,11 @@ public class CoarseFine extends AbstractTaskSolver {
             temp[DeformationLimit.VSTEP] = step;
             zeroOrderLimits.add(temp);
         }
-        results = computeTask(
+        localResults = computeTask(
                 kernel,
-                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), weights, zeroOrderLimits));
+                new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), localWeights, zeroOrderLimits, DeformationOrder.ZERO, true));
         for (int i = 0; i < subsetCount; i++) {
-            addSubsetResult(subsets.get(i), results.get(i));
+            addSubsetResultInfo(subsets.get(i), localResults.get(i));
         }
         signalizeRoundComplete(++round, roundCount);
 
@@ -78,7 +84,7 @@ public class CoarseFine extends AbstractTaskSolver {
             zeroOrderLimits = new ArrayList<>(subsetCount);
 
             for (int i = 0; i < subsetCount; i++) {
-                coarseResult = results.get(i).getDeformation();
+                coarseResult = localResults.get(i).getDeformation();
                 temp = new double[COUNT_ZERO_ORDER_LIMITS];
 
                 temp[DeformationLimit.UMIN] = coarseResult[Coordinates.X] - (10 * step);
@@ -90,22 +96,17 @@ public class CoarseFine extends AbstractTaskSolver {
 
                 zeroOrderLimits.add(temp);
             }
-            results = computeTask(
+            localResults = computeTask(
                     kernel,
-                    new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), weights, zeroOrderLimits));
+                    new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), localWeights, zeroOrderLimits, DeformationOrder.ZERO, true));
             
             for (int i = 0; i < subsetCount; i++) {
-                addSubsetResult(subsets.get(i), results.get(i));
+                addSubsetResultInfo(subsets.get(i), localResults.get(i));
             }            
             signalizeRoundComplete(++round, roundCount);
-        } while (step > STEP_MINIMAL);
+        } while (step > STEP_MINIMAL);             
 
-        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
-        if (defDegree != DeformationDegree.ZERO) {
-            Logger.debug("CoarseFine solver does support only zero order deformations.");
-        }        
-
-        return results;
+        return localResults;
     }
 
     private static int coumputeRoundCount(final FullTask fullTask) throws ComputationException {
@@ -123,8 +124,8 @@ public class CoarseFine extends AbstractTaskSolver {
             roundCount++;
         } while (tempStep > STEP_MINIMAL);
 
-        final DeformationDegree defDegree = DeformationUtils.getDegreeFromLimits(fullTask.getDeformationLimits().get(0));
-        if (defDegree != DeformationDegree.ZERO) {
+        final DeformationOrder defDegree = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
+        if (defDegree != DeformationOrder.ZERO) {
             roundCount++;
         }
 

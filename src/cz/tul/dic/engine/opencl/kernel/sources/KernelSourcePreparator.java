@@ -9,7 +9,7 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationDirection;
 import cz.tul.dic.data.Interpolation;
-import cz.tul.dic.data.deformation.DeformationDegree;
+import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class KernelSourcePreparator {
     }
 
     public static String prepareKernel(
-            final int subsetSize, final DeformationDegree deg,
+            final int subsetSize, final DeformationOrder deg, final boolean usesLimits,
             final boolean is2D, final boolean usesVectorization, final Interpolation interpolation,
             final boolean usesImage, final boolean usesLocalMemory, final boolean usesMemoryCoalescing,
             final boolean subsetsGroupped, final boolean usesZNCC, final boolean usesWeights) throws ComputationException {
@@ -60,7 +60,7 @@ public class KernelSourcePreparator {
             kp.prepareInit(is2D, usesLocalMemory, usesMemoryCoalescing);
             kp.prepareCorrelation(usesVectorization, usesImage, usesZNCC, usesWeights);
             kp.prepareStore();
-            kp.prepareDeformations(deg, usesVectorization, usesLocalMemory);
+            kp.prepareDeformations(deg, usesLimits, usesVectorization, usesLocalMemory);
             kp.prepareSubsetSize(subsetSize);
             return kp.kernel;
         } catch (IOException ex) {
@@ -141,9 +141,14 @@ public class KernelSourcePreparator {
         kernel = kernel.replaceAll(REPLACE_INIT, loadKernelResource(resourceName));
     }
 
-    private void prepareDeformations(final DeformationDegree deg, final boolean usesVectorization, final boolean usesLocalMemory) {
+    private void prepareDeformations(final DeformationOrder deg, final boolean usesLimits, final boolean usesVectorization, final boolean usesLocalMemory) {
         final StringBuilder sb = new StringBuilder();
-        String resourceName = "deformation-coeffs-";
+        String resourceName = "deformation-";
+        if (usesLimits) {
+            resourceName = resourceName.concat("limits-");
+        } else {
+            resourceName = resourceName.concat("vals-");
+        }
         switch (deg) {
             case ZERO:
                 resourceName = resourceName.concat("zero");

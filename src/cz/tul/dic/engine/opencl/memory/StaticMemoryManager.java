@@ -54,16 +54,16 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
             clSubsetWeights = generateSubsetWeights(task.getSubsetWeights());
             queue.putWriteBuffer(clSubsetWeights, false);
 
-            release(clDeformationLimits);
+            release(clDeformations);
             release(clDefStepCount);
-            clDeformationLimits = generateDeformationLimits(task.getDeformationLimits());
-            queue.putWriteBuffer(clDeformationLimits, false);
-            final List<long[]> deformationCounts = DeformationUtils.generateDeformationCounts(task.getDeformationLimits());
+            clDeformations = generateDeformationLimits(task.getDeformations());
+            queue.putWriteBuffer(clDeformations, false);
+            final List<long[]> deformationCounts = DeformationUtils.generateDeformationCounts(task.getDeformations());
             clDefStepCount = generateDeformationStepCounts(deformationCounts);
             queue.putWriteBuffer(clDefStepCount, false);
 
             release(clResults);
-            maxDeformationCount = DeformationUtils.findMaxDeformationCount(deformationCounts);
+            maxDeformationCount = DeformationUtils.findMaxDeformationCount(task.getDeformations(), task.getOrder(), task.usesLimits());
             final long size = task.getSubsets().size() * maxDeformationCount;
             if (size <= 0 || size >= Integer.MAX_VALUE) {
                 throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, "Illegal size of resulting array - " + size);

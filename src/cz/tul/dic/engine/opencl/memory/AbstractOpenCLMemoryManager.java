@@ -41,15 +41,15 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class AbstractOpenCLMemoryManager {
 
-    private static final CLImageFormat IMAGE_FORMAT;    
-    private static final Map<Type, AbstractOpenCLMemoryManager> INSTANCES;    
+    private static final CLImageFormat IMAGE_FORMAT;
+    private static final Map<Type, AbstractOpenCLMemoryManager> INSTANCES;
     protected long maxDeformationCount;
     // OpenCL entities
     protected CLMemory<ByteBuffer> clImageA, clImageB;
     protected CLBuffer<IntBuffer> clSubsetData;
     protected CLBuffer<FloatBuffer> clSubsetCenters;
     protected CLBuffer<IntBuffer> clSubsetWeights;
-    protected CLBuffer<FloatBuffer> clDeformationLimits;
+    protected CLBuffer<FloatBuffer> clDeformations;
     protected CLBuffer<LongBuffer> clDefStepCount;
     protected CLBuffer<FloatBuffer> clResults;
     // OpenCL context        
@@ -57,12 +57,12 @@ public abstract class AbstractOpenCLMemoryManager {
     protected CLContext context;
     private final Lock lock;
 
-    static {                
+    static {
         DeviceManager.getContext();
         DeviceManager.clearMemory();
-        
+
         IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
-        
+
         INSTANCES = new EnumMap<>(Type.class);
         INSTANCES.put(Type.STATIC, new StaticMemoryManager());
         INSTANCES.put(Type.DYNAMIC, new DynamicMemoryManager());
@@ -80,10 +80,10 @@ public abstract class AbstractOpenCLMemoryManager {
     }
 
     public void assignData(final ComputationTask task, final Kernel kernel) throws ComputationException {
-        lock.lock();                
+        lock.lock();
         context = DeviceManager.getContext();
         queue = DeviceManager.getQueue();
-        maxDeformationCount = DeformationUtils.findMaxDeformationCount(DeformationUtils.generateDeformationCounts(task.getDeformationLimits()));
+        maxDeformationCount = DeformationUtils.findMaxDeformationCount(task.getDeformations(), task.getOrder(), task.usesLimits());
         assignDataToGPU(task, kernel);
     }
 
@@ -152,7 +152,7 @@ public abstract class AbstractOpenCLMemoryManager {
         final IntBuffer resultBuffer = result.getBuffer();
         for (int i : weights) {
             resultBuffer.put(i);
-        }        
+        }
         resultBuffer.rewind();
         return result;
     }
@@ -212,7 +212,7 @@ public abstract class AbstractOpenCLMemoryManager {
 
     public void clearMemory() {
         release(clDefStepCount);
-        release(clDeformationLimits);
+        release(clDeformations);
         release(clSubsetCenters);
         release(clSubsetData);
         release(clImageA);
@@ -224,14 +224,14 @@ public abstract class AbstractOpenCLMemoryManager {
         return new OpenCLDataPackage(
                 clImageA, clImageB,
                 clSubsetData, clSubsetCenters, clSubsetWeights,
-                clDeformationLimits, clDefStepCount,
+                clDeformations, clDefStepCount,
                 clResults);
     }
 
     public long getMaxDeformationCount() {
         return maxDeformationCount;
     }
-    
+
     public enum Type {
         STATIC,
         DYNAMIC,

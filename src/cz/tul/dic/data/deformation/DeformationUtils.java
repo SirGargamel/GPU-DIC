@@ -25,17 +25,17 @@ public final class DeformationUtils {
         return Math.sqrt(result);
     }
 
-    public static DeformationDegree getDegreeFromLimits(final double[] limits) {
-        final DeformationDegree result;
+    public static DeformationOrder getOrderFromLimits(final double[] limits) {
+        final DeformationOrder result;
         switch (limits.length) {
             case 6:
-                result = DeformationDegree.ZERO;
+                result = DeformationOrder.ZERO;
                 break;
             case 18:
-                result = DeformationDegree.FIRST;
+                result = DeformationOrder.FIRST;
                 break;
             case 36:
-                result = DeformationDegree.SECOND;
+                result = DeformationOrder.SECOND;
                 break;
             default:
                 throw new IllegalArgumentException("Illegal count of deformation limits - " + limits.length);
@@ -43,31 +43,39 @@ public final class DeformationUtils {
         return result;
     }
 
-    public static DeformationDegree getDegreeFromValue(final double[] deformation) {
-        final DeformationDegree result;
+    public static DeformationOrder getDegreeFromValue(final double[] deformation) {
+        final DeformationOrder result;
         switch (deformation.length) {
             case 2:
-                result = DeformationDegree.ZERO;
+                result = DeformationOrder.ZERO;
                 break;
             case 6:
-                result = DeformationDegree.FIRST;
+                result = DeformationOrder.FIRST;
                 break;
             case 12:
-                result = DeformationDegree.SECOND;
+                result = DeformationOrder.SECOND;
                 break;
             default:
                 throw new IllegalArgumentException("Illegal count of deformations - " + deformation.length);
         }
         return result;
-    }    
+    }
 
-    public static long findMaxDeformationCount(final List<long[]> counts) {
+    public static long findMaxDeformationCount(final List<double[]> deformations, final DeformationOrder order, final boolean usesLimits) {        
         long max = 0;
-        for (long[] iA : counts) {
-            max = Math.max(max, iA[iA.length - 1]);
+        if (usesLimits) {
+            final List<long[]> counts = DeformationUtils.generateDeformationCounts(deformations);            
+            for (long[] iA : counts) {
+                max = Math.max(max, iA[iA.length - 1]);
+            }
+        } else {
+            final int coueffCount = DeformationUtils.getDeformationCoeffCount(order);            
+            for (double[] dA : deformations) {
+                max = Math.max(max, dA.length / coueffCount);
+            }
         }
         return max;
-    }            
+    }
 
     public static List<long[]> generateDeformationCounts(final List<double[]> deformationLimits) {
         final List<long[]> result = new ArrayList<>(deformationLimits.size());
@@ -89,13 +97,13 @@ public final class DeformationUtils {
         counts[l] = total;
         return counts;
     }
-    
-    public static double[] extractDeformation(final int index, final double[] deformationLimits, final long[] deformationCounts) {
+
+    public static double[] extractDeformationFromLimits(final int index, final double[] deformationLimits, final long[] deformationCounts) {
         if (index < 0) {
             throw new IllegalArgumentException("Negative index not allowed.");
         }
 
-        final int l = getDeformationCoeffCount(getDegreeFromLimits(deformationLimits));
+        final int l = getDeformationCoeffCount(getOrderFromLimits(deformationLimits));
         final double[] result = new double[l];
         int counter = index;
         for (int i = 0; i < l; i++) {
@@ -109,7 +117,14 @@ public final class DeformationUtils {
         return result;
     }
 
-    public static int getDeformationCoeffCount(final DeformationDegree deg) {
+    public static double[] extractDeformationFromValues(final int index, final double[] deformationValues, final DeformationOrder order) {
+        final int coeffCount = getDeformationCoeffCount(order);
+        final double[] result = new double[coeffCount];
+        System.arraycopy(deformationValues, index * coeffCount, result, 0, coeffCount);
+        return result;
+    }
+
+    public static int getDeformationCoeffCount(final DeformationOrder deg) {
         final int result;
         switch (deg) {
             case ZERO:
@@ -127,7 +142,7 @@ public final class DeformationUtils {
         return result;
     }
 
-    public static int getDeformationLimitsArrayLength(final DeformationDegree deg) {
+    public static int getDeformationLimitsArrayLength(final DeformationOrder deg) {
         return getDeformationCoeffCount(deg) * 3;
     }
 

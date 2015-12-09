@@ -1,4 +1,4 @@
-	global read_only float * deformationLimits, global read_only long * deformationCounts,
+	global read_only float * deformations, global read_only long * deformationCounts,
     global write_only float * result,    
     const int imageWidth, const long deformationCount,
     const int subsetSize, const int subsetCount,

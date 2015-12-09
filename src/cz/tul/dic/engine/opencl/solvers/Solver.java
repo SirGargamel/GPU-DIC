@@ -13,9 +13,9 @@ public enum Solver {
 
     BRUTE_FORCE("BruteForce", "BF", false, false),
     COARSE_FINE("CoarseFine", "CF", false, true),
-    NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral", "NRC", true, true),
+    NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral", "NRC", true, false),
     NEWTON_RHAPSON_CENTRAL_HE("NewtonRaphsonCentralHE", "NRCH", true, false),
-    NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward", "NRF", true, true),    
+    NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward", "NRF", true, false),    
     NEWTON_RHAPSON_FORWARD_HE("NewtonRaphsonForwardHE", "NRFH", true, false),
     SPGD("SPGD", "SPGD", true, true),
     ;

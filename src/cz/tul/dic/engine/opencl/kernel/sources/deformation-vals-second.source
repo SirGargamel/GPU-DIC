@@ -1,0 +1,14 @@
+float deformation[%DEF_D%];
+const int deformationValueBase = (subsetId * deformationCount * 12) + (deformationId * 12);
+deformation[0] = deformations[deformationValueBase + 0];
+deformation[1] = deformations[deformationValueBase + 1];
+deformation[2] = deformations[deformationValueBase + 2];
+deformation[3] = deformations[deformationValueBase + 3];
+deformation[4] = deformations[deformationValueBase + 4];
+deformation[5] = deformations[deformationValueBase + 5];
+deformation[6] = deformations[deformationValueBase + 6];
+deformation[7] = deformations[deformationValueBase + 7];
+deformation[8] = deformations[deformationValueBase + 8];
+deformation[9] = deformations[deformationValueBase + 9];
+deformation[10] = deformations[deformationValueBase + 10];
+deformation[11] = deformations[deformationValueBase + 11];

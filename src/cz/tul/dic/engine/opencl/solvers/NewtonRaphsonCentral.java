@@ -7,7 +7,9 @@ package cz.tul.dic.engine.opencl.solvers;
 
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -19,89 +21,147 @@ import org.apache.commons.math3.linear.RealVector;
  */
 public class NewtonRaphsonCentral extends NewtonRaphson {
 
-    private static final int COUNT_STEP = 3;
-
-    public NewtonRaphsonCentral() {
-        super(COUNT_STEP);
-    }
-
     // central difference
     // dF / dx = (F(x + h) - F(x - h)) / 2h
     @Override
-    protected RealVector generateNegativeGradient(final AbstractSubset subset) {
-        final double[] subsetLimits = prepareArrayForSolver(subset);
+    protected RealVector generateNegativeGradient(final AbstractSubset subset, final double step) {
         final int coeffCount = getCoeffCount();
         final double[] data = new double[coeffCount];
 
-        final int resultsBase = (subsetsToCompute.indexOf(subset) * computeDeformationCount(defDegree));
-        final int midPoint = getMidPoint();
-        final int[] indices = new int[coeffCount];
-        Arrays.fill(indices, midPoint);
-        final long[] counts = DeformationUtils.generateDeformationCounts(subsetLimits);
+        final int deformationCount = getDeformationCount();
+        final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
 
+        final int baseIndex = resultsBase + 1;
         for (int i = 0; i < coeffCount; i++) {
-            // right index
-            indices[i]++;
-            data[i] = gpuData[resultsBase + generateIndex(counts, indices)];
-            // left index
-            indices[i] -= 2;
-            data[i] -= gpuData[resultsBase + generateIndex(counts, indices)];
-            indices[i] = midPoint;
+            // f(x+h)            
+            data[i] = gpuData[baseIndex + coeffCount * 2];
+            // f(x-h)
+            data[i] -= gpuData[baseIndex + coeffCount * 2 + 1];
 
-            data[i] /= 2 * subsetLimits[i * 3 + 2];
+            data[i] /= 2 * step;
             data[i] *= -1;
         }
-
         return new ArrayRealVector(data);
     }
 
-    @Override
     // d^2 F / dx1 dx2 = (F(x1 + h, x2 + h) - F(x1 + h, x2 - h) - F(x1 - h, x2 + h) + F(x1 - h, x2 - h)) / (2h)^2
-    protected RealMatrix generateHessianMatrix(final AbstractSubset subset) {
-        final double[] subsetLimits = prepareArrayForSolver(subset);
+    @Override
+    protected RealMatrix generateHessianMatrix(final AbstractSubset subset, final double step) {
         final int coeffCount = getCoeffCount();
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final int resultsBase = (fullTask.getSubsets().indexOf(subset) * computeDeformationCount(defDegree));
-        final int[] indices = new int[coeffCount];
-        final int midPoint = getMidPoint();
-        Arrays.fill(indices, midPoint);
-        final long[] counts = DeformationUtils.generateDeformationCounts(subsetLimits);
+        final int deformationCount = getDeformationCount();
+        final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
 
-        double step;
+        final double step212 = 12 * step * step;
         for (int i = 0; i < coeffCount; i++) {
-            indices[i]++;
-            data[i][i] = gpuData[resultsBase + generateIndex(counts, indices)];
-            indices[i] -= 2;
-            data[i][i] += gpuData[resultsBase + generateIndex(counts, indices)];
-            indices[i] = midPoint;
-            data[i][i] -= 2 * gpuData[resultsBase + generateIndex(counts, indices)];
+            data[i][i] = -gpuData[resultsBase + generatePositiveDoubleStepIndex(i, i, coeffCount)];
+            data[i][i] += 16 * gpuData[resultsBase + 1 + i];
+            data[i][i] -= 30 * gpuData[resultsBase];
+            data[i][i] += 16 * gpuData[resultsBase + 1 + coeffCount + i];
+            data[i][i] -= gpuData[resultsBase + generateNegativeDoubleStepIndex(i, i, coeffCount)];
 
-            step = subsetLimits[i * 3 + 2];
-            data[i][i] /= step * step;
+            data[i][i] /= step212;
         }
 
+        final double step4 = 4 * step * step;
         for (int i = 0; i < coeffCount; i++) {
             for (int j = i + 1; j < coeffCount; j++) {
-                indices[i]++;
-                indices[j]++;
-                data[i][j] = gpuData[resultsBase + generateIndex(counts, indices)];
-                indices[i] -= 2;
-                indices[j] -= 2;
-                data[i][j] += gpuData[resultsBase + generateIndex(counts, indices)];
-                indices[j] += 2;
-                data[i][j] -= gpuData[resultsBase + generateIndex(counts, indices)];
-                indices[i] += 2;
-                indices[j] -= 2;
-                data[i][j] -= gpuData[resultsBase + generateIndex(counts, indices)];
-                indices[i] = midPoint;
-                indices[j] = midPoint;
+                data[i][j] = gpuData[resultsBase + generatePositiveDoubleStepIndex(i, j, coeffCount)];
+                data[i][j] -= gpuData[resultsBase + generatePositiveNegativeDoubleStepIndex(i, j, coeffCount)];
+                data[i][j] -= gpuData[resultsBase + generateNegativePositiveDoubleStepIndex(i, j, coeffCount)];
+                data[i][j] += gpuData[resultsBase + generateNegativeDoubleStepIndex(i, j, coeffCount)];
 
-                data[i][j] /= (subsetLimits[i * 3 + 2] + subsetLimits[j * 3 + 2]) * (subsetLimits[i * 3 + 2] + subsetLimits[j * 3 + 2]);
+                data[i][j] /= step4;
                 data[j][i] = data[i][j];
             }
         }
 
         return new Array2DRowRealMatrix(data, false);
+    }
+
+    @Override
+    protected double[] generateDeformations(double[] solution, double step) {
+        final int coeffCount = solution.length;
+        final List<double[]> resultA = new ArrayList<>();
+        // f(x)
+        resultA.add(Arrays.copyOf(solution, coeffCount));
+        // f(x + h)
+        double[] deformation;
+        for (int i = 0; i < coeffCount; i++) {
+            deformation = Arrays.copyOf(solution, coeffCount);
+            deformation[i] += step;
+            resultA.add(deformation);
+        }
+        // f(x - h)
+        for (int i = 0; i < coeffCount; i++) {
+            deformation = Arrays.copyOf(solution, coeffCount);
+            deformation[i] -= step;
+            resultA.add(deformation);
+        }
+        // f(x + h + k)
+        for (int i = 0; i < coeffCount; i++) {
+            for (int j = 0; j < coeffCount; j++) {
+                deformation = Arrays.copyOf(solution, coeffCount);
+                deformation[i] += step;
+                deformation[j] += step;
+                resultA.add(deformation);
+            }
+        }
+        // f(x - h - k)
+        for (int i = 0; i < coeffCount; i++) {
+            for (int j = 0; j < coeffCount; j++) {
+                deformation = Arrays.copyOf(solution, coeffCount);
+                deformation[i] -= step;
+                deformation[j] -= step;
+                resultA.add(deformation);
+            }
+        }
+        // f(x + h - k)
+        for (int i = 0; i < coeffCount; i++) {
+            for (int j = 0; j < coeffCount; j++) {
+                deformation = Arrays.copyOf(solution, coeffCount);
+                deformation[i] += step;
+                deformation[j] -= step;
+                resultA.add(deformation);
+            }
+        }
+        // f(x - h + k)
+        for (int i = 0; i < coeffCount; i++) {
+            for (int j = 0; j < coeffCount; j++) {
+                deformation = Arrays.copyOf(solution, coeffCount);
+                deformation[i] -= step;
+                deformation[j] += step;
+                resultA.add(deformation);
+            }
+        }
+        // create resulting array
+        final double[] result = new double[coeffCount * resultA.size()];
+        for (int i = 0; i < resultA.size(); i++) {
+            System.arraycopy(resultA.get(i), 0, result, i * coeffCount, coeffCount);
+        }
+        return result;
+    }
+
+    private int generatePositiveDoubleStepIndex(final int i, final int j, final int coeffCount) {
+        return 1 + (2 * coeffCount) + (i * coeffCount) + j;
+    }
+
+    private int generateNegativeDoubleStepIndex(final int i, final int j, final int coeffCount) {
+        return 1 + (2 * coeffCount) + (coeffCount * coeffCount) + (i * coeffCount) + j;
+    }
+
+    private int generatePositiveNegativeDoubleStepIndex(final int i, final int j, final int coeffCount) {
+        return 1 + (2 * coeffCount) + (2 * coeffCount * coeffCount) + (i * coeffCount) + j;
+    }
+    
+    private int generateNegativePositiveDoubleStepIndex(final int i, final int j, final int coeffCount) {
+        return 1 + (2 * coeffCount) + (3 * coeffCount * coeffCount) + (i * coeffCount) + j;
+    }
+
+    @Override
+    protected int getDeformationCount() {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+        return 1 + 2 * coeffCount + 4 * coeffCount * coeffCount;
     }
 }

@@ -13,7 +13,7 @@ public class NoSplit extends AbstractTaskSplitter {
 
     private boolean hasNextElement;
 
-    public NoSplit(final FullTask task) {
+    public NoSplit(final ComputationTask task) {
         super(task);
         hasNextElement = true;
     }
@@ -29,7 +29,7 @@ public class NoSplit extends AbstractTaskSplitter {
             throw new NoSuchElementException();
         }
         hasNextElement = false;
-        return new ComputationTask(image1, image2, subsets, subsetWeights, deformationLimits);
+        return new ComputationTask(image1, image2, subsets, subsetWeights, deformations, order, usesLimits);
     }
 
 }

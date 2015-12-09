@@ -26,6 +26,7 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.data.task.TaskDefaultValues;
+import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
