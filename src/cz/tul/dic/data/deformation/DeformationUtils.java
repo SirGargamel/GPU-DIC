@@ -6,6 +6,7 @@
 package cz.tul.dic.data.deformation;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -13,9 +14,6 @@ import java.util.List;
  * @author Petr Jecmen
  */
 public final class DeformationUtils {
-
-    private DeformationUtils() {
-    }
 
     public static double getAbs(final double[] deformation) {
         double result = 0;
@@ -61,15 +59,15 @@ public final class DeformationUtils {
         return result;
     }
 
-    public static long findMaxDeformationCount(final List<double[]> deformations, final DeformationOrder order, final boolean usesLimits) {        
+    public static long findMaxDeformationCount(final List<double[]> deformations, final DeformationOrder order, final boolean usesLimits) {
         long max = 0;
         if (usesLimits) {
-            final List<long[]> counts = DeformationUtils.generateDeformationCounts(deformations);            
+            final List<long[]> counts = DeformationUtils.generateDeformationCounts(deformations);
             for (long[] iA : counts) {
                 max = Math.max(max, iA[iA.length - 1]);
             }
         } else {
-            final int coueffCount = DeformationUtils.getDeformationCoeffCount(order);            
+            final int coueffCount = DeformationUtils.getDeformationCoeffCount(order);
             for (double[] dA : deformations) {
                 max = Math.max(max, dA.length / coueffCount);
             }
@@ -144,6 +142,50 @@ public final class DeformationUtils {
 
     public static int getDeformationLimitsArrayLength(final DeformationOrder deg) {
         return getDeformationCoeffCount(deg) * 3;
+    }
+
+    public static List<double[]> generateDeformationsFromLimits(final List<double[]> deformationLimits, final DeformationOrder order) {
+        List<long[]> counts = DeformationUtils.generateDeformationCounts(deformationLimits);
+        List<double[]> result = new ArrayList<>(deformationLimits.size());
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+        double[] limits;
+        double[] deformation;
+        long[] count;
+        long counter;
+        List<double[]> deformations = new LinkedList<>();
+        for (int i = 0; i < deformationLimits.size(); i++) {
+            deformations.clear();
+            limits = deformationLimits.get(i);
+            count = counts.get(i);
+            // generate deformations
+            for (int j = 0; j < count[count.length - 1]; j++) {
+                deformation = new double[coeffCount];
+                counter = j;
+                for (int k = 0; k < coeffCount; k++) {
+                    deformation[k] = counter % count[k];
+                    counter = counter / count[k];
+                }
+                for (int k = 0; k < coeffCount; k++) {
+                    deformation[k] = limits[k * 3] + deformation[k] * limits[k * 3 + 2];
+                }
+                deformations.add(deformation);
+            }
+            result.add(condenseDeformations(deformations, coeffCount));
+        }
+        return result;
+    }
+
+    private static double[] condenseDeformations(final List<double[]> deformations, final int coeffCount) {
+        final double[] result = new double[deformations.size() * coeffCount];
+        double[] deformation;
+        for (int i = 0; i < deformations.size(); i++) {
+            deformation = deformations.get(i);
+            System.arraycopy(deformation, 0, result, i * coeffCount, coeffCount);
+        }
+        return result;
+    }
+
+    private DeformationUtils() {
     }
 
 }

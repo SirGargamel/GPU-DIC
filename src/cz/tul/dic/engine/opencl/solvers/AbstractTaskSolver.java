@@ -18,6 +18,8 @@ import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernel.Kernel;
 import cz.tul.dic.data.Interpolation;
+import cz.tul.dic.data.deformation.DeformationOrder;
+import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
@@ -128,13 +130,15 @@ public abstract class AbstractTaskSolver extends Observable {
     protected abstract boolean needsBestResult();
 
     protected synchronized List<CorrelationResult> computeTask(
-            final Kernel kernel, final ComputationTask computationTask) throws ComputationException {
+            final Kernel kernel, ComputationTask computationTask) throws ComputationException {
         final List<CorrelationResult> taskResults = new ArrayList<>(computationTask.getSubsets().size());
         for (int i = 0; i < computationTask.getSubsets().size(); i++) {
             taskResults.add(null);
         }
 
-        try {
+        try {            
+            computationTask = adjustLimitsUse(kernel, computationTask);
+            
             kernel.prepareKernel(subsetSize, computationTask.getOrder(), computationTask.usesLimits(), interpolation);
 
             final AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(computationTask, taskSplitVariant, taskSplitValue);
@@ -155,6 +159,21 @@ public abstract class AbstractTaskSolver extends Observable {
         }
 
         return taskResults;
+    }
+    
+    private ComputationTask adjustLimitsUse(final Kernel kernel, final ComputationTask task) {                
+        // ct coeffs - no change        
+        // ct limits - 
+        //      pick type according to kernel
+        if (task.usesLimits() && kernel.getKernelInfo().getUseLimits() == KernelInfo.UseLimits.NO) {
+            // generate deformation values
+            final List<double[]> limits = task.getDeformations();
+            final DeformationOrder order = task.getOrder();
+            final List<double[]> deformationsFromLimits = DeformationUtils.generateDeformationsFromLimits(limits, order);
+            return new ComputationTask(task.getImageA(), task.getImageB(), task.getSubsets(), task.getSubsetWeights(), deformationsFromLimits, order, false);
+        } else {
+            return task;
+        }        
     }
 
     private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> results, final Kernel kernel, final ComputationTask fullTask) throws ComputationException {

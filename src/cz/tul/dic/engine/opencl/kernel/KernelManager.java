@@ -32,7 +32,7 @@ import org.pmw.tinylog.Logger;
 public class KernelManager {
 
     private static final String PREF_TIME_CREATION = "time.test";
-    private static final KernelInfo DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST);
+    private static final KernelInfo DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
     private static final List<KernelInfo> UNSUPPORTED_KERNELS;
     private static boolean inited;
 
@@ -40,8 +40,8 @@ public class KernelManager {
         inited = false;
 
         UNSUPPORTED_KERNELS = new ArrayList<>(2);
-        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES)));
-        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
 
         final long lastCheck = Preferences.userNodeForPackage(KernelManager.class).getLong(PREF_TIME_CREATION, 0);
         final long current = System.currentTimeMillis();
@@ -139,9 +139,15 @@ public class KernelManager {
                             continue;
                         }
 
-                        kernelInfo = new KernelInfo(kt, in, cor, mc);
-                        if (!UNSUPPORTED_KERNELS.contains(kernelInfo)) {
-                            result.add(kernelInfo);
+                        for (KernelInfo.UseLimits lim : KernelInfo.UseLimits.values()) {
+                            if (lim == KernelInfo.UseLimits.BEST) {
+                                continue;
+                            }
+
+                            kernelInfo = new KernelInfo(kt, in, cor, mc, lim);
+                            if (!UNSUPPORTED_KERNELS.contains(kernelInfo)) {
+                                result.add(kernelInfo);
+                            }
                         }
                     }
                 }
@@ -186,14 +192,24 @@ public class KernelManager {
             memoryCoalescing.add(requestedKernelInfo.getMemoryCoalescing());
         }
 
+        final List<KernelInfo.UseLimits> useLimits = new ArrayList<>();
+        if (requestedKernelInfo.getUseLimits() == KernelInfo.UseLimits.BEST) {
+            useLimits.addAll(Arrays.asList(KernelInfo.UseLimits.values()));
+            useLimits.remove(KernelInfo.UseLimits.BEST);
+        } else {
+            useLimits.add(requestedKernelInfo.getUseLimits());
+        }
+
         KernelInfo kernelInfo;
         for (Type kt : kernels) {
             for (KernelInfo.Input in : inputs) {
                 for (KernelInfo.Correlation cor : correlations) {
                     for (KernelInfo.MemoryCoalescing mc : memoryCoalescing) {
-                        kernelInfo = new KernelInfo(kt, in, cor, mc);
-                        if (!UNSUPPORTED_KERNELS.contains(kernelInfo)) {
-                            result.add(kernelInfo);
+                        for (KernelInfo.UseLimits lim : useLimits) {
+                            kernelInfo = new KernelInfo(kt, in, cor, mc, lim);
+                            if (!UNSUPPORTED_KERNELS.contains(kernelInfo)) {
+                                result.add(kernelInfo);
+                            }
                         }
                     }
                 }

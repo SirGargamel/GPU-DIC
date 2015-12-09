@@ -80,7 +80,12 @@ public class SolverTest {
             }
 
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.ZERO);
+                task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.ZERO, KernelInfo.UseLimits.YES);
+                msg = checkResult(e.getValue(), task);
+                errors.add(msg);
+                counter++;
+
+                task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.ZERO, KernelInfo.UseLimits.NO);
                 msg = checkResult(e.getValue(), task);
                 errors.add(msg);
                 counter++;
@@ -88,14 +93,24 @@ public class SolverTest {
 
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                    task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.FIRST);
+                    task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.FIRST, KernelInfo.UseLimits.YES);
+                    msg = checkResult(e.getValue(), task);
+                    errors.add(msg);
+                    counter++;
+
+                    task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.FIRST, KernelInfo.UseLimits.NO);
                     msg = checkResult(e.getValue(), task);
                     errors.add(msg);
                     counter++;
                 }
 
                 for (Entry<String, double[]> e : testFilesF.entrySet()) {
-                    task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.FIRST);
+                    task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.FIRST, KernelInfo.UseLimits.YES);
+                    msg = checkResult(e.getValue(), task);
+                    errors.add(msg);
+                    counter++;
+
+                    task = generateAndComputeTask(e.getKey(), solver, DeformationOrder.FIRST, KernelInfo.UseLimits.NO);
                     msg = checkResult(e.getValue(), task);
                     errors.add(msg);
                     counter++;
@@ -106,7 +121,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTask(final String fileOut, final Solver solver, final DeformationOrder degree) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTask(final String fileOut, final Solver solver, final DeformationOrder degree, final KernelInfo.UseLimits useLimits) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -120,7 +135,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
-        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.ZNSSD, KernelInfo.MemoryCoalescing.BEST));
+        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.ZNSSD, KernelInfo.MemoryCoalescing.BEST, useLimits));
 
         Engine.getInstance().computeTask(task);
 
@@ -236,7 +251,12 @@ public class SolverTest {
             }
 
             for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.ZERO);
+                task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.ZERO, KernelInfo.UseLimits.YES);
+                msg = checkResult(e.getValue(), task);
+                errors.add(msg);
+                counter++;
+
+                task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.ZERO, KernelInfo.UseLimits.NO);
                 msg = checkResult(e.getValue(), task);
                 errors.add(msg);
                 counter++;
@@ -244,14 +264,24 @@ public class SolverTest {
 
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, double[]> e : testFiles0.entrySet()) {
-                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.FIRST);
+                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.FIRST, KernelInfo.UseLimits.YES);
+                    msg = checkResult(e.getValue(), task);
+                    errors.add(msg);
+                    counter++;
+
+                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.FIRST, KernelInfo.UseLimits.NO);
                     msg = checkResult(e.getValue(), task);
                     errors.add(msg);
                     counter++;
                 }
 
                 for (Entry<String, double[]> e : testFilesF.entrySet()) {
-                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.FIRST);
+                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.FIRST, KernelInfo.UseLimits.YES);
+                    msg = checkResult(e.getValue(), task);
+                    errors.add(msg);
+                    counter++;
+
+                    task = generateAndComputeTaskWeighed(e.getKey(), solver, DeformationOrder.FIRST, KernelInfo.UseLimits.NO);
                     msg = checkResult(e.getValue(), task);
                     errors.add(msg);
                     counter++;
@@ -262,7 +292,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTaskWeighed(final String fileOut, final Solver solver, final DeformationOrder degree) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTaskWeighed(final String fileOut, final Solver solver, final DeformationOrder degree, final KernelInfo.UseLimits useLimits) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -277,7 +307,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
         // weighed correlation weigh too large to show effect
-        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.BEST));
+        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.BEST, useLimits));
         task.setParameter(TaskParameter.CORRELATION_WEIGHT, 2.0);
 
         Engine.getInstance().computeTask(task);
