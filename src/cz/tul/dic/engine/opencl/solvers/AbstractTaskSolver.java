@@ -129,9 +129,9 @@ public abstract class AbstractTaskSolver extends Observable {
 
     protected synchronized List<CorrelationResult> computeTask(
             final Kernel kernel, final ComputationTask computationTask) throws ComputationException {
-        final List<CorrelationResult> results = new ArrayList<>(computationTask.getSubsets().size());
+        final List<CorrelationResult> taskResults = new ArrayList<>(computationTask.getSubsets().size());
         for (int i = 0; i < computationTask.getSubsets().size(); i++) {
-            results.add(null);
+            taskResults.add(null);
         }
 
         try {
@@ -140,10 +140,10 @@ public abstract class AbstractTaskSolver extends Observable {
             final AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(computationTask, taskSplitVariant, taskSplitValue);
 
             if (stop) {
-                return results;
+                return taskResults;
             }
 
-            computeSubtasks(ts, results, kernel, computationTask);
+            computeSubtasks(ts, taskResults, kernel, computationTask);
         } catch (CLException ex) {
             memManager.clearMemory();
             Logger.debug(ex);
@@ -151,10 +151,10 @@ public abstract class AbstractTaskSolver extends Observable {
         }
 
         if (!stop) {
-            Logger.trace("Found solution for {} subsets.", results.size());
+            Logger.trace("Found solution for {} subsets.", taskResults.size());
         }
 
-        return results;
+        return taskResults;
     }
 
     private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> results, final Kernel kernel, final ComputationTask fullTask) throws ComputationException {
