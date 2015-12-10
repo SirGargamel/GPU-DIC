@@ -175,17 +175,6 @@ public class EngineTest {
         Assert.assertEquals(errors.toString(), 0, errors.size());
     }
 
-    @Test
-    public void testEngineLarge() throws IOException, URISyntaxException, ComputationException {
-        TaskContainer tc;
-        Set<String> errors = new HashSet<>();
-
-        tc = generateTask(DEF_ZERO_FIRST_FILES[2], DEF_LARGE);
-        errors.add(computeAndCheckTask(tc, DEF_ZERO_FIRST_FILES[2]));
-        errors.remove(null);
-        Assert.assertEquals(errors.toString(), 0, errors.size());
-    }
-
     private TaskContainer generateTask(final String outFilename, final double[] deformations) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
@@ -276,7 +265,7 @@ public class EngineTest {
             }
         }
 
-        if (errorCount > 0) {            
+        if (errorCount > 0) {
             return generateDescription(fileName, tc, errorCount);
         } else {
             return null;
@@ -352,8 +341,8 @@ public class EngineTest {
         roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
         roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
         subsets.put(roi, roiSubsets);
-                
-        final List<Integer> weights = Collections.nCopies(roiSubsets.size(), TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));        
+
+        final List<Integer> weights = Collections.nCopies(roiSubsets.size(), TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
 
         final HashMap<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
@@ -407,7 +396,7 @@ public class EngineTest {
         roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
         roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
         subsets.put(roi, roiSubsets);
-        
+
         final List<Integer> weights = Collections.nCopies(roiSubsets.size(), TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
 
         final HashMap<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
