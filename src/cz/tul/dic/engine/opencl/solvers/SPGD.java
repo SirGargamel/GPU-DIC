@@ -213,6 +213,11 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         this.gpuData = resultData;
     }
 
+    @Override
+    public long getDeformationCount() {
+        return 3;
+    }
+
     private class StepMaker implements Callable<AbstractSubset> {
 
         private final AbstractSubset subset;

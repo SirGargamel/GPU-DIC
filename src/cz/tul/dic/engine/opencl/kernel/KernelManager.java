@@ -12,6 +12,7 @@ import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
+import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo.Type;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 import org.pmw.tinylog.Logger;
@@ -34,6 +36,17 @@ public class KernelManager {
     private static final String PREF_TIME_CREATION = "time.test";
     private static final KernelInfo DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
     private static final List<KernelInfo> UNSUPPORTED_KERNELS;
+    private static final Map<Long, Map<Long, Map<KernelInfo, Long>>> TIME_DATA;
+    private static final double[][] TEST_LIMITS = new double[][]{
+        {-10.0, 10.0, 1, -10, 10, 1}, // BruteForce - 11*11
+        {-1, 1, 1, 0, 0, 0}, // SPGD - 3
+        {-3, 3, 1, -1, 1, 1}, {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -2, 2, 1}, // NRC - 21, 160
+        {-2, 2, 1, 0, 0, 0}, {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -1, 1, 1, -1, 1, 1}, // NRCHE - 5, 13
+        {-1, 1, 1, -1, 1, 1}, {0, 1, 1, 0, 1, 1, -3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // NRF - 6, 28
+        {-3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // NRFHE - 3, 7
+    };
+    private static final int[] TEST_SUBSET_COUNT = new int[]{1, 32};
+    private static final int TEST_SUBSET_SIZE = 10;
     private static boolean inited;
 
     static {
@@ -49,12 +62,12 @@ public class KernelManager {
         if (TimeUnit.MILLISECONDS.toDays(diff) == 0) {
             inited = TimeDataStorage.getInstance().loadTimeDataFromFile();
         }
-
+        
         if (!inited) {
             Logger.debug("Initializing best kernel.");
-            final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.COARSE_FINE);
+            final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
             solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
-            solver.setTaskSplitVariant(TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
+            solver.setTaskSplitVariant(TaskSplitMethod.NONE, null);
 
             try {
                 for (KernelInfo ki : generateKernelInfos()) {
@@ -71,46 +84,66 @@ public class KernelManager {
 
             inited = true;
         }
+
+        TIME_DATA = TimeDataStorage.getInstance().getFullDataBySize();
     }
 
     private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo) throws ComputationException {
         solver.setKernel(kernelInfo);
         final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
-        final List<double[]> deformationLimits = new ArrayList<>(2);
-        final double[] limits = new double[]{-49, 50, 0.05, -49, 50, 0.05};
-        deformationLimits.add(limits);
-        deformationLimits.add(limits);
-        final int ss = 10;
-        final List<AbstractSubset> subsets = new ArrayList<>(2);
-        subsets.add(new SquareSubset2D(ss, 15, 15));
-        subsets.add(new SquareSubset2D(ss, 15, 15));
-        final List<Integer> weights = Collections.nCopies(subsets.size(), TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
-        solver.solve(
-                new FullTask(img, img, subsets, weights, deformationLimits),
-                ss);
+        final AbstractSubset subset = new SquareSubset2D(TEST_SUBSET_SIZE, 15, 15);
+
+        List<double[]> deformationLimits;
+        List<AbstractSubset> subsets;
+        List<Integer> weights;
+        for (int sc : TEST_SUBSET_COUNT) {            
+            for (double[] limits : TEST_LIMITS) {
+                subsets = Collections.nCopies(sc, subset);
+                deformationLimits = Collections.nCopies(sc, limits);
+                weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(TEST_SUBSET_SIZE, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
+                solver.solve(
+                        new FullTask(img, img, subsets, weights, deformationLimits),
+                        TEST_SUBSET_SIZE);
+            }
+        }
     }
 
-    public static KernelInfo getBestKernel(final KernelInfo kernelInfo) {
+    public static KernelInfo getBestKernel(final KernelInfo kernelInfo, final long deformationCount) {
         final List<KernelInfo> infos = generatePossibleInfos(kernelInfo);
         if (infos.size() == 1) {
             return infos.get(0);
         }
 
-        // find best performing kernel        
-        final Map<KernelInfo, Map<Long, Map<Long, Long>>> TIME_DATA = TimeDataStorage.getInstance().getFullData();
-        double performance;
-        double bestPerformance = Double.NEGATIVE_INFINITY;
-        KernelInfo bestKernel = null;
-        for (KernelInfo ki : infos) {
-            for (Map.Entry<Long, Map<Long, Long>> e : TIME_DATA.get(ki).entrySet()) {
-                for (Map.Entry<Long, Long> e2 : e.getValue().entrySet()) {
-                    performance = (e.getKey() * e2.getKey()) / (double) e2.getValue();
-                    if (performance > bestPerformance) {
-                        bestPerformance = performance;
-                        bestKernel = ki;
-                    }
+        final long subsetCount = 1;
+        final Map<Long, Map<KernelInfo, Long>> data = TIME_DATA.get(subsetCount);
+        long defCount = 1;
+        for (Long dc : data.keySet()) {
+            if (dc < deformationCount) {
+                defCount = dc;
+            } else if (dc == deformationCount) {
+                defCount = dc;
+                break;
+            } else {
+                double difA = deformationCount - defCount;
+                double difB = dc - deformationCount;
+                if (difB < difA) {
+                    defCount = dc;
                 }
+                break;
             }
+        }
+
+        // find best performing kernel                
+        double time;
+        double bestTime = Double.MAX_VALUE;
+        KernelInfo bestKernel = null;
+        for (Entry<KernelInfo, Long> e : data.get(defCount).entrySet()) {
+            time = e.getValue();
+            if (time < bestTime) {
+                bestTime = time;
+                bestKernel = e.getKey();
+            }
+
         }
         return bestKernel;
     }

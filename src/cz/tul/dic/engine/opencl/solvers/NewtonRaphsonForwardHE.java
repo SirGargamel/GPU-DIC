@@ -26,10 +26,37 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
 
     private static final double DX = 0.5;
     private static final double DY = DX;
+    
+    @Override
+    protected double[] generateDeformations(double[] solution, double step) {
+        final int coeffCount = solution.length;
+        final List<double[]> resultA = new ArrayList<>();
+        // f(x)
+        resultA.add(Arrays.copyOf(solution, coeffCount));
+        // f(x + h)
+        double[] deformation;
+        for (int i = 0; i < coeffCount; i++) {
+            deformation = Arrays.copyOf(solution, coeffCount);
+            deformation[i] += step;
+            resultA.add(deformation);
+        }
+        // create resulting array
+        final double[] result = new double[coeffCount * resultA.size()];
+        for (int i = 0; i < resultA.size(); i++) {
+            System.arraycopy(resultA.get(i), 0, result, i * coeffCount, coeffCount);
+        }
+        return result;
+    }   
+    
+    @Override
+    public long getDeformationCount() {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
+        return 1 + coeffCount;
+    }
 
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset, final double step) {
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
         final double[][] data = new double[coeffCount][coeffCount];
 
         final double[] deformation = extractDeformation(subset);
@@ -204,32 +231,5 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
             double calculateValue(final double x, final double y, final AbstractSubset subset, final BivariateFunction interpolation);
         }
 
-    }
-
-    @Override
-    protected double[] generateDeformations(double[] solution, double step) {
-        final int coeffCount = solution.length;
-        final List<double[]> resultA = new ArrayList<>();
-        // f(x)
-        resultA.add(Arrays.copyOf(solution, coeffCount));
-        // f(x + h)
-        double[] deformation;
-        for (int i = 0; i < coeffCount; i++) {
-            deformation = Arrays.copyOf(solution, coeffCount);
-            deformation[i] += step;
-            resultA.add(deformation);
-        }
-        // create resulting array
-        final double[] result = new double[coeffCount * resultA.size()];
-        for (int i = 0; i < resultA.size(); i++) {
-            System.arraycopy(resultA.get(i), 0, result, i * coeffCount, coeffCount);
-        }
-        return result;
-    }
-
-    @Override
-    protected int getDeformationCount() {
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
-        return 1 + coeffCount;
     }
 }

@@ -15,6 +15,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +32,8 @@ public class CoarseFine extends AbstractTaskSolver {
         final DeformationOrder defDegree = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
         if (defDegree != DeformationOrder.ZERO) {
             throw new ComputationException(ComputationExceptionCause.ILLEGAL_CONFIG, "CoarseFine solver does not support higher order deformations.");
-        }   
-        
+        }
+
         if (fullTask.getSubsets().isEmpty()) {
             return new ArrayList<>(0);
         }
@@ -44,8 +45,8 @@ public class CoarseFine extends AbstractTaskSolver {
         double[] temp;
         double step = STEP_INITIAL;
 
-        final int roundCount = coumputeRoundCount(fullTask);                
-        final List<Integer> localWeights = fullTask.getSubsetWeights();        
+        final int roundCount = coumputeRoundCount(fullTask);
+        final List<Integer> localWeights = fullTask.getSubsetWeights();
 
         // initial pixel step
         int round = 0;
@@ -99,12 +100,12 @@ public class CoarseFine extends AbstractTaskSolver {
             localResults = computeTask(
                     kernel,
                     new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), localWeights, zeroOrderLimits, DeformationOrder.ZERO, true));
-            
+
             for (int i = 0; i < subsetCount; i++) {
                 addSubsetResultInfo(subsets.get(i), localResults.get(i));
-            }            
+            }
             signalizeRoundComplete(++round, roundCount);
-        } while (step > STEP_MINIMAL);             
+        } while (step > STEP_MINIMAL);
 
         return localResults;
     }
@@ -148,6 +149,21 @@ public class CoarseFine extends AbstractTaskSolver {
     @Override
     protected boolean needsBestResult() {
         return true;
+    }
+
+    @Override
+    public long getDeformationCount() {
+        final List<double[]> def = fullTask.getDeformationLimits();
+        double[] limits;
+        if (!def.isEmpty()) {
+            limits = def.get(0);
+        } else {
+            limits = TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO;
+        }
+        long count = 0;
+        count += (Math.ceil(limits[1]) - Math.floor(limits[0])) / 1;
+        count *= (Math.ceil(limits[4]) - Math.floor(limits[3])) / 1;
+        return count;
     }
 
 }

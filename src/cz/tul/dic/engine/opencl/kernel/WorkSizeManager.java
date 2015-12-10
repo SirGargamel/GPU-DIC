@@ -62,6 +62,7 @@ public final class WorkSizeManager {
     public void reset() {
         workSizeS = INITIAL_WORK_SIZE_F;
         workSizeD = INITIAL_WORK_SIZE_D;
+        computeNextWorkSize();
     }
 
     public void storeTime(final long workSizeF, final long workSizeD, final long time) {
@@ -70,7 +71,7 @@ public final class WorkSizeManager {
     }
 
     private void computeNextWorkSize() {
-        if (!TimeDataStorage.getInstance().getTimeData(kernel).isEmpty()) {
+        if (TimeDataStorage.getInstance().getTimeData(kernel) != null) {
             final long[] max = findMaxTimeValue(kernel);
             final long[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
             workSizeS = newMax[0];

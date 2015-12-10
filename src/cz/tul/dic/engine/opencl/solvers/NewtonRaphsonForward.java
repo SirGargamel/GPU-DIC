@@ -28,7 +28,7 @@ public class NewtonRaphsonForward extends NewtonRaphson {
         final int coeffCount = getCoeffCount();
         final double[] data = new double[coeffCount];
 
-        final int deformationCount = getDeformationCount();
+        final int deformationCount = (int) getDeformationCount();
         final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
 
         for (int i = 0; i < coeffCount; i++) {
@@ -49,7 +49,7 @@ public class NewtonRaphsonForward extends NewtonRaphson {
         final int coeffCount = getCoeffCount();
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final int deformationCount = getDeformationCount();
+        final int deformationCount = (int) getDeformationCount();
         final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
 
         final double step2 = step * step;
@@ -112,8 +112,8 @@ public class NewtonRaphsonForward extends NewtonRaphson {
     }       
 
     @Override
-    protected int getDeformationCount() {
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+    public long getDeformationCount() {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
         return 1 + coeffCount + ((coeffCount * (coeffCount + 1)) / 2);
     }
 

@@ -26,7 +26,6 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.data.task.TaskDefaultValues;
-import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
@@ -76,7 +75,7 @@ public class EngineTest {
         "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};
     private static final double[] DEF_LARGE = new double[]{
         -5, 5, 0.5, -5, 5, 0.25,
-        -1.0, 1.0, 0.05, -1.0, 1.0, 0.2, -1.0, 1.0, 0.2, -1.0, 1.0, 0.1};
+        -1.0, 1.0, 0.1, -1.0, 1.0, 0.2, -1.0, 1.0, 0.1, -1.0, 1.0, 0.1};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {

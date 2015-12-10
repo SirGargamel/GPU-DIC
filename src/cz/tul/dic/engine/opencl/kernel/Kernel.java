@@ -64,7 +64,7 @@ public abstract class Kernel {
     }
 
     protected Kernel(final KernelInfo info, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
-        this.kernelInfo = KernelManager.getBestKernel(info);
+        this.kernelInfo = info;
         clMem = new HashSet<>();
 
         this.memManager = memManager;
@@ -74,18 +74,20 @@ public abstract class Kernel {
         context = DeviceManager.getContext();
     }
 
-    public static Kernel createInstance(KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager) {
-        final WorkSizeManager wsm = new WorkSizeManager(kernelInfo);
+    public static Kernel createInstance(KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final long deformationCount) {
+        final KernelInfo concreteInfo = KernelManager.getBestKernel(kernelInfo, deformationCount);
+        final WorkSizeManager wsm = new WorkSizeManager(concreteInfo);
+
         Kernel result;
         try {
-            kernelInfo = KernelManager.getBestKernel(kernelInfo);
-            final KernelInfo.Type kernelType = kernelInfo.getType();
+            final KernelInfo.Type kernelType = concreteInfo.getType();
             final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernel.".concat(kernelType.toString()));
-            result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(kernelInfo, memManager, wsm);
+            result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(concreteInfo, memManager, wsm);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.warn("Error instantiating kernel with kernel info [{}], using default kernel.", kernelInfo);
+            Logger.warn("Error instantiating kernel with kernel info [{}], using default kernel.", concreteInfo);
             Logger.error(ex);
-            result = new CL1D(kernelInfo, memManager, wsm);
+            final KernelInfo defaultInfo = KernelManager.getBestKernel(KernelManager.getBestKernel(), deformationCount);
+            result = new CL1D(defaultInfo, memManager, wsm);
         }
 
         return result;

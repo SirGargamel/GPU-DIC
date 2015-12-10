@@ -48,8 +48,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     private static final double STEP_INITIAL = 1;
     private static final double STEP_FIRST = 0.01;
     private static final double STEP_SECOND = 0.001;
-    protected static final int STEP_WEIGHT = 1;
-    protected DeformationOrder order;
+    protected static final int STEP_WEIGHT = 1;    
     private final Set<AbstractSubset> smallerStep;
 
     public NewtonRaphson() {
@@ -64,9 +63,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             return new ArrayList<>(0);
         }
 
-        final int subsetCount = subsetsToCompute.size();
-
-        order = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
+        final int subsetCount = subsetsToCompute.size();        
 
         smallerStep.clear();
 
@@ -79,10 +76,10 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
         // initial data for NR solver
         Kernel.registerListener(this);
-        computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, fullTask.getSubsetWeights(), new ArrayList<>(deformations.values()), order, false));
+        computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, fullTask.getSubsetWeights(), new ArrayList<>(deformations.values()), deformationOrder, false));
 
         for (int i = 0; i < LIMITS_ITERATIONS; i++) {
-            makeStep(subsetsToCompute, order);
+            makeStep(subsetsToCompute, deformationOrder);
 
             notifyProgress(subsetsToCompute.size(), subsetCount);
 
@@ -99,7 +96,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     private void prepareInitialResults() throws ComputationException {
         final List<AbstractSubset> subsets = fullTask.getSubsets();
         final int subsetCount = subsets.size();
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
 
         double[] temp;
         List<double[]> zeroOrderLimits = new ArrayList<>(subsetCount);
@@ -183,11 +180,11 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
     // UTILS
     protected int getCoeffCount() {
-        return DeformationUtils.getDeformationCoeffCount(order);
+        return DeformationUtils.getDeformationCoeffCount(deformationOrder);
     }
 
     protected double[] extractDeformation(final AbstractSubset subset) {
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
         final double[] result = new double[coeffCount];
         System.arraycopy(deformations.get(subset), 0, result, 0, coeffCount);
         return result;
@@ -198,9 +195,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
     protected abstract RealMatrix generateHessianMatrix(final AbstractSubset subset, final double step);
 
-    protected abstract double[] generateDeformations(final double[] solution, final double step);
-
-    protected abstract int getDeformationCount();
+    protected abstract double[] generateDeformations(final double[] solution, final double step);    
 
     ///// MISC
     @Override
@@ -286,7 +281,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         }
 
         private int generateResultIndex(final AbstractSubset subset) {
-            return subsetsToCompute.indexOf(subset) * getDeformationCount();
+            return (int) (subsetsToCompute.indexOf(subset) * getDeformationCount());
         }
 
         private double computeImprovement(final double[] oldResult, final double[] newResult) {

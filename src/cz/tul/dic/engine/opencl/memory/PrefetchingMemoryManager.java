@@ -19,6 +19,8 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.opencl.kernel.Kernel;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
+import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +141,8 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
 
     private void init(final TaskContainer task) {
         final KernelInfo kt = (KernelInfo) task.getParameter(TaskParameter.KERNEL);
-        final Kernel k = Kernel.createInstance(kt, this);
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
+        final Kernel k = Kernel.createInstance(kt, this, solver.getDeformationCount());
         switch (k.getKernelInfo().getInput()) {
             case IMAGE:
                 generateImagesAsImage2Dt(task.getImages());

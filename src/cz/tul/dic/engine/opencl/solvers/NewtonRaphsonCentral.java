@@ -28,18 +28,21 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
         final int coeffCount = getCoeffCount();
         final double[] data = new double[coeffCount];
 
-        final int deformationCount = getDeformationCount();
+        final int deformationCount = (int) getDeformationCount();
         final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
 
-        final int baseIndex = resultsBase + 1;
-        for (int i = 0; i < coeffCount; i++) {
-            // f(x+h)            
-            data[i] = gpuData[baseIndex + coeffCount * 2];
-            // f(x-h)
-            data[i] -= gpuData[baseIndex + coeffCount * 2 + 1];
+        try {            
+            for (int i = 0; i < coeffCount; i++) {
+                // f(x+h)            
+                data[i] = gpuData[resultsBase + 1 + i];
+                // f(x-h)
+                data[i] -= gpuData[resultsBase + 1 + coeffCount + i];
 
-            data[i] /= 2 * step;
-            data[i] *= -1;
+                data[i] /= 2 * step;
+                data[i] *= -1;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR");
         }
         return new ArrayRealVector(data);
     }
@@ -50,7 +53,7 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
         final int coeffCount = getCoeffCount();
         final double[][] data = new double[coeffCount][coeffCount];
 
-        final int deformationCount = getDeformationCount();
+        final int deformationCount = (int) getDeformationCount();
         final int resultsBase = (subsetsToCompute.indexOf(subset) * deformationCount);
 
         final double step212 = 12 * step * step;
@@ -154,14 +157,14 @@ public class NewtonRaphsonCentral extends NewtonRaphson {
     private int generatePositiveNegativeDoubleStepIndex(final int i, final int j, final int coeffCount) {
         return 1 + (2 * coeffCount) + (2 * coeffCount * coeffCount) + (i * coeffCount) + j;
     }
-    
+
     private int generateNegativePositiveDoubleStepIndex(final int i, final int j, final int coeffCount) {
         return 1 + (2 * coeffCount) + (3 * coeffCount * coeffCount) + (i * coeffCount) + j;
     }
 
     @Override
-    protected int getDeformationCount() {
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+    public long getDeformationCount() {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
         return 1 + 2 * coeffCount + 4 * coeffCount * coeffCount;
     }
 }

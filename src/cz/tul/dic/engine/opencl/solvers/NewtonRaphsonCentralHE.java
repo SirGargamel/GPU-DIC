@@ -9,6 +9,7 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetDeformator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.analysis.BivariateFunction;
@@ -26,10 +27,43 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
 
     private static final double DX = 0.5;
     private static final double DY = DX;
+    
+    @Override
+    protected double[] generateDeformations(double[] solution, double step) {
+        final int coeffCount = solution.length;
+        final List<double[]> resultA = new ArrayList<>();
+        // f(x)
+        resultA.add(Arrays.copyOf(solution, coeffCount));
+        // f(x + h)
+        double[] deformation;
+        for (int i = 0; i < coeffCount; i++) {
+            deformation = Arrays.copyOf(solution, coeffCount);
+            deformation[i] += step;
+            resultA.add(deformation);
+        }
+        // f(x - h)
+        for (int i = 0; i < coeffCount; i++) {
+            deformation = Arrays.copyOf(solution, coeffCount);
+            deformation[i] -= step;
+            resultA.add(deformation);
+        }
+        // create resulting array
+        final double[] result = new double[coeffCount * resultA.size()];
+        for (int i = 0; i < resultA.size(); i++) {
+            System.arraycopy(resultA.get(i), 0, result, i * coeffCount, coeffCount);
+        }
+        return result;
+    }
+    
+    @Override
+    public long getDeformationCount() {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
+        return 1 + 2 * coeffCount;
+    }
 
     @Override
     protected RealMatrix generateHessianMatrix(final AbstractSubset subset, final double step) {
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
         final double[][] data = new double[coeffCount][coeffCount];
 
         final double[] deformation = extractDeformation(subset);

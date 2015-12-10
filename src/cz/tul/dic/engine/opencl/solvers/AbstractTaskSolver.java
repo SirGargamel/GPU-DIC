@@ -50,6 +50,7 @@ public abstract class AbstractTaskSolver extends Observable {
     boolean stop;
     // data storage
     protected FullTask fullTask;
+    protected DeformationOrder deformationOrder;
     protected Map<AbstractSubset, CorrelationResult> results;
     protected Map<AbstractSubset, double[]> deformations;
     protected Map<AbstractSubset, Integer> weights;
@@ -92,6 +93,7 @@ public abstract class AbstractTaskSolver extends Observable {
         computationInfo.clear();
 
         this.fullTask = fullTask;
+        deformationOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
 
         final List<AbstractSubset> subsets = fullTask.getSubsets();
         final int subsetCount = subsets.size();
@@ -104,7 +106,7 @@ public abstract class AbstractTaskSolver extends Observable {
             weights.put(fullTask.getSubsets().get(i), fullTask.getSubsetWeights().get(i));
         }
 
-        kernel = Kernel.createInstance(kernelType, memManager);
+        kernel = Kernel.createInstance(kernelType, memManager, getDeformationCount());
         Logger.trace("Kernel prepared - {}", kernel);
 
         this.subsetSize = subsetSize;
@@ -128,6 +130,8 @@ public abstract class AbstractTaskSolver extends Observable {
             final boolean usesWeights) throws ComputationException;
 
     protected abstract boolean needsBestResult();
+    
+    public abstract long getDeformationCount();
 
     protected synchronized List<CorrelationResult> computeTask(
             final Kernel kernel, ComputationTask computationTask) throws ComputationException {
