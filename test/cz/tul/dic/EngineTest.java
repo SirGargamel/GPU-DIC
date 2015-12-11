@@ -74,7 +74,7 @@ public class EngineTest {
     private static final String[] DEF_ZERO_FIRST_FILES = new String[]{
         "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};
     private static final double[] DEF_LARGE = new double[]{
-        -5, 5, 0.5, -5, 5, 0.25,
+        -5, 5, 0.5, -5, 5, 0.5,
         -1.0, 1.0, 0.1, -1.0, 1.0, 0.2, -1.0, 1.0, 0.1, -1.0, 1.0, 0.1};
 
     @Test
@@ -367,9 +367,10 @@ public class EngineTest {
 
     @Test
     public void testEngineMultiSubsetLarge() throws IOException, URISyntaxException, ComputationException {
+        final String in = DEF_ZERO_FILES[3];
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
-        input.add(Paths.get(getClass().getResource("/resources/engine/" + DEF_ZERO_FIRST_FILES[0] + ".bmp").toURI()).toFile());
+        input.add(Paths.get(getClass().getResource("/resources/engine/" + in + ".bmp").toURI()).toFile());
 
         final TaskContainer tc = TaskContainer.initTaskContainer(input);
 
@@ -395,6 +396,8 @@ public class EngineTest {
         final List<AbstractSubset> roiSubsets = new ArrayList<>(4);
         roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
         roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
+        roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
+        roiSubsets.add(new SquareSubset2D(ss, roi.getX1() + ss, roi.getY1() + ss));
         subsets.put(roi, roiSubsets);
 
         final List<Integer> weights = Collections.nCopies(roiSubsets.size(), TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
@@ -413,7 +416,7 @@ public class EngineTest {
         tc.setResult(ROUND, ROUND + 1, new Result(subsets, results, displacement));
 
         Assert.assertEquals(roiSubsets.size(), tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi).size());
-        Assert.assertNull(checkTask(tc, DEF_ZERO_FIRST_FILES[0]));
+        Assert.assertNull(checkTask(tc, in));
 
         final List<CorrelationResult> computedResults = tc.getResult(ROUND, ROUND + 1).getCorrelations().get(roi);
         CorrelationResult cr1, cr2;
