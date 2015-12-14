@@ -11,8 +11,10 @@ import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.CLProgram;
-import com.jogamp.opencl.util.Filter;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -20,64 +22,55 @@ import org.pmw.tinylog.Logger;
  * @author Petr Jecmen
  */
 public final class DeviceManager {
+    
+    private static CLDevice DEVICE;
+    private static CLContext CONTEXT;
+    private static CLCommandQueue QUEUE;
 
-    private static final CLDevice.Type DEVICE_TYPE = CLDevice.Type.GPU;
-    private static CLPlatform platform;
-    private static CLDevice device;
-    private static CLContext context;
-    private static CLCommandQueue queue;
-
-    static {
-        initContext();
-
+    static {        
         Runtime.getRuntime().addShutdownHook(
                 new Thread(() -> clearMemory()
                 ));
     }
 
+    public static List<CLDevice> listAllDevices() {
+        final List<CLDevice> result = new LinkedList<>();
+        for (CLPlatform plf : CLPlatform.listCLPlatforms()) {
+            result.addAll(Arrays.asList(plf.listCLDevices()));
+        }
+        return result;
+    }
+
     private DeviceManager() {
     }
 
-    private static void initContext() {
+    public static void initContext(final CLDevice device) {
         clearMemory();
 
-        @SuppressWarnings("unchecked")
-        final CLPlatform tmpP = CLPlatform.getDefault((Filter<CLPlatform>) (CLPlatform i) -> i.getMaxFlopsDevice(CLDevice.Type.GPU) != null && i.listCLDevices(CLDevice.Type.CPU).length == 0);
-        if (tmpP == null) {
-            platform = CLPlatform.getDefault();
-        } else {
-            platform = tmpP;
-        }
-
-        final CLDevice tmpD = platform.getMaxFlopsDevice(DEVICE_TYPE);
-        if (tmpD == null) {
-            device = platform.getMaxFlopsDevice();
-        } else {
-            device = tmpD;
-        }
+        DEVICE = device;        
         Logger.debug("Using " + device);
 
-        context = CLContext.create(device);
-        context.addCLErrorHandler((String string, ByteBuffer bb, long l)
+        CONTEXT = CLContext.create(device);
+        CONTEXT.addCLErrorHandler((String string, ByteBuffer bb, long l)
                 -> Logger.error("CLError - " + string)
         );
 
-        queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
+        QUEUE = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
     }
 
     public static CLContext getContext() {
-        return context;
+        return CONTEXT;
     }
 
     public static void clearMemory() {
-        if (context != null) {
+        if (CONTEXT != null) {
             Logger.warn("Reseting context memory.");
-            for (CLMemory mem : context.getMemoryObjects()) {
+            for (CLMemory mem : CONTEXT.getMemoryObjects()) {
                 if (mem != null && !mem.isReleased()) {
                     mem.release();
                 }
             }
-            for (CLProgram mem : context.getPrograms()) {
+            for (CLProgram mem : CONTEXT.getPrograms()) {
                 if (mem != null && !mem.isReleased()) {
                     mem.release();
                 }
@@ -86,11 +79,11 @@ public final class DeviceManager {
     }
 
     public static CLDevice getDevice() {
-        return device;
+        return DEVICE;
     }
 
     public static CLCommandQueue getQueue() {
-        return queue;
+        return QUEUE;
     }
 
 }

@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.kernel;
 
+import com.jogamp.opencl.CLDevice;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.subset.AbstractSubset;
@@ -13,6 +14,7 @@ import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
+import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo.Type;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
@@ -20,9 +22,13 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 import org.pmw.tinylog.Logger;
@@ -33,77 +39,174 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelManager {
 
-    private static final String PREF_TIME_CREATION = "time.test";
-    private static final KernelInfo DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
+    private static final KernelInfo DEFAULT_KERNEL;
     private static final List<KernelInfo> UNSUPPORTED_KERNELS;
-    private static final Map<Long, Map<Long, Map<KernelInfo, Long>>> TIME_DATA;
-    private static final double[][] TEST_LIMITS = new double[][]{
-        {-10.0, 10.0, 1, -10, 10, 1}, // BruteForce - 11*11
-        {-1, 1, 1, 0, 0, 0}, // SPGD - 3
-        {-3, 3, 1, -1, 1, 1}, {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -2, 2, 1}, // NRC - 21, 160
-        {-2, 2, 1, 0, 0, 0}, {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -1, 1, 1, -1, 1, 1}, // NRCHE - 5, 13
-        {-1, 1, 1, -1, 1, 1}, {0, 1, 1, 0, 1, 1, -3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // NRF - 6, 28
-        {-3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // NRFHE - 3, 7
+    private static final String PERFORMANCE_TEST_TIME = "performance.time";
+    private static final String PERFORMANCE_DEVICE = "performance.device";    
+    private static final Map<Long, Map<Long, Map<KernelInfo, Long>>> PERFORMANCE_TIME_DATA;
+    private static final double[][] PERFORMANCE_TEST_LIMITS = new double[][]{
+        // deformation counts - BruteForce - 441, SPGD - 3, NRC - 21, 160, NRCHE - 5, 13, NRF - 6, 28, NRFHE - 3, 7        
+        {-1, 1, 1, 0, 0, 0}, // 3
+        {-3, 3, 1, -1, 1, 1}, // 21
+        {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -2, 2, 1}, // 160
+        {-10.0, 10.0, 1, -10, 10, 1}, // 441
     };
-    private static final int[] TEST_SUBSET_COUNT = new int[]{1, 32};
-    private static final int TEST_SUBSET_SIZE = 10;
+    private static final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{1, 8};
+    private static final int PERFORMANCE_TEST_SUBSET_SIZE = 10;
+    private static final int PERFORMANCE_TEST_BLANK_COUNT = 10;
     private static boolean inited;
 
     static {
         inited = false;
 
+        DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
+
         UNSUPPORTED_KERNELS = new ArrayList<>(2);
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
 
-        final long lastCheck = Preferences.userNodeForPackage(KernelManager.class).getLong(PREF_TIME_CREATION, 0);
-        final long current = System.currentTimeMillis();
-        final long diff = current - lastCheck;
-        if (TimeUnit.MILLISECONDS.toDays(diff) == 0) {
-            inited = TimeDataStorage.getInstance().loadTimeDataFromFile();
+        final long lastCheck = Preferences.userNodeForPackage(KernelManager.class).getLong(PERFORMANCE_TEST_TIME, 0);
+        final long currentTime = System.currentTimeMillis();
+        final long diff = currentTime - lastCheck;
+        if (TimeUnit.MILLISECONDS.toDays(diff) < 7) {
+            loadPerformanceAndPrepareDevice();
         }
-        
-        if (!inited) {
-            Logger.debug("Initializing best kernel.");
-            final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
-            solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
-            solver.setTaskSplitVariant(TaskSplitMethod.NONE, null);
 
-            try {
-                for (KernelInfo ki : generateKernelInfos()) {
-                    testKernelInfo(solver, ki);
+        if (!inited) {
+            runDevicePerformanceTest(currentTime);
+        }
+
+        PERFORMANCE_TIME_DATA = TimeDataStorage.getInstance().getFullDataBySize();
+    }
+
+    private static void loadPerformanceAndPrepareDevice() {
+        inited = TimeDataStorage.getInstance().loadTimeDataFromFile();
+        if (inited) {
+            final String deviceName = Preferences.userNodeForPackage(KernelManager.class).get(PERFORMANCE_DEVICE, null);
+            if (deviceName == null) {
+                inited = false;
+            } else {
+                boolean deviceFound = false;
+                for (CLDevice device : DeviceManager.listAllDevices()) {
+                    if (device.getName().trim().equals(deviceName)) {
+                        DeviceManager.initContext(device);
+                        deviceFound = true;
+                        break;
+                    }
                 }
+                inited = deviceFound;
+            }
+        }
+    }
+
+    private static void runDevicePerformanceTest(final long current) throws RuntimeException {
+        Logger.debug("Initializing best kernel.");
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
+        solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
+        solver.setTaskSplitVariant(TaskSplitMethod.NONE, null);
+
+        final List<CLDevice> devices = DeviceManager.listAllDevices();
+        final SortedMap<Map<KernelInfo, Long>, CLDevice> times = new TreeMap<>((Map<KernelInfo, Long> o1, Map<KernelInfo, Long> o2) -> {
+            if (o1.isEmpty()) {
+                return 1;
+            }
+            if (o2.isEmpty()) {
+                return -1;
+            }
+
+            int countO1 = 0;
+            int countO2 = 0;
+            for (KernelInfo ki : o1.keySet()) {
+                if (o1.get(ki) < o2.get(ki)) {
+                    countO1++;
+                } else if (o1.get(ki) > o2.get(ki)) {
+                    countO2++;
+                }
+            }
+
+            return Long.compare(countO2, countO1);
+        });
+
+        try {
+            final Random rnd = new Random();
+            final List<KernelInfo> infos = generateKernelInfos();
+
+            Map<KernelInfo, Long> timeTable;
+            long time;
+            for (CLDevice device : devices) {
+                TimeDataStorage.getInstance().reset();
+                DeviceManager.initContext(device);
+
+                // run blank test for device preparation
+                for (int i = 0; i < PERFORMANCE_TEST_BLANK_COUNT; i++) {
+                    testKernelInfo(solver, infos.get(rnd.nextInt(infos.size())));
+                }
+
+                // commence testing
+                time = System.currentTimeMillis();
+                timeTable = runDeviceTest(solver);
+                times.put(timeTable, device);
+
+                time = System.currentTimeMillis() - time;
+                System.out.println("Test for " + device.toString() + " took " + time + "ms.");
+            }
+        } catch (ComputationException ex) {
+            Logger.debug(ex);
+            throw new RuntimeException("Error initializing OpenCL.", ex);
+        }
+        solver.endTask();
+        // pick best device
+        final CLDevice bestDevice = times.values().toArray(new CLDevice[0])[0];
+
+        // store results
+        if (bestDevice != devices.get(devices.size() - 1)) {
+            // run test again if the device was not the last on tested
+            try {
+                TimeDataStorage.getInstance().reset();
+                DeviceManager.initContext(bestDevice);
+                runDeviceTest(solver);
             } catch (ComputationException ex) {
                 Logger.debug(ex);
-                throw new RuntimeException("Error initializing OpenCL.", ex);
+                throw new RuntimeException("Error running retest for best device.", ex);
             }
-            solver.endTask();
-            TimeDataStorage.getInstance().storeTimeDataToFile();
-            Preferences.userNodeForPackage(KernelManager.class).putLong(PREF_TIME_CREATION, current);
-            Logger.debug("Kernel performance assesment completed.");
+        }
+        TimeDataStorage.getInstance().storeTimeDataToFile();
+        Preferences.userNodeForPackage(KernelManager.class).putLong(PERFORMANCE_TEST_TIME, current);
+        Preferences.userNodeForPackage(KernelManager.class).put(PERFORMANCE_DEVICE, bestDevice.getName().trim());
+        Logger.debug("Kernel performance assesment completed.");
 
-            inited = true;
+        inited = true;
+    }
+
+    private static Map<KernelInfo, Long> runDeviceTest(final AbstractTaskSolver solver) throws ComputationException {
+        final List<KernelInfo> infos = generateKernelInfos();
+        final Map<KernelInfo, Long> result = new HashMap<>(infos.size());
+        long time;
+        for (KernelInfo ki : infos) {
+            time = System.nanoTime();
+            testKernelInfo(solver, ki);
+            result.put(ki, System.nanoTime() - time);
         }
 
-        TIME_DATA = TimeDataStorage.getInstance().getFullDataBySize();
+        return result;
     }
 
     private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo) throws ComputationException {
         solver.setKernel(kernelInfo);
         final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
-        final AbstractSubset subset = new SquareSubset2D(TEST_SUBSET_SIZE, 15, 15);
+        final AbstractSubset subset = new SquareSubset2D(PERFORMANCE_TEST_SUBSET_SIZE, 15, 15);
 
         List<double[]> deformationLimits;
         List<AbstractSubset> subsets;
         List<Integer> weights;
-        for (int sc : TEST_SUBSET_COUNT) {            
-            for (double[] limits : TEST_LIMITS) {
+        for (int sc : PERFORMANCE_TEST_SUBSET_COUNT) {
+            for (double[] limits : PERFORMANCE_TEST_LIMITS) {
                 subsets = Collections.nCopies(sc, subset);
                 deformationLimits = Collections.nCopies(sc, limits);
-                weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(TEST_SUBSET_SIZE, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
+                weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(PERFORMANCE_TEST_SUBSET_SIZE, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
                 solver.solve(
                         new FullTask(img, img, subsets, weights, deformationLimits),
-                        TEST_SUBSET_SIZE);
+                        PERFORMANCE_TEST_SUBSET_SIZE);
             }
         }
     }
@@ -115,7 +218,7 @@ public class KernelManager {
         }
 
         final long subsetCount = 1;
-        final Map<Long, Map<KernelInfo, Long>> data = TIME_DATA.get(subsetCount);
+        final Map<Long, Map<KernelInfo, Long>> data = PERFORMANCE_TIME_DATA.get(subsetCount);
         long defCount = 1;
         for (Long dc : data.keySet()) {
             if (dc < deformationCount) {

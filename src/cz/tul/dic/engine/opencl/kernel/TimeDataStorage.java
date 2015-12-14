@@ -76,11 +76,11 @@ public class TimeDataStorage implements Serializable {
         if (mB2 == null) {
             mB2 = new HashMap<>();
             mB.put(workSizeD, mB2);
-        }
-        
+        }        
         mB2.put(kernel, time);
     }
 
+    @SuppressWarnings("unchecked")
     public boolean loadTimeDataFromFile() {
         boolean result = false;
         try (final ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_STORE_A))) {
@@ -109,6 +109,11 @@ public class TimeDataStorage implements Serializable {
         } catch (IOException ex) {
             Logger.error(ex, "Error storing time data.");
         }
+    }
+    
+    public void reset() {        
+        timeDataA = new HashMap<>();        
+        timeDataB = new TreeMap<>();
     }
 
 }
