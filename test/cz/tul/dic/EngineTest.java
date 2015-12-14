@@ -346,12 +346,11 @@ public class EngineTest {
 
         final HashMap<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
-                solver.solve(
-                        new FullTask(
-                                tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                                roiSubsets, weights,
-                                generateDeformations(tc.getDeformationLimits(ROUND, roi), roiSubsets.size())),
-                        tc.getSubsetSize(ROUND, roi)));
+                solver.solve(new FullTask(
+                        tc.getImage(ROUND), tc.getImage(ROUND + 1),
+                        roiSubsets, weights,
+                        generateDeformations(tc.getDeformationLimits(ROUND, roi), roiSubsets.size()))
+                ));
         solver.endTask();
 
         final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, subsets, tc, ROUND);
@@ -404,12 +403,10 @@ public class EngineTest {
 
         final HashMap<AbstractROI, List<CorrelationResult>> results = new HashMap<>(1);
         results.put(roi,
-                solver.solve(
-                        new FullTask(
-                                tc.getImage(ROUND), tc.getImage(ROUND + 1),
-                                roiSubsets, weights,
-                                generateDeformations(tc.getDeformationLimits(ROUND, roi), roiSubsets.size())),
-                        tc.getSubsetSize(ROUND, roi)));
+                solver.solve(new FullTask(
+                        tc.getImage(ROUND), tc.getImage(ROUND + 1),
+                        roiSubsets, weights,
+                        generateDeformations(tc.getDeformationLimits(ROUND, roi), roiSubsets.size()))));
         solver.endTask();
 
         final DisplacementResult displacement = DisplacementCalculator.computeDisplacement(results, subsets, tc, ROUND);

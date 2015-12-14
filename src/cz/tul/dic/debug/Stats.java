@@ -16,7 +16,7 @@ import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.cluster.Analyzer2D;
 import cz.tul.dic.engine.cluster.Analyzer2D.Analayzer2DData;
 import cz.tul.dic.engine.displacement.MaxAndWeightedAverage;
-import cz.tul.dic.engine.opencl.kernel.Kernel;
+import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
@@ -65,7 +65,7 @@ public class Stats implements IGPUResultsReceiver {
             // do nothing, external stats not found
         }
         if (INSTANCE.get(Types.GPU_RESULTS)) {
-            Kernel.registerListener(INSTANCE);
+            AbstractTaskSolver.registerGPUDataListener(INSTANCE);
         }
     }
 

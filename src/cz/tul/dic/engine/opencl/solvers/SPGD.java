@@ -14,7 +14,6 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.opencl.kernel.Kernel;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -63,7 +62,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         notifyProgress(subsetCount, subsetCount);
 
         // initial data for solver
-        Kernel.registerListener(this);
+        registerGPUDataListener(this);
         prepareDeformations(order);
         prepareWeights(usesWeights);
         final List<double[]> localDeformations = new ArrayList<>(deformations.values());
@@ -80,7 +79,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
             }
         }
 
-        Kernel.deregisterListener(this);
+        deregisterGPUDataListener(this);
 
         return new ArrayList<>(results.values());
     }

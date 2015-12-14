@@ -15,7 +15,6 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.opencl.kernel.Kernel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -48,7 +47,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     private static final double STEP_INITIAL = 1;
     private static final double STEP_FIRST = 0.01;
     private static final double STEP_SECOND = 0.001;
-    protected static final int STEP_WEIGHT = 1;    
+    protected static final int STEP_WEIGHT = 1;
     private final Set<AbstractSubset> smallerStep;
 
     public NewtonRaphson() {
@@ -63,7 +62,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             return new ArrayList<>(0);
         }
 
-        final int subsetCount = subsetsToCompute.size();        
+        final int subsetCount = subsetsToCompute.size();
 
         smallerStep.clear();
 
@@ -75,7 +74,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
         prepareDeformations();
 
         // initial data for NR solver
-        Kernel.registerListener(this);
+        registerGPUDataListener(this);
         computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, fullTask.getSubsetWeights(), new ArrayList<>(deformations.values()), deformationOrder, false));
 
         for (int i = 0; i < LIMITS_ITERATIONS; i++) {
@@ -88,7 +87,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             }
         }
 
-        Kernel.deregisterListener(this);
+        deregisterGPUDataListener(this);
 
         return new ArrayList<>(results.values());
     }
@@ -113,8 +112,8 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             temp[DeformationLimit.VSTEP] = STEP_INITIAL;
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> localResults = computeTask(kernel,
-                new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), fullTask.getSubsetWeights(), zeroOrderLimits, DeformationOrder.ZERO, true));
+        final List<CorrelationResult> localResults = new BruteForce().solve(
+                new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), fullTask.getSubsetWeights(), zeroOrderLimits));
         CorrelationResult paddedResult, currentResult;
         for (int i = 0; i < subsetCount; i++) {
             // set the length of the result to match correlation degree
@@ -195,7 +194,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
     protected abstract RealMatrix generateHessianMatrix(final AbstractSubset subset, final double step);
 
-    protected abstract double[] generateDeformations(final double[] solution, final double step);    
+    protected abstract double[] generateDeformations(final double[] solution, final double step);
 
     ///// MISC
     @Override
@@ -205,7 +204,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
 
     @Override
     protected boolean needsBestResult() {
-        return true;
+        return false;
     }
 
     private void notifyProgress(final int subsetToCompute, final int subsetCount) {

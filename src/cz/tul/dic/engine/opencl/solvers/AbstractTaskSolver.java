@@ -20,6 +20,7 @@ import cz.tul.dic.engine.opencl.kernel.Kernel;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -58,6 +60,11 @@ public abstract class AbstractTaskSolver extends Observable {
     protected double[] gpuData;
     // logging
     private final Map<AbstractSubset, ComputationInfo> computationInfo;
+    private static final List<IGPUResultsReceiver> LISTENERS;
+
+    static {
+        LISTENERS = new LinkedList<>();
+    }
 
     protected AbstractTaskSolver() {
         memManager = AbstractOpenCLMemoryManager.getInstance();
@@ -88,11 +95,12 @@ public abstract class AbstractTaskSolver extends Observable {
     }
 
     public synchronized List<CorrelationResult> solve(
-            final FullTask fullTask, int subsetSize) throws ComputationException {
+            final FullTask fullTask) throws ComputationException {
         stop = false;
         computationInfo.clear();
 
         this.fullTask = fullTask;
+
         deformationOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
 
         final List<AbstractSubset> subsets = fullTask.getSubsets();
@@ -109,7 +117,7 @@ public abstract class AbstractTaskSolver extends Observable {
         kernel = Kernel.createInstance(kernelType, memManager, getDeformationCount());
         Logger.trace("Kernel prepared - {}", kernel);
 
-        this.subsetSize = subsetSize;
+        this.subsetSize = fullTask.getSubsets().get(0).getSize();
         final boolean usesWeights = kernel.getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD;
 
         long time = System.nanoTime();
@@ -130,7 +138,7 @@ public abstract class AbstractTaskSolver extends Observable {
             final boolean usesWeights) throws ComputationException;
 
     protected abstract boolean needsBestResult();
-    
+
     public abstract long getDeformationCount();
 
     protected synchronized List<CorrelationResult> computeTask(
@@ -140,9 +148,9 @@ public abstract class AbstractTaskSolver extends Observable {
             taskResults.add(null);
         }
 
-        try {            
+        try {
             computationTask = adjustLimitsUse(kernel, computationTask);
-            
+
             kernel.prepareKernel(subsetSize, computationTask.getOrder(), computationTask.usesLimits(), interpolation);
 
             final AbstractTaskSplitter ts = AbstractTaskSplitter.prepareSplitter(computationTask, taskSplitVariant, taskSplitValue);
@@ -164,8 +172,8 @@ public abstract class AbstractTaskSolver extends Observable {
 
         return taskResults;
     }
-    
-    private ComputationTask adjustLimitsUse(final Kernel kernel, final ComputationTask task) {                
+
+    private ComputationTask adjustLimitsUse(final Kernel kernel, final ComputationTask task) {
         // ct coeffs - no change        
         // ct limits - 
         //      pick type according to kernel
@@ -177,11 +185,13 @@ public abstract class AbstractTaskSolver extends Observable {
             return new ComputationTask(task.getImageA(), task.getImageB(), task.getSubsets(), task.getSubsetWeights(), deformationsFromLimits, order, false);
         } else {
             return task;
-        }        
+        }
     }
 
     private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> results, final Kernel kernel, final ComputationTask fullTask) throws ComputationException {
+        final boolean needsBestResult = needsBestResult();
         boolean finished = false;
+        List<double[]> gpuDataList = new LinkedList<>();
         while (!finished) {
             try {
                 ComputationTask ct;
@@ -190,19 +200,42 @@ public abstract class AbstractTaskSolver extends Observable {
                         return;
                     }
                     ct = ts.next();
-                    if (needsBestResult()) {
-                        ct.setResults(kernel.compute(ct, true));
+                    if (needsBestResult) {
+                        ct.setResults(kernel.computeFindBest(ct));
                         // pick best results for this computation task and discard ct data                   
                         pickBestResultsForTask(ct, results, fullTask.getSubsets());
                     } else {
                         // TODO join gpuData in case of split computation and no best results
-                        kernel.compute(ct, false);
-                    }                    
+                        gpuDataList.add(kernel.computeRaw(ct));
+                    }
                 }
                 finished = true;
             } catch (ComputationException ex) {
                 memManager.clearMemory();
+                gpuDataList.clear();
                 throw ex;
+            }
+        }
+        if (!gpuDataList.isEmpty() && !LISTENERS.isEmpty()) {
+            if (gpuDataList.size() == 1) {
+                gpuData = gpuDataList.get(0);
+            } else {
+                int length = 0;
+                for (double[] dA : gpuDataList) {
+                    length += dA.length;
+                }
+                gpuData = new double[length];
+                int base = 0;
+                int l;
+                for (double[] dA : gpuDataList) {
+                    l = dA.length;
+                    System.arraycopy(dA, 0, gpuData, base, l);
+                    base += l;
+                }
+            }
+
+            for (IGPUResultsReceiver rr : LISTENERS) {
+                rr.dumpGpuResults(gpuData, fullTask.getSubsets(), fullTask.getDeformations());
             }
         }
     }
@@ -274,6 +307,16 @@ public abstract class AbstractTaskSolver extends Observable {
         }
         sb.setLength(Math.max(0, sb.length() - "\n".length()));
         return sb.toString();
+    }
+
+    public static void registerGPUDataListener(final IGPUResultsReceiver listener) {
+        LISTENERS.add(listener);
+        Logger.trace("Registering {} for GPU results.", listener);
+    }
+
+    public static void deregisterGPUDataListener(final IGPUResultsReceiver listener) {
+        LISTENERS.remove(listener);
+        Logger.trace("Deregistering {} for GPU results.", listener);
     }
 
 }

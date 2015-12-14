@@ -42,7 +42,7 @@ public class KernelManager {
     private static final KernelInfo DEFAULT_KERNEL;
     private static final List<KernelInfo> UNSUPPORTED_KERNELS;
     private static final String PERFORMANCE_TEST_TIME = "performance.time";
-    private static final String PERFORMANCE_DEVICE = "performance.device";    
+    private static final String PERFORMANCE_DEVICE = "performance.device";
     private static final Map<Long, Map<Long, Map<KernelInfo, Long>>> PERFORMANCE_TIME_DATA;
     private static final double[][] PERFORMANCE_TEST_LIMITS = new double[][]{
         // deformation counts - BruteForce - 441, SPGD - 3, NRC - 21, 160, NRCHE - 5, 13, NRF - 6, 28, NRFHE - 3, 7        
@@ -204,9 +204,8 @@ public class KernelManager {
                 subsets = Collections.nCopies(sc, subset);
                 deformationLimits = Collections.nCopies(sc, limits);
                 weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(PERFORMANCE_TEST_SUBSET_SIZE, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
-                solver.solve(
-                        new FullTask(img, img, subsets, weights, deformationLimits),
-                        PERFORMANCE_TEST_SUBSET_SIZE);
+                solver.solve(new FullTask(
+                        img, img, subsets, weights, deformationLimits));
             }
         }
     }

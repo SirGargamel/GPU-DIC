@@ -191,12 +191,10 @@ public final class Engine extends Observable implements Observer {
             notifyObservers(AbstractTaskSolver.class);
             correlations.put(
                     roi,
-                    solver.solve(
-                            new FullTask(
-                                    in, out,
-                                    subsetList, subsetWeights,
-                                    generateDeformations(task.getDeformationLimits(roundFrom, roi), subsets.get(roi).size())),
-                            subsetSize));
+                    solver.solve(new FullTask(
+                            in, out,
+                            subsetList, subsetWeights,
+                            generateDeformations(task.getDeformationLimits(roundFrom, roi), subsets.get(roi).size()))));
         }
 
         setChanged();

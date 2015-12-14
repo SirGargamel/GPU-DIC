@@ -21,11 +21,11 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.debug.IGPUResultsReceiver;
-import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.Interpolation;
+import cz.tul.dic.debug.Stats;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,8 +49,7 @@ public abstract class Kernel {
     private static final String KERNEL_EXTENSION = ".cl";
     private static final String KERNEL_REDUCE = "reduce";
     private static final String KERNEL_FIND_POS = "findPos";
-    private static final String KERNEL_DIC_NAME = "DIC";
-    private static final List<IGPUResultsReceiver> LISTENERS;
+    private static final String KERNEL_DIC_NAME = "DIC";    
     protected final CLContext context;
     protected final CLCommandQueue queue;
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
@@ -59,9 +58,7 @@ public abstract class Kernel {
     private final Set<CLResource> clMem;
     private final AbstractOpenCLMemoryManager memManager;
 
-    static {
-        LISTENERS = new LinkedList<>();
-    }
+    
 
     protected Kernel(final KernelInfo info, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
         this.kernelInfo = info;
@@ -175,7 +172,7 @@ public abstract class Kernel {
         }
     }
 
-    public List<CorrelationResult> compute(final ComputationTask task, boolean findBest) throws ComputationException {
+    public List<CorrelationResult> computeFindBest(final ComputationTask task) throws ComputationException {
         if (task.getSubsets().isEmpty()) {
             Logger.warn("Empty subsets for computation.");
             return new ArrayList<>(0);
@@ -194,25 +191,51 @@ public abstract class Kernel {
                     task.getImageA().getWidth(), subsetSize, subsetCount);
             queue.flush();
 
-            if (!LISTENERS.isEmpty()) {
+            if (Stats.getInstance().isGpuDebugEnabled()) {
                 final CLBuffer<FloatBuffer> clResults = clData.getResults();
                 queue.putReadBuffer(clResults, true);
-                final double[] results = readResultBuffer(clResults.getBuffer());
-                for (IGPUResultsReceiver rr : LISTENERS) {
-                    rr.dumpGpuResults(results, task.getSubsets(), task.getDeformations());
-                }
+                final double[] results = readResultBuffer(clResults.getBuffer());                
+                Stats.getInstance().dumpGpuResults(results, task.getSubsets(), task.getDeformations());
             }
 
-            if (findBest || Stats.getInstance().isGpuDebugEnabled()) {
-                final CLBuffer<FloatBuffer> clResults = clData.getResults();
-                final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, subsetCount, (int) maxDeformationCount);
-                final int[] positions = findPos(clResults, subsetCount, (int) maxDeformationCount, maxValuesCl);
+            final CLBuffer<FloatBuffer> clResults = clData.getResults();
+            final CLBuffer<FloatBuffer> maxValuesCl = findMax(clResults, subsetCount, (int) maxDeformationCount);
+            final int[] positions = findPos(clResults, subsetCount, (int) maxDeformationCount, maxValuesCl);
 
-                result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, task.getDeformations(), task.getOrder(), task.usesLimits());
-            } else {
-                result = null;
-            }
+            result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, task.getDeformations(), task.getOrder(), task.usesLimits());
             return result;
+        } catch (CLException ex) {
+            if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
+                throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex);
+            } else {
+                throw ex;
+            }
+        } finally {
+            memManager.unlockData();
+        }
+    }
+
+    public double[] computeRaw(final ComputationTask task) throws ComputationException {
+        if (task.getSubsets().isEmpty()) {
+            Logger.warn("Empty subsets for computation.");
+            return new double[0];
+        }
+        final int subsetCount = task.getSubsets().size();
+        final int subsetSize = task.getSubsets().get(0).getSize();
+
+        try {
+            memManager.assignData(task, this);
+            final OpenCLDataPackage clData = memManager.getData();
+            final long maxDeformationCount = memManager.getMaxDeformationCount();
+
+            runKernel(clData,
+                    maxDeformationCount,
+                    task.getImageA().getWidth(), subsetSize, subsetCount);
+            queue.flush();
+
+            final CLBuffer<FloatBuffer> clResults = clData.getResults();
+            queue.putReadBuffer(clResults, true);            
+            return readResultBuffer(clResults.getBuffer());
         } catch (CLException ex) {
             if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
                 throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex);
@@ -378,17 +401,7 @@ public abstract class Kernel {
             result = globalSize + groupSize - r;
         }
         return result;
-    }
-
-    public static void registerListener(final IGPUResultsReceiver listener) {
-        LISTENERS.add(listener);
-        Logger.trace("Registering {} for GPU results.", listener);
-    }
-
-    public static void deregisterListener(final IGPUResultsReceiver listener) {
-        LISTENERS.remove(listener);
-        Logger.trace("Deregistering {} for GPU results.", listener);
-    }
+    }    
 
     public KernelInfo getKernelInfo() {
         return kernelInfo;
