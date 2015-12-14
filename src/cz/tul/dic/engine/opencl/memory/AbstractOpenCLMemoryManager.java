@@ -40,8 +40,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Petr Ječmen
  */
 public abstract class AbstractOpenCLMemoryManager {
-
-    private static final CLImageFormat IMAGE_FORMAT;
+    
+    private static final CLImageFormat.ChannelOrder IMAGE_ORDER = CLImageFormat.ChannelOrder.R;
+    private static final CLImageFormat.ChannelType IMAGE_TYPE = CLImageFormat.ChannelType.UNSIGNED_INT8;
     private static final Map<Type, AbstractOpenCLMemoryManager> INSTANCES;
     protected long maxDeformationCount;
     // OpenCL entities
@@ -60,8 +61,6 @@ public abstract class AbstractOpenCLMemoryManager {
     static {
         DeviceManager.getContext();
         DeviceManager.clearMemory();
-
-        IMAGE_FORMAT = new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelType.UNSIGNED_INT8);
 
         INSTANCES = new EnumMap<>(Type.class);
         INSTANCES.put(Type.STATIC, new StaticMemoryManager());
@@ -99,7 +98,7 @@ public abstract class AbstractOpenCLMemoryManager {
         return context.createImage2d(
                 Buffers.newDirectByteBuffer(image.toFiltered()),
                 image.getWidth(), image.getHeight(),
-                IMAGE_FORMAT, CLMemory.Mem.READ_ONLY);
+                new CLImageFormat(IMAGE_ORDER, IMAGE_TYPE), CLMemory.Mem.READ_ONLY);
     }
 
     protected CLBuffer<ByteBuffer> generateImageArray(final Image image) {
