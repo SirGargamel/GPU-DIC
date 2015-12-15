@@ -41,6 +41,7 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class AbstractTaskSolver extends Observable {
 
+    private static final Map<Class, Solver> SOLVERS;
     final AbstractOpenCLMemoryManager memManager;
     // dynamic
     KernelInfo kernelType;
@@ -51,7 +52,7 @@ public abstract class AbstractTaskSolver extends Observable {
     Object taskSplitValue;
     boolean stop;
     // data storage
-    protected FullTask fullTask;    
+    protected FullTask fullTask;
     protected Map<AbstractSubset, CorrelationResult> results;
     protected Map<AbstractSubset, double[]> deformations;
     protected Map<AbstractSubset, Integer> weights;
@@ -63,12 +64,23 @@ public abstract class AbstractTaskSolver extends Observable {
 
     static {
         LISTENERS = new LinkedList<>();
+        
+        SOLVERS = new HashMap<>();
+        SOLVERS.put(BruteForce.class, Solver.BRUTE_FORCE);
+        SOLVERS.put(CoarseFine.class, Solver.COARSE_FINE);
+        SOLVERS.put(SPGD.class, Solver.SPGD);
+        SOLVERS.put(NewtonRaphsonCentral.class, Solver.NEWTON_RHAPSON_CENTRAL);
+        SOLVERS.put(NewtonRaphsonCentralHE.class, Solver.NEWTON_RHAPSON_CENTRAL_HE);
+        SOLVERS.put(NewtonRaphsonForward.class, Solver.NEWTON_RHAPSON_FORWARD);
+        SOLVERS.put(NewtonRaphsonForwardHE.class, Solver.NEWTON_RHAPSON_FORWARD_HE);
     }
 
     protected AbstractTaskSolver() {
         memManager = AbstractOpenCLMemoryManager.getInstance();
 
-        kernelType = KernelManager.getBestKernel();
+        final Solver solver = SOLVERS.get(this.getClass());
+        kernelType = KernelManager.getBestKernel(solver.supportsWeighedCorrelation());
+        
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
         taskSplitVariant = TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD;
         taskSplitValue = null;
@@ -83,7 +95,7 @@ public abstract class AbstractTaskSolver extends Observable {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.warn("Error instantiating class {}, using default correlation calculator.", type);
             Logger.error(ex);
-            return new NewtonRaphsonCentral();
+            return new CoarseFine();
         }
     }
 
@@ -98,14 +110,14 @@ public abstract class AbstractTaskSolver extends Observable {
         stop = false;
         computationInfo.clear();
 
-        this.fullTask = fullTask;        
+        this.fullTask = fullTask;
 
-        final List<AbstractSubset> subsets = fullTask.getSubsets();        
+        final List<AbstractSubset> subsets = fullTask.getSubsets();
         if (subsets.isEmpty()) {
             return new ArrayList<>(0);
         }
         final int subsetCount = subsets.size();
-        
+
         results = new LinkedHashMap<>(subsetCount);
         deformations = new ConcurrentHashMap<>(subsetCount);
         subsetsToCompute = Collections.synchronizedList(new ArrayList<>(subsets));
@@ -113,7 +125,7 @@ public abstract class AbstractTaskSolver extends Observable {
         weights = new ConcurrentHashMap<>(subsetCount);
         for (int i = 0; i < fullTask.getSubsets().size(); i++) {
             weights.put(fullTask.getSubsets().get(i), fullTask.getSubsetWeights().get(i));
-        }               
+        }
 
         kernel = Kernel.createInstance(kernelType, memManager, getDeformationCount());
         Logger.trace("Kernel prepared - {}", kernel);

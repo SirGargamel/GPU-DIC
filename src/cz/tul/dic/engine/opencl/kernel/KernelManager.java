@@ -39,7 +39,7 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelManager {
 
-    private static final KernelInfo DEFAULT_KERNEL;
+    private static final KernelInfo DEFAULT_KERNEL, DEFAULT_KERNEL_WEIGHED;
     private static final List<KernelInfo> UNSUPPORTED_KERNELS;
     private static final String PERFORMANCE_TEST_TIME = "performance.time";
     private static final String PERFORMANCE_DEVICE = "performance.device";
@@ -60,6 +60,7 @@ public class KernelManager {
         inited = false;
 
         DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
+        DEFAULT_KERNEL_WEIGHED = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
 
         UNSUPPORTED_KERNELS = new ArrayList<>(2);
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
@@ -312,11 +313,19 @@ public class KernelManager {
         }
 
         final List<KernelInfo.Correlation> correlations = new ArrayList<>();
-        if (requestedKernelInfo.getCorrelation() == KernelInfo.Correlation.BEST) {
-            correlations.addAll(Arrays.asList(KernelInfo.Correlation.values()));
-            correlations.remove(KernelInfo.Correlation.BEST);
-        } else {
-            correlations.add(requestedKernelInfo.getCorrelation());
+        if (null != requestedKernelInfo.getCorrelation()) switch (requestedKernelInfo.getCorrelation()) {
+            case BEST:
+                correlations.addAll(Arrays.asList(KernelInfo.Correlation.values()));
+                correlations.remove(KernelInfo.Correlation.BEST);
+                correlations.remove(KernelInfo.Correlation.NO_WEIGHTS);
+                break;
+            case NO_WEIGHTS:
+                correlations.add(KernelInfo.Correlation.ZNCC);
+                correlations.add(KernelInfo.Correlation.ZNSSD);
+                break;
+            default:
+                correlations.add(requestedKernelInfo.getCorrelation());
+                break;
         }
 
         final List<KernelInfo.MemoryCoalescing> memoryCoalescing = new ArrayList<>();
@@ -354,8 +363,12 @@ public class KernelManager {
         return result;
     }
 
-    public static KernelInfo getBestKernel() {
-        return DEFAULT_KERNEL;
+    public static KernelInfo getBestKernel(final boolean usesWeights) {
+        if (usesWeights) {
+            return DEFAULT_KERNEL_WEIGHED;
+        } else {
+            return DEFAULT_KERNEL;
+        }
     }
 
     public static boolean isInited() {

@@ -113,6 +113,7 @@ public class NewtonRaphsonForward extends NewtonRaphson {
 
     @Override
     public long getDeformationCount() {
+        deformationOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
         return 1 + coeffCount + ((coeffCount * (coeffCount + 1)) / 2);
     }

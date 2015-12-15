@@ -26,7 +26,7 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
 
     private static final double DX = 0.5;
     private static final double DY = DX;
-    
+
     @Override
     protected double[] generateDeformations(double[] solution, double step) {
         final int coeffCount = solution.length;
@@ -50,6 +50,7 @@ public class NewtonRaphsonForwardHE extends NewtonRaphsonForward {
     
     @Override
     public long getDeformationCount() {
+        deformationOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
         return 1 + coeffCount;
     }

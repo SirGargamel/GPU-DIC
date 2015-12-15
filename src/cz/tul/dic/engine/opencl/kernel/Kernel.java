@@ -20,7 +20,6 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.task.ComputationTask;
@@ -34,7 +33,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.pmw.tinylog.Logger;
@@ -49,7 +47,7 @@ public abstract class Kernel {
     private static final String KERNEL_EXTENSION = ".cl";
     private static final String KERNEL_REDUCE = "reduce";
     private static final String KERNEL_FIND_POS = "findPos";
-    private static final String KERNEL_DIC_NAME = "DIC";    
+    private static final String KERNEL_DIC_NAME = "DIC";
     protected final CLContext context;
     protected final CLCommandQueue queue;
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
@@ -57,8 +55,6 @@ public abstract class Kernel {
     protected final KernelInfo kernelInfo;
     private final Set<CLResource> clMem;
     private final AbstractOpenCLMemoryManager memManager;
-
-    
 
     protected Kernel(final KernelInfo info, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
         this.kernelInfo = info;
@@ -83,7 +79,7 @@ public abstract class Kernel {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.warn("Error instantiating kernel with kernel info [{}], using default kernel.", concreteInfo);
             Logger.error(ex);
-            final KernelInfo defaultInfo = KernelManager.getBestKernel(KernelManager.getBestKernel(), deformationCount);
+            final KernelInfo defaultInfo = KernelManager.getBestKernel(KernelManager.getBestKernel(false), deformationCount);
             result = new CL1D(defaultInfo, memManager, wsm);
         }
 
@@ -194,7 +190,7 @@ public abstract class Kernel {
             if (Stats.getInstance().isGpuDebugEnabled()) {
                 final CLBuffer<FloatBuffer> clResults = clData.getResults();
                 queue.putReadBuffer(clResults, true);
-                final double[] results = readResultBuffer(clResults.getBuffer());                
+                final double[] results = readResultBuffer(clResults.getBuffer());
                 Stats.getInstance().dumpGpuResults(results, task.getSubsets(), task.getDeformations());
             }
 
@@ -234,7 +230,7 @@ public abstract class Kernel {
             queue.flush();
 
             final CLBuffer<FloatBuffer> clResults = clData.getResults();
-            queue.putReadBuffer(clResults, true);            
+            queue.putReadBuffer(clResults, true);
             return readResultBuffer(clResults.getBuffer());
         } catch (CLException ex) {
             if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
@@ -401,7 +397,7 @@ public abstract class Kernel {
             result = globalSize + groupSize - r;
         }
         return result;
-    }    
+    }
 
     public KernelInfo getKernelInfo() {
         return kernelInfo;

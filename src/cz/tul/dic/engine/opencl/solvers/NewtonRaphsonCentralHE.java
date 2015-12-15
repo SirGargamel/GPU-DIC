@@ -15,7 +15,6 @@ import java.util.Map;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolatingFunction;
 import org.apache.commons.math3.analysis.interpolation.PiecewiseBicubicSplineInterpolator;
-import org.apache.commons.math3.exception.InsufficientDataException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -27,7 +26,7 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
 
     private static final double DX = 0.5;
     private static final double DY = DX;
-    
+
     @Override
     protected double[] generateDeformations(double[] solution, double step) {
         final int coeffCount = solution.length;
@@ -57,6 +56,7 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
     
     @Override
     public long getDeformationCount() {
+        deformationOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
         final int coeffCount = DeformationUtils.getDeformationCoeffCount(deformationOrder);
         return 1 + 2 * coeffCount;
     }

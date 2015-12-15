@@ -110,7 +110,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             temp[DeformationLimit.VSTEP] = STEP_INITIAL;
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> localResults = new BruteForce().solve(
+        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE).solve(
                 new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), fullTask.getSubsetWeights(), zeroOrderLimits));
         CorrelationResult paddedResult, currentResult;
         for (int i = 0; i < subsetCount; i++) {

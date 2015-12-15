@@ -25,7 +25,7 @@ public class CoarseFine extends AbstractTaskSolver {
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final double STEP_INITIAL = 1;
     private static final double STEP_MINIMAL = 0.01;
-    
+
     @Override
     public List<CorrelationResult> solve(
             final FullTask fullTask,

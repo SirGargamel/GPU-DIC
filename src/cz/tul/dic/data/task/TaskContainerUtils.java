@@ -17,6 +17,7 @@ import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.loaders.ConfigLoader;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
+import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -264,12 +265,7 @@ public final class TaskContainerUtils {
         if (tsp == null) {
             Logger.info("Adding default TaskSplit param.");
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
-        }
-        final Object kernel = tc.getParameter(TaskParameter.KERNEL);
-        if (kernel == null) {
-            Logger.info("Adding default kernel.");
-            tc.setParameter(TaskParameter.KERNEL, KernelManager.getBestKernel());
-        }
+        }        
         final Object subsetGenMode = tc.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD);
         if (subsetGenMode == null) {
             Logger.info("Adding default subset generator.");
@@ -315,6 +311,12 @@ public final class TaskContainerUtils {
         if (correlation == null) {
             Logger.info("Adding default solver.");
             tc.setParameter(TaskParameter.SOLVER, TaskDefaultValues.DEFAULT_SOLVER);
+        }
+        final Object kernel = tc.getParameter(TaskParameter.KERNEL);
+        if (kernel == null) {
+            Logger.info("Adding default kernel.");
+            final Solver solver = (Solver) tc.getParameter(TaskParameter.SOLVER);
+            tc.setParameter(TaskParameter.KERNEL, KernelManager.getBestKernel(solver.supportsWeighedCorrelation()));
         }
         final Object filterSize = tc.getParameter(TaskParameter.FILTER_KERNEL_SIZE);
         if (filterSize == null) {

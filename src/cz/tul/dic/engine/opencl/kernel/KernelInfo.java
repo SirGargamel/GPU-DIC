@@ -106,6 +106,7 @@ public class KernelInfo implements Serializable {
         ZNCC,
         ZNSSD,
         WZNSSD,
+        NO_WEIGHTS,
         BEST
     }
 
