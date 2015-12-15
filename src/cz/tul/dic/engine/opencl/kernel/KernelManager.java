@@ -271,7 +271,7 @@ public class KernelManager {
                 }
 
                 for (KernelInfo.Correlation cor : KernelInfo.Correlation.values()) {
-                    if (cor == KernelInfo.Correlation.BEST) {
+                    if (cor == KernelInfo.Correlation.BEST || cor == KernelInfo.Correlation.NO_WEIGHTS) {
                         continue;
                     }
 
