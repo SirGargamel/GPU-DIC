@@ -51,8 +51,7 @@ public abstract class AbstractTaskSolver extends Observable {
     Object taskSplitValue;
     boolean stop;
     // data storage
-    protected FullTask fullTask;
-    protected DeformationOrder deformationOrder;
+    protected FullTask fullTask;    
     protected Map<AbstractSubset, CorrelationResult> results;
     protected Map<AbstractSubset, double[]> deformations;
     protected Map<AbstractSubset, Integer> weights;
@@ -99,12 +98,14 @@ public abstract class AbstractTaskSolver extends Observable {
         stop = false;
         computationInfo.clear();
 
-        this.fullTask = fullTask;
+        this.fullTask = fullTask;        
 
-        deformationOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
-
-        final List<AbstractSubset> subsets = fullTask.getSubsets();
+        final List<AbstractSubset> subsets = fullTask.getSubsets();        
+        if (subsets.isEmpty()) {
+            return new ArrayList<>(0);
+        }
         final int subsetCount = subsets.size();
+        
         results = new LinkedHashMap<>(subsetCount);
         deformations = new ConcurrentHashMap<>(subsetCount);
         subsetsToCompute = Collections.synchronizedList(new ArrayList<>(subsets));
@@ -112,7 +113,7 @@ public abstract class AbstractTaskSolver extends Observable {
         weights = new ConcurrentHashMap<>(subsetCount);
         for (int i = 0; i < fullTask.getSubsets().size(); i++) {
             weights.put(fullTask.getSubsets().get(i), fullTask.getSubsetWeights().get(i));
-        }
+        }               
 
         kernel = Kernel.createInstance(kernelType, memManager, getDeformationCount());
         Logger.trace("Kernel prepared - {}", kernel);

@@ -12,12 +12,12 @@ package cz.tul.dic.engine.opencl.solvers;
 public enum Solver {
 
     BRUTE_FORCE("BruteForce", "BF", false, false),
-    COARSE_FINE("CoarseFine", "CF", false, true),
+    COARSE_FINE("CoarseFine", "CF", false, false),
     NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral", "NRC", true, false),
     NEWTON_RHAPSON_CENTRAL_HE("NewtonRaphsonCentralHE", "NRCH", true, false),
     NEWTON_RHAPSON_FORWARD("NewtonRaphsonForward", "NRF", true, false),    
     NEWTON_RHAPSON_FORWARD_HE("NewtonRaphsonForwardHE", "NRFH", true, false),
-    SPGD("SPGD", "SPGD", true, true),
+    SPGD("SPGD", "SPGD", true, false),
     ;
     
     private final String className, abbreviation;

@@ -49,6 +49,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     private static final double STEP_SECOND = 0.001;
     protected static final int STEP_WEIGHT = 1;
     private final Set<AbstractSubset> smallerStep;
+    protected DeformationOrder deformationOrder;
 
     public NewtonRaphson() {
         smallerStep = new HashSet<>();
@@ -58,11 +59,8 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     public List<CorrelationResult> solve(
             final FullTask fullTask,
             final boolean usesWeights) throws ComputationException {
-        if (fullTask.getSubsets().isEmpty()) {
-            return new ArrayList<>(0);
-        }
-
         final int subsetCount = subsetsToCompute.size();
+        deformationOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
 
         smallerStep.clear();
 
