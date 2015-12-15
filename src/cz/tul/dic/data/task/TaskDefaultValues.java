@@ -40,7 +40,6 @@ public final class TaskDefaultValues {
     public static final double DEFAULT_STRAIN_ESTIMATION_PARAMETER = 20;
     public static final TaskSplitMethod DEFAULT_TASK_SPLIT_METHOD = TaskSplitMethod.DYNAMIC;
     public static final int DEFAULT_TASK_SPLIT_PARAMETER = 1000;
-    public static final int DEFAULT_WINDOW_SIZE = 0;
 
     private TaskDefaultValues() {
     }
