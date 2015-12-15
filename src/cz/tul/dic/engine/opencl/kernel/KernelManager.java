@@ -239,12 +239,17 @@ public class KernelManager {
         // find best performing kernel                
         double time;
         double bestTime = Double.MAX_VALUE;
-        KernelInfo bestKernel = null;
+        KernelInfo bestKernel = null, kernel;
         for (Entry<KernelInfo, Long> e : data.get(defCount).entrySet()) {
+            kernel = e.getKey();
+            if (!infos.contains(kernel)) {
+                continue;
+            }
+            
             time = e.getValue();
             if (time < bestTime) {
                 bestTime = time;
-                bestKernel = e.getKey();
+                bestKernel = kernel;
             }
 
         }
