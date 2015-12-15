@@ -19,7 +19,7 @@ if (deltaF != 0 && deltaG != 0) {
 
 		wGorig = gauss(subsets[index] - centerX, subsets[index+1] - centerY, weight);
 		wGdef = gauss(deformedFacet[i2] - centerDefX, deformedFacet[i2+1] - centerDefY, weight);
-		temp = ((subsetI[i] / deltaF) * wGorig) - ((deformedI[i] / deltaG) * wGdef);
+		temp = ((deformedI[i] / deltaG) * wGdef) - ((subsetI[i] / deltaF) * wGorig);
         resultVal +=  temp * temp;
 		
 		sumWg += wGdef * wGdef;

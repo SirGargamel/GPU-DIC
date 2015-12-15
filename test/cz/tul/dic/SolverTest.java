@@ -308,7 +308,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
         // weighed correlation weigh too large to show effect
         task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.BEST, useLimits));
-        task.setParameter(TaskParameter.CORRELATION_WEIGHT, 2.0);
+        task.setParameter(TaskParameter.CORRELATION_WEIGHT, 0.75);
 
         Engine.getInstance().computeTask(task);
 

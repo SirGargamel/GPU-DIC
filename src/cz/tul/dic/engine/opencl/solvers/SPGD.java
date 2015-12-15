@@ -144,7 +144,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         if (usesWeights) {
             int weight, pertubation;
             for (Entry<AbstractSubset, Integer> e : weights.entrySet()) {
-                pertubation = generateWeightPertubation();
+                pertubation = generateWeightPertubation(usesWeights);
                 weightsPertubations.put(e.getKey(), pertubation);
                 weight = e.getValue() + pertubation;
                 weights.put(e.getKey(), weight);
@@ -152,9 +152,13 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         }
     }
 
-    private int generateWeightPertubation() {
-        final Random rnd = new Random();
-        return rnd.nextInt(2 * PERTUBATION_AMPLITUDE_WEIGHT) - (PERTUBATION_AMPLITUDE_WEIGHT / 2);
+    private int generateWeightPertubation(final boolean usesWeights) {
+        if (usesWeights) {
+            final Random rnd = new Random();
+            return rnd.nextInt(2 * PERTUBATION_AMPLITUDE_WEIGHT) - (PERTUBATION_AMPLITUDE_WEIGHT);
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -266,16 +270,11 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
                 final double[] nextDeformationPertubation = generateDeformationPertubation(order);
                 deformationsPertubations.put(subset, nextDeformationPertubation);
                 deformations.put(subset, generateDeformation(nextDeformation, nextDeformationPertubation));
-
-                final int oldWeight = weights.get(subset);
-                if (usesWeights) {
-                    final int nextWeightPertubation = generateWeightPertubation();
-                    weightsPertubations.put(subset, nextWeightPertubation);
-                    final int nextWeight = oldWeight + nextWeightPertubation;
-                    weights.put(subset, nextWeight);
-                } else {
-                    weights.put(subset, oldWeight);
-                }
+                
+                final int nextWeightPertubation = generateWeightPertubation(usesWeights);
+                weightsPertubations.put(subset, nextWeightPertubation);
+                final int nextWeight = weights.get(subset) + nextWeightPertubation;
+                weights.put(subset, nextWeight);
             } catch (Exception ex) {
                 if (ex.getStackTrace().length == 0) {
                     Logger.warn("{} stop, exception occured - {}, no stack trace...", subset, ex);

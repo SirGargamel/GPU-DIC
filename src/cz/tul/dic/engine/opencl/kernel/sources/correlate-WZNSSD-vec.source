@@ -16,7 +16,7 @@ if (deltaF != 0 && deltaG != 0) {
     for (int i = 0; i < subsetSize2; i++) {  		  
 		wGorig = gauss(subsetLocal[i].x - centerX, subsetLocal[i].y - centerY, weight);
 		wGdef = gauss(deformedFacet[i].x - centerDefX, deformedFacet[i].y - centerDefY, weight);
-		temp = ((subsetI[i] / deltaF) * wGorig) - ((deformedI[i] / deltaG) * wGdef);
+		temp = ((deformedI[i] / deltaG) * wGdef) - ((subsetI[i] / deltaF) * wGorig);
         resultVal +=  temp * temp;
 		
 		sumWg += wGdef * wGdef;
