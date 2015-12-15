@@ -11,7 +11,7 @@ package cz.tul.dic.engine.opencl.solvers;
  */
 public enum Solver {
 
-    BRUTE_FORCE("BruteForce", "BF", false, false),
+    BRUTE_FORCE("BruteForce", "BF", true, false),
     COARSE_FINE("CoarseFine", "CF", false, false),
     NEWTON_RHAPSON_CENTRAL("NewtonRaphsonCentral", "NRC", true, false),
     NEWTON_RHAPSON_CENTRAL_HE("NewtonRaphsonCentralHE", "NRCH", true, false),
