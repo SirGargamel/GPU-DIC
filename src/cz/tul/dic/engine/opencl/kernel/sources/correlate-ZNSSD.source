@@ -1,9 +1,6 @@
 float resultVal = 0;           
 float temp;
-if (deltaF != 0 && deltaG != 0) {
-	deltaF = sqrt(deltaF);
-	deltaG = sqrt(deltaG);
-	
+if (deltaF != 0 && deltaG != 0) {	
     for (int i = 0; i < subsetSize2; i++) {            
 		temp = (subsetI[i] / deltaF) - (deformedI[i] / deltaG);
         resultVal +=  temp * temp;

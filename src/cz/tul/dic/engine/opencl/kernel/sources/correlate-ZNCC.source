@@ -3,5 +3,5 @@ if (deltaF != 0 && deltaG != 0) {
     for (int i = 0; i < subsetSize2; i++) {            
         resultVal += subsetI[i] * deformedI[i];
     }
-    resultVal /= sqrt(deltaF) * sqrt(deltaG);  
+    resultVal /= deltaF * deltaG;  
 }

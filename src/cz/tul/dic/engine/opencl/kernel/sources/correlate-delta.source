@@ -7,3 +7,5 @@ for (int i = 0; i < subsetSize2; i++) {
     deformedI[i] -= meanG;
     deltaG += deformedI[i] * deformedI[i];
 }
+deltaF = sqrt(deltaF);
+deltaG = sqrt(deltaG);

@@ -1,10 +1,7 @@
 float resultVal = 0;           
 float sumWg = 0;
 float temp, wGorig, wGdef, centerDefX, centerDefY, centerX, centerY;
-if (deltaF != 0 && deltaG != 0) {
-	deltaF = sqrt(deltaF);
-	deltaG = sqrt(deltaG);
-	
+if (deltaF != 0 && deltaG != 0) {	
 	const float weight = weights[subsetId];
 	
 	centerX = subsetCenters[subsetId].x;
