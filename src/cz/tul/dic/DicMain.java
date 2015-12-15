@@ -65,80 +65,19 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
         //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
         //////////////////////////////
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRC.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRCHE.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRF.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__NRFHE.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi__SPGD.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRC.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRCHE.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRF.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__NRFHE.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi__SPGD.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRC.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRCHE.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRF.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__NRFHE.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi__SPGD.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRC.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRCHE.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRF.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__NRFHE.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi__SPGD.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRC.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRCHE.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRF.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__NRFHE.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi__SPGD.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRC.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRCHE.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRF.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__NRFHE.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__CF.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi__SPGD.config",
-    /////////////
-    //        "d:\\temp\\.smallSolverCompare\\6107544m.avi__BF.config",
-    //        "d:\\temp\\.smallSolverCompare\\6113599m.avi__BF.config",
-    //        "d:\\temp\\.smallSolverCompare\\6203652m.avi__BF.config",    
-    //        "d:\\temp\\.smallSolverCompare\\7202845m.avi__BF.config",
-    //        "d:\\temp\\.smallSolverCompare\\9112502m.avi__BF.config", 
-    //        "d:\\temp\\.smallSolverCompare\\9905121m.avi__BF.config",
+        "d:\\temp\\.smallSolverCompare\\6107544m.avi.config",
+        "d:\\temp\\.smallSolverCompare\\6113599m.avi.config",
+        "d:\\temp\\.smallSolverCompare\\6203652m.avi.config",
+        "d:\\temp\\.smallSolverCompare\\7202845m.avi.config",
+        "d:\\temp\\.smallSolverCompare\\9112502m.avi.config",
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi.config", 
     ////////////////////////////
-    //        "d:\\temp\\.solverCompare\\6107544m.avi.NR.config",
-    //        "d:\\temp\\.solverCompare\\6113599m.avi.NR.config",
-    //        "d:\\temp\\.solverCompare\\6203652m.avi.NR.config",
-    //        "d:\\temp\\.solverCompare\\7202845m.avi.NR.config",
-    //        "d:\\temp\\.solverCompare\\9112502m.avi.NR.config",
-    //        "d:\\temp\\.solverCompare\\9905121m.avi.NR.config",    
-    //        "d:\\temp\\.solverCompare\\6107544m.avi.NR2.config",
-    //        "d:\\temp\\.solverCompare\\6113599m.avi.NR2.config",
-    //        "d:\\temp\\.solverCompare\\6203652m.avi.NR2.config",
-    //        "d:\\temp\\.solverCompare\\7202845m.avi.NR2.config",
-    //        "d:\\temp\\.solverCompare\\9112502m.avi.NR2.config",        
-    //        "d:\\temp\\.solverCompare\\9905121m.avi.NR2.config",
-    //        "d:\\temp\\.solverCompare\\6107544m.avi.CF.config",
-    //        "d:\\temp\\.solverCompare\\6113599m.avi.CF.config",
-    //        "d:\\temp\\.solverCompare\\6203652m.avi.CF.config",
-    //        "d:\\temp\\.solverCompare\\7202845m.avi.CF.config",
-    //        "d:\\temp\\.solverCompare\\9112502m.avi.CF.config",
-    //        "d:\\temp\\.solverCompare\\9905121m.avi.CF.config",
-    //        "d:\\temp\\.solverCompare\\6107544m.avi.BF.config",
-    //        "d:\\temp\\.solverCompare\\6113599m.avi.BF.config",
-    //        "d:\\temp\\.solverCompare\\6203652m.avi.BF.config",
-    //        "d:\\temp\\.solverCompare\\7202845m.avi.BF.config",
-    //        "d:\\temp\\.solverCompare\\9112502m.avi.BF.config",
-    //        "d:\\temp\\.solverCompare\\9905121m.avi.BF.config",
-    //        "d:\\temp\\.solverCompare\\6107544m.avi.SPGD.config",
-    //        "d:\\temp\\.solverCompare\\6113599m.avi.SPGD.config",
-    //        "d:\\temp\\.solverCompare\\6203652m.avi.SPGD.config",
-    //        "d:\\temp\\.solverCompare\\7202845m.avi.SPGD.config",
-    //        "d:\\temp\\.solverCompare\\9112502m.avi.SPGD.config",
-    //        "d:\\temp\\.solverCompare\\9905121m.avi.SPGD.config",
+            "d:\\temp\\.solverCompare\\6107544m.avi.config",
+            "d:\\temp\\.solverCompare\\6113599m.avi.config",
+            "d:\\temp\\.solverCompare\\6203652m.avi.config",
+            "d:\\temp\\.solverCompare\\7202845m.avi.config",
+            "d:\\temp\\.solverCompare\\9112502m.avi.config",
+            "d:\\temp\\.solverCompare\\9905121m.avi.config",
     ///////////////////////////////
     //            "z:\\TUL\\DIC\\testData\\.custom\\ShiftX.config",
     //            "z:\\TUL\\DIC\\testData\\.custom\\ShiftXY.config",
@@ -163,7 +102,8 @@ public class DicMain extends Application {
             if (DEBUG_COMPUTE_PREPROCESSING) {
                 performPreprocessingTest();
             } else {
-                performComputationTest();
+//                performComputationTest();
+                performEngineTest();
             }
         }
 
@@ -332,6 +272,43 @@ public class DicMain extends Application {
         for (int param = spacingMax; param >= spacingMin; param--) {
             task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, param);
             commenceComputationDynamic(task);
+        }
+    }
+
+    private static void performEngineTest() {
+        final int fs1 = 5; //10
+        final int fs2 = 30; //30        
+        TaskContainer task;
+        for (int size = fs1; size <= fs2; size += 5) {
+            for (String s : FILES_TO_DEBUG) {
+                for (Solver slvr : Solver.values()) {
+                    if (slvr == Solver.BRUTE_FORCE) {
+                        continue;
+                    }
+
+                    try {
+                        Context.getInstance().setTc(TaskContainer.initTaskContainer(new File(s)));
+                        task = Context.getInstance().getTc();
+                        if ((int) task.getParameter(TaskParameter.SUBSET_SIZE) < size) {
+                            System.out.println("STOPPING --- " + task.getParameter(TaskParameter.SUBSET_SIZE) + " --- " + size + " --- " + s);
+                            break;
+                        }
+                        task.setParameter(TaskParameter.IN, new File(s));
+                        task.setParameter(TaskParameter.SUBSET_SIZE, size);
+                        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, size / 2);
+                        task.setParameter(TaskParameter.SOLVER, slvr);
+
+                        commenceComputationDynamic(task);
+
+                        exportTask(task);
+                    } catch (IOException | ComputationException ex) {
+                        Logger.error(ex);
+                    } catch (Exception t) {
+                        Logger.error(t);
+                        System.out.println(Context.getInstance().getTc());
+                    }
+                }
+            }
         }
     }
 
