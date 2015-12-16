@@ -51,7 +51,7 @@ public class KernelManager {
         {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -2, 2, 1}, // 160
         {-10.0, 10.0, 1, -10, 10, 1}, // 441
     };
-    private static final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{1, 8};
+    private static final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{1, 32};
     private static final int PERFORMANCE_TEST_SUBSET_SIZE = 10;
     private static final int PERFORMANCE_TEST_BLANK_COUNT = 10;
     private static boolean inited;
@@ -135,6 +135,7 @@ public class KernelManager {
             Map<KernelInfo, Long> timeTable;
             long time;
             for (CLDevice device : devices) {
+                System.out.println("Testing " + device.toString());
                 TimeDataStorage.getInstance().reset();
                 DeviceManager.initContext(device);
 
@@ -245,7 +246,7 @@ public class KernelManager {
             if (!infos.contains(kernel)) {
                 continue;
             }
-            
+
             time = e.getValue();
             if (time < bestTime) {
                 bestTime = time;
@@ -318,19 +319,21 @@ public class KernelManager {
         }
 
         final List<KernelInfo.Correlation> correlations = new ArrayList<>();
-        if (null != requestedKernelInfo.getCorrelation()) switch (requestedKernelInfo.getCorrelation()) {
-            case BEST:
-                correlations.addAll(Arrays.asList(KernelInfo.Correlation.values()));
-                correlations.remove(KernelInfo.Correlation.BEST);
-                correlations.remove(KernelInfo.Correlation.NO_WEIGHTS);
-                break;
-            case NO_WEIGHTS:
-                correlations.add(KernelInfo.Correlation.ZNCC);
-                correlations.add(KernelInfo.Correlation.ZNSSD);
-                break;
-            default:
-                correlations.add(requestedKernelInfo.getCorrelation());
-                break;
+        if (null != requestedKernelInfo.getCorrelation()) {
+            switch (requestedKernelInfo.getCorrelation()) {
+                case BEST:
+                    correlations.addAll(Arrays.asList(KernelInfo.Correlation.values()));
+                    correlations.remove(KernelInfo.Correlation.BEST);
+                    correlations.remove(KernelInfo.Correlation.NO_WEIGHTS);
+                    break;
+                case NO_WEIGHTS:
+                    correlations.add(KernelInfo.Correlation.ZNCC);
+                    correlations.add(KernelInfo.Correlation.ZNSSD);
+                    break;
+                default:
+                    correlations.add(requestedKernelInfo.getCorrelation());
+                    break;
+            }
         }
 
         final List<KernelInfo.MemoryCoalescing> memoryCoalescing = new ArrayList<>();
