@@ -14,12 +14,12 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.Engine;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -40,6 +40,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
     private static final double GAIN_SYSTEM = 100;
     private Map<AbstractSubset, double[]> deformationsPertubations;
     private Map<AbstractSubset, Integer> weightsPertubations;
+    private DeformationOrder defOrder;
 
     @Override
     public List<CorrelationResult> solve() throws ComputationException {
@@ -52,23 +53,20 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         deformationsPertubations = new LinkedHashMap<>(subsetCount);
         weightsPertubations = new LinkedHashMap<>(subsetCount);
 
-        final DeformationOrder order = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
-        final int coeffCount = DeformationUtils.getDeformationCoeffCount(order);
+        defOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
 
         // estimate initial solution by direct search
-        prepareInitialResults(coeffCount);
+        prepareInitialResults();
         notifyProgress(subsetCount, subsetCount);
 
         // initial data for solver
         registerGPUDataListener(this);
-        prepareDeformations(order);
-        prepareWeights(usesWeights);
-        final List<double[]> localDeformations = new ArrayList<>(deformations.values());
-        final List<Integer> localWeights = new ArrayList<>(weights.values());
-        computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, localWeights, localDeformations, order, false));
+        prepareDeformations();
+        prepareWeightsPertubations(usesWeights);
+        computeStep();
 
         for (int i = 0; i < LIMIT_ITERATIONS; i++) {
-            makeStep(subsetsToCompute, order, usesWeights);
+            makeStep();
 
             notifyProgress(subsetsToCompute.size(), subsetCount);
 
@@ -82,7 +80,81 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         return new ArrayList<>(results.values());
     }
 
-    private void prepareInitialResults(final int coeffCount) throws ComputationException {
+    private void computeStep() throws ComputationException {
+        final List<double[]> deformationsToCompute = new ArrayList<>(subsetsToCompute.size());
+        final List<Integer> weightsToCompute = new ArrayList<>(subsetsToCompute.size());
+        if (!usesWeights) {
+            for (AbstractSubset subset : subsetsToCompute) {
+                deformationsToCompute.add(generateDeformation(deformations.get(subset), deformationsPertubations.get(subset)));
+                weightsToCompute.add(weights.get(subset));
+            }
+            computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, weightsToCompute, deformationsToCompute, defOrder, false));
+        } else {
+            final List<double[]> gpuDataList = new ArrayList<>(3);
+
+            // result after step
+            for (AbstractSubset subset : subsetsToCompute) {
+                deformationsToCompute.add(deformations.get(subset));
+                weightsToCompute.add(weights.get(subset));
+            }
+            computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, weightsToCompute, deformationsToCompute, defOrder, false));
+            gpuDataList.add(gpuData);
+
+            // result - pertubation
+            deformationsToCompute.clear();
+            weightsToCompute.clear();
+            for (AbstractSubset subset : subsetsToCompute) {
+                deformationsToCompute.add(subtract(deformations.get(subset), deformationsPertubations.get(subset)));
+                weightsToCompute.add(weights.get(subset) - weightsPertubations.get(subset));
+            }
+            computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, weightsToCompute, deformationsToCompute, defOrder, false));
+            gpuDataList.add(gpuData);
+
+            // result + pertubation
+            deformationsToCompute.clear();
+            weightsToCompute.clear();
+            for (AbstractSubset subset : subsetsToCompute) {
+                deformationsToCompute.add(add(deformations.get(subset), deformationsPertubations.get(subset)));
+                weightsToCompute.add(weights.get(subset) + weightsPertubations.get(subset));
+            }
+            computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, weightsToCompute, deformationsToCompute, defOrder, false));
+            gpuDataList.add(gpuData);
+
+            // join data together
+            final double[] orig = gpuDataList.get(0);
+            final double[] minus = gpuDataList.get(1);
+            final double[] plus = gpuDataList.get(2);
+            final int l = orig.length;
+            
+            gpuData = new double[l * 3];
+            int base;
+            for (int i = 0; i < l; i++) {
+                base = i * 3;
+                gpuData[base] = orig[i];
+                gpuData[base + 1] = minus[i];
+                gpuData[base + 2] = plus[i];
+            }
+        }
+    }
+
+    private double[] subtract(final double[] dA1, final double[] dA2) {
+        final double[] result = Arrays.copyOf(dA1, dA1.length);
+        for (int i = 0; i < dA1.length; i++) {
+            result[i] -= dA2[i];
+        }
+        return result;
+    }
+
+    private double[] add(final double[] dA1, final double[] dA2) {
+        final double[] result = Arrays.copyOf(dA1, dA1.length);
+        for (int i = 0; i < dA1.length; i++) {
+            result[i] += dA2[i];
+        }
+        return result;
+    }
+
+    private void prepareInitialResults() throws ComputationException {
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defOrder);
         final List<AbstractSubset> subsets = fullTask.getSubsets();
         final int subsetCount = subsets.size();
         AbstractSubset subset;
@@ -93,18 +165,15 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         }
     }
 
-    private void prepareDeformations(final DeformationOrder degree) {
-        double[] deformation, pertubation;
+    private void prepareDeformations() {
         for (AbstractSubset subset : subsetsToCompute) {
-            pertubation = generateDeformationPertubation(degree);
-            deformation = generateDeformation(results.get(subset).getDeformation(), pertubation);
-            deformationsPertubations.put(subset, pertubation);
-            deformations.put(subset, deformation);
+            deformationsPertubations.put(subset, generateDeformationPertubation(defOrder));
+            deformations.put(subset, results.get(subset).getDeformation());
         }
     }
 
     private double[] generateDeformation(final double[] solution, final double[] pertubation) {
-        final int coeffCount = solution.length;
+        final int coeffCount = DeformationUtils.getDeformationCoeffCount(defOrder);
         final double[] result = new double[coeffCount * 3];
         for (int i = 0; i < coeffCount; i++) {
             result[i] = solution[i];
@@ -138,17 +207,11 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         return result;
     }
 
-    private void prepareWeights(final boolean usesWeights) {
-        if (usesWeights) {
-            int weight, pertubation;
-            for (Entry<AbstractSubset, Integer> e : weights.entrySet()) {
-                pertubation = generateWeightPertubation(usesWeights);
-                weightsPertubations.put(e.getKey(), pertubation);
-                weight = e.getValue() + pertubation;
-                weights.put(e.getKey(), weight);
-            }
+    private void prepareWeightsPertubations(final boolean usesWeights) {
+        for (AbstractSubset subset : subsetsToCompute) {
+            weightsPertubations.put(subset, generateWeightPertubation(usesWeights));
         }
-    }       
+    }
 
     private int generateWeightPertubation(final boolean usesWeights) {
         if (usesWeights) {
@@ -166,14 +229,14 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
      * @param defDegree
      * @throws ComputationException
      */
-    private void makeStep(final List<AbstractSubset> subsetsToCompute, final DeformationOrder defDegree, final boolean usesWeights) throws ComputationException {
+    private void makeStep() throws ComputationException {
         final ExecutorService exec = Engine.getInstance().getExecutorService();
         final Set<Future<AbstractSubset>> steps = new HashSet<>(subsetsToCompute.size());
 
         final Iterator<AbstractSubset> it = subsetsToCompute.iterator();
         while (it.hasNext()) {
             final AbstractSubset as = it.next();
-            steps.add(exec.submit(new StepMaker(as, defDegree, usesWeights)));
+            steps.add(exec.submit(new StepMaker(as, defOrder, usesWeights)));
         }
 
         for (Future<AbstractSubset> fas : steps) {
@@ -185,13 +248,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
         }
 
         if (!subsetsToCompute.isEmpty()) {
-            final List<double[]> deformationsToCompute = new ArrayList<>(subsetsToCompute.size());
-            final List<Integer> weightToCompute = new ArrayList<>(subsetsToCompute.size());
-            for (AbstractSubset subset : subsetsToCompute) {
-                deformationsToCompute.add(deformations.get(subset));
-                weightToCompute.add(weights.get(subset));
-            }
-            computeTask(kernel, new ComputationTask(fullTask.getImageA(), fullTask.getImageB(), subsetsToCompute, weightToCompute, deformationsToCompute, defDegree, false));
+            computeStep();
         }
     }
 
@@ -257,21 +314,22 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
                     return subset;
                 }
 
+                // prepare data for next step
                 final double[] currentDeformationPertubation = deformationsPertubations.get(subset);
                 final double[] nextDeformation = new double[currentDeformation.length];
                 for (int i = 0; i < nextDeformation.length; i++) {
                     // new = old + Gain * Pertubation * dJ
                     nextDeformation[i] = currentDeformation[i] + (GAIN_SYSTEM * currentDeformationPertubation[i] * dJ);
                 }
-
-                // prepare data for next step
                 final double[] nextDeformationPertubation = generateDeformationPertubation(order);
                 deformationsPertubations.put(subset, nextDeformationPertubation);
-                deformations.put(subset, generateDeformation(nextDeformation, nextDeformationPertubation));
+                deformations.put(subset, nextDeformation);
 
+                final int currentWeight = weights.get(subset);
+                final int currentWeightPertuation = weightsPertubations.get(subset);
+                final int nextWeight = (int) (currentWeight + Math.round(GAIN_SYSTEM * currentWeightPertuation + dJ));
                 final int nextWeightPertubation = generateWeightPertubation(usesWeights);
                 weightsPertubations.put(subset, nextWeightPertubation);
-                final int nextWeight = weights.get(subset) + nextWeightPertubation;
                 weights.put(subset, nextWeight);
             } catch (Exception ex) {
                 if (ex.getStackTrace().length == 0) {
