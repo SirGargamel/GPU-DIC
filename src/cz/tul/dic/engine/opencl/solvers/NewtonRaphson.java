@@ -56,9 +56,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     }
 
     @Override
-    public List<CorrelationResult> solve(
-            final FullTask fullTask,
-            final boolean usesWeights) throws ComputationException {
+    public List<CorrelationResult> solve() throws ComputationException {
         final int subsetCount = subsetsToCompute.size();
         deformationOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
 

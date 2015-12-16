@@ -11,7 +11,6 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.Engine;
 import java.util.ArrayList;
@@ -43,8 +42,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
     private Map<AbstractSubset, Integer> weightsPertubations;
 
     @Override
-    public List<CorrelationResult> solve(FullTask fullTask,
-            final boolean usesWeights) throws ComputationException {
+    public List<CorrelationResult> solve() throws ComputationException {
         if (fullTask.getSubsets().isEmpty()) {
             return new ArrayList<>(0);
         }
@@ -150,7 +148,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
                 weights.put(e.getKey(), weight);
             }
         }
-    }
+    }       
 
     private int generateWeightPertubation(final boolean usesWeights) {
         if (usesWeights) {
@@ -270,7 +268,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
                 final double[] nextDeformationPertubation = generateDeformationPertubation(order);
                 deformationsPertubations.put(subset, nextDeformationPertubation);
                 deformations.put(subset, generateDeformation(nextDeformation, nextDeformationPertubation));
-                
+
                 final int nextWeightPertubation = generateWeightPertubation(usesWeights);
                 weightsPertubations.put(subset, nextWeightPertubation);
                 final int nextWeight = weights.get(subset) + nextWeightPertubation;

@@ -58,6 +58,7 @@ public abstract class AbstractTaskSolver extends Observable {
     protected Map<AbstractSubset, Integer> weights;
     protected List<AbstractSubset> subsetsToCompute;
     protected double[] gpuData;
+    protected boolean usesWeights;
     // logging
     private final Map<AbstractSubset, ComputationInfo> computationInfo;
     private static final List<IGPUResultsReceiver> LISTENERS;
@@ -131,11 +132,11 @@ public abstract class AbstractTaskSolver extends Observable {
         Logger.trace("Kernel prepared - {}", kernel);
 
         this.subsetSize = fullTask.getSubsets().get(0).getSize();
-        final boolean usesWeights = kernel.getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD;
+        usesWeights = kernel.getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD;
 
         long time = System.nanoTime();
 
-        final List<CorrelationResult> result = solve(fullTask, usesWeights);
+        final List<CorrelationResult> result = solve();
 
         time = System.nanoTime() - time;
         Logger.debug("Task [{}] computed in {}ms using {}.", fullTask, time / 1_000_000, getClass().getSimpleName());
@@ -146,9 +147,7 @@ public abstract class AbstractTaskSolver extends Observable {
         return result;
     }
 
-    public abstract List<CorrelationResult> solve(
-            final FullTask fullTask,
-            final boolean usesWeights) throws ComputationException;
+    public abstract List<CorrelationResult> solve() throws ComputationException;
 
     protected abstract boolean needsBestResult();
 

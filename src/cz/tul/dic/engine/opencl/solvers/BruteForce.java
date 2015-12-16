@@ -18,9 +18,7 @@ import java.util.List;
 public class BruteForce extends AbstractTaskSolver {
 
     @Override
-    public List<CorrelationResult> solve(
-            final FullTask fullTask,
-            final boolean usesWeights) throws ComputationException {
+    public List<CorrelationResult> solve() throws ComputationException {
         final DeformationOrder order = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
         final List<CorrelationResult> localResults = computeTask(kernel, new ComputationTask(
                 fullTask.getImageA(), fullTask.getImageB(),

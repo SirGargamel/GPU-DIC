@@ -27,9 +27,7 @@ public class CoarseFine extends AbstractTaskSolver {
     private static final double STEP_MINIMAL = 0.01;
 
     @Override
-    public List<CorrelationResult> solve(
-            final FullTask fullTask,
-            final boolean usesWeights) throws ComputationException {
+    public List<CorrelationResult> solve() throws ComputationException {
         final DeformationOrder defOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
         if (defOrder != DeformationOrder.ZERO) {
             Logger.warn("CoarseFine solver does not support higher order deformations.");
