@@ -63,8 +63,11 @@ public class KernelManager {
         DEFAULT_KERNEL_WEIGHED = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
 
         UNSUPPORTED_KERNELS = new ArrayList<>(2);
+        // implementation does not exist
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
+        // CPU
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL1D, KernelInfo.Input.ARRAY, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.YES)));
 
         final long lastCheck = Preferences.userNodeForPackage(KernelManager.class).getLong(PERFORMANCE_TEST_TIME, 0);
         final long currentTime = System.currentTimeMillis();
