@@ -171,9 +171,10 @@ public final class NameGenerator {
                 sb.append(Utils.format((int) task.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM)));
                 sb.append(DELIMITER);
                 sb.append(Utils.format((double) task.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM)));
-                sb.append(DELIMITER);
-                final Solver solver  = (Solver) task.getParameter(TaskParameter.SOLVER);
-                sb.append(solver.getAbbreviation());
+                sb.append(DELIMITER);                
+                sb.append(((Solver) task.getParameter(TaskParameter.SOLVER)).getAbbreviation());
+                sb.append(DELIMITER);                
+                sb.append(task.getParameter(TaskParameter.KERNEL).toString());
             }
             sb.append(extension);
             return sb.toString();
