@@ -99,7 +99,7 @@ public class KernelInfo implements Serializable {
     public enum Input {
         ARRAY,
         IMAGE,
-        BEST
+        ANY
     }
 
     public enum Correlation {
@@ -107,21 +107,21 @@ public class KernelInfo implements Serializable {
         ZNSSD,
         WZNSSD,
         NO_WEIGHTS,
-        BEST
+        ANY
     }
 
     public enum Type {
         CL1D,
         CL2D,
         CL15D_pF,
-        BEST
+        ANY
     }
 
     public enum MemoryCoalescing {
-        YES, NO, BEST
+        YES, NO, ANY
     }
 
     public enum UseLimits {
-        YES, NO, BEST
+        YES, NO, ANY
     }
 }

@@ -59,15 +59,15 @@ public class KernelManager {
     static {
         inited = false;
 
-        DEFAULT_KERNEL = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
-        DEFAULT_KERNEL_WEIGHED = new KernelInfo(Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.BEST);
+        DEFAULT_KERNEL = new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY);
+        DEFAULT_KERNEL_WEIGHED = new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY);
 
         UNSUPPORTED_KERNELS = new ArrayList<>(2);
         // implementation does not exist
-        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
-        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.BEST, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.BEST)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.ANY)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.ANY)));
         // CPU
-        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL1D, KernelInfo.Input.ARRAY, KernelInfo.Correlation.BEST, KernelInfo.MemoryCoalescing.BEST, KernelInfo.UseLimits.YES)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL1D, KernelInfo.Input.ARRAY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.YES)));
 
         final long lastCheck = Preferences.userNodeForPackage(KernelManager.class).getLong(PERFORMANCE_TEST_TIME, 0);
         final long currentTime = System.currentTimeMillis();
@@ -265,27 +265,27 @@ public class KernelManager {
         KernelInfo kernelInfo;
 
         for (KernelInfo.Type kt : KernelInfo.Type.values()) {
-            if (kt == KernelInfo.Type.BEST) {
+            if (kt == KernelInfo.Type.ANY) {
                 continue;
             }
 
             for (KernelInfo.Input in : KernelInfo.Input.values()) {
-                if (in == KernelInfo.Input.BEST) {
+                if (in == KernelInfo.Input.ANY) {
                     continue;
                 }
 
                 for (KernelInfo.Correlation cor : KernelInfo.Correlation.values()) {
-                    if (cor == KernelInfo.Correlation.BEST || cor == KernelInfo.Correlation.NO_WEIGHTS) {
+                    if (cor == KernelInfo.Correlation.ANY || cor == KernelInfo.Correlation.NO_WEIGHTS) {
                         continue;
                     }
 
                     for (KernelInfo.MemoryCoalescing mc : KernelInfo.MemoryCoalescing.values()) {
-                        if (mc == KernelInfo.MemoryCoalescing.BEST) {
+                        if (mc == KernelInfo.MemoryCoalescing.ANY) {
                             continue;
                         }
 
                         for (KernelInfo.UseLimits lim : KernelInfo.UseLimits.values()) {
-                            if (lim == KernelInfo.UseLimits.BEST) {
+                            if (lim == KernelInfo.UseLimits.ANY) {
                                 continue;
                             }
 
@@ -306,17 +306,17 @@ public class KernelManager {
         final ArrayList<KernelInfo> result = new ArrayList<>();
 
         final List<Type> kernels = new ArrayList<>();
-        if (requestedKernelInfo.getType() == Type.BEST) {
+        if (requestedKernelInfo.getType() == Type.ANY) {
             kernels.addAll(Arrays.asList(Type.values()));
-            kernels.remove(KernelInfo.Type.BEST);
+            kernels.remove(KernelInfo.Type.ANY);
         } else {
             kernels.add(requestedKernelInfo.getType());
         }
 
         final List<KernelInfo.Input> inputs = new ArrayList<>();
-        if (requestedKernelInfo.getInput() == KernelInfo.Input.BEST) {
+        if (requestedKernelInfo.getInput() == KernelInfo.Input.ANY) {
             inputs.addAll(Arrays.asList(KernelInfo.Input.values()));
-            inputs.remove(KernelInfo.Input.BEST);
+            inputs.remove(KernelInfo.Input.ANY);
         } else {
             inputs.add(requestedKernelInfo.getInput());
         }
@@ -324,9 +324,9 @@ public class KernelManager {
         final List<KernelInfo.Correlation> correlations = new ArrayList<>();
         if (null != requestedKernelInfo.getCorrelation()) {
             switch (requestedKernelInfo.getCorrelation()) {
-                case BEST:
+                case ANY:
                     correlations.addAll(Arrays.asList(KernelInfo.Correlation.values()));
-                    correlations.remove(KernelInfo.Correlation.BEST);
+                    correlations.remove(KernelInfo.Correlation.ANY);
                     correlations.remove(KernelInfo.Correlation.NO_WEIGHTS);
                     break;
                 case NO_WEIGHTS:
@@ -340,17 +340,17 @@ public class KernelManager {
         }
 
         final List<KernelInfo.MemoryCoalescing> memoryCoalescing = new ArrayList<>();
-        if (requestedKernelInfo.getMemoryCoalescing() == KernelInfo.MemoryCoalescing.BEST) {
+        if (requestedKernelInfo.getMemoryCoalescing() == KernelInfo.MemoryCoalescing.ANY) {
             memoryCoalescing.addAll(Arrays.asList(KernelInfo.MemoryCoalescing.values()));
-            memoryCoalescing.remove(KernelInfo.MemoryCoalescing.BEST);
+            memoryCoalescing.remove(KernelInfo.MemoryCoalescing.ANY);
         } else {
             memoryCoalescing.add(requestedKernelInfo.getMemoryCoalescing());
         }
 
         final List<KernelInfo.UseLimits> useLimits = new ArrayList<>();
-        if (requestedKernelInfo.getUseLimits() == KernelInfo.UseLimits.BEST) {
+        if (requestedKernelInfo.getUseLimits() == KernelInfo.UseLimits.ANY) {
             useLimits.addAll(Arrays.asList(KernelInfo.UseLimits.values()));
-            useLimits.remove(KernelInfo.UseLimits.BEST);
+            useLimits.remove(KernelInfo.UseLimits.ANY);
         } else {
             useLimits.add(requestedKernelInfo.getUseLimits());
         }

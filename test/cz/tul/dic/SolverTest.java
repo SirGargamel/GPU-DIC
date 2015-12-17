@@ -135,7 +135,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, PARAM_SUBSET_SIZE);
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
-        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.ZNSSD, KernelInfo.MemoryCoalescing.BEST, useLimits));
+        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ZNSSD, KernelInfo.MemoryCoalescing.ANY, useLimits));
 
         Engine.getInstance().computeTask(task);
 
@@ -307,7 +307,7 @@ public class SolverTest {
         task.setParameter(TaskParameter.SOLVER, solver);
         task.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
         // weighed correlation weigh too large to show effect
-        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.BEST, KernelInfo.Input.BEST, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.BEST, useLimits));
+        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.ANY, useLimits));
         task.setParameter(TaskParameter.CORRELATION_WEIGHT, 0.75);
 
         Engine.getInstance().computeTask(task);
