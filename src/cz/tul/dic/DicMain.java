@@ -5,9 +5,15 @@
  */
 package cz.tul.dic;
 
+import com.jogamp.opencl.CLDevice;
 import cz.tul.dic.complextask.ComplexTaskSolver;
+import cz.tul.dic.data.Image;
+import cz.tul.dic.data.subset.AbstractSubset;
+import cz.tul.dic.data.subset.SquareSubset2D;
+import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
+import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
@@ -17,13 +23,21 @@ import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.data.task.loaders.InputLoader;
+import cz.tul.dic.engine.opencl.DeviceManager;
+import cz.tul.dic.engine.opencl.kernel.KernelInfo;
+import cz.tul.dic.engine.opencl.kernel.KernelManager;
+import cz.tul.dic.engine.opencl.kernel.TimeDataStorage;
+import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.output.NameGenerator;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Application;
@@ -70,15 +84,14 @@ public class DicMain extends Application {
         "d:\\temp\\.smallSolverCompare\\6203652m.avi.config",
         "d:\\temp\\.smallSolverCompare\\7202845m.avi.config",
         "d:\\temp\\.smallSolverCompare\\9112502m.avi.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi.config", 
-    ////////////////////////////
-            "d:\\temp\\.solverCompare\\6107544m.avi.config",
-            "d:\\temp\\.solverCompare\\6113599m.avi.config",
-            "d:\\temp\\.solverCompare\\6203652m.avi.config",
-            "d:\\temp\\.solverCompare\\7202845m.avi.config",
-            "d:\\temp\\.solverCompare\\9112502m.avi.config",
-            "d:\\temp\\.solverCompare\\9905121m.avi.config",
-    ///////////////////////////////
+        "d:\\temp\\.smallSolverCompare\\9905121m.avi.config",
+        ////////////////////////////
+        "d:\\temp\\.solverCompare\\6107544m.avi.config",
+        "d:\\temp\\.solverCompare\\6113599m.avi.config",
+        "d:\\temp\\.solverCompare\\6203652m.avi.config",
+        "d:\\temp\\.solverCompare\\7202845m.avi.config",
+        "d:\\temp\\.solverCompare\\9112502m.avi.config",
+        "d:\\temp\\.solverCompare\\9905121m.avi.config", ///////////////////////////////
     //            "z:\\TUL\\DIC\\testData\\.custom\\ShiftX.config",
     //            "z:\\TUL\\DIC\\testData\\.custom\\ShiftXY.config",
     //            "z:\\TUL\\DIC\\testData\\.custom\\StretchX.config",
@@ -103,7 +116,8 @@ public class DicMain extends Application {
                 performPreprocessingTest();
             } else {
 //                performComputationTest();
-                performEngineTest();
+//                performEngineTest();
+                performDeviceTest();
             }
         }
 
@@ -308,6 +322,61 @@ public class DicMain extends Application {
                         System.out.println(Context.getInstance().getTc());
                     }
                 }
+            }
+        }
+    }
+
+    private static void performDeviceTest() throws ComputationException, IOException {
+        final List<KernelInfo> infos = KernelManager.generateKernelInfos();
+        final List<CLDevice> devices = DeviceManager.listAllDevices();
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
+
+        CsvOutput<Long> csvOutput;
+        for (CLDevice device : devices) {
+//        final CLDevice device = devices.get(2);
+            csvOutput = new CsvOutput<>();
+            try {
+                TimeDataStorage.getInstance().reset();
+                DeviceManager.initContext(device);
+
+                for (KernelInfo ki : infos) {
+                    testKernelInfo(solver, ki, csvOutput);
+                }
+
+            } catch (Exception ex) {
+                Logger.error(ex);
+            }
+            csvOutput.writeData(new File(device.getName().trim() + "-performance.csv"));
+        }
+    }
+
+    private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo, final CsvOutput<Long> dataHolder) throws ComputationException {
+        final double[][] PERFORMANCE_TEST_LIMITS = new double[][]{
+            {-1, 1, 1, 0, 0, 0}, // 3
+            {-3, 3, 1, -1, 1, 1}, // 21
+            {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -2, 2, 1}, // 160
+            {-10.0, 10.0, 1, -10, 10, 1}, // 441
+        };
+        final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{1, 2, 8, 32};
+
+        solver.setKernel(kernelInfo);
+        final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
+        final AbstractSubset subset = new SquareSubset2D(10, 15, 15);
+
+        List<double[]> deformationLimits;
+        List<AbstractSubset> subsets;
+        List<Integer> weights;
+        long time;
+        for (int sc : PERFORMANCE_TEST_SUBSET_COUNT) {
+            for (double[] limits : PERFORMANCE_TEST_LIMITS) {
+                subsets = Collections.nCopies(sc, subset);
+                deformationLimits = Collections.nCopies(sc, limits);
+                weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(10, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
+                time = System.nanoTime();
+                solver.solve(new FullTask(
+                        img, img, subsets, weights, deformationLimits));
+                time = System.nanoTime() - time;
+                dataHolder.addValue(Integer.toString(sc) + ":" + Arrays.toString(limits), kernelInfo.toString(), time / 1_000);
             }
         }
     }

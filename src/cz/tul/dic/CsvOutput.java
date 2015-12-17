@@ -9,91 +9,66 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map.Entry;
+import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
+ * @param <F>
  */
-public class CsvOutput {
+public class CsvOutput<F> {
 
     private static final String SEPARATOR_VALUE = ",";
     private static final String SEPARATOR_LINE = "\n";
-    private static final Map<Integer, Map<Integer, CsvOutput>> outputters;
-    private static final NumberFormat nf;
-    private final BufferedWriter out;
+    private final Map<String, Map<String, F>> data;
 
-    static {
-        outputters = new HashMap<>();
-        nf = new DecimalFormat("000");
-    }
-    
-    private CsvOutput(final File target) throws IOException {
-        if (!target.exists()) {
-            target.createNewFile();
-        }
-        out = new BufferedWriter(new FileWriter(target));
+    public CsvOutput() throws IOException {
+        data = new LinkedHashMap<>();
     }
 
-    public static void addValue(final int round, final int x, final int y, final double[] value) {
-        Map<Integer, CsvOutput> m = outputters.get(x);
+    public void addValue(final String key1, final String key2, final F value) {
+        Map<String, F> m = data.get(key1);
         if (m == null) {
-            m = new HashMap<>();
-            outputters.put(x, m);
+            m = new LinkedHashMap<>();
+            data.put(key1, m);
         }
+        m.put(key2, value);
+    }
 
-        CsvOutput out = m.get(y);
-        if (out == null) {
-            try {
-                out = new CsvOutput(new File("D:\\temp\\.cluster\\".concat(nf.format(round)).concat("_").concat(nf.format(x)).concat("_").concat(nf.format(y)).concat(".csv")));
-            } catch (IOException ex) {
-                Logger.getLogger(CsvOutput.class.getName()).log(Level.SEVERE, null, ex);
+    public void writeData(final File out) throws IOException {
+        if (!out.exists()) {
+            out.createNewFile();
+        }
+        try (final BufferedWriter output = new BufferedWriter(new FileWriter(out))) {
+            output.write(" ");
+            for (String s : data.get(data.keySet().iterator().next()).keySet()) {
+                output.write(SEPARATOR_VALUE);
+                writeValue(output, s);
             }
-            m.put(y, out);
-        }
-        out.addLine(value);
-    }
+            output.write(SEPARATOR_LINE);
+            
+            for (Entry<String, Map<String, F>> e : data.entrySet()) {
+                writeValue(output, e.getKey());
 
-    public static void closeSession() {
-        outputters.values().stream().forEach(
-                m -> m.values().stream().forEach(
-                        out -> out.closeWriter()));
-        outputters.clear();
-    }    
+                for (F val : e.getValue().values()) {
+                    output.write(SEPARATOR_VALUE);
+                    writeValue(output, val.toString());
+                }
 
-    void addLine(final String line) {
-        try {
-            out.write(line);
-            out.write(SEPARATOR_LINE);
-        } catch (IOException ex) {
-            Logger.getLogger(CsvOutput.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    void addLine(final double[] value) {
-        try {
-            for (double d : value) {
-                out.write(Double.toString(d));
-                out.write(SEPARATOR_VALUE);
+                output.write(SEPARATOR_LINE);
             }
-            out.write(SEPARATOR_LINE);
         } catch (IOException ex) {
-            Logger.getLogger(CsvOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.error(ex);
         }
     }
 
-    void closeWriter() {
-        try {
-            out.flush();
-            out.close();
-        } catch (IOException ex) {
-            Logger.getLogger(CsvOutput.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    private void writeValue(final BufferedWriter output, final String val) throws IOException {
+        output.write("\"");
+        output.write(val);
+        output.write("\"");
     }
 
 }
