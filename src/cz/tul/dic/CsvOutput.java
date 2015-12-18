@@ -38,7 +38,10 @@ public class CsvOutput<F> {
         m.put(key2, value);
     }
 
-    public void writeData(final File out) throws IOException {
+    public void writeData(final File out) throws IOException {        
+        if (data.isEmpty()) {
+            return;
+        }
         if (!out.exists()) {
             out.createNewFile();
         }
