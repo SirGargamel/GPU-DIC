@@ -131,33 +131,32 @@ public class KernelManager {
             return Long.compare(countO2, countO1);
         });
 
-        try {
-            final Random rnd = new Random();
-            final List<KernelInfo> infos = generateKernelInfos();
+        final Random rnd = new Random();
+        final List<KernelInfo> infos = generateKernelInfos();
 
-            Map<KernelInfo, Long> timeTable;
-            long time;
-            for (CLDevice device : devices) {
-                System.out.println("Testing " + device.toString());
-                TimeDataStorage.getInstance().reset();
-                DeviceManager.initContext(device);
+        Map<KernelInfo, Long> timeTable;
+        long time;
+        for (CLDevice device : devices) {
+            System.out.println("Testing " + device.toString());
+            TimeDataStorage.getInstance().reset();
+            DeviceManager.initContext(device);
 
-                // run blank test for device preparation
+            // run blank test for device preparation
+            try {
                 for (int i = 0; i < PERFORMANCE_TEST_BLANK_COUNT; i++) {
                     testKernelInfo(solver, infos.get(rnd.nextInt(infos.size())));
                 }
-
-                // commence testing
-                time = System.currentTimeMillis();
-                timeTable = runDeviceTest(solver);
-                times.put(timeTable, device);
-
-                time = System.currentTimeMillis() - time;
-                System.out.println("Test for " + device.toString() + " took " + time + "ms.");
+            } catch (Exception ex) {
+                Logger.warn(ex, "Blank test failed for {}.", device.toString());
             }
-        } catch (ComputationException ex) {
-            Logger.debug(ex);
-            throw new RuntimeException("Error initializing OpenCL.", ex);
+
+            // commence testing
+            time = System.currentTimeMillis();
+            timeTable = runDeviceTest(solver);
+            times.put(timeTable, device);
+
+            time = System.currentTimeMillis() - time;
+            System.out.println("Test for " + device.toString() + " took " + time + "ms.");
         }
         solver.endTask();
         // pick best device
@@ -165,15 +164,10 @@ public class KernelManager {
 
         // store results
         if (bestDevice != devices.get(devices.size() - 1)) {
-            // run test again if the device was not the last on tested
-            try {
-                TimeDataStorage.getInstance().reset();
-                DeviceManager.initContext(bestDevice);
-                runDeviceTest(solver);
-            } catch (ComputationException ex) {
-                Logger.debug(ex);
-                throw new RuntimeException("Error running retest for best device.", ex);
-            }
+            // run test again if the device was not the last on tested            
+            TimeDataStorage.getInstance().reset();
+            DeviceManager.initContext(bestDevice);
+            runDeviceTest(solver);
         }
         TimeDataStorage.getInstance().storeTimeDataToFile();
         Preferences.userNodeForPackage(KernelManager.class).putLong(PERFORMANCE_TEST_TIME, current);
@@ -183,14 +177,19 @@ public class KernelManager {
         inited = true;
     }
 
-    private static Map<KernelInfo, Long> runDeviceTest(final AbstractTaskSolver solver) throws ComputationException {
+    private static Map<KernelInfo, Long> runDeviceTest(final AbstractTaskSolver solver) {
         final List<KernelInfo> infos = generateKernelInfos();
         final Map<KernelInfo, Long> result = new HashMap<>(infos.size());
         long time;
         for (KernelInfo ki : infos) {
-            time = System.nanoTime();
-            testKernelInfo(solver, ki);
-            result.put(ki, System.nanoTime() - time);
+            try {
+                time = System.nanoTime();
+                testKernelInfo(solver, ki);
+                result.put(ki, System.nanoTime() - time);
+            } catch (Exception ex) {
+                Logger.warn(ex);
+                result.put(ki, Long.MAX_VALUE);
+            }
         }
 
         return result;
