@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -60,7 +61,6 @@ import org.pmw.tinylog.writers.RollingFileWriter;
  */
 public class DicMain extends Application {
 
-    private static final boolean DEBUG_COMPUTE_PREPROCESSING = false;
     private static final String DEBUG_SMALL = "-d";
     private static final String DEBUG_COMPUTE = "-debug";
     private static final String LICENSE_FILE = "license.dat";
@@ -79,12 +79,12 @@ public class DicMain extends Application {
         //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
         //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
         //////////////////////////////
-        "d:\\temp\\.smallSolverCompare\\6107544m.avi.config",
-        "d:\\temp\\.smallSolverCompare\\6113599m.avi.config",
-        "d:\\temp\\.smallSolverCompare\\6203652m.avi.config",
-        "d:\\temp\\.smallSolverCompare\\7202845m.avi.config",
-        "d:\\temp\\.smallSolverCompare\\9112502m.avi.config",
-        "d:\\temp\\.smallSolverCompare\\9905121m.avi.config",
+        //        "d:\\temp\\.smallSolverCompare\\6107544m.avi.config",
+        //        "d:\\temp\\.smallSolverCompare\\6113599m.avi.config",
+        //        "d:\\temp\\.smallSolverCompare\\6203652m.avi.config",
+        //        "d:\\temp\\.smallSolverCompare\\7202845m.avi.config",
+        //        "d:\\temp\\.smallSolverCompare\\9112502m.avi.config",
+        //        "d:\\temp\\.smallSolverCompare\\9905121m.avi.config",
         ////////////////////////////
         "d:\\temp\\.solverCompare\\6107544m.avi.config",
         "d:\\temp\\.solverCompare\\6113599m.avi.config",
@@ -112,12 +112,23 @@ public class DicMain extends Application {
         Stats.getInstance();
 
         if (parameters.contains(DEBUG_COMPUTE)) {
-            if (DEBUG_COMPUTE_PREPROCESSING) {
-                performPreprocessingTest();
-            } else {
-//                performComputationTest();
-//                performEngineTest();
-                performDeviceTest();
+            System.out.println("Choose a test:\n c : Computation\n d : Device\n e : Engine\n p : Preprocess");
+            final String in = new Scanner(System.in).nextLine().trim().toLowerCase();
+            switch (in) {
+                case "c":
+                    performComputationTest();
+                    break;
+                case "d":
+                    performDeviceTest();
+                    break;
+                case "e":
+                    performEngineTest();
+                    break;
+                case "p":
+                    performPreprocessingTest();
+                    break;
+                default:
+                    System.out.println("Illegal choice, launching GUI.");
             }
         }
 
@@ -290,6 +301,9 @@ public class DicMain extends Application {
     }
 
     private static void performEngineTest() {
+        final KernelInfo.Correlation[] correlations = new KernelInfo.Correlation[]{KernelInfo.Correlation.ZNCC, KernelInfo.Correlation.ZNSSD, KernelInfo.Correlation.WZNSSD};
+        final KernelInfo.Type[] types = new KernelInfo.Type[]{KernelInfo.Type.CL15D_pF, KernelInfo.Type.CL1D, KernelInfo.Type.CL2D};
+
         final int fs1 = 5; //10
         final int fs2 = 30; //30        
         TaskContainer task;
@@ -299,27 +313,31 @@ public class DicMain extends Application {
                     if (slvr == Solver.BRUTE_FORCE) {
                         continue;
                     }
+                    for (KernelInfo.Correlation corr : correlations) {
+                        for (KernelInfo.Type type : types) {
+                            try {
+                                Context.getInstance().setTc(TaskContainer.initTaskContainer(new File(s)));
+                                task = Context.getInstance().getTc();
+                                if ((int) task.getParameter(TaskParameter.SUBSET_SIZE) < size) {
+                                    System.out.println("STOPPING --- " + task.getParameter(TaskParameter.SUBSET_SIZE) + " --- " + size + " --- " + s);
+                                    break;
+                                }
+                                task.setParameter(TaskParameter.IN, new File(s));
+                                task.setParameter(TaskParameter.SUBSET_SIZE, size);
+                                task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, size / 2);
+                                task.setParameter(TaskParameter.SOLVER, slvr);
+                                task.setParameter(TaskParameter.KERNEL, new KernelInfo(type, KernelInfo.Input.ANY, corr, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY));
 
-                    try {
-                        Context.getInstance().setTc(TaskContainer.initTaskContainer(new File(s)));
-                        task = Context.getInstance().getTc();
-                        if ((int) task.getParameter(TaskParameter.SUBSET_SIZE) < size) {
-                            System.out.println("STOPPING --- " + task.getParameter(TaskParameter.SUBSET_SIZE) + " --- " + size + " --- " + s);
-                            break;
+                                commenceComputationDynamic(task);
+
+                                exportTask(task);
+                            } catch (IOException | ComputationException ex) {
+                                Logger.error(ex);
+                            } catch (Exception t) {
+                                Logger.error(t);
+                                System.out.println(Context.getInstance().getTc());
+                            }
                         }
-                        task.setParameter(TaskParameter.IN, new File(s));
-                        task.setParameter(TaskParameter.SUBSET_SIZE, size);
-                        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, size / 2);
-                        task.setParameter(TaskParameter.SOLVER, slvr);
-
-                        commenceComputationDynamic(task);
-
-                        exportTask(task);
-                    } catch (IOException | ComputationException ex) {
-                        Logger.error(ex);
-                    } catch (Exception t) {
-                        Logger.error(t);
-                        System.out.println(Context.getInstance().getTc());
                     }
                 }
             }
@@ -332,22 +350,22 @@ public class DicMain extends Application {
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
 
         CsvOutput<Long> csvOutput;
-        for (CLDevice device : devices) {
-//        final CLDevice device = devices.get(2);
-            csvOutput = new CsvOutput<>();
-            try {
-                TimeDataStorage.getInstance().reset();
-                DeviceManager.initContext(device);
+//        for (CLDevice device : devices) {
+        final CLDevice device = devices.get(2);
+        csvOutput = new CsvOutput<>();
+        try {
+            TimeDataStorage.getInstance().reset();
+            DeviceManager.initContext(device);
 
-                for (KernelInfo ki : infos) {
-                    testKernelInfo(solver, ki, csvOutput);
-                }
-
-            } catch (Exception ex) {
-                Logger.error(ex);
+            for (KernelInfo ki : infos) {
+                testKernelInfo(solver, ki, csvOutput);
             }
-            csvOutput.writeData(new File(device.getName().trim() + "-performance.csv"));
+
+        } catch (Exception ex) {
+            Logger.error(ex);
         }
+        csvOutput.writeData(new File(device.getName().trim() + "-performance.csv"));
+//        }
     }
 
     private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo, final CsvOutput<Long> dataHolder) throws ComputationException {
@@ -372,11 +390,16 @@ public class DicMain extends Application {
                 subsets = Collections.nCopies(sc, subset);
                 deformationLimits = Collections.nCopies(sc, limits);
                 weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(10, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
-                time = System.nanoTime();
-                solver.solve(new FullTask(
-                        img, img, subsets, weights, deformationLimits));
-                time = System.nanoTime() - time;
-                dataHolder.addValue(Integer.toString(sc) + ":" + Arrays.toString(limits), kernelInfo.toString(), time / 1_000);
+                try {
+                    time = System.nanoTime();
+                    solver.solve(new FullTask(
+                            img, img, subsets, weights, deformationLimits));
+                    time = System.nanoTime() - time;
+                    dataHolder.addValue(Integer.toString(sc) + ":" + Arrays.toString(limits), kernelInfo.toString(), time / 1_000);
+                } catch (ComputationException ex) {
+                    Logger.warn("Failed {}", kernelInfo);
+                    dataHolder.addValue(Integer.toString(sc) + ":" + Arrays.toString(limits), kernelInfo.toString(), Long.MAX_VALUE);
+                }
             }
         }
     }
