@@ -5,6 +5,7 @@
  */
 package cz.tul.dic;
 
+import cz.tul.pj.journal.Journal;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -12,7 +13,6 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -64,7 +64,7 @@ public class CsvOutput<F> {
                 output.write(SEPARATOR_LINE);
             }
         } catch (IOException ex) {
-            Logger.error(ex);
+            Journal.addDataEntry(ex, "Error writing CSV to file {0}.", out.getAbsolutePath());            
         }
     }
 

@@ -15,6 +15,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.Engine;
+import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,7 +33,6 @@ import org.apache.commons.math3.linear.QRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.SingularMatrixException;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -158,7 +158,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 final AbstractSubset as = fas.get();
                 subsetsToCompute.remove(as);
             } catch (InterruptedException | ExecutionException ex) {
-                Logger.warn(ex, "Error retrieving result after computing new step.");
+                Journal.addDataEntry(ex, "Solver error", "Error retrieving result after computing new step.");
             }
         }
 
@@ -265,9 +265,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 return subset;
             } catch (Exception ex) {
                 if (ex.getStackTrace().length == 0) {
-                    Logger.warn("{} stop, exception occured - {}, no stack trace...", subset, ex);
+                    Journal.addEntry("Subset computation stopped", "{0} stop, exception occured - {1}, no stack trace...", subset, ex);
                 } else {
-                    Logger.warn(ex, "{} stop, exception occured.", subset);
+                    Journal.addDataEntry(ex,"Subset computation stopped",  "{0} stop, exception occured.", subset);
                 }
                 addSubsetTerminationInfo(subset, "StepMaker exception - " + ex);
                 return subset;

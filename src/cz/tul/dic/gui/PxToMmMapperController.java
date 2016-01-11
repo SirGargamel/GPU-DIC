@@ -6,6 +6,7 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.pj.journal.Journal;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -22,7 +23,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
-import org.pmw.tinylog.Logger;
 
 /**
  * FXML Controller class
@@ -58,7 +58,7 @@ public class PxToMmMapperController implements Initializable {
             image.setFitWidth(img.getWidth());
         } else {
             image.setImage(null);
-            Logger.error("Error obtaining first image.");
+            Journal.addEntry("Error obtaining first image.");
         }
         image.setOnMousePressed((MouseEvent event) -> {
             anchor.getChildren().remove(line);

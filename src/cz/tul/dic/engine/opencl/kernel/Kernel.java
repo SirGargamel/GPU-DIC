@@ -25,6 +25,7 @@ import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.debug.Stats;
+import cz.tul.pj.journal.Journal;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -77,8 +78,7 @@ public abstract class Kernel {
             final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernel.".concat(kernelType.toString()));
             result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(concreteInfo, memManager, wsm);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.warn("Error instantiating kernel with kernel info [{}], using default kernel.", concreteInfo);
-            Logger.error(ex);
+            Logger.warn(ex, "Error instantiating kernel with kernel info [{}], using default kernel.", concreteInfo);
             final KernelInfo defaultInfo = KernelManager.getBestKernel(KernelManager.getBestKernel(false), deformationCount);
             result = new CL1D(defaultInfo, memManager, wsm);
         }
@@ -163,16 +163,11 @@ public abstract class Kernel {
                 clMem.add(kernelFindPos);
             }
         } catch (IOException ex) {
-            Logger.debug(ex);
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);
         }
     }
 
-    public List<CorrelationResult> computeFindBest(final ComputationTask task) throws ComputationException {
-        if (task.getSubsets().isEmpty()) {
-            Logger.warn("Empty subsets for computation.");
-            return new ArrayList<>(0);
-        }
+    public List<CorrelationResult> computeFindBest(final ComputationTask task) throws ComputationException {        
         final int subsetCount = task.getSubsets().size();
         final int subsetSize = task.getSubsets().get(0).getSize();
 
@@ -213,7 +208,7 @@ public abstract class Kernel {
 
     public double[] computeRaw(final ComputationTask task) throws ComputationException {
         if (task.getSubsets().isEmpty()) {
-            Logger.warn("Empty subsets for computation.");
+            Journal.addEntry("Empty subsets for raw computation.");
             return new double[0];
         }
         final int subsetCount = task.getSubsets().size();

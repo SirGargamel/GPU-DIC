@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.data.task;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
@@ -19,6 +20,7 @@ import java.io.File;
  *
  * @author Petr Jecmen
  */
+@XStreamAlias("TaskParameter")
 public enum TaskParameter {
 
     IN(File.class),

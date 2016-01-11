@@ -11,13 +11,13 @@ import cz.tul.dic.data.Image;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
+import cz.tul.pj.journal.Journal;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -74,16 +74,16 @@ public abstract class AbstractInputLoader {
                         try {
                             fps = Integer.parseInt(val);
                         } catch (NumberFormatException ex) {
-                            Logger.warn("Failed to parse FPS value \"{}\", using default FPS - ", val, fps);
+                            Journal.addEntry("UDA parsing failed.", "Failed to parse FPS value \"{0}\", using default FPS of {1}", val, fps);
                         }
                         break;
                     }
                 }
             } catch (IOException ex) {
-                Logger.warn("Missing UDA file, using default FPS - {}", fps);
+                Journal.addEntry("Missing UDA file", "Using default FPS - {0}", fps);
             }
         } else {
-            Logger.warn("Missing UDA file, using default FPS - {}", fps);
+            Journal.addEntry("Missing UDA file", "Using default FPS - {0}", fps);
         }
         tc.setParameter(TaskParameter.FPS, fps);
     }

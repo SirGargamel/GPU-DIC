@@ -5,17 +5,14 @@
  */
 package cz.tul.dic.data.task;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.Container;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.loaders.InputLoader;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +28,6 @@ import java.util.Observable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import javax.imageio.ImageIO;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -48,9 +43,12 @@ public class TaskContainer extends Observable implements Serializable {
     private final Container<HashMap<AbstractROI, double[]>> deformationLimits;
     private final Set<Hint> hints;
     // generated data
-    private transient List<Image> images;
-    // results    
+    @XStreamOmitField
+    private final transient List<Image> images;
+    // results
+    @XStreamOmitField
     private final List<Result> results;
+    @XStreamOmitField
     private final Map<Integer, Map<Integer, Result>> cumulativeResults;
 
     public TaskContainer() {
@@ -289,39 +287,5 @@ public class TaskContainer extends Observable implements Serializable {
         sb.setLength(sb.length() - "; ".length());
         sb.append("}");
         return sb.toString();
-    }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        try {
-            out.defaultWriteObject();
-            out.writeInt(images.size()); // how many images are serialized?
-            for (BufferedImage eachImage : images) {
-                ImageIO.write(eachImage, "bmp", out); // bmp is lossless            
-            }
-            out.flush();
-        } catch (IOException ex) {
-            Logger.error(ex);
-            throw ex;
-        }
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        try {
-            in.defaultReadObject();
-            final int imageCount = in.readInt();
-            images = new ArrayList<>(imageCount);
-            BufferedImage img;
-            for (int i = 0; i < imageCount; i++) {
-                img = ImageIO.read(in);
-                if (img != null) {
-                    images.add(Image.createImage(img));
-                } else {
-                    Logger.error("Error loading images nr." + i);
-                }
-            }
-        } catch (IOException ex) {
-            Logger.error(ex);
-            throw ex;
-        }
     }
 }

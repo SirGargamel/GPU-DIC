@@ -18,7 +18,6 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.kernel.Kernel;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import java.util.List;
-import org.pmw.tinylog.Logger;
 
 public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
 
@@ -27,8 +26,9 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
     private List<Integer> subsetWeights;
     private List<double[]> deformationLimits;
     private List<long[]> deformationCounts;
-    
-    protected DynamicMemoryManager() {}
+
+    protected DynamicMemoryManager() {
+    }
 
     @Override
     public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {
@@ -120,8 +120,7 @@ public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
                 clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
             }
         } catch (OutOfMemoryError e) {
-            Logger.debug(e);
-            throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
+            throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e);
         }
     }
 

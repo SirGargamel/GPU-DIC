@@ -13,6 +13,7 @@ import cz.tul.dic.data.config.ConfigType;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.pj.journal.Journal;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,7 +28,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import org.pmw.tinylog.Logger;
 
 public class VideoLoader extends AbstractInputLoader {
 
@@ -77,13 +77,12 @@ public class VideoLoader extends AbstractInputLoader {
 
             return result;
         } catch (IOException ex) {
-            Logger.error(ex, "Error loading sequence config file.");
-            return null;
+            Journal.addDataEntry(ex, "Error loading video.");
+            throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
     }
 
     private static List<File> loadVideoByVirtualDub(File input, final File temp, final File sequenceConfigFile) throws IOException {
-        Logger.trace("Cache data for file {} invalid, using VirtualDub.", input.getAbsolutePath());
         // prepare script
         String script = loadScript();
         script = script.replace(SCRIPT_FILE, input.getAbsolutePath());
@@ -202,7 +201,6 @@ public class VideoLoader extends AbstractInputLoader {
                 }
             }
         }
-        Logger.trace("Found valid cache data for file {}, importing {} images.", source.getAbsolutePath(), result.size());
         return result;
     }
 

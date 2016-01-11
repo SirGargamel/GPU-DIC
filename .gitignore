@@ -3,8 +3,8 @@
 /dist/
 /.sonar/
 /.jacocoverage/
-*.log
-log*.txt
+/*.log
+/log*.txt
 /build.xml
 /manifest.mf
 /cov-int/
@@ -13,3 +13,4 @@ log*.txt
 /license.dat
 /performance.kernel*
 /*-performance.csv
+/journal*.xml

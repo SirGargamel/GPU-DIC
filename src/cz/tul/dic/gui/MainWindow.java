@@ -15,6 +15,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.pj.journal.Journal;
 import java.awt.Desktop;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -149,7 +150,7 @@ public class MainWindow implements Initializable {
             try {
                 Desktop.getDesktop().browse(new URI(webLink));
             } catch (IOException | URISyntaxException ex) {
-                Logger.error(ex, "Error opening GitHub link.");
+                Journal.addDataEntry(ex, "Error opening GitHub link.");
             }
         });
 
@@ -224,7 +225,6 @@ public class MainWindow implements Initializable {
                 Platform.runLater(()
                         -> Dialogs.showException(ex)
                 );
-                Logger.error(ex);
             } catch (CancellationException ex) {
                 // don nothing when user cancels
             }
@@ -275,11 +275,15 @@ public class MainWindow implements Initializable {
                     }
                 }
             } catch (IOException ex) {
-                Logger.warn(ex);
+                Platform.runLater(()
+                        -> Dialogs.showWarning(
+                                Lang.getString("error"),
+                                ex.getLocalizedMessage()));
+                Journal.addDataEntry(ex, "Error saving task container to file.");
             }
         });
     }
-    
+
     @FXML
     private void handleButtonActionSettings(ActionEvent event) {
         try {
@@ -322,14 +326,14 @@ public class MainWindow implements Initializable {
                                             Lang.getString("Exception"),
                                             err.getLocalizedMessage())
                             );
-                            Logger.error(err);
+                            Journal.addDataEntry(err, "Exception occured during computation.");
                         } else {
                             Platform.runLater(()
                                     -> buttonResults.setDisable(false)
                             );
                         }
                     } catch (InterruptedException | ExecutionException ex) {
-                        Logger.error(ex);
+                        Journal.addDataEntry(ex, "Exception occured during computation.");
                     } catch (CancellationException ex) {
                         Platform.runLater(()
                                 -> buttonResults.setDisable(false)
@@ -358,7 +362,7 @@ public class MainWindow implements Initializable {
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading ROI dialog from JAR.\n{}", e);
+            Logger.error(e, "Error loading ROI dialog from JAR.");
         }
     }
 
@@ -374,7 +378,7 @@ public class MainWindow implements Initializable {
             stage.initOwner(imagePane.getScene().getWindow());
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading Expert settings dialog from JAR.\n{}", e);
+            Logger.error(e, "Error loading Expert settings dialog from JAR.");
         }
     }
 
@@ -396,7 +400,7 @@ public class MainWindow implements Initializable {
             });
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading Results dialog from JAR.\n{}", e);
+            Logger.error(e, "Error loading Results dialog from JAR.");
         }
     }
 
@@ -420,7 +424,7 @@ public class MainWindow implements Initializable {
             }
             stage.showAndWait();
         } catch (IOException e) {
-            Logger.error("Error loading PxToMmMapper dialog from JAR.\n{}", e);
+            Logger.error(e, "Error loading PxToMmMapper dialog from JAR.");
         }
     }
 
@@ -762,7 +766,7 @@ public class MainWindow implements Initializable {
                         } catch (ComputationException ex) {
                             error = true;
                             result = Lang.getString("wrongBin");
-                            Logger.error(ex);
+                            Journal.addDataEntry(ex, "Error loading binary task.");
                         }
                         break;
                     default:

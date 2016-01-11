@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.solvers;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.subset.AbstractSubset;
 import java.util.LinkedList;
@@ -14,9 +15,11 @@ import java.util.List;
  *
  * @author Petr Ječmen
  */
+@XStreamAlias("ComputationInfo")
 public class ComputationInfo {
     
     private final AbstractSubset subset;
+    @XStreamAlias("Results")
     private final List<CorrelationResult> results;
     private String terminationInfo;
 

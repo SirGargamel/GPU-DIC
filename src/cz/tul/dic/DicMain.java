@@ -23,6 +23,8 @@ import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.data.task.loaders.InputLoader;
+import cz.tul.dic.debug.converters.ImageConverter;
+import cz.tul.dic.debug.converters.SubsetConverter;
 import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
@@ -30,15 +32,17 @@ import cz.tul.dic.engine.opencl.kernel.TimeDataStorage;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.pj.journal.Journal;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 import javafx.application.Application;
@@ -66,35 +70,35 @@ public class DicMain extends Application {
     private static final String LICENSE_FILE = "license.dat";
     private static final File LICENSE = new File(LICENSE_FILE);
     private static final String[] FILES_TO_DEBUG = new String[]{
-        //        "d:\\temp\\.test FS vs Quality\\6107544m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\6113599m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\6203652m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\7202845m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\9112502m.avi.config",
-        //        "d:\\temp\\.test FS vs Quality\\9905121m.avi.config",
-        //        "d:\\temp\\.test spacing\\6107544m\\6107544m.avi.config",
-        //        "d:\\temp\\.test spacing\\6113599m\\6113599m.avi.config",
-        //        "d:\\temp\\.test spacing\\6203652m\\6203652m.avi.config",
-        //        "d:\\temp\\.test spacing\\7202845m\\7202845m.avi.config",
-        //        "d:\\temp\\.test spacing\\9112502m\\9112502m.avi.config",
-        //        "d:\\temp\\.test spacing\\9905121m\\9905121m.avi.config",                
+        //        "d:\\TUL\testData\\.test FS vs Quality\\6107544m.avi.config",
+        //        "d:\\TUL\testData\\.test FS vs Quality\\6113599m.avi.config",
+        //        "d:\\TUL\testData\\.test FS vs Quality\\6203652m.avi.config",
+        //        "d:\\TUL\testData\\.test FS vs Quality\\7202845m.avi.config",
+        //        "d:\\TUL\testData\\.test FS vs Quality\\9112502m.avi.config",
+        //        "d:\\TUL\testData\\.test FS vs Quality\\9905121m.avi.config",
+        //        "d:\\TUL\testData\\.test spacing\\6107544m\\6107544m.avi.config",
+        //        "d:\\TUL\testData\\.test spacing\\6113599m\\6113599m.avi.config",
+        //        "d:\\TUL\testData\\.test spacing\\6203652m\\6203652m.avi.config",
+        //        "d:\\TUL\testData\\.test spacing\\7202845m\\7202845m.avi.config",
+        //        "d:\\TUL\testData\\.test spacing\\9112502m\\9112502m.avi.config",
+        //        "d:\\TUL\testData\\.test spacing\\9905121m\\9905121m.avi.config",                
         //////////////////////////////
-        //        "d:\\temp\\.smallSolverCompare\\6107544m.avi.config",
-        //        "d:\\temp\\.smallSolverCompare\\6113599m.avi.config",
-        //        "d:\\temp\\.smallSolverCompare\\6203652m.avi.config",
-        //        "d:\\temp\\.smallSolverCompare\\7202845m.avi.config",
-        //        "d:\\temp\\.smallSolverCompare\\9112502m.avi.config",
-        //        "d:\\temp\\.smallSolverCompare\\9905121m.avi.config",
-        ////////////////////////////
-        "d:\\temp\\.solverCompare\\6107544m.avi.config",
-        "d:\\temp\\.solverCompare\\6113599m.avi.config",
-        "d:\\temp\\.solverCompare\\6203652m.avi.config",
-        "d:\\temp\\.solverCompare\\7202845m.avi.config",
-        "d:\\temp\\.solverCompare\\9112502m.avi.config",
-        "d:\\temp\\.solverCompare\\9905121m.avi.config", ///////////////////////////////
-    //            "z:\\TUL\\DIC\\testData\\.custom\\ShiftX.config",
-    //            "z:\\TUL\\DIC\\testData\\.custom\\ShiftXY.config",
-    //            "z:\\TUL\\DIC\\testData\\.custom\\StretchX.config",
+        "d:\\TUL\\testData\\.smallSolverCompare\\6107544m.avi.config", //        "d:\\TUL\testData\\.smallSolverCompare\\6113599m.avi.config",
+    //        "d:\\TUL\testData\\.smallSolverCompare\\6203652m.avi.config",
+    //        "d:\\TUL\testData\\.smallSolverCompare\\7202845m.avi.config",
+    //        "d:\\TUL\testData\\.smallSolverCompare\\9112502m.avi.config",
+    //        "d:\\TUL\testData\\.smallSolverCompare\\9905121m.avi.config",
+    ////////////////////////////
+    //        "d:\\TUL\testData\\.solverCompare\\6107544m.avi.config",
+    //        "d:\\TUL\testData\\.solverCompare\\6113599m.avi.config",
+    //        "d:\\TUL\testData\\.solverCompare\\6203652m.avi.config",
+    //        "d:\\TUL\testData\\.solverCompare\\7202845m.avi.config",
+    //        "d:\\TUL\testData\\.solverCompare\\9112502m.avi.config",
+    //        "d:\\TUL\testData\\.solverCompare\\9905121m.avi.config", 
+    ///////////////////////////////
+    //            "z:\\TUL\\testData\\.custom\\ShiftX.config",
+    //            "z:\\TUL\\testData\\.custom\\ShiftXY.config",
+    //            "z:\\TUL\\testData\\.custom\\StretchX.config",
     };
 
     @Override
@@ -103,10 +107,10 @@ public class DicMain extends Application {
         final List<String> parameters = params.getRaw();
 
         if (parameters.contains(DEBUG_COMPUTE) || parameters.contains(DEBUG_SMALL)) {
-            configureTinyLog(true);
+            configureLogging(true);
             DebugControl.startDebugMode();
         } else {
-            configureTinyLog(false);
+            configureLogging(false);
         }
 
         Stats.getInstance();
@@ -176,7 +180,7 @@ public class DicMain extends Application {
         }
     }
 
-    private static void configureTinyLog(final boolean debug) throws IOException {
+    private static void configureLogging(final boolean debug) throws IOException {
         Configurator c = Configurator.defaultConfig();
         c.writingThread(true);
         try {
@@ -193,15 +197,20 @@ public class DicMain extends Application {
         c.activate();
 
         if (debug) {
-            Logger.info("----- Starting APP ----- DEBUG -----");
+            Journal.addEntry("App launched in DEBUG mode.");
         } else {
-            Logger.info("----- Starting APP -----");
+            Journal.addEntry("App launched.");
         }
+
+        Journal.registerConverter(new ImageConverter());
+        Journal.registerConverter(new SubsetConverter());
+
+        Journal.addAlias("TaskParameter", TaskParameter.class);
     }
 
     private static void performComputationTest() {
         final int fs1 = 5; //10
-        final int fs2 = 30; //30        
+        final int fs2 = 5; //30        
         TaskContainer task;
         for (int size = fs1; size <= fs2; size += 5) {
             for (String s : FILES_TO_DEBUG) {
@@ -227,7 +236,7 @@ public class DicMain extends Application {
                     Logger.error(ex);
                 } catch (Exception t) {
                     Logger.error(t);
-                    System.out.println(Context.getInstance().getTc());
+                    Logger.info(Context.getInstance().getTc());
                 }
             }
         }
@@ -335,7 +344,7 @@ public class DicMain extends Application {
                                 Logger.error(ex);
                             } catch (Exception t) {
                                 Logger.error(t);
-                                System.out.println(Context.getInstance().getTc());
+                                Logger.info(Context.getInstance().getTc());
                             }
                         }
                     }
@@ -350,32 +359,41 @@ public class DicMain extends Application {
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
 
         CsvOutput<Long> csvOutput;
-//        for (CLDevice device : devices) {
-        final CLDevice device = devices.get(2);
-        csvOutput = new CsvOutput<>();
-        try {
-            TimeDataStorage.getInstance().reset();
-            DeviceManager.initContext(device);
+        for (CLDevice device : devices) {
+//        final CLDevice device = devices.get(2);
+            csvOutput = new CsvOutput<>();
+            try {
+                TimeDataStorage.getInstance().reset();
+                DeviceManager.initContext(device);
 
-            for (KernelInfo ki : infos) {
-                testKernelInfo(solver, ki, csvOutput);
+                for (KernelInfo ki : infos) {
+                    testKernelInfo(solver, ki, csvOutput);
+                }
+
+            } catch (Exception ex) {
+                Logger.error(ex);
             }
-
-        } catch (Exception ex) {
-            Logger.error(ex);
+            csvOutput.writeData(new File(device.getName().trim() + "-performance.csv"));
         }
-        csvOutput.writeData(new File(device.getName().trim() + "-performance.csv"));
-//        }
     }
 
     private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo, final CsvOutput<Long> dataHolder) throws ComputationException {
+        final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{1, 2, 8, 32};
         final double[][] PERFORMANCE_TEST_LIMITS = new double[][]{
             {-1, 1, 1, 0, 0, 0}, // 3
-            {-3, 3, 1, -1, 1, 1}, // 21
-            {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -2, 2, 1}, // 160
+            {-3, 3, 1, -1, 1, 1}, // 21            
+            {-6.0, 6.0, 1, -6, 6, 1}, // 169
             {-10.0, 10.0, 1, -10, 10, 1}, // 441
+            {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -2, 2, 1}, // 160
+            {-1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, 0, 1, 1}, // 486
         };
-        final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{1, 2, 8, 32};
+        final Map<double[], String> limitsDescr = new HashMap<>();
+        limitsDescr.put(PERFORMANCE_TEST_LIMITS[0], "Z-3");
+        limitsDescr.put(PERFORMANCE_TEST_LIMITS[1], "Z-21");
+        limitsDescr.put(PERFORMANCE_TEST_LIMITS[2], "Z-169");
+        limitsDescr.put(PERFORMANCE_TEST_LIMITS[3], "Z-441");
+        limitsDescr.put(PERFORMANCE_TEST_LIMITS[4], "F-160");
+        limitsDescr.put(PERFORMANCE_TEST_LIMITS[5], "F-486");
 
         solver.setKernel(kernelInfo);
         final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
@@ -391,14 +409,18 @@ public class DicMain extends Application {
                 deformationLimits = Collections.nCopies(sc, limits);
                 weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(10, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
                 try {
+                    // blind test to initialize device for current task
+                    solver.solve(new FullTask(
+                            img, img, subsets, weights, deformationLimits));
+                    // real test
                     time = System.nanoTime();
                     solver.solve(new FullTask(
                             img, img, subsets, weights, deformationLimits));
                     time = System.nanoTime() - time;
-                    dataHolder.addValue(Integer.toString(sc) + ":" + Arrays.toString(limits), kernelInfo.toString(), time / 1_000);
+                    dataHolder.addValue(Integer.toString(sc) + ":" + limitsDescr.get(limits), kernelInfo.toString(), time / 1_000);
                 } catch (ComputationException ex) {
-                    Logger.warn("Failed {}", kernelInfo);
-                    dataHolder.addValue(Integer.toString(sc) + ":" + Arrays.toString(limits), kernelInfo.toString(), Long.MAX_VALUE);
+                    Logger.warn(ex, "Failed {}", kernelInfo);
+                    dataHolder.addValue(Integer.toString(sc) + ":" + limitsDescr.get(limits), kernelInfo.toString(), Long.MAX_VALUE);
                 }
             }
         }

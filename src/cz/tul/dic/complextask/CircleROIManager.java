@@ -21,13 +21,13 @@ import cz.tul.dic.data.subset.generator.AbstractSubsetGenerator;
 import cz.tul.dic.engine.cluster.Analyzer1D;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
+import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -74,53 +74,36 @@ public class CircleROIManager extends AbstractROIManager {
         topRight = cRois.get(1);
         bottomLeft = cRois.get(2);
         bottomRight = cRois.get(3);
-
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Top Left - ");
-        sb.append(topLeft);
-        sb.append(" ; Top Right - ");
-        sb.append(topRight);
-        sb.append(" ; Bottom Left - ");
-        sb.append(bottomLeft);
-        sb.append(" ; Bottom Right - ");
-        sb.append(bottomRight);
-        Logger.trace(sb);
+        
+        Journal.addDataEntry(cRois, "Circle ROI manager initialized.");
 
         defLimits = DEFAULT_DEFORMATION_LIMITS;
         setROIs(initialRound);
     }
 
-    public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) {
+    public static CircleROIManager prepareManager(final TaskContainer tc, final int initialRound) throws ComputationException {
         final TaskContainer tcC = new TaskContainer(tc);
 
         tcC.setROIs(initialRound, tc.getRois(initialRound));
 
-        CircleROIManager result = null;
-
-        try {
-            result = new CircleROIManager(tcC, initialRound);
-        } catch (ComputationException ex) {
-            Logger.debug(ex, "Error initializing CircleROIManager.");
-        }
-
-        return result;
+        return new CircleROIManager(tcC, initialRound);
     }
 
     @Override
-    public void generateNextRound(int round, int nextRound) {
+    public void generateNextRound(int round, int nextRound) throws ComputationException {
         // find new position of Circle ROIs
         //// determine shifts of circle ROIs from previous round
         final double shift0 = determineROIShift(round, topLeft);
         final double shift1 = determineROIShift(round, topRight);
         final double shift2 = determineROIShift(round, bottomLeft);
         final double shift3 = determineROIShift(round, bottomRight);
-        Logger.trace("Detected jaw shifts - TOP : {}; {}; BOTTOM : {}, {}", shift0, shift1, shift2, shift3);
+        Journal.addEntry("Jaw shifts computed","TOP: {0}, {1}; BOTTOM: {2}, {3}", shift0, shift1, shift2, shift3);
         //// check if left equals right
         if (Math.abs(shift2 - shift3) > MAX_SHIFT_DIFFERENCE) {
-            Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat("-LOWER- ").concat(Double.toString(shift2)).concat(" vs ".concat(Double.toString(shift3))));
+            Journal.addEntry("Warning", "Detected fixture shift mismatch for lower fixtures - {0} vs {1}.", shift2, shift3);
         }
         if (Math.abs(shift1 - shift0) > MAX_SHIFT_DIFFERENCE) {
-            Logger.warn(ComputationExceptionCause.FIXTURES_SHIFT_MISMATCH.toString().concat("-UPPER- ").concat(Double.toString(shift0)).concat(" vs ".concat(Double.toString(shift1))));
+            Journal.addEntry("Warning", "Detected fixture shift mismatch for upper fixtures - {0} vs {1}.", shift0, shift1);
         }
         // generate new Circle ROIs
         topLeft = new CircularROI(topLeft.getCenterX(), topLeft.getCenterY() + shift0, topLeft.getRadius());
@@ -155,7 +138,7 @@ public class CircleROIManager extends AbstractROIManager {
         return analyzer.findMajorValue();
     }
 
-    private void setROIs(final int round) {
+    private void setROIs(final int round) throws ComputationException {
         final HashSet<AbstractROI> rois = new HashSet<>(4);
         rois.add(topLeft);
         rois.add(topRight);
@@ -173,26 +156,21 @@ public class CircleROIManager extends AbstractROIManager {
             task.setDeformationLimits(round, roi, defLimits);
         }
 
-        try {
-            final AbstractSubsetGenerator generator = AbstractSubsetGenerator.initGenerator((SubsetGenerator) task.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD));
-            Map<AbstractROI, List<AbstractSubset>> subsets;
+        final AbstractSubsetGenerator generator = AbstractSubsetGenerator.initGenerator((SubsetGenerator) task.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD));
+        Map<AbstractROI, List<AbstractSubset>> subsets;
 
-            boolean sizeAdjusted;
-            do {
-                subsets = generator.generateSubsets(task, round);
-                sizeAdjusted = false;
+        boolean sizeAdjusted;
+        do {
+            subsets = generator.generateSubsets(task, round);
+            sizeAdjusted = false;
 
-                for (AbstractROI roi : rois) {
-                    if (subsets.get(roi).size() < MIN_SUBSET_COUNT) {
-                        task.addSubsetSize(round, roi, task.getSubsetSize(round, roi) - 1);
-                        sizeAdjusted = true;
-                    }
+            for (AbstractROI roi : rois) {
+                if (subsets.get(roi).size() < MIN_SUBSET_COUNT) {
+                    task.addSubsetSize(round, roi, task.getSubsetSize(round, roi) - 1);
+                    sizeAdjusted = true;
                 }
-            } while (sizeAdjusted);
-
-        } catch (ComputationException ex) {
-            Logger.warn(ex, "Error adjsting subset sizes.");
-        }
+            }
+        } while (sizeAdjusted);
     }
 
     public double getShiftTop() {
@@ -214,7 +192,7 @@ public class CircleROIManager extends AbstractROIManager {
         return haveMoved(shiftBottom, shiftBottom);
     }
 
-    public void increaseLimits(final int round) {
+    public void increaseLimits(final int round) throws ComputationException {
         final double[] oldLimits = defLimits;
         defLimits = new double[oldLimits.length];
         System.arraycopy(oldLimits, 0, defLimits, 0, oldLimits.length);

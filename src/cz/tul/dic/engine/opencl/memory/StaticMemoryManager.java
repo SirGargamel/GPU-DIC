@@ -16,11 +16,11 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.kernel.Kernel;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import java.util.List;
-import org.pmw.tinylog.Logger;
 
 public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
-    
-    protected StaticMemoryManager() {}
+
+    protected StaticMemoryManager() {
+    }
 
     @Override
     public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {
@@ -70,8 +70,7 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
             }
             clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
         } catch (OutOfMemoryError e) {
-            Logger.debug(e);
-            throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
+            throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e);
         }
     }
 

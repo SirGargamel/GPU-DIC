@@ -9,6 +9,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.license.License;
 import cz.tul.dic.license.LicenseHandler;
+import cz.tul.pj.journal.Journal;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -20,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -30,22 +30,22 @@ import org.pmw.tinylog.Logger;
 public final class Utils {
 
     private static final String TEMP_DIR_NAME = "temp";
-    private static final Map<TaskContainer, List<File>> tempFiles;
-    private static final NumberFormat nfDouble, nfInt;
+    private static final Map<TaskContainer, List<File>> TEMP_FILES;
+    private static final NumberFormat NF_DOUBLE, NF_INT;
 
     static {
-        tempFiles = new HashMap<>();
+        TEMP_FILES = new HashMap<>();
 
         final DecimalFormatSymbols decimalSymbol = new DecimalFormatSymbols(Locale.getDefault());
         decimalSymbol.setDecimalSeparator('.');
-        nfDouble = new DecimalFormat("#0.00#", decimalSymbol);
-        nfInt = new DecimalFormat("00", decimalSymbol);
+        NF_DOUBLE = new DecimalFormat("#0.00#", decimalSymbol);
+        NF_INT = new DecimalFormat("00", decimalSymbol);
     }
 
     private Utils() {
     }
 
-    public static File getTempDir(final File in) {        
+    public static File getTempDir(final File in) {
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         ensureDirectoryExistence(temp);
@@ -54,10 +54,10 @@ public final class Utils {
     }
 
     public static void markTempFilesForDeletion(final TaskContainer tc, final File... filesForDeletion) {
-        List<File> f = tempFiles.get(tc);
+        List<File> f = TEMP_FILES.get(tc);
         if (f == null) {
             f = new LinkedList<>();
-            tempFiles.put(tc, f);
+            TEMP_FILES.put(tc, f);
         }
         f.addAll(Arrays.asList(filesForDeletion));
     }
@@ -67,17 +67,15 @@ public final class Utils {
         final String tempPath = in.getParent().concat(File.separator).concat(TEMP_DIR_NAME);
         final File temp = new File(tempPath);
         if (temp.exists()) {
-            Logger.trace("Deleting files inside temp folder {}.", temp.getAbsolutePath());
-
-            List<File> list = tempFiles.get(tc);
+            List<File> list = TEMP_FILES.get(tc);
             for (File f : list) {
                 if (!f.delete()) {
-                    Logger.warn("Error deleting {}", f.getAbsolutePath());
+                    Logger.warn("Error deleting {}", f);
                 }
             }
             list.clear();
             if (temp.listFiles().length == 0 && !temp.delete()) {
-                Logger.warn("Error deleting {}", temp.getAbsolutePath());
+                Logger.warn("Error deleting {}", temp);
             }
         }
     }
@@ -88,27 +86,12 @@ public final class Utils {
         }
     }
 
-    public static boolean isLevelLogged(final Level testedLevel) {
-        final Level currentLevel = Logger.getLevel();
-        int indexTestedLevel = 0, indexCurrentLevel = 1;
-        final Level[] levels = Level.values();
-        for (int l = 0; l < levels.length; l++) {
-            if (levels[l].equals(testedLevel)) {
-                indexTestedLevel = l;
-            }
-            if (levels[l].equals(currentLevel)) {
-                indexCurrentLevel = l;
-            }
-        }
-        return indexCurrentLevel < indexTestedLevel;
-    }
-
     public static String format(final double val) {
-        return nfDouble.format(val);
+        return NF_DOUBLE.format(val);
     }
 
     public static String format(final int val) {
-        return nfInt.format(val);
+        return NF_INT.format(val);
     }
 
     public static double[][] generateNaNarray(final int width, final int height) {
@@ -125,7 +108,7 @@ public final class Utils {
             final License license = LicenseHandler.readLicenseFile(licenseFile);
             result = LicenseHandler.checkLicense(license);
         } catch (IOException ex) {
-            Logger.error(ex);
+            Journal.addDataEntry(ex, "Error checking the license file {0}.", licenseFile.getAbsolutePath());
         }
         return result;
     }

@@ -5,8 +5,10 @@
  */
 package cz.tul.dic.data.roi;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import java.io.Serializable;
 
+@XStreamAlias("Rectangle")
 public class RectangleROI extends AbstractROI implements Serializable {
 
     private final double x1, y1, x2, y2;

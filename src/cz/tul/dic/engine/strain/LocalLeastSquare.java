@@ -14,6 +14,7 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.result.StrainResult;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
-import org.pmw.tinylog.Logger;
 
 public class LocalLeastSquare extends StrainEstimator {
 
@@ -36,7 +36,7 @@ public class LocalLeastSquare extends StrainEstimator {
     private static final int INDEX_ERR_V = 7;
     private static final double COEFF_ADJUST = 100;
     private boolean stop;
-    
+
     public LocalLeastSquare() {
         super();
     }
@@ -85,9 +85,7 @@ public class LocalLeastSquare extends StrainEstimator {
                     resultQualityV[eu.getX()][eu.getY()] = eu.getErrors()[1];
                 }
             } catch (InterruptedException | ExecutionException ex) {
-                if (!stop) {
-                    Logger.error(ex);
-                }
+                Journal.addDataEntry(ex, "Error wcomputing strain using LLS.");
             }
 
             if (DebugControl.isDebugMode()) {
@@ -149,7 +147,6 @@ public class LocalLeastSquare extends StrainEstimator {
                 System.arraycopy(beta, 0, result, 3, 3);
                 result[INDEX_ERR_V] = regression.estimateRegressionStandardError();
             } catch (MathIllegalArgumentException ex) {
-                Logger.debug(ex);
                 // singular matrix, let solution be zeroes
             }
         } else {

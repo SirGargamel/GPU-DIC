@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.pmw.tinylog.Logger;
 
 public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
 
@@ -119,8 +118,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
                 clResults = context.createFloatBuffer((int) size, CLMemory.Mem.READ_WRITE);
             }
         } catch (OutOfMemoryError e) {
-            Logger.debug(e);
-            throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e.getLocalizedMessage());
+            throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, e);
         }
     }
 

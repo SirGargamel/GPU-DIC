@@ -13,11 +13,11 @@ import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -83,17 +83,7 @@ public class RectROIManager extends AbstractROIManager {
                     yBottom);
         }
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Main ROI - [");
-        sb.append(rect.getX1());
-        sb.append("; ");
-        sb.append(rect.getY1());
-        sb.append("], [");
-        sb.append(rect.getX2());
-        sb.append("; ");
-        sb.append(rect.getY2());
-        sb.append("]");
-        Logger.trace(sb);
+        Journal.addDataEntry(rect, "Rectangle ROI manager prepared");
 
         final HashSet<AbstractROI> rois = new HashSet<>(1);
         rois.add(rect);

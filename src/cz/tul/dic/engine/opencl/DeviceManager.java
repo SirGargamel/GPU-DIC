@@ -11,23 +11,23 @@ import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.CLProgram;
+import cz.tul.pj.journal.Journal;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
 public final class DeviceManager {
-    
+
     private static CLDevice DEVICE;
     private static CLContext CONTEXT;
     private static CLCommandQueue QUEUE;
 
-    static {        
+    static {
         Runtime.getRuntime().addShutdownHook(
                 new Thread(() -> clearMemory()
                 ));
@@ -47,12 +47,12 @@ public final class DeviceManager {
     public static void initContext(final CLDevice device) {
         clearMemory();
 
-        DEVICE = device;        
-        Logger.debug("Using " + device);
+        DEVICE = device;
+        Journal.addEntry("Using new OpenCL device.", "{0}", device);
 
         CONTEXT = CLContext.create(device);
         CONTEXT.addCLErrorHandler((String string, ByteBuffer bb, long l)
-                -> Logger.error("CLError - " + string)
+                -> Journal.addEntry("CLError - " + string)
         );
 
         QUEUE = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
@@ -64,7 +64,6 @@ public final class DeviceManager {
 
     public static void clearMemory() {
         if (CONTEXT != null) {
-            Logger.warn("Reseting context memory.");
             for (CLMemory mem : CONTEXT.getMemoryObjects()) {
                 if (mem != null && !mem.isReleased()) {
                     mem.release();

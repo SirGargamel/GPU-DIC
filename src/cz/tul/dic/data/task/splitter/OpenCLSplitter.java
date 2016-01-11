@@ -15,14 +15,13 @@ import cz.tul.dic.engine.opencl.DeviceManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
 public class OpenCLSplitter extends AbstractTaskSplitter {
-    
+
     private static final long SIZE_INT = 4;
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
@@ -63,7 +62,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         List<double[]> checkedDeformations = null;
         final int rest = subsets.size() - subsetIndex;
 
-        int taskSize = rest;        
+        int taskSize = rest;
         final long deformationCount = DeformationUtils.findMaxDeformationCount(deformations, order, usesLimits);
         while (taskSize > 1 && !isMemOk(deformationCount, taskSize, subsetSize, deformationsArraySize)) {
             taskSize *= COEFF_LIMIT_ADJUST;
@@ -91,10 +90,7 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
 
         checkIfHasNext();
 
-        ComputationTask ct = new ComputationTask(image1, image2, sublistS, sublistW, checkedDeformations, order, usesLimits);
-        Logger.trace("OpenCL splitter computing task with {} subsets.", sublistS.size());
-
-        return ct;
+        return new ComputationTask(image1, image2, sublistS, sublistW, checkedDeformations, order, usesLimits);
     }
 
     private boolean isMemOk(final long deformationCount, final long subsetCount, final long subsetSize, final long deformationsArraySize) {

@@ -25,6 +25,7 @@ import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.pj.journal.Journal;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -36,7 +37,6 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -57,13 +57,16 @@ public class ComplexTaskSolver extends Observable implements Observer {
     }
 
     public void solveComplexTask() throws ComputationException {
+        Journal.addDataEntry(task, "Computing complex task");
+        Journal.createSubEntry();
+
         stop = false;
         Engine.getInstance().addObserver(this);
 
         TaskContainerUtils.checkTaskValidity(task);
         task.clearResultData();
         bottomShifts.clear();
-        
+
         AbstractOpenCLMemoryManager.getInstance().assignTask(task);
 
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
@@ -120,7 +123,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
                 rrm.generateNextRound(r, nextR);
                 Engine.getInstance().computeRound(rrm.getTc(), r, nextR);
             } else {
-                Logger.info("Skipping round " + r + ", no shift detected.");
+                Journal.addEntry("Skipping round", "No shift detected in round {0}.", r);
                 final Image img = rrm.getTc().getImage(r);
                 final double[][][] data;
                 if (!tcR.getRois(r).isEmpty()) {
@@ -159,7 +162,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
                 f.get();
             }
         } catch (InterruptedException | ExecutionException | NullPointerException ex) {
-            Logger.warn(ex);
+            Journal.addDataEntry(ex, "Exception occured while waiting for strain computation finish.");
         }
 
         try {
@@ -184,6 +187,8 @@ public class ComplexTaskSolver extends Observable implements Observer {
         }
 
         Engine.getInstance().deleteObserver(this);
+
+        Journal.closeSubEntry();
     }
 
     private static boolean checkResultsQuality(final CircleROIManager crm, int round) {
@@ -214,12 +219,16 @@ public class ComplexTaskSolver extends Observable implements Observer {
             }
         }
         return data;
-    }    
+    }
 
     public boolean isValidComplexTask() {
-        final int[] rounds = (int[]) task.getParameter(TaskParameter.ROUND_LIMITS);
-        final int baseRound = rounds[0];
-        return CircleROIManager.prepareManager(task, baseRound) != null;
+        try {
+            final int[] rounds = (int[]) task.getParameter(TaskParameter.ROUND_LIMITS);
+            final int baseRound = rounds[0];
+            return CircleROIManager.prepareManager(task, baseRound) != null;
+        } catch (ComputationException ex) {
+            return false;
+        }
     }
 
     public List<Double> getBottomShifts() {
@@ -230,7 +239,6 @@ public class ComplexTaskSolver extends Observable implements Observer {
         stop = true;
         Engine.getInstance().stop();
         strain.stop();
-        Logger.debug("Stopping complex task solver.");
     }
 
     @Override

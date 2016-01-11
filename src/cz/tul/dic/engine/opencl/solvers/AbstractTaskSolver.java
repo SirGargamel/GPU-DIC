@@ -5,25 +5,26 @@
  */
 package cz.tul.dic.engine.opencl.solvers;
 
-import cz.tul.dic.data.result.CorrelationResult;
 import com.jogamp.opencl.CLException;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
-import cz.tul.dic.data.subset.AbstractSubset;
-import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.TaskDefaultValues;
-import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.data.task.splitter.AbstractTaskSplitter;
-import cz.tul.dic.data.task.FullTask;
-import cz.tul.dic.engine.opencl.DeviceManager;
-import cz.tul.dic.engine.opencl.kernel.Kernel;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
+import cz.tul.dic.data.result.CorrelationResult;
+import cz.tul.dic.data.subset.AbstractSubset;
+import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.data.task.FullTask;
+import cz.tul.dic.data.task.TaskDefaultValues;
+import cz.tul.dic.data.task.splitter.AbstractTaskSplitter;
+import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.debug.IGPUResultsReceiver;
+import cz.tul.dic.engine.opencl.DeviceManager;
+import cz.tul.dic.engine.opencl.kernel.Kernel;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.kernel.KernelManager;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
+import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public abstract class AbstractTaskSolver extends Observable {
 
     static {
         LISTENERS = new LinkedList<>();
-        
+
         SOLVERS = new HashMap<>();
         SOLVERS.put(BruteForce.class, Solver.BRUTE_FORCE);
         SOLVERS.put(CoarseFine.class, Solver.COARSE_FINE);
@@ -81,7 +82,7 @@ public abstract class AbstractTaskSolver extends Observable {
 
         final Solver solver = SOLVERS.get(this.getClass());
         kernelType = KernelManager.getBestKernel(solver.supportsWeighedCorrelation());
-        
+
         interpolation = TaskDefaultValues.DEFAULT_INTERPOLATION;
         taskSplitVariant = TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD;
         taskSplitValue = null;
@@ -94,8 +95,7 @@ public abstract class AbstractTaskSolver extends Observable {
             final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.solvers.".concat(type.getClassName()));
             return (AbstractTaskSolver) cls.newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            Logger.warn("Error instantiating class {}, using default correlation calculator.", type);
-            Logger.error(ex);
+            Logger.warn(ex, "Error instantiating class {}, using default correlation calculator.", type);
             return new CoarseFine();
         }
     }
@@ -108,6 +108,9 @@ public abstract class AbstractTaskSolver extends Observable {
 
     public synchronized List<CorrelationResult> solve(
             final FullTask fullTask) throws ComputationException {
+        Journal.addDataEntry(fullTask, "Solving full task", "Using \"{0}\" solver.", getClass().getSimpleName());
+        Journal.createSubEntry();
+
         stop = false;
         computationInfo.clear();
 
@@ -129,7 +132,6 @@ public abstract class AbstractTaskSolver extends Observable {
         }
 
         kernel = Kernel.createInstance(kernelType, memManager, getDeformationCount());
-        Logger.trace("Kernel prepared - {}", kernel);
 
         this.subsetSize = fullTask.getSubsets().get(0).getSize();
         usesWeights = kernel.getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD;
@@ -138,11 +140,11 @@ public abstract class AbstractTaskSolver extends Observable {
 
         final List<CorrelationResult> result = solve();
 
-        time = System.nanoTime() - time;
-        Logger.debug("Task [{}] computed in {}ms using {}.", fullTask, time / 1_000_000, getClass().getSimpleName());
-        Logger.debug(dumpComputationInfo());
-
         kernel.clearMemory();
+
+        time = System.nanoTime() - time;
+        Journal.addDataEntry(computationInfo, "Full task solved", "Task completed in {0}ms.", time / 1_000_000);
+        Journal.closeSubEntry();
 
         return result;
     }
@@ -174,13 +176,10 @@ public abstract class AbstractTaskSolver extends Observable {
             computeSubtasks(ts, taskResults, kernel, computationTask);
         } catch (CLException ex) {
             memManager.clearMemory();
-            Logger.debug(ex);
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);
         }
 
-        if (!stop) {
-            Logger.trace("Found solution for {} subsets.", taskResults.size());
-        }
+        Journal.addEntry("Computation subtask completed.", "Found solution for {0} subsets.", taskResults.size());
 
         return taskResults;
     }
@@ -292,7 +291,6 @@ public abstract class AbstractTaskSolver extends Observable {
             kernel.stopComputation();
         }
         endTask();
-        Logger.debug("Stopping correlation counter.");
     }
 
     protected void addSubsetResultInfo(final AbstractSubset subset, final CorrelationResult result) {
@@ -310,15 +308,6 @@ public abstract class AbstractTaskSolver extends Observable {
 
     protected void addSubsetTerminationInfo(final AbstractSubset subset, final String info) {
         getInfo(subset).setTerminationInfo(info);
-    }
-
-    private String dumpComputationInfo() {
-        final StringBuilder sb = new StringBuilder("Subset computation results:\n");
-        for (ComputationInfo ci : computationInfo.values()) {
-            sb.append(ci).append("\n");
-        }
-        sb.setLength(Math.max(0, sb.length() - "\n".length()));
-        return sb.toString();
     }
 
     public static void registerGPUDataListener(final IGPUResultsReceiver listener) {

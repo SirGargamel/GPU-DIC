@@ -15,6 +15,7 @@ import cz.tul.dic.output.target.ExportTarget;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.pj.journal.Journal;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -55,7 +56,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
@@ -224,7 +224,7 @@ public class ResultPresenter implements Initializable {
                 }
             }
         } catch (IOException ex) {
-            Logger.warn(ex);
+            Journal.addDataEntry(ex, "Error saving result to file.");
         }
     }
 
@@ -403,7 +403,7 @@ public class ResultPresenter implements Initializable {
                     openTwoPointStrainAnalysis(context);
                 }
             } catch (IOException e) {
-                Logger.error("Error loading Results dialog from JAR.\n{}", e);
+                Logger.error(e, "Error loading Results dialog from JAR.");
             }
         });
 

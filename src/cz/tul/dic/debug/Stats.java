@@ -21,6 +21,7 @@ import cz.tul.dic.output.CsvWriter;
 import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.ExportUtils;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.pj.journal.Journal;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,11 +57,11 @@ public class Stats implements IGPUResultsReceiver {
         try {
             INSTANCE.loadConfig(Stats.class.getResourceAsStream("stats.properties"));
         } catch (IOException ex) {
-            Logger.error("Error loading internal stats properites.", ex);
+            Logger.warn(ex, "Error loading internal stats properites.");
         }
         try {
             INSTANCE.loadConfig(new FileInputStream("stats.properties"));
-            Logger.info("Loading external stats.properties.");
+            Journal.addEntry("Loading external stats.properties.");
         } catch (IOException ex) {
             // do nothing, external stats not found
         }
@@ -97,7 +98,7 @@ public class Stats implements IGPUResultsReceiver {
                 }
                 data.put(type, val);
             } catch (IllegalArgumentException ex) {
-                Logger.warn("Illegal item in stats properties file - " + ex);
+                Journal.addDataEntry(ex, "Illegal item in stats properties file.");
             }
         }
     }
@@ -304,7 +305,7 @@ public class Stats implements IGPUResultsReceiver {
         try (FileWriter out = new FileWriter(outFile)) {
             out.write(textDump);
         } catch (IOException ex) {
-            Logger.error(ex);
+            Logger.warn(ex, "Error saving dump.");
         }
     }
 
@@ -334,7 +335,7 @@ public class Stats implements IGPUResultsReceiver {
             try {
                 ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultData, Direction.DABS)), "BMP", out);
             } catch (IOException ex) {
-                Logger.error(ex);
+                Logger.warn(ex, "Error drawing subset quality statistics.");
             }
         }
     }
@@ -347,7 +348,7 @@ public class Stats implements IGPUResultsReceiver {
             try {
                 ImageIO.write(ExportUtils.overlayImage(tc.getImage(roundTo), ExportUtils.createImageFromMap(tc.getResult(roundFrom, roundTo).getDisplacementResult().getQuality(), Direction.DABS)), "BMP", out);
             } catch (IOException ex) {
-                Logger.error(ex);
+                Logger.warn(ex, "Error drawing point result statistics.");
             }
         }
     }
@@ -381,7 +382,7 @@ public class Stats implements IGPUResultsReceiver {
                 ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQualityU, Direction.EXX)), "BMP", new File(nameA));
                 ImageIO.write(ExportUtils.overlayImage(img, ExportUtils.createImageFromMap(resultQualityV, Direction.EYY)), "BMP", new File(nameB));
             } catch (IOException ex) {
-                Logger.warn(ex);
+                Logger.warn(ex, "Error drawing regression qualities.");
             }
         }
     }

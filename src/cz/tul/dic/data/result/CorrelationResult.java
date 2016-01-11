@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.data.result;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -12,6 +13,7 @@ import java.util.Arrays;
  *
  * @author Petr Ječmen
  */
+@XStreamAlias("CorrelationResult")
 public class CorrelationResult implements Serializable {
 
     private final double quality;
@@ -21,14 +23,14 @@ public class CorrelationResult implements Serializable {
         this.quality = value;
         this.deformation = deformation;
     }
-    
+
     public double getQuality() {
         return quality;
     }
 
     public double[] getDeformation() {
         return deformation;
-    }    
+    }
 
     @Override
     public String toString() {

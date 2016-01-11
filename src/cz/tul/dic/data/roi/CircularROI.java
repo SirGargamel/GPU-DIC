@@ -5,8 +5,10 @@
  */
 package cz.tul.dic.data.roi;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import java.io.Serializable;
 
+@XStreamAlias("Circle")
 public class CircularROI extends AbstractROI implements Serializable {
 
     private final double centerX, centerY, radius;

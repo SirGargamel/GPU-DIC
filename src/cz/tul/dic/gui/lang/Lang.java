@@ -5,17 +5,17 @@
  */
 package cz.tul.dic.gui.lang;
 
+import cz.tul.pj.journal.Journal;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
 public final class Lang {
-    
+
     private static final ResourceBundle BUNDLE;
 
     static {
@@ -37,8 +37,8 @@ public final class Lang {
             for (int i = 0; i < params.length; i++) {
                 result = result.replaceAll("\\{".concat(Integer.toString(i).concat("\\}")), params[i]);
             }
-        } catch (MissingResourceException ex) {            
-            Logger.debug(ex);
+        } catch (MissingResourceException ex) {
+            Journal.addDataEntry(ex, "A resource is missing.");
         }
 
         return result;

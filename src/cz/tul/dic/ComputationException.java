@@ -25,7 +25,7 @@ public class ComputationException extends Exception {
         this.cause = cause;
     }
     
-    public ComputationException(final ComputationExceptionCause cause, final Exception ex) {
+    public ComputationException(final ComputationExceptionCause cause, final Throwable ex) {
         super(ex);
         
         this.cause = cause;

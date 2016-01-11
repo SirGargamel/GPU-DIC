@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.pmw.tinylog.Logger;
 
 public class MaxAndWeightedAverage extends DisplacementCalculator {
 
@@ -92,7 +91,6 @@ public class MaxAndWeightedAverage extends DisplacementCalculator {
 
                 f = susbets.get(i);
                 if (f == null) {
-                    Logger.warn("No subset - {}", f);
                     continue;
                 }
                 if (!SubsetUtils.areLinesInsideSubset(f, lowerBound, upperBound)) {

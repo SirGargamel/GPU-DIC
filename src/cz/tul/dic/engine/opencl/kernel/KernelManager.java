@@ -18,6 +18,7 @@ import cz.tul.dic.engine.opencl.DeviceManager;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo.Type;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.pj.journal.Journal;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,7 +105,6 @@ public class KernelManager {
     }
 
     private static void runDevicePerformanceTest(final long current) throws RuntimeException {
-        Logger.debug("Initializing best kernel.");
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
         solver.setTaskSplitVariant(TaskSplitMethod.NONE, null);
@@ -154,9 +154,6 @@ public class KernelManager {
             time = System.currentTimeMillis();
             timeTable = runDeviceTest(solver);
             times.put(timeTable, device);
-
-            time = System.currentTimeMillis() - time;
-            System.out.println("Test for " + device.toString() + " took " + time + "ms.");
         }
         solver.endTask();
         // pick best device
@@ -172,7 +169,7 @@ public class KernelManager {
         TimeDataStorage.getInstance().storeTimeDataToFile();
         Preferences.userNodeForPackage(KernelManager.class).putLong(PERFORMANCE_TEST_TIME, current);
         Preferences.userNodeForPackage(KernelManager.class).put(PERFORMANCE_DEVICE, bestDevice.getName().trim());
-        Logger.debug("Kernel performance assesment completed.");
+        Journal.addEntry("Kernel performance assesment completed.");
 
         inited = true;
     }
@@ -187,7 +184,7 @@ public class KernelManager {
                 testKernelInfo(solver, ki);
                 result.put(ki, System.nanoTime() - time);
             } catch (Exception ex) {
-                Logger.warn(ex);
+                Logger.warn(ex, "Device test exception", "KernelInfo {} on {}.", ki, DeviceManager.getDevice().getName());
                 result.put(ki, Long.MAX_VALUE);
             }
         }

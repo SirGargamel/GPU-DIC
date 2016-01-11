@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.engine.opencl.kernel;
 
+import cz.tul.pj.journal.Journal;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,14 +45,14 @@ public class TimeDataStorage implements Serializable {
     public Map<KernelInfo, Map<Long, Map<Long, Long>>> getFullDataByKernel() {
         return timeDataA;
     }
-    
+
     public Map<Long, Map<Long, Map<KernelInfo, Long>>> getFullDataBySize() {
         return timeDataB;
     }
 
     public Map<Long, Map<Long, Long>> getTimeData(final KernelInfo kernel) {
         return timeDataA.get(kernel);
-    }      
+    }
 
     public void storeTime(final KernelInfo kernel, final long workSizeF, final long workSizeD, final long time) {
         // Time data per kernel
@@ -71,12 +72,12 @@ public class TimeDataStorage implements Serializable {
         if (mB == null) {
             mB = new TreeMap<>();
             timeDataB.put(workSizeF, mB);
-        }        
+        }
         Map<KernelInfo, Long> mB2 = mB.get(workSizeD);
         if (mB2 == null) {
             mB2 = new HashMap<>();
             mB.put(workSizeD, mB2);
-        }        
+        }
         mB2.put(kernel, time);
     }
 
@@ -87,13 +88,13 @@ public class TimeDataStorage implements Serializable {
             timeDataA = (Map<KernelInfo, Map<Long, Map<Long, Long>>>) in.readObject();
             result = true;
         } catch (IOException | ClassNotFoundException ex) {
-            Logger.error(ex, "Error reading time data.");
+            Logger.warn(ex, "Error reading time data.");
         }
         try (final ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_STORE_B))) {
             timeDataB = (Map<Long, Map<Long, Map<KernelInfo, Long>>>) in.readObject();
             result = true;
         } catch (IOException | ClassNotFoundException ex) {
-            Logger.error(ex, "Error reading time data.");
+            Logger.warn(ex, "Error reading time data.");
         }
         return result;
     }
@@ -102,17 +103,17 @@ public class TimeDataStorage implements Serializable {
         try (final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_STORE_A))) {
             out.writeObject(timeDataA);
         } catch (IOException ex) {
-            Logger.error(ex, "Error storing time data.");
+            Logger.warn(ex, "Error storing time data.");
         }
         try (final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_STORE_B))) {
             out.writeObject(timeDataB);
         } catch (IOException ex) {
-            Logger.error(ex, "Error storing time data.");
+            Logger.warn(ex, "Error storing time data.");
         }
     }
-    
-    public void reset() {        
-        timeDataA = new HashMap<>();        
+
+    public void reset() {
+        timeDataA = new HashMap<>();
         timeDataB = new TreeMap<>();
     }
 

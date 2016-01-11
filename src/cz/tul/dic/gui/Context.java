@@ -10,12 +10,12 @@ import cz.tul.dic.output.Direction;
 import cz.tul.dic.output.target.ExportTarget;
 import cz.tul.dic.output.ExportTask;
 import cz.tul.dic.output.Exporter;
+import cz.tul.pj.journal.Journal;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -67,7 +67,7 @@ public class Context {
                 result = m.get(dir);
             }
         } catch (IOException ex) {
-            Logger.error(ex, UNEXPECTED_IO_ERROR);
+            Journal.addDataEntry(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;
@@ -79,7 +79,7 @@ public class Context {
             Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.GUI, this, x, y));
             result = exportCachePoints.get(generateKey(x, y));
         } catch (IOException ex) {
-            Logger.error(ex, UNEXPECTED_IO_ERROR);
+            Journal.addDataEntry(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;
@@ -91,7 +91,7 @@ public class Context {
             Exporter.export(tc, ExportTask.generateDoublePointExport(ExportTarget.GUI, this, x1, y1, x2, y2));
             result = exportCachePoints.get(generateKey(x1, y1, x2, y2));
         } catch (IOException ex) {
-            Logger.error(ex, UNEXPECTED_IO_ERROR);
+            Journal.addDataEntry(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;

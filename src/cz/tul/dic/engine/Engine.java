@@ -31,6 +31,7 @@ import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import cz.tul.dic.output.NameGenerator;
+import cz.tul.pj.journal.Journal;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -73,6 +74,9 @@ public final class Engine extends Observable implements Observer {
     }
 
     public void computeTask(final TaskContainer tc) throws ComputationException {
+        Journal.addDataEntry(tc, "Computing task");
+        Journal.createSubEntry();
+
         stopEngine = false;
         setChanged();
         notifyObservers(0);
@@ -117,7 +121,7 @@ public final class Engine extends Observable implements Observer {
                 f.get();
             }
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.warn(ex);
+            Journal.addDataEntry(ex, "Error waiting for Strain estimation.");
         }
 
         endTask();
@@ -125,8 +129,10 @@ public final class Engine extends Observable implements Observer {
         try {
             TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
         } catch (IOException ex) {
-            Logger.error(ex, "Task serialization to binary failed.");
+            Journal.addDataEntry(ex, "Task serialization to binary failed.");
         }
+
+        Journal.closeSubEntry();
     }
 
     public void computeRound(final TaskContainer task, final int roundFrom, final int roundTo) throws ComputationException {
@@ -134,7 +140,8 @@ public final class Engine extends Observable implements Observer {
 
         final long time = System.currentTimeMillis();
 
-        Logger.trace("Computing round {}:{} - {}.", roundFrom, roundTo, task);
+        Journal.addEntry("Computing round", "Round {0}:{1}.", roundFrom, roundTo);
+        Journal.createSubEntry();
         final Set<Hint> hints = task.getHints();
         if (hints.contains(Hint.NO_STATS)) {
             DebugControl.pauseDebugMode();
@@ -217,15 +224,16 @@ public final class Engine extends Observable implements Observer {
             notifyObservers(StrainEstimator.class);
             future.get();
         } catch (InterruptedException | ExecutionException | NullPointerException ex) {
-            Logger.warn(ex);
+            Logger.warn(ex, "Error waitng for overlapping computation.");
         }
-
-        Logger.debug("Computed round {}:{}.", roundFrom, roundTo);
 
         setChanged();
         notifyObservers(System.currentTimeMillis() - time);
 
         solver.deleteObserver(this);
+
+        Journal.addEntry("Round finished.");
+        Journal.closeSubEntry();
     }
 
     public void endTask() {
@@ -243,7 +251,6 @@ public final class Engine extends Observable implements Observer {
         solver.stop();
         strain.stop();
         exec.shutdownNow();
-        Logger.debug("Stopping engine.");
     }
 
     @Override

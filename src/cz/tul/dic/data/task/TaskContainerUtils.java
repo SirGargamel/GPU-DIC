@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -224,12 +223,10 @@ public final class TaskContainerUtils {
         }
         final Object fs = tc.getParameter(TaskParameter.SUBSET_SIZE);
         if (fs == null) {
-            Logger.info("Adding default subset size.");
             tc.setParameter(TaskParameter.SUBSET_SIZE, TaskDefaultValues.DEFAULT_SUBSET_SIZE);
         }
         final Object dl = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
         if (dl == null) {
-            Logger.info("Adding default deformation limits.");
             if (tc.getParameter(TaskParameter.DEFORMATION_ORDER) == DeformationOrder.ZERO) {
                 tc.setParameter(TaskParameter.DEFORMATION_LIMITS, TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_ZERO);
             } else {
@@ -252,80 +249,65 @@ public final class TaskContainerUtils {
             }
             rois = tc.getRois(round);
             if (rois == null || rois.isEmpty()) {
-                Logger.info("Adding default ROI.");
                 tc.addRoi(round, new RectangleROI(0, 0, img.getWidth() - 1, img.getHeight() - 1));
             }
         }
         final Object ts = tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         if (ts == null) {
-            Logger.info("Adding default TaskSplit.");
             tc.setParameter(TaskParameter.TASK_SPLIT_METHOD, TaskDefaultValues.DEFAULT_TASK_SPLIT_METHOD);
         }
         final Object tsp = tc.getParameter(TaskParameter.TASK_SPLIT_PARAM);
         if (tsp == null) {
-            Logger.info("Adding default TaskSplit param.");
             tc.setParameter(TaskParameter.TASK_SPLIT_PARAM, TaskDefaultValues.DEFAULT_TASK_SPLIT_PARAMETER);
-        }        
+        }
         final Object subsetGenMode = tc.getParameter(TaskParameter.SUBSET_GENERATOR_METHOD);
         if (subsetGenMode == null) {
-            Logger.info("Adding default subset generator.");
             tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, TaskDefaultValues.DEFAULT_SUBSET_GENERATOR);
         }
         final Object subsetGenModeParam = tc.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM);
         if (subsetGenModeParam == null) {
-            Logger.info("Adding default subset generator.");
             tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, TaskDefaultValues.DEFAULT_SUBSET_SPACING);
         }
         final Object interpolation = tc.getParameter(TaskParameter.INTERPOLATION);
         if (interpolation == null) {
-            Logger.info("Adding default interpolation.");
             tc.setParameter(TaskParameter.INTERPOLATION, TaskDefaultValues.DEFAULT_INTERPOLATION);
         }
         final Object strainEstimation = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD);
         if (strainEstimation == null) {
-            Logger.info("Adding default strain estimator.");
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_METHOD, TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_METHOD);
         }
         final Object strainEstimationParam = tc.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM);
         if (strainEstimationParam == null) {
-            Logger.info("Adding default strain estimator.");
             tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER);
         }
         final Object displacementCalculator = tc.getParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD);
         if (displacementCalculator == null) {
-            Logger.info("Adding default displacement calculator.");
             tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_METHOD, TaskDefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_METHOD);
             tc.setParameter(TaskParameter.DISPLACEMENT_CALCULATION_PARAM, TaskDefaultValues.DEFAULT_DISPLACEMENT_CALCULATION_PARAM);
         }
         final Object ratio = tc.getParameter(TaskParameter.MM_TO_PX_RATIO);
         if (ratio == null) {
-            Logger.info("Adding default mmToPx ratio.");
             tc.setParameter(TaskParameter.MM_TO_PX_RATIO, TaskDefaultValues.DEFAULT_MM_TO_PX_RATIO);
         }
         final Object quality = tc.getParameter(TaskParameter.RESULT_QUALITY);
         if (quality == null) {
-            Logger.info("Adding default result quality.");
             tc.setParameter(TaskParameter.RESULT_QUALITY, TaskDefaultValues.DEFAULT_RESULT_QUALITY);
         }
         final Object correlation = tc.getParameter(TaskParameter.SOLVER);
         if (correlation == null) {
-            Logger.info("Adding default solver.");
             tc.setParameter(TaskParameter.SOLVER, TaskDefaultValues.DEFAULT_SOLVER);
         }
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
         if (kernel == null) {
-            Logger.info("Adding default kernel.");
             final Solver solver = (Solver) tc.getParameter(TaskParameter.SOLVER);
             tc.setParameter(TaskParameter.KERNEL, KernelManager.getBestKernel(solver.supportsWeighedCorrelation()));
         }
         final Object filterSize = tc.getParameter(TaskParameter.FILTER_KERNEL_SIZE);
         if (filterSize == null) {
-            Logger.info("Adding default filter size.");
             tc.setParameter(TaskParameter.FILTER_KERNEL_SIZE, TaskDefaultValues.DEFAULT_FILTER_KERNEL_SIZE);
         }
         final Object weight = tc.getParameter(TaskParameter.CORRELATION_WEIGHT);
         if (weight == null) {
-            Logger.info("Adding default correlation weight.");
             tc.setParameter(TaskParameter.CORRELATION_WEIGHT, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT);
         }
     }

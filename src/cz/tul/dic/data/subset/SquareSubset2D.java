@@ -5,6 +5,7 @@
  */
 package cz.tul.dic.data.subset;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import cz.tul.dic.data.Coordinates;
 import java.util.Arrays;
 
@@ -12,6 +13,7 @@ import java.util.Arrays;
  *
  * @author Petr Jecmen
  */
+@XStreamAlias("SquareSubset")
 public final class SquareSubset2D extends AbstractSubset {
 
     private static final int DIMENSION = 2;

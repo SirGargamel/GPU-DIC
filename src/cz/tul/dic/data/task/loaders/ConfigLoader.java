@@ -20,13 +20,13 @@ import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.engine.opencl.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
+import cz.tul.pj.journal.Journal;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import org.pmw.tinylog.Logger;
 
 public class ConfigLoader extends AbstractInputLoader {
 
@@ -169,8 +169,7 @@ public class ConfigLoader extends AbstractInputLoader {
                     }
                 }
             } catch (IllegalArgumentException ex) {
-                Logger.error("Error parsing config file - {} : {}", key, value);
-                Logger.debug(ex);
+                Journal.addDataEntry(ex, "Error in config file", "Error parsing config file line - {0} : {1}", key, value);
             }
         }
 

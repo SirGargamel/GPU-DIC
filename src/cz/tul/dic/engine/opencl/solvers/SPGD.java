@@ -13,6 +13,7 @@ import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.Engine;
+import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -26,7 +27,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import org.pmw.tinylog.Logger;
 
 public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
 
@@ -125,7 +125,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
             final double[] minus = gpuDataList.get(1);
             final double[] plus = gpuDataList.get(2);
             final int l = orig.length;
-            
+
             gpuData = new double[l * 3];
             int base;
             for (int i = 0; i < l; i++) {
@@ -243,7 +243,7 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
             try {
                 subsetsToCompute.remove(fas.get());
             } catch (InterruptedException | ExecutionException ex) {
-                Logger.warn(ex, "Error retrieving result after computing new step.");
+                Journal.addDataEntry(ex, "Solver error", "Error retrieving result after computing new step.");
             }
         }
 
@@ -333,9 +333,9 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
                 weights.put(subset, nextWeight);
             } catch (Exception ex) {
                 if (ex.getStackTrace().length == 0) {
-                    Logger.warn("{} stop, exception occured - {}, no stack trace...", subset, ex);
+                    Journal.addEntry("Subset computation stopped", "{0} stop, exception occured - {1}, no stack trace...", subset, ex);
                 } else {
-                    Logger.warn(ex, "{} stop, exception occured.", subset);
+                    Journal.addDataEntry(ex, "Subset computation stopped", "{0} stop, exception occured.", subset);
                 }
                 addSubsetTerminationInfo(subset, "StepMaker exception - " + ex);
                 return subset;

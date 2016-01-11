@@ -21,6 +21,7 @@ import org.opencv.imgproc.Imgproc;
  */
 public final class Image extends BufferedImage {
 
+    private final String imageName;
     private byte[] grayScale;
     private byte[][] grayScale2d;
     private byte[] filtered;
@@ -29,8 +30,9 @@ public final class Image extends BufferedImage {
         OpenCVHandler.loadLibrary();
     }
 
-    private Image(final int width, final int height, final int imageType) {
+    private Image(final int width, final int height, final int imageType, final String imageName) {
         super(width, height, imageType);
+        this.imageName = imageName;
     }
 
     public static Image loadImageFromDisk(final File in) throws IOException {
@@ -38,11 +40,15 @@ public final class Image extends BufferedImage {
             throw new IllegalArgumentException("Illegal input file.");
         }
 
-        return createImage(ImageIO.read(in));
+        return createImage(ImageIO.read(in), in.getName());
     }
 
     public static Image createImage(final BufferedImage img) {
-        final Image result = new Image(img.getWidth(), img.getHeight(), img.getType());
+        return createImage(img, null);
+    }
+    
+    public static Image createImage(final BufferedImage img, final String imageName) {
+        final Image result = new Image(img.getWidth(), img.getHeight(), img.getType(), imageName);
         result.getGraphics().drawImage(img, 0, 0, null);
 
         return result;
@@ -105,6 +111,10 @@ public final class Image extends BufferedImage {
     public byte[] toFiltered() {
         final byte[] result = filtered == null ? toBWArray() : filtered;
         return result;
+    }
+
+    public String getImageName() {
+        return imageName;
     }
 
 }

@@ -1,15 +1,15 @@
 package cz.tul.dic;
 
+import cz.tul.pj.journal.Journal;
 import java.lang.reflect.Field;
 import org.opencv.core.Core;
-import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Ječmen
  */
 public class OpenCVHandler {
-    
+
     private static boolean LOADED = false;
 
     public static void loadLibrary() {
@@ -44,10 +44,10 @@ public class OpenCVHandler {
                 final Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
                 fieldSysPath.setAccessible(true);
                 fieldSysPath.set(null, null);
-//
+
                 System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
                 LOADED = true;
-                Logger.info("OpenCV loaded successfully, {}.", msg);
+                Journal.addEntry("OpenCV loaded", msg);
             } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
                 throw new RuntimeException("Failed to load opencv native library.", ex);
             }
