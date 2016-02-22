@@ -13,9 +13,13 @@ import com.jogamp.opencl.CLPlatform;
 import com.jogamp.opencl.CLProgram;
 import cz.tul.pj.journal.Journal;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -34,11 +38,22 @@ public final class DeviceManager {
     }
 
     public static List<CLDevice> listAllDevices() {
-        final List<CLDevice> result = new LinkedList<>();
+        final Map<String, CLDevice> result = new HashMap<>();
+        String name;
         for (CLPlatform plf : CLPlatform.listCLPlatforms()) {
-            result.addAll(Arrays.asList(plf.listCLDevices()));
+            for (CLDevice device : plf.listCLDevices()) {
+                name = device.getName();
+                if (!result.containsKey(name) || platformAndDeviceNameMatch(plf.getName(), device.getName())) {
+                    result.put(name, device);
+                }
+            }
         }
-        return result;
+        return new ArrayList<>(result.values());
+    }
+
+    private static boolean platformAndDeviceNameMatch(final String platformName, final String deviceName) {
+        final String devicePlatform = deviceName.split(" ")[0];
+        return platformName.contains(devicePlatform);
     }
 
     private DeviceManager() {
