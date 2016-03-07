@@ -310,6 +310,10 @@ public final class TaskContainerUtils {
         if (weight == null) {
             tc.setParameter(TaskParameter.CORRELATION_WEIGHT, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT);
         }
+        final Object fps = tc.getParameter(TaskParameter.FPS);
+        if (fps == null) {
+            tc.setParameter(TaskParameter.FPS, TaskDefaultValues.DEFAULT_FPS);
+        }
     }
 
     public static int computeCorrelationWeight(final int subsetSize, final double correlationWeightCoefficient) {
