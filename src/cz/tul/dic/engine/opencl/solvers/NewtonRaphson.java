@@ -44,7 +44,6 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     private static final int LIMITS_ITERATIONS = 10;
     private static final double LIMIT_MIN_IMPROVEMENT = 0.01;
     private static final double LIMIT_Q_DONE = 1 - LIMIT_MIN_IMPROVEMENT;
-    private static final double STEP_INITIAL = 1;
     private static final double STEP_FIRST = 0.01;
     private static final double STEP_SECOND = 0.001;
     protected static final int STEP_WEIGHT = 1;
@@ -102,13 +101,11 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
             temp[DeformationLimit.UMIN] = Math.floor(temp[DeformationLimit.UMIN]);
             temp[DeformationLimit.UMAX] = Math.ceil(temp[DeformationLimit.UMAX]);
-            temp[DeformationLimit.USTEP] = STEP_INITIAL;
             temp[DeformationLimit.VMIN] = Math.floor(temp[DeformationLimit.VMIN]);
             temp[DeformationLimit.VMAX] = Math.ceil(temp[DeformationLimit.VMAX]);
-            temp[DeformationLimit.VSTEP] = STEP_INITIAL;
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE).solve(
+        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.COARSE_FINE).solve(
                 new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), fullTask.getSubsetWeights(), zeroOrderLimits));
         CorrelationResult paddedResult, currentResult;
         for (int i = 0; i < subsetCount; i++) {
