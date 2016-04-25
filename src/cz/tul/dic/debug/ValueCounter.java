@@ -83,11 +83,16 @@ public class ValueCounter {
 
     @Override
     public String toString() {
-        List<Map.Entry> a = new ArrayList<>(counter.entrySet());
-        Collections.sort(a,
-                (Map.Entry o1, Map.Entry o2)
-                -> ((Comparable) o1.getValue()).compareTo(o2.getValue())
-        );
+        final List<Map.Entry<String, Integer>> a = new ArrayList<>(counter.entrySet());
+        Collections.sort(a, (Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) -> {
+            if (o1.getValue() instanceof Comparable && o2.getValue() instanceof Comparable) { 
+                final Integer val1 = o1.getValue();
+                final Integer val2 = o2.getValue();
+                return val1.compareTo(val2);
+            } else {
+                throw new IllegalArgumentException("Values must implement Comparable interface.");
+            }
+        });
 
         final StringBuilder sb = new StringBuilder();
         a.stream().forEach(e
