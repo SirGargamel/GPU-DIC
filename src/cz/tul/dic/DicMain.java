@@ -10,6 +10,7 @@ import cz.tul.dic.complextask.ComplexTaskSolver;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SquareSubset2D;
+import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
@@ -26,9 +27,9 @@ import cz.tul.dic.data.task.loaders.InputLoader;
 import cz.tul.dic.debug.converters.ImageConverter;
 import cz.tul.dic.debug.converters.SubsetConverter;
 import cz.tul.dic.engine.opencl.DeviceManager;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
-import cz.tul.dic.engine.opencl.kernel.KernelManager;
-import cz.tul.dic.engine.opencl.kernel.TimeDataStorage;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.KernelManager;
+import cz.tul.dic.engine.kernel.TimeDataStorage;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.output.NameGenerator;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -69,36 +71,37 @@ public class DicMain extends Application {
     private static final String DEBUG_COMPUTE = "-debug";
     private static final String LICENSE_FILE = "license.dat";
     private static final File LICENSE = new File(LICENSE_FILE);
+    private static final String EXT_CONFIG = ".config";
     private static final String[] FILES_TO_DEBUG = new String[]{
-        //        "d:\\TUL\testData\\.test FS vs Quality\\6107544m.avi.config",
-        //        "d:\\TUL\testData\\.test FS vs Quality\\6113599m.avi.config",
-        //        "d:\\TUL\testData\\.test FS vs Quality\\6203652m.avi.config",
-        //        "d:\\TUL\testData\\.test FS vs Quality\\7202845m.avi.config",
-        //        "d:\\TUL\testData\\.test FS vs Quality\\9112502m.avi.config",
-        //        "d:\\TUL\testData\\.test FS vs Quality\\9905121m.avi.config",
-        //        "d:\\TUL\testData\\.test spacing\\6107544m\\6107544m.avi.config",
-        //        "d:\\TUL\testData\\.test spacing\\6113599m\\6113599m.avi.config",
-        //        "d:\\TUL\testData\\.test spacing\\6203652m\\6203652m.avi.config",
-        //        "d:\\TUL\testData\\.test spacing\\7202845m\\7202845m.avi.config",
-        //        "d:\\TUL\testData\\.test spacing\\9112502m\\9112502m.avi.config",
-        //        "d:\\TUL\testData\\.test spacing\\9905121m\\9905121m.avi.config",                
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test FS vs Quality\\6107544m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test FS vs Quality\\6113599m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test FS vs Quality\\6203652m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test FS vs Quality\\7202845m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test FS vs Quality\\9112502m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test FS vs Quality\\9905121m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test spacing\\6107544m\\6107544m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test spacing\\6113599m\\6113599m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test spacing\\6203652m\\6203652m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test spacing\\7202845m\\7202845m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test spacing\\9112502m\\9112502m.avi.config",
+        //        "c:\\Users\\user\\Documents\\data DIC\\.test spacing\\9905121m\\9905121m.avi.config",                
         //////////////////////////////
-        "d:\\TUL\\testData\\.smallSolverCompare\\6107544m.avi.config", //        "d:\\TUL\testData\\.smallSolverCompare\\6113599m.avi.config",
-    //        "d:\\TUL\testData\\.smallSolverCompare\\6203652m.avi.config",
-    //        "d:\\TUL\testData\\.smallSolverCompare\\7202845m.avi.config",
-    //        "d:\\TUL\testData\\.smallSolverCompare\\9112502m.avi.config",
-    //        "d:\\TUL\testData\\.smallSolverCompare\\9905121m.avi.config",
+        "c:\\Users\\user\\Documents\\data DIC\\.smallSolverCompare\\6107544m.avi.config", //        "c:\\Users\\user\\Documents\\data DIC\\.smallSolverCompare\\6113599m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.smallSolverCompare\\6203652m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.smallSolverCompare\\7202845m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.smallSolverCompare\\9112502m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.smallSolverCompare\\9905121m.avi.config",
     ////////////////////////////
-    //        "d:\\TUL\testData\\.solverCompare\\6107544m.avi.config",
-    //        "d:\\TUL\testData\\.solverCompare\\6113599m.avi.config",
-    //        "d:\\TUL\testData\\.solverCompare\\6203652m.avi.config",
-    //        "d:\\TUL\testData\\.solverCompare\\7202845m.avi.config",
-    //        "d:\\TUL\testData\\.solverCompare\\9112502m.avi.config",
-    //        "d:\\TUL\testData\\.solverCompare\\9905121m.avi.config", 
+    //        "c:\\Users\\user\\Documents\\data DIC\\.solverCompare\\6107544m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.solverCompare\\6113599m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.solverCompare\\6203652m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.solverCompare\\7202845m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.solverCompare\\9112502m.avi.config",
+    //        "c:\\Users\\user\\Documents\\data DIC\\.solverCompare\\9905121m.avi.config", 
     ///////////////////////////////
-    //            "z:\\TUL\\testData\\.custom\\ShiftX.config",
-    //            "z:\\TUL\\testData\\.custom\\ShiftXY.config",
-    //            "z:\\TUL\\testData\\.custom\\StretchX.config",
+    //            "c:\\Users\\user\\Documents\\data DIC\\.custom\\ShiftX.config",
+    //            "c:\\Users\\user\\Documents\\data DIC\\.custom\\ShiftXY.config",
+    //            "c:\\Users\\user\\Documents\\data DIC\\.custom\\StretchX.config",
     };
 
     @Override
@@ -116,7 +119,7 @@ public class DicMain extends Application {
         Stats.getInstance();
 
         if (parameters.contains(DEBUG_COMPUTE)) {
-            System.out.println("Choose a test:\n c : Computation\n d : Device\n e : Engine\n p : Preprocess");
+            System.out.println("Choose a test:\n c : Computation\n d : Device\n e : Engine\n p : Preprocess\n s : Subset size\n t : Generic test");
             final String in = new Scanner(System.in).nextLine().trim().toLowerCase();
             switch (in) {
                 case "c":
@@ -130,6 +133,12 @@ public class DicMain extends Application {
                     break;
                 case "p":
                     performPreprocessingTest();
+                    break;
+                case "s":
+                    performSubsetSizeTest();
+                    break;
+                case "t":
+                    runTest();
                     break;
                 default:
                     System.out.println("Illegal choice, launching GUI.");
@@ -200,12 +209,7 @@ public class DicMain extends Application {
             Journal.addEntry("App launched in DEBUG mode.");
         } else {
             Journal.addEntry("App launched.");
-        }
-
-        Journal.registerConverter(new ImageConverter());
-        Journal.registerConverter(new SubsetConverter());
-
-        Journal.addAlias("TaskParameter", TaskParameter.class);
+        }                       
     }
 
     private static void performComputationTest() {
@@ -358,14 +362,29 @@ public class DicMain extends Application {
         final List<CLDevice> devices = DeviceManager.listAllDevices();
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
 
+        if (devices.size() > 1) {
+            System.out.println("Pick device: (0 for all devices)");
+            for (int i = 0; i < devices.size(); i++) {
+                System.err.println((i + 1) + ": " + devices.get(i).getName() + " on " + devices.get(i).getPlatform().getName());
+            }
+            final int choice = new Scanner(System.in).nextInt();
+            System.out.println(choice);
+            if (choice != 0) {
+                final CLDevice temp = devices.get(choice - 1);
+                devices.clear();
+                devices.add(temp);
+            }
+        }
+
         CsvOutput<Long> csvOutput;
         for (CLDevice device : devices) {
-//        final CLDevice device = devices.get(2);
+//        final CLDevice device = devices.get(2);            
             csvOutput = new CsvOutput<>();
             try {
                 TimeDataStorage.getInstance().reset();
                 DeviceManager.initContext(device);
 
+                Logger.info("Running device test on {}", device);
                 for (KernelInfo ki : infos) {
                     testKernelInfo(solver, ki, csvOutput);
                 }
@@ -378,7 +397,7 @@ public class DicMain extends Application {
     }
 
     private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo, final CsvOutput<Long> dataHolder) throws ComputationException {
-        final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{1, 2, 8, 32};
+        final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{2, 8, 32, 128};
         final double[][] PERFORMANCE_TEST_LIMITS = new double[][]{
             {-1, 1, 1, 0, 0, 0}, // 3
             {-3, 3, 1, -1, 1, 1}, // 21            
@@ -417,9 +436,10 @@ public class DicMain extends Application {
                     solver.solve(new FullTask(
                             img, img, subsets, weights, deformationLimits));
                     time = System.nanoTime() - time;
+                    Logger.debug("Finished {}:{}:{}", kernelInfo, sc, Arrays.toString(limits));
                     dataHolder.addValue(Integer.toString(sc) + ":" + limitsDescr.get(limits), kernelInfo.toString(), time / 1_000);
                 } catch (ComputationException ex) {
-                    Logger.warn(ex, "Failed {}", kernelInfo);
+                    Logger.warn(ex, "Failed {}:{}:{}", kernelInfo, sc, Arrays.toString(limits));
                     dataHolder.addValue(Integer.toString(sc) + ":" + limitsDescr.get(limits), kernelInfo.toString(), Long.MAX_VALUE);
                 }
             }
@@ -518,6 +538,50 @@ public class DicMain extends Application {
                 Logger.error(ex, "{}", newTask);
             }
         }
+    }
+
+    private static void performSubsetSizeTest() {
+        File[] files = new File("c:\\Users\\user\\Documents\\data DIC\\.test SS").listFiles((File dir, String name) -> name.endsWith(EXT_CONFIG));
+
+        final int sizeMin = 32;
+        final int sizeMax = 40;
+        final int subsetCount = 20;
+
+        TaskContainer task;
+        for (File f : files) {
+            for (int size = sizeMin; size <= sizeMax; size += 1) {
+                try {
+                    Context.getInstance().setTc(TaskContainer.initTaskContainer(f));
+                    task = Context.getInstance().getTc();
+                    if (task.getParameter(TaskParameter.SUBSET_SIZE) != null && (int) task.getParameter(TaskParameter.SUBSET_SIZE) < size) {
+                        System.out.println("STOPPING --- " + task.getParameter(TaskParameter.SUBSET_SIZE) + " --- " + size + " --- " + f.getName());
+                        break;
+                    }
+                    task.setParameter(TaskParameter.IN, f);
+                    task.setParameter(TaskParameter.SUBSET_SIZE, size);
+                    task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.RANDOM);
+                    task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, subsetCount);
+
+                    commenceComputation(task);
+                } catch (IOException | ComputationException ex) {
+                    Logger.error(ex);
+                } catch (Exception t) {
+                    Logger.error(t);
+                    Logger.info(Context.getInstance().getTc());
+                }
+            }
+        }
+    }
+
+    private static void runTest() throws ComputationException, IOException {
+        final File f = new File("c:\\Users\\user\\Documents\\data DIC\\.test SS\\trs2_b8_00.bmp.config");
+        final TaskContainer task = TaskContainer.initTaskContainer(f);
+        task.setParameter(TaskParameter.IN, f);
+        task.setParameter(TaskParameter.SUBSET_SIZE, 20);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.RANDOM);
+        task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 20);
+        task.setParameter(TaskParameter.KERNEL, new KernelInfo(KernelInfo.Type.JavaKernel, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY));
+        commenceComputation(task);
     }
 
     /**

@@ -7,12 +7,14 @@ package cz.tul.dic.engine.opencl.kernel;
 
 import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import com.jogamp.opencl.CLBuffer;
-import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.WorkSizeManager;
+import cz.tul.dic.engine.memory.MemoryManager;
 import java.nio.IntBuffer;
 
-public class CL2D extends Kernel {
+public class CL2D extends OpenCLKernel {
 
     private static final int ARGUMENT_INDEX_D_COUNT = 11;
     private static final int ARGUMENT_INDEX_D_BASE = 12;
@@ -23,7 +25,7 @@ public class CL2D extends Kernel {
     private static final int LWS1_BASE = 64;
     private boolean stop;
 
-    public CL2D(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+    public CL2D(final KernelInfo kernelInfo, final MemoryManager memManager, final WorkSizeManager wsm) {
         super(kernelInfo, memManager, wsm);
     }
 
@@ -35,7 +37,7 @@ public class CL2D extends Kernel {
         final int subsetArea = subsetSize * subsetSize;
 
         final int lws0 = calculateLws0();
-        long lws1 = Kernel.roundUp(calculateLws1Base(), subsetArea);
+        long lws1 = OpenCLKernel.roundUp(calculateLws1Base(), subsetArea);
         lws1 = Math.min(lws1, getMaxWorkItemSize());
 
         kernelDIC.rewind();
@@ -50,7 +52,7 @@ public class CL2D extends Kernel {
                 .putArg(0L)
                 .putArg(0L);
         final CLBuffer<IntBuffer> weights = data.getWeights();
-        if (kernelInfo.getCorrelation() == KernelInfo.Correlation.WZNSSD) {
+        if (getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD) {
             kernelDIC.putArg(weights);
         }
         kernelDIC.rewind();
@@ -80,8 +82,8 @@ public class CL2D extends Kernel {
                 subsetSubCount = Math.min(wsm.getSubsetCount(), subsetCount - currentBaseSubset);
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
-                subsetGlobalWorkSize = Kernel.roundUp(lws0, subsetSubCount);
-                deformationGlobalWorkSize = Kernel.roundUp(lws1, deformationSubCount);
+                subsetGlobalWorkSize = OpenCLKernel.roundUp(lws0, subsetSubCount);
+                deformationGlobalWorkSize = OpenCLKernel.roundUp(lws1, deformationSubCount);
 
                 groupCountPerSubset = deformationSubCount / lws1;
                 if (deformationCount % lws1 > 0) {

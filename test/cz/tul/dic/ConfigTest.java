@@ -14,7 +14,7 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.KernelInfo;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import java.io.File;

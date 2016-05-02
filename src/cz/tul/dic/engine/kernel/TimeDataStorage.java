@@ -3,9 +3,9 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernel;
+package cz.tul.dic.engine.kernel;
 
-import cz.tul.pj.journal.Journal;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,8 +23,7 @@ import org.pmw.tinylog.Logger;
  */
 public class TimeDataStorage implements Serializable {
 
-    private static final String FILE_STORE_A = "performance.kernel.A";
-    private static final String FILE_STORE_B = "performance.kernel.B";
+    private static final File FILE_STORE = new File("performance.kernel");
     private static final TimeDataStorage INSTANCE;
     private Map<KernelInfo, Map<Long, Map<Long, Long>>> timeDataA;
     private Map<Long, Map<Long, Map<KernelInfo, Long>>> timeDataB;
@@ -84,28 +83,21 @@ public class TimeDataStorage implements Serializable {
     @SuppressWarnings("unchecked")
     public boolean loadTimeDataFromFile() {
         boolean result = false;
-        try (final ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_STORE_A))) {
-            timeDataA = (Map<KernelInfo, Map<Long, Map<Long, Long>>>) in.readObject();
-            result = true;
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.warn(ex, "Error reading time data.");
-        }
-        try (final ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_STORE_B))) {
-            timeDataB = (Map<Long, Map<Long, Map<KernelInfo, Long>>>) in.readObject();
-            result = true;
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.warn(ex, "Error reading time data.");
+        if (FILE_STORE.exists()) {
+            try (final ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_STORE))) {
+                timeDataA = (Map<KernelInfo, Map<Long, Map<Long, Long>>>) in.readObject();
+                timeDataB = (Map<Long, Map<Long, Map<KernelInfo, Long>>>) in.readObject();
+                result = true;
+            } catch (IOException | ClassNotFoundException ex) {
+                Logger.warn(ex, "Error reading time data.");
+            }
         }
         return result;
     }
 
     public void storeTimeDataToFile() {
-        try (final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_STORE_A))) {
+        try (final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_STORE))) {
             out.writeObject(timeDataA);
-        } catch (IOException ex) {
-            Logger.warn(ex, "Error storing time data.");
-        }
-        try (final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_STORE_B))) {
             out.writeObject(timeDataB);
         } catch (IOException ex) {
             Logger.warn(ex, "Error storing time data.");

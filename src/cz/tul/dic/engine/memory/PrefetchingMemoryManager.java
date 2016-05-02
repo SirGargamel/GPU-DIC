@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.memory;
+package cz.tul.dic.engine.memory;
 
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLImage2d;
@@ -16,9 +16,12 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.opencl.kernel.Kernel;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
-import cz.tul.dic.engine.opencl.kernel.KernelManager;
+import cz.tul.dic.engine.kernel.AbstractKernel;
+import cz.tul.dic.engine.opencl.kernel.OpenCLKernel;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import static cz.tul.dic.engine.kernel.KernelInfo.Input.ARRAY;
+import static cz.tul.dic.engine.kernel.KernelInfo.Input.IMAGE;
+import cz.tul.dic.engine.kernel.KernelManager;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.nio.ByteBuffer;
@@ -42,7 +45,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
     }
 
     @Override
-    public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {
+    public void assignDataToGPU(final ComputationTask task, final OpenCLKernel kernel) throws ComputationException {
         try {
             if (KernelManager.isInited()) {
                 if (!inited) {
@@ -124,9 +127,9 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
 
     @Override
     public void assignTask(final TaskContainer task) {
-        for (CLMemory<ByteBuffer> m : imageBuffer.values()) {
+        imageBuffer.values().stream().forEach((m) -> {
             release(m);
-        }
+        });
         imageBuffer.clear();
 
         if (KernelManager.isInited()) {
@@ -140,7 +143,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
     private void init(final TaskContainer task) {
         final KernelInfo kt = (KernelInfo) task.getParameter(TaskParameter.KERNEL);
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
-        final Kernel k = Kernel.createInstance(kt, this, solver.getDeformationCount());
+        final AbstractKernel k = AbstractKernel.createInstance(kt, solver.getDeformationCount());
         switch (k.getKernelInfo().getInput()) {
             case IMAGE:
                 generateImagesAsImage2Dt(task.getImages());

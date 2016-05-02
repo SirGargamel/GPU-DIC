@@ -14,7 +14,7 @@ import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.KernelInfo;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -19,11 +19,10 @@ import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.AbstractTaskSplitter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.debug.IGPUResultsReceiver;
+import cz.tul.dic.engine.kernel.AbstractKernel;
 import cz.tul.dic.engine.opencl.DeviceManager;
-import cz.tul.dic.engine.opencl.kernel.Kernel;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
-import cz.tul.dic.engine.opencl.kernel.KernelManager;
-import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.KernelManager;
 import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,13 +41,12 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class AbstractTaskSolver extends Observable {
 
-    private static final Map<Class, Solver> SOLVERS;
-    final AbstractOpenCLMemoryManager memManager;
-    // dynamic
+    private static final Map<Class, Solver> SOLVERS;    
+    // dynamic    
     KernelInfo kernelType;
     Interpolation interpolation;
     TaskSplitMethod taskSplitVariant;
-    Kernel kernel;
+    AbstractKernel kernel;
     int subsetSize;
     Object taskSplitValue;
     boolean stop;
@@ -78,8 +76,6 @@ public abstract class AbstractTaskSolver extends Observable {
     }
 
     protected AbstractTaskSolver() {
-        memManager = AbstractOpenCLMemoryManager.getInstance();
-
         final Solver solver = SOLVERS.get(this.getClass());
         kernelType = KernelManager.getBestKernel(solver.supportsWeighedCorrelation());
 
@@ -101,7 +97,6 @@ public abstract class AbstractTaskSolver extends Observable {
     }
 
     public void endTask() {
-        memManager.clearMemory();
         kernel.clearMemory();
         DeviceManager.clearMemory();
     }
@@ -130,8 +125,8 @@ public abstract class AbstractTaskSolver extends Observable {
         for (int i = 0; i < fullTask.getSubsets().size(); i++) {
             weights.put(fullTask.getSubsets().get(i), fullTask.getSubsetWeights().get(i));
         }
-
-        kernel = Kernel.createInstance(kernelType, memManager, getDeformationCount());
+        
+        kernel = AbstractKernel.createInstance(kernelType, getDeformationCount());        
 
         this.subsetSize = fullTask.getSubsets().get(0).getSize();
         usesWeights = kernel.getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD;
@@ -156,7 +151,7 @@ public abstract class AbstractTaskSolver extends Observable {
     public abstract long getDeformationCount();
 
     protected synchronized List<CorrelationResult> computeTask(
-            final Kernel kernel, ComputationTask computationTask) throws ComputationException {
+            final AbstractKernel kernel, ComputationTask computationTask) throws ComputationException {
         final List<CorrelationResult> taskResults = new ArrayList<>(computationTask.getSubsets().size());
         for (int i = 0; i < computationTask.getSubsets().size(); i++) {
             taskResults.add(null);
@@ -175,7 +170,7 @@ public abstract class AbstractTaskSolver extends Observable {
 
             computeSubtasks(ts, taskResults, kernel, computationTask);
         } catch (CLException ex) {
-            memManager.clearMemory();
+            kernel.clearMemory();
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);
         }
 
@@ -184,7 +179,7 @@ public abstract class AbstractTaskSolver extends Observable {
         return taskResults;
     }
 
-    private ComputationTask adjustLimitsUse(final Kernel kernel, final ComputationTask task) {
+    private ComputationTask adjustLimitsUse(final AbstractKernel kernel, final ComputationTask task) {
         // ct coeffs - no change        
         // ct limits - 
         //      pick type according to kernel
@@ -199,10 +194,11 @@ public abstract class AbstractTaskSolver extends Observable {
         }
     }
 
-    private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> results, final Kernel kernel, final ComputationTask fullTask) throws ComputationException {
+    private void computeSubtasks(AbstractTaskSplitter ts, final List<CorrelationResult> results, final AbstractKernel<?> kernel, final ComputationTask fullTask) throws ComputationException {
         final boolean needsBestResult = needsBestResult();
         boolean finished = false;
         List<double[]> gpuDataList = new LinkedList<>();
+        List<CorrelationResult> result;
         while (!finished) {
             try {
                 ComputationTask ct;
@@ -212,7 +208,8 @@ public abstract class AbstractTaskSolver extends Observable {
                     }
                     ct = ts.next();
                     if (needsBestResult) {
-                        ct.setResults(kernel.computeFindBest(ct));
+                        result = kernel.computeFindBest(ct);
+                        ct.setResults(result);
                         // pick best results for this computation task and discard ct data                   
                         pickBestResultsForTask(ct, results, fullTask.getSubsets());
                     } else {
@@ -222,7 +219,7 @@ public abstract class AbstractTaskSolver extends Observable {
                 }
                 finished = true;
             } catch (ComputationException ex) {
-                memManager.clearMemory();
+                kernel.clearMemory();
                 gpuDataList.clear();
                 throw ex;
             }

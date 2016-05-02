@@ -7,7 +7,7 @@ package cz.tul.dic.engine.opencl.kernel;
 
 import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import cz.tul.dic.engine.opencl.kernel.sources.KernelSourcePreparator;
-import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
+import cz.tul.dic.engine.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
@@ -25,24 +25,26 @@ import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.debug.Stats;
+import cz.tul.dic.engine.kernel.AbstractKernel;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.WorkSizeManager;
+import cz.tul.dic.engine.memory.MemoryManager;
 import cz.tul.pj.journal.Journal;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.pmw.tinylog.Logger;
 
 /**
  *
  * @author Petr Jecmen
  */
-public abstract class Kernel {
+public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryManager> {
 
     private static final String CL_MEM_ERROR = "CL_OUT_OF_RESOURCES";
     private static final String KERNEL_EXTENSION = ".cl";
@@ -52,42 +54,20 @@ public abstract class Kernel {
     protected final CLContext context;
     protected final CLCommandQueue queue;
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
-    protected final WorkSizeManager wsm;
-    protected final KernelInfo kernelInfo;
     private final Set<CLResource> clMem;
-    private final AbstractOpenCLMemoryManager memManager;
 
-    protected Kernel(final KernelInfo info, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
-        this.kernelInfo = info;
+    protected OpenCLKernel(final KernelInfo info, final MemoryManager memManager, final WorkSizeManager wsm) {
+        super(info, (AbstractOpenCLMemoryManager) memManager, wsm);
+
         clMem = new HashSet<>();
-
-        this.memManager = memManager;
-        this.wsm = wsm;
-
         queue = DeviceManager.getQueue();
         context = DeviceManager.getContext();
     }
 
-    public static Kernel createInstance(KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final long deformationCount) {
-        final KernelInfo concreteInfo = KernelManager.getBestKernel(kernelInfo, deformationCount);
-        final WorkSizeManager wsm = new WorkSizeManager(concreteInfo);
-
-        Kernel result;
-        try {
-            final KernelInfo.Type kernelType = concreteInfo.getType();
-            final Class<?> cls = Class.forName("cz.tul.dic.engine.opencl.kernel.".concat(kernelType.toString()));
-            result = (Kernel) cls.getConstructor(KernelInfo.class, AbstractOpenCLMemoryManager.class, WorkSizeManager.class).newInstance(concreteInfo, memManager, wsm);
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.warn(ex, "Error instantiating kernel with kernel info [{}], using default kernel.", concreteInfo);
-            final KernelInfo defaultInfo = KernelManager.getBestKernel(KernelManager.getBestKernel(false), deformationCount);
-            result = new CL1D(defaultInfo, memManager, wsm);
-        }
-
-        return result;
-    }
-
+    @Override
     public void prepareKernel(final int subsetSize, final DeformationOrder deg, final boolean usesLimits, final Interpolation interpolation) throws ComputationException {
         try {
+            final KernelInfo kernelInfo = getKernelInfo();
             final boolean usesZncc, usesWeight;
             switch (kernelInfo.getCorrelation()) {
                 case ZNCC:
@@ -167,7 +147,13 @@ public abstract class Kernel {
         }
     }
 
-    public List<CorrelationResult> computeFindBest(final ComputationTask task) throws ComputationException {        
+    public abstract void runKernel(
+            final OpenCLDataPackage data,
+            final long maxDeformationCount, final int imageWidth,
+            final int subsetSize, final int subsetCount);
+    
+    @Override
+    public List<CorrelationResult> computeFindBestInner(final ComputationTask task) throws ComputationException {
         final int subsetCount = task.getSubsets().size();
         final int subsetSize = task.getSubsets().get(0).getSize();
 
@@ -195,6 +181,7 @@ public abstract class Kernel {
 
             result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, task.getDeformations(), task.getOrder(), task.usesLimits());
             return result;
+            //return new ArrayList<>();
         } catch (CLException ex) {
             if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
                 throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex);
@@ -206,7 +193,8 @@ public abstract class Kernel {
         }
     }
 
-    public double[] computeRaw(final ComputationTask task) throws ComputationException {
+    @Override
+    public double[] computeRawInner(final ComputationTask task) throws ComputationException {
         if (task.getSubsets().isEmpty()) {
             Journal.addEntry("Empty subsets for raw computation.");
             return new double[0];
@@ -238,13 +226,8 @@ public abstract class Kernel {
         }
     }
 
-    public abstract void runKernel(
-            final OpenCLDataPackage data,
-            final long maxDeformationCount, final int imageWidth,
-            final int subsetSize, final int subsetCount);
-
     private CLBuffer<FloatBuffer> findMax(final CLBuffer<FloatBuffer> results, final int subsetCount, final int deformationCount) {
-        final int lws0 = getMaxWorkItemSize();
+        final int lws0 = getMaxWorkItemSize() / 2;
         final CLBuffer<FloatBuffer> maxVal = context.createFloatBuffer(subsetCount, CLMemory.Mem.WRITE_ONLY);
 
         kernelReduce.rewind();
@@ -283,7 +266,7 @@ public abstract class Kernel {
 
         for (int i = 0; i < subsetCount; i++) {
             kernelFindPos.setArg(4, i);
-            queue.put1DRangeKernel(kernelFindPos, 0, Kernel.roundUp(lws0, deformationCount), lws0);
+            queue.put1DRangeKernel(kernelFindPos, 0, OpenCLKernel.roundUp(lws0, deformationCount), lws0);
         }
         queue.putReadBuffer(maxVal, true);
         final int[] result = readBuffer(maxVal.getBuffer());
@@ -333,7 +316,14 @@ public abstract class Kernel {
         return false;
     }
 
+    @Override
+    public boolean usesGPU() {
+        return true;
+    }
+
+    @Override
     public void clearMemory() {
+        super.clearMemory();
         clearMem(clMem);
     }
 
@@ -378,10 +368,8 @@ public abstract class Kernel {
 
     @Override
     public String toString() {
-        return kernelInfo.toString();
+        return getKernelInfo().toString();
     }
-
-    public abstract void stopComputation();
 
     static long roundUp(long groupSize, long globalSize) {
         long r = globalSize % groupSize;
@@ -392,10 +380,6 @@ public abstract class Kernel {
             result = globalSize + groupSize - r;
         }
         return result;
-    }
-
-    public KernelInfo getKernelInfo() {
-        return kernelInfo;
     }
 
 }

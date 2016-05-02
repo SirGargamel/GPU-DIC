@@ -11,7 +11,6 @@ import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import java.util.List;
 

@@ -28,8 +28,8 @@ import cz.tul.dic.data.subset.generator.AbstractSubsetGenerator;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
-import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.memory.AbstractOpenCLMemoryManager;
 import cz.tul.dic.output.NameGenerator;
 import cz.tul.pj.journal.Journal;
 import java.io.File;
@@ -84,7 +84,7 @@ public final class Engine extends Observable implements Observer {
         tc.clearResultData();
         TaskContainerUtils.checkTaskValidity(tc);
 
-        AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
+        AbstractOpenCLMemoryManager.assignTaskForInit(tc);
 
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
         final Set<Future<Void>> futures = new HashSet<>();

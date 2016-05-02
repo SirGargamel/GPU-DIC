@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernel;
+package cz.tul.dic.engine.kernel;
 
 import com.jogamp.opencl.CLDevice;
 import cz.tul.dic.ComputationException;
@@ -15,7 +15,7 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.opencl.DeviceManager;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo.Type;
+import cz.tul.dic.engine.kernel.KernelInfo.Type;
 import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import cz.tul.pj.journal.Journal;
@@ -49,11 +49,11 @@ public class KernelManager {
         // deformation counts - BruteForce - 441, SPGD - 3, NRC - 21, 160, NRCHE - 5, 13, NRF - 6, 28, NRFHE - 3, 7        
         {-1, 1, 1, 0, 0, 0}, // 3
         {-3, 3, 1, -1, 1, 1}, // 21
-        {0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, -2, 2, 1}, // 160
+        {0, 1, 1, 0, 1, 1, 0.0, 0.1, 0.1, 0.0, 0.1, 0.1, 0.00, 0.01, 0.01, -0.02, 0.02, 0.01}, // 160
         {-10.0, 10.0, 1, -10, 10, 1}, // 441
     };
     private static final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{1, 32};
-    private static final int PERFORMANCE_TEST_SUBSET_SIZE = 10;
+    private static final int[] PERFORMANCE_TEST_SUBSET_SIZES = new int[]{5, 15, 35};
     private static final int PERFORMANCE_TEST_BLANK_COUNT = 10;
     private static boolean inited;
 
@@ -63,12 +63,23 @@ public class KernelManager {
         DEFAULT_KERNEL = new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY);
         DEFAULT_KERNEL_WEIGHED = new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY);
 
-        UNSUPPORTED_KERNELS = new ArrayList<>(2);
+        UNSUPPORTED_KERNELS = new ArrayList<>(3);
         // implementation does not exist
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.ANY)));
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.ANY)));
-        // CPU
+        // OCL CPU
         UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL1D, KernelInfo.Input.ARRAY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.YES)));
+        // Java kernel
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.JavaKernel, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.NO)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.JavaKernel, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.ANY)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.JavaKernel, KernelInfo.Input.IMAGE, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.JavaKernel, KernelInfo.Input.ANY, KernelInfo.Correlation.WZNSSD, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.JavaKernel, KernelInfo.Input.ANY, KernelInfo.Correlation.ZNSSD, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));        
+        // DEBUG !!! - OPenCL not working for now
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL1D, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
+        UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.CL2D, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
+        //UNSUPPORTED_KERNELS.addAll(generatePossibleInfos(new KernelInfo(Type.JavaKernel, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
 
         final long lastCheck = Preferences.userNodeForPackage(KernelManager.class).getLong(PERFORMANCE_TEST_TIME, 0);
         final long currentTime = System.currentTimeMillis();
@@ -194,19 +205,22 @@ public class KernelManager {
 
     private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo) throws ComputationException {
         solver.setKernel(kernelInfo);
-        final Image img = Image.createImage(new BufferedImage(50, 50, BufferedImage.TYPE_BYTE_GRAY));
-        final AbstractSubset subset = new SquareSubset2D(PERFORMANCE_TEST_SUBSET_SIZE, 15, 15);
+        final Image img = Image.createImage(new BufferedImage(100, 100, BufferedImage.TYPE_BYTE_GRAY));
 
         List<double[]> deformationLimits;
         List<AbstractSubset> subsets;
         List<Integer> weights;
-        for (int sc : PERFORMANCE_TEST_SUBSET_COUNT) {
-            for (double[] limits : PERFORMANCE_TEST_LIMITS) {
-                subsets = Collections.nCopies(sc, subset);
-                deformationLimits = Collections.nCopies(sc, limits);
-                weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(PERFORMANCE_TEST_SUBSET_SIZE, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
-                solver.solve(new FullTask(
-                        img, img, subsets, weights, deformationLimits));
+        AbstractSubset subset;
+        for (int ss : PERFORMANCE_TEST_SUBSET_SIZES) {
+            subset = new SquareSubset2D(ss, ss + 1, ss + 1);
+            for (int sc : PERFORMANCE_TEST_SUBSET_COUNT) {
+                for (double[] limits : PERFORMANCE_TEST_LIMITS) {
+                    subsets = Collections.nCopies(sc, subset);
+                    deformationLimits = Collections.nCopies(sc, limits);
+                    weights = Collections.nCopies(sc, TaskContainerUtils.computeCorrelationWeight(ss, TaskDefaultValues.DEFAULT_CORRELATION_WEIGHT));
+                    solver.solve(new FullTask(
+                            img, img, subsets, weights, deformationLimits));
+                }
             }
         }
     }

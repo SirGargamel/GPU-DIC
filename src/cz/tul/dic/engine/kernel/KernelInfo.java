@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernel;
+package cz.tul.dic.engine.kernel;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -88,6 +88,9 @@ public class KernelInfo implements Serializable {
         if (this.memoryCoalescing != other.memoryCoalescing) {
             return false;
         }
+        if (this.useLimits != other.useLimits) {
+            return false;
+        }
         return true;
     }
 
@@ -111,10 +114,21 @@ public class KernelInfo implements Serializable {
     }
 
     public enum Type {
-        CL1D,
-        CL2D,
-        CL15D_pF,
-        ANY
+        CL1D("cz.tul.dic.engine.opencl.kernel.CL1D"),
+        CL2D("cz.tul.dic.engine.opencl.kernel.CL2D"),
+        CL15D_pF("cz.tul.dic.engine.opencl.kernel.CL15D_pF"),
+        JavaKernel("cz.tul.dic.engine.kernel.JavaKernel"),
+        ANY(null);
+        
+        String packageName;
+
+        private Type(String packageName) {
+            this.packageName = packageName;
+        }
+
+        public String getPackageName() {
+            return packageName;
+        }
     }
 
     public enum MemoryCoalescing {

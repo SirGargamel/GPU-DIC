@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.memory;
+package cz.tul.dic.engine.memory;
 
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLImage2d;
@@ -13,8 +13,8 @@ import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.engine.opencl.kernel.Kernel;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
+import cz.tul.dic.engine.opencl.kernel.OpenCLKernel;
+import cz.tul.dic.engine.kernel.KernelInfo;
 import java.util.List;
 
 public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
@@ -23,7 +23,7 @@ public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
     }
 
     @Override
-    public void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException {
+    public void assignDataToGPU(final ComputationTask task, final OpenCLKernel kernel) throws ComputationException {
         try {
             release(clImageA);
             release(clImageB);

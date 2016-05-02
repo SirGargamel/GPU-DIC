@@ -6,7 +6,7 @@
 package cz.tul.dic.gui;
 
 import cz.tul.dic.data.AppSettings;
-import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
+import cz.tul.dic.engine.memory.AbstractOpenCLMemoryManager;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.color.ColorMap;
 import java.net.URL;

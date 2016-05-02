@@ -16,7 +16,7 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.loaders.ConfigLoader;
-import cz.tul.dic.engine.opencl.kernel.KernelManager;
+import cz.tul.dic.engine.kernel.KernelManager;
 import cz.tul.dic.engine.opencl.solvers.Solver;
 import java.io.BufferedOutputStream;
 import java.io.File;

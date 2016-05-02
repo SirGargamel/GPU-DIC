@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.memory;
+package cz.tul.dic.engine.memory;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opencl.CLBuffer;
@@ -14,7 +14,6 @@ import com.jogamp.opencl.CLImageFormat;
 import com.jogamp.opencl.CLMemory;
 import com.jogamp.opencl.CLResource;
 import cz.tul.dic.ComputationException;
-import cz.tul.dic.data.AppSettings;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Coordinates;
 import cz.tul.dic.data.Image;
@@ -22,29 +21,26 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
+import cz.tul.dic.engine.kernel.AbstractKernel;
+import cz.tul.dic.engine.opencl.kernel.OpenCLKernel;
 import cz.tul.dic.engine.opencl.DeviceManager;
-import cz.tul.dic.engine.opencl.kernel.Kernel;
 import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
  * @author Petr Ječmen
  */
-public abstract class AbstractOpenCLMemoryManager {
+public abstract class AbstractOpenCLMemoryManager extends MemoryManager {
     
     private static final CLImageFormat.ChannelOrder IMAGE_ORDER = CLImageFormat.ChannelOrder.R;
-    private static final CLImageFormat.ChannelType IMAGE_TYPE = CLImageFormat.ChannelType.UNSIGNED_INT8;
-    private static final Map<Type, AbstractOpenCLMemoryManager> INSTANCES;
-    protected long maxDeformationCount;
+    private static final CLImageFormat.ChannelType IMAGE_TYPE = CLImageFormat.ChannelType.UNSIGNED_INT8;    
+    protected ComputationTask computationTask;
+    protected long maxDeformationCount;    
     // OpenCL entities
     protected CLMemory<ByteBuffer> clImageA, clImageB;
     protected CLBuffer<IntBuffer> clSubsetData;
@@ -56,43 +52,29 @@ public abstract class AbstractOpenCLMemoryManager {
     // OpenCL context        
     protected CLCommandQueue queue;
     protected CLContext context;
-    private final Lock lock;
+       
 
-    static {
-        DeviceManager.getContext();
-        DeviceManager.clearMemory();
-
-        INSTANCES = new EnumMap<>(Type.class);
-        INSTANCES.put(Type.STATIC, new StaticMemoryManager());
-        INSTANCES.put(Type.DYNAMIC, new DynamicMemoryManager());
-        INSTANCES.put(Type.PREFETCH, new StaticMemoryManager());
-    }
-
-    protected AbstractOpenCLMemoryManager() {
-        lock = new ReentrantLock();
+    protected AbstractOpenCLMemoryManager() {        
         context = DeviceManager.getContext();
         queue = DeviceManager.getQueue();
-    }
+    }    
 
-    public static AbstractOpenCLMemoryManager getInstance() {
-        return INSTANCES.get(AppSettings.getInstance().getMemManagerType());
-    }
-
-    public void assignData(final ComputationTask task, final Kernel kernel) throws ComputationException {
-        lock.lock();
+    @Override
+    public void assignData(final ComputationTask task, final AbstractKernel kernel) throws ComputationException {
+        if (!(kernel instanceof OpenCLKernel)) {
+            throw new IllegalArgumentException("Kernel must be an instance of OpenCL kernel.");
+        }
+        
+        super.assignData(task, kernel);
         context = DeviceManager.getContext();
         queue = DeviceManager.getQueue();
         maxDeformationCount = DeformationUtils.findMaxDeformationCount(task.getDeformations(), task.getOrder(), task.usesLimits());
-        assignDataToGPU(task, kernel);
+        assignDataToGPU(task, (OpenCLKernel) kernel);
     }
 
-    public abstract void assignDataToGPU(final ComputationTask task, final Kernel kernel) throws ComputationException;
+    abstract void assignDataToGPU(final ComputationTask task, final OpenCLKernel kernel) throws ComputationException;
 
-    public abstract void assignTask(final TaskContainer task);
-
-    public void unlockData() {
-        lock.unlock();
-    }
+    public abstract void assignTask(final TaskContainer task);    
 
     protected CLImage2d<ByteBuffer> generateImage2d(final Image image) {
         return context.createImage2d(
@@ -209,6 +191,7 @@ public abstract class AbstractOpenCLMemoryManager {
         }
     }
 
+    @Override
     public void clearMemory() {
         release(clDefStepCount);
         release(clDeformations);
@@ -229,12 +212,6 @@ public abstract class AbstractOpenCLMemoryManager {
 
     public long getMaxDeformationCount() {
         return maxDeformationCount;
-    }
-
-    public enum Type {
-        STATIC,
-        DYNAMIC,
-        PREFETCH
-    }
+    }    
 
 }

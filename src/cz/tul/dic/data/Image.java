@@ -6,6 +6,8 @@
 package cz.tul.dic.data;
 
 import cz.tul.dic.OpenCVHandler;
+import cz.tul.dic.debug.converters.ImageConverter;
+import cz.tul.pj.journal.Journal;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +30,7 @@ public final class Image extends BufferedImage {
 
     static {
         OpenCVHandler.loadLibrary();
+        Journal.registerConverter(new ImageConverter());
     }
 
     private Image(final int width, final int height, final int imageType, final String imageName) {

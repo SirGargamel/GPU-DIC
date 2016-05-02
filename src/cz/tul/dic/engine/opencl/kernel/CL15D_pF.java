@@ -7,12 +7,14 @@ package cz.tul.dic.engine.opencl.kernel;
 
 import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import com.jogamp.opencl.CLBuffer;
-import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.WorkSizeManager;
+import cz.tul.dic.engine.memory.MemoryManager;
 import java.nio.IntBuffer;
 
-public class CL15D_pF extends Kernel {
+public class CL15D_pF extends OpenCLKernel {
 
     private static final int ARGUMENT_INDEX_D_COUNT = 11;
     private static final int ARGUMENT_INDEX_D_BASE = 12;
@@ -20,7 +22,7 @@ public class CL15D_pF extends Kernel {
     private static final int LWS0_BASE = 32;    
     private boolean stop;
 
-    public CL15D_pF(final KernelInfo kernelInfo, final AbstractOpenCLMemoryManager memManager, final WorkSizeManager wsm) {
+    public CL15D_pF(final KernelInfo kernelInfo, final MemoryManager memManager, final WorkSizeManager wsm) {
         super(kernelInfo, memManager, wsm);
     }
 
@@ -30,7 +32,7 @@ public class CL15D_pF extends Kernel {
             final int subsetSize, final int subsetCount) {
         stop = false;
         final int subsetArea = subsetSize * subsetSize;
-        long lws0 = Kernel.roundUp(calculateLws0base(), subsetArea);
+        long lws0 = OpenCLKernel.roundUp(calculateLws0base(), subsetArea);
         lws0 = Math.min(lws0, getMaxWorkItemSize());
 
         kernelDIC.rewind();
@@ -43,7 +45,7 @@ public class CL15D_pF extends Kernel {
                 .putArg(0L)
                 .putArg(0);
         final CLBuffer<IntBuffer> weights = data.getWeights();
-        if (kernelInfo.getCorrelation() == KernelInfo.Correlation.WZNSSD) {
+        if (getKernelInfo().getCorrelation() == KernelInfo.Correlation.WZNSSD) {
             kernelDIC.putArg(weights);
         }
         kernelDIC.rewind();
@@ -72,7 +74,7 @@ public class CL15D_pF extends Kernel {
 
                 deformationSubCount = Math.min(wsm.getDeformationCount(), deformationCount - currentBaseDeformation);
 
-                globalWorkSize = Kernel.roundUp(lws0, deformationSubCount);
+                globalWorkSize = OpenCLKernel.roundUp(lws0, deformationSubCount);
 
                 kernelDIC.setArg(ARGUMENT_INDEX_D_COUNT, deformationSubCount);
                 kernelDIC.setArg(ARGUMENT_INDEX_D_BASE, currentBaseDeformation);

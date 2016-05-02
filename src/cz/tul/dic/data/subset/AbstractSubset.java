@@ -5,6 +5,8 @@
  */
 package cz.tul.dic.data.subset;
 
+import cz.tul.dic.debug.converters.SubsetConverter;
+import cz.tul.pj.journal.Journal;
 import java.io.Serializable;
 
 /**
@@ -16,6 +18,10 @@ public abstract class AbstractSubset implements Serializable {
     private final double[] center;
     private final int size;
     private final int[] data;
+    
+    static {
+        Journal.registerConverter(new SubsetConverter());
+    }
 
     public AbstractSubset(final double[] center, final int size, final int[] data) {
         this.center = new double[center.length];

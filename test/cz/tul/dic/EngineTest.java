@@ -26,9 +26,9 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.data.task.TaskDefaultValues;
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
-import cz.tul.dic.engine.opencl.kernel.KernelManager;
-import cz.tul.dic.engine.opencl.memory.AbstractOpenCLMemoryManager;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.KernelManager;
+import cz.tul.dic.engine.memory.MemoryManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -74,8 +74,8 @@ public class EngineTest {
     private static final String[] DEF_ZERO_FIRST_FILES = new String[]{
         "out_2_0_1_0_0_0", "out_1_-2_0_0_0_1", "out_-2_-1_1_0_0_1"};
     private static final double[] DEF_LARGE = new double[]{
-        -5, 5, 0.5, -5, 5, 0.5,
-        -1.0, 1.0, 0.1, -1.0, 1.0, 0.2, -1.0, 1.0, 0.1, -1.0, 1.0, 0.1};
+        -5, 5, 1, -5, 5, 1,
+        -1.0, 1.0, 0.2, -1.0, 1.0, 0.2, -1.0, 1.0, 0.2, -1.0, 1.0, 0.2};
 
     @Test
     public void testEngineAll() throws IOException, URISyntaxException, ComputationException {
@@ -326,7 +326,7 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
+        MemoryManager.assignTaskForInit(tc);
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setKernel((KernelInfo) tc.getParameter(TaskParameter.KERNEL));
@@ -383,7 +383,7 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        AbstractOpenCLMemoryManager.getInstance().assignTask(tc);
+        MemoryManager.assignTaskForInit(tc);
 
         final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
         solver.setKernel((KernelInfo) tc.getParameter(TaskParameter.KERNEL));

@@ -3,10 +3,10 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.kernel;
+package cz.tul.dic.engine.kernel;
 
-import cz.tul.dic.engine.opencl.kernel.KernelInfo;
-import cz.tul.dic.engine.opencl.kernel.TimeDataStorage;
+import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.kernel.TimeDataStorage;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -65,8 +65,7 @@ public final class WorkSizeManager {
         computeNextWorkSize();
     }
 
-    public void storeTime(final long workSizeF, final long workSizeD, final long time) {
-        TimeDataStorage.getInstance().storeTime(kernel, workSizeF, workSizeD, time);
+    public void storeTime(final long workSizeF, final long workSizeD, final long time) {        
         computeNextWorkSize();
     }
 
