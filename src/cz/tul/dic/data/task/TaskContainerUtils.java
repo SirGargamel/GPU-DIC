@@ -16,8 +16,8 @@ import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.roi.RectangleROI;
 import cz.tul.dic.data.task.loaders.ConfigLoader;
-import cz.tul.dic.engine.kernel.KernelManager;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.KernelPerformanceManager;
+import cz.tul.dic.engine.solvers.SolverType;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -299,8 +299,8 @@ public final class TaskContainerUtils {
         }
         final Object kernel = tc.getParameter(TaskParameter.KERNEL);
         if (kernel == null) {
-            final Solver solver = (Solver) tc.getParameter(TaskParameter.SOLVER);
-            tc.setParameter(TaskParameter.KERNEL, KernelManager.getBestKernel(solver.supportsWeighedCorrelation()));
+            final SolverType solver = (SolverType) tc.getParameter(TaskParameter.SOLVER);
+            tc.setParameter(TaskParameter.KERNEL, KernelPerformanceManager.getInstance().getBestKernel(solver.supportsWeighedCorrelation()));
         }
         final Object filterSize = tc.getParameter(TaskParameter.FILTER_KERNEL_SIZE);
         if (filterSize == null) {

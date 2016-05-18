@@ -16,19 +16,16 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.kernel.OpenCLKernel;
-import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.KernelInfo;
 import java.util.List;
 
-public class DynamicMemoryManager extends AbstractOpenCLMemoryManager {
+public class DynamicOpenCLMemoryManager extends AbstractOpenCLMemoryManager {
 
     private Image imageA, imageB;
     private List<AbstractSubset> subsets;
     private List<Integer> subsetWeights;
     private List<double[]> deformationLimits;
     private List<long[]> deformationCounts;
-
-    protected DynamicMemoryManager() {
-    }
 
     @Override
     public void assignDataToGPU(final ComputationTask task, final OpenCLKernel kernel) throws ComputationException {

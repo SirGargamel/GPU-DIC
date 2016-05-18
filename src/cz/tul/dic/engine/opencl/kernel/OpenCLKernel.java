@@ -20,15 +20,14 @@ import cz.tul.dic.ComputationException;
 import cz.tul.dic.ComputationExceptionCause;
 import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.deformation.DeformationUtils;
-import cz.tul.dic.engine.opencl.DeviceManager;
+import cz.tul.dic.engine.opencl.OpenCLDeviceManager;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.debug.Stats;
-import cz.tul.dic.engine.kernel.AbstractKernel;
-import cz.tul.dic.engine.kernel.KernelInfo;
-import cz.tul.dic.engine.kernel.WorkSizeManager;
-import cz.tul.dic.engine.memory.MemoryManager;
+import cz.tul.dic.engine.AbstractKernel;
+import cz.tul.dic.engine.KernelInfo;
+import cz.tul.dic.engine.platform.Platform;
 import cz.tul.pj.journal.Journal;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,17 +50,21 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
     private static final String KERNEL_REDUCE = "reduce";
     private static final String KERNEL_FIND_POS = "findPos";
     private static final String KERNEL_DIC_NAME = "DIC";
+    protected final WorkSizeManager wsm;
     protected final CLContext context;
     protected final CLCommandQueue queue;
     protected CLKernel kernelDIC, kernelReduce, kernelFindPos;
+    private final OpenCLDeviceManager deviceManager;
     private final Set<CLResource> clMem;
 
-    protected OpenCLKernel(final KernelInfo info, final MemoryManager memManager, final WorkSizeManager wsm) {
-        super(info, (AbstractOpenCLMemoryManager) memManager, wsm);
+    protected OpenCLKernel(final Platform platform) {
+        super(platform);
 
         clMem = new HashSet<>();
-        queue = DeviceManager.getQueue();
-        context = DeviceManager.getContext();
+        this.deviceManager = (OpenCLDeviceManager) platform.getDeviceManager();        
+        queue = this.deviceManager.getQueue();
+        context = this.deviceManager.getContext();
+        this.wsm = new WorkSizeManager(platform);
     }
 
     @Override
@@ -153,7 +156,7 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
             final int subsetSize, final int subsetCount);
     
     @Override
-    public List<CorrelationResult> computeFindBestInner(final ComputationTask task) throws ComputationException {
+    public List<CorrelationResult> computeFindBest(final ComputationTask task) throws ComputationException {
         final int subsetCount = task.getSubsets().size();
         final int subsetSize = task.getSubsets().get(0).getSize();
 
@@ -181,7 +184,6 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
 
             result = createResults(readBuffer(maxValuesCl.getBuffer()), positions, task.getDeformations(), task.getOrder(), task.usesLimits());
             return result;
-            //return new ArrayList<>();
         } catch (CLException ex) {
             if (ex.getCLErrorString().contains(CL_MEM_ERROR)) {
                 throw new ComputationException(ComputationExceptionCause.MEMORY_ERROR, ex);
@@ -194,7 +196,7 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
     }
 
     @Override
-    public double[] computeRawInner(final ComputationTask task) throws ComputationException {
+    public double[] computeRaw(final ComputationTask task) throws ComputationException {
         if (task.getSubsets().isEmpty()) {
             Journal.addEntry("Empty subsets for raw computation.");
             return new double[0];
@@ -248,8 +250,8 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
         return maxVal;
     }
 
-    protected static int getMaxWorkItemSize() {
-        return DeviceManager.getDevice().getMaxWorkItemSizes()[0];
+    protected int getMaxWorkItemSize() {
+        return deviceManager.getDevice().getMaxWorkItemSizes()[0];
     }
 
     private int[] findPos(final CLBuffer<FloatBuffer> results, final int subsetCount, final int deformationCount, final CLBuffer<FloatBuffer> vals) {

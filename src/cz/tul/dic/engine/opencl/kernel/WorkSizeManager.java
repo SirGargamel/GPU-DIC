@@ -3,12 +3,16 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.kernel;
+package cz.tul.dic.engine.opencl.kernel;
 
-import cz.tul.dic.engine.kernel.KernelInfo;
-import cz.tul.dic.engine.kernel.TimeDataStorage;
+import cz.tul.dic.engine.DeviceType;
+import cz.tul.dic.engine.platform.Platform;
+import cz.tul.dic.engine.platform.PlatformDefinition;
+import cz.tul.dic.engine.platform.PlatformType;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  *
@@ -16,6 +20,7 @@ import java.util.Map.Entry;
  */
 public final class WorkSizeManager {
 
+    private static final Map<PlatformType, Map<DeviceType, PerformanceData>> PERFORMANCE_DATA;
     private static final long MAX_TIME_WIN = 2;
     private static final long MAX_TIME_LIN = 5;
     private static final long MAX_TIME_BASE = 1_000_000_000; // 1s
@@ -26,7 +31,7 @@ public final class WorkSizeManager {
     private static final double GROWTH_LIMIT_B = 0.75;
     private static final double GROWTH_FACTOR_A = 0.75;
     private static final double GROWTH_FACTOR_B = 1.25;
-    private final KernelInfo kernel;
+    private final PerformanceData performance;
     private long workSizeS, workSizeD, maxF, maxD;
 
     static {
@@ -36,10 +41,23 @@ public final class WorkSizeManager {
         } else {
             MAX_TIME = MAX_TIME_LIN * MAX_TIME_BASE;
         }
+        PERFORMANCE_DATA = new EnumMap<>(PlatformType.class);
     }
 
-    public WorkSizeManager(final KernelInfo kernel) {
-        this.kernel = kernel;
+    public WorkSizeManager(final Platform platform) {
+        final PlatformDefinition paltformDef = platform.getPlatformDefinition();
+        Map<DeviceType, PerformanceData> m = PERFORMANCE_DATA.get(paltformDef.getPlatform());
+        if (m == null) {
+            m = new EnumMap<>(DeviceType.class);
+            PERFORMANCE_DATA.put(paltformDef.getPlatform(), m);
+        }
+        if (m.containsKey(paltformDef.getDevice())) {
+            performance = m.get(paltformDef.getDevice());
+        } else {
+            performance = new PerformanceData();
+            performance.storeTime(1, 1000, (long) (MAX_TIME * 0.75));
+            m.put(paltformDef.getDevice(), performance);
+        }
         reset();
     }
 
@@ -65,25 +83,23 @@ public final class WorkSizeManager {
         computeNextWorkSize();
     }
 
-    public void storeTime(final long workSizeF, final long workSizeD, final long time) {        
+    public void storeTime(final long workSizeF, final long workSizeD, final long time) {
         computeNextWorkSize();
     }
 
     private void computeNextWorkSize() {
-        if (TimeDataStorage.getInstance().getTimeData(kernel) != null) {
-            final long[] max = findMaxTimeValue(kernel);
-            final long[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
-            workSizeS = newMax[0];
-            workSizeD = newMax[1];
-        }
+        final long[] max = findMaxTimeValue();
+        final long[] newMax = computeNewCount((int) max[0], (int) max[1], max[2]);
+        workSizeS = newMax[0];
+        workSizeD = newMax[1];
     }
 
-    private static long[] findMaxTimeValue(final KernelInfo kernel) {
+    private long[] findMaxTimeValue() {
         final long[] result = new long[]{0, 0, -1};
 
         long time;
         long subsetCount, deformationCount;
-        for (Entry<Long, Map<Long, Long>> e : TimeDataStorage.getInstance().getTimeData(kernel).entrySet()) {
+        for (Entry<Long, Map<Long, Long>> e : performance.data.entrySet()) {
             for (Entry<Long, Long> e2 : e.getValue().entrySet()) {
                 time = e2.getValue();
                 subsetCount = e.getKey();
@@ -128,5 +144,23 @@ public final class WorkSizeManager {
         }
 
         return Math.min(result, maxValue);
+    }
+
+    private static class PerformanceData {
+
+        private final Map<Long, Map<Long, Long>> data;
+
+        public PerformanceData() {
+            this.data = new TreeMap<>();
+        }
+
+        public void storeTime(final long subsetCount, final long deformationCount, final long time) {
+            Map<Long, Long> m = data.get(subsetCount);
+            if (m == null) {
+                m = new TreeMap<>();
+                data.put(subsetCount, m);
+            }
+            m.put(deformationCount, time);
+        }
     }
 }

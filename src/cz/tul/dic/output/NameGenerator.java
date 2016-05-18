@@ -9,7 +9,7 @@ import cz.tul.dic.FpsManager;
 import cz.tul.dic.Utils;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.solvers.SolverType;
 import java.io.File;
 
 /**
@@ -172,7 +172,7 @@ public final class NameGenerator {
                 sb.append(DELIMITER);
                 sb.append(Utils.format((double) task.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM)));
                 sb.append(DELIMITER);                
-                sb.append(((Solver) task.getParameter(TaskParameter.SOLVER)).getAbbreviation());
+                sb.append(((SolverType) task.getParameter(TaskParameter.SOLVER)).getAbbreviation());
                 sb.append(DELIMITER);                
                 sb.append(task.getParameter(TaskParameter.KERNEL).toString());
             }

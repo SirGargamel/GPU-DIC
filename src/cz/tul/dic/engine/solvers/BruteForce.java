@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.engine.solvers;
 
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
@@ -12,9 +12,15 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
+import cz.tul.dic.engine.AbstractDeviceManager;
+import cz.tul.dic.engine.platform.Platform;
 import java.util.List;
 
 public class BruteForce extends AbstractTaskSolver {
+
+    public BruteForce(final Platform platform) {
+        super(platform);
+    }
 
     @Override
     public List<CorrelationResult> solve() throws ComputationException {

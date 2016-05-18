@@ -19,7 +19,7 @@ import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.generator.AbstractSubsetGenerator;
 import cz.tul.dic.engine.cluster.Analyzer1D;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class CircleROIManager extends AbstractROIManager {
 
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_METHOD, SubsetGenerator.EQUAL);
         tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, 1);
-        tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
+        tc.setParameter(TaskParameter.SOLVER, SolverType.BRUTE_FORCE);
         tc.addHint(Hint.NO_STRAIN);
         tc.addHint(Hint.NO_CUMULATIVE);
         tc.addHint(Hint.NO_STATS);

@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.engine.solvers;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import cz.tul.dic.data.result.CorrelationResult;

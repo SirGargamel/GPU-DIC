@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.engine.solvers;
 
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.deformation.DeformationOrder;
@@ -13,6 +13,7 @@ import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.platform.Platform;
 import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,10 @@ public class SPGD extends AbstractTaskSolver implements IGPUResultsReceiver {
     private Map<AbstractSubset, double[]> deformationsPertubations;
     private Map<AbstractSubset, Integer> weightsPertubations;
     private DeformationOrder defOrder;
+
+    public SPGD(Platform platform) {
+        super(platform);
+    }
 
     @Override
     public List<CorrelationResult> solve() throws ComputationException {

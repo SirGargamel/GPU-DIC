@@ -16,19 +16,22 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
-import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
+import cz.tul.dic.engine.solvers.AbstractTaskSolver;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.data.Interpolation;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 import cz.tul.dic.data.task.TaskDefaultValues;
-import cz.tul.dic.engine.kernel.KernelInfo;
-import cz.tul.dic.engine.kernel.KernelManager;
-import cz.tul.dic.engine.memory.MemoryManager;
+import cz.tul.dic.engine.DeviceType;
+import cz.tul.dic.engine.KernelInfo;
+import cz.tul.dic.engine.KernelPerformanceManager;
+import cz.tul.dic.engine.platform.Platform;
+import cz.tul.dic.engine.platform.PlatformManager;
+import cz.tul.dic.engine.platform.PlatformType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -82,34 +85,38 @@ public class EngineTest {
         TaskContainer tc;
         Set<String> errors = new LinkedHashSet<>();
         int counter = 0;
-        final Solver slvr = Solver.BRUTE_FORCE;
-        final List<KernelInfo> infos = KernelManager.generateKernelInfos();
-        for (Interpolation i : Interpolation.values()) {
-            for (TaskSplitMethod ts : TaskSplitMethod.values()) {
-                for (SubsetGenerator fgm : SubsetGenerator.values()) {
-                    for (KernelInfo ki : infos) {
-                        for (String s : DEF_ZERO_FILES) {
-                            tc = generateTask(s, DEF_ZERO, ki, i, ts, fgm, slvr);
-                            errors.add(computeAndCheckTask(tc, s));
-                            counter++;
-                            tc = generateTask(s, DEF_ZERO_F, ki, i, ts, fgm, slvr);
-                            errors.add(computeAndCheckTask(tc, s));
-                            counter++;
-                        }
+        final SolverType slvr = SolverType.BRUTE_FORCE;
+        for (PlatformType platform : PlatformType.values()) {
+            for (DeviceType device : DeviceType.values()) {
+                final List<KernelInfo> infos = KernelPerformanceManager.getInstance().generateKernelInfos(platform, device);
+                for (Interpolation i : Interpolation.values()) {
+                    for (TaskSplitMethod ts : TaskSplitMethod.values()) {
+                        for (SubsetGenerator fgm : SubsetGenerator.values()) {
+                            for (KernelInfo ki : infos) {
+                                for (String s : DEF_ZERO_FILES) {
+                                    tc = generateTask(s, DEF_ZERO, ki, i, ts, fgm, slvr);
+                                    errors.add(computeAndCheckTask(tc, s));
+                                    counter++;
+                                    tc = generateTask(s, DEF_ZERO_F, ki, i, ts, fgm, slvr);
+                                    errors.add(computeAndCheckTask(tc, s));
+                                    counter++;
+                                }
 
-                        for (String s : DEF_FIRST_FILES) {
-                            tc = generateTask(s, DEF_FIRST, ki, i, ts, fgm, slvr);
-                            errors.add(computeAndCheckTask(tc, s));
-                            counter++;
-                            tc = generateTask(s, DEF_FIRST_F, ki, i, ts, fgm, slvr);
-                            errors.add(computeAndCheckTask(tc, s));
-                            counter++;
-                        }
+                                for (String s : DEF_FIRST_FILES) {
+                                    tc = generateTask(s, DEF_FIRST, ki, i, ts, fgm, slvr);
+                                    errors.add(computeAndCheckTask(tc, s));
+                                    counter++;
+                                    tc = generateTask(s, DEF_FIRST_F, ki, i, ts, fgm, slvr);
+                                    errors.add(computeAndCheckTask(tc, s));
+                                    counter++;
+                                }
 
-                        for (String s : DEF_ZERO_FIRST_FILES) {
-                            tc = generateTask(s, DEF_FIRST_F, ki, i, ts, fgm, slvr);
-                            errors.add(computeAndCheckTask(tc, s));
-                            counter++;
+                                for (String s : DEF_ZERO_FIRST_FILES) {
+                                    tc = generateTask(s, DEF_FIRST_F, ki, i, ts, fgm, slvr);
+                                    errors.add(computeAndCheckTask(tc, s));
+                                    counter++;
+                                }
+                            }
                         }
                     }
                 }
@@ -124,7 +131,7 @@ public class EngineTest {
             final String outFilename, final double[] deformations,
             final KernelInfo kernelInfo, final Interpolation interpolation,
             final TaskSplitMethod taskSplit, final SubsetGenerator fgm,
-            final Solver solver) throws IOException, URISyntaxException, ComputationException {
+            final SolverType solver) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(getClass().getResource("/resources/engine/in.bmp").toURI()).toFile());
         input.add(Paths.get(getClass().getResource("/resources/engine/" + outFilename + ".bmp").toURI()).toFile());
@@ -192,7 +199,7 @@ public class EngineTest {
 
         tc.setParameter(TaskParameter.IN, input.get(0));
         tc.setParameter(TaskParameter.SUBSET_SIZE, 5);
-        tc.setParameter(TaskParameter.SOLVER, Solver.BRUTE_FORCE);
+        tc.setParameter(TaskParameter.SOLVER, SolverType.BRUTE_FORCE);
         tc.setParameter(TaskParameter.FILTER_KERNEL_SIZE, -1);
 
         return tc;
@@ -325,11 +332,11 @@ public class EngineTest {
         tc.setParameter(TaskParameter.SUBSET_SIZE, ss);
 
         TaskContainerUtils.checkTaskValidity(tc);
+        
+        final Platform platform = PlatformManager.getInstance().initPlatform();
+        platform.getMemoryManager().assignTask(tc);        
 
-        MemoryManager.assignTaskForInit(tc);
-
-        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
-        solver.setKernel((KernelInfo) tc.getParameter(TaskParameter.KERNEL));
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(SolverType.BRUTE_FORCE, platform);        
         solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));
@@ -383,10 +390,10 @@ public class EngineTest {
 
         TaskContainerUtils.checkTaskValidity(tc);
 
-        MemoryManager.assignTaskForInit(tc);
+        final Platform platform = PlatformManager.getInstance().initPlatform();
+        platform.getMemoryManager().assignTask(tc);        
 
-        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
-        solver.setKernel((KernelInfo) tc.getParameter(TaskParameter.KERNEL));
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(SolverType.BRUTE_FORCE, platform);
         solver.setInterpolation((Interpolation) tc.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) tc.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         solver.setTaskSplitVariant(taskSplit, tc.getParameter(TaskParameter.TASK_SPLIT_PARAM));

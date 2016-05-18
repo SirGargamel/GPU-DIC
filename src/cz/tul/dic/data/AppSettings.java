@@ -6,7 +6,7 @@
 package cz.tul.dic.data;
 
 import cz.tul.dic.engine.memory.AbstractOpenCLMemoryManager;
-import cz.tul.dic.engine.memory.MemoryManager;
+import cz.tul.dic.engine.memory.BasicMemoryManager;
 import cz.tul.dic.output.color.ColorMap;
 import java.util.prefs.Preferences;
 
@@ -18,7 +18,7 @@ public class AppSettings {
 
     private final Preferences prefs;
     private ColorMap.Type colorMapType;
-    private MemoryManager.Type memManagerType;
+    private BasicMemoryManager.Type memManagerType;
 
     private AppSettings() {        
         prefs = Preferences.userNodeForPackage(AppSettings.class);
@@ -35,7 +35,7 @@ public class AppSettings {
         prefs.put(ColorMap.Type.class.toString(), colorMapType.toString());
     }
 
-    public MemoryManager.Type getMemManagerType() {
+    public BasicMemoryManager.Type getMemManagerType() {
         return memManagerType;
     }
 

@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.engine.solvers;
 
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
@@ -15,6 +15,8 @@ import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskDefaultValues;
+import cz.tul.dic.engine.AbstractDeviceManager;
+import cz.tul.dic.engine.platform.Platform;
 import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,10 @@ public class CoarseFine extends AbstractTaskSolver {
     private static final int COUNT_ZERO_ORDER_LIMITS = 6;
     private static final double STEP_INITIAL = 1;
     private static final double STEP_MINIMAL = 0.01;
+
+    public CoarseFine(final Platform platform) {
+        super(platform);
+    }
 
     @Override
     public List<CorrelationResult> solve() throws ComputationException {

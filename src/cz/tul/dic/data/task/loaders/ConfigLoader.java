@@ -17,8 +17,8 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
-import cz.tul.dic.engine.kernel.KernelInfo;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.KernelInfo;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.pj.journal.Journal;
 import java.io.File;
@@ -156,7 +156,7 @@ public class ConfigLoader extends AbstractInputLoader {
                             task.setParameter(tp, intArrayFromString(value));
                             break;
                         case SOLVER:
-                            task.setParameter(tp, Solver.valueOf(value));
+                            task.setParameter(tp, SolverType.valueOf(value));
                             break;
                         case STRAIN_ESTIMATION_METHOD:
                             task.setParameter(tp, StrainEstimationMethod.valueOf(value));

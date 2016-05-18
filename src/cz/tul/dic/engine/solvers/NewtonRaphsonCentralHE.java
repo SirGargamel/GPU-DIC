@@ -3,11 +3,13 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.engine.solvers;
 
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetDeformator;
+import cz.tul.dic.engine.AbstractDeviceManager;
+import cz.tul.dic.engine.platform.Platform;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +28,10 @@ public class NewtonRaphsonCentralHE extends NewtonRaphsonCentral {
 
     private static final double DX = 0.5;
     private static final double DY = DX;
+
+    public NewtonRaphsonCentralHE(Platform platform) {
+        super(platform);
+    }
 
     @Override
     protected double[] generateDeformations(double[] solution, double step) {

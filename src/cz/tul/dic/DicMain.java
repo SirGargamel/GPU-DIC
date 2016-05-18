@@ -5,16 +5,10 @@
  */
 package cz.tul.dic;
 
-import com.jogamp.opencl.CLDevice;
 import cz.tul.dic.complextask.ComplexTaskSolver;
-import cz.tul.dic.data.Image;
-import cz.tul.dic.data.subset.AbstractSubset;
-import cz.tul.dic.data.subset.SquareSubset2D;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskContainerUtils;
-import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
@@ -24,27 +18,17 @@ import cz.tul.dic.gui.Context;
 import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.data.task.loaders.InputLoader;
-import cz.tul.dic.debug.converters.ImageConverter;
-import cz.tul.dic.debug.converters.SubsetConverter;
-import cz.tul.dic.engine.opencl.DeviceManager;
-import cz.tul.dic.engine.kernel.KernelInfo;
-import cz.tul.dic.engine.kernel.KernelManager;
-import cz.tul.dic.engine.kernel.TimeDataStorage;
-import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.KernelInfo;
+import cz.tul.dic.engine.solvers.AbstractTaskSolver;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.output.NameGenerator;
 import cz.tul.pj.journal.Journal;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 import javafx.application.Application;
@@ -209,7 +193,7 @@ public class DicMain extends Application {
             Journal.addEntry("App launched in DEBUG mode.");
         } else {
             Journal.addEntry("App launched.");
-        }                       
+        }
     }
 
     private static void performComputationTest() {
@@ -229,7 +213,7 @@ public class DicMain extends Application {
                     task.setParameter(TaskParameter.SUBSET_SIZE, size);
                     task.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, size / 2);
 //                    tc.setParameter(TaskParameter.STRAIN_ESTIMATION_PARAM, (double) size);
-//                    tc.setParameter(TaskParameter.SOLVER, Solver.CoarseFine);                                        
+//                    tc.setParameter(TaskParameter.SOLVER, SolverType.CoarseFine);                                        
 
 //                    commenceComputation(task);                    
                     commenceComputationDynamic(task);
@@ -322,8 +306,8 @@ public class DicMain extends Application {
         TaskContainer task;
         for (int size = fs1; size <= fs2; size += 5) {
             for (String s : FILES_TO_DEBUG) {
-                for (Solver slvr : Solver.values()) {
-                    if (slvr == Solver.BRUTE_FORCE) {
+                for (SolverType slvr : SolverType.values()) {
+                    if (slvr == SolverType.BRUTE_FORCE) {
                         continue;
                     }
                     for (KernelInfo.Correlation corr : correlations) {
@@ -358,9 +342,9 @@ public class DicMain extends Application {
     }
 
     private static void performDeviceTest() throws ComputationException, IOException {
-        final List<KernelInfo> infos = KernelManager.generateKernelInfos();
-        final List<CLDevice> devices = DeviceManager.listAllDevices();
-        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(Solver.BRUTE_FORCE);
+        /*final List<KernelInfo> infos = KernelPerformanceManager.generateKernelInfos();
+        final List<CLDevice> devices = OpenCLDeviceManager.listAllDevices();
+        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver(SolverType.BRUTE_FORCE);
 
         if (devices.size() > 1) {
             System.out.println("Pick device: (0 for all devices)");
@@ -382,7 +366,7 @@ public class DicMain extends Application {
             csvOutput = new CsvOutput<>();
             try {
                 TimeDataStorage.getInstance().reset();
-                DeviceManager.initContext(device);
+                OpenCLDeviceManager.initContext(device);
 
                 Logger.info("Running device test on {}", device);
                 for (KernelInfo ki : infos) {
@@ -394,10 +378,12 @@ public class DicMain extends Application {
             }
             csvOutput.writeData(new File(device.getName().trim() + "-performance.csv"));
         }
+         */
+        throw new UnsupportedOperationException("Test needs to be reimpleted using Platforms..");
     }
 
     private static void testKernelInfo(final AbstractTaskSolver solver, final KernelInfo kernelInfo, final CsvOutput<Long> dataHolder) throws ComputationException {
-        final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{2, 8, 32, 128};
+        /*final int[] PERFORMANCE_TEST_SUBSET_COUNT = new int[]{2, 8, 32, 128};
         final double[][] PERFORMANCE_TEST_LIMITS = new double[][]{
             {-1, 1, 1, 0, 0, 0}, // 3
             {-3, 3, 1, -1, 1, 1}, // 21            
@@ -444,6 +430,8 @@ public class DicMain extends Application {
                 }
             }
         }
+        */
+        throw new UnsupportedOperationException("Test needs to be reimpleted using Platforms..");
     }
 
     private static void performPreprocessingTest() throws ComputationException, IOException {
@@ -471,10 +459,10 @@ public class DicMain extends Application {
         filters.add("gaussian");
         filters.add("binomial");
 
-        final List<Solver> solvers = new ArrayList<>();
-        solvers.add(Solver.COARSE_FINE);
-        solvers.add(Solver.NEWTON_RHAPSON_CENTRAL);
-//        solvers.add(Solver.NEWTON_RHAPSON_CENTRAL_HE);
+        final List<SolverType> solvers = new ArrayList<>();
+        solvers.add(SolverType.COARSE_FINE);
+        solvers.add(SolverType.NEWTON_RHAPSON_CENTRAL);
+//        solvers.add(SolverType.NEWTON_RHAPSON_CENTRAL_HE);
 
         TaskContainer task;
         for (String in : configs) {
@@ -484,7 +472,7 @@ public class DicMain extends Application {
                 for (int size = 5; size <= 15; size += 5) {
                     task.setParameter(TaskParameter.SUBSET_SIZE, size);
 
-                    for (Solver solver : solvers) {
+                    for (SolverType solver : solvers) {
                         task.setParameter(TaskParameter.SOLVER, solver);
 
                         final double roiWidth;

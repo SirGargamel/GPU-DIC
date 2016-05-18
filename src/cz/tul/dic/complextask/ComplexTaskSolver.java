@@ -20,7 +20,8 @@ import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.engine.Engine;
 import cz.tul.dic.data.result.Result;
 import cz.tul.dic.engine.OverlapComputation;
-import cz.tul.dic.engine.memory.AbstractOpenCLMemoryManager;
+import cz.tul.dic.engine.platform.Platform;
+import cz.tul.dic.engine.platform.PlatformManager;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.output.CsvWriter;
@@ -48,6 +49,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
     private static final int LIMIT_REPETITION = 10;
     private final List<Double> bottomShifts;
     private final TaskContainer task;
+    private Platform platform;
     private StrainEstimator strain;
     private boolean stop;
 
@@ -67,7 +69,11 @@ public class ComplexTaskSolver extends Observable implements Observer {
         task.clearResultData();
         bottomShifts.clear();
 
-        AbstractOpenCLMemoryManager.assignTaskForInit(task);
+        if (platform != null) {
+            platform.release();
+        }
+        platform = PlatformManager.getInstance().initPlatform();
+        platform.getMemoryManager().assignTask(task);   
 
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
 

@@ -21,9 +21,10 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
-import cz.tul.dic.engine.kernel.AbstractKernel;
+import cz.tul.dic.engine.AbstractKernel;
+import cz.tul.dic.engine.platform.Platform;
 import cz.tul.dic.engine.opencl.kernel.OpenCLKernel;
-import cz.tul.dic.engine.opencl.DeviceManager;
+import cz.tul.dic.engine.opencl.OpenCLDeviceManager;
 import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -35,12 +36,12 @@ import java.util.List;
  *
  * @author Petr Ječmen
  */
-public abstract class AbstractOpenCLMemoryManager extends MemoryManager {
-    
+public abstract class AbstractOpenCLMemoryManager extends AbstractMemoryManager {
+
     private static final CLImageFormat.ChannelOrder IMAGE_ORDER = CLImageFormat.ChannelOrder.R;
-    private static final CLImageFormat.ChannelType IMAGE_TYPE = CLImageFormat.ChannelType.UNSIGNED_INT8;    
+    private static final CLImageFormat.ChannelType IMAGE_TYPE = CLImageFormat.ChannelType.UNSIGNED_INT8;
     protected ComputationTask computationTask;
-    protected long maxDeformationCount;    
+    protected long maxDeformationCount;
     // OpenCL entities
     protected CLMemory<ByteBuffer> clImageA, clImageB;
     protected CLBuffer<IntBuffer> clSubsetData;
@@ -49,32 +50,42 @@ public abstract class AbstractOpenCLMemoryManager extends MemoryManager {
     protected CLBuffer<FloatBuffer> clDeformations;
     protected CLBuffer<LongBuffer> clDefStepCount;
     protected CLBuffer<FloatBuffer> clResults;
-    // OpenCL context        
+    // OpenCL context
     protected CLCommandQueue queue;
     protected CLContext context;
-       
+    protected OpenCLDeviceManager deviceManager;
 
-    protected AbstractOpenCLMemoryManager() {        
-        context = DeviceManager.getContext();
-        queue = DeviceManager.getQueue();
-    }    
+    protected AbstractOpenCLMemoryManager() {
+    }
+
+    @Override
+    public void setPlatform(final Platform platform) {
+        if (!(platform.getDeviceManager() instanceof OpenCLDeviceManager)) {
+            throw new IllegalArgumentException("Device manager needs to be OpenCL based manager.");
+        }        
+        
+        deviceManager = (OpenCLDeviceManager) platform.getDeviceManager();
+        context = deviceManager.getContext();
+        queue = deviceManager.getQueue();
+    }
 
     @Override
     public void assignData(final ComputationTask task, final AbstractKernel kernel) throws ComputationException {
         if (!(kernel instanceof OpenCLKernel)) {
             throw new IllegalArgumentException("Kernel must be an instance of OpenCL kernel.");
         }
-        
+
         super.assignData(task, kernel);
-        context = DeviceManager.getContext();
-        queue = DeviceManager.getQueue();
+        context = deviceManager.getContext();
+        queue = deviceManager.getQueue();
         maxDeformationCount = DeformationUtils.findMaxDeformationCount(task.getDeformations(), task.getOrder(), task.usesLimits());
         assignDataToGPU(task, (OpenCLKernel) kernel);
     }
 
     abstract void assignDataToGPU(final ComputationTask task, final OpenCLKernel kernel) throws ComputationException;
 
-    public abstract void assignTask(final TaskContainer task);    
+    @Override
+    public abstract void assignTask(final TaskContainer task);
 
     protected CLImage2d<ByteBuffer> generateImage2d(final Image image) {
         return context.createImage2d(
@@ -212,6 +223,6 @@ public abstract class AbstractOpenCLMemoryManager extends MemoryManager {
 
     public long getMaxDeformationCount() {
         return maxDeformationCount;
-    }    
+    }
 
 }

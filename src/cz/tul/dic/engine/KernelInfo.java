@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.kernel;
+package cz.tul.dic.engine;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -117,7 +117,7 @@ public class KernelInfo implements Serializable {
         CL1D("cz.tul.dic.engine.opencl.kernel.CL1D"),
         CL2D("cz.tul.dic.engine.opencl.kernel.CL2D"),
         CL15D_pF("cz.tul.dic.engine.opencl.kernel.CL15D_pF"),
-        JavaKernel("cz.tul.dic.engine.kernel.JavaKernel"),
+        JavaKernel("cz.tul.dic.engine.java.JavaKernel"),
         ANY(null);
         
         String packageName;

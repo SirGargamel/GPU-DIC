@@ -14,8 +14,8 @@ import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
-import cz.tul.dic.engine.kernel.KernelInfo;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.KernelInfo;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import java.io.File;
 import java.io.IOException;
@@ -75,7 +75,7 @@ public class ConfigTest {
         Assert.assertEquals(20.0, (double) task.getParameter(TaskParameter.STRAIN_ESTIMATION_PARAM));
         Assert.assertTrue(Arrays.equals(new double[]{-1.5, 1.5, 0.5, -1.0, 1.0, 0.5, -0.25, 0.05, 0.05, -0.4, 0.25, 0.05, -0.25, 0.45, 0.05, -0.25, 0.5, 0.1}, (double[]) task.getParameter(TaskParameter.DEFORMATION_LIMITS)));
         Assert.assertEquals(DeformationOrder.ZERO, task.getParameter(TaskParameter.DEFORMATION_ORDER));
-        Assert.assertEquals(Solver.BRUTE_FORCE, task.getParameter(TaskParameter.SOLVER));
+        Assert.assertEquals(SolverType.BRUTE_FORCE, task.getParameter(TaskParameter.SOLVER));
 
         final Config configSequence = new Config().load(Paths.get(getClass().getResource("/resources/config/sequence.config").toURI()).toFile());
         Assert.assertEquals(325, configSequence.keySet().size());

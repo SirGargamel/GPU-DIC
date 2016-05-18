@@ -11,7 +11,8 @@ import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.subset.SubsetUtils;
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.engine.opencl.DeviceManager;
+import cz.tul.dic.engine.AbstractDeviceManager;
+import cz.tul.dic.engine.opencl.OpenCLDeviceManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,12 +27,17 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
     private static final long SIZE_FLOAT = 4;
     private static final long SIZE_PIXEL = 4;
     private static final double COEFF_LIMIT_ADJUST = 0.75;
-    private final int subsetSize;
+    private OpenCLDeviceManager deviceManager;
+    private int subsetSize;
     private boolean hasNextElement;
     private int subsetIndex;
 
-    public OpenCLSplitter(final ComputationTask task) {
-        super(task);
+    @Override
+    public void prepareSplitter(final Object taskSplitValue) {
+        if (!(deviceManager instanceof OpenCLDeviceManager)) {
+            throw new IllegalArgumentException("Device manager needs to support OpenCL.");
+        }
+
         if (!subsets.isEmpty()) {
             subsetSize = subsets.get(0).getSize();
             checkIfHasNext();
@@ -39,6 +45,11 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
             subsetSize = -1;
             hasNextElement = false;
         }
+    }
+
+    @Override
+    public void assignDeviceManager(AbstractDeviceManager deviceManager) {
+        this.deviceManager = (OpenCLDeviceManager) deviceManager;
     }
 
     @Override
@@ -104,8 +115,8 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
         final long resultSize = resultCount * SIZE_FLOAT;
         final long fullSize = imageSize + deformationsSize + subsetDataSize + subsetCentersSize + subsetWeightsSize + resultSize + reserve;
 
-        final long maxAllocMem = DeviceManager.getDevice().getMaxMemAllocSize();
-        final long maxMem = DeviceManager.getDevice().getGlobalMemSize();
+        final long maxAllocMem = deviceManager.getDevice().getMaxMemAllocSize();
+        final long maxMem = deviceManager.getDevice().getGlobalMemSize();
         boolean result = fullSize >= 0 && fullSize <= maxMem;
         result &= resultCount <= Integer.MAX_VALUE;
         result &= subsetCount <= Integer.MAX_VALUE;

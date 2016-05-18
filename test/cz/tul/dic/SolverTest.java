@@ -12,9 +12,9 @@ import cz.tul.dic.data.roi.AbstractROI;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.KernelInfo;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -43,9 +43,9 @@ public class SolverTest {
     private static final double LIMIT_ABS_DIF = 0.1;
     private static final double LIMIT_QUALITY_GOOD = 0.75;
     private static final double LIMIT_RATIO_BAD = 0.1;
-    private static final Solver[] SOLVERS
-            = Solver.values();
-//            = new Solver[] {Solver.COARSE_FINE};    
+    private static final SolverType[] SOLVERS
+            = SolverType.values();
+//            = new SolverType[] {SolverType.COARSE_FINE};    
     private static final int PARAM_SUBSET_SIZE = 20;
 
     public SolverTest() {
@@ -74,8 +74,8 @@ public class SolverTest {
         int counter = 0;
         String msg;
         TaskContainer task;
-        for (Solver solver : SOLVERS) {
-            if (solver.equals(Solver.BRUTE_FORCE)) {
+        for (SolverType solver : SOLVERS) {
+            if (solver.equals(SolverType.BRUTE_FORCE)) {
                 continue;
             }
 
@@ -121,7 +121,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTask(final String fileOut, final Solver solver, final DeformationOrder degree, final KernelInfo.UseLimits useLimits) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTask(final String fileOut, final SolverType solver, final DeformationOrder degree, final KernelInfo.UseLimits useLimits) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -245,7 +245,7 @@ public class SolverTest {
         int counter = 0;
         String msg;
         TaskContainer task;
-        for (Solver solver : SOLVERS) {
+        for (SolverType solver : SOLVERS) {
             if (!solver.supportsWeighedCorrelation()) {
                 continue;
             }
@@ -292,7 +292,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTaskWeighed(final String fileOut, final Solver solver, final DeformationOrder degree, final KernelInfo.UseLimits useLimits) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTaskWeighed(final String fileOut, final SolverType solver, final DeformationOrder degree, final KernelInfo.UseLimits useLimits) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/speckle.bmp").toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());
@@ -321,7 +321,7 @@ public class SolverTest {
         int counter = 0;
         String msg;
         TaskContainer task;
-        for (Solver solver : SOLVERS) {
+        for (SolverType solver : SOLVERS) {
             if (solver.supportsHigherOrderDeformation()) {
                 for (Entry<String, String> e : testFilesSEM.entrySet()) {
                     task = generateAndComputeTaskSEM(e.getKey(), e.getValue(), solver);
@@ -335,7 +335,7 @@ public class SolverTest {
         Assert.assertEquals(errors.toString() + "\nTotal: " + counter + ",", 0, errors.size());
     }
 
-    private static TaskContainer generateAndComputeTaskSEM(final String fileIn, final String fileOut, final Solver solver) throws IOException, URISyntaxException, ComputationException {
+    private static TaskContainer generateAndComputeTaskSEM(final String fileIn, final String fileOut, final SolverType solver) throws IOException, URISyntaxException, ComputationException {
         final List<File> input = new ArrayList<>(2);
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileIn).toURI()).toFile());
         input.add(Paths.get(SolverTest.class.getResource("/resources/solver/" + fileOut).toURI()).toFile());

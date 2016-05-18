@@ -7,15 +7,21 @@ package cz.tul.dic.data.task.splitter;
 
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.FullTask;
+import cz.tul.dic.engine.AbstractDeviceManager;
 import java.util.NoSuchElementException;
 
 public class NoSplit extends AbstractTaskSplitter {
 
     private boolean hasNextElement;
 
-    public NoSplit(final ComputationTask task) {
-        super(task);
+    @Override
+    public void prepareSplitter(final Object taskSplitValue) {          
         hasNextElement = true;
+    }
+    
+    @Override
+    public void assignDeviceManager(AbstractDeviceManager deviceManager) {
+        // nothing to do
     }
 
     @Override
@@ -30,6 +36,6 @@ public class NoSplit extends AbstractTaskSplitter {
         }
         hasNextElement = false;
         return new ComputationTask(image1, image2, subsets, subsetWeights, deformations, order, usesLimits);
-    }
+    }    
 
 }

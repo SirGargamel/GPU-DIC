@@ -5,8 +5,10 @@
  */
 package cz.tul.dic.engine;
 
+import cz.tul.dic.engine.platform.PlatformManager;
+import cz.tul.dic.engine.platform.Platform;
 import cz.tul.dic.data.task.FullTask;
-import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
+import cz.tul.dic.engine.solvers.AbstractTaskSolver;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.subset.AbstractSubset;
@@ -20,7 +22,7 @@ import cz.tul.dic.debug.DebugControl;
 import cz.tul.dic.debug.Stats;
 import cz.tul.dic.engine.displacement.DisplacementCalculator;
 import cz.tul.dic.data.Interpolation;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.result.DisplacementResult;
 import cz.tul.dic.data.result.Result;
@@ -28,8 +30,6 @@ import cz.tul.dic.data.subset.generator.AbstractSubsetGenerator;
 import cz.tul.dic.engine.strain.StrainEstimator;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.engine.kernel.KernelInfo;
-import cz.tul.dic.engine.memory.AbstractOpenCLMemoryManager;
 import cz.tul.dic.output.NameGenerator;
 import cz.tul.pj.journal.Journal;
 import java.io.File;
@@ -56,6 +56,7 @@ public final class Engine extends Observable implements Observer {
 
     private static final Engine INSTANCE;
     private final ExecutorService exec;
+    private Platform platform;
     private StrainEstimator strain;
     private AbstractTaskSolver solver;
     private boolean stopEngine;
@@ -66,31 +67,35 @@ public final class Engine extends Observable implements Observer {
 
     private Engine() {
         super();
-        exec = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() - 1);
+        exec = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() - 1);        
     }
 
     public static Engine getInstance() {
         return INSTANCE;
     }
 
-    public void computeTask(final TaskContainer tc) throws ComputationException {
-        Journal.addDataEntry(tc, "Computing task");
+    public void computeTask(final TaskContainer task) throws ComputationException {
+        Journal.addDataEntry(task, "Computing task");
         Journal.createSubEntry();
 
         stopEngine = false;
         setChanged();
         notifyObservers(0);
 
-        tc.clearResultData();
-        TaskContainerUtils.checkTaskValidity(tc);
+        task.clearResultData();
+        TaskContainerUtils.checkTaskValidity(task);
 
-        AbstractOpenCLMemoryManager.assignTaskForInit(tc);
+        if (platform != null) {
+            platform.release();
+        }
+        platform = PlatformManager.getInstance().initPlatform();
+        platform.getMemoryManager().assignTask(task);        
 
-        strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) tc.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
+        strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
         final Set<Future<Void>> futures = new HashSet<>();
 
         int r, nextR, baseR = -1;
-        for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(tc).entrySet()) {
+        for (Map.Entry<Integer, Integer> e : TaskContainerUtils.getRounds(task).entrySet()) {
             if (stopEngine) {
                 endTask();
                 return;
@@ -102,12 +107,12 @@ public final class Engine extends Observable implements Observer {
             setChanged();
             notifyObservers(r);
 
-            computeRound(tc, r, nextR);
+            computeRound(task, r, nextR);
 
             if (baseR == -1) {
                 baseR = r;
             } else {
-                futures.add(exec.submit(new OverlapComputation(tc, baseR, nextR, strain)));
+                futures.add(exec.submit(new OverlapComputation(task, baseR, nextR, strain)));
             }
         }
 
@@ -127,7 +132,7 @@ public final class Engine extends Observable implements Observer {
         endTask();
 
         try {
-            TaskContainerUtils.serializeTaskToBinary(tc, new File(NameGenerator.generateBinary(tc)));
+            TaskContainerUtils.serializeTaskToBinary(task, new File(NameGenerator.generateBinary(task)));
         } catch (IOException ex) {
             Journal.addDataEntry(ex, "Task serialization to binary failed.");
         }
@@ -150,14 +155,20 @@ public final class Engine extends Observable implements Observer {
         }
         Stats.getInstance().setTaskContainer(task);
 
+        if (platform == null) {
+            platform = PlatformManager.getInstance().initPlatform();
+            platform.getMemoryManager().assignTask(task);
+        }
+        final KernelInfo backup = (KernelInfo) task.getParameter(TaskParameter.KERNEL);
+        task.setParameter(TaskParameter.KERNEL, platform.getPlatformDefinition().getKernelInfo());
+        
         setChanged();
         notifyObservers(TaskContainerUtils.class);
         TaskContainerUtils.checkTaskValidity(task);
 
         // prepare correlation calculator
-        solver = AbstractTaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
-        solver.addObserver(this);
-        solver.setKernel((KernelInfo) task.getParameter(TaskParameter.KERNEL));
+        solver = AbstractTaskSolver.initSolver((SolverType) task.getParameter(TaskParameter.SOLVER), platform);
+        solver.addObserver(this);        
         solver.setInterpolation((Interpolation) task.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) task.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = task.getParameter(TaskParameter.TASK_SPLIT_PARAM);
@@ -231,6 +242,7 @@ public final class Engine extends Observable implements Observer {
         notifyObservers(System.currentTimeMillis() - time);
 
         solver.deleteObserver(this);
+        task.setParameter(TaskParameter.KERNEL, backup);
 
         Journal.addEntry("Round finished.");
         Journal.closeSubEntry();

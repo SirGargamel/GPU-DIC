@@ -14,13 +14,10 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.engine.opencl.kernel.OpenCLKernel;
-import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.KernelInfo;
 import java.util.List;
 
-public class StaticMemoryManager extends AbstractOpenCLMemoryManager {
-
-    protected StaticMemoryManager() {
-    }
+public class StaticOpenCLMemoryManager extends AbstractOpenCLMemoryManager {
 
     @Override
     public void assignDataToGPU(final ComputationTask task, final OpenCLKernel kernel) throws ComputationException {

@@ -10,10 +10,10 @@ import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.data.Interpolation;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
-import cz.tul.dic.engine.kernel.KernelInfo;
+import cz.tul.dic.engine.KernelInfo;
 import java.io.File;
 
 /**
@@ -42,7 +42,7 @@ public enum TaskParameter {
     STRAIN_ESTIMATION_PARAM(Double.class),
     DEFORMATION_LIMITS(double[].class),
     DEFORMATION_ORDER(DeformationOrder.class),
-    SOLVER(Solver.class),
+    SOLVER(SolverType.class),
     CORRELATION_WEIGHT(Double.class);
 
     private final Class type;

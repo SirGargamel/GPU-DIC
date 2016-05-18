@@ -10,6 +10,7 @@ import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.Image;
 import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.task.ComputationTask;
+import cz.tul.dic.engine.AbstractDeviceManager;
 import java.util.List;
 
 /**
@@ -18,14 +19,14 @@ import java.util.List;
  */
 public abstract class AbstractTaskSplitter {
 
-    protected final Image image1, image2;
-    protected final List<AbstractSubset> subsets;
-    protected final List<Integer> subsetWeights;
-    protected final List<double[]> deformations;
-    protected final DeformationOrder order;
-    protected final boolean usesLimits;
-
-    public AbstractTaskSplitter(final ComputationTask task) {
+    protected Image image1, image2;
+    protected List<AbstractSubset> subsets;
+    protected List<Integer> subsetWeights;
+    protected List<double[]> deformations;
+    protected DeformationOrder order;
+    protected boolean usesLimits;
+    
+    public void assignTask(final ComputationTask task, final Object taskSplitValue) {
         this.image1 = task.getImageA();
         this.image2 = task.getImageB();
         this.subsets = task.getSubsets();
@@ -33,25 +34,13 @@ public abstract class AbstractTaskSplitter {
         this.deformations = task.getDeformations();
         this.order = task.getOrder();
         this.usesLimits = task.usesLimits();
+        
+        prepareSplitter(taskSplitValue);
     }
-
-    public static AbstractTaskSplitter prepareSplitter(final ComputationTask task, final TaskSplitMethod ts, final Object taskSplitValue) {
-        AbstractTaskSplitter result;
-        switch (ts) {
-            case NONE:
-                result = new NoSplit(task);
-                break;
-            case STATIC:
-                result = new StaticSplit(task, taskSplitValue);
-                break;
-            case DYNAMIC:
-                result = new OpenCLSplitter(task);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported type of task splitting - " + ts);
-        }
-        return result;
-    }        
+    
+    abstract void prepareSplitter(final Object taskSplitValue);     
+    
+    public abstract void assignDeviceManager(final AbstractDeviceManager deviceManager);
     
     public abstract boolean hasNext();
     

@@ -9,7 +9,7 @@ import cz.tul.dic.data.deformation.DeformationOrder;
 import cz.tul.dic.data.task.splitter.TaskSplitMethod;
 import cz.tul.dic.engine.displacement.DisplacementCalculation;
 import cz.tul.dic.data.Interpolation;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.engine.strain.StrainEstimationMethod;
 import cz.tul.dic.data.subset.generator.SubsetGenerator;
 
@@ -19,7 +19,7 @@ import cz.tul.dic.data.subset.generator.SubsetGenerator;
  */
 public final class TaskDefaultValues {
 
-    public static final Solver DEFAULT_SOLVER = Solver.NEWTON_RHAPSON_CENTRAL;
+    public static final SolverType DEFAULT_SOLVER = SolverType.NEWTON_RHAPSON_CENTRAL;
     public static final double DEFAULT_CORRELATION_WEIGHT = 0.75;
     public static final DisplacementCalculation DEFAULT_DISPLACEMENT_CALCULATION_METHOD = DisplacementCalculation.MAX_WEIGHTED_AVERAGE;
     public static final int DEFAULT_DISPLACEMENT_CALCULATION_PARAM = 2000;

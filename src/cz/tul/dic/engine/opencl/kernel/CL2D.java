@@ -9,9 +9,10 @@ import cz.tul.dic.engine.opencl.OpenCLDataPackage;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLEvent;
 import com.jogamp.opencl.CLEventList;
-import cz.tul.dic.engine.kernel.KernelInfo;
-import cz.tul.dic.engine.kernel.WorkSizeManager;
-import cz.tul.dic.engine.memory.MemoryManager;
+import cz.tul.dic.engine.AbstractDeviceManager;
+import cz.tul.dic.engine.KernelInfo;
+import cz.tul.dic.engine.platform.Platform;
+import cz.tul.dic.engine.memory.AbstractMemoryManager;
 import java.nio.IntBuffer;
 
 public class CL2D extends OpenCLKernel {
@@ -25,8 +26,8 @@ public class CL2D extends OpenCLKernel {
     private static final int LWS1_BASE = 64;
     private boolean stop;
 
-    public CL2D(final KernelInfo kernelInfo, final MemoryManager memManager, final WorkSizeManager wsm) {
-        super(kernelInfo, memManager, wsm);
+    public CL2D(final Platform platform) {
+        super(platform);
     }
 
     @Override

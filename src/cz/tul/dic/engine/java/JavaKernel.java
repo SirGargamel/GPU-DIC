@@ -3,8 +3,9 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.kernel;
+package cz.tul.dic.engine.java;
 
+import cz.tul.dic.engine.AbstractKernel;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Interpolation;
 import cz.tul.dic.data.deformation.DeformationOrder;
@@ -12,7 +13,8 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.data.subset.AbstractSubset;
 import cz.tul.dic.data.task.ComputationTask;
-import cz.tul.dic.engine.memory.MemoryManager;
+import cz.tul.dic.engine.platform.Platform;
+import cz.tul.dic.engine.memory.BasicMemoryManager;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,18 +23,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.pmw.tinylog.Logger;
 
-public class JavaKernel extends AbstractKernel<MemoryManager> {
+public class JavaKernel extends AbstractKernel<BasicMemoryManager> {
 
     private static final int COUNT_THREADS = Runtime.getRuntime().availableProcessors();
     private ExecutorService exec;
 
-    public JavaKernel(final KernelInfo kernelInfo, final MemoryManager memManager, final WorkSizeManager wsm) {
-        super(kernelInfo, memManager, wsm);
+    public JavaKernel(final Platform platform) {
+        super(platform);
     }
 
     @Override
-    public List<CorrelationResult> computeFindBestInner(ComputationTask task) throws ComputationException {
-        final double[] results = computeRawInner(task);
+    public List<CorrelationResult> computeFindBest(ComputationTask task) throws ComputationException {
+        final double[] results = computeRaw(task);
         // create results
         final int subsetCount = task.getSubsets().size();
         final int defArrayLength = DeformationUtils.getDeformationCoeffCount(task.getOrder());
@@ -42,8 +44,7 @@ public class JavaKernel extends AbstractKernel<MemoryManager> {
         int base = 0;
         double max;
         int maxIndex;
-        long defCount;
-        double[] resultDeformation;
+        long defCount;        
         for (int i = 0; i < subsetCount; i++) {
             max = -Double.MAX_VALUE;
             maxIndex = -1;
@@ -66,7 +67,7 @@ public class JavaKernel extends AbstractKernel<MemoryManager> {
     }
 
     @Override
-    public double[] computeRawInner(ComputationTask task) throws ComputationException {
+    public double[] computeRaw(ComputationTask task) throws ComputationException {
         return compute(
                 task.getImageA().toBWArray(), task.getImageB().toBWArray(),
                 task.getSubsets(),

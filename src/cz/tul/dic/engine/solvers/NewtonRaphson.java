@@ -3,7 +3,7 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.engine.solvers;
 
 import cz.tul.dic.data.result.CorrelationResult;
 import cz.tul.dic.ComputationException;
@@ -15,6 +15,7 @@ import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.debug.IGPUResultsReceiver;
 import cz.tul.dic.data.task.FullTask;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.platform.Platform;
 import cz.tul.pj.journal.Journal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +51,8 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
     private final Set<AbstractSubset> smallerStep;
     protected DeformationOrder deformationOrder;
 
-    public NewtonRaphson() {
+    public NewtonRaphson(final Platform platform) {
+        super(platform);
         smallerStep = new HashSet<>();
     }
 
@@ -105,7 +107,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             temp[DeformationLimit.VMAX] = Math.ceil(temp[DeformationLimit.VMAX]);
             zeroOrderLimits.add(temp);
         }
-        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(Solver.COARSE_FINE).solve(
+        final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(SolverType.COARSE_FINE, platform).solve(
                 new FullTask(fullTask.getImageA(), fullTask.getImageB(), fullTask.getSubsets(), fullTask.getSubsetWeights(), zeroOrderLimits));
         CorrelationResult paddedResult, currentResult;
         for (int i = 0; i < subsetCount; i++) {

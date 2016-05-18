@@ -16,20 +16,16 @@ import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.task.ComputationTask;
 import cz.tul.dic.data.task.TaskContainer;
 import cz.tul.dic.data.task.TaskParameter;
-import cz.tul.dic.engine.kernel.AbstractKernel;
 import cz.tul.dic.engine.opencl.kernel.OpenCLKernel;
-import cz.tul.dic.engine.kernel.KernelInfo;
-import static cz.tul.dic.engine.kernel.KernelInfo.Input.ARRAY;
-import static cz.tul.dic.engine.kernel.KernelInfo.Input.IMAGE;
-import cz.tul.dic.engine.kernel.KernelManager;
-import cz.tul.dic.engine.opencl.solvers.AbstractTaskSolver;
-import cz.tul.dic.engine.opencl.solvers.Solver;
+import cz.tul.dic.engine.KernelInfo;
+import static cz.tul.dic.engine.KernelInfo.Input.ARRAY;
+import static cz.tul.dic.engine.KernelInfo.Input.IMAGE;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
+public class PrefetchingOpenCLMemoryManager extends AbstractOpenCLMemoryManager {
 
     private final Map<Image, CLMemory<ByteBuffer>> imageBuffer;
     private List<AbstractSubset> subsets;
@@ -39,7 +35,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
     private boolean inited;
     private TaskContainer task;
 
-    protected PrefetchingMemoryManager() {
+    public PrefetchingOpenCLMemoryManager() {
         imageBuffer = new HashMap<>();
         inited = false;
     }
@@ -47,7 +43,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
     @Override
     public void assignDataToGPU(final ComputationTask task, final OpenCLKernel kernel) throws ComputationException {
         try {
-            if (KernelManager.isInited()) {
+            if (clImageA == null) {
                 if (!inited) {
                     init(this.task);
                 }
@@ -132,19 +128,15 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
         });
         imageBuffer.clear();
 
-        if (KernelManager.isInited()) {
+        if (!inited) {
             init(task);
-        } else {
-            inited = false;
         }
         this.task = task;
     }
 
     private void init(final TaskContainer task) {
-        final KernelInfo kt = (KernelInfo) task.getParameter(TaskParameter.KERNEL);
-        final AbstractTaskSolver solver = AbstractTaskSolver.initSolver((Solver) task.getParameter(TaskParameter.SOLVER));
-        final AbstractKernel k = AbstractKernel.createInstance(kt, solver.getDeformationCount());
-        switch (k.getKernelInfo().getInput()) {
+        final KernelInfo kt = (KernelInfo) task.getParameter(TaskParameter.KERNEL);        
+        switch (kt.getInput()) {
             case IMAGE:
                 generateImagesAsImage2Dt(task.getImages());
                 break;
@@ -152,7 +144,7 @@ public class PrefetchingMemoryManager extends AbstractOpenCLMemoryManager {
                 generateImagesAsArray(task.getImages());
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported type of input - " + k.getKernelInfo().getInput());
+                throw new IllegalArgumentException("Unsupported type of input - " + kt.getInput());
         }
 
         inited = true;

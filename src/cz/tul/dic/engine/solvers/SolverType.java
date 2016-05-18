@@ -3,13 +3,13 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.engine.solvers;
 
 /**
  *
  * @author Petr Ječmen
  */
-public enum Solver {
+public enum SolverType {
 
     BRUTE_FORCE("BruteForce", "BF", true, false),
     COARSE_FINE("CoarseFine", "CF", false, false),
@@ -23,7 +23,7 @@ public enum Solver {
     private final String className, abbreviation;
     private final boolean higherOrderDeformation, weighedCorrelation;
 
-    private Solver(String className, String abbreviation, boolean higherOrderDeformation, boolean weighedCorrelation) {
+    private SolverType(String className, String abbreviation, boolean higherOrderDeformation, boolean weighedCorrelation) {
         this.className = className;
         this.abbreviation = abbreviation;
         this.higherOrderDeformation = higherOrderDeformation;

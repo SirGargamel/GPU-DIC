@@ -3,10 +3,12 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.engine.opencl.solvers;
+package cz.tul.dic.engine.solvers;
 
 import cz.tul.dic.data.deformation.DeformationUtils;
 import cz.tul.dic.data.subset.AbstractSubset;
+import cz.tul.dic.engine.AbstractDeviceManager;
+import cz.tul.dic.engine.platform.Platform;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +22,10 @@ import org.apache.commons.math3.linear.RealVector;
  * @author Petr Ječmen
  */
 public class NewtonRaphsonForward extends NewtonRaphson {
+
+    public NewtonRaphsonForward(Platform platform) {
+        super(platform);
+    }
 
     // forward difference
     // dF / dx = (F(x + h) - F(x)) / h
