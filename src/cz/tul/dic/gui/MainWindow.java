@@ -82,7 +82,7 @@ public class MainWindow implements Initializable {
     private static final String LAST_DIR = "lastDir";
     private static final String LOGO = "logo.png";
     private static final int EXTRA_WIDTH = 19;
-    private static final int EXTRA_HEIGHT = 88;
+    private static final int EXTRA_HEIGHT = 10;
 
     @FXML
     private TextField textFs;
@@ -809,7 +809,7 @@ public class MainWindow implements Initializable {
                         imagePane.getScene().getWindow().setWidth(size);
                         size = Math.max(
                                 tc.getImage(0).getHeight() + boxImage.getHeight() + EXTRA_HEIGHT,
-                                boxRight.getPrefHeight());
+                                boxRight.getHeight() + boxImage.getHeight() + EXTRA_HEIGHT);
                         imagePane.getScene().getWindow().setHeight(size);
 
                         loadCurrentTaskContainerToGUI();
