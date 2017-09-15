@@ -1,6 +1,7 @@
 /build/
 /nbproject/
 /dist/
+/libs/
 /.sonar/
 /.jacocoverage/
 /*.log
