@@ -110,6 +110,9 @@ public class VideoLoader extends AbstractInputLoader {
                 return name.startsWith(inputName) && !name.endsWith(NameGenerator.EXT_CONFIG);
             }
         }));
+        if (files.isEmpty()) {
+            throw new IOException("Video splitting has failed, no images found.");
+        }
         // save config
         final Config config = new Config();
         config.put(PREFIX_MOD.concat(input.getName()), Long.toString(input.lastModified()));
