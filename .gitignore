@@ -13,6 +13,7 @@
 /LicenseManager/
 /license.dat
 /performance.kernel*
+/performance.time
 /*-performance.csv
 /journal*.xml
 stats.properties
