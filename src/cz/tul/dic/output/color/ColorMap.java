@@ -81,8 +81,8 @@ public abstract class ColorMap {
 
     protected abstract double convertVal(double value);
 
-    public int getRGBColor(final double value) {
-        if (Double.isNaN(value)) {
+    public int getRGBColor(final double value, double min, double max) {
+        if (Double.isNaN(value) || value < min || value > max) {
             if (debug) {
                 return COLOR_NAN;
             } else {

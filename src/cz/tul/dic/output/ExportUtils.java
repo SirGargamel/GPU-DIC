@@ -267,7 +267,7 @@ public final class ExportUtils {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                out.setRGB(x, y, colorMap.getRGBColor(mapData[x][y]));
+                out.setRGB(x, y, colorMap.getRGBColor(mapData[x][y], min, max));
             }
         }
 
@@ -324,7 +324,7 @@ public final class ExportUtils {
         final int width = image.getWidth();
         // positive part           
         for (int y = 0; y < height; y++) {
-            g.setColor(new Color(colorMap.getRGBColor(y)));
+            g.setColor(new Color(colorMap.getRGBColor(y, 0, height)));
             g.drawRect(x, y, BAR_SIZE_VERT, 1);
         }
 
@@ -355,7 +355,7 @@ public final class ExportUtils {
         final ColorMap colorMap = new AbsoluteColorMap(colorMapType, height - 1);
         // positive part           
         for (int y = 0; y < height; y++) {
-            g.setColor(new Color(colorMap.getRGBColor(height - 1 - y)));
+            g.setColor(new Color(colorMap.getRGBColor(height - 1 - y, 0, height)));
             g.drawRect(x, y, BAR_SIZE_VERT, 1);
         }
 
@@ -389,7 +389,7 @@ public final class ExportUtils {
         final ColorMap colorMap = new GeneralColorMap(colorMapType, 0, width - 1);
 
         for (int x = 0; x < width; x++) {
-            g.setColor(new Color(colorMap.getRGBColor(width - x - 1)));
+            g.setColor(new Color(colorMap.getRGBColor(width - x - 1, 0, width)));
             g.drawRect(width - 1 - x, y, 1, BAR_SIZE_HOR);
         }
 
