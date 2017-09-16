@@ -38,6 +38,8 @@ public class OpenCLSplitter extends AbstractTaskSplitter {
             throw new IllegalArgumentException("Device manager needs to support OpenCL.");
         }
 
+        subsetIndex = 0;
+        
         if (!subsets.isEmpty()) {
             subsetSize = subsets.get(0).getSize();
             checkIfHasNext();
