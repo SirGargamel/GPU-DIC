@@ -153,9 +153,9 @@ public class KernelPerformanceManager {
         uInfos.addAll(generateKernelInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.ANY)));
         result.get(PlatformType.OPENCL).put(DeviceType.iGPU, uInfos);
 
-        // DEBUG !!! - OpenCL not working for now
-        result.get(PlatformType.OPENCL).get(DeviceType.CPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
-        result.get(PlatformType.OPENCL).get(DeviceType.GPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
+        // DEBUG !!! - OpenCL not working for iGPU
+//        result.get(PlatformType.OPENCL).get(DeviceType.CPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
+//        result.get(PlatformType.OPENCL).get(DeviceType.GPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
         result.get(PlatformType.OPENCL).get(DeviceType.iGPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
         return result;
     }
@@ -195,6 +195,7 @@ public class KernelPerformanceManager {
                     Logger.warn(ex, "Blank test failed for {}.", deviceType.toString());
                 }
 
+                PerformanceData testPerformanceData;
                 for (KernelInfo kernel : kernels) {
                     platform = PlatformManager.getInstance().initPlatform(platformType, deviceType, kernel);
                     System.out.println("Test - " + platform);
@@ -202,7 +203,8 @@ public class KernelPerformanceManager {
                     solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
                     solver.setTaskSplitVariant(TaskSplitMethod.NONE, null);
                     // run test
-                    result.get(platformType).put(deviceType, testKernelInfo(solver, platform));
+                    testPerformanceData = testKernelInfo(solver, platform);
+                    result.get(platformType).put(deviceType, testPerformanceData);
                 }
             }
         }
