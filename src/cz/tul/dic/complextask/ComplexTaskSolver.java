@@ -73,7 +73,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
             platform.release();
         }
         platform = PlatformManager.getInstance().initPlatform();
-        platform.getMemoryManager().assignTask(task);   
+        platform.getMemoryManager().assignTask(task);
 
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
 
@@ -244,7 +244,9 @@ public class ComplexTaskSolver extends Observable implements Observer {
     public void stop() {
         stop = true;
         Engine.getInstance().stop();
-        strain.stop();
+        if (strain != null) {
+            strain.stop();
+        }
     }
 
     @Override
