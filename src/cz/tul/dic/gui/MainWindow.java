@@ -342,7 +342,7 @@ public class MainWindow implements Initializable {
                         Journal.getInstance().addDataEntry(ex, "Exception occured during computation.");
                     } catch (CancellationException ex) {
                         Platform.runLater(()
-                                -> buttonResults.setDisable(false)
+                                -> buttonResults.setDisable(true)
                         );
                     }
                 });

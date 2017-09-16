@@ -67,7 +67,7 @@ public final class Engine extends Observable implements Observer {
 
     private Engine() {
         super();
-        exec = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() - 1);        
+        exec = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() - 1);
     }
 
     public static Engine getInstance() {
@@ -89,7 +89,7 @@ public final class Engine extends Observable implements Observer {
             platform.release();
         }
         platform = PlatformManager.getInstance().initPlatform();
-        platform.getMemoryManager().assignTask(task);        
+        platform.getMemoryManager().assignTask(task);
 
         strain = StrainEstimator.initStrainEstimator((StrainEstimationMethod) task.getParameter(TaskParameter.STRAIN_ESTIMATION_METHOD));
         final Set<Future<Void>> futures = new HashSet<>();
@@ -161,14 +161,14 @@ public final class Engine extends Observable implements Observer {
         }
         final KernelInfo backup = (KernelInfo) task.getParameter(TaskParameter.KERNEL);
         task.setParameter(TaskParameter.KERNEL, platform.getPlatformDefinition().getKernelInfo());
-        
+
         setChanged();
         notifyObservers(TaskContainerUtils.class);
         TaskContainerUtils.checkTaskValidity(task);
 
         // prepare correlation calculator
         solver = AbstractTaskSolver.initSolver((SolverType) task.getParameter(TaskParameter.SOLVER), platform);
-        solver.addObserver(this);        
+        solver.addObserver(this);
         solver.setInterpolation((Interpolation) task.getParameter(TaskParameter.INTERPOLATION));
         final TaskSplitMethod taskSplit = (TaskSplitMethod) task.getParameter(TaskParameter.TASK_SPLIT_METHOD);
         final Object taskSplitValue = task.getParameter(TaskParameter.TASK_SPLIT_PARAM);
@@ -260,8 +260,12 @@ public final class Engine extends Observable implements Observer {
 
     public void stop() {
         stopEngine = true;
-        solver.stop();
-        strain.stop();
+        if (solver != null) {
+            solver.stop();
+        }
+        if (strain != null) {
+            strain.stop();
+        }
         exec.shutdownNow();
     }
 
