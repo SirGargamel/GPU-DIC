@@ -58,7 +58,7 @@ public class PxToMmMapperController implements Initializable {
             image.setFitWidth(img.getWidth());
         } else {
             image.setImage(null);
-            Journal.addEntry("Error obtaining first image.");
+            Journal.getInstance().addEntry("Error obtaining first image.");
         }
         image.setOnMousePressed((MouseEvent event) -> {
             anchor.getChildren().remove(line);

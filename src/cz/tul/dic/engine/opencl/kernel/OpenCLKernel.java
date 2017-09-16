@@ -198,7 +198,7 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
     @Override
     public double[] computeRaw(final ComputationTask task) throws ComputationException {
         if (task.getSubsets().isEmpty()) {
-            Journal.addEntry("Empty subsets for raw computation.");
+            Journal.getInstance().addEntry("Empty subsets for raw computation.");
             return new double[0];
         }
         final int subsetCount = task.getSubsets().size();

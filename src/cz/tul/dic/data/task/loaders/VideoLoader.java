@@ -77,7 +77,7 @@ public class VideoLoader extends AbstractInputLoader {
 
             return result;
         } catch (IOException ex) {
-            Journal.addDataEntry(ex, "Error loading video.");
+            Journal.getInstance().addDataEntry(ex, "Error loading video.");
             throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
     }

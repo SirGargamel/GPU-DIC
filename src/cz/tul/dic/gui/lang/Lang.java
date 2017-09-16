@@ -38,7 +38,7 @@ public final class Lang {
                 result = result.replaceAll("\\{".concat(Integer.toString(i).concat("\\}")), params[i]);
             }
         } catch (MissingResourceException ex) {
-            Journal.addDataEntry(ex, "A resource is missing.");
+            Journal.getInstance().addDataEntry(ex, "A resource is missing.");
         }
 
         return result;

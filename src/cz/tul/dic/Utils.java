@@ -108,7 +108,7 @@ public final class Utils {
             final License license = LicenseHandler.readLicenseFile(licenseFile);
             result = LicenseHandler.checkLicense(license);
         } catch (IOException ex) {
-            Journal.addDataEntry(ex, "Error checking the license file {0}.", licenseFile.getAbsolutePath());
+            Journal.getInstance().addDataEntry(ex, "Error checking the license file {0}.", licenseFile.getAbsolutePath());
         }
         return result;
     }

@@ -157,7 +157,7 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 final AbstractSubset as = fas.get();
                 subsetsToCompute.remove(as);
             } catch (InterruptedException | ExecutionException ex) {
-                Journal.addDataEntry(ex, "Solver error", "Error retrieving result after computing new step.");
+                Journal.getInstance().addDataEntry(ex, "Solver error", "Error retrieving result after computing new step.");
             }
         }
 
@@ -264,9 +264,9 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
                 return subset;
             } catch (Exception ex) {
                 if (ex.getStackTrace().length == 0) {
-                    Journal.addEntry("Subset computation stopped", "{0} stop, exception occured - {1}, no stack trace...", subset, ex);
+                    Journal.getInstance().addEntry("Subset computation stopped", "{0} stop, exception occured - {1}, no stack trace...", subset, ex);
                 } else {
-                    Journal.addDataEntry(ex,"Subset computation stopped",  "{0} stop, exception occured.", subset);
+                    Journal.getInstance().addDataEntry(ex,"Subset computation stopped",  "{0} stop, exception occured.", subset);
                 }
                 addSubsetTerminationInfo(subset, "StepMaker exception - " + ex);
                 return subset;

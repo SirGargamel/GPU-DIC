@@ -59,12 +59,12 @@ public final class OpenCLDeviceManager extends AbstractDeviceManager {
         clearMemory();
 
         device = findDevice(deviceType);        
-        Journal.addEntry("Using new OpenCL device.", "{0}", device);
+        Journal.getInstance().addEntry("Using new OpenCL device.", "{0}", device);
 
         context = CLContext.create(device);
         context.addCLErrorHandler((String string, ByteBuffer bb, long l)
                 -> {
-            Journal.addEntry("CLError - " + string);            
+            Journal.getInstance().addEntry("CLError - " + string);            
             System.out.println(l + " -- " + string + "; " + bb);
             
         });

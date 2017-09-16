@@ -83,7 +83,7 @@ public class RectROIManager extends AbstractROIManager {
                     yBottom);
         }
 
-        Journal.addDataEntry(rect, "Rectangle ROI manager prepared");
+        Journal.getInstance().addDataEntry(rect, "Rectangle ROI manager prepared");
 
         final HashSet<AbstractROI> rois = new HashSet<>(1);
         rois.add(rect);

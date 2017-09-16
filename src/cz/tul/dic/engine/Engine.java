@@ -75,8 +75,8 @@ public final class Engine extends Observable implements Observer {
     }
 
     public void computeTask(final TaskContainer task) throws ComputationException {
-        Journal.addDataEntry(task, "Computing task");
-        Journal.createSubEntry();
+        Journal.getInstance().addDataEntry(task, "Computing task");
+        Journal.getInstance().createSubEntry();
 
         stopEngine = false;
         setChanged();
@@ -126,7 +126,7 @@ public final class Engine extends Observable implements Observer {
                 f.get();
             }
         } catch (InterruptedException | ExecutionException ex) {
-            Journal.addDataEntry(ex, "Error waiting for Strain estimation.");
+            Journal.getInstance().addDataEntry(ex, "Error waiting for Strain estimation.");
         }
 
         endTask();
@@ -134,10 +134,10 @@ public final class Engine extends Observable implements Observer {
         try {
             TaskContainerUtils.serializeTaskToBinary(task, new File(NameGenerator.generateBinary(task)));
         } catch (IOException ex) {
-            Journal.addDataEntry(ex, "Task serialization to binary failed.");
+            Journal.getInstance().addDataEntry(ex, "Task serialization to binary failed.");
         }
 
-        Journal.closeSubEntry();
+        Journal.getInstance().closeSubEntry();
     }
 
     public void computeRound(final TaskContainer task, final int roundFrom, final int roundTo) throws ComputationException {
@@ -145,8 +145,8 @@ public final class Engine extends Observable implements Observer {
 
         final long time = System.currentTimeMillis();
 
-        Journal.addEntry("Computing round", "Round {0}:{1}.", roundFrom, roundTo);
-        Journal.createSubEntry();
+        Journal.getInstance().addEntry("Computing round", "Round {0}:{1}.", roundFrom, roundTo);
+        Journal.getInstance().createSubEntry();
         final Set<Hint> hints = task.getHints();
         if (hints.contains(Hint.NO_STATS)) {
             DebugControl.pauseDebugMode();
@@ -244,8 +244,8 @@ public final class Engine extends Observable implements Observer {
         solver.deleteObserver(this);
         task.setParameter(TaskParameter.KERNEL, backup);
 
-        Journal.addEntry("Round finished.");
-        Journal.closeSubEntry();
+        Journal.getInstance().addEntry("Round finished.");
+        Journal.getInstance().closeSubEntry();
     }
 
     public void endTask() {

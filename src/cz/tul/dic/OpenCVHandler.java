@@ -47,7 +47,7 @@ public class OpenCVHandler {
 
                 System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
                 LOADED = true;
-                Journal.addEntry("OpenCV loaded", msg);
+                Journal.getInstance().addEntry("OpenCV loaded", msg);
             } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
                 throw new RuntimeException("Failed to load opencv native library.", ex);
             }

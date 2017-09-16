@@ -61,7 +61,7 @@ public class Stats implements IGPUResultsReceiver {
         }
         try {
             INSTANCE.loadConfig(new FileInputStream("stats.properties"));
-            Journal.addEntry("Loading external stats.properties.");
+            Journal.getInstance().addEntry("Loading external stats.properties.");
         } catch (IOException ex) {
             // do nothing, external stats not found
         }
@@ -98,7 +98,7 @@ public class Stats implements IGPUResultsReceiver {
                 }
                 data.put(type, val);
             } catch (IllegalArgumentException ex) {
-                Journal.addDataEntry(ex, "Illegal item in stats properties file.");
+                Journal.getInstance().addDataEntry(ex, "Illegal item in stats properties file.");
             }
         }
     }

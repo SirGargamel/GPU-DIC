@@ -67,7 +67,7 @@ public class Context {
                 result = m.get(dir);
             }
         } catch (IOException ex) {
-            Journal.addDataEntry(ex, UNEXPECTED_IO_ERROR);
+            Journal.getInstance().addDataEntry(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;
@@ -79,7 +79,7 @@ public class Context {
             Exporter.export(tc, ExportTask.generatePointExport(ExportTarget.GUI, this, x, y));
             result = exportCachePoints.get(generateKey(x, y));
         } catch (IOException ex) {
-            Journal.addDataEntry(ex, UNEXPECTED_IO_ERROR);
+            Journal.getInstance().addDataEntry(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;
@@ -91,7 +91,7 @@ public class Context {
             Exporter.export(tc, ExportTask.generateDoublePointExport(ExportTarget.GUI, this, x1, y1, x2, y2));
             result = exportCachePoints.get(generateKey(x1, y1, x2, y2));
         } catch (IOException ex) {
-            Journal.addDataEntry(ex, UNEXPECTED_IO_ERROR);
+            Journal.getInstance().addDataEntry(ex, UNEXPECTED_IO_ERROR);
         }
 
         return result;

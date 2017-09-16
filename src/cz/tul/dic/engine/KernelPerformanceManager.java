@@ -100,10 +100,10 @@ public class KernelPerformanceManager {
             } catch (IOException ex) {
                 Logger.warn(ex, "Error saving performance assesment.");
             }
-            Journal.addEntry("Kernel performance assesment completed.");
+            Journal.getInstance().addEntry("Kernel performance assesment completed.");
         } else {
             performanceData = data;
-            Journal.addEntry("Kernel performance assesment loaded.");
+            Journal.getInstance().addEntry("Kernel performance assesment loaded.");
         }
 
         bestPlatform = findBestPlatform();

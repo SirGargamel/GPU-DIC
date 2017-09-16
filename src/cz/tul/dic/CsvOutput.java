@@ -64,7 +64,7 @@ public class CsvOutput<F> {
                 output.write(SEPARATOR_LINE);
             }
         } catch (IOException ex) {
-            Journal.addDataEntry(ex, "Error writing CSV to file {0}.", out.getAbsolutePath());            
+            Journal.getInstance().addDataEntry(ex, "Error writing CSV to file {0}.", out.getAbsolutePath());            
         }
     }
 

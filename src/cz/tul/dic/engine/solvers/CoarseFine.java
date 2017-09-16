@@ -35,7 +35,7 @@ public class CoarseFine extends AbstractTaskSolver {
     public List<CorrelationResult> solve() throws ComputationException {
         final DeformationOrder defOrder = DeformationUtils.getOrderFromLimits(fullTask.getDeformationLimits().get(0));
         if (defOrder != DeformationOrder.ZERO) {
-            Journal.addEntry("CoarseFine solver does not support higher order deformations.");
+            Journal.getInstance().addEntry("CoarseFine solver does not support higher order deformations.");
         }
 
         final List<AbstractSubset> subsets = fullTask.getSubsets();

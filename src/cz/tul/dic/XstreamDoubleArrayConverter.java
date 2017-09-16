@@ -3,28 +3,27 @@
  * Proprietary and confidential
  * Written by Petr Jecmen <petr.jecmen@tul.cz>, 2015
  */
-package cz.tul.dic.debug.converters;
+package cz.tul.dic;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import cz.tul.dic.data.subset.AbstractSubset;
 import java.util.Arrays;
 
 /**
  *
- * @author Petr Ječmen
+ * @author user
  */
-public class SubsetConverter implements Converter {
 
+
+public class XstreamDoubleArrayConverter implements Converter {
+    
     @Override
     public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-        final AbstractSubset subset = (AbstractSubset) source;
-        final String center = Arrays.toString(subset.getCenter());
-        writer.addAttribute("center", center.substring(1, center.length() - 1));        
-        writer.addAttribute("size", Integer.toString(subset.getSize()));
+        final double[] data = (double[]) source;
+        writer.addAttribute("data", Arrays.toString(data));  
     }
 
     @Override
@@ -34,7 +33,7 @@ public class SubsetConverter implements Converter {
 
     @Override
     public boolean canConvert(Class type) {
-        return AbstractSubset.class.isAssignableFrom(type);
+        return double[].class.isAssignableFrom(type);
     }
-
+    
 }

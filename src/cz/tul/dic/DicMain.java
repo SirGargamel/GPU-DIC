@@ -95,6 +95,7 @@ public class DicMain extends Application {
 
         if (parameters.contains(DEBUG_COMPUTE) || parameters.contains(DEBUG_SMALL)) {
             configureLogging(true);
+            Journal.getInstance().setStoreOnlyOnException(false);
             DebugControl.startDebugMode();
         } else {
             configureLogging(false);
@@ -189,10 +190,11 @@ public class DicMain extends Application {
         }
         c.activate();
 
+        Journal.registerConverter(new XstreamDoubleArrayConverter());
         if (debug) {
-            Journal.addEntry("App launched in DEBUG mode.");
+            Journal.getInstance().addEntry("App launched in DEBUG mode.");
         } else {
-            Journal.addEntry("App launched.");
+            Journal.getInstance().addEntry("App launched.");
         }
     }
 

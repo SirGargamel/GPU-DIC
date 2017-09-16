@@ -59,8 +59,8 @@ public class ComplexTaskSolver extends Observable implements Observer {
     }
 
     public void solveComplexTask() throws ComputationException {
-        Journal.addDataEntry(task, "Computing complex task");
-        Journal.createSubEntry();
+        Journal.getInstance().addDataEntry(task, "Computing complex task");
+        Journal.getInstance().createSubEntry();
 
         stop = false;
         Engine.getInstance().addObserver(this);
@@ -129,7 +129,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
                 rrm.generateNextRound(r, nextR);
                 Engine.getInstance().computeRound(rrm.getTc(), r, nextR);
             } else {
-                Journal.addEntry("Skipping round", "No shift detected in round {0}.", r);
+                Journal.getInstance().addEntry("Skipping round", "No shift detected in round {0}.", r);
                 final Image img = rrm.getTc().getImage(r);
                 final double[][][] data;
                 if (!tcR.getRois(r).isEmpty()) {
@@ -168,7 +168,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
                 f.get();
             }
         } catch (InterruptedException | ExecutionException | NullPointerException ex) {
-            Journal.addDataEntry(ex, "Exception occured while waiting for strain computation finish.");
+            Journal.getInstance().addDataEntry(ex, "Exception occured while waiting for strain computation finish.");
         }
 
         try {
@@ -194,7 +194,7 @@ public class ComplexTaskSolver extends Observable implements Observer {
 
         Engine.getInstance().deleteObserver(this);
 
-        Journal.closeSubEntry();
+        Journal.getInstance().closeSubEntry();
     }
 
     private static boolean checkResultsQuality(final CircleROIManager crm, int round) {

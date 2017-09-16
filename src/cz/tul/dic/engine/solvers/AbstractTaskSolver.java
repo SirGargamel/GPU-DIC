@@ -102,8 +102,8 @@ public abstract class AbstractTaskSolver extends Observable {
 
     public synchronized List<CorrelationResult> solve(
             final FullTask fullTask) throws ComputationException {
-        Journal.addDataEntry(fullTask, "Solving full task", "Using \"{0}\" solver.", getClass().getSimpleName());
-        Journal.createSubEntry();
+        Journal.getInstance().addDataEntry(fullTask, "Solving full task", "Using \"{0}\" solver.", getClass().getSimpleName());
+        Journal.getInstance().createSubEntry();
 
         stop = false;
         computationInfo.clear();
@@ -137,8 +137,8 @@ public abstract class AbstractTaskSolver extends Observable {
         kernel.clearMemory();
 
         time = System.nanoTime() - time;
-        Journal.addDataEntry(computationInfo, "Full task solved", "Task completed in {0}ms.", time / 1_000_000);
-        Journal.closeSubEntry();
+        Journal.getInstance().addDataEntry(computationInfo, "Full task solved", "Task completed in {0}ms.", time / 1_000_000);
+        Journal.getInstance().closeSubEntry();
 
         return result;
     }
@@ -174,7 +174,7 @@ public abstract class AbstractTaskSolver extends Observable {
             throw new ComputationException(ComputationExceptionCause.OPENCL_ERROR, ex);
         }
 
-        Journal.addEntry("Computation subtask completed.", "Found solution for {0} subsets.", taskResults.size());
+        Journal.getInstance().addEntry("Computation subtask completed.", "Found solution for {0} subsets.", taskResults.size());
 
         return taskResults;
     }

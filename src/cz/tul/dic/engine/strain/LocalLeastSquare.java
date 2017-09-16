@@ -85,7 +85,7 @@ public class LocalLeastSquare extends StrainEstimator {
                     resultQualityV[eu.getX()][eu.getY()] = eu.getErrors()[1];
                 }
             } catch (InterruptedException | ExecutionException ex) {
-                Journal.addDataEntry(ex, "Error wcomputing strain using LLS.");
+                Journal.getInstance().addDataEntry(ex, "Error wcomputing strain using LLS.");
             }
 
             if (DebugControl.isDebugMode()) {

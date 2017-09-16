@@ -55,7 +55,7 @@ public final class InputLoader {
             throw new IllegalArgumentException("Unsupported type of input data - " + in.getClass().toString() + " - " + in.toString());
         }
         
-        Journal.addEntry("Input loaded", "Loaded file {0} using {1}.", in.toString(), loader.getClass().getSimpleName());
+        Journal.getInstance().addEntry("Input loaded", "Loaded file {0} using {1}.", in.toString(), loader.getClass().getSimpleName());
 
         return result;
     }

@@ -224,7 +224,7 @@ public class ResultPresenter implements Initializable {
                 }
             }
         } catch (IOException ex) {
-            Journal.addDataEntry(ex, "Error saving result to file.");
+            Journal.getInstance().addDataEntry(ex, "Error saving result to file.");
         }
     }
 

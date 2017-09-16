@@ -13,6 +13,8 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.KernelPerformanceManager;
+import cz.tul.dic.engine.platform.PlatformManager;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.NameGenerator;
 import cz.tul.pj.journal.Journal;
@@ -150,7 +152,7 @@ public class MainWindow implements Initializable {
             try {
                 Desktop.getDesktop().browse(new URI(webLink));
             } catch (IOException | URISyntaxException ex) {
-                Journal.addDataEntry(ex, "Error opening GitHub link.");
+                Journal.getInstance().addDataEntry(ex, "Error opening GitHub link.");
             }
         });
 
@@ -161,6 +163,10 @@ public class MainWindow implements Initializable {
 
         dialog.getDialogPane().setContent(grid);
         dialog.show();
+        
+        // DEBUG only, remove !!!
+        Preferences.userNodeForPackage(KernelPerformanceManager.class).remove("performance.time");
+        PlatformManager.getInstance().initPlatform();
     }
 
     @FXML
@@ -279,7 +285,7 @@ public class MainWindow implements Initializable {
                         -> Dialogs.showWarning(
                                 Lang.getString("error"),
                                 ex.getLocalizedMessage()));
-                Journal.addDataEntry(ex, "Error saving task container to file.");
+                Journal.getInstance().addDataEntry(ex, "Error saving task container to file.");
             }
         });
     }
@@ -326,14 +332,14 @@ public class MainWindow implements Initializable {
                                             Lang.getString("Exception"),
                                             err.getLocalizedMessage())
                             );
-                            Journal.addDataEntry(err, "Exception occured during computation.");
+                            Journal.getInstance().addDataEntry(err, "Exception occured during computation.");
                         } else {
                             Platform.runLater(()
                                     -> buttonResults.setDisable(false)
                             );
                         }
                     } catch (InterruptedException | ExecutionException ex) {
-                        Journal.addDataEntry(ex, "Exception occured during computation.");
+                        Journal.getInstance().addDataEntry(ex, "Exception occured during computation.");
                     } catch (CancellationException ex) {
                         Platform.runLater(()
                                 -> buttonResults.setDisable(false)
@@ -665,7 +671,7 @@ public class MainWindow implements Initializable {
                     Engine.getInstance().addObserver(this);
                     Engine.getInstance().computeTask(tc);
                 }
-            } catch (ComputationException ex) {
+            } catch (Exception ex) {
                 result = ex;
             }
             Engine.getInstance().deleteObserver(this);
@@ -766,7 +772,7 @@ public class MainWindow implements Initializable {
                         } catch (ComputationException ex) {
                             error = true;
                             result = Lang.getString("wrongBin");
-                            Journal.addDataEntry(ex, "Error loading binary task.");
+                            Journal.getInstance().addDataEntry(ex, "Error loading binary task.");
                         }
                         break;
                     default:

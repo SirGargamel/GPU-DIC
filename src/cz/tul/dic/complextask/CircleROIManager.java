@@ -75,7 +75,7 @@ public class CircleROIManager extends AbstractROIManager {
         bottomLeft = cRois.get(2);
         bottomRight = cRois.get(3);
         
-        Journal.addDataEntry(cRois, "Circle ROI manager initialized.");
+        Journal.getInstance().addDataEntry(cRois, "Circle ROI manager initialized.");
 
         defLimits = DEFAULT_DEFORMATION_LIMITS;
         setROIs(initialRound);
@@ -97,13 +97,13 @@ public class CircleROIManager extends AbstractROIManager {
         final double shift1 = determineROIShift(round, topRight);
         final double shift2 = determineROIShift(round, bottomLeft);
         final double shift3 = determineROIShift(round, bottomRight);
-        Journal.addEntry("Jaw shifts computed","TOP: {0}, {1}; BOTTOM: {2}, {3}", shift0, shift1, shift2, shift3);
+        Journal.getInstance().addEntry("Jaw shifts computed","TOP: {0}, {1}; BOTTOM: {2}, {3}", shift0, shift1, shift2, shift3);
         //// check if left equals right
         if (Math.abs(shift2 - shift3) > MAX_SHIFT_DIFFERENCE) {
-            Journal.addEntry("Warning", "Detected fixture shift mismatch for lower fixtures - {0} vs {1}.", shift2, shift3);
+            Journal.getInstance().addEntry("Warning", "Detected fixture shift mismatch for lower fixtures - {0} vs {1}.", shift2, shift3);
         }
         if (Math.abs(shift1 - shift0) > MAX_SHIFT_DIFFERENCE) {
-            Journal.addEntry("Warning", "Detected fixture shift mismatch for upper fixtures - {0} vs {1}.", shift0, shift1);
+            Journal.getInstance().addEntry("Warning", "Detected fixture shift mismatch for upper fixtures - {0} vs {1}.", shift0, shift1);
         }
         // generate new Circle ROIs
         topLeft = new CircularROI(topLeft.getCenterX(), topLeft.getCenterY() + shift0, topLeft.getRadius());
