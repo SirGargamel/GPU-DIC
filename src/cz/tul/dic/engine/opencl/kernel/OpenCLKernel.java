@@ -61,7 +61,7 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
         super(platform);
 
         clMem = new HashSet<>();
-        this.deviceManager = (OpenCLDeviceManager) platform.getDeviceManager();        
+        this.deviceManager = (OpenCLDeviceManager) platform.getDeviceManager();
         queue = this.deviceManager.getQueue();
         context = this.deviceManager.getContext();
         this.wsm = new WorkSizeManager(platform);
@@ -113,11 +113,11 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
                     throw new IllegalArgumentException("Unsupported type of memory coalescing - " + kernelInfo.getMemoryCoalescing());
             }
 
-            CLProgram program = context.createProgram(
-                    KernelSourcePreparator.prepareKernel(
-                            subsetSize, deg, usesLimits,
-                            is2D(), usesVectorization(),
-                            interpolation, usesImage, usesLocalMemory(), usesMemoryCoalescing, subsetsGroupped(), usesZncc, usesWeight)).build();
+            final String kernelSource = KernelSourcePreparator.prepareKernel(
+                    subsetSize, deg, usesLimits,
+                    is2D(), usesVectorization(),
+                    interpolation, usesImage, usesLocalMemory(), usesMemoryCoalescing, subsetsGroupped(), usesZncc, usesWeight);
+            CLProgram program = context.createProgram(kernelSource).build();
             clMem.add(program);
             kernelDIC = program.createCLKernel(KERNEL_DIC_NAME);
             clMem.add(kernelDIC);
@@ -154,7 +154,7 @@ public abstract class OpenCLKernel extends AbstractKernel<AbstractOpenCLMemoryMa
             final OpenCLDataPackage data,
             final long maxDeformationCount, final int imageWidth,
             final int subsetSize, final int subsetCount);
-    
+
     @Override
     public List<CorrelationResult> computeFindBest(final ComputationTask task) throws ComputationException {
         final int subsetCount = task.getSubsets().size();
