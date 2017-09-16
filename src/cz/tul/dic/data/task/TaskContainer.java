@@ -5,7 +5,6 @@
  */
 package cz.tul.dic.data.task;
 
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import cz.tul.dic.ComputationException;
 import cz.tul.dic.data.Image;
@@ -44,7 +43,7 @@ public class TaskContainer extends Observable implements Serializable {
     private final Container<HashMap<AbstractROI, double[]>> deformationLimits;
     private final Set<Hint> hints;
     // generated data
-    private final transient List<Image> images;
+    private transient List<Image> images;
     // results
     @XStreamOmitField
     private final List<Result> results;
@@ -86,10 +85,14 @@ public class TaskContainer extends Observable implements Serializable {
 
     public void setInput(final List<File> input, final List<Image> images) {
         this.input.clear();
-        this.images.clear();
-
         this.input.addAll(input);
-        this.images.addAll(images);
+
+        if (this.images != null) {
+            this.images.clear();
+            this.images.addAll(images);
+        } else {
+            this.images = new ArrayList<>(images);
+        }
     }
 
     public List<File> getInput() {

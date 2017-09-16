@@ -22,13 +22,14 @@ public class BinaryLoader extends AbstractInputLoader {
     @Override
     public TaskContainer loadTask(final Object in, final TaskContainer task) throws ComputationException {
         if (!(in instanceof File)) {
-            throw new IllegalArgumentException("ImageLoader needs a list of files as input.");
+            throw new IllegalArgumentException("BinaryLoader needs a file as input.");
         }        
 
         final File input = (File) in;
         TaskContainer result;
         try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(input)))) {
             result = (TaskContainer) ois.readObject();
+            result = InputLoader.loadInput(result, result);
         } catch (IOException | ClassNotFoundException ex) {
             throw new ComputationException(ComputationExceptionCause.IO, ex);
         }
