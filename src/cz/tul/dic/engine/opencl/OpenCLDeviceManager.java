@@ -16,7 +16,8 @@ import cz.tul.dic.engine.DeviceType;
 import cz.tul.dic.engine.AbstractDeviceManager;
 import cz.tul.pj.journal.Journal;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.pmw.tinylog.Logger;
@@ -57,13 +58,16 @@ public final class OpenCLDeviceManager extends AbstractDeviceManager {
     public void prepareDevice(DeviceType deviceType) {
         clearMemory();
 
-        device = findDevice(deviceType);
+        device = findDevice(deviceType);        
         Journal.addEntry("Using new OpenCL device.", "{0}", device);
 
         context = CLContext.create(device);
         context.addCLErrorHandler((String string, ByteBuffer bb, long l)
-                -> Journal.addEntry("CLError - " + string)
-        );
+                -> {
+            Journal.addEntry("CLError - " + string);            
+            System.out.println(l + " -- " + string + "; " + bb);
+            
+        });
 
         queue = device.createCommandQueue(CLCommandQueue.Mode.PROFILING_MODE);
     }
@@ -78,10 +82,18 @@ public final class OpenCLDeviceManager extends AbstractDeviceManager {
                     break;
                 case GPU:
                     joinDevicesToList(results, platform.listCLDevices(Type.GPU));
+                    final Iterator<CLDevice> it = results.iterator();
+                    String name;
+                    while (it.hasNext()) {
+                        name = it.next().getName().toLowerCase();
+                        if (name.contains("intel") || name.contains("simulator")) {
+                            it.remove();    // Intel graphics are iGPU, skip simulators
+                        }
+                    }
                     break;
                 case iGPU:
                     if (platform.getName().toLowerCase().contains("intel")) {
-                        joinDevicesToList(results, platform.listCLDevices(Type.GPU));                        
+                        joinDevicesToList(results, platform.listCLDevices(Type.GPU));
                     }
                     break;
                 default:
@@ -89,6 +101,11 @@ public final class OpenCLDeviceManager extends AbstractDeviceManager {
             }
         }
 
+        Collections.sort(results, (CLDevice o1, CLDevice o2) -> {
+            final int performance1 = o1.getMaxComputeUnits() * o1.getMaxClockFrequency();
+            final int performance2 = o2.getMaxComputeUnits() * o2.getMaxClockFrequency();
+            return Integer.compare(performance2, performance1);
+        });
         if (results.size() > 1) {
             Logger.warn("Found multiple devices for device type " + deviceType + ": " + results.toString() + "using " + results.get(0).toString());
         }
