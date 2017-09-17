@@ -156,6 +156,7 @@ public final class Engine extends Observable implements Observer {
         Stats.getInstance().setTaskContainer(task);
 
         if (platform == null) {
+            notifyObservers(PlatformManager.class);
             platform = PlatformManager.getInstance().initPlatform();
             platform.getMemoryManager().assignTask(task);
         }

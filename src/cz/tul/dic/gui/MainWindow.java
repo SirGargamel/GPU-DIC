@@ -13,6 +13,7 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
+import cz.tul.dic.engine.platform.PlatformManager;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.NameGenerator;
 import cz.tul.pj.journal.Journal;
@@ -307,8 +308,7 @@ public class MainWindow implements Initializable {
         try {
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
-                saveSubsetSize();
-                TaskContainerUtils.checkTaskValidity(tc);
+                saveSubsetSize();                
                 ComplexTaskSolver cts = new ComplexTaskSolver(tc);
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
                 Dialogs.showProgress(worker, Lang.getString("Computing"));
@@ -658,6 +658,8 @@ public class MainWindow implements Initializable {
         protected Exception call() throws Exception {
             Exception result = null;
             try {
+                update(null, PlatformManager.class);
+                TaskContainerUtils.checkTaskValidity(tc);
                 if (cts.isValidComplexTask()) {
                     cts.addObserver(this);
                     cts.solveComplexTask();

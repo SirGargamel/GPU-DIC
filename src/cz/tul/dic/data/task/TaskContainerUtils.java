@@ -296,12 +296,7 @@ public final class TaskContainerUtils {
         final Object correlation = tc.getParameter(TaskParameter.SOLVER);
         if (correlation == null) {
             tc.setParameter(TaskParameter.SOLVER, TaskDefaultValues.DEFAULT_SOLVER);
-        }
-        final Object kernel = tc.getParameter(TaskParameter.KERNEL);
-        if (kernel == null) {
-            final SolverType solver = (SolverType) tc.getParameter(TaskParameter.SOLVER);
-            tc.setParameter(TaskParameter.KERNEL, KernelPerformanceManager.getInstance().getBestKernel(solver.supportsWeighedCorrelation()));
-        }
+        }        
         final Object filterSize = tc.getParameter(TaskParameter.FILTER_KERNEL_SIZE);
         if (filterSize == null) {
             tc.setParameter(TaskParameter.FILTER_KERNEL_SIZE, TaskDefaultValues.DEFAULT_FILTER_KERNEL_SIZE);
@@ -313,6 +308,11 @@ public final class TaskContainerUtils {
         final Object fps = tc.getParameter(TaskParameter.FPS);
         if (fps == null) {
             tc.setParameter(TaskParameter.FPS, TaskDefaultValues.DEFAULT_FPS);
+        }
+        final Object kernel = tc.getParameter(TaskParameter.KERNEL);
+        if (kernel == null) {
+            final SolverType solver = (SolverType) tc.getParameter(TaskParameter.SOLVER);
+            tc.setParameter(TaskParameter.KERNEL, KernelPerformanceManager.getInstance().getBestKernel(solver.supportsWeighedCorrelation()));
         }
     }
 

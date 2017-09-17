@@ -19,6 +19,7 @@ import cz.tul.dic.gui.MainWindow;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.data.task.loaders.InputLoader;
 import cz.tul.dic.engine.KernelInfo;
+import cz.tul.dic.engine.KernelPerformanceManager;
 import cz.tul.dic.engine.solvers.AbstractTaskSolver;
 import cz.tul.dic.engine.solvers.SolverType;
 import cz.tul.dic.output.NameGenerator;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -101,8 +103,6 @@ public class DicMain extends Application {
             configureLogging(false);
         }
 
-        Stats.getInstance();
-
         if (parameters.contains(DEBUG_COMPUTE)) {
             System.out.println("Choose a test:\n c : Computation\n d : Device\n e : Engine\n p : Preprocess\n s : Subset size\n t : Generic test");
             final String in = new Scanner(System.in).nextLine().trim().toLowerCase();
@@ -171,6 +171,13 @@ public class DicMain extends Application {
             stage.setTitle(rb.getString("Title"));
             stage.setResizable(false);
             stage.show();
+
+            final Thread performance = new Thread(() -> {
+                Stats.getInstance();
+                KernelPerformanceManager.getInstance();
+            });
+            performance.setDaemon(true);
+            performance.start();
         }
     }
 
@@ -432,7 +439,7 @@ public class DicMain extends Application {
                 }
             }
         }
-        */
+         */
         throw new UnsupportedOperationException("Test needs to be reimpleted using Platforms..");
     }
 

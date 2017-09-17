@@ -50,6 +50,7 @@ import org.pmw.tinylog.Logger;
  */
 public class KernelPerformanceManager {
 
+    private static final Object SYNC_LOCK;
     private static final String PERFORMANCE_TEST_LABEL = "performance.time";
     private static final double[][] PERFORMANCE_TEST_LIMITS = new double[][]{
         // deformation counts - BruteForce - 441, SPGD - 3, NRC - 21, 160, NRCHE - 5, 13, NRF - 6, 28, NRFHE - 3, 7        
@@ -67,11 +68,16 @@ public class KernelPerformanceManager {
     private final PlatformDefinition bestPlatform;
 
     static {
-        INSTANCE = new KernelPerformanceManager();
+        SYNC_LOCK = new Object();
+        synchronized (SYNC_LOCK) {
+            INSTANCE = new KernelPerformanceManager();
+        }
     }
 
     public static KernelPerformanceManager getInstance() {
-        return INSTANCE;
+        synchronized (SYNC_LOCK) {
+            return INSTANCE;
+        }
     }
 
     private KernelPerformanceManager() {
@@ -88,7 +94,7 @@ public class KernelPerformanceManager {
                 data = loadPerformanceData();
                 loaded = true;
             } catch (IOException | ClassNotFoundException ex) {
-                Logger.warn(ex, "Error loading performance assesment.");
+                Logger.warn("Error loading performance assesment - " + ex.getLocalizedMessage());
             }
         }
 
@@ -153,8 +159,8 @@ public class KernelPerformanceManager {
         uInfos.addAll(generateKernelInfos(new KernelInfo(Type.CL15D_pF, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.YES, KernelInfo.UseLimits.ANY)));
         result.get(PlatformType.OPENCL).put(DeviceType.iGPU, uInfos);
 
-        // DEBUG !!! - OpenCL not working for iGPU
-//        result.get(PlatformType.OPENCL).get(DeviceType.CPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
+        // DEBUG !!! - use OpenCL only for GPU
+        result.get(PlatformType.OPENCL).get(DeviceType.CPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
 //        result.get(PlatformType.OPENCL).get(DeviceType.GPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
         result.get(PlatformType.OPENCL).get(DeviceType.iGPU).addAll(generateKernelInfos(new KernelInfo(Type.ANY, KernelInfo.Input.ANY, KernelInfo.Correlation.ANY, KernelInfo.MemoryCoalescing.ANY, KernelInfo.UseLimits.ANY)));
         return result;
