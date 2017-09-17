@@ -20,6 +20,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -54,7 +55,7 @@ public class Dialogs {
     }
 
     private static void showDialog(final Alert.AlertType type, final String title, final String text) {
-        final Alert dlg = new Alert(type);        
+        final Alert dlg = new Alert(type);
         dlg.initModality(Modality.APPLICATION_MODAL);
         dlg.initStyle(StageStyle.UTILITY);
         dlg.setHeaderText("");
@@ -116,13 +117,17 @@ public class Dialogs {
 
     private static final class ProgressDialog extends Dialog<DialogEvent> {
 
-        final ProgressBar progress;
+        final ProgressBar progressBar;
+        final ProgressIndicator progressIndicator;
         final Label message;
 
         public ProgressDialog(final Worker worker) {
             super();
 
-            progress = new ProgressBar();
+            progressBar = new ProgressBar();
+            progressBar.setProgress(0);
+            progressIndicator = new ProgressIndicator();
+            progressIndicator.setProgress(-1);
             message = new Label();
             message.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
 
@@ -131,23 +136,23 @@ public class Dialogs {
         }
 
         private void buildGui() {
-            progress.setPrefSize(Double.MAX_VALUE, Region.USE_COMPUTED_SIZE);
+            progressBar.setPrefSize(Double.MAX_VALUE, Region.USE_COMPUTED_SIZE);
+            progressIndicator.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
             message.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
 
-            final VBox items = new VBox(5, message, progress);
-            items.setPrefSize(300, 50);
+            final VBox items = new VBox(5, message, progressBar, progressIndicator);
+            items.setPrefSize(300, 90);
 
             final ButtonType cancel = new ButtonType(null, ButtonBar.ButtonData.CANCEL_CLOSE);
             getDialogPane().getButtonTypes().add(cancel);
             getDialogPane().lookupButton(cancel).setVisible(false);
 
             this.getDialogPane().setContent(items);
-
         }
 
         private void assignListeners(final Worker worker) {
             worker.progressProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
-                    -> progress.progressProperty().set((double) newValue)
+                    -> progressBar.progressProperty().set((double) newValue)
             );
             worker.messageProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue)
                     -> message.textProperty().set(newValue)
