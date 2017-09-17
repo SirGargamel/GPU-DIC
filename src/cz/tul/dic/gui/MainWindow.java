@@ -13,8 +13,6 @@ import cz.tul.dic.data.task.TaskContainerUtils;
 import cz.tul.dic.data.task.TaskDefaultValues;
 import cz.tul.dic.data.task.TaskParameter;
 import cz.tul.dic.engine.Engine;
-import cz.tul.dic.engine.KernelPerformanceManager;
-import cz.tul.dic.engine.platform.PlatformManager;
 import cz.tul.dic.gui.lang.Lang;
 import cz.tul.dic.output.NameGenerator;
 import cz.tul.pj.journal.Journal;
@@ -718,9 +716,9 @@ public class MainWindow implements Initializable {
 
     private static enum Scenario {
 
-        PRECISE(1),
-        DEFAULT(2),
-        COARSE(5);
+        DEFAULT(5),
+        PRECISE(1),        
+        COARSE(10);
 
         private final int subsetSpacing;
 

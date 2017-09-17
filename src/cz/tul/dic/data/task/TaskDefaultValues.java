@@ -26,12 +26,12 @@ public final class TaskDefaultValues {
     public static final int DEFAULT_FILTER_KERNEL_SIZE = 5;
     public static final int DEFAULT_FPS = 5000;
     public static final DeformationOrder DEFAULT_DEFORMATION_ORDER = DeformationOrder.FIRST;
-    public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-10.0, 10.0, 0.01, -10, 10, 0.01};
+    public static final double[] DEFAULT_DEFORMATION_LIMITS_ZERO = new double[]{-5.0, 5.0, 0.01, -5, 5, 0.01};
     public static final double[] DEFAULT_DEFORMATION_LIMITS_FIRST = new double[]{
-        -10.0, 10.0, 0.01, -10, 10, 0.01,
+        -5.0, 5.0, 0.5, -5, 5, 0.5,
         -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05, -0.25, 0.25, 0.05};
     public static final SubsetGenerator DEFAULT_SUBSET_GENERATOR = SubsetGenerator.EQUAL;
-    public static final int DEFAULT_SUBSET_SPACING = 1;
+    public static final int DEFAULT_SUBSET_SPACING = 5;
     public static final int DEFAULT_SUBSET_SIZE = 10;
     public static final Interpolation DEFAULT_INTERPOLATION = Interpolation.BICUBIC;
     public static final double DEFAULT_MM_TO_PX_RATIO = 1;    
