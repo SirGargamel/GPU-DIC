@@ -65,7 +65,7 @@ public class Stats implements IGPUResultsReceiver {
         } catch (IOException ex) {
             // do nothing, external stats not found
         }
-        if (INSTANCE.get(Types.GPU_RESULTS)) {
+        if (INSTANCE.isSet(Types.GPU_RESULTS)) {
             AbstractTaskSolver.registerGPUDataListener(INSTANCE);
         }
     }
@@ -103,7 +103,7 @@ public class Stats implements IGPUResultsReceiver {
         }
     }
 
-    private boolean get(Types type) {
+    private boolean isSet(Types type) {
         return data.containsKey(type) && data.get(type);
     }
 
@@ -113,7 +113,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void dumpDeformationsStatisticsUsage(final int round) {
-        if (get(Types.DEF_USAGE)) {
+        if (isSet(Types.DEF_USAGE)) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
             final ValueCounter quality = ValueCounter.createCounter();
@@ -151,7 +151,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void dumpDeformationsStatisticsUsage() {
-        if (get(Types.DEF_USAGE)) {
+        if (isSet(Types.DEF_USAGE)) {
             final ValueCounter counterGood = ValueCounter.createCounter();
             final ValueCounter counterNotGood = ValueCounter.createCounter();
             final ValueCounter quality = ValueCounter.createCounter();
@@ -195,7 +195,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void dumpDeformationsStatisticsPerQuality(final int round) {
-        if (get(Types.DEF_QUALITY)) {
+        if (isSet(Types.DEF_QUALITY)) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Map<AbstractROI, List<CorrelationResult>> results = tc.getResult(round, round + 1).getCorrelations();
 
@@ -232,7 +232,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void dumpDeformationsStatisticsPerQuality() {
-        if (get(Types.DEF_QUALITY)) {
+        if (isSet(Types.DEF_QUALITY)) {
             final Map<Integer, ValueCounter> counters = new HashMap<>();
             final Set<Integer> rounds = TaskContainerUtils.getRounds(tc).keySet();
 
@@ -274,7 +274,7 @@ public class Stats implements IGPUResultsReceiver {
 
     @Override
     public void dumpGpuResults(final double[] resultData, final List<AbstractSubset> subsets, final List<double[]> deformationLimits) {
-        if (get(Types.GPU_RESULTS)) {
+        if (isSet(Types.GPU_RESULTS) && tc != null) {
             final File outFile = new File(NameGenerator.generateGpuResultsDump(tc, gpuBatch++));
             outFile.getParentFile().mkdirs();
             try (BufferedWriter out = new BufferedWriter(new FileWriter(outFile))) {
@@ -310,7 +310,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void drawSubsetQualityStatistics(final Map<AbstractROI, List<AbstractSubset>> allSubsets, final int roundFrom, final int roundTo) {
-        if (get(Types.SUBSET_QUALITY)) {
+        if (isSet(Types.SUBSET_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapSubset(tc, roundTo));
             out.getParentFile().mkdirs();
 
@@ -341,7 +341,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void drawPointResultStatistics(final int roundFrom, final int roundTo) {
-        if (get(Types.POINT_QUALITY)) {
+        if (isSet(Types.POINT_QUALITY)) {
             final File out = new File(NameGenerator.generateQualityMapPoint(tc, roundTo));
             out.getParentFile().mkdirs();
 
@@ -354,7 +354,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void exportPointSubResultsStatistics(final Analyzer2D counter, final String name) {
-        if (get(Types.POINT_STATS)) {
+        if (isSet(Types.POINT_STATS)) {
             final File out = new File(name);
             out.getParentFile().mkdirs();
 
@@ -374,7 +374,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public void drawRegressionQualities(final Image img, final double[][] resultQualityU, final double[][] resultQualityV, final String nameA, final String nameB) {
-        if (get(Types.REGRESSION_QUALITY)) {
+        if (isSet(Types.REGRESSION_QUALITY)) {
             final File out = new File(nameA);
             out.getParentFile().mkdirs();
 
@@ -388,7 +388,7 @@ public class Stats implements IGPUResultsReceiver {
     }
 
     public boolean isGpuDebugEnabled() {
-        return DebugControl.isDebugMode() && Stats.getInstance().get(Types.GPU_RESULTS);
+        return DebugControl.isDebugMode() && Stats.getInstance().isSet(Types.GPU_RESULTS);
     }
 
     public enum Types {
