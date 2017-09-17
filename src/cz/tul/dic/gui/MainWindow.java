@@ -119,12 +119,7 @@ public class MainWindow implements Initializable {
     private HBox boxImage;
     private Timeline timeLine;
 
-    // Main menu
-    @FXML
-    private void handleButtonActionNew(ActionEvent event) {
-        Context.getInstance().setTc(new TaskContainer());
-        loadCurrentTaskContainerToGUI();
-    }
+    // Main menu    
 
     @FXML
     private void handleButtonActionExit(ActionEvent event) {
