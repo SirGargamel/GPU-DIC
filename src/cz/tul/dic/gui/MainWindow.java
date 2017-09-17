@@ -120,7 +120,6 @@ public class MainWindow implements Initializable {
     private Timeline timeLine;
 
     // Main menu    
-
     @FXML
     private void handleButtonActionExit(ActionEvent event) {
         Platform.exit();
@@ -303,7 +302,7 @@ public class MainWindow implements Initializable {
         try {
             final TaskContainer tc = Context.getInstance().getTc();
             if (tc != null) {
-                saveSubsetSize();                
+                saveSubsetSize();
                 ComplexTaskSolver cts = new ComplexTaskSolver(tc);
                 final Task<Exception> worker = new ComputationObserver(cts, tc);
                 Dialogs.showProgress(worker, Lang.getString("Computing"));
@@ -664,9 +663,10 @@ public class MainWindow implements Initializable {
                 }
             } catch (Exception ex) {
                 result = ex;
+            } finally {
+                Engine.getInstance().deleteObserver(this);
+                cts.deleteObserver(this);
             }
-            Engine.getInstance().deleteObserver(this);
-            cts.deleteObserver(this);
 
             return result;
         }
@@ -714,7 +714,7 @@ public class MainWindow implements Initializable {
     private static enum Scenario {
 
         DEFAULT(5),
-        PRECISE(1),        
+        PRECISE(1),
         COARSE(10);
 
         private final int subsetSpacing;
