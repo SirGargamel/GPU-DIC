@@ -37,6 +37,8 @@ public class ExpertSettings implements Initializable {
     private TextField textWindowSize;
     @FXML
     private TextField textDefLimits;
+    @FXML
+    private TextField textSubsetSpacing;
 
     @FXML
     private void handleButtonActionOk(ActionEvent event) throws InterruptedException, ExecutionException {
@@ -121,6 +123,9 @@ public class ExpertSettings implements Initializable {
                     th.start();
                 }
             }
+            
+            final int spacing = Integer.parseInt(textSubsetSpacing.getText());
+            tc.setParameter(TaskParameter.SUBSET_GENERATOR_PARAM, spacing);
         }
 
         closeWindow();
@@ -174,6 +179,7 @@ public class ExpertSettings implements Initializable {
         textWindowSize.setText(String.valueOf(TaskDefaultValues.DEFAULT_STRAIN_ESTIMATION_PARAMETER));
         textRoundLimits.setText("");
         textDefLimits.setText(toString(TaskDefaultValues.DEFAULT_DEFORMATION_LIMITS_FIRST));
+        textSubsetSpacing.setText(String.valueOf(TaskDefaultValues.DEFAULT_SUBSET_SPACING));
 
         final TaskContainer tc = Context.getInstance().getTc();
         if (tc != null) {
@@ -192,6 +198,11 @@ public class ExpertSettings implements Initializable {
             o = tc.getParameter(TaskParameter.DEFORMATION_LIMITS);
             if (o != null) {
                 textDefLimits.setText(toString((double[]) o));
+            }
+            
+            o = tc.getParameter(TaskParameter.SUBSET_GENERATOR_PARAM);
+            if (o != null) {
+                textSubsetSpacing.setText(o.toString());
             }
         }
     }

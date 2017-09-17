@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--
 /* Copyright (C) LENAM, s.r.o. - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
@@ -41,6 +42,17 @@
 <VBox.margin>
 <Insets left="5.0" right="5.0" />
 </VBox.margin></BorderPane>
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <left>
+                  <Label text="%SubsetSpacing" BorderPane.alignment="CENTER" />
+               </left>
+               <right>
+                  <TextField fx:id="textSubsetSpacing" onKeyTyped="#handleTextKeyTypedNumbers" BorderPane.alignment="CENTER" />
+               </right>
+               <VBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </VBox.margin>
+            </BorderPane>
                 <HBox alignment="BOTTOM_CENTER" prefHeight="70.0" prefWidth="350.0" spacing="50.0">
                     <children>
                         <Button mnemonicParsing="false" onAction="#handleButtonActionOk" text="%Ok" />
