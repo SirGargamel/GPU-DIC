@@ -55,8 +55,9 @@ public class DicMain extends Application {
 
     private static final String DEBUG_SMALL = "-d";
     private static final String DEBUG_COMPUTE = "-debug";
-    private static final String LICENSE_FILE = "license.dat";
-    private static final File LICENSE = new File(LICENSE_FILE);
+    private static final String LICENSE_FILE_FILTER = "*.dat";
+    private static final String LICENSE_FILE_NAME = "license.dat";
+    private static final File LICENSE = new File(LICENSE_FILE_NAME);
     private static final String EXT_CONFIG = ".config";
     private static final String[] FILES_TO_DEBUG = new String[]{
         //        "c:\\Users\\user\\Documents\\data DIC\\.test FS vs Quality\\6107544m.avi.config",
@@ -140,8 +141,8 @@ public class DicMain extends Application {
 
             final FileChooser chooser = new FileChooser();
             chooser.setTitle(Lang.getString("LicenseMissingSelectTitle"));
-            chooser.setInitialFileName(LICENSE_FILE);
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("License file [license.dat]", LICENSE_FILE));
+            chooser.setInitialFileName(LICENSE_FILE_NAME);
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("License file [*.dat]", LICENSE_FILE_FILTER));
             final File license = chooser.showOpenDialog(null);
             if (license != null) {
                 validLicense = Utils.checkLicense(license);
