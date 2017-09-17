@@ -103,8 +103,10 @@ public abstract class NewtonRaphson extends AbstractTaskSolver implements IGPURe
             System.arraycopy(dA, 0, temp, 0, COUNT_ZERO_ORDER_LIMITS);
             temp[DeformationLimit.UMIN] = Math.floor(temp[DeformationLimit.UMIN]);
             temp[DeformationLimit.UMAX] = Math.ceil(temp[DeformationLimit.UMAX]);
+            temp[DeformationLimit.USTEP] = 1;
             temp[DeformationLimit.VMIN] = Math.floor(temp[DeformationLimit.VMIN]);
             temp[DeformationLimit.VMAX] = Math.ceil(temp[DeformationLimit.VMAX]);
+            temp[DeformationLimit.VSTEP] = 1;
             zeroOrderLimits.add(temp);
         }
         final List<CorrelationResult> localResults = AbstractTaskSolver.initSolver(SolverType.COARSE_FINE, platform).solve(
