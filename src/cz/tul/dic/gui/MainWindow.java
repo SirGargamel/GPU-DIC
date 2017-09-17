@@ -163,10 +163,6 @@ public class MainWindow implements Initializable {
 
         dialog.getDialogPane().setContent(grid);
         dialog.show();
-        
-        // DEBUG only, remove !!!
-        Preferences.userNodeForPackage(KernelPerformanceManager.class).remove("performance.time");
-        PlatformManager.getInstance().initPlatform();
     }
 
     @FXML
