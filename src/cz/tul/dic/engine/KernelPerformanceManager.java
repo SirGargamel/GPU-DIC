@@ -242,7 +242,7 @@ public class KernelPerformanceManager {
                                 img, img, subsets, weights, deformationLimits));
                         result.store(sc, counts[counts.length - 1], platform.getPlatformDefinition().getKernelInfo(), System.currentTimeMillis() - start);
                     } catch (ComputationException ex) {
-                        Logger.warn(ex, "Device test exception", "KernelInfo {} on {}-{}.", platform.getPlatformDefinition().getKernelInfo(), platform.getPlatformDefinition().getPlatform(), platform.getPlatformDefinition().getDevice());
+                        Logger.debug(ex, "Device test exception", "KernelInfo {} on {}-{}.", platform.getPlatformDefinition().getKernelInfo(), platform.getPlatformDefinition().getPlatform(), platform.getPlatformDefinition().getDevice());
                         result.store(sc, sc, platform.getPlatformDefinition().getKernelInfo(), Long.MAX_VALUE);
                     }
                 }
