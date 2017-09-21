@@ -191,7 +191,7 @@ public class KernelPerformanceManager {
                     for (int i = 0; i < testCount; i++) {
                         KernelInfo kernel = kernels.get(rnd.nextInt(kernels.size()));
                         platform = PlatformManager.getInstance().initPlatform(platformType, deviceType, kernel);
-                        System.out.println("Blank - " + platform);
+                        Logger.info("Blank - " + platform);
                         solver = AbstractTaskSolver.initSolver(SolverType.BRUTE_FORCE, platform);
                         solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
                         solver.setTaskSplitVariant(TaskSplitMethod.NONE, null);
@@ -204,7 +204,7 @@ public class KernelPerformanceManager {
                 PerformanceData testPerformanceData;
                 for (KernelInfo kernel : kernels) {
                     platform = PlatformManager.getInstance().initPlatform(platformType, deviceType, kernel);
-                    System.out.println("Test - " + platform);
+                    Logger.info("Test - " + platform);
                     solver = AbstractTaskSolver.initSolver(SolverType.BRUTE_FORCE, platform);
                     solver.setInterpolation(TaskDefaultValues.DEFAULT_INTERPOLATION);
                     solver.setTaskSplitVariant(TaskSplitMethod.NONE, null);
